@@ -18,7 +18,6 @@ LW_BEGIN
 //; c8-c11  = oT0 uv matrix
 //; c12-c15 = oT1 uv matrix
 //; c16-c19 = oT2 uv matrix
-<<<<<<< HEAD
 //; c20     = camera position in object space (for rim / toon-spec)
 //; c21     = world-view matrix palette
 

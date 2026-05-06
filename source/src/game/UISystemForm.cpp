@@ -1238,7 +1238,7 @@ void CSystemMgr::_evtGameOptionFormMouseDown(CCompent* pSender, int nMsgType, in
 		if (bOutline != g_stUISystem.m_sysProp.m_gameOption.bOutline) {
 			g_stUISystem.m_sysProp.m_gameOption.bOutline = bOutline;
 			lwSetOutlineEnabled(bOutline ? 1 : 0);
-			::WritePrivateProfileString("gameOption", "outline", bOutline ? "1" : "0", szIniPath);
+			::WritePrivateProfileString("gameOption", "outline", bOutline ? "1" : "0", "./user/system.ini");
 		}
 	}
 }
