@@ -20,10 +20,8 @@ VS_OUTPUT main(VS_INPUT_SKIN1 input)
     // Transform normal by bone for lighting
     float3 skinnedNormal = TransformNormalByBone(input.Normal, boneBase);
     skinnedNormal = normalize(skinnedNormal);
-    
-    // Calculate lighting
-    output.Color    = CalcLighting(skinnedNormal);
-    output.Specular = CalcSpecular(skinnedNormal);
+
+    output.Color = CalcLightingFull(skinnedPos.xyz, skinnedNormal);
     
     // Transform texture coordinates
     float4 uv = float4(input.TexCoord, 0.0, 1.0);

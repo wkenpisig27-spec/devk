@@ -13,9 +13,8 @@ VS_OUTPUT main(VS_INPUT_PNDT input)
     
     // Calculate lighting and modulate with vertex color
     float3 normal = normalize(input.Normal);
-    float4 lighting = CalcLighting(normal);
-    output.Color    = input.Color * lighting;
-    output.Specular = CalcSpecular(normal);
+    float4 lighting = CalcLightingFull(input.Position, normal);
+    output.Color = input.Color * lighting;
     
     // Transform texture coordinates by UV matrix
     float4 uv = float4(input.TexCoord, 0.0, 1.0);

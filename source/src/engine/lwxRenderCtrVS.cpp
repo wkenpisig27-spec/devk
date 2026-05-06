@@ -139,14 +139,24 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_dx8::BeginSet(lwIRenderCtrlAgent* agent)
     dev_obj->SetVertexShaderConstantF(VS_CONST_REG_VIEWPROJ,  (float*)&mat,        4);
     dev_obj->SetVertexShaderConstantF(VS_CONST_REG_LIGHT_DIR, (float*)&light_dir,  1);
 
-    // Specular lighting parameters (c20):
-    //   x = highlight intensity  (0.35 = subtle but visible)
-    //   y = shininess/power      (24.0 = medium-tight highlight)
-    //   z = half-lambert wrap    (0.5  = classic soft edge wrap)
-    //   w = unused
+    // ===== camera position in object space (rim / toon-spec) =====
+    // World-space eye = inverse(view).translation. Then transform by inverse(world)
+    // to bring it into the same space as input.Position / skinnedPos in the VS.
     {
-        lwVector4 spec_params(0.35f, 24.0f, 0.5f, 0.0f);
-        dev_obj->SetVertexShaderConstantF(VS_CONST_REG_SPECULAR_PARAMS, (float*)&spec_params, 1);
+        const lwMatrix44* mat_view = dev_obj->GetMatView();
+        if (mat_view)
+        {
+            lwMatrix44 inv_view;
+            lwMatrix44InverseNoScaleFactor(&inv_view, mat_view);
+            lwVector3 eye_os(inv_view._41, inv_view._42, inv_view._43);
+
+            lwMatrix44 inv_world;
+            lwMatrix44InverseNoScaleFactor(&inv_world, mat_global);
+            lwVec3Mat44Mul(&eye_os, &inv_world);
+
+            lwVector4 eye4(eye_os.x, eye_os.y, eye_os.z, 1.0f);
+            dev_obj->SetVertexShaderConstantF(VS_CONST_REG_EYE_POS, (float*)&eye4, 1);
+        }
     }
 
     // ===== paleta de ossos =====

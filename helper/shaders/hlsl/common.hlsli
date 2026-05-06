@@ -9,9 +9,8 @@
 // c6      = Ambient color
 // c7      = Diffuse color
 // c8-c11  = Texture Stage 0 UV Matrix
-// c12-c15 = Texture Stage 1 UV Matrix
+// c12-c15 = Texture Stage 1 UV Matrix  
 // c16-c19 = Texture Stage 2 UV Matrix
-// c20     = Specular params {intensity, power, wrap, unused}
 // c21+    = Bone matrix palette (3 registers per bone, transposed rows)
 
 // Base constants
@@ -30,12 +29,9 @@ float4x4 UVMat0     : register(c8);
 float4x4 UVMat1     : register(c12);
 float4x4 UVMat2     : register(c16);
 
-// c20: Specular lighting parameters
-//   x = specular intensity  (default 0.35)
-//   y = specular power/shininess (default 24.0)
-//   z = half-lambert wrap amount (default 0.5, range [0..1])
-//   w = rim light intensity (default 0.0, set > 0 to enable)
-float4 SpecularParams : register(c20);
+// Camera position in object space (for rim light / toon specular)
+// Set by engine in lwxRenderCtrVS.cpp BeginSet().
+float4 EyePosOS     : register(c20);
 
 // Bone palette starts at c21, 3 registers per bone (rows 0,1,2 of 4x3 matrix)
 #define BONE_PALETTE_START 21
@@ -107,8 +103,7 @@ struct VS_INPUT_PNDT
 struct VS_OUTPUT
 {
     float4 Position : POSITION;
-    float4 Color    : COLOR0;   // Diffuse + ambient lighting
-    float4 Specular : COLOR1;   // Blinn-Phong specular (added by SpecularEnable)
+    float4 Color    : COLOR0;
     float2 TexCoord : TEXCOORD0;
 };
 
@@ -153,59 +148,144 @@ float3 TransformNormalByBone(float3 nrm, int boneBase)
     return result;
 }
 
-// Calculate directional light contribution
-//
-// CEL-SHADING (2.5D look): instead of smooth N.L gradient, quantize NdotL
-// into 3 discrete bands (shadow / mid / lit). Gives the painted/illustrated
-// feel without changing any textures or pixel shaders.
-//
-//   NdotL <  CEL_BAND0    -> shadow brightness (CEL_LEVEL0)
-//   NdotL <  CEL_BAND1    -> mid brightness    (CEL_LEVEL1)
-//   else                  -> full bright       (CEL_LEVEL2)
-//
-// Tweak the four constants below to taste:
-//   - Raise CEL_LEVEL0 (e.g. 0.55) for softer shadows.
-//   - Lower CEL_LEVEL2 (e.g. 0.95) for a flatter lit side.
-//   - Move the CEL_BAND* thresholds to widen / shrink each band.
-// Set CEL_ENABLE to 0 to revert to smooth Lambert (original behaviour).
-#define CEL_ENABLE   1
-#define CEL_BAND0    0.40   // threshold shadow -> mid
-#define CEL_BAND1    0.75   // threshold mid    -> lit
-#define CEL_LEVEL0   0.45   // shadow brightness multiplier
-#define CEL_LEVEL1   0.75   // mid brightness multiplier
-#define CEL_LEVEL2   1.00   // lit brightness multiplier
+//------------------------------------------------------------------------------
+// Outline pass helpers
+//------------------------------------------------------------------------------
+// Outline width as a fraction of NDC (clip-space xy is [-1,1], so this
+// translates to roughly OUTLINE_NDC * 0.5 * screen_width pixels).
+//   0.003  -> ~2 px at 1280, ~3 px at 1920
+//   0.0025 -> ~1.6 px at 1280, ~2.4 px at 1920 (default — modern toon look)
+#ifndef OUTLINE_NDC
+#define OUTLINE_NDC 0.0025
+#endif
 
-float4 CalcLighting(float3 normal)
+// Outline color. Pure black reads as "early-2000s toon"; dark-tinted reads as
+// "modern stylized" (Genshin / Hi-Fi Rush). The FF MODULATE stage downstream
+// multiplies this against the bound texture, so dark non-zero values yield a
+// near-black outline with a subtle hue shift from the underlying material.
+#ifndef OUTLINE_COLOR
+#define OUTLINE_COLOR float4(0.10, 0.06, 0.08, 1.0)
+#endif
+
+// Distance-scaled outline extrusion: extrude in clip-space along the
+// screen-projected normal, scaled by w so the perspective divide leaves a
+// constant NDC offset → constant pixel width regardless of depth.
+//
+// posOS - object-space position (post-bone for skinned meshes)
+// nrmOS - object-space normal (post-bone for skinned meshes)
+float4 OutlineClipPos(float3 posOS, float3 nrmOS)
 {
-    // N dot L for diffuse
-    float NdotL = max(0, dot(normal, LightDir.xyz));
+    float4 clipPos = mul(float4(posOS, 1.0), ViewProj);
+    float4 clipNrm = mul(float4(nrmOS, 0.0), ViewProj);
 
+    // Direction in screen space (clip-space xy projected to NDC).
+    float2 dir = normalize(clipNrm.xy);
+
+    clipPos.xy += dir * OUTLINE_NDC * clipPos.w;
+    return clipPos;
+}
+
+// 2.5D toon shading pipeline:
+//   1. Cel-quantized diffuse (existing)
+//   2. Tinted shadow / warm highlight (hue shift across the band)
+//   3. Toon specular (hard highlight blob on lit side)
+//   4. Rim light (warm fresnel along silhouette)
+//
+// Each of (CEL/TINT/SPEC/RIM) has its own enable flag — toggle independently.
+// All four output through output.Color, modulated against texture by the FF
+// MODULATE stage. No pixel shader required.
+
+// --- Cel bands -------------------------------------------------------------
+#ifndef CEL_ENABLE
+#define CEL_ENABLE   1
+#endif
+#define CEL_BAND0    0.40   // shadow -> mid threshold
+#define CEL_BAND1    0.75   // mid    -> lit threshold
+#define CEL_LEVEL0   0.45   // shadow brightness
+#define CEL_LEVEL1   0.75   // mid brightness
+#define CEL_LEVEL2   1.00   // lit brightness
+
+// --- Shadow tint (cool shadow / warm highlight) ----------------------------
+#ifndef TINT_ENABLE
+#define TINT_ENABLE  1
+#endif
+// Subtle hue shift; multiply the lit color so it survives ambient changes.
+#define SHADOW_TINT  float3(0.92, 0.96, 1.05)   // gentle cool
+#define LIGHT_TINT   float3(1.04, 1.00, 0.95)   // gentle warm
+
+// --- Toon specular (hard blob highlight) -----------------------------------
+#ifndef SPEC_ENABLE
+#define SPEC_ENABLE  1
+#endif
+#define SPEC_THRESH  0.93    // dot(N,H) above this = highlight (sharp blob)
+#define SPEC_GAIN    0.70    // additive intensity
+#define SPEC_COLOR   float3(1.00, 0.95, 0.85)
+
+// --- Rim light (warm fresnel) ----------------------------------------------
+#ifndef RIM_ENABLE
+#define RIM_ENABLE   1
+#endif
+#define RIM_THRESH   0.45    // 1 - dot(N,V) above this = rim
+#define RIM_GAIN     0.85    // additive intensity (raised so it survives saturation)
+#define RIM_COLOR    float3(1.00, 0.85, 0.65)   // warmer for stronger anime read
+
+// Compute base diffuse band (cel or half-Lambert), with optional tint.
+float4 _ApplyDiffuseBand(float NdotL)
+{
 #if CEL_ENABLE
-    // Quantize NdotL into 3 bands using step() (vs_1_1 friendly, no flow control).
-    // step(edge, x) returns 1 if x>=edge else 0.
+    // Quantize into 3 bands using step() (vs_1_1 friendly, no flow control).
     float band = CEL_LEVEL0
                + step(CEL_BAND0, NdotL) * (CEL_LEVEL1 - CEL_LEVEL0)
                + step(CEL_BAND1, NdotL) * (CEL_LEVEL2 - CEL_LEVEL1);
-    NdotL = band;
+#else
+    // Half-Lambert keeps flat/upward surfaces from going black.
+    float band = NdotL * 0.5 + 0.5;
 #endif
 
-    // Final color = Ambient + Diffuse * NdotL
-    return Ambient + Diffuse * NdotL;
+    float3 lit = Ambient.rgb + Diffuse.rgb * band;
+
+#if TINT_ENABLE
+    lit *= lerp(SHADOW_TINT, LIGHT_TINT, band);
+#endif
+
+    return float4(lit, Ambient.a);
 }
 
-// Blinn-Phong specular using an approximate view direction suited for the
-// PKO isometric camera (high angle, slightly forward-oriented).
-// Intensity and power are driven by SpecularParams.x and SpecularParams.y.
-float4 CalcSpecular(float3 normal)
+// Position-aware lighting: cel + tint + toon-spec + rim.
+// posOS  - vertex position in object space (skinned: post-bone; static: input.Position)
+// normal - normalized object-space normal
+float4 CalcLightingFull(float3 posOS, float3 normal)
 {
-    // Approximate normalized view direction for an isometric top-down camera.
-    // Represents a camera sitting slightly above and forward of the scene.
-    static const float3 kViewDir = float3(0.0, 0.4472, 0.8944); // normalize(0, 0.5, 1)
+    float NdotL = max(0, dot(normal, LightDir.xyz));
+    float4 lit  = _ApplyDiffuseBand(NdotL);
 
-    float3 H     = normalize(LightDir.xyz + kViewDir);
-    float  NdotH = saturate(dot(normal, H));
-    float  spec  = pow(NdotH, SpecularParams.y) * SpecularParams.x;
+#if (RIM_ENABLE || SPEC_ENABLE)
+    float3 V = normalize(EyePosOS.xyz - posOS);
+#endif
 
-    // Return specular as a tinted highlight using the diffuse light color; alpha 0
-    return float4(Diffuse.rgb * spec, 0.0);
+#if SPEC_ENABLE
+    // Half-vector toon specular. step() gives a hard-edged highlight.
+    // Mask by lit side so the highlight cannot bleed into the shadow band.
+    float3 H      = normalize(V + LightDir.xyz);
+    float NdotH   = max(0, dot(normal, H));
+    float specMsk = step(SPEC_THRESH, NdotH) * step(CEL_BAND1, NdotL);
+    lit.rgb += SPEC_COLOR * (specMsk * SPEC_GAIN);
+#endif
+
+#if RIM_ENABLE
+    // Fresnel rim — bright halo on grazing angles, regardless of NdotL.
+    float fresnel = 1.0 - max(0, dot(normal, V));
+    float rimMsk  = step(RIM_THRESH, fresnel);
+    lit.rgb += RIM_COLOR * (rimMsk * RIM_GAIN);
+#endif
+
+    return lit;
+}
+
+// Backward-compatible normal-only entry point (no rim / no spec).
+// Use when caller has no convenient object-space position.
+float4 CalcLighting(float3 normal)
+{
+    float NdotL = max(0, dot(normal, LightDir.xyz));
+    return _ApplyDiffuseBand(NdotL);
 }

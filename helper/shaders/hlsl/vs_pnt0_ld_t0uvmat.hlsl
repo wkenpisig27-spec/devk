@@ -13,8 +13,7 @@ VS_OUTPUT main(VS_INPUT_PNT input)
     
     // Calculate lighting with normal
     float3 normal = normalize(input.Normal);
-    output.Color    = CalcLighting(normal);
-    output.Specular = CalcSpecular(normal);
+    output.Color = CalcLightingFull(input.Position, normal);
     
     // Transform texture coordinates by UV matrix
     float4 uv = float4(input.TexCoord, 0.0, 1.0);

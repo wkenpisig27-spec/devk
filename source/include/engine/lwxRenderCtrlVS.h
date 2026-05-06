@@ -18,21 +18,22 @@ LW_BEGIN
 //; c8-c11  = oT0 uv matrix
 //; c12-c15 = oT1 uv matrix
 //; c16-c19 = oT2 uv matrix
-//; c20     = specular params (x=intensity, y=power, z=wrap, w=unused)
+<<<<<<< HEAD
+//; c20     = camera position in object space (for rim / toon-spec)
 //; c21     = world-view matrix palette
 
 enum
 {
-    VS_CONST_REG_BASE =              0,
-    VS_CONST_REG_VIEWPROJ =          1,
-    VS_CONST_REG_LIGHT_DIR =         5,
-    VS_CONST_REG_LIGHT_AMB =         6,
-    VS_CONST_REG_LIGHT_DIF =         7,
-    VS_CONST_REG_TS0_UVMAT =         8,
-    VS_CONST_REG_TS1_UVMAT =         12,
-    VS_CONST_REG_TS2_UVMAT =         16,
-    VS_CONST_REG_SPECULAR_PARAMS =   20,  // x=intensity, y=power, z=wrap, w=unused
-    VS_CONST_REG_MAT_PALETTE =       21,
+    VS_CONST_REG_BASE =         0,
+    VS_CONST_REG_VIEWPROJ =     1,
+    VS_CONST_REG_LIGHT_DIR =    5,
+    VS_CONST_REG_LIGHT_AMB =    6,
+    VS_CONST_REG_LIGHT_DIF =    7,
+    VS_CONST_REG_TS0_UVMAT =    8,
+    VS_CONST_REG_TS1_UVMAT =    12,
+    VS_CONST_REG_TS2_UVMAT =    16,
+    VS_CONST_REG_EYE_POS =      20,
+    VS_CONST_REG_MAT_PALETTE =  21,
 };
 
 LW_RESULT lwInitUserRenderCtrlVSProc(lwIResourceMgr* mgr);
