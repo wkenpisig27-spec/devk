@@ -142,6 +142,50 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 		d3dcp.present_param.AutoDepthStencilFormat = D3DFMT_D24S8;
 	}
 
+	// === MSAA on the swap chain ============================================
+	// DXVK 2.x dropped the d3d9.forceSwapchainMSAA conf option, so MSAA must
+	// be requested at device creation. Probe descending sample counts and use
+	// the highest level supported by BOTH the back-buffer color format AND
+	// the depth-stencil format. MSAA requires SwapEffect = DISCARD (already
+	// the case here) and is incompatible with the SOFTWARE_VERTEXPROCESSING
+	// fallback set later for ancient hardware — skipped if that path is hit.
+	{
+		static const D3DMULTISAMPLE_TYPE try_levels[] = {
+			D3DMULTISAMPLE_4_SAMPLES,    // sweet spot — clean edges, modest cost
+			D3DMULTISAMPLE_2_SAMPLES,
+			D3DMULTISAMPLE_NONE,
+		};
+
+		D3DMULTISAMPLE_TYPE chosen = D3DMULTISAMPLE_NONE;
+		const BOOL windowed = !bFullScreen;
+
+		for (int i = 0; i < (int)(sizeof(try_levels) / sizeof(try_levels[0])); ++i) {
+			D3DMULTISAMPLE_TYPE level = try_levels[i];
+			if (level == D3DMULTISAMPLE_NONE) {
+				chosen = level;
+				break;
+			}
+
+			DWORD q_color = 0, q_depth = 0;
+			HRESULT hr_c = d3d->CheckDeviceMultiSampleType(
+				D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
+				d3dcp.present_param.BackBufferFormat,
+				windowed, level, &q_color);
+			HRESULT hr_d = d3d->CheckDeviceMultiSampleType(
+				D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
+				d3dcp.present_param.AutoDepthStencilFormat,
+				windowed, level, &q_depth);
+
+			if (SUCCEEDED(hr_c) && SUCCEEDED(hr_d)) {
+				chosen = level;
+				break;
+			}
+		}
+
+		d3dcp.present_param.MultiSampleType    = chosen;
+		d3dcp.present_param.MultiSampleQuality = 0;  // standard MSAA, not CSAA/EQAA
+	}
+
 	d3dcp.present_param.PresentationInterval =
 	    bFullScreen ? D3DPRESENT_INTERVAL_DEFAULT : D3DPRESENT_INTERVAL_IMMEDIATE;
 	// ����ֻ�ǲ���vs�İ汾���Ժ�d3d�Ĵ���������Ҫ���ⲿ���
@@ -149,6 +193,9 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 		d3dcp.behavior_flag = D3DCREATE_SOFTWARE_VERTEXPROCESSING;
 		d3dcp.present_param.SwapEffect = bFullScreen ? D3DSWAPEFFECT_DISCARD : D3DSWAPEFFECT_COPY;
 		d3dcp.present_param.BackBufferCount = 1; // �ϻ����ڴ����ٵ�
+		// SW-VP + COPY swap rules out MSAA — drop it for this fallback path.
+		d3dcp.present_param.MultiSampleType    = D3DMULTISAMPLE_NONE;
+		d3dcp.present_param.MultiSampleQuality = 0;
 	}
 
 	//	add by	jze	begin!

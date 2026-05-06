@@ -1,4 +1,4 @@
-# Compile only the lit shaders affected by the cel-shading change in common.hlsli,
+# Compile lit shaders + outline shaders (everything that depends on common.hlsli),
 # strip comments, XOR-encrypt them with the PKO shader key, and write them
 # directly to ..\..\client\shader\ (overwriting the existing encrypted .vsh).
 #
@@ -50,7 +50,14 @@ $Mappings = @(
     @{ Hlsl='vs_pndt0_ld';          Out='vs_pnt0_ld_t0uvmat';       Defs='/DUSE_TEX_TRANSFORM /DNO_DIFFUSE' },
     @{ Hlsl='vs_pndt0_ld_t0uvmat';  Out='vs_pndt0_ld_t0uvmat_alt';  Defs='' },
     @{ Hlsl='vs_pnt0_ld';           Out='vs_pnt0_ld_alt';           Defs='' },
-    @{ Hlsl='vs_pnt0_ld_t0uvmat';   Out='vs_pnt0_ld_t0uvmat_alt';   Defs='' }
+    @{ Hlsl='vs_pnt0_ld_t0uvmat';   Out='vs_pnt0_ld_t0uvmat_alt';   Defs='' },
+
+    # --- Outline pass (inverted-hull, distance-scaled, tinted) ---
+    @{ Hlsl='pu4nt0_ld_outline';   Out='skinmesh8_1_outline';  Defs='' },
+    @{ Hlsl='pb1u4nt0_ld_outline'; Out='skinmesh8_2_outline';  Defs='' },
+    @{ Hlsl='pb2u4nt0_ld_outline'; Out='skinmesh8_3_outline';  Defs='' },
+    @{ Hlsl='pb3u4nt0_ld_outline'; Out='skinmesh8_4_outline';  Defs='' },
+    @{ Hlsl='vs_static_outline';   Out='vs_static_outline';    Defs='' }
 )
 
 function Strip-Comments {

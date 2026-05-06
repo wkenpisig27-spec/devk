@@ -71,6 +71,8 @@ CMPResManger::CMPResManger(void)
 	WORD iw;
 //#ifndef USE_GAME
 	_vecMeshList.resize(MAXMESH_COUNT);
+	_vecMeshLastUse.assign(MAXMESH_COUNT, 0);
+	_dwLastMeshSweep = 0;
 	_vecPartCtrl.resize(MAXPART_COUNT);
 	_vecPartCtrl.setsize(MAXPART_COUNT);
 
@@ -544,6 +546,7 @@ CEffectModel* CMPResManger::GetMeshByID( int iID)
 {
 
 	CEffectModel* pRetMesh(0);
+	int iUsedSlot = iID;
 
 	if(iID >=7)
 	{
@@ -586,7 +589,7 @@ CEffectModel* CMPResManger::GetMeshByID( int iID)
 					{	// ����б������λ���Ѿ���ģ���ˣ�����ģ������ʹ�ã��������һ��λ��
 						continue;
 					}
-					if(!_vecMeshList[n])	
+					if(!_vecMeshList[n])
 					{	//���Ϊ���´���һ��ģ�Ͷ��󣨳�ʼģ��Ϊδʹ��״̬��
 						_vecMeshList[n] = new CEffectModel;
 					}
@@ -613,6 +616,7 @@ CEffectModel* CMPResManger::GetMeshByID( int iID)
 					return 0;
 				}
 				pRetMesh =_vecMeshList[n];
+				iUsedSlot = n;
 			}
 			else
 			{
@@ -620,12 +624,14 @@ CEffectModel* CMPResManger::GetMeshByID( int iID)
 			}
 		}
 	}
-	else 
+	else
 	{
 		pRetMesh = _vecMeshList[iID];
 	}
 	pRetMesh->m_iID = iID;
 	pRetMesh->SetUsing(true);
+	if (iUsedSlot >= 0 && iUsedSlot < (int)_vecMeshLastUse.size())
+		_vecMeshLastUse[iUsedSlot] = GetTickCount();
 	return pRetMesh;
 }
 
@@ -2486,6 +2492,9 @@ void CMPResManger::FrameMove(DWORD dwTime)
 
 	D3DXMatrixTranspose(&_MatViewProjPose, _pMatViewProj);
 	//Transpose(_MatViewProjPose,*_pMatViewProj);
+
+	DynamicReleaseMeshes(GetTickCount());
+
 	if(_vecValidID.size() >= MAXMSG_COUNT)
 		return;
 
@@ -2495,6 +2504,33 @@ void CMPResManger::FrameMove(DWORD dwTime)
 		{
 			_vecPartArray[iw]->FrameMove(dwTime);
 		}
+	}
+}
+//-----------------------------------------------------------------------------
+void CMPResManger::DynamicReleaseMeshes(DWORD dwCurTick)
+{
+	if (dwCurTick - _dwLastMeshSweep < MESH_SWEEP_MS) return;
+	_dwLastMeshSweep = dwCurTick;
+
+	// Count loaded meshes outside the eternal-primitive range [0,7).
+	int nLoaded = 0;
+	int nMax = (int)_vecMeshList.size();
+	for (int i = 7; i < nMax; ++i)
+	{
+		if (_vecMeshList[i]) ++nLoaded;
+	}
+	if (nLoaded <= MESH_CACHE_MAX) return;
+
+	int nEvict = 0;
+	for (int i = 7; i < nMax; ++i)
+	{
+		if (!_vecMeshList[i]) continue;
+		if (_vecMeshList[i]->IsUsing()) continue;
+		if (dwCurTick - _vecMeshLastUse[i] < MESH_IDLE_MS) continue;
+		SAFE_DELETE(_vecMeshList[i]);
+		_vecMeshLastUse[i] = 0;
+		++nEvict;
+		if (nLoaded - nEvict <= MESH_CACHE_MAX) break;
 	}
 }
 //-----------------------------------------------------------------------------

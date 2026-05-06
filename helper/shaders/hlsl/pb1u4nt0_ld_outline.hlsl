@@ -1,10 +1,8 @@
 //==============================================================================
 // pb1u4nt0_ld_outline.hlsl - Outline pass, 2 bone influences
-// Inverted hull technique: extrude vertices along normals, cull=CW, black
+// Inverted hull: extrude in clip space (constant pixel width), tinted color.
 //==============================================================================
 #include "common.hlsli"
-
-static const float OUTLINE_WIDTH = 0.025;
 
 VS_OUTPUT main(VS_INPUT_SKIN2 input)
 {
@@ -16,22 +14,17 @@ VS_OUTPUT main(VS_INPUT_SKIN2 input)
     float weight0 = input.BlendWeight.x;
     float weight1 = 1.0 - weight0;
 
-    // Blend position
     float4 pos0 = TransformByBone(input.Position, bone0Base);
     float4 pos1 = TransformByBone(input.Position, bone1Base);
     float4 skinnedPos = pos0 * weight0 + pos1 * weight1;
 
-    // Blend normal
     float3 nrm0 = TransformNormalByBone(input.Normal, bone0Base);
     float3 nrm1 = TransformNormalByBone(input.Normal, bone1Base);
     float3 skinnedNormal = normalize(nrm0 * weight0 + nrm1 * weight1);
 
-    // Extrude vertex outward along normal to create outline shell
-    skinnedPos.xyz += skinnedNormal * OUTLINE_WIDTH;
-
-    output.Position  = mul(skinnedPos, ViewProj);
-    output.Color     = float4(0.0, 0.0, 0.0, 1.0);
-    output.TexCoord  = input.TexCoord;
+    output.Position = OutlineClipPos(skinnedPos.xyz, skinnedNormal);
+    output.Color    = OUTLINE_COLOR;
+    output.TexCoord = input.TexCoord;
 
     return output;
 }

@@ -85,6 +85,15 @@ inline bool fEquat( float f1, float f2)
 
 #define  MAXMESH_COUNT		800
 
+// LRU cache for loaded meshes (CEffectModel). Slots [0,7) are eternal primitives
+// (triangle/rect/cone/etc); slots [7, _iMeshNum) are unique base meshes loaded
+// from disk on demand; slots [_iMeshNum, MAXMESH_COUNT) are runtime copies for
+// concurrent instances. Eviction below applies to indices >= 7 only and skips
+// any slot whose CEffectModel::IsUsing() is true.
+#define  MESH_CACHE_MAX		120		// Soft cap on total non-primitive meshes resident
+#define  MESH_IDLE_MS		60000	// 60 s idle => candidate for eviction
+#define  MESH_SWEEP_MS		5000	// Sweep every 5 s
+
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -261,6 +270,11 @@ protected:
 	//!װ��һ�����Ч��
 	bool					LoadEffectFromFile(int idx, char* pszFileName);
 
+	// Frees idle, !IsUsing() CEffectModel slots when the resident count exceeds
+	// MESH_CACHE_MAX. Self-throttled to once per MESH_SWEEP_MS. Reload on next
+	// GetMeshByID is automatic (LoadModel for base slots, Copy for copy slots).
+	void					DynamicReleaseMeshes(DWORD dwCurTick);
+
 	void					LoadTotalRes();
 	void					LoadTotalData();
 	bool					LoadTotalTexture();
@@ -298,6 +312,8 @@ protected:
 
 	std::vector<lwITex*>			_vecTexList;
 	std::vector<CEffectModel*>				_vecMeshList;
+	std::vector<DWORD>						_vecMeshLastUse;	// Per-slot GetTickCount() touch
+	DWORD									_dwLastMeshSweep;	// Last DynamicReleaseMeshes() tick
 	CEffectModel*							_CShadeModel;
 	std::vector< std::vector<I_Effect> >	_vecEffectList;
 
