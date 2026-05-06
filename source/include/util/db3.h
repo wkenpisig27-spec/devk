@@ -288,7 +288,6 @@ public:
 	void SetColumn(const char* columnName, const std::string& a_sValue, char a_DataType = STRING);
 	void SetColumn(const char* columnName, double value);
 	void SetColumn(const char* columnName, int value, char a_DataType = CSQLBase::LONG);
-	void SetColumn(const char* columnName, int value);
 	void SetColumn(const char* columnName, bool isValidTime, int month, int day, int year); // use CSQLBASE_OLEDATETIME( o ) as 2nd arg
 
 	void ResetContent();
@@ -361,7 +360,6 @@ public:
 	void SetColumn(const char* columnName, const std::string& a_sValue, char a_DataType = CSQLBase::STRING);
 	void SetColumn(const char* columnName, int a_lValue, char a_DataType = CSQLBase::LONG);
 	void SetColumn(const char* columnName, double value);
-	void SetColumn(const char* columnName, int value);
 	// void SetColumn( const char* columnName, COleDateTime& value );
 	void SetColumn(const char* columnName, bool isValidTime, int month = 0, int day = 0, int year = 0);
 

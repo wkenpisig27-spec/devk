@@ -1365,6 +1365,58 @@ inline int lua_IsPosValid(lua_State* L) {
 	T_E
 }
 
+// Check if a game-world position is a blocked (impassable) tile on the map
+inline int lua_IsMapBlock(lua_State* L) {
+	T_B
+	BOOL bValid = (lua_gettop(L) == 3 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3));
+	if (!bValid) {
+		PARAM_ERROR
+		return 0;
+	}
+
+	SubMap* pMap = (SubMap*)lua_touserdata(L, 1);
+	if (!pMap) {
+		lua_pushnumber(L, 1); // Treat null map as blocked
+		return 1;
+	}
+
+	int posX = (int)lua_tonumber(L, 2);
+	int posY = (int)lua_tonumber(L, 3);
+
+	// Check if position is within map bounds first
+	if (!pMap->IsValidPos(posX, posY)) {
+		lua_pushnumber(L, 1); // Out of bounds = blocked
+		return 1;
+	}
+
+	// Convert game coordinates to block cell coordinates
+	dbc::Short blockW = pMap->GetBlockCellWidth();
+	dbc::Short blockH = pMap->GetBlockCellHeight();
+	if (blockW <= 0 || blockH <= 0) {
+		lua_pushnumber(L, 1); // Invalid block size = blocked
+		return 1;
+	}
+
+	dbc::Long cellX = posX / blockW;
+	dbc::Long cellY = posY / blockH;
+
+	// Bounds check against actual block grid dimensions to prevent out-of-bounds read
+	CMapRes* pMapRes = pMap->GetMapRes();
+	if (pMapRes) {
+		int gridW = pMapRes->m_CBlock.getWidth();
+		int gridH = pMapRes->m_CBlock.getHeight();
+		if (cellX < 0 || cellY < 0 || cellX >= gridW || cellY >= gridH) {
+			lua_pushnumber(L, 1); // Outside block grid = blocked
+			return 1;
+		}
+	}
+
+	BYTE isBlocked = pMap->IsBlock(cellX, cellY);
+	lua_pushnumber(L, isBlocked ? 1 : 0);
+	return 1;
+	T_E
+}
+
 // 取得角色面向方面前面的位置
 #define PI 3.1415926
 inline int lua_GetChaFacePos(lua_State* L) {

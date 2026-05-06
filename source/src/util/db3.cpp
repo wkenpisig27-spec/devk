@@ -1404,18 +1404,6 @@ void CSQLInsert::SetColumn(const char* columnName, double value) {
 	_values += ach;
 }
 
-void CSQLInsert::SetColumn(const char* columnName, int value) {
-	if (_columns != "")
-		_columns += ", ";
-	_columns += columnName;
-
-	char ach[32];
-	sprintf(ach, "%d", value);
-	if (_values != "")
-		_values += ", ";
-	_values += ach;
-}
-
 /*
 void CSQLInsert::SetColumn( const char* columnName, COleDateTime& value )
 {
@@ -1878,22 +1866,6 @@ void CSQLUpdate::SetColumn(const char* columnName, bool isValidTime, int month, 
 		cs = "NULL";
 
 	_columns += cs;
-}
-
-void CSQLUpdate::SetColumn(const char* columnName, int value) {
-	if (_columns != "")
-		_columns += ", ";
-	_columns += columnName;
-
-	// if there's already an equal sign then don't add one.  This makes
-	// it possible for the user to enter "column=column+"
-	std::string cs = columnName;
-	if (cs.find('=') == cs.npos)
-		_columns += "=";
-
-	ostringstream os;
-	os << dec << value;
-	_columns += os.str();
 }
 
 void CSQLUpdate::SetColumn(const char* columnName, int a_lValue, char a_DataType) {
