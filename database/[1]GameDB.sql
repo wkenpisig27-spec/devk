@@ -89,7 +89,7 @@ CREATE TABLE [dbo].[boat] (
   [boat_cannon] [int] NOT NULL,
   [boat_equipment] [int] NOT NULL,
   [boat_bagsize] [smallint] NOT NULL,
-  [boat_bag] [varchar](max) NOT NULL,
+  [boat_bag] [char](7000) NOT NULL,
   [boat_diecount] [smallint] NOT NULL,
   [boat_isdead] [char](1) NOT NULL,
   [cur_endure] [int] NOT NULL,
@@ -160,7 +160,7 @@ CREATE TABLE [dbo].[character] (
   [angle] [int] NOT NULL,
   [look] [varchar](2000) NOT NULL,
   [kb_capacity] [int] NOT NULL,
-  [kitbag] [varchar](max) NOT NULL,
+  [kitbag] [varchar](7000) NOT NULL,
   [skillbag] [varchar](1200) NOT NULL,
   [shortcut] [varchar](1200) NOT NULL,
   [mission] [varchar](2048) NOT NULL,
@@ -1952,7 +1952,7 @@ CREATE PROCEDURE [dbo].[SaveBoatData]
     @cannon INT,
     @equipment INT,
     @bagSize SMALLINT,
-    @bag VARCHAR(max),
+    @bag VARCHAR(7000),
     @curEndure INT,
     @mxEndure INT,
     @curSupply INT,
@@ -2628,7 +2628,7 @@ CREATE PROCEDURE [dbo].[SaveBoatExWithPos]
     @_ANGLE INT,
     @_DEGREE SMALLINT,
     @_EXP INT,
-    @_BOAT_BAG VARCHAR(max),
+    @_BOAT_BAG VARCHAR(7000),
     @_BOAT_ID INT
 AS
 BEGIN
@@ -2659,7 +2659,7 @@ CREATE PROCEDURE [dbo].[SaveBoatEx]
     @_SKILL_STATE VARCHAR(400),
     @_DEGREE SMALLINT,
     @_EXP INT,
-    @_BOAT_BAG VARCHAR(max),
+    @_BOAT_BAG VARCHAR(7000),
     @_BOAT_ID INT
 AS
 BEGIN
@@ -2711,7 +2711,7 @@ IF OBJECT_ID('dbo.SaveCabin', 'P') IS NOT NULL
 GO
 
 CREATE PROCEDURE [dbo].[SaveCabin]
-    @_KITBAG VARCHAR(max),
+    @_KITBAG VARCHAR(7000),
     @_BOAT_ID INT
 AS
 BEGIN
@@ -5742,6 +5742,121 @@ END
 GO
 
 PRINT 'Created stored procedure: GetPlayerLoginInfo'
+GO
+
+-- ============================================================
+-- Phase 2.5: Parameterized stored procedures (replaces raw SQL)
+-- ============================================================
+
+IF OBJECT_ID('dbo.GetMasterDBID', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.GetMasterDBID
+GO
+
+CREATE PROCEDURE [dbo].[GetMasterDBID]
+    @cha_id1 INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT cha_id2 FROM master (NOLOCK) WHERE cha_id1 = @cha_id1;
+END
+GO
+
+PRINT 'Created stored procedure: GetMasterDBID'
+GO
+
+IF OBJECT_ID('dbo.IsMasterRelation', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.IsMasterRelation
+GO
+
+CREATE PROCEDURE [dbo].[IsMasterRelation]
+    @cha_id1 INT,
+    @cha_id2 INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT count(*) FROM master (NOLOCK) WHERE (cha_id1 = @cha_id1) AND (cha_id2 = @cha_id2);
+END
+GO
+
+PRINT 'Created stored procedure: IsMasterRelation'
+GO
+
+IF OBJECT_ID('dbo.CalWinTicket', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.CalWinTicket
+GO
+
+CREATE PROCEDURE [dbo].[CalWinTicket]
+    @issue INT,
+    @max   INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT TOP 10 itemno, num FROM (
+        SELECT itemno, COUNT(*) AS num
+        FROM Ticket
+        WHERE (issue = @issue) AND real = 0
+        GROUP BY itemno
+    ) AS A
+    WHERE num <= @max
+    ORDER BY num;
+END
+GO
+
+PRINT 'Created stored procedure: CalWinTicket'
+GO
+
+IF OBJECT_ID('dbo.ReadKitbagTmpDataByID', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.ReadKitbagTmpDataByID
+GO
+
+CREATE PROCEDURE [dbo].[ReadKitbagTmpDataByID]
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT content FROM resource WHERE id = @id;
+END
+GO
+
+PRINT 'Created stored procedure: ReadKitbagTmpDataByID'
+GO
+
+IF OBJECT_ID('dbo.ShowExpRank', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.ShowExpRank
+GO
+
+CREATE PROCEDURE [dbo].[ShowExpRank]
+    @count INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT TOP (@count) cha_name, job, degree
+    FROM character
+    WHERE delflag = 0
+    ORDER BY CASE WHEN (exp < 0) THEN (exp + 4294967296) ELSE exp END DESC;
+END
+GO
+
+PRINT 'Created stored procedure: ShowExpRank'
+GO
+
+IF OBJECT_ID('dbo.IsAmphitheaterTeamLogin', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.IsAmphitheaterTeamLogin
+GO
+
+CREATE PROCEDURE [dbo].[IsAmphitheaterTeamLogin]
+    @actor_id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT count(*) FROM AmphitheaterTeam (NOLOCK)
+    WHERE captain = @actor_id
+       OR member LIKE CAST(@actor_id AS VARCHAR(20)) + ',%'
+       OR member LIKE '%,' + CAST(@actor_id AS VARCHAR(20));
+END
+GO
+
+PRINT 'Created stored procedure: IsAmphitheaterTeamLogin'
 GO
 
 
