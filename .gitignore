@@ -1,0 +1,85 @@
+*.d
+*.slo
+*.lo
+*.o
+*.obj
+*.iobj
+*.gch
+*.pch
+*.so
+*.dylib
+*.mod
+*.smod
+*.lai
+*.la
+*.a
+*.exe
+*.loc
+*.bin
+*.idb
+*.ipch
+*.db
+*.vs/
+*.vscode/
+*.bsc
+*.recipe
+*.tlog
+*.log
+*.res
+*.pdb
+*.exp
+*.copied
+*.ilk
+*.htm
+*.ncb
+*.json
+*.command
+*.cfg
+**/user
+**/LOG
+**/log
+**/logfile
+**/Debug/
+**/client/scripts/
+**/source/tmp/
+
+# Build output directories
+**/source/out/
+**/source/build-linux/
+**/source/bin/
+
+# Library files (ignore by default, but allow specific paths)
+*.lib
+*.dll
+# Allow x64 libraries to be tracked
+!**/source/lib/x64/**/*.lib
+!**/source/bin/x64/**/*.dll
+# Allow source-libs (third-party library sources)
+!**/source-libs/
+
+# Build output logs
+build_errors.txt
+build_log.txt
+build_result.txt
+
+# Loose root scripts (consolidated into source/scripts/)
+/build.sh
+/build_safe.sh
+/fixlong.sh
+/start_pko.sh
+/start_servers.sh
+/check_logs.sh
+/check_db.sh
+
+# Backup/temp files
+*.orig
+*.bak
+*.tmp
+*~
+
+# Client runtime logs
+**/client/log/
+**/client/log1/
+**/client/calua_err.txt
+**/client/lua_err.txt
+**/client/exception.txt
