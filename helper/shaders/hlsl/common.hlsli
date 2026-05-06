@@ -153,20 +153,43 @@ float3 TransformNormalByBone(float3 nrm, int boneBase)
     return result;
 }
 
-// Calculate directional light contribution with half-lambert wrap
-// Half-lambert remaps the NdotL from the standard [-1..1] hard cutoff to a
-// soft [0..1] wrap, giving surfaces a rounder, more 3D appearance.
-// The wrap amount from SpecularParams.z controls the blend:
-//   0.0 = standard Lambertian (sharp terminator)
-//   0.5 = classic half-lambert (smooth, Valve-style)
+// Calculate directional light contribution
+//
+// CEL-SHADING (2.5D look): instead of smooth N.L gradient, quantize NdotL
+// into 3 discrete bands (shadow / mid / lit). Gives the painted/illustrated
+// feel without changing any textures or pixel shaders.
+//
+//   NdotL <  CEL_BAND0    -> shadow brightness (CEL_LEVEL0)
+//   NdotL <  CEL_BAND1    -> mid brightness    (CEL_LEVEL1)
+//   else                  -> full bright       (CEL_LEVEL2)
+//
+// Tweak the four constants below to taste:
+//   - Raise CEL_LEVEL0 (e.g. 0.55) for softer shadows.
+//   - Lower CEL_LEVEL2 (e.g. 0.95) for a flatter lit side.
+//   - Move the CEL_BAND* thresholds to widen / shrink each band.
+// Set CEL_ENABLE to 0 to revert to smooth Lambert (original behaviour).
+#define CEL_ENABLE   1
+#define CEL_BAND0    0.40   // threshold shadow -> mid
+#define CEL_BAND1    0.75   // threshold mid    -> lit
+#define CEL_LEVEL0   0.45   // shadow brightness multiplier
+#define CEL_LEVEL1   0.75   // mid brightness multiplier
+#define CEL_LEVEL2   1.00   // lit brightness multiplier
+
 float4 CalcLighting(float3 normal)
 {
-    float wrap  = SpecularParams.z;               // e.g. 0.5
-    float NdotL = dot(normal, LightDir.xyz);
+    // N dot L for diffuse
+    float NdotL = max(0, dot(normal, LightDir.xyz));
 
-    // Wrap formula: remaps NdotL so backfaces still receive a fraction of diffuse
-    NdotL = saturate((NdotL + wrap) / (1.0 + wrap));
+#if CEL_ENABLE
+    // Quantize NdotL into 3 bands using step() (vs_1_1 friendly, no flow control).
+    // step(edge, x) returns 1 if x>=edge else 0.
+    float band = CEL_LEVEL0
+               + step(CEL_BAND0, NdotL) * (CEL_LEVEL1 - CEL_LEVEL0)
+               + step(CEL_BAND1, NdotL) * (CEL_LEVEL2 - CEL_LEVEL1);
+    NdotL = band;
+#endif
 
+    // Final color = Ambient + Diffuse * NdotL
     return Ambient + Diffuse * NdotL;
 }
 
