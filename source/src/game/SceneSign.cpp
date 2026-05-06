@@ -5,6 +5,7 @@
 #include "GameApp.h"
 #include "Character.h"
 #include "EffectObj.h"
+#include "UISystemForm.h"
 
 CSceneSign::CSceneSign(void)
 	: _pAttack(nullptr), _pMove(nullptr), _pScene(nullptr), _eStyle(enumNone) {
@@ -21,7 +22,9 @@ bool CSceneSign::Init(CGameScene* pScene) {
 	_pAttack = _pScene->AddSceneItem("targeta.lgo");
 	if (_pAttack) {
 		_pAttack->setIsSystem(true);
-		_pAttack->PlayObjImpPose(ANIM_CTRL_TYPE_MAT, 0, PLAY_LOOP, 0.0f, 2.0f);
+		// FPS-aware velocity: halved at 60 FPS to keep target indicator spinning at original speed.
+		const float vel = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 1.0f : 2.0f;
+		_pAttack->PlayObjImpPose(ANIM_CTRL_TYPE_MAT, 0, PLAY_LOOP, 0.0f, vel);
 	} else {
 		LG("init", RES_STRING(CL_LANGUAGE_MATCH_377));
 		return false;
@@ -42,7 +45,9 @@ bool CSceneSign::Init(CGameScene* pScene) {
 	_pMove = _pScene->AddSceneItem("target.lgo");
 	if (_pMove) {
 		_pMove->setIsSystem(true);
-		_pMove->PlayObjImpPose(ANIM_CTRL_TYPE_MAT, 0, PLAY_LOOP, 0.0f, 2.0f);
+		// FPS-aware velocity: halved at 60 FPS to keep move indicator spinning at original speed.
+		const float vel = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 1.0f : 2.0f;
+		_pMove->PlayObjImpPose(ANIM_CTRL_TYPE_MAT, 0, PLAY_LOOP, 0.0f, vel);
 	} else {
 		LG("init", RES_STRING(CL_LANGUAGE_MATCH_379));
 		return false;

@@ -29,6 +29,21 @@ extern "C" __declspec(dllexport) void lwSetOutlineEnabled(int enabled)
     g_lwOutlineEnabled = (enabled != 0);
 }
 
+// Internal flag for ambient/default-pose animation speed scaling.
+// Original engine ran the game loop at 30 FPS so default-pose velocity = 1.0f
+// advances the keyframe pointer once per tick. We now run at 60 FPS, so the
+// engine-side default-pose helpers (which can't see the game's UI option) need
+// to halve the per-tick advance to keep ambient animations (texture scrolls,
+// node/model default poses) at their original real-time speed.
+// true  = 60 FPS mode (velocity = 0.5f)
+// false = legacy 30 FPS mode (velocity = 1.0f)
+bool g_lw60FpsMode = true;
+
+extern "C" __declspec(dllexport) void lwSet60FpsMode(int enabled)
+{
+    g_lw60FpsMode = (enabled != 0);
+}
+
 LW_BEGIN
 
 unsigned int __stdcall __load_bone(void* param)

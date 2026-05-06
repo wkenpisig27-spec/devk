@@ -182,7 +182,8 @@ bool CSelectChaScene::_Init() {
 				ppi.pose = 0;
 				ppi.frame = 0.0f;
 				ppi.type = PLAY_ONCE;
-				ppi.velocity = 1.0f;
+				// FPS-aware: halved at 60 FPS to preserve real-time animation speed.
+				ppi.velocity = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 0.5f : 1.0f;
 
 				lwAnimCtrlObjTypeInfo type_info;
 

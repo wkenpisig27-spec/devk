@@ -34,6 +34,7 @@ using namespace GUI;
 
 // Engine-side outline toggle (defined in MindPower3D.dll / lwPhysique.cpp).
 extern "C" __declspec(dllimport) void lwSetOutlineEnabled(int enabled);
+extern "C" __declspec(dllimport) void lwSet60FpsMode(int enabled);
 
 extern bool g_IsShowStates;
 extern bool g_IsCameraMode;
@@ -500,6 +501,9 @@ void CSystemMgr::LoadCustomProp() {
 
 	// Apply outline rendering toggle
 	lwSetOutlineEnabled(m_sysProp.m_gameOption.bOutline ? 1 : 0);
+
+	// Apply 60 FPS animation scaling toggle (engine-side default-pose / TexUV velocity).
+	lwSet60FpsMode(m_sysProp.m_gameOption.bFramerate ? 1 : 0);
 }
 bool CSystemMgr::Init() {
 
@@ -716,6 +720,35 @@ void CSystemMgr::End() {
 
 	if (cbxRunMode)
 		m_sysProp.m_gameOption.bRunMode = cbxRunMode->GetActiveIndex() == 0 ? false : true;
+	if (cbxLockMode)
+		m_sysProp.m_gameOption.bLockMode = cbxLockMode->GetActiveIndex() == 1 ? true : false;
+	if (cbxHelpMode)
+		m_sysProp.m_gameOption.bHelpMode = cbxHelpMode->GetActiveIndex() == 1 ? true : false;
+	if (cbxCameraMode)
+		m_sysProp.m_gameOption.bCameraMode = cbxCameraMode->GetActiveIndex() == 1 ? true : false;
+	if (cbxAppMode)
+		m_sysProp.m_gameOption.bAppMode = cbxAppMode->GetActiveIndex() == 1 ? true : false;
+	if (cbxEffMode)
+		m_sysProp.m_gameOption.bEffMode = cbxEffMode->GetActiveIndex() == 1 ? true : false;
+	if (cbxStateMode)
+		m_sysProp.m_gameOption.bStateMode = cbxStateMode->GetActiveIndex() == 1 ? true : false;
+	if (cbxEnemyNames)
+		m_sysProp.m_gameOption.bEnemyNames = cbxEnemyNames->GetActiveIndex() == 1 ? true : false;
+	if (cbxShowBars)
+		m_sysProp.m_gameOption.bShowBars = cbxShowBars->GetActiveIndex() == 1 ? true : false;
+	if (cbxShowPercentages)
+		m_sysProp.m_gameOption.bShowPercentages = cbxShowPercentages->GetActiveIndex() == 1 ? true : false;
+	if (cbxShowInfo)
+		m_sysProp.m_gameOption.bShowInfo = cbxShowInfo->GetActiveIndex() == 1 ? true : false;
+	if (cbxFramerate)
+	{
+		m_sysProp.m_gameOption.bFramerate = cbxFramerate->GetActiveIndex() == 1 ? true : false;
+		lwSet60FpsMode(m_sysProp.m_gameOption.bFramerate ? 1 : 0);
+	}
+	if (cbxShowMounts)
+		m_sysProp.m_gameOption.bShowMounts = cbxShowMounts->GetActiveIndex() == 1 ? true : false;
+	if (cbxDisableMelee)
+		m_sysProp.m_gameOption.bDisableMelee = cbxDisableMelee->GetActiveIndex() == 1 ? true : false;
 
 	// if (cbxAppMode)
 	//	m_sysProp.m_gameOption.bAppMode = cbxAppMode->GetActiveIndex() == 0 ? false : true;

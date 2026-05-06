@@ -1,5 +1,6 @@
 ﻿#include "StdAfx.h"
 #include "SceneLight.h"
+#include "UISystemForm.h"
 
 int SceneLight::UpdateAnimLight() {
 	if (anim_light) {
@@ -122,6 +123,9 @@ int AnimCtrlLight::Load(const char* file) {
 int AnimCtrlLight::UpdateObject(SceneLight* ret_obj) {
 	if (_data_num == 0)
 		return 0;
+
+	// FPS-aware velocity: keeps dynamic scene-light flicker/cycle at original real-time speed.
+	ret_obj->ppi.velocity = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 0.5f : 1.0f;
 
 	_pose_ctrl->PlayPose(&ret_obj->ppi);
 

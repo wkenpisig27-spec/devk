@@ -202,7 +202,7 @@ lwIPoseCtrl* MPSceneItem::GetObjImpPoseCtrl( DWORD ctrl_type )
 
 LW_RESULT MPSceneItem::PlayDefaultAnimation(bool IsGlitched)
 {
-    return _obj->PlayDefaultAnimation();
+    return _obj->PlayDefaultAnimation(IsGlitched);
 }
 
 void MPSceneItem::ShowBoundingObject( int show )

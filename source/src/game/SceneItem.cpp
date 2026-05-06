@@ -13,6 +13,7 @@
 #include "StoneSet.h"
 #include "GameApp.h"
 #include "ItemRefineSet.h"
+#include "UISystemForm.h"
 #include "ItemRefineEffectSet.h"
 #include "EffectObj.h"
 #include "UIItemCommand.h"
@@ -206,7 +207,8 @@ HRESULT CSceneItem::LitResetTexture(DWORD item_id, DWORD lit_id) {
 		ppi.bit_mask = PPI_MASK_DEFAULT;
 		ppi.type = PLAY_LOOP;
 		ppi.pose = 0;
-		ppi.velocity = 1.0f;
+		// FPS-aware velocity: halved at 60 FPS to keep real-time speed parity with legacy 30 FPS path.
+		ppi.velocity = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 0.5f : 1.0f;
 		ctrlobj_tc->PlayPose(&ppi);
 	}
 

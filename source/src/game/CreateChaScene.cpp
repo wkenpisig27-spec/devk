@@ -173,7 +173,8 @@ int LoginScene_CreateCha::_InitChaObjSeq() {
 	play_info.bit_mask = PPI_MASK_POSE | PPI_MASK_TYPE | PPI_MASK_VELOCITY;
 	play_info.pose = 1;
 	play_info.type = PLAY_LOOP;
-	play_info.velocity = 1.0f;
+	// FPS-aware idle pose velocity for character-creation race previews.
+	play_info.velocity = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 0.5f : 1.0f;
 
 	for (DWORD i = 0; i < _cha_num; i++) {
 		lwINodeBoneCtrl* bone_ctrl = (lwINodeBoneCtrl*)_cha_obj[i]->GetParent();
@@ -311,22 +312,25 @@ int LoginScene_CreateCha::LoadModelLXO(const char* file) {
 		PoseConfigInfo pci[32];
 		DWORD pci_num = 13;
 
+		// FPS scale: original velocities calibrated for 30 FPS. Halve at 60 FPS to keep real-time speed.
+		const float fpsScale = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 0.5f : 1.0f;
+
 		// char end_pose[64];
 
-		pci[0].pose_id = 41, pci[0].subset = -1, pci[0].stage = -1, pci[0].anim_type = 0, pci[0].play_type = 1, pci[0].velocity = 1.0f;
-		pci[1].pose_id = 41, pci[1].subset = 0, pci[1].stage = -1, pci[1].anim_type = 4, pci[1].play_type = 1, pci[1].velocity = 1.0f;
-		pci[2].pose_id = 54, pci[2].subset = -1, pci[2].stage = -1, pci[2].anim_type = 0, pci[2].play_type = 1, pci[2].velocity = 1.0f;
-		pci[3].pose_id = 54, pci[3].subset = 0, pci[3].stage = -1, pci[3].anim_type = 4, pci[3].play_type = 1, pci[3].velocity = 1.0f;
-		pci[4].pose_id = 27, pci[4].subset = 0, pci[4].stage = 0, pci[4].anim_type = 2, pci[4].play_type = 2, pci[4].velocity = 0.8f;
-		pci[5].pose_id = 28, pci[5].subset = 0, pci[5].stage = 0, pci[5].anim_type = 2, pci[5].play_type = 2, pci[5].velocity = 0.5f;
-		pci[6].pose_id = 106, pci[6].subset = -1, pci[6].stage = -1, pci[6].anim_type = 1, pci[6].play_type = 2, pci[6].velocity = 0.3f;
-		pci[7].pose_id = 60, pci[7].subset = -1, pci[7].stage = -1, pci[7].anim_type = 1, pci[7].play_type = 2, pci[7].velocity = 0.8f;
-		pci[8].pose_id = 61, pci[8].subset = -1, pci[8].stage = -1, pci[8].anim_type = 1, pci[8].play_type = 2, pci[8].velocity = 0.8f;
-		pci[9].pose_id = 62, pci[9].subset = -1, pci[9].stage = -1, pci[9].anim_type = 1, pci[9].play_type = 2, pci[9].velocity = 0.8f;
-		pci[10].pose_id = 63, pci[10].subset = -1, pci[10].stage = -1, pci[10].anim_type = 1, pci[10].play_type = 2, pci[10].velocity = 0.8f;
-		pci[11].pose_id = 64, pci[11].subset = -1, pci[11].stage = -1, pci[11].anim_type = 1, pci[11].play_type = 2, pci[11].velocity = 0.8f;
-		pci[12].pose_id = 110, pci[12].subset = -1, pci[12].stage = -1, pci[12].anim_type = 0, pci[12].play_type = 2, pci[12].velocity = 1.5f;
-		pci[13].pose_id = 111, pci[13].subset = -1, pci[13].stage = -1, pci[13].anim_type = 0, pci[13].play_type = 2, pci[13].velocity = 1.5f;
+		pci[0].pose_id = 41, pci[0].subset = -1, pci[0].stage = -1, pci[0].anim_type = 0, pci[0].play_type = 1, pci[0].velocity = 1.0f * fpsScale;
+		pci[1].pose_id = 41, pci[1].subset = 0, pci[1].stage = -1, pci[1].anim_type = 4, pci[1].play_type = 1, pci[1].velocity = 1.0f * fpsScale;
+		pci[2].pose_id = 54, pci[2].subset = -1, pci[2].stage = -1, pci[2].anim_type = 0, pci[2].play_type = 1, pci[2].velocity = 1.0f * fpsScale;
+		pci[3].pose_id = 54, pci[3].subset = 0, pci[3].stage = -1, pci[3].anim_type = 4, pci[3].play_type = 1, pci[3].velocity = 1.0f * fpsScale;
+		pci[4].pose_id = 27, pci[4].subset = 0, pci[4].stage = 0, pci[4].anim_type = 2, pci[4].play_type = 2, pci[4].velocity = 0.8f * fpsScale;
+		pci[5].pose_id = 28, pci[5].subset = 0, pci[5].stage = 0, pci[5].anim_type = 2, pci[5].play_type = 2, pci[5].velocity = 0.5f * fpsScale;
+		pci[6].pose_id = 106, pci[6].subset = -1, pci[6].stage = -1, pci[6].anim_type = 1, pci[6].play_type = 2, pci[6].velocity = 0.3f * fpsScale;
+		pci[7].pose_id = 60, pci[7].subset = -1, pci[7].stage = -1, pci[7].anim_type = 1, pci[7].play_type = 2, pci[7].velocity = 0.8f * fpsScale;
+		pci[8].pose_id = 61, pci[8].subset = -1, pci[8].stage = -1, pci[8].anim_type = 1, pci[8].play_type = 2, pci[8].velocity = 0.8f * fpsScale;
+		pci[9].pose_id = 62, pci[9].subset = -1, pci[9].stage = -1, pci[9].anim_type = 1, pci[9].play_type = 2, pci[9].velocity = 0.8f * fpsScale;
+		pci[10].pose_id = 63, pci[10].subset = -1, pci[10].stage = -1, pci[10].anim_type = 1, pci[10].play_type = 2, pci[10].velocity = 0.8f * fpsScale;
+		pci[11].pose_id = 64, pci[11].subset = -1, pci[11].stage = -1, pci[11].anim_type = 1, pci[11].play_type = 2, pci[11].velocity = 0.8f * fpsScale;
+		pci[12].pose_id = 110, pci[12].subset = -1, pci[12].stage = -1, pci[12].anim_type = 0, pci[12].play_type = 2, pci[12].velocity = 1.5f * fpsScale;
+		pci[13].pose_id = 111, pci[13].subset = -1, pci[13].stage = -1, pci[13].anim_type = 0, pci[13].play_type = 2, pci[13].velocity = 1.5f * fpsScale;
 
 		lwModelNodeQueryInfo mnqi;
 		memset(&mnqi, 0, sizeof(mnqi));
@@ -412,12 +416,15 @@ int LoginScene_CreateCha::LoadModelLMO(const char* file) {
 			PoseConfigInfo pci[32];
 			DWORD pci_num = 6;
 
-			pci[0].pose_id = 0, pci[0].subset = -1, pci[0].stage = -1, pci[0].anim_type = 1, pci[0].play_type = 1, pci[0].velocity = 0.5;
-			pci[1].pose_id = 1, pci[1].subset = -1, pci[1].stage = -1, pci[1].anim_type = 1, pci[1].play_type = 1, pci[1].velocity = 0.5;
-			pci[2].pose_id = 2, pci[2].subset = -1, pci[2].stage = -1, pci[2].anim_type = 1, pci[2].play_type = 1, pci[2].velocity = 0.5;
-			pci[3].pose_id = 3, pci[3].subset = -1, pci[3].stage = -1, pci[3].anim_type = 1, pci[3].play_type = 1, pci[3].velocity = 0.5;
-			pci[4].pose_id = 4, pci[4].subset = -1, pci[4].stage = -1, pci[4].anim_type = 1, pci[4].play_type = 1, pci[4].velocity = 0.5;
-			pci[5].pose_id = 26, pci[5].subset = -1, pci[5].stage = -1, pci[5].anim_type = 1, pci[5].play_type = 1, pci[5].velocity = 0.5;
+			// FPS scale: original velocities calibrated for 30 FPS. Halve at 60 FPS to keep real-time speed.
+			const float fpsScale = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 0.5f : 1.0f;
+
+			pci[0].pose_id = 0, pci[0].subset = -1, pci[0].stage = -1, pci[0].anim_type = 1, pci[0].play_type = 1, pci[0].velocity = 0.5f * fpsScale;
+			pci[1].pose_id = 1, pci[1].subset = -1, pci[1].stage = -1, pci[1].anim_type = 1, pci[1].play_type = 1, pci[1].velocity = 0.5f * fpsScale;
+			pci[2].pose_id = 2, pci[2].subset = -1, pci[2].stage = -1, pci[2].anim_type = 1, pci[2].play_type = 1, pci[2].velocity = 0.5f * fpsScale;
+			pci[3].pose_id = 3, pci[3].subset = -1, pci[3].stage = -1, pci[3].anim_type = 1, pci[3].play_type = 1, pci[3].velocity = 0.5f * fpsScale;
+			pci[4].pose_id = 4, pci[4].subset = -1, pci[4].stage = -1, pci[4].anim_type = 1, pci[4].play_type = 1, pci[4].velocity = 0.5f * fpsScale;
+			pci[5].pose_id = 26, pci[5].subset = -1, pci[5].stage = -1, pci[5].anim_type = 1, pci[5].play_type = 1, pci[5].velocity = 0.5f * fpsScale;
 
 			lwIPrimitive* p = 0;
 
@@ -486,7 +493,8 @@ void LoginScene_CreateCha::OnMouseMove(int flag, int x, int y) {
 	lwPlayPoseInfo_Construct(&play_info);
 	play_info.bit_mask = PPI_MASK_POSE | PPI_MASK_TYPE | PPI_MASK_VELOCITY | PPI_MASK_FRAME;
 	play_info.type = PLAY_LOOP_SMOOTH;
-	play_info.velocity = 1.0f;
+	// FPS-aware hover-pose velocity (race-preview reaction animation).
+	play_info.velocity = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 0.5f : 1.0f;
 	play_info.frame = 0.0f;
 
 	BOOL octopus_flag = 0;
@@ -570,7 +578,8 @@ int LoginScene_CreateCha::OnLButtonDown(int flag, int x, int y) {
 	lwPlayPoseInfo_Construct(&play_info);
 	play_info.bit_mask = PPI_MASK_POSE | PPI_MASK_TYPE | PPI_MASK_VELOCITY | PPI_MASK_FRAME;
 	play_info.type = PLAY_LOOP_SMOOTH;
-	play_info.velocity = 1.0f;
+	// FPS-aware velocity (used by HitTest path; kept consistent with OnMouseMove).
+	play_info.velocity = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 0.5f : 1.0f;
 	play_info.frame = 0.0f;
 
 	BOOL octopus_flag = 0;

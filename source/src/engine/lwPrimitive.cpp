@@ -956,7 +956,9 @@ LW_RESULT lwPrimitive::PlayDefaultAnimation(bool IsGlitched)
     ppi.pose = 0;
     ppi.frame = 0.0f;
     ppi.type = PLAY_LOOP;
-    ppi.velocity = 1.0f; // Mdr.st, doesnt seem to change anything
+    // 60 FPS mode advances 0.5 keyframes per tick (matches free-function sibling).
+    // 30 FPS legacy mode advances 1.0 keyframes per tick.
+    ppi.velocity = IsGlitched ? 1.0f : 0.5f;
 
     if(_anim_agent == NULL)
         goto __ret_ok;
