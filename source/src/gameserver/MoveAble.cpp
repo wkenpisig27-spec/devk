@@ -364,7 +364,7 @@ bool CMoveAble::overlap(int& xdist, int& ydist) {
 bool CMoveAble::DesireMoveBegin(SMoveInit* pSMoveInit) {
 	T_B if (m_usHeartbeatFreq == 0) {
 		if (IsCharacter()->IsPlayerCha())
-			m_usHeartbeatFreq = 300;
+			m_usHeartbeatFreq = 100;  // Reduced from 300ms: finer position updates reduce rubber-banding at high speeds
 		else
 			m_usHeartbeatFreq = 600;
 	}

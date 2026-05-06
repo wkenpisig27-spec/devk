@@ -17,6 +17,7 @@
 
 // New auth system integration
 #include "Auth.h"
+#include "PacketSanitizer.h"
 
 using namespace std;
 
@@ -135,6 +136,14 @@ void AccountServer2::OnProcessData(DataSocket* datasock, RPacket& rpkt) {
 	case CMD_PA_CHANGEPASS: {
 		string name = rpkt.ReadString();
 		string pass = rpkt.ReadString();
+		if (!PS::ValidateUsername(name.c_str())) {
+			LG("Security", "[AccountServer] CMD_PA_CHANGEPASS: invalid username '%s'\n", name.c_str());
+			break;
+		}
+		if (!PS::IsSafeString(pass.c_str())) {
+			LG("Security", "[AccountServer] CMD_PA_CHANGEPASS: unsafe password for user '%s'\n", name.c_str());
+			break;
+		}
 		g_MainDBHandle.UpdatePassword(name, pass);
 		break;
 	}
@@ -142,11 +151,19 @@ void AccountServer2::OnProcessData(DataSocket* datasock, RPacket& rpkt) {
 		string name = rpkt.ReadString();
 		string pass = rpkt.ReadString();
 		string email = rpkt.ReadString();
-		printf("[AccountServer] Registration request received: user=%s, email=%s\n", name.c_str(), email.c_str());
-		LG("AccountServer", "Registration request received: user=%s, email=%s\n", name.c_str(), email.c_str());
+		if (!PS::ValidateUsername(name.c_str())) {
+			LG("Security", "[AccountServer] CMD_PA_REGISTER: invalid username '%s'\n", name.c_str());
+			break;
+		}
+		if (!PS::IsSafeString(pass.c_str())) {
+			LG("Security", "[AccountServer] CMD_PA_REGISTER: unsafe password for user '%s'\n", name.c_str());
+			break;
+		}
+		if (!PS::IsSafeString(email.c_str())) {
+			LG("Security", "[AccountServer] CMD_PA_REGISTER: unsafe email for user '%s'\n", name.c_str());
+			break;
+		}
 		bool result = g_MainDBHandle.InsertUser(name, pass, email);
-		printf("[AccountServer] InsertUser result: %s\n", result ? "SUCCESS" : "FAILED");
-		LG("AccountServer", "InsertUser result: %s\n", result ? "SUCCESS" : "FAILED");
 		break;
 	}
 	case CMD_PA_LOGOUT: {
@@ -162,11 +179,19 @@ void AccountServer2::OnProcessData(DataSocket* datasock, RPacket& rpkt) {
 
 	case CMD_PA_GMBANACCOUNT: {
 		string actName = rpkt.ReadString();
+		if (actName.empty() || actName.size() > PS::MAX_USERNAME_LENGTH) {
+			LG("Security", "[AccountServer] CMD_PA_GMBANACCOUNT: invalid account name length\n");
+			break;
+		}
 		g_MainDBHandle.OperAccountBan(actName, 3);
 		break;
 	}
 	case CMD_PA_GMUNBANACCOUNT: {
 		string actName = rpkt.ReadString();
+		if (actName.empty() || actName.size() > PS::MAX_USERNAME_LENGTH) {
+			LG("Security", "[AccountServer] CMD_PA_GMUNBANACCOUNT: invalid account name length\n");
+			break;
+		}
 		g_MainDBHandle.OperAccountBan(actName, 0);
 		break;
 	}

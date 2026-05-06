@@ -660,12 +660,17 @@ void ToClient::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 					// handled in OnServeCall. SendData routes to OnProcessData which has
 					// no handler for it, causing the logout to be silently dropped.
 					{
-						WPacket l_wpk = g_gtsvr->gp_conn->get_datasock()->GetWPacket();
-						l_wpk.WriteCmd(CMD_TP_USER_LOGOUT);
-						l_wpk.WriteLongLong(MakeULong(player));
-						l_wpk.WriteLongLong(player->gp_addr);
-						player->gp_addr = 0;
-						g_gtsvr->gp_conn->SyncCall(g_gtsvr->gp_conn->get_datasock(), l_wpk, 10 * 1000);
+						DataSocket* gp_ds = g_gtsvr->gp_conn->get_datasock();
+						if (gp_ds) {
+							WPacket l_wpk = g_gtsvr->gp_conn->GetWPacket();
+							l_wpk.WriteCmd(CMD_TP_USER_LOGOUT);
+							l_wpk.WriteLongLong(MakeULong(player));
+							l_wpk.WriteLongLong(player->gp_addr);
+							player->gp_addr = 0;
+							g_gtsvr->gp_conn->SyncCall(gp_ds, l_wpk, 10 * 1000);
+						} else {
+							player->gp_addr = 0;
+						}
 					}
 
 					player->EndRun();
@@ -944,12 +949,15 @@ WPacket ToClient::CM_LOGOUT(DataSocket* datasock, RPacket& recvbuf) {
 			}
 
 			{ // ֪ͨGroupServer Logout
-				WPacket l_wpk = g_gtsvr->gp_conn->get_datasock()->GetWPacket();
+				WPacket l_wpk = g_gtsvr->gp_conn->GetWPacket();
 				l_wpk.WriteCmd(CMD_TP_USER_LOGOUT);
 				l_wpk.WriteLongLong(MakeULong(l_ply));
 				l_wpk.WriteLongLong(l_ply->gp_addr);
 				l_ply->gp_addr = 0;
-				l_retpk = g_gtsvr->gp_conn->SyncCall(g_gtsvr->gp_conn->get_datasock(), l_wpk, l_ulMilliseconds);
+				DataSocket* gp_ds = g_gtsvr->gp_conn->get_datasock();
+				if (gp_ds) {
+					l_retpk = g_gtsvr->gp_conn->SyncCall(gp_ds, l_wpk, l_ulMilliseconds);
+				}
 			}
 		} catch (...) {
 			LG("GateServer", "Error exit!\n");

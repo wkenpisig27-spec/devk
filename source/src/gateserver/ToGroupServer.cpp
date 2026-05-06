@@ -46,14 +46,16 @@ int ConnectGroupServer::Process() {
 
 				if (!retpk.HasData() || err == ERR_PT_LOGFAIL) {
 					Sleep(5000);
-					_tgps->Disconnect(_tgps->get_datasock());
+					DataSocket* ds = _tgps->get_datasock();
+					if (ds) _tgps->Disconnect(ds);
 					// Ê§°ÜÁË
 				} else {
 					int num = retpk.ReadShort();
 
 					if (num != ply_cnt) {
 						Sleep(5000);
-						_tgps->Disconnect(_tgps->get_datasock());
+						DataSocket* ds = _tgps->get_datasock();
+						if (ds) _tgps->Disconnect(ds);
 						// Ê§°ÜÁË
 					} else {
 						// NOTE(Ogge): What is this? Investigate
@@ -168,6 +170,12 @@ void ToGroupServer::OnDisconnect(DataSocket* datasock, int reason) // reasonÖµ
 
 	if (!g_appexit) {
 		_connected = false;
+		// Clear the datasock pointer so no thread can use the stale socket
+		// after Finally() deletes its RPCInfo. Only clear if it matches
+		// the disconnecting socket (a new connection may already exist).
+		if (_gs.datasock == datasock) {
+			_gs.datasock = nullptr;
+		}
 	}
 }
 

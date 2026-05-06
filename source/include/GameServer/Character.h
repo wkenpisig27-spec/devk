@@ -262,9 +262,9 @@ public:
 
 	// ??npc????
 	BOOL SafeSale(BYTE byIndex, BYTE byCount, WORD& wItemID, __int64& dwMoney);
-	BOOL SafeBuy(WORD wItemID, BYTE byCount, BYTE byIndex, __int64& dwMoney);
+	BOOL SafeBuy(WORD wItemID, short sCount, BYTE byIndex, __int64& dwMoney);
 	BOOL SafeSaleGoods(DWORD dwBoatID, BYTE byIndex, BYTE byCount, WORD& wItemID, __int64& dwMoney);
-	BOOL SafeBuyGoods(DWORD dwBoatID, WORD wItemID, BYTE byCount, BYTE byIndex, __int64& dwMoney);
+	BOOL SafeBuyGoods(DWORD dwBoatID, WORD wItemID, short sCount, BYTE byIndex, __int64& dwMoney);
 	BOOL GetSaleGoodsItem(DWORD dwBoatID, BYTE byIndex, WORD& wItemID);
 
 	BOOL ExchangeReq(short sSrcID, short sSrcNum, short sTarID, short sTarNum);
@@ -763,6 +763,7 @@ public:
 	dbc::Short CanEquipItem(SItemGrid* pSEquipIt);
 
 	dbc::Short IsItemExpired(SItemGrid* pSEquipIt);
+	void InvalidateExpiredEquipItems();
 
 public:
 	CKitbag m_CKitbag;		   // ??????

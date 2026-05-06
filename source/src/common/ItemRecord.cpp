@@ -231,8 +231,10 @@ bool CItemRecord::IsLockable() const {
 		   IsArmor() ||
 		   IsGlove() ||
 		   IsBoot() ||
+		   IsNecklace() ||
 		   sType == EItemType::enumItemTypeConch ||
-		   sType == EItemType::enumItemTypePet;
+		   sType == EItemType::enumItemTypePet ||
+		   sType == EItemType::enumItemMount;
 }
 
 //---------------------------------------------------------------------------
@@ -293,7 +295,7 @@ BOOL CItemRecordSet::_ReadRawDataInfo(CRawDataInfo* pRawDataInfo, vector<string>
 	// 是否实例化
 	pInfo->chInstance = Str2Int(ParamList[m++]);
 	// 价格
-	pInfo->lPrice = Str2Int(ParamList[m++]);
+	pInfo->lPrice = _atoi64(ParamList[m++].c_str());
 	// 体形
 	memset(pInfo->chBody, cchItemRecordKeyValue, sizeof(pInfo->chBody));
 	strLine = ParamList[m++];

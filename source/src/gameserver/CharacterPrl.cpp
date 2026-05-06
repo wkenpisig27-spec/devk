@@ -309,14 +309,21 @@ void CCharacter::ProcessPacket(unsigned short usCmd, RPACKET pk) {
 		Char bankType = READ_CHAR(pk);
 
 		// Rate limit guild bank DB operations (1s cooldown)
+		// NOTE: must NOT break here - ack must always be sent or GroupServer queue gets permanently stuck
+		bool bRateLimited = false;
 		{
 			DWORD dwNow = GetTickCount();
-			if (dwNow - m_dwLastGuildBankTime < 1000) break;
-			m_dwLastGuildBankTime = dwNow;
+			if (dwNow - m_dwLastGuildBankTime < 1000) {
+				bRateLimited = true;
+			} else {
+				m_dwLastGuildBankTime = dwNow;
+			}
 		}
 
 		// Check if player is in a safezone (enumAREA_TYPE_NOT_FIGHT = 0x0002)
-		if (!IsLiveing()) {
+		if (bRateLimited) {
+			// silently skip processing but still fall through to send ack
+		} else if (!IsLiveing()) {
 			SystemNotice("Dead pirates are unable to trade.");
 		} else if (!IsInArea(enumAREA_TYPE_NOT_FIGHT)) {
 			SystemNotice("Must be in a safe zone to use the guild bank.");
@@ -791,7 +798,12 @@ void CCharacter::ProcessPacket(unsigned short usCmd, RPACKET pk) {
 		DWORD dwCharID = READ_LONG(pk);
 		BYTE byOpType = READ_CHAR(pk);
 		BYTE currency = READ_CHAR(pk);
-		long long llMoney = READ_LONGLONG(pk);
+		long long llMoney = 0;
+		if (currency == 0) {
+			llMoney = READ_LONGLONG(pk);
+		} else {
+			llMoney = (long long)READ_LONG(pk);
+		}
 
 		// SANITIZE: Validate currency type and money amount
 		if (currency != 0 && currency != 1) {
@@ -2174,6 +2186,11 @@ void CCharacter::ProcessPacket(unsigned short usCmd, RPACKET pk) {
 
 		cChar* szTitle = READ_STRING(pk);
 		cChar* szContent = READ_STRING(pk);
+		// SANITIZE: null check before strlen to prevent crash on malformed packet
+		if (!szTitle || !szContent) {
+			LG("Security", "[GMSend] Null title or content from character %s\n", GetName());
+			break;
+		}
 		if (strlen(szTitle) > 32 || strlen(szContent) > 512) {
 			// pMainCha->SystemNotice("??????!");
 			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00033));

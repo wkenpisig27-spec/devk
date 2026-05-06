@@ -74,6 +74,12 @@ int AcceptConnect::Process() {
 		closesocket(l_sock);
 		return 0;
 	}
+
+	// TCP_NODELAY: disable Nagle's algorithm for real-time game traffic.
+	// Without this, small PKO packets (movement, combat) are buffered up to 40ms before sending.
+	BOOL l_nodelay = 1;
+	setsockopt(l_sock, IPPROTO_TCP, TCP_NODELAY, (cChar*)&l_nodelay, sizeof(l_nodelay));
+
 #ifdef _DEBUG
 #ifdef PKO_PLATFORM_WINDOWS
 	struct tcp_keepalive ka;

@@ -12,6 +12,7 @@
 #include "GameAppNet.h"
 #include "SkillStateRecord.h"
 #include "lua_gamectrl.h"
+#include "LevelRecord.h"
 #include <fstream>
 #include <iostream>
 
@@ -606,7 +607,60 @@ BOOL CCharacter::DoGMCommand(const char* pszCmd, const char* pszParam) {
 		lua_settop(g_pLuaState, 0);
 		return TRUE;
 	} else if (!strcmp(szComHead, g_Command.m_cAddexp)) {
-		AddExpAndNotic(_atoi64(szComParam));
+		int n = Util_ResolveTextLine(szComParam, strList, 10, ',');
+		LONG64 lAddExp = _atoi64(strList[0].c_str());
+		if (n >= 2) {
+			CCharacter* pCCha = g_pGameApp->FindChaByName(strList[1].c_str());
+			if (!pCCha) {
+				SystemNotice("[addexp] Player '%s' not found on this server.", strList[1].c_str());
+				return FALSE;
+			}
+			pCCha->AddExpAndNotic(lAddExp);
+			SystemNotice("[addexp] Added %I64d EXP to %s.", lAddExp, pCCha->GetName());
+		} else {
+			AddExpAndNotic(lAddExp);
+		}
+		LG("ServerRunLog", "ChaID: %i, ChaName: %s, CMD: %s, Param: %s\n", GetPlayer()->GetID(), GetName(), pszCmd, pszParam);
+		return TRUE;
+	} else if (!strcmp(szComHead, "setlv")) {
+		int n = Util_ResolveTextLine(szComParam, strList, 10, ',');
+		if (n < 1) return FALSE;
+		int nTargetLv = (int)atol(strList[0].c_str());
+		if (nTargetLv < 1) nTargetLv = 1;
+		if (nTargetLv > 150) nTargetLv = 150;
+
+		CLevelRecord* pRec = GetLevelRecordInfo(nTargetLv);
+		if (!pRec) {
+			SystemNotice("[setlv] Level %d record not found.", nTargetLv);
+			return FALSE;
+		}
+
+		CCharacter* pTarget = this;
+		if (n >= 2) {
+			pTarget = g_pGameApp->FindChaByName(strList[1].c_str());
+			if (!pTarget) {
+				SystemNotice("[setlv] Player '%s' not found on this server.", strList[1].c_str());
+				return FALSE;
+			}
+		}
+
+		pTarget->m_CChaAttr.ResetChangeFlag();
+		int nCurrentLv = (int)pTarget->getAttr(ATTR_LV);
+		// Step through each level so BsAttrUpgrade awards AP/TP per level, same as AddExpAndNotic
+		for (int lv = nCurrentLv + 1; lv <= nTargetLv; lv++) {
+			pTarget->setAttr(ATTR_LV, (LONG64)lv);
+			g_CParser.DoString("Shengji_Shuxingchengzhang", enumSCRIPT_RETURN_NONE, 0, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, pTarget, DOSTRING_PARAM_END);
+			pTarget->OnLevelUp((USHORT)lv);
+		}
+		pTarget->setAttr(ATTR_CEXP, (LONG64)pRec->ulExp);
+		pTarget->setAttr(ATTR_CLEXP, (LONG64)pRec->ulExp);
+		CLevelRecord* pNextRec = GetLevelRecordInfo(nTargetLv + 1);
+		if (pNextRec)
+			pTarget->setAttr(ATTR_NLEXP, (LONG64)pNextRec->ulExp);
+		else
+			pTarget->setAttr(ATTR_NLEXP, (LONG64)pRec->ulExp);
+		pTarget->SynAttr(enumATTRSYN_TASK);
+		SystemNotice("[setlv] %s set to level %d.", pTarget->GetName(), nTargetLv);
 		LG("ServerRunLog", "ChaID: %i, ChaName: %s, CMD: %s, Param: %s\n", GetPlayer()->GetID(), GetName(), pszCmd, pszParam);
 		return TRUE;
 	} else if (!strcmp(szComHead, "addlifeexp")) {
@@ -1094,6 +1148,55 @@ BOOL CCharacter::DoGMCommand(const char* pszCmd, const char* pszParam) {
 		sprintf(buffer, "Attribute updated (1 is ok, 0 is not ok) =  %d", p);
 		SystemNotice(buffer);
 		player->SynKitbagNew(enumSYN_KITBAG_PICK);
+		return TRUE;
+	} else if (!strcmp(szComHead, "saveall")) {
+		// Force-save all online players on this GameServer instance to the database
+		g_pGameApp->SaveAllPlayer();
+		SystemNotice("[saveall] All online players on this server have been saved.");
+		LG("ServerRunLog", "ChaID: %i, ChaName: %s, CMD: %s, Param: %s\n", GetPlayer()->GetID(), GetName(), pszCmd, pszParam);
+		return TRUE;
+	} else if (!strcmp(szComHead, "getid")) {
+		// Format: getid player_name  ->  returns the database char_id of the named player
+		CCharacter* pCCha = g_pGameApp->FindChaByName(szComParam);
+		if (!pCCha) {
+			SystemNotice("[getid] Player '%s' not found on this server.", szComParam);
+			return FALSE;
+		}
+		DWORD dwChaID = pCCha->GetPlayer()->GetDBChaId();
+		SystemNotice("[getid] %s => char_id: %u", szComParam, dwChaID);
+		LG("ServerRunLog", "ChaID: %i, ChaName: %s, CMD: %s, Param: %s\n", GetPlayer()->GetID(), GetName(), pszCmd, pszParam);
+		return TRUE;
+	} else if (!strcmp(szComHead, "give")) {
+		// Format: give player_name,item_id,quantity,quality
+		int n = Util_ResolveTextLine(szComParam, strList, 10, ',');
+		if (n < 4) {
+			SystemNotice("[give] Usage: give player_name,item_id,quantity,quality");
+			return FALSE;
+		}
+		const char* szTargetName = strList[0].c_str();
+		short sItemID  = Str2Int(strList[1]);
+		short sQty     = Str2Int(strList[2]);
+		char  chQuality = (char)Str2Int(strList[3]);
+		if (sQty <= 0 || sQty > 999) {
+			SystemNotice("[give] Invalid quantity %d (must be 1-999).", sQty);
+			return FALSE;
+		}
+		CCharacter* pCCha = g_pGameApp->FindChaByName(szTargetName);
+		if (!pCCha) {
+			SystemNotice("[give] Player '%s' not found on this server.", szTargetName);
+			return FALSE;
+		}
+		short sFreeBag = (short)(pCCha->m_CKitbag.GetCapacity() - pCCha->m_CKitbag.GetUseGridNum());
+		if (sFreeBag < sQty) {
+			SystemNotice("[give] %s has only %d free slot(s), need %d.", szTargetName, sFreeBag, sQty);
+			return FALSE;
+		}
+		if (!pCCha->AddItem(sItemID, sQty, GetName(), chQuality)) {
+			SystemNotice("[give] Failed to give item %d to %s.", sItemID, szTargetName);
+			return FALSE;
+		}
+		SystemNotice("[give] Gave %dx item %d (quality %d) to %s.", sQty, sItemID, chQuality, szTargetName);
+		LG("ServerRunLog", "ChaID: %i, ChaName: %s, CMD: %s, Param: %s\n", GetPlayer()->GetID(), GetName(), pszCmd, pszParam);
 		return TRUE;
 	}
 

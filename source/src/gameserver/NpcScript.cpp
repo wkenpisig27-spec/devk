@@ -1,4 +1,4 @@
-﻿// NpcScript.cpp Created by knight-gongjian 2004.11.30.
+// NpcScript.cpp Created by knight-gongjian 2004.11.30.
 //---------------------------------------------------------
 #include "stdafx.h"
 #include "NpcScript.h"
@@ -568,9 +568,9 @@ inline int lua_SafeBuy(lua_State* L) {
 
 	WORD wItemID = (WORD)lua_tonumber(L, 2);
 	BYTE byIndex = (BYTE)lua_tonumber(L, 3);
-	BYTE byCount = (BYTE)lua_tonumber(L, 4);
+	short sCount = (short)lua_tonumber(L, 4);
 	__int64 dwMoney;
-	BOOL bRet = pChar->SafeBuy(wItemID, byCount, byIndex, dwMoney);
+	BOOL bRet = pChar->SafeBuy(wItemID, sCount, byIndex, dwMoney);
 	lua_pushnumber(L, (bRet) ? LUA_TRUE : LUA_FALSE);
 	lua_pushnumber(L, dwMoney);
 
@@ -675,10 +675,10 @@ inline int lua_SafeBuyGoods(lua_State* L) {
 	DWORD dwBoatID = (DWORD)lua_tonumber(L, 2);
 	WORD wItemID = (WORD)lua_tonumber(L, 3);
 	BYTE byIndex = (BYTE)lua_tonumber(L, 4);
-	BYTE byCount = (BYTE)lua_tonumber(L, 5);
+	short sCount = (short)lua_tonumber(L, 5);
 	__int64 dwMoney = (__int64)lua_tonumber(L, 6);
 
-	BOOL bRet = pChar->SafeBuyGoods(dwBoatID, wItemID, byCount, byIndex, dwMoney);
+	BOOL bRet = pChar->SafeBuyGoods(dwBoatID, wItemID, sCount, byIndex, dwMoney);
 
 	lua_pushnumber(L, (bRet) ? LUA_TRUE : LUA_FALSE);
 	lua_pushnumber(L, dwMoney);

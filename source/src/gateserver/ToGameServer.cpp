@@ -121,6 +121,8 @@ void ToGameServer::OnDisconnect(DataSocket* datasock, int reason) // reasonÖµ:
 			l_game->mapcnt = 0;
 			l_game->Free();
 			datasock->SetPointer(nullptr);
+
+			portalcache.Clear(reinterpret_cast<uintptr_t>(l_game));
 		} else {
 			already_delete = true;
 		}
@@ -346,6 +348,25 @@ void ToGameServer::MT_LOGIN(DataSocket* datasock, RPacket& rpk) {
 				gms->m_datasock = datasock;
 				retpk.WriteShort(ERR_SUCCESS);
 				retpk.WriteString(g_gtsvr->gp_conn->_myself.c_str());
+
+				{ // Portal times
+					const auto maps_with_potal = rpk.ReverseReadShort();
+					std::vector<Portal> portals;
+					for (auto i = 0; i < maps_with_potal; ++i)
+					{
+						auto& portal = portals.emplace_back();
+						portal.map_id = rpk.ReadChar();
+						portal.entryFirst = rpk.ReadLongLong();
+						portal.entryInterval = rpk.ReadLongLong();
+						portal.entryClose = rpk.ReadLongLong();
+						portal.destinationClose = rpk.ReadLongLong();
+					}
+					portalcache.Clear(reinterpret_cast<uintptr_t>(gms));
+					if (!portals.empty())
+					{
+						portalcache.Add(reinterpret_cast<uintptr_t>(gms), std::move(portals));
+					}
+				}
 			} else { // ·Ç·¨µÄ GateServer
 				gms->Free();
 			}
@@ -475,6 +496,13 @@ void ToGameServer::MC_ENTERMAP(dbc::DataSocket* datasock, dbc::RPacket& recvbuf)
 		// Fixed: count (uShort=2) + gm_addr (LLong=8) + playercount (uLong=4) + chLogin (uChar=1) = 15 bytes
 		recvbuf.DiscardLast(sizeof(uShort) + (sizeof(uLong) + sizeof(LLong)) * l_aimnum + sizeof(LLong) + sizeof(uLong) + sizeof(uChar));
 		g_gtsvr->cli_conn->SendData(l_ply->m_datasock, recvbuf);
+
+		{ // Send portal times to client
+			auto wpk = g_gtsvr->cli_conn->GetWPacket();
+			wpk.WriteCmd(CMD_TC_PORTALTIMES);
+			portalcache.Fetch(wpk);
+			g_gtsvr->cli_conn->SendData(l_ply->m_datasock, wpk);
+		}
 		{
 			WPacket l_wpk = GetWPacket();
 			l_wpk.WriteCmd(CMD_MP_ENTERMAP);

@@ -129,7 +129,10 @@ bool cfl_db::handle_err(SQLHANDLE h, SQLSMALLINT t,
 	LG2("util_db_error", SQLERR_FORMAT, state, error, msg);
 	if (sql != nullptr)
 	{
-		LG2("util_db_error", "[STMT:0x%x][SQLERR]: [%s]\n", h, sql);
+		// Truncate SQL to 256 chars - large queries (e.g. inline hex binary) would overflow LG2's 8KB buffer   
+		char truncSql[260];
+		_snprintf_s(truncSql, sizeof(truncSql), _TRUNCATE, "%s", sql);
+		LG2("util_db_error", "[STMT:0x%x][SQLERR]: [%.256s%s]\n", h, truncSql, strlen(sql) > 256 ? "..." : ""); 
 	}
 
 	if (_dump_errinfo && g_cchLogUtilDb == 1)

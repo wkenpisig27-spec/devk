@@ -285,6 +285,7 @@ void RegisterLuaAI(lua_State* L) {
 	REGFN(ClearHideChaByRange);
 	REGFN(IsChaFighting);
 	REGFN(IsPosValid);
+	REGFN(IsMapBlock);
 	REGFN(IsChaSleeping);
 	REGFN(ChaActEyeshot);
 	REGFN(GetChaFacePos);

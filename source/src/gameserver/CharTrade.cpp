@@ -634,7 +634,7 @@ BOOL CTradeSystem::AddIMP(BYTE byType, CCharacter& character, DWORD dwCharID, BY
 		pMain->SystemNotice(RES_STRING(GM_CHARTRADE_CPP_00039));
 		return FALSE;
 	} else if (byOpType == TRADE_DRAGMONEY_TRADE) {
-		DWORD dwCharIMP = pMain->GetIMP();
+		DWORD dwCharIMP = pMain->GetPlayer() ? (DWORD)pMain->GetIMP() : 0;
 		pItemData->dwIMP = dwMoney;
 		if (pItemData->dwIMP > 2000000) {
 			pItemData->dwIMP = 2000000;
@@ -651,7 +651,7 @@ BOOL CTradeSystem::AddIMP(BYTE byType, CCharacter& character, DWORD dwCharID, BY
 	WRITE_CMD(packet, CMD_MC_CHARTRADE);
 	WRITE_SHORT(packet, CMD_MC_CHARTRADE_MONEY);
 	WRITE_LONG(packet, pMain->GetID());
-	WRITE_LONG(packet, pItemData->dwIMP);
+	WRITE_LONGLONG(packet, (long long)pItemData->dwIMP);
 	WRITE_CHAR(packet, 1);
 	pTradeData->pAccept->ReflectINFof(pMain, packet);
 	pTradeData->pRequest->ReflectINFof(pMain, packet);
@@ -1210,8 +1210,8 @@ BOOL CTradeSystem::ValidateTrade(BYTE byType, CCharacter& character, DWORD dwCha
 		long long llReqMoney = pRequest->getAttr(ATTR_GD);
 		long long llAcpMoney = pAccept->getAttr(ATTR_GD);
 
-		int dwReqIMP = pRequest->GetIMP();
-		int dwAcpIMP = pAccept->GetIMP();
+		int dwReqIMP = pRequest->GetPlayer() ? pRequest->GetIMP() : 0;
+		int dwAcpIMP = pAccept->GetPlayer() ? pAccept->GetIMP() : 0;
 
 		if (pTradeData->ReqTradeData.dwIMP > dwReqIMP) {
 			pAccept->SystemNotice("Character (%s] IMP in trading mode is incorrect, trading cannot be continued!", pRequest->GetName());
@@ -1680,13 +1680,17 @@ BOOL CTradeSystem::ValidateTrade(BYTE byType, CCharacter& character, DWORD dwCha
 
 		// IMP
 		if (pTradeData->ReqTradeData.dwIMP > 0) {
-			pRequest->SetIMP(pRequest->GetIMP() - pTradeData->ReqTradeData.dwIMP);
-			pAccept->SetIMP(pAccept->GetIMP() + pTradeData->ReqTradeData.dwIMP);
+			if (pRequest->GetPlayer() && pAccept->GetPlayer()) {
+				pRequest->SetIMP(pRequest->GetIMP() - (int)pTradeData->ReqTradeData.dwIMP, false);
+				pAccept->SetIMP(pAccept->GetIMP() + (int)pTradeData->ReqTradeData.dwIMP, false);
+			}
 		}
 
 		if (pTradeData->AcpTradeData.dwIMP > 0) {
-			pAccept->SetIMP(pAccept->GetIMP() - pTradeData->AcpTradeData.dwIMP);
-			pRequest->SetIMP(pRequest->GetIMP() + pTradeData->AcpTradeData.dwIMP);
+			if (pRequest->GetPlayer() && pAccept->GetPlayer()) {
+				pAccept->SetIMP(pAccept->GetIMP() - (int)pTradeData->AcpTradeData.dwIMP, false);
+				pRequest->SetIMP(pRequest->GetIMP() + (int)pTradeData->AcpTradeData.dwIMP, false);
+			}
 		}
 
 		// sprintf( szTemp, "æŽ¥å—è€…äº¤æ˜“é‡‘é’±ï¼š%dï¼Œè¯·æ±‚è€…äº¤æ˜“é‡‘é’±ï¼š%d", pTradeData->AcpTradeData.llMoney,
@@ -1932,12 +1936,12 @@ BOOL CTradeSystem::ValidateTrade(BYTE byType, CCharacter& character, DWORD dwCha
 		if (pTradeData->AcpTradeData.dwIMP > 0 || pTradeData->ReqTradeData.dwIMP > 0) {
 			WPACKET packet = GETWPACKET();
 			WRITE_CMD(packet, CMD_MC_UPDATEIMP);
-			WRITE_LONG(packet, pAccept->GetIMP());
+			WRITE_LONG(packet, pAccept->GetPlayer() ? pAccept->GetIMP() : 0);
 			pAccept->ReflectINFof(pMain, packet);
 
 			WPACKET packet2 = GETWPACKET();
 			WRITE_CMD(packet2, CMD_MC_UPDATEIMP);
-			WRITE_LONG(packet2, pRequest->GetIMP());
+			WRITE_LONG(packet2, pRequest->GetPlayer() ? pRequest->GetIMP() : 0);
 			pRequest->ReflectINFof(pMain, packet2);
 		}
 

@@ -2619,7 +2619,7 @@ BOOL CCharacter::ExchangeReq(short sSrcID, short sSrcNum, short sTarID, short sT
 	return TRUE;
 }
 
-BOOL CCharacter::SafeBuy(WORD wItemID, BYTE byCount, BYTE byIndex, __int64& dwMoney) {
+BOOL CCharacter::SafeBuy(WORD wItemID, short sCount, BYTE byIndex, __int64& dwMoney) {
 	T_B if (GetPlyMainCha()->m_CKitbag.IsPwdLocked()) {
 		// SystemNotice("Item bar is locked!");
 		SystemNotice(RES_STRING(GM_CHARACTER_CPP_00002));
@@ -2652,19 +2652,19 @@ BOOL CCharacter::SafeBuy(WORD wItemID, BYTE byCount, BYTE byIndex, __int64& dwMo
 		return FALSE;
 	}
 
-	if (byCount <= 0) {
+	if (sCount <= 0) {
 		// SystemNotice("Data error, purchase failed!");
 		SystemNotice(RES_STRING(GM_CHARACTER_CPP_00015));
 		return FALSE;
 	}
 	// mothannakh fix the npc exploit in src ,
-	if (byCount > pItem->nPileMax) {
+	if (sCount > pItem->nPileMax) {
 
 		BickerNotice("%s comes in Stacks of %d Only", pItem->szName, pItem->nPileMax);
 		return FALSE;
 	}
 
-	dwMoney = (__int64)pItem->lPrice * byCount;
+	dwMoney = (__int64)pItem->lPrice * sCount;
 	USHORT sSize = m_CKitbag.GetCapacity();
 	if (byIndex >= sSize) {
 		// SystemNotice( "Item field index (% d) is invalid!", By Index );
@@ -2682,8 +2682,8 @@ BOOL CCharacter::SafeBuy(WORD wItemID, BYTE byCount, BYTE byIndex, __int64& dwMo
 
 	__int64 dwCharMoney = getAttr(ATTR_GD);
 	if (dwCharMoney < dwMoney) {
-		// SystemNotice( "Your money (% d) is not enough to purchase% d items "% s"! Unit price (% d)", dwCharMoney,byCount, pItem->szName, pItem->lPrice );
-		SystemNotice("Your gold (%lld) is not enough to buy %d %s! Price: %d", dwCharMoney, byCount, pItem->szName, pItem->lPrice);
+		// SystemNotice( "Your money (% d) is not enough to purchase% d items "% s"! Unit price (% d)", dwCharMoney,sCount, pItem->szName, pItem->lPrice );
+		SystemNotice("Your gold (%lld) is not enough to buy %d %s! Price: %d", dwCharMoney, sCount, pItem->szName, pItem->lPrice);
 		return FALSE;
 	}
 	// fix money npc exploit >mothannakh<
@@ -2694,11 +2694,11 @@ BOOL CCharacter::SafeBuy(WORD wItemID, BYTE byCount, BYTE byIndex, __int64& dwMo
 		}
 	}
 
-	USHORT sNum = byCount;
+	USHORT sNum = sCount;
 
 	SItemGrid SGridCont;
 	SGridCont.sID = wItemID;
-	SGridCont.sNum = byCount;
+	SGridCont.sNum = sCount;
 	ItemInstance(enumITEM_INST_BUY, &SGridCont);
 
 	m_CKitbag.SetChangeFlag(false);
@@ -2910,7 +2910,7 @@ BOOL CCharacter::SafeSaleGoods(DWORD dwBoatID, BYTE byIndex, BYTE byCount, WORD&
 	T_E
 }
 
-BOOL CCharacter::SafeBuyGoods(DWORD dwBoatID, WORD wItemID, BYTE byCount, BYTE byIndex, __int64& dwMoney) {
+BOOL CCharacter::SafeBuyGoods(DWORD dwBoatID, WORD wItemID, short sCount, BYTE byIndex, __int64& dwMoney) {
 	T_B if (m_pCPlayer) {
 		USHORT sBerthID, sxPos, syPos, sDir;
 		m_pCPlayer->GetBerth(sBerthID, sxPos, syPos, sDir);
@@ -2941,7 +2941,7 @@ BOOL CCharacter::SafeBuyGoods(DWORD dwBoatID, WORD wItemID, BYTE byCount, BYTE b
 					return FALSE;
 				}
 				// mothannakh fix the npc exploit in src ,
-				if (byCount > pItem->nPileMax) {
+				if (sCount > pItem->nPileMax) {
 
 					BickerNotice("%s comes in Stacks of %d Only", pItem->szName, pItem->nPileMax);
 					return FALSE;
@@ -2962,20 +2962,20 @@ BOOL CCharacter::SafeBuyGoods(DWORD dwBoatID, WORD wItemID, BYTE byCount, BYTE b
 				}
 
 				// Calculate the total price of an item
-				USHORT sNum = byCount;
+				USHORT sNum = sCount;
 				__int64 dwPrice = (dwMoney > 0) ? dwMoney : (__int64)pItem->lPrice;
 				dwMoney = (__int64)sNum * dwPrice;
 
 				__int64 dwCharMoney = getAttr(ATTR_GD);
 				if (dwCharMoney < dwMoney) {
 					// SystemNotice( "Your money (% d) is not enough to purchase% d items "% s"!??(%d)", dwCharMoney,byCount, pItem->szName, dwPrice );
-					SystemNotice("Your gold (%lld) is not enough to buy %d %s! Price: %lld", dwCharMoney, byCount, pItem->szName, dwPrice);
+					SystemNotice("Your gold (%lld) is not enough to buy %d %s! Price: %lld", dwCharMoney, sCount, pItem->szName, dwPrice);
 					return FALSE;
 				}
 
 				SItemGrid SGridCont;
 				SGridCont.sID = wItemID;
-				SGridCont.sNum = byCount;
+				SGridCont.sNum = sCount;
 				ItemInstance(enumITEM_INST_BUY, &SGridCont);
 
 				Bag.SetChangeFlag(false);
@@ -4083,6 +4083,54 @@ dbc::Short CCharacter::IsItemExpired(SItemGrid* pSEquipIt) {
 	} else {
 		return enumITEMOPT_SUCCESS;
 	}
+}
+
+void CCharacter::InvalidateExpiredEquipItems() {
+	if (!IsPlayerCha() || IsBoat())
+		return;
+	if (!GetPlayer())
+		return;
+
+	CCharacter* pMainCha = GetPlyMainCha();
+	CCharacter* pCtrlCha = GetPlyCtrlCha();
+	if (!pMainCha || !pCtrlCha)
+		return;
+
+	bool changed = false;
+	pMainCha->m_CSkillBag.SetChangeFlag(false);
+	m_CChaAttr.ResetChangeFlag();
+	SetBoatAttrChangeFlag(false);
+	m_CSkillState.ResetChangeFlag();
+	pMainCha->SetLookChangeFlag();
+
+	for (Char i = enumEQUIP_HEAD; i < enumEQUIP_NUM; ++i) {
+		SItemGrid* pSEquipIt = m_SChaPart.SLink + i;
+		if (!g_IsRealItemID(pSEquipIt->sID))
+			continue;
+
+		if (!pSEquipIt->IsValid())
+			continue;
+
+		if (IsItemExpired(pSEquipIt) != enumITEMOPT_ERROR_EXPIRED)
+			continue;
+
+		// Remove stat contribution while item is still valid, then flag it invalid.
+		ChangeItem(false, pSEquipIt, i);
+		pSEquipIt->SetValid(false);
+		changed = true;
+	}
+
+	if (!changed)
+		return;
+
+	pCtrlCha->SkillRefresh();
+	pMainCha->SynSkillBag(enumSYN_SKILLBAG_MODI);
+	SynSkillStateToEyeshot();
+	g_CParser.DoString("AttrRecheck", enumSCRIPT_RETURN_NONE, 0, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, this, DOSTRING_PARAM_END);
+	GetPlayer()->RefreshBoatAttr();
+	SyncBoatAttr(enumATTRSYN_ITEM_EQUIP);
+	SynAttrToSelf(enumATTRSYN_ITEM_EQUIP);
+	pMainCha->SynLook(enumSYN_LOOK_CHANGE);
 }
 
 // Helper function to check if an item is a Chaos equipment item
@@ -6891,7 +6939,7 @@ char* SStateData2String(CCharacter* pCCha, char* szSStateBuf, int nLen, char chS
 				continue;
 		}
 
-		sprintf(szData, ";%d,%d,%d", pStateUnit->GetStateID(), pStateUnit->GetStateLv(), lOnTick);
+		sprintf(szData, ";%d,%d,%d,%d", pStateUnit->GetStateID(), pStateUnit->GetStateLv(), lOnTick, 0);
 		nDataLen = (int)strlen(szData);
 		if (nBufLen + nDataLen >= nLen)
 			return nullptr;
@@ -6908,7 +6956,7 @@ bool Strin2SStateData(CCharacter* pCCha, std::string& strData) {
 		return false;
 
 	std::string strList[SKILL_STATE_MAXID + 1];
-	const short csSubNum = 3;
+	const short csSubNum = 4;
 	std::string strSubList[csSubNum];
 	int nSegNum = Util_ResolveTextLine(strData.c_str(), strList, SKILL_STATE_MAXID + 1, ';');
 	if (nSegNum < 1)
@@ -6918,6 +6966,7 @@ bool Strin2SStateData(CCharacter* pCCha, std::string& strData) {
 	uChar uchStateNum = Str2Int(strSubList[0]);
 	uChar uchStateID, uchStateLv;
 	Long lOnTick;
+	Short sSourceItemID;
 
 	short sTCount;
 
@@ -6930,6 +6979,7 @@ bool Strin2SStateData(CCharacter* pCCha, std::string& strData) {
 		uchStateID = Str2Int(strSubList[sTCount++]);
 		uchStateLv = Str2Int(strSubList[sTCount++]);
 		lOnTick = Str2Int(strSubList[sTCount++]);
+		sSourceItemID = Str2Int(strSubList[sTCount++]);
 		if (uchStateID == 83)
 			// fix Energy Shield
 			// lOnTick = -1;

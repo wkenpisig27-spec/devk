@@ -164,13 +164,19 @@ int RPCMGR::AsynCall(DataSocket* datasock, WPacket in_parameter, void* pointer) 
 	l_fncall->m_oldsessid = in_parameter.BackupSESS(); // backup sessid
 	in_parameter.WriteSESS(l_fncall->m_sessid);
 	l_retval = __tca->_SendData(datasock, in_parameter);
-	if (l_retval) // senddata��������
+	if (l_retval) // senddata failed
 	{
-		MutexArmor l_lockFnCall(l_rpcinfo->m_mtxfncall);
-		if (l_rpcinfo->DelFnCall(l_fncall)) {
+		// Re-fetch RPCInfo — the DataSocket may have been freed during _SendData.
+		RPCInfo* l_rpcinfo_now = datasock->GetRPCInfo();
+		if (l_rpcinfo_now) {
+			MutexArmor l_lockFnCall(l_rpcinfo_now->m_mtxfncall);
+			if (l_rpcinfo_now->DelFnCall(l_fncall)) {
+				l_fncall->Free();
+			}
+			l_lockFnCall.unlock();
+		} else {
 			l_fncall->Free();
 		}
-		l_lockFnCall.unlock();
 		return -5;
 	}
 	return 0;
@@ -225,11 +231,17 @@ RPacket RPCMGR::SyncCall(DataSocket* datasock, WPacket in_parameter, uLong ulMil
 	in_parameter.WriteSESS(l_sessid);
 	l_retval = __tca->_SendData(datasock, in_parameter);
 	if (l_retval) {
-		MutexArmor l_lockFnCall(l_rpcinfo->m_mtxfncall);
-		if (l_rpcinfo->DelFnCall(l_fncall)) {
+		// Re-fetch RPCInfo — the DataSocket may have been freed during _SendData.
+		RPCInfo* l_rpcinfo_now = datasock->GetRPCInfo();
+		if (l_rpcinfo_now) {
+			MutexArmor l_lockFnCall(l_rpcinfo_now->m_mtxfncall);
+			if (l_rpcinfo_now->DelFnCall(l_fncall)) {
+				l_fncall->Free();
+			}
+			l_lockFnCall.unlock();
+		} else {
 			l_fncall->Free();
 		}
-		l_lockFnCall.unlock();
 		return 0;
 	}
 
@@ -239,7 +251,10 @@ RPacket RPCMGR::SyncCall(DataSocket* datasock, WPacket in_parameter, uLong ulMil
 	MutexArmor l_lockFnCall(l_fncall->m_mtx);
 	if (l_fncall->m_sessid == l_sessid) {
 		l_fncall->m_sessid = 0;
-		if (l_rpcinfo->DelFnCall(l_fncall)) {
+		// Re-fetch RPCInfo after TimeBlock — the DataSocket may have been
+		// disconnected and freed while we were waiting, making l_rpcinfo stale.
+		RPCInfo* l_rpcinfo_now = datasock->GetRPCInfo();
+		if (l_rpcinfo_now && l_rpcinfo_now->DelFnCall(l_fncall)) {
 			l_retbuf = l_fncall->m_retbuf;
 		}
 	}

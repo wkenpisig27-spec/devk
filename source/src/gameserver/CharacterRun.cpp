@@ -129,8 +129,10 @@ void CCharacter::Run(uLong dwCurTime) {
 
 	t.Begin();
 	if (bIsLiveing)
-		if (m_timerSkillState.IsOK(dwCurTime))
+		if (m_timerSkillState.IsOK(dwCurTime)) {
+			InvalidateExpiredEquipItems();
 			OnSkillState(dwCurTime);
+		}
 	m_dwCellRunTime[chCount++] = t.End();
 	t.Begin();
 	if (bIsLiveing)

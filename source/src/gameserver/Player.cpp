@@ -139,7 +139,12 @@ void CPlayer::Free() {
 }
 
 void CPlayer::SetIMP(int imp, bool sync) {
-	m_lIMP = imp < 2000000000 ? imp : 2000000000;
+	if (imp < 0) {
+		imp = 0;
+	} else if (imp > 2000000000) {
+		imp = 2000000000;
+	}
+	m_lIMP = imp;
 	if (sync) {
 		char cmd[64];
 		sprintf(cmd, "SetIMPAcc('%s',%d)", GetActName(), GetIMP());

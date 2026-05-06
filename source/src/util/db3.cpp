@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <math.h>
 #include <time.h>
+#include <assert.h>
 #include <sqlext.h>
 
 using namespace std;
@@ -1403,6 +1404,18 @@ void CSQLInsert::SetColumn(const char* columnName, double value) {
 	_values += ach;
 }
 
+void CSQLInsert::SetColumn(const char* columnName, int value) {
+	if (_columns != "")
+		_columns += ", ";
+	_columns += columnName;
+
+	char ach[32];
+	sprintf(ach, "%d", value);
+	if (_values != "")
+		_values += ", ";
+	_values += ach;
+}
+
 /*
 void CSQLInsert::SetColumn( const char* columnName, COleDateTime& value )
 {
@@ -1487,8 +1500,7 @@ CSQLRecordset::CSQLRecordset(SQLHDBC a_hdbc)
 	  _rc(SQL_SUCCESS),
 	  _hdbc(a_hdbc),
 	  _hstmt(nullptr) {
-	// Debug assertion: a_hdbc should not be null
-	// Note: assert macro unavailable due to include chain interference on Linux
+	assert(a_hdbc != nullptr);
 }
 
 CSQLRecordset::~CSQLRecordset() {
@@ -1866,6 +1878,22 @@ void CSQLUpdate::SetColumn(const char* columnName, bool isValidTime, int month, 
 		cs = "NULL";
 
 	_columns += cs;
+}
+
+void CSQLUpdate::SetColumn(const char* columnName, int value) {
+	if (_columns != "")
+		_columns += ", ";
+	_columns += columnName;
+
+	// if there's already an equal sign then don't add one.  This makes
+	// it possible for the user to enter "column=column+"
+	std::string cs = columnName;
+	if (cs.find('=') == cs.npos)
+		_columns += "=";
+
+	ostringstream os;
+	os << dec << value;
+	_columns += os.str();
 }
 
 void CSQLUpdate::SetColumn(const char* columnName, int a_lValue, char a_DataType) {

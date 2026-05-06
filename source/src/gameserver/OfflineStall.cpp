@@ -784,10 +784,16 @@ void COfflineStallMgr::Update(DWORD dwCurTime) {
     
     // Second, check for inactive stalls that need NPCs spawned
     // (These are stalls where player just clicked Offline Mode but hasn't disconnected yet)
+    time_t nowSpawn = time(nullptr);
     std::vector<SOfflineStallInfo*> stallsToActivate;
     for (auto& pair : m_mapStalls) {
         SOfflineStallInfo* pInfo = pair.second;
         if (!pInfo || pInfo->bActive) continue;  // Skip active stalls
+        
+        // Never re-spawn an expired stall. CleanupExpiredStalls() sets bActive=false but keeps
+        // the record alive (for pending gold), which would cause this loop to re-spawn it every
+        // tick indefinitely. The expiry check here prevents that.
+        if (nowSpawn >= pInfo->tExpire) continue;
         
         // Check if player is still online
         CPlayer* pOwner = g_pGameApp->GetPlayerByDBID(pInfo->dwChaID);

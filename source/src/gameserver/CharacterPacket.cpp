@@ -362,6 +362,7 @@ void CCharacter::WriteLookData(WPACKET& WtPk, Char chLookType, Char chSynType) {
 		WRITE_SHORT(WtPk, m_SChaPart.sEngine);
 		WRITE_SHORT(WtPk, m_SChaPart.sCannon);
 		WRITE_SHORT(WtPk, m_SChaPart.sEquipment);
+		WRITE_CHAR(WtPk, (Char)m_nBadgeLevel); // PvP badge level (0-5) - boat path
 	} else {
 		// modify by kong@pkodev.net 11.08.2017 [begin]
 		int nJob = (int)getAttr(ATTR_JOB);
@@ -426,6 +427,7 @@ void CCharacter::WriteLookData(WPACKET& WtPk, Char chLookType, Char chSynType) {
 				} else
 					WRITE_CHAR(WtPk, 0);
 			}
+			WRITE_CHAR(WtPk, (Char)m_nBadgeLevel); // PvP badge level (0-5)
 			return;
 		} // modification [ends]
 
@@ -503,6 +505,7 @@ void CCharacter::WriteLookData(WPACKET& WtPk, Char chLookType, Char chSynType) {
 			} else
 				WRITE_CHAR(WtPk, 0);
 		}
+		WRITE_CHAR(WtPk, (Char)m_nBadgeLevel); // PvP badge level (0-5)
 	}
 }
 

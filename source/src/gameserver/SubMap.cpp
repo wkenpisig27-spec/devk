@@ -364,7 +364,13 @@ CNpcRecord* SubMap::GetNpcInfo(USHORT sNpcID) {
 // 加入视野单元
 void SubMap::Add(Entity* pCEnt) {
 	T_B
-		CCharacter* pCCha = pCEnt->IsCharacter();
+	// Safety check: validate entity pointer
+	if (!pCEnt) {
+		LG("SubMap", "Add called with null entity on map %s\n", GetName());
+		return;
+	}
+
+	CCharacter* pCCha = pCEnt->IsCharacter();
 	CItem* pCItem;
 	Point l_pt = pCEnt->GetPos();
 	Rect l_rect = GetEyeshot(l_pt);
