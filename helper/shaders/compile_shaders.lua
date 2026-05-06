@@ -262,7 +262,14 @@ local pko_shader_mappings = {
         {"skinmesh8_4_tt2", "/DNUM_SKIN_WEIGHTS=4 /DUSE_UVMAT1"},
         {"skinmesh8_4_tt3", "/DNUM_SKIN_WEIGHTS=4 /DUSE_UVMAT2"}
     },
-    
+
+    -- Outline (inverted hull) shaders - second pass, black, CW cull, no depth write
+    ["pu4nt0_ld_outline"]  = { {"skinmesh8_1_outline", ""} },
+    ["pb1u4nt0_ld_outline"] = { {"skinmesh8_2_outline", ""} },
+    ["pb2u4nt0_ld_outline"] = { {"skinmesh8_3_outline", ""} },
+    ["pb3u4nt0_ld_outline"] = { {"skinmesh8_4_outline", ""} },
+    ["vs_static_outline"]   = { {"vs_static_outline",   ""} },
+
     -- Static mesh shaders
     ["vs_pndt0"] = {
         {"vs_pndt0", "/DNO_LIGHTING"},

@@ -308,9 +308,9 @@ LW_RESULT lwDeviceObject::InitCapsInfo()
         { // depthstencil format
             D3DFORMAT check_fmt[] =
             {
-                D3DFMT_D16,
+                D3DFMT_D24S8,
                 D3DFMT_D24X8,
-                D3DFMT_D24S8
+                D3DFMT_D16
             };
 
             int fmt_num = LW_ARRAY_LENGTH(check_fmt);

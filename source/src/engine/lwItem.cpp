@@ -11,6 +11,10 @@
 #include "lwPathInfo.h"
 #include "lwD3D.h"
 #include "lwShaderMgr.h"
+#include "ShaderLoad.h"
+
+// Defined in lwPhysique.cpp.  Engine-internal flag for outline pass.
+extern bool g_lwOutlineEnabled;
 
 LW_BEGIN
 
@@ -251,7 +255,102 @@ LW_RESULT lwItem::Render()
 
 
     if(_obj)
-    {     
+    {
+        // ── Inverted-hull outline pass (run BEFORE mesh render so the
+        //    actual mesh draws on top, hiding the inner half of the shell).
+        //    Run for both opaque AND transparent items — weapons are usually
+        //    transparent and would otherwise skip the outline entirely.
+        //
+        //    Items use RENDERCTRL_VS_FIXEDFUNCTION whose BeginSet() ONLY
+        //    sets the world transform — it never binds a vertex shader.
+        //    We must bind the outline VS, declaration, and ViewProj*World
+        //    constants manually.
+        // ──────────────────────────────────────────────────────────────────
+        do
+        {
+            if (!::g_lwOutlineEnabled) break;
+
+            lwIRenderCtrlAgent* agent = _obj->GetRenderCtrlAgent();
+            if (!agent) break;
+
+            // Items typically use FIXEDFUNCTION (no VS bound). Decide based on
+            // the vertex DECLARATION — any decl that includes a NORMAL
+            // component is valid for inverted-hull extrusion.
+            DWORD outline_vs = LW_INVALID_INDEX;
+            switch (agent->GetVertexDeclaration())
+            {
+            case VDT_PNT0:    // pos + normal + tex0
+            case VDT_PND:     // pos + normal + diffuse
+            case VDT_PNDT0:   // pos + normal + diffuse + tex0
+            case VDT_PNDT1:
+            case VDT_PNDT2:
+            case VDT_PNDT3:
+                outline_vs = VSTU_STATIC_OUTLINE;
+                break;
+            default:
+                break;
+            }
+            if (outline_vs == LW_INVALID_INDEX) break;
+
+            DWORD snum = 0;
+            _obj->GetSubsetNum(&snum);
+            if (snum == 0) break;   // nothing to draw
+
+            lwIDeviceObject* dev_obj    = _res_mgr->GetDeviceObject();
+            lwIShaderMgr*    shader_mgr = _res_mgr->GetShaderMgr();
+            if (!dev_obj || !shader_mgr) break;
+
+            IDirect3DVertexShaderX*      outline_shader = NULL;
+            IDirect3DVertexDeclarationX* decl           = NULL;
+
+            if (LW_FAILED(shader_mgr->QueryVertexShader(&outline_shader, outline_vs))
+             || LW_FAILED(shader_mgr->QueryVertexDeclaration(&decl, agent->GetVertexDeclaration()))
+             || !outline_shader || !decl)
+                break;
+
+            const lwMatrix44* viewProj   = dev_obj->GetMatViewProj();
+            const lwMatrix44* mat_global = agent->GetGlobalMatrix();
+            if (!viewProj || !mat_global) break;
+
+            // Compute MVP (transposed for HLSL `mul(pos, ViewProj)` layout)
+            lwMatrix44 mvp = *viewProj;
+            lwMatrix44Multiply(&mvp, mat_global, &mvp);
+            lwMatrix44Transpose(&mvp, &mvp);
+
+            // BeginSet binds VB/IB and sets world transform via FF; it may
+            // also apply mesh render-state-atoms that override our settings.
+            agent->BeginSet();
+
+            // Manually bind outline VS + matching declaration + MVP constants.
+            dev_obj->SetVertexDeclarationForced(decl);
+            dev_obj->SetVertexShader(outline_shader);
+            dev_obj->SetVertexShaderConstantF(1, (float*)&mvp, 4);
+
+            // Force critical states AFTER BeginSet so mesh RSA can't override.
+            // The VS outputs black diffuse; existing FF MODULATE stage gives
+            // (texture * 0) = 0 for any bound texture, so we don't touch TSS
+            // or texture bindings (changing those would leave the device in a
+            // state the next mesh render doesn't expect, breaking textures).
+            dev_obj->SetRenderStateForced(D3DRS_CULLMODE,         D3DCULL_CW);
+            dev_obj->SetRenderStateForced(D3DRS_ZENABLE,          TRUE);
+            dev_obj->SetRenderStateForced(D3DRS_ZWRITEENABLE,     FALSE);
+            dev_obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE,  FALSE);
+            dev_obj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, FALSE);
+
+            for (DWORD s = 0; s < snum; s++)
+                agent->DrawSubset(s);
+
+            agent->EndSet();
+
+            // Restore: unbind outline VS so subsequent FF draws work; restore
+            // states the rest of the renderer expects (CCW, ZWRITE on).
+            dev_obj->SetVertexShader((IDirect3DVertexShaderX*)NULL);
+            dev_obj->SetRenderStateForced(D3DRS_CULLMODE,     D3DCULL_CCW);
+            dev_obj->SetRenderStateForced(D3DRS_ZWRITEENABLE, TRUE);
+        } while (false);
+        // ────────────────────────────────────────────────────────────────
+
+        // Now render the actual item (opaque immediate, transparent queued)
         if(_scene_mgr && _obj->GetState(STATE_TRANSPARENT))
         {
             if(LW_FAILED(_scene_mgr->AddTransparentPrimitive(_obj)))

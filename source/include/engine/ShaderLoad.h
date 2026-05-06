@@ -43,6 +43,13 @@ enum UserShaderType
 	VSTU_SHADE_E6,
 
 	VSTU_MINIMAP_E6,
+
+    // Inverted-hull outline shaders (skinning + normal extrusion, black output)
+    VSTU_PU4NT0_OUTLINE,    // 1-bone
+    VSTU_PB1U4NT0_OUTLINE,  // 2-bone
+    VSTU_PB2U4NT0_OUTLINE,  // 3-bone
+    VSTU_PB3U4NT0_OUTLINE,  // 4-bone
+    VSTU_STATIC_OUTLINE,    // static mesh (PNT / PNDT)
 };
 
 LW_RESULT MINDPOWER_API LoadShader0(lwISysGraphics* sys_graphics);

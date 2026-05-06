@@ -32,6 +32,9 @@ extern CAudioThread g_AudioThread;
 using namespace std;
 using namespace GUI;
 
+// Engine-side outline toggle (defined in MindPower3D.dll / lwPhysique.cpp).
+extern "C" __declspec(dllimport) void lwSetOutlineEnabled(int enabled);
+
 extern bool g_IsShowStates;
 extern bool g_IsCameraMode;
 
@@ -297,6 +300,12 @@ int CSystemProperties::readFromFile(const char* szIniFileName) {
 	else
 		m_gameOption.bDisableMelee = int2bool(iTemp);
 
+	iTemp = GetPrivateProfileInt("gameOption", "outline", DEFAULT_NUM, szIniFileName);
+	if (iTemp == DEFAULT_NUM)
+		m_gameOption.bOutline = true;
+	else
+		m_gameOption.bOutline = int2bool(iTemp);
+
 	// Add by lark.li 20080826 begin
 	iTemp = GetPrivateProfileInt("startOption", "first", DEFAULT_NUM, szIniFileName);
 	if (iTemp == DEFAULT_NUM)
@@ -384,6 +393,8 @@ int CSystemProperties::writeToFile(const char* szIniFileName) {
 		return OTHER_ERROR;
 	if (!WriteInteger("gameOption", "disablemelee", bool2int(m_gameOption.bDisableMelee), szIniFileName))
 		return OTHER_ERROR;
+	if (!WriteInteger("gameOption", "outline", bool2int(m_gameOption.bOutline), szIniFileName))
+		return OTHER_ERROR;
 	// Add by lark.li 20080826 begin
 	if (!WriteInteger("startOption", "first", bool2int(m_startOption.bFirst), szIniFileName))
 		return OTHER_ERROR;
@@ -460,6 +471,7 @@ void CSystemMgr::LoadCustomProp() {
 			m_sysProp.m_gameOption.bFramerate = false;
 			m_sysProp.m_gameOption.bShowMounts = true;
 			m_sysProp.m_gameOption.bDisableMelee = true;
+			m_sysProp.m_gameOption.bOutline = true;
 		}
 		//	m_sysProp.m_gameOption.bRunMode = true;	//�����ļ���������Σ���һ�Ϊtrue����ʱ
 		m_isLoad = true;
@@ -485,6 +497,9 @@ void CSystemMgr::LoadCustomProp() {
 	// Apply melee lock for caster classes
 	extern bool g_bDisableMeleeForCasters;
 	g_bDisableMeleeForCasters = m_sysProp.m_gameOption.bDisableMelee;
+
+	// Apply outline rendering toggle
+	lwSetOutlineEnabled(m_sysProp.m_gameOption.bOutline ? 1 : 0);
 }
 bool CSystemMgr::Init() {
 
@@ -631,6 +646,11 @@ bool CSystemMgr::Init() {
 	cbxDisableMelee = static_cast<CCheckGroup*>(frmGameOption->Find("cbxDisableMelee_p"));
 	if (!cbxDisableMelee) {
 		return Error(RES_STRING(CL_LANGUAGE_MATCH_45), frmGameOption->GetName(), "cbxDisableMelee_p");
+	}
+
+	cbxOutline = static_cast<CCheckGroup*>(frmGameOption->Find("cbxOutline_p"));
+	if (!cbxOutline) {
+		return Error(RES_STRING(CL_LANGUAGE_MATCH_45), frmGameOption->GetName(), "cbxOutline_p");
 	}
 
 	//////// ����
@@ -1178,6 +1198,16 @@ void CSystemMgr::_evtGameOptionFormMouseDown(CCompent* pSender, int nMsgType, in
 			::WritePrivateProfileString("gameOption", "disablemelee", bDisableMelee ? "1" : "0", "./user/system.ini");
 		}
 	}
+
+	pGroup = g_stUISystem.cbxOutline;
+	if (pGroup) {
+		const bool bOutline = pGroup->GetActiveIndex() == 1 ? true : false;
+		if (bOutline != g_stUISystem.m_sysProp.m_gameOption.bOutline) {
+			g_stUISystem.m_sysProp.m_gameOption.bOutline = bOutline;
+			lwSetOutlineEnabled(bOutline ? 1 : 0);
+			::WritePrivateProfileString("gameOption", "outline", bOutline ? "1" : "0", szIniPath);
+		}
+	}
 }
 
 void CSystemMgr::_evtGameOptionFormBeforeShow(CForm* pForm, bool& IsShow) {
@@ -1231,6 +1261,9 @@ void CSystemMgr::_evtGameOptionFormBeforeShow(CForm* pForm, bool& IsShow) {
 	pGroup = g_stUISystem.cbxDisableMelee;
 	if (pGroup)
 		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bDisableMelee ? 1 : 0);
+	pGroup = g_stUISystem.cbxOutline;
+	if (pGroup)
+		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bOutline ? 1 : 0);
 }
 
 void CSystemMgr::CloseForm() {

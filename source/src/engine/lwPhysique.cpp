@@ -12,9 +12,23 @@
 #include "lwD3D.h"
 #include "lwShaderMgr.h"
 #include "lwItem.h"
+#include "ShaderLoad.h"
 #include "lwPredefinition.h"
 
 using namespace std;
+
+// Internal flag for inverted-hull outline pass (characters + items).
+// Toggled from game-side via lwSetOutlineEnabled() exported below.
+// External linkage so lwItem.cpp can extern-reference it.
+bool g_lwOutlineEnabled = true;
+
+// Exported setter so game.exe (which links against MindPower3D import lib)
+// can toggle the outline pass without needing a shared global.
+extern "C" __declspec(dllexport) void lwSetOutlineEnabled(int enabled)
+{
+    g_lwOutlineEnabled = (enabled != 0);
+}
+
 LW_BEGIN
 
 unsigned int __stdcall __load_bone(void* param)
@@ -859,6 +873,74 @@ LW_RESULT lwPhysique::Render()
                 }
             }
         }
+
+        // ── Inverted-hull outline pass ──────────────────────────────────────
+        // Some character meshes have D3DRS_CULLMODE=NONE in their render-state
+        // atoms (_rsa_0) which is applied inside BeginSet().  Calling p->Render()
+        // lets that atom override our D3DCULL_CW setting, causing BOTH front and
+        // back faces to be drawn black (solid-black silhouette).
+        //
+        // Fix: use BeginSet/DrawSubset/EndSet directly, then force-reassert all
+        // critical states AFTER BeginSet (which may have applied the mesh RSA).
+        // This bypasses the material-state (BeginSetSubset) path entirely so no
+        // texture blending or alpha states are set by the material either.
+        if (g_lwOutlineEnabled)
+        {
+            lwIDeviceObject* dev_obj = _res_mgr->GetDeviceObject();
+
+            for (DWORD i = 0; i < LW_MAX_SUBSKIN_NUM; i++)
+            {
+                lwIPrimitive* p;
+                if ((p = _obj_seq[i]) == 0)
+                    continue;
+                if (_scene_mgr && p->GetState(STATE_TRANSPARENT))
+                    continue;
+
+                // Map normal VS → outline VS variant
+                DWORD cur_vs = p->GetRenderCtrlAgent()->GetVertexShader();
+                DWORD outline_vs = LW_INVALID_INDEX;
+                switch (cur_vs)
+                {
+                case VST_PU4NT0_LD:   outline_vs = VSTU_PU4NT0_OUTLINE;   break;
+                case VST_PB1U4NT0_LD: outline_vs = VSTU_PB1U4NT0_OUTLINE; break;
+                case VST_PB2U4NT0_LD: outline_vs = VSTU_PB2U4NT0_OUTLINE; break;
+                case VST_PB3U4NT0_LD: outline_vs = VSTU_PB3U4NT0_OUTLINE; break;
+                default: break;
+                }
+                if (outline_vs == LW_INVALID_INDEX)
+                    continue;
+
+                p->GetRenderCtrlAgent()->SetVertexShader(outline_vs);
+                p->GetRenderCtrlAgent()->BeginSet();
+
+                // Re-assert after BeginSet: mesh RSA may have overridden CULLMODE
+                // (e.g. D3DCULL_NONE for double-sided meshes). Use Forced to sync
+                // both the cache mirror and the actual D3D device.
+                // The VS outputs black diffuse; existing FF MODULATE stage gives
+                // (texture * 0) = 0 for any bound texture, so we don't touch TSS
+                // or texture bindings (changing those would leave the device in a
+                // state the next mesh render doesn't expect, breaking textures).
+                dev_obj->SetRenderStateForced(D3DRS_CULLMODE,         D3DCULL_CW);
+                dev_obj->SetRenderStateForced(D3DRS_ZWRITEENABLE,     FALSE);
+                dev_obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE,  FALSE);
+                dev_obj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, FALSE);
+
+                DWORD snum = 0;
+                p->GetSubsetNum(&snum);
+                for (DWORD s = 0; s < snum; s++)
+                    p->GetRenderCtrlAgent()->DrawSubset(s);
+
+                p->GetRenderCtrlAgent()->EndSet();
+                p->GetRenderCtrlAgent()->SetVertexShader(cur_vs);
+            }
+
+            // Restore render states; use Forced to guarantee cache+device are in sync
+            dev_obj->SetRenderStateForced(D3DRS_CULLMODE,         D3DCULL_CCW);
+            dev_obj->SetRenderStateForced(D3DRS_ZWRITEENABLE,     TRUE);
+            dev_obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE,  FALSE);
+            dev_obj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, FALSE);
+        }
+        // ───────────────────────────────────────────────────────────────────
     }
 __addr_ret_ok:
     ret = LW_RET_OK;

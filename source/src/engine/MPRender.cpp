@@ -131,21 +131,16 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 	d3dcp.present_param.BackBufferHeight = nScrHeight;
 	d3dcp.present_param.EnableAutoDepthStencil = 1;
 
-	// if( FAILED( d3d->CheckDeviceFormat( D3DADAPTER_DEFAULT,
-	//	D3DDEVTYPE_HAL,
-	//	d3ddm.Format,
-	//	D3DUSAGE_DEPTHSTENCIL,
-	//	D3DRTYPE_SURFACE,
-	//	D3DFMT_D24S8 ) ) )
-	//{
-	//	d3dcp.present_param.AutoDepthStencilFormat = D3DFMT_D16;
-	// }
-	// else
-	//{
-	//	d3dcp.present_param.AutoDepthStencilFormat = D3DFMT_D24S8;
-	// }
-
-	d3dcp.present_param.AutoDepthStencilFormat = D3DFMT_D16;
+	if (FAILED(d3d->CheckDeviceFormat(D3DADAPTER_DEFAULT,
+	    D3DDEVTYPE_HAL,
+	    d3ddm.Format,
+	    D3DUSAGE_DEPTHSTENCIL,
+	    D3DRTYPE_SURFACE,
+	    D3DFMT_D24S8))) {
+		d3dcp.present_param.AutoDepthStencilFormat = D3DFMT_D16;
+	} else {
+		d3dcp.present_param.AutoDepthStencilFormat = D3DFMT_D24S8;
+	}
 
 	d3dcp.present_param.PresentationInterval =
 	    bFullScreen ? D3DPRESENT_INTERVAL_DEFAULT : D3DPRESENT_INTERVAL_IMMEDIATE;

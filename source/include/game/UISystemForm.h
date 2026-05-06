@@ -49,12 +49,13 @@ public:
 		bool bFramerate;
 		bool bShowMounts;
 		bool bDisableMelee;
+		bool bOutline;
 
 		SGameOption()
 			: bRunMode(false), bLockMode(false), bHelpMode(false), bCameraMode(false),
 			  bAppMode(true), bEffMode(true), bStateMode(true), bEnemyNames(false),
 			  bShowBars(true), bShowPercentages(false), bShowInfo(true), bFramerate(false), bShowMounts(true),
-			  bDisableMelee(true) {}
+			  bDisableMelee(true), bOutline(true) {}
 
 	} m_gameOption;
 
@@ -247,6 +248,7 @@ private:
 	CCheckGroup* cbxFramerate;
 	CCheckGroup* cbxShowMounts;
 	CCheckGroup* cbxDisableMelee;
+	CCheckGroup* cbxOutline;
 
 	CForm* frmAskRelogin;
 	CForm* frmAskExit;
