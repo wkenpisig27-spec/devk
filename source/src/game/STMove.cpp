@@ -625,7 +625,8 @@ bool COneMoveState::SendInfo() {
 
 int COneMoveState::GetSyschroDistance() {
 	// The distance that needs to be synchronized, that is, how much distance is exceeded, you should directly pull back to the protagonist
-	int len = _pCha->getMoveSpeed() + _pCha->getMoveSpeed() + (int)_dwPreMoveDis;
+	// Widened from 2x to 3x speed to reduce false snap-backs at high movement speeds
+	int len = _pCha->getMoveSpeed() + _pCha->getMoveSpeed() + _pCha->getMoveSpeed() + (int)_dwPreMoveDis;
 	if (len < 1000)
 		len = 1000;
 	return len;
