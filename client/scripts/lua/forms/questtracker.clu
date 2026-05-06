@@ -1,0 +1,85 @@
+-----------------------------------------------------------------------
+-- Quest Tracker (Objective Tracker) UI
+-- Displayed on the left side of the screen as a semi-transparent overlay
+-- Tracks active quests with real-time objective updates
+-----------------------------------------------------------------------
+
+-- Create the main form: semi-transparent, left-aligned overlay
+-- Width: 220, Height: 340, positioned at left side with slight offset
+frmQuestTracker = UI_CreateForm( "frmQuestTracker", FALSE, 220, 340, 8, 80, FALSE, FALSE )
+UI_ShowForm( frmQuestTracker, TRUE )
+UI_AddFormToTemplete( frmQuestTracker, FORM_MAIN )
+UI_SetFormStyle( frmQuestTracker, FORM_LEFT )
+UI_FormSetIsEscClose( frmQuestTracker, FALSE )
+UI_SetIsDrag( frmQuestTracker, TRUE )
+UI_SetAlpha( frmQuestTracker, 180 )
+
+-- Background panel (semi-transparent dark overlay)
+imgQTBackground = UI_CreateCompent( frmQuestTracker, IMAGE_TYPE, "imgQTBackground", 220, 340, 0, 0 )
+UI_LoadImage( imgQTBackground, "texture/ui/Nbotton.tga", COMPENT_BACK, 1, 1, 100, 171 )
+UI_SetImageAlpha( imgQTBackground, 140 )
+
+-- Header section
+-- Title: "Quest Tracker"
+labQTTitle = UI_CreateCompent( frmQuestTracker, LABELEX_TYPE, "labQTTitle", 170, 16, 10, 6 )
+UI_SetCaption( labQTTitle, "Quest Tracker" )
+UI_SetTextColor( labQTTitle, 0xFFFFD700 )
+UI_SetLabelExFont( labQTTitle, DEFAULT_FONT, TRUE, 0xFF000000 )
+
+-- Collapse/Expand toggle button (top right)
+btnQTToggle = UI_CreateCompent( frmQuestTracker, BUTTON_TYPE, "btnQTToggle", 14, 14, 200, 5 )
+UI_LoadButtonImage( btnQTToggle, "texture/ui/PublicC.tga", 14, 14, 116, 175, TRUE )
+UI_SetHint( btnQTToggle, "Collapse/Expand" )
+
+-- Separator line under header
+imgQTSeparator = UI_CreateCompent( frmQuestTracker, IMAGE_TYPE, "imgQTSeparator", 200, 1, 10, 24 )
+UI_LoadImage( imgQTSeparator, "texture/ui/Nbotton.tga", COMPENT_BACK, 1, 1, 100, 171 )
+UI_SetImageAlpha( imgQTSeparator, 200 )
+
+-----------------------------------------------------------------------
+-- Quest entry rows (up to 8 tracked quests)
+-- Each quest has: type icon, quest name, objective text, status
+-- Row height: 36 pixels per quest entry
+-----------------------------------------------------------------------
+
+local ROW_START_Y = 30
+local ROW_HEIGHT = 36
+local MAX_QUEST_ROWS = 8
+
+for i = 1, MAX_QUEST_ROWS do
+    local yPos = ROW_START_Y + (i - 1) * ROW_HEIGHT
+    local idx = tostring(i)
+
+    -- Quest type icon (main/side/event/daily indicator)
+    local imgIcon = UI_CreateCompent( frmQuestTracker, IMAGE_TYPE, "imgQTIcon" .. idx, 12, 12, 8, yPos + 2 )
+    UI_LoadImage( imgIcon, "texture/ui/SystemBotton3.tga", NORMAL, 12, 12, 205, 120 )
+    UI_SetIsShow( imgIcon, FALSE )
+
+    -- Quest name label (clickable)
+    local labName = UI_CreateCompent( frmQuestTracker, LABELEX_TYPE, "labQTName" .. idx, 185, 14, 24, yPos )
+    UI_SetCaption( labName, "" )
+    UI_SetTextColor( labName, 0xFFFFFFFF )
+    UI_SetLabelExFont( labName, DEFAULT_FONT, TRUE, 0xFF000000 )
+    UI_SetIsShow( labName, FALSE )
+
+    -- Objective / progress text
+    local labObj = UI_CreateCompent( frmQuestTracker, LABELEX_TYPE, "labQTObj" .. idx, 185, 14, 24, yPos + 15 )
+    UI_SetCaption( labObj, "" )
+    UI_SetTextColor( labObj, 0xFFCCCCCC )
+    UI_SetLabelExFont( labObj, DEFAULT_FONT, FALSE, 0xFF000000 )
+    UI_SetIsShow( labObj, FALSE )
+
+    -- Click button overlay (invisible, captures clicks on the quest row)
+    local btnClick = UI_CreateCompent( frmQuestTracker, BUTTON_TYPE, "btnQTClick" .. idx, 200, ROW_HEIGHT - 2, 8, yPos )
+    UI_SetAlpha( btnClick, 0 )
+    UI_SetIsShow( btnClick, FALSE )
+    UI_SetHint( btnClick, "Click to track quest" )
+end
+
+-----------------------------------------------------------------------
+-- Status bar at bottom
+-----------------------------------------------------------------------
+labQTStatusBar = UI_CreateCompent( frmQuestTracker, LABELEX_TYPE, "labQTStatusBar", 200, 14, 10, 322 )
+UI_SetCaption( labQTStatusBar, "" )
+UI_SetTextColor( labQTStatusBar, 0xFF888888 )
+UI_SetLabelExFont( labQTStatusBar, DEFAULT_FONT, FALSE, 0xFF000000 )

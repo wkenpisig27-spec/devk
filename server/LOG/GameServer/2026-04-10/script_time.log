@@ -1,0 +1,10 @@
+[04-10 00:35:19.808]script[ItemUse_Lv100Lvl]cost time too long time = 35
+[04-10 00:37:01.857]	character Cha-tempra+5187 map switch(darkblue-->darkblue) expend much time:time = 179
+[04-10 03:00:25.924]script[check_can_enter_garner2]cost time too long time = 207
+[04-10 03:01:15.769]script[check_can_enter_garner2]cost time too long time = 37
+[04-10 03:01:15.823]script[after_enter_garner2]cost time too long time = 51
+[04-10 03:01:15.823]	character Cha-tempra+5187 map switch(garner2-->garner2) expend much time:time = 55
+[04-10 03:01:15.823]script[begin_enter_garner2]cost time too long time = 55
+[04-10 03:01:23.366]script[ItemUse_Lv100Lvl]cost time too long time = 31
+[04-10 03:01:29.361]script[after_enter_garner2]cost time too long time = 64
+[04-10 03:01:49.423]script[before_leave_garner2]cost time too long time = 61

@@ -1,0 +1,1034 @@
+[04-06 10:32:13.664]Load Game Config File(Text Mode) [GameServer.cfg]
+[04-06 10:32:13.673]Load Game Config File(Text Mode) [cmd.cfg]
+[04-06 10:32:13.674]Define __CATCH
+[04-06 10:32:13.674]game map server [GameServer] startup...
+[04-06 10:32:13.674]start initialization GameApp
+[04-06 10:32:13.674]initialization DB...
+[04-06 10:32:13.708]database init...ok
+[04-06 10:32:13.708]database init...ok
+[04-06 10:32:14.485]start to assign every Entity memory
+[04-06 10:32:14.493]initialization every form...
+[04-06 10:32:19.487]initialization Lua Script...
+[04-06 10:32:19.850]initialization map list...
+[04-06 10:32:20.406]map garner init resource succeed
+[04-06 10:32:20.406]map [garner] ok!
+[04-06 10:32:20.449]map ctf init resource succeed
+[04-06 10:32:20.449]map [ctf] ok!
+[04-06 10:32:20.456]map garner2 init resource succeed
+[04-06 10:32:20.456]map [garner2] ok!
+[04-06 10:32:20.468]map PKmap init resource succeed
+[04-06 10:32:20.468]map [PKmap] ok!
+[04-06 10:32:20.478]map shalan2 init resource succeed
+[04-06 10:32:20.478]map [shalan2] ok!
+[04-06 10:32:20.508]map leiting2 init resource succeed
+[04-06 10:32:20.508]map [leiting2] ok!
+[04-06 10:32:20.549]map lonetower init resource succeed
+[04-06 10:32:20.549]map [lonetower] ok!
+[04-06 10:32:20.603]map L4MAP init resource succeed
+[04-06 10:32:20.603]map [L4MAP] ok!
+[04-06 10:32:20.633]map LostCity init resource succeed
+[04-06 10:32:20.633]map [LostCity] ok!
+[04-06 10:32:21.112]map magicsea init resource succeed
+[04-06 10:32:21.112]map [magicsea] ok!
+[04-06 10:32:21.222]map jialebi init resource succeed
+[04-06 10:32:21.222]map [jialebi] ok!
+[04-06 10:32:21.237]map hell init resource succeed
+[04-06 10:32:21.237]map [hell] ok!
+[04-06 10:32:21.282]map hell2 init resource succeed
+[04-06 10:32:21.282]map [hell2] ok!
+[04-06 10:32:21.319]map hell3 init resource succeed
+[04-06 10:32:21.319]map [hell3] ok!
+[04-06 10:32:21.352]map hell4 init resource succeed
+[04-06 10:32:21.352]map [hell4] ok!
+[04-06 10:32:21.387]map hell5 init resource succeed
+[04-06 10:32:21.387]map [hell5] ok!
+[04-06 10:32:21.960]map darkblue init resource succeed
+[04-06 10:32:21.960]map [darkblue] ok!
+[04-06 10:32:22.005]map eastgoaf init resource succeed
+[04-06 10:32:22.005]map [eastgoaf] ok!
+[04-06 10:32:22.144]map winterland init resource succeed
+[04-06 10:32:22.144]map [winterland] ok!
+[04-06 10:32:22.162]map mjing1 init resource succeed
+[04-06 10:32:22.162]map [mjing1] ok!
+[04-06 10:32:22.180]map mjing2 init resource succeed
+[04-06 10:32:22.180]map [mjing2] ok!
+[04-06 10:32:22.199]map mjing3 init resource succeed
+[04-06 10:32:22.199]map [mjing3] ok!
+[04-06 10:32:22.218]map mjing4 init resource succeed
+[04-06 10:32:22.218]map [mjing4] ok!
+[04-06 10:32:22.225]map starena13 init resource succeed
+[04-06 10:32:22.225]map [starena13] ok!
+[04-06 10:32:22.230]map starena23 init resource succeed
+[04-06 10:32:22.230]map [starena23] ok!
+[04-06 10:32:22.237]map starena33 init resource succeed
+[04-06 10:32:22.237]map [starena33] ok!
+[04-06 10:32:22.268]map abandonedcity init resource succeed
+[04-06 10:32:22.268]map [abandonedcity] ok!
+[04-06 10:32:22.317]map abandonedcity2 init resource succeed
+[04-06 10:32:22.317]map [abandonedcity2] ok!
+[04-06 10:32:22.359]map abandonedcity3 init resource succeed
+[04-06 10:32:22.359]map [abandonedcity3] ok!
+[04-06 10:32:22.444]map darkswamp init resource succeed
+[04-06 10:32:22.444]map [darkswamp] ok!
+[04-06 10:32:22.473]map puzzleworld init resource succeed
+[04-06 10:32:22.473]map [puzzleworld] ok!
+[04-06 10:32:22.504]map puzzleworld2 init resource succeed
+[04-06 10:32:22.504]map [puzzleworld2] ok!
+[04-06 10:32:22.584]map DreamIsland init resource succeed
+[04-06 10:32:22.584]map [DreamIsland] ok!
+[04-06 10:32:22.639]map teampk init resource succeed
+[04-06 10:32:22.639]map [teampk] ok!
+[04-06 10:32:22.691]map Hellchapter init resource succeed
+[04-06 10:32:22.691]map [Hellchapter] ok!
+[04-06 10:32:22.716]map chaosicicle init resource succeed
+[04-06 10:32:22.716]map [chaosicicle] ok!
+[04-06 10:32:22.735]map yschurch init resource succeed
+[04-06 10:32:22.735]map [yschurch] ok!
+[04-06 10:32:22.736]execute monster placement script/monster/baiyinlinqu.lua  
+[04-06 10:32:22.738]execute monster placement script/monster/lietinglinqu.lua  
+[04-06 10:32:22.739]execute monster placement script/monster/baiyinyuchang.lua  
+[04-06 10:32:22.739]execute monster placement script/monster/jianazuixiayuchang.lua  
+[04-06 10:32:22.740]execute monster placement script/monster/haifengyuchang.lua  
+[04-06 10:32:22.741]execute monster placement script/monster/jianayunshi.lua  
+[04-06 10:32:22.741]execute monster placement script/monster/bycduizhang.lua  
+[04-06 10:32:22.742]execute monster placement script/monster/bycdaoguai.lua  
+[04-06 10:32:22.742]garnerscript release monster ended! 
+[04-06 10:32:22.742]execute monster placement script/monster/mingshapaota.lua  
+[04-06 10:32:22.743]execute monster placement script/monster/monv480.lua  
+[04-06 10:32:22.769]execute monster placement script/monster/shalanyuchang.lua  
+[04-06 10:32:22.770]execute monster placement script/monster/mingshayuchang.lua  
+[04-06 10:32:22.770]execute monster placement script/monster/shalanlinqu.lua  
+[04-06 10:32:22.771]execute monster placement script/monster/shalanmingshaxian.lua  
+[04-06 10:32:22.772]execute monster placement script/monster/shaxie.lua  
+[04-06 10:32:22.773]execute monster placement script/monster/shalanyunshi.lua  
+[04-06 10:32:22.773]execute monster placement script/monster/slcdaoguai.lua  
+[04-06 10:32:22.774]execute monster placement script/monster/slcduizhang.lua  
+[04-06 10:32:22.774]execute monster placement script/monster/WriteSheepKiper.lua  
+[04-06 10:32:22.774]magicseascript release monster ended! 
+[04-06 10:32:22.774]execute monster placement script/monster/binglanglinqu.lua  
+[04-06 10:32:22.774]execute monster placement script/monster/binglangyuchang.lua  
+[04-06 10:32:22.775]execute monster placement script/monster/binglangyunshi.lua  
+[04-06 10:32:22.775]execute monster placement script/monster/chundaoguai.lua  
+[04-06 10:32:22.777]execute monster placement script/monster/qiudaoguai.lua  
+[04-06 10:32:22.795]execute monster placement script/monster/xiadaoguai.lua  
+[04-06 10:32:22.806]execute monster placement script/monster/blbdaoguai.lua  
+[04-06 10:32:22.806]execute monster placement script/monster/blbduizhang.lua  
+[04-06 10:32:22.807]darkbluescript release monster ended! 
+[04-06 10:32:22.807]lonetower instance mode - no static monster spawns 
+[04-06 10:32:22.807]execute monster placement script/monster/haidisuidao.lua  
+[04-06 10:32:22.811]execute monster placement script/monster/xiashuidao.lua  
+[04-06 10:32:22.814]execute monster placement script/monster/heilong1.lua  
+[04-06 10:32:22.816]execute monster placement script/monster/heilong2.lua  
+[04-06 10:32:22.817]Eastgoafscript release monster ended! 
+[04-06 10:32:22.817]Initializing Offline Stall System...
+[04-06 10:32:22.834]Offline Stall System initialized with 0 stalls
+[04-06 10:32:22.834]GameApp initialization finish!
+[04-06 10:32:22.835]start init ServerApp
+[04-06 10:32:22.835]ServerApp init over
+[04-06 10:32:22.835]startup Gate server connect thread...
+[04-06 10:32:22.835]startup game thread...
+[04-06 10:32:22.835]Game Thread ID = 4720
+[04-06 10:32:22.835]start create Win32 control dialog box
+[04-06 10:32:22.882]Entering main message loop
+[04-06 10:40:05.384]Console close event received - saving boss timers and players...
+[04-06 10:40:05.385]Save complete - exiting...
+[04-06 10:40:10.060]Load Game Config File(Text Mode) [GameServer.cfg]
+[04-06 10:40:10.073]Load Game Config File(Text Mode) [cmd.cfg]
+[04-06 10:40:10.074]Define __CATCH
+[04-06 10:40:10.074]game map server [GameServer] startup...
+[04-06 10:40:10.074]start initialization GameApp
+[04-06 10:40:10.074]initialization DB...
+[04-06 10:40:10.114]database init...ok
+[04-06 10:40:10.114]database init...ok
+[04-06 10:40:10.763]start to assign every Entity memory
+[04-06 10:40:10.771]initialization every form...
+[04-06 10:40:16.255]initialization Lua Script...
+[04-06 10:40:16.604]initialization map list...
+[04-06 10:40:17.093]map garner init resource succeed
+[04-06 10:40:17.093]map [garner] ok!
+[04-06 10:40:17.102]map ctf init resource succeed
+[04-06 10:40:17.102]map [ctf] ok!
+[04-06 10:40:17.108]map garner2 init resource succeed
+[04-06 10:40:17.108]map [garner2] ok!
+[04-06 10:40:17.118]map PKmap init resource succeed
+[04-06 10:40:17.118]map [PKmap] ok!
+[04-06 10:40:17.126]map shalan2 init resource succeed
+[04-06 10:40:17.126]map [shalan2] ok!
+[04-06 10:40:17.138]map leiting2 init resource succeed
+[04-06 10:40:17.138]map [leiting2] ok!
+[04-06 10:40:17.170]map lonetower init resource succeed
+[04-06 10:40:17.170]map [lonetower] ok!
+[04-06 10:40:17.179]map L4MAP init resource succeed
+[04-06 10:40:17.179]map [L4MAP] ok!
+[04-06 10:40:17.189]map LostCity init resource succeed
+[04-06 10:40:17.189]map [LostCity] ok!
+[04-06 10:40:17.628]map magicsea init resource succeed
+[04-06 10:40:17.628]map [magicsea] ok!
+[04-06 10:40:17.714]map jialebi init resource succeed
+[04-06 10:40:17.714]map [jialebi] ok!
+[04-06 10:40:17.721]map hell init resource succeed
+[04-06 10:40:17.721]map [hell] ok!
+[04-06 10:40:17.728]map hell2 init resource succeed
+[04-06 10:40:17.728]map [hell2] ok!
+[04-06 10:40:17.739]map hell3 init resource succeed
+[04-06 10:40:17.739]map [hell3] ok!
+[04-06 10:40:17.744]map hell4 init resource succeed
+[04-06 10:40:17.744]map [hell4] ok!
+[04-06 10:40:17.751]map hell5 init resource succeed
+[04-06 10:40:17.751]map [hell5] ok!
+[04-06 10:40:18.223]map darkblue init resource succeed
+[04-06 10:40:18.223]map [darkblue] ok!
+[04-06 10:40:18.247]map eastgoaf init resource succeed
+[04-06 10:40:18.247]map [eastgoaf] ok!
+[04-06 10:40:18.376]map winterland init resource succeed
+[04-06 10:40:18.376]map [winterland] ok!
+[04-06 10:40:18.391]map mjing1 init resource succeed
+[04-06 10:40:18.391]map [mjing1] ok!
+[04-06 10:40:18.405]map mjing2 init resource succeed
+[04-06 10:40:18.405]map [mjing2] ok!
+[04-06 10:40:18.421]map mjing3 init resource succeed
+[04-06 10:40:18.421]map [mjing3] ok!
+[04-06 10:40:18.437]map mjing4 init resource succeed
+[04-06 10:40:18.437]map [mjing4] ok!
+[04-06 10:40:18.441]map starena13 init resource succeed
+[04-06 10:40:18.441]map [starena13] ok!
+[04-06 10:40:18.445]map starena23 init resource succeed
+[04-06 10:40:18.445]map [starena23] ok!
+[04-06 10:40:18.450]map starena33 init resource succeed
+[04-06 10:40:18.450]map [starena33] ok!
+[04-06 10:40:18.465]map abandonedcity init resource succeed
+[04-06 10:40:18.465]map [abandonedcity] ok!
+[04-06 10:40:18.483]map abandonedcity2 init resource succeed
+[04-06 10:40:18.483]map [abandonedcity2] ok!
+[04-06 10:40:18.499]map abandonedcity3 init resource succeed
+[04-06 10:40:18.499]map [abandonedcity3] ok!
+[04-06 10:40:18.537]map darkswamp init resource succeed
+[04-06 10:40:18.537]map [darkswamp] ok!
+[04-06 10:40:18.563]map puzzleworld init resource succeed
+[04-06 10:40:18.563]map [puzzleworld] ok!
+[04-06 10:40:18.590]map puzzleworld2 init resource succeed
+[04-06 10:40:18.590]map [puzzleworld2] ok!
+[04-06 10:40:18.616]map DreamIsland init resource succeed
+[04-06 10:40:18.616]map [DreamIsland] ok!
+[04-06 10:40:18.663]map teampk init resource succeed
+[04-06 10:40:18.663]map [teampk] ok!
+[04-06 10:40:18.673]map Hellchapter init resource succeed
+[04-06 10:40:18.673]map [Hellchapter] ok!
+[04-06 10:40:18.678]map chaosicicle init resource succeed
+[04-06 10:40:18.678]map [chaosicicle] ok!
+[04-06 10:40:18.688]map yschurch init resource succeed
+[04-06 10:40:18.688]map [yschurch] ok!
+[04-06 10:40:18.688]execute monster placement script/monster/baiyinlinqu.lua  
+[04-06 10:40:18.690]execute monster placement script/monster/lietinglinqu.lua  
+[04-06 10:40:18.691]execute monster placement script/monster/baiyinyuchang.lua  
+[04-06 10:40:18.691]execute monster placement script/monster/jianazuixiayuchang.lua  
+[04-06 10:40:18.692]execute monster placement script/monster/haifengyuchang.lua  
+[04-06 10:40:18.692]execute monster placement script/monster/jianayunshi.lua  
+[04-06 10:40:18.692]execute monster placement script/monster/bycduizhang.lua  
+[04-06 10:40:18.692]execute monster placement script/monster/bycdaoguai.lua  
+[04-06 10:40:18.693]garnerscript release monster ended! 
+[04-06 10:40:18.693]execute monster placement script/monster/mingshapaota.lua  
+[04-06 10:40:18.693]execute monster placement script/monster/monv480.lua  
+[04-06 10:40:18.717]execute monster placement script/monster/shalanyuchang.lua  
+[04-06 10:40:18.717]execute monster placement script/monster/mingshayuchang.lua  
+[04-06 10:40:18.717]execute monster placement script/monster/shalanlinqu.lua  
+[04-06 10:40:18.718]execute monster placement script/monster/shalanmingshaxian.lua  
+[04-06 10:40:18.719]execute monster placement script/monster/shaxie.lua  
+[04-06 10:40:18.720]execute monster placement script/monster/shalanyunshi.lua  
+[04-06 10:40:18.720]execute monster placement script/monster/slcdaoguai.lua  
+[04-06 10:40:18.720]execute monster placement script/monster/slcduizhang.lua  
+[04-06 10:40:18.720]execute monster placement script/monster/WriteSheepKiper.lua  
+[04-06 10:40:18.720]magicseascript release monster ended! 
+[04-06 10:40:18.720]execute monster placement script/monster/binglanglinqu.lua  
+[04-06 10:40:18.721]execute monster placement script/monster/binglangyuchang.lua  
+[04-06 10:40:18.721]execute monster placement script/monster/binglangyunshi.lua  
+[04-06 10:40:18.721]execute monster placement script/monster/chundaoguai.lua  
+[04-06 10:40:18.724]execute monster placement script/monster/qiudaoguai.lua  
+[04-06 10:40:18.743]execute monster placement script/monster/xiadaoguai.lua  
+[04-06 10:40:18.753]execute monster placement script/monster/blbdaoguai.lua  
+[04-06 10:40:18.753]execute monster placement script/monster/blbduizhang.lua  
+[04-06 10:40:18.753]darkbluescript release monster ended! 
+[04-06 10:40:18.753]lonetower instance mode - no static monster spawns 
+[04-06 10:40:18.753]execute monster placement script/monster/haidisuidao.lua  
+[04-06 10:40:18.758]execute monster placement script/monster/xiashuidao.lua  
+[04-06 10:40:18.760]execute monster placement script/monster/heilong1.lua  
+[04-06 10:40:18.763]execute monster placement script/monster/heilong2.lua  
+[04-06 10:40:18.763]Eastgoafscript release monster ended! 
+[04-06 10:40:18.764]Initializing Offline Stall System...
+[04-06 10:40:18.774]Offline Stall System initialized with 0 stalls
+[04-06 10:40:18.774]GameApp initialization finish!
+[04-06 10:40:18.775]start init ServerApp
+[04-06 10:40:18.775]ServerApp init over
+[04-06 10:40:18.775]startup Gate server connect thread...
+[04-06 10:40:18.775]startup game thread...
+[04-06 10:40:18.775]Game Thread ID = 16520
+[04-06 10:40:18.775]start create Win32 control dialog box
+[04-06 10:40:18.828]Entering main message loop
+[04-06 10:45:52.000]Graceful shutdown initiated - 3 seconds remaining
+[04-06 10:45:55.091]start to exit game map server
+[04-06 10:45:55.106]game thread finish!
+[04-06 10:45:56.069]game map server succeed to exit
+[04-06 10:46:01.908]Load Game Config File(Text Mode) [GameServer.cfg]
+[04-06 10:46:01.920]Load Game Config File(Text Mode) [cmd.cfg]
+[04-06 10:46:01.921]Define __CATCH
+[04-06 10:46:01.921]game map server [GameServer] startup...
+[04-06 10:46:01.922]start initialization GameApp
+[04-06 10:46:01.922]initialization DB...
+[04-06 10:46:01.957]database init...ok
+[04-06 10:46:01.957]database init...ok
+[04-06 10:46:02.491]start to assign every Entity memory
+[04-06 10:46:02.499]initialization every form...
+[04-06 10:46:07.731]initialization Lua Script...
+[04-06 10:46:08.023]initialization map list...
+[04-06 10:46:08.447]map garner init resource succeed
+[04-06 10:46:08.447]map [garner] ok!
+[04-06 10:46:08.454]map ctf init resource succeed
+[04-06 10:46:08.454]map [ctf] ok!
+[04-06 10:46:08.460]map garner2 init resource succeed
+[04-06 10:46:08.460]map [garner2] ok!
+[04-06 10:46:08.469]map PKmap init resource succeed
+[04-06 10:46:08.469]map [PKmap] ok!
+[04-06 10:46:08.476]map shalan2 init resource succeed
+[04-06 10:46:08.476]map [shalan2] ok!
+[04-06 10:46:08.487]map leiting2 init resource succeed
+[04-06 10:46:08.487]map [leiting2] ok!
+[04-06 10:46:08.514]map lonetower init resource succeed
+[04-06 10:46:08.514]map [lonetower] ok!
+[04-06 10:46:08.521]map L4MAP init resource succeed
+[04-06 10:46:08.521]map [L4MAP] ok!
+[04-06 10:46:08.530]map LostCity init resource succeed
+[04-06 10:46:08.530]map [LostCity] ok!
+[04-06 10:46:08.908]map magicsea init resource succeed
+[04-06 10:46:08.908]map [magicsea] ok!
+[04-06 10:46:08.985]map jialebi init resource succeed
+[04-06 10:46:08.985]map [jialebi] ok!
+[04-06 10:46:08.992]map hell init resource succeed
+[04-06 10:46:08.992]map [hell] ok!
+[04-06 10:46:08.998]map hell2 init resource succeed
+[04-06 10:46:08.998]map [hell2] ok!
+[04-06 10:46:09.008]map hell3 init resource succeed
+[04-06 10:46:09.008]map [hell3] ok!
+[04-06 10:46:09.014]map hell4 init resource succeed
+[04-06 10:46:09.014]map [hell4] ok!
+[04-06 10:46:09.020]map hell5 init resource succeed
+[04-06 10:46:09.020]map [hell5] ok!
+[04-06 10:46:09.430]map darkblue init resource succeed
+[04-06 10:46:09.430]map [darkblue] ok!
+[04-06 10:46:09.453]map eastgoaf init resource succeed
+[04-06 10:46:09.453]map [eastgoaf] ok!
+[04-06 10:46:09.569]map winterland init resource succeed
+[04-06 10:46:09.569]map [winterland] ok!
+[04-06 10:46:09.582]map mjing1 init resource succeed
+[04-06 10:46:09.582]map [mjing1] ok!
+[04-06 10:46:09.596]map mjing2 init resource succeed
+[04-06 10:46:09.596]map [mjing2] ok!
+[04-06 10:46:09.610]map mjing3 init resource succeed
+[04-06 10:46:09.610]map [mjing3] ok!
+[04-06 10:46:09.629]map mjing4 init resource succeed
+[04-06 10:46:09.629]map [mjing4] ok!
+[04-06 10:46:09.633]map starena13 init resource succeed
+[04-06 10:46:09.633]map [starena13] ok!
+[04-06 10:46:09.638]map starena23 init resource succeed
+[04-06 10:46:09.638]map [starena23] ok!
+[04-06 10:46:09.642]map starena33 init resource succeed
+[04-06 10:46:09.642]map [starena33] ok!
+[04-06 10:46:09.656]map abandonedcity init resource succeed
+[04-06 10:46:09.656]map [abandonedcity] ok!
+[04-06 10:46:09.672]map abandonedcity2 init resource succeed
+[04-06 10:46:09.672]map [abandonedcity2] ok!
+[04-06 10:46:09.686]map abandonedcity3 init resource succeed
+[04-06 10:46:09.686]map [abandonedcity3] ok!
+[04-06 10:46:09.720]map darkswamp init resource succeed
+[04-06 10:46:09.720]map [darkswamp] ok!
+[04-06 10:46:09.744]map puzzleworld init resource succeed
+[04-06 10:46:09.744]map [puzzleworld] ok!
+[04-06 10:46:09.768]map puzzleworld2 init resource succeed
+[04-06 10:46:09.768]map [puzzleworld2] ok!
+[04-06 10:46:09.792]map DreamIsland init resource succeed
+[04-06 10:46:09.792]map [DreamIsland] ok!
+[04-06 10:46:09.835]map teampk init resource succeed
+[04-06 10:46:09.835]map [teampk] ok!
+[04-06 10:46:09.852]map Hellchapter init resource succeed
+[04-06 10:46:09.852]map [Hellchapter] ok!
+[04-06 10:46:09.857]map chaosicicle init resource succeed
+[04-06 10:46:09.857]map [chaosicicle] ok!
+[04-06 10:46:09.867]map yschurch init resource succeed
+[04-06 10:46:09.867]map [yschurch] ok!
+[04-06 10:46:09.867]execute monster placement script/monster/baiyinlinqu.lua  
+[04-06 10:46:09.868]execute monster placement script/monster/lietinglinqu.lua  
+[04-06 10:46:09.869]execute monster placement script/monster/baiyinyuchang.lua  
+[04-06 10:46:09.869]execute monster placement script/monster/jianazuixiayuchang.lua  
+[04-06 10:46:09.870]execute monster placement script/monster/haifengyuchang.lua  
+[04-06 10:46:09.870]execute monster placement script/monster/jianayunshi.lua  
+[04-06 10:46:09.870]execute monster placement script/monster/bycduizhang.lua  
+[04-06 10:46:09.871]execute monster placement script/monster/bycdaoguai.lua  
+[04-06 10:46:09.871]garnerscript release monster ended! 
+[04-06 10:46:09.871]execute monster placement script/monster/mingshapaota.lua  
+[04-06 10:46:09.872]execute monster placement script/monster/monv480.lua  
+[04-06 10:46:09.894]execute monster placement script/monster/shalanyuchang.lua  
+[04-06 10:46:09.895]execute monster placement script/monster/mingshayuchang.lua  
+[04-06 10:46:09.895]execute monster placement script/monster/shalanlinqu.lua  
+[04-06 10:46:09.896]execute monster placement script/monster/shalanmingshaxian.lua  
+[04-06 10:46:09.896]execute monster placement script/monster/shaxie.lua  
+[04-06 10:46:09.897]execute monster placement script/monster/shalanyunshi.lua  
+[04-06 10:46:09.898]execute monster placement script/monster/slcdaoguai.lua  
+[04-06 10:46:09.898]execute monster placement script/monster/slcduizhang.lua  
+[04-06 10:46:09.898]execute monster placement script/monster/WriteSheepKiper.lua  
+[04-06 10:46:09.898]magicseascript release monster ended! 
+[04-06 10:46:09.898]execute monster placement script/monster/binglanglinqu.lua  
+[04-06 10:46:09.899]execute monster placement script/monster/binglangyuchang.lua  
+[04-06 10:46:09.899]execute monster placement script/monster/binglangyunshi.lua  
+[04-06 10:46:09.899]execute monster placement script/monster/chundaoguai.lua  
+[04-06 10:46:09.901]execute monster placement script/monster/qiudaoguai.lua  
+[04-06 10:46:09.927]execute monster placement script/monster/xiadaoguai.lua  
+[04-06 10:46:09.936]execute monster placement script/monster/blbdaoguai.lua  
+[04-06 10:46:09.937]execute monster placement script/monster/blbduizhang.lua  
+[04-06 10:46:09.937]darkbluescript release monster ended! 
+[04-06 10:46:09.937]lonetower instance mode - no static monster spawns 
+[04-06 10:46:09.937]execute monster placement script/monster/haidisuidao.lua  
+[04-06 10:46:09.941]execute monster placement script/monster/xiashuidao.lua  
+[04-06 10:46:09.943]execute monster placement script/monster/heilong1.lua  
+[04-06 10:46:09.945]execute monster placement script/monster/heilong2.lua  
+[04-06 10:46:09.945]Eastgoafscript release monster ended! 
+[04-06 10:46:09.945]Initializing Offline Stall System...
+[04-06 10:46:09.952]Offline Stall System initialized with 0 stalls
+[04-06 10:46:09.952]GameApp initialization finish!
+[04-06 10:46:09.953]start init ServerApp
+[04-06 10:46:09.953]ServerApp init over
+[04-06 10:46:09.953]startup Gate server connect thread...
+[04-06 10:46:09.953]startup game thread...
+[04-06 10:46:09.953]Game Thread ID = 5572
+[04-06 10:46:09.953]start create Win32 control dialog box
+[04-06 10:46:09.995]Entering main message loop
+[04-06 10:49:02.494]Console close event received - saving boss timers and players...
+[04-06 10:49:02.495]Save complete - exiting...
+[04-06 10:50:09.602]Load Game Config File(Text Mode) [GameServer.cfg]
+[04-06 10:50:09.614]Load Game Config File(Text Mode) [cmd.cfg]
+[04-06 10:50:09.615]Define __CATCH
+[04-06 10:50:09.615]game map server [GameServer] startup...
+[04-06 10:50:09.615]start initialization GameApp
+[04-06 10:50:09.615]initialization DB...
+[04-06 10:50:09.664]database init...ok
+[04-06 10:50:09.664]database init...ok
+[04-06 10:50:10.226]start to assign every Entity memory
+[04-06 10:50:10.234]initialization every form...
+[04-06 10:50:15.707]initialization Lua Script...
+[04-06 10:50:16.060]initialization map list...
+[04-06 10:50:16.548]map garner init resource succeed
+[04-06 10:50:16.548]map [garner] ok!
+[04-06 10:50:16.557]map ctf init resource succeed
+[04-06 10:50:16.557]map [ctf] ok!
+[04-06 10:50:16.562]map garner2 init resource succeed
+[04-06 10:50:16.562]map [garner2] ok!
+[04-06 10:50:16.571]map PKmap init resource succeed
+[04-06 10:50:16.571]map [PKmap] ok!
+[04-06 10:50:16.581]map shalan2 init resource succeed
+[04-06 10:50:16.581]map [shalan2] ok!
+[04-06 10:50:16.592]map leiting2 init resource succeed
+[04-06 10:50:16.592]map [leiting2] ok!
+[04-06 10:50:16.624]map lonetower init resource succeed
+[04-06 10:50:16.624]map [lonetower] ok!
+[04-06 10:50:16.632]map L4MAP init resource succeed
+[04-06 10:50:16.632]map [L4MAP] ok!
+[04-06 10:50:16.645]map LostCity init resource succeed
+[04-06 10:50:16.645]map [LostCity] ok!
+[04-06 10:50:17.231]map magicsea init resource succeed
+[04-06 10:50:17.231]map [magicsea] ok!
+[04-06 10:50:17.325]map jialebi init resource succeed
+[04-06 10:50:17.325]map [jialebi] ok!
+[04-06 10:50:17.332]map hell init resource succeed
+[04-06 10:50:17.332]map [hell] ok!
+[04-06 10:50:17.338]map hell2 init resource succeed
+[04-06 10:50:17.338]map [hell2] ok!
+[04-06 10:50:17.352]map hell3 init resource succeed
+[04-06 10:50:17.352]map [hell3] ok!
+[04-06 10:50:17.358]map hell4 init resource succeed
+[04-06 10:50:17.358]map [hell4] ok!
+[04-06 10:50:17.367]map hell5 init resource succeed
+[04-06 10:50:17.367]map [hell5] ok!
+[04-06 10:50:17.935]map darkblue init resource succeed
+[04-06 10:50:17.935]map [darkblue] ok!
+[04-06 10:50:17.966]map eastgoaf init resource succeed
+[04-06 10:50:17.966]map [eastgoaf] ok!
+[04-06 10:50:18.131]map winterland init resource succeed
+[04-06 10:50:18.131]map [winterland] ok!
+[04-06 10:50:18.149]map mjing1 init resource succeed
+[04-06 10:50:18.149]map [mjing1] ok!
+[04-06 10:50:18.166]map mjing2 init resource succeed
+[04-06 10:50:18.166]map [mjing2] ok!
+[04-06 10:50:18.183]map mjing3 init resource succeed
+[04-06 10:50:18.183]map [mjing3] ok!
+[04-06 10:50:18.199]map mjing4 init resource succeed
+[04-06 10:50:18.199]map [mjing4] ok!
+[04-06 10:50:18.204]map starena13 init resource succeed
+[04-06 10:50:18.204]map [starena13] ok!
+[04-06 10:50:18.208]map starena23 init resource succeed
+[04-06 10:50:18.208]map [starena23] ok!
+[04-06 10:50:18.212]map starena33 init resource succeed
+[04-06 10:50:18.212]map [starena33] ok!
+[04-06 10:50:18.227]map abandonedcity init resource succeed
+[04-06 10:50:18.227]map [abandonedcity] ok!
+[04-06 10:50:18.245]map abandonedcity2 init resource succeed
+[04-06 10:50:18.245]map [abandonedcity2] ok!
+[04-06 10:50:18.262]map abandonedcity3 init resource succeed
+[04-06 10:50:18.262]map [abandonedcity3] ok!
+[04-06 10:50:18.302]map darkswamp init resource succeed
+[04-06 10:50:18.302]map [darkswamp] ok!
+[04-06 10:50:18.336]map puzzleworld init resource succeed
+[04-06 10:50:18.336]map [puzzleworld] ok!
+[04-06 10:50:18.375]map puzzleworld2 init resource succeed
+[04-06 10:50:18.375]map [puzzleworld2] ok!
+[04-06 10:50:18.408]map DreamIsland init resource succeed
+[04-06 10:50:18.408]map [DreamIsland] ok!
+[04-06 10:50:18.458]map teampk init resource succeed
+[04-06 10:50:18.458]map [teampk] ok!
+[04-06 10:50:18.472]map Hellchapter init resource succeed
+[04-06 10:50:18.472]map [Hellchapter] ok!
+[04-06 10:50:18.477]map chaosicicle init resource succeed
+[04-06 10:50:18.477]map [chaosicicle] ok!
+[04-06 10:50:18.487]map yschurch init resource succeed
+[04-06 10:50:18.487]map [yschurch] ok!
+[04-06 10:50:18.488]execute monster placement script/monster/baiyinlinqu.lua  
+[04-06 10:50:18.489]execute monster placement script/monster/lietinglinqu.lua  
+[04-06 10:50:18.490]execute monster placement script/monster/baiyinyuchang.lua  
+[04-06 10:50:18.491]execute monster placement script/monster/jianazuixiayuchang.lua  
+[04-06 10:50:18.491]execute monster placement script/monster/haifengyuchang.lua  
+[04-06 10:50:18.492]execute monster placement script/monster/jianayunshi.lua  
+[04-06 10:50:18.492]execute monster placement script/monster/bycduizhang.lua  
+[04-06 10:50:18.492]execute monster placement script/monster/bycdaoguai.lua  
+[04-06 10:50:18.492]garnerscript release monster ended! 
+[04-06 10:50:18.492]execute monster placement script/monster/mingshapaota.lua  
+[04-06 10:50:18.494]execute monster placement script/monster/monv480.lua  
+[04-06 10:50:18.527]execute monster placement script/monster/shalanyuchang.lua  
+[04-06 10:50:18.528]execute monster placement script/monster/mingshayuchang.lua  
+[04-06 10:50:18.528]execute monster placement script/monster/shalanlinqu.lua  
+[04-06 10:50:18.529]execute monster placement script/monster/shalanmingshaxian.lua  
+[04-06 10:50:18.530]execute monster placement script/monster/shaxie.lua  
+[04-06 10:50:18.531]execute monster placement script/monster/shalanyunshi.lua  
+[04-06 10:50:18.532]execute monster placement script/monster/slcdaoguai.lua  
+[04-06 10:50:18.532]execute monster placement script/monster/slcduizhang.lua  
+[04-06 10:50:18.532]execute monster placement script/monster/WriteSheepKiper.lua  
+[04-06 10:50:18.532]magicseascript release monster ended! 
+[04-06 10:50:18.532]execute monster placement script/monster/binglanglinqu.lua  
+[04-06 10:50:18.532]execute monster placement script/monster/binglangyuchang.lua  
+[04-06 10:50:18.534]execute monster placement script/monster/binglangyunshi.lua  
+[04-06 10:50:18.534]execute monster placement script/monster/chundaoguai.lua  
+[04-06 10:50:18.535]execute monster placement script/monster/qiudaoguai.lua  
+[04-06 10:50:18.558]execute monster placement script/monster/xiadaoguai.lua  
+[04-06 10:50:18.572]execute monster placement script/monster/blbdaoguai.lua  
+[04-06 10:50:18.572]execute monster placement script/monster/blbduizhang.lua  
+[04-06 10:50:18.572]darkbluescript release monster ended! 
+[04-06 10:50:18.572]lonetower instance mode - no static monster spawns 
+[04-06 10:50:18.572]execute monster placement script/monster/haidisuidao.lua  
+[04-06 10:50:18.580]execute monster placement script/monster/xiashuidao.lua  
+[04-06 10:50:18.584]execute monster placement script/monster/heilong1.lua  
+[04-06 10:50:18.588]execute monster placement script/monster/heilong2.lua  
+[04-06 10:50:18.588]Eastgoafscript release monster ended! 
+[04-06 10:50:18.589]Initializing Offline Stall System...
+[04-06 10:50:18.596]Offline Stall System initialized with 0 stalls
+[04-06 10:50:18.596]GameApp initialization finish!
+[04-06 10:50:18.596]start init ServerApp
+[04-06 10:50:18.597]ServerApp init over
+[04-06 10:50:18.597]startup Gate server connect thread...
+[04-06 10:50:18.597]startup game thread...
+[04-06 10:50:18.597]Game Thread ID = 24368
+[04-06 10:50:18.597]start create Win32 control dialog box
+[04-06 10:50:18.658]Entering main message loop
+[04-06 10:55:23.864]Console close event received - saving boss timers and players...
+[04-06 10:55:23.865]Save complete - exiting...
+[04-06 10:56:01.529]Load Game Config File(Text Mode) [GameServer.cfg]
+[04-06 10:56:01.543]Load Game Config File(Text Mode) [cmd.cfg]
+[04-06 10:56:01.544]Define __CATCH
+[04-06 10:56:01.544]game map server [GameServer] startup...
+[04-06 10:56:01.544]start initialization GameApp
+[04-06 10:56:01.544]initialization DB...
+[04-06 10:56:01.574]database init...ok
+[04-06 10:56:01.574]database init...ok
+[04-06 10:56:02.113]start to assign every Entity memory
+[04-06 10:56:02.121]initialization every form...
+[04-06 10:56:07.069]initialization Lua Script...
+[04-06 10:56:07.421]initialization map list...
+[04-06 10:56:07.949]map garner init resource succeed
+[04-06 10:56:07.949]map [garner] ok!
+[04-06 10:56:07.958]map ctf init resource succeed
+[04-06 10:56:07.958]map [ctf] ok!
+[04-06 10:56:07.963]map garner2 init resource succeed
+[04-06 10:56:07.963]map [garner2] ok!
+[04-06 10:56:07.974]map PKmap init resource succeed
+[04-06 10:56:07.974]map [PKmap] ok!
+[04-06 10:56:07.983]map shalan2 init resource succeed
+[04-06 10:56:07.983]map [shalan2] ok!
+[04-06 10:56:07.996]map leiting2 init resource succeed
+[04-06 10:56:07.996]map [leiting2] ok!
+[04-06 10:56:08.030]map lonetower init resource succeed
+[04-06 10:56:08.030]map [lonetower] ok!
+[04-06 10:56:08.038]map L4MAP init resource succeed
+[04-06 10:56:08.038]map [L4MAP] ok!
+[04-06 10:56:08.049]map LostCity init resource succeed
+[04-06 10:56:08.049]map [LostCity] ok!
+[04-06 10:56:08.505]map magicsea init resource succeed
+[04-06 10:56:08.505]map [magicsea] ok!
+[04-06 10:56:08.593]map jialebi init resource succeed
+[04-06 10:56:08.593]map [jialebi] ok!
+[04-06 10:56:08.602]map hell init resource succeed
+[04-06 10:56:08.602]map [hell] ok!
+[04-06 10:56:08.607]map hell2 init resource succeed
+[04-06 10:56:08.607]map [hell2] ok!
+[04-06 10:56:08.619]map hell3 init resource succeed
+[04-06 10:56:08.619]map [hell3] ok!
+[04-06 10:56:08.625]map hell4 init resource succeed
+[04-06 10:56:08.625]map [hell4] ok!
+[04-06 10:56:08.633]map hell5 init resource succeed
+[04-06 10:56:08.633]map [hell5] ok!
+[04-06 10:56:09.136]map darkblue init resource succeed
+[04-06 10:56:09.136]map [darkblue] ok!
+[04-06 10:56:09.163]map eastgoaf init resource succeed
+[04-06 10:56:09.163]map [eastgoaf] ok!
+[04-06 10:56:09.301]map winterland init resource succeed
+[04-06 10:56:09.301]map [winterland] ok!
+[04-06 10:56:09.316]map mjing1 init resource succeed
+[04-06 10:56:09.316]map [mjing1] ok!
+[04-06 10:56:09.331]map mjing2 init resource succeed
+[04-06 10:56:09.331]map [mjing2] ok!
+[04-06 10:56:09.348]map mjing3 init resource succeed
+[04-06 10:56:09.348]map [mjing3] ok!
+[04-06 10:56:09.366]map mjing4 init resource succeed
+[04-06 10:56:09.366]map [mjing4] ok!
+[04-06 10:56:09.370]map starena13 init resource succeed
+[04-06 10:56:09.370]map [starena13] ok!
+[04-06 10:56:09.375]map starena23 init resource succeed
+[04-06 10:56:09.375]map [starena23] ok!
+[04-06 10:56:09.382]map starena33 init resource succeed
+[04-06 10:56:09.382]map [starena33] ok!
+[04-06 10:56:09.398]map abandonedcity init resource succeed
+[04-06 10:56:09.398]map [abandonedcity] ok!
+[04-06 10:56:09.417]map abandonedcity2 init resource succeed
+[04-06 10:56:09.417]map [abandonedcity2] ok!
+[04-06 10:56:09.434]map abandonedcity3 init resource succeed
+[04-06 10:56:09.434]map [abandonedcity3] ok!
+[04-06 10:56:09.473]map darkswamp init resource succeed
+[04-06 10:56:09.473]map [darkswamp] ok!
+[04-06 10:56:09.499]map puzzleworld init resource succeed
+[04-06 10:56:09.500]map [puzzleworld] ok!
+[04-06 10:56:09.527]map puzzleworld2 init resource succeed
+[04-06 10:56:09.527]map [puzzleworld2] ok!
+[04-06 10:56:09.557]map DreamIsland init resource succeed
+[04-06 10:56:09.557]map [DreamIsland] ok!
+[04-06 10:56:09.603]map teampk init resource succeed
+[04-06 10:56:09.603]map [teampk] ok!
+[04-06 10:56:09.616]map Hellchapter init resource succeed
+[04-06 10:56:09.616]map [Hellchapter] ok!
+[04-06 10:56:09.621]map chaosicicle init resource succeed
+[04-06 10:56:09.621]map [chaosicicle] ok!
+[04-06 10:56:09.631]map yschurch init resource succeed
+[04-06 10:56:09.631]map [yschurch] ok!
+[04-06 10:56:09.632]execute monster placement script/monster/baiyinlinqu.lua  
+[04-06 10:56:09.633]execute monster placement script/monster/lietinglinqu.lua  
+[04-06 10:56:09.635]execute monster placement script/monster/baiyinyuchang.lua  
+[04-06 10:56:09.635]execute monster placement script/monster/jianazuixiayuchang.lua  
+[04-06 10:56:09.635]execute monster placement script/monster/haifengyuchang.lua  
+[04-06 10:56:09.636]execute monster placement script/monster/jianayunshi.lua  
+[04-06 10:56:09.636]execute monster placement script/monster/bycduizhang.lua  
+[04-06 10:56:09.636]execute monster placement script/monster/bycdaoguai.lua  
+[04-06 10:56:09.637]garnerscript release monster ended! 
+[04-06 10:56:09.637]execute monster placement script/monster/mingshapaota.lua  
+[04-06 10:56:09.638]execute monster placement script/monster/monv480.lua  
+[04-06 10:56:09.667]execute monster placement script/monster/shalanyuchang.lua  
+[04-06 10:56:09.667]execute monster placement script/monster/mingshayuchang.lua  
+[04-06 10:56:09.668]execute monster placement script/monster/shalanlinqu.lua  
+[04-06 10:56:09.668]execute monster placement script/monster/shalanmingshaxian.lua  
+[04-06 10:56:09.669]execute monster placement script/monster/shaxie.lua  
+[04-06 10:56:09.670]execute monster placement script/monster/shalanyunshi.lua  
+[04-06 10:56:09.670]execute monster placement script/monster/slcdaoguai.lua  
+[04-06 10:56:09.671]execute monster placement script/monster/slcduizhang.lua  
+[04-06 10:56:09.671]execute monster placement script/monster/WriteSheepKiper.lua  
+[04-06 10:56:09.671]magicseascript release monster ended! 
+[04-06 10:56:09.671]execute monster placement script/monster/binglanglinqu.lua  
+[04-06 10:56:09.672]execute monster placement script/monster/binglangyuchang.lua  
+[04-06 10:56:09.672]execute monster placement script/monster/binglangyunshi.lua  
+[04-06 10:56:09.672]execute monster placement script/monster/chundaoguai.lua  
+[04-06 10:56:09.674]execute monster placement script/monster/qiudaoguai.lua  
+[04-06 10:56:09.694]execute monster placement script/monster/xiadaoguai.lua  
+[04-06 10:56:09.704]execute monster placement script/monster/blbdaoguai.lua  
+[04-06 10:56:09.706]execute monster placement script/monster/blbduizhang.lua  
+[04-06 10:56:09.706]darkbluescript release monster ended! 
+[04-06 10:56:09.706]lonetower instance mode - no static monster spawns 
+[04-06 10:56:09.706]execute monster placement script/monster/haidisuidao.lua  
+[04-06 10:56:09.711]execute monster placement script/monster/xiashuidao.lua  
+[04-06 10:56:09.714]execute monster placement script/monster/heilong1.lua  
+[04-06 10:56:09.717]execute monster placement script/monster/heilong2.lua  
+[04-06 10:56:09.717]Eastgoafscript release monster ended! 
+[04-06 10:56:09.717]Initializing Offline Stall System...
+[04-06 10:56:09.724]Offline Stall System initialized with 0 stalls
+[04-06 10:56:09.724]GameApp initialization finish!
+[04-06 10:56:09.725]start init ServerApp
+[04-06 10:56:09.725]ServerApp init over
+[04-06 10:56:09.725]startup Gate server connect thread...
+[04-06 10:56:09.725]startup game thread...
+[04-06 10:56:09.725]Game Thread ID = 23716
+[04-06 10:56:09.725]start create Win32 control dialog box
+[04-06 10:56:09.774]Entering main message loop
+[04-06 11:00:23.405]Console close event received - saving boss timers and players...
+[04-06 11:00:23.406]Save complete - exiting...
+[04-06 11:00:49.943]Load Game Config File(Text Mode) [GameServer.cfg]
+[04-06 11:00:49.956]Load Game Config File(Text Mode) [cmd.cfg]
+[04-06 11:00:49.957]Define __CATCH
+[04-06 11:00:49.957]game map server [GameServer] startup...
+[04-06 11:00:49.957]start initialization GameApp
+[04-06 11:00:49.957]initialization DB...
+[04-06 11:00:49.995]database init...ok
+[04-06 11:00:49.995]database init...ok
+[04-06 11:00:50.521]start to assign every Entity memory
+[04-06 11:00:50.529]initialization every form...
+[04-06 11:00:55.376]initialization Lua Script...
+[04-06 11:00:55.695]initialization map list...
+[04-06 11:00:56.130]map garner init resource succeed
+[04-06 11:00:56.130]map [garner] ok!
+[04-06 11:00:56.139]map ctf init resource succeed
+[04-06 11:00:56.139]map [ctf] ok!
+[04-06 11:00:56.143]map garner2 init resource succeed
+[04-06 11:00:56.143]map [garner2] ok!
+[04-06 11:00:56.152]map PKmap init resource succeed
+[04-06 11:00:56.152]map [PKmap] ok!
+[04-06 11:00:56.161]map shalan2 init resource succeed
+[04-06 11:00:56.161]map [shalan2] ok!
+[04-06 11:00:56.172]map leiting2 init resource succeed
+[04-06 11:00:56.172]map [leiting2] ok!
+[04-06 11:00:56.202]map lonetower init resource succeed
+[04-06 11:00:56.202]map [lonetower] ok!
+[04-06 11:00:56.210]map L4MAP init resource succeed
+[04-06 11:00:56.210]map [L4MAP] ok!
+[04-06 11:00:56.218]map LostCity init resource succeed
+[04-06 11:00:56.218]map [LostCity] ok!
+[04-06 11:00:56.620]map magicsea init resource succeed
+[04-06 11:00:56.620]map [magicsea] ok!
+[04-06 11:00:56.701]map jialebi init resource succeed
+[04-06 11:00:56.701]map [jialebi] ok!
+[04-06 11:00:56.708]map hell init resource succeed
+[04-06 11:00:56.708]map [hell] ok!
+[04-06 11:00:56.713]map hell2 init resource succeed
+[04-06 11:00:56.713]map [hell2] ok!
+[04-06 11:00:56.725]map hell3 init resource succeed
+[04-06 11:00:56.725]map [hell3] ok!
+[04-06 11:00:56.730]map hell4 init resource succeed
+[04-06 11:00:56.730]map [hell4] ok!
+[04-06 11:00:56.737]map hell5 init resource succeed
+[04-06 11:00:56.737]map [hell5] ok!
+[04-06 11:00:57.174]map darkblue init resource succeed
+[04-06 11:00:57.174]map [darkblue] ok!
+[04-06 11:00:57.197]map eastgoaf init resource succeed
+[04-06 11:00:57.197]map [eastgoaf] ok!
+[04-06 11:00:57.318]map winterland init resource succeed
+[04-06 11:00:57.318]map [winterland] ok!
+[04-06 11:00:57.332]map mjing1 init resource succeed
+[04-06 11:00:57.332]map [mjing1] ok!
+[04-06 11:00:57.346]map mjing2 init resource succeed
+[04-06 11:00:57.346]map [mjing2] ok!
+[04-06 11:00:57.361]map mjing3 init resource succeed
+[04-06 11:00:57.361]map [mjing3] ok!
+[04-06 11:00:57.376]map mjing4 init resource succeed
+[04-06 11:00:57.376]map [mjing4] ok!
+[04-06 11:00:57.381]map starena13 init resource succeed
+[04-06 11:00:57.381]map [starena13] ok!
+[04-06 11:00:57.385]map starena23 init resource succeed
+[04-06 11:00:57.385]map [starena23] ok!
+[04-06 11:00:57.389]map starena33 init resource succeed
+[04-06 11:00:57.389]map [starena33] ok!
+[04-06 11:00:57.403]map abandonedcity init resource succeed
+[04-06 11:00:57.403]map [abandonedcity] ok!
+[04-06 11:00:57.420]map abandonedcity2 init resource succeed
+[04-06 11:00:57.420]map [abandonedcity2] ok!
+[04-06 11:00:57.436]map abandonedcity3 init resource succeed
+[04-06 11:00:57.436]map [abandonedcity3] ok!
+[04-06 11:00:57.472]map darkswamp init resource succeed
+[04-06 11:00:57.472]map [darkswamp] ok!
+[04-06 11:00:57.497]map puzzleworld init resource succeed
+[04-06 11:00:57.497]map [puzzleworld] ok!
+[04-06 11:00:57.524]map puzzleworld2 init resource succeed
+[04-06 11:00:57.524]map [puzzleworld2] ok!
+[04-06 11:00:57.548]map DreamIsland init resource succeed
+[04-06 11:00:57.548]map [DreamIsland] ok!
+[04-06 11:00:57.599]map teampk init resource succeed
+[04-06 11:00:57.599]map [teampk] ok!
+[04-06 11:00:57.616]map Hellchapter init resource succeed
+[04-06 11:00:57.616]map [Hellchapter] ok!
+[04-06 11:00:57.622]map chaosicicle init resource succeed
+[04-06 11:00:57.622]map [chaosicicle] ok!
+[04-06 11:00:57.633]map yschurch init resource succeed
+[04-06 11:00:57.633]map [yschurch] ok!
+[04-06 11:00:57.633]execute monster placement script/monster/baiyinlinqu.lua  
+[04-06 11:00:57.634]execute monster placement script/monster/lietinglinqu.lua  
+[04-06 11:00:57.635]execute monster placement script/monster/baiyinyuchang.lua  
+[04-06 11:00:57.635]execute monster placement script/monster/jianazuixiayuchang.lua  
+[04-06 11:00:57.636]execute monster placement script/monster/haifengyuchang.lua  
+[04-06 11:00:57.636]execute monster placement script/monster/jianayunshi.lua  
+[04-06 11:00:57.637]execute monster placement script/monster/bycduizhang.lua  
+[04-06 11:00:57.637]execute monster placement script/monster/bycdaoguai.lua  
+[04-06 11:00:57.637]garnerscript release monster ended! 
+[04-06 11:00:57.637]execute monster placement script/monster/mingshapaota.lua  
+[04-06 11:00:57.638]execute monster placement script/monster/monv480.lua  
+[04-06 11:00:57.661]execute monster placement script/monster/shalanyuchang.lua  
+[04-06 11:00:57.662]execute monster placement script/monster/mingshayuchang.lua  
+[04-06 11:00:57.662]execute monster placement script/monster/shalanlinqu.lua  
+[04-06 11:00:57.663]execute monster placement script/monster/shalanmingshaxian.lua  
+[04-06 11:00:57.663]execute monster placement script/monster/shaxie.lua  
+[04-06 11:00:57.664]execute monster placement script/monster/shalanyunshi.lua  
+[04-06 11:00:57.665]execute monster placement script/monster/slcdaoguai.lua  
+[04-06 11:00:57.665]execute monster placement script/monster/slcduizhang.lua  
+[04-06 11:00:57.665]execute monster placement script/monster/WriteSheepKiper.lua  
+[04-06 11:00:57.665]magicseascript release monster ended! 
+[04-06 11:00:57.665]execute monster placement script/monster/binglanglinqu.lua  
+[04-06 11:00:57.666]execute monster placement script/monster/binglangyuchang.lua  
+[04-06 11:00:57.666]execute monster placement script/monster/binglangyunshi.lua  
+[04-06 11:00:57.666]execute monster placement script/monster/chundaoguai.lua  
+[04-06 11:00:57.667]execute monster placement script/monster/qiudaoguai.lua  
+[04-06 11:00:57.687]execute monster placement script/monster/xiadaoguai.lua  
+[04-06 11:00:57.697]execute monster placement script/monster/blbdaoguai.lua  
+[04-06 11:00:57.697]execute monster placement script/monster/blbduizhang.lua  
+[04-06 11:00:57.697]darkbluescript release monster ended! 
+[04-06 11:00:57.697]lonetower instance mode - no static monster spawns 
+[04-06 11:00:57.697]execute monster placement script/monster/haidisuidao.lua  
+[04-06 11:00:57.702]execute monster placement script/monster/xiashuidao.lua  
+[04-06 11:00:57.705]execute monster placement script/monster/heilong1.lua  
+[04-06 11:00:57.707]execute monster placement script/monster/heilong2.lua  
+[04-06 11:00:57.707]Eastgoafscript release monster ended! 
+[04-06 11:00:57.707]Initializing Offline Stall System...
+[04-06 11:00:57.719]Offline Stall System initialized with 0 stalls
+[04-06 11:00:57.719]GameApp initialization finish!
+[04-06 11:00:57.719]start init ServerApp
+[04-06 11:00:57.719]ServerApp init over
+[04-06 11:00:57.719]startup Gate server connect thread...
+[04-06 11:00:57.719]startup game thread...
+[04-06 11:00:57.719]Game Thread ID = 13524
+[04-06 11:00:57.719]start create Win32 control dialog box
+[04-06 11:00:57.767]Entering main message loop
+[04-06 11:01:44.777]Console close event received - saving boss timers and players...
+[04-06 11:01:44.779]Save complete - exiting...
+[04-06 11:02:05.957]Load Game Config File(Text Mode) [GameServer.cfg]
+[04-06 11:02:07.140]Load Game Config File(Text Mode) [cmd.cfg]
+[04-06 11:02:07.141]Define __CATCH
+[04-06 11:02:07.141]game map server [GameServer] startup...
+[04-06 11:02:07.141]start initialization GameApp
+[04-06 11:02:07.141]initialization DB...
+[04-06 11:02:07.170]database init...ok
+[04-06 11:02:07.170]database init...ok
+[04-06 11:02:07.695]start to assign every Entity memory
+[04-06 11:02:07.702]initialization every form...
+[04-06 11:02:12.545]initialization Lua Script...
+[04-06 11:02:12.878]initialization map list...
+[04-06 11:02:13.325]map garner init resource succeed
+[04-06 11:02:13.325]map [garner] ok!
+[04-06 11:02:13.332]map ctf init resource succeed
+[04-06 11:02:13.332]map [ctf] ok!
+[04-06 11:02:13.339]map garner2 init resource succeed
+[04-06 11:02:13.339]map [garner2] ok!
+[04-06 11:02:13.350]map PKmap init resource succeed
+[04-06 11:02:13.350]map [PKmap] ok!
+[04-06 11:02:13.358]map shalan2 init resource succeed
+[04-06 11:02:13.358]map [shalan2] ok!
+[04-06 11:02:13.371]map leiting2 init resource succeed
+[04-06 11:02:13.371]map [leiting2] ok!
+[04-06 11:02:13.401]map lonetower init resource succeed
+[04-06 11:02:13.401]map [lonetower] ok!
+[04-06 11:02:13.410]map L4MAP init resource succeed
+[04-06 11:02:13.410]map [L4MAP] ok!
+[04-06 11:02:13.420]map LostCity init resource succeed
+[04-06 11:02:13.420]map [LostCity] ok!
+[04-06 11:02:13.855]map magicsea init resource succeed
+[04-06 11:02:13.855]map [magicsea] ok!
+[04-06 11:02:13.937]map jialebi init resource succeed
+[04-06 11:02:13.937]map [jialebi] ok!
+[04-06 11:02:13.944]map hell init resource succeed
+[04-06 11:02:13.944]map [hell] ok!
+[04-06 11:02:13.951]map hell2 init resource succeed
+[04-06 11:02:13.951]map [hell2] ok!
+[04-06 11:02:13.963]map hell3 init resource succeed
+[04-06 11:02:13.963]map [hell3] ok!
+[04-06 11:02:13.968]map hell4 init resource succeed
+[04-06 11:02:13.968]map [hell4] ok!
+[04-06 11:02:13.977]map hell5 init resource succeed
+[04-06 11:02:13.977]map [hell5] ok!
+[04-06 11:02:14.423]map darkblue init resource succeed
+[04-06 11:02:14.423]map [darkblue] ok!
+[04-06 11:02:14.447]map eastgoaf init resource succeed
+[04-06 11:02:14.447]map [eastgoaf] ok!
+[04-06 11:02:14.579]map winterland init resource succeed
+[04-06 11:02:14.579]map [winterland] ok!
+[04-06 11:02:14.595]map mjing1 init resource succeed
+[04-06 11:02:14.595]map [mjing1] ok!
+[04-06 11:02:14.612]map mjing2 init resource succeed
+[04-06 11:02:14.612]map [mjing2] ok!
+[04-06 11:02:14.630]map mjing3 init resource succeed
+[04-06 11:02:14.630]map [mjing3] ok!
+[04-06 11:02:14.648]map mjing4 init resource succeed
+[04-06 11:02:14.648]map [mjing4] ok!
+[04-06 11:02:14.653]map starena13 init resource succeed
+[04-06 11:02:14.653]map [starena13] ok!
+[04-06 11:02:14.658]map starena23 init resource succeed
+[04-06 11:02:14.658]map [starena23] ok!
+[04-06 11:02:14.662]map starena33 init resource succeed
+[04-06 11:02:14.662]map [starena33] ok!
+[04-06 11:02:14.679]map abandonedcity init resource succeed
+[04-06 11:02:14.679]map [abandonedcity] ok!
+[04-06 11:02:14.700]map abandonedcity2 init resource succeed
+[04-06 11:02:14.700]map [abandonedcity2] ok!
+[04-06 11:02:14.721]map abandonedcity3 init resource succeed
+[04-06 11:02:14.721]map [abandonedcity3] ok!
+[04-06 11:02:14.767]map darkswamp init resource succeed
+[04-06 11:02:14.767]map [darkswamp] ok!
+[04-06 11:02:14.802]map puzzleworld init resource succeed
+[04-06 11:02:14.802]map [puzzleworld] ok!
+[04-06 11:02:14.837]map puzzleworld2 init resource succeed
+[04-06 11:02:14.837]map [puzzleworld2] ok!
+[04-06 11:02:14.868]map DreamIsland init resource succeed
+[04-06 11:02:14.868]map [DreamIsland] ok!
+[04-06 11:02:14.919]map teampk init resource succeed
+[04-06 11:02:14.919]map [teampk] ok!
+[04-06 11:02:14.930]map Hellchapter init resource succeed
+[04-06 11:02:14.930]map [Hellchapter] ok!
+[04-06 11:02:14.935]map chaosicicle init resource succeed
+[04-06 11:02:14.935]map [chaosicicle] ok!
+[04-06 11:02:14.953]map yschurch init resource succeed
+[04-06 11:02:14.953]map [yschurch] ok!
+[04-06 11:02:14.954]execute monster placement script/monster/baiyinlinqu.lua  
+[04-06 11:02:14.955]execute monster placement script/monster/lietinglinqu.lua  
+[04-06 11:02:14.958]execute monster placement script/monster/baiyinyuchang.lua  
+[04-06 11:02:14.958]execute monster placement script/monster/jianazuixiayuchang.lua  
+[04-06 11:02:14.959]execute monster placement script/monster/haifengyuchang.lua  
+[04-06 11:02:14.960]execute monster placement script/monster/jianayunshi.lua  
+[04-06 11:02:14.960]execute monster placement script/monster/bycduizhang.lua  
+[04-06 11:02:14.960]execute monster placement script/monster/bycdaoguai.lua  
+[04-06 11:02:14.961]garnerscript release monster ended! 
+[04-06 11:02:14.961]execute monster placement script/monster/mingshapaota.lua  
+[04-06 11:02:14.962]execute monster placement script/monster/monv480.lua  
+[04-06 11:02:14.993]execute monster placement script/monster/shalanyuchang.lua  
+[04-06 11:02:14.994]execute monster placement script/monster/mingshayuchang.lua  
+[04-06 11:02:14.994]execute monster placement script/monster/shalanlinqu.lua  
+[04-06 11:02:14.995]execute monster placement script/monster/shalanmingshaxian.lua  
+[04-06 11:02:14.996]execute monster placement script/monster/shaxie.lua  
+[04-06 11:02:14.999]execute monster placement script/monster/shalanyunshi.lua  
+[04-06 11:02:14.999]execute monster placement script/monster/slcdaoguai.lua  
+[04-06 11:02:14.999]execute monster placement script/monster/slcduizhang.lua  
+[04-06 11:02:14.999]execute monster placement script/monster/WriteSheepKiper.lua  
+[04-06 11:02:14.999]magicseascript release monster ended! 
+[04-06 11:02:14.999]execute monster placement script/monster/binglanglinqu.lua  
+[04-06 11:02:15.001]execute monster placement script/monster/binglangyuchang.lua  
+[04-06 11:02:15.001]execute monster placement script/monster/binglangyunshi.lua  
+[04-06 11:02:15.001]execute monster placement script/monster/chundaoguai.lua  
+[04-06 11:02:15.003]execute monster placement script/monster/qiudaoguai.lua  
+[04-06 11:02:15.031]execute monster placement script/monster/xiadaoguai.lua  
+[04-06 11:02:15.045]execute monster placement script/monster/blbdaoguai.lua  
+[04-06 11:02:15.045]execute monster placement script/monster/blbduizhang.lua  
+[04-06 11:02:15.045]darkbluescript release monster ended! 
+[04-06 11:02:15.045]lonetower instance mode - no static monster spawns 
+[04-06 11:02:15.045]execute monster placement script/monster/haidisuidao.lua  
+[04-06 11:02:15.053]execute monster placement script/monster/xiashuidao.lua  
+[04-06 11:02:15.055]execute monster placement script/monster/heilong1.lua  
+[04-06 11:02:15.058]execute monster placement script/monster/heilong2.lua  
+[04-06 11:02:15.059]Eastgoafscript release monster ended! 
+[04-06 11:02:15.059]Initializing Offline Stall System...
+[04-06 11:02:15.067]Offline Stall System initialized with 0 stalls
+[04-06 11:02:15.067]GameApp initialization finish!
+[04-06 11:02:15.068]start init ServerApp
+[04-06 11:02:15.068]ServerApp init over
+[04-06 11:02:15.068]startup Gate server connect thread...
+[04-06 11:02:15.068]startup game thread...
+[04-06 11:02:15.068]Game Thread ID = 21532
+[04-06 11:02:15.068]start create Win32 control dialog box
+[04-06 11:02:15.125]Entering main message loop
+[04-06 11:11:40.720]Console close event received - saving boss timers and players...
+[04-06 11:11:40.727]Save complete - exiting...
+[04-06 11:11:54.382]Load Game Config File(Text Mode) [GameServer.cfg]
+[04-06 11:11:54.394]Load Game Config File(Text Mode) [cmd.cfg]
+[04-06 11:11:54.394]Define __CATCH
+[04-06 11:11:54.394]game map server [GameServer] startup...
+[04-06 11:11:54.394]start initialization GameApp
+[04-06 11:11:54.394]initialization DB...
+[04-06 11:11:54.426]database init...ok
+[04-06 11:11:54.426]database init...ok
+[04-06 11:11:54.962]start to assign every Entity memory
+[04-06 11:11:54.970]initialization every form...
+[04-06 11:11:59.843]initialization Lua Script...
+[04-06 11:12:00.181]initialization map list...
+[04-06 11:12:00.683]map garner init resource succeed
+[04-06 11:12:00.683]map [garner] ok!
+[04-06 11:12:00.694]map ctf init resource succeed
+[04-06 11:12:00.694]map [ctf] ok!
+[04-06 11:12:00.701]map garner2 init resource succeed
+[04-06 11:12:00.701]map [garner2] ok!
+[04-06 11:12:00.712]map PKmap init resource succeed
+[04-06 11:12:00.712]map [PKmap] ok!
+[04-06 11:12:00.723]map shalan2 init resource succeed
+[04-06 11:12:00.723]map [shalan2] ok!
+[04-06 11:12:00.736]map leiting2 init resource succeed
+[04-06 11:12:00.736]map [leiting2] ok!
+[04-06 11:12:00.774]map lonetower init resource succeed
+[04-06 11:12:00.774]map [lonetower] ok!
+[04-06 11:12:00.785]map L4MAP init resource succeed
+[04-06 11:12:00.785]map [L4MAP] ok!
+[04-06 11:12:00.796]map LostCity init resource succeed
+[04-06 11:12:00.796]map [LostCity] ok!
+[04-06 11:12:01.298]map magicsea init resource succeed
+[04-06 11:12:01.298]map [magicsea] ok!
+[04-06 11:12:01.417]map jialebi init resource succeed
+[04-06 11:12:01.417]map [jialebi] ok!
+[04-06 11:12:01.429]map hell init resource succeed
+[04-06 11:12:01.429]map [hell] ok!
+[04-06 11:12:01.436]map hell2 init resource succeed
+[04-06 11:12:01.436]map [hell2] ok!
+[04-06 11:12:01.456]map hell3 init resource succeed
+[04-06 11:12:01.456]map [hell3] ok!
+[04-06 11:12:01.465]map hell4 init resource succeed
+[04-06 11:12:01.465]map [hell4] ok!
+[04-06 11:12:01.479]map hell5 init resource succeed
+[04-06 11:12:01.479]map [hell5] ok!
+[04-06 11:12:02.034]map darkblue init resource succeed
+[04-06 11:12:02.034]map [darkblue] ok!
+[04-06 11:12:02.065]map eastgoaf init resource succeed
+[04-06 11:12:02.065]map [eastgoaf] ok!
+[04-06 11:12:02.208]map winterland init resource succeed
+[04-06 11:12:02.208]map [winterland] ok!
+[04-06 11:12:02.226]map mjing1 init resource succeed
+[04-06 11:12:02.226]map [mjing1] ok!
+[04-06 11:12:02.243]map mjing2 init resource succeed
+[04-06 11:12:02.243]map [mjing2] ok!
+[04-06 11:12:02.263]map mjing3 init resource succeed
+[04-06 11:12:02.263]map [mjing3] ok!
+[04-06 11:12:02.282]map mjing4 init resource succeed
+[04-06 11:12:02.282]map [mjing4] ok!
+[04-06 11:12:02.286]map starena13 init resource succeed
+[04-06 11:12:02.286]map [starena13] ok!
+[04-06 11:12:02.292]map starena23 init resource succeed
+[04-06 11:12:02.292]map [starena23] ok!
+[04-06 11:12:02.298]map starena33 init resource succeed
+[04-06 11:12:02.298]map [starena33] ok!
+[04-06 11:12:02.314]map abandonedcity init resource succeed
+[04-06 11:12:02.314]map [abandonedcity] ok!
+[04-06 11:12:02.338]map abandonedcity2 init resource succeed
+[04-06 11:12:02.338]map [abandonedcity2] ok!
+[04-06 11:12:02.358]map abandonedcity3 init resource succeed
+[04-06 11:12:02.358]map [abandonedcity3] ok!
+[04-06 11:12:02.403]map darkswamp init resource succeed
+[04-06 11:12:02.403]map [darkswamp] ok!
+[04-06 11:12:02.435]map puzzleworld init resource succeed
+[04-06 11:12:02.435]map [puzzleworld] ok!
+[04-06 11:12:02.465]map puzzleworld2 init resource succeed
+[04-06 11:12:02.465]map [puzzleworld2] ok!
+[04-06 11:12:02.502]map DreamIsland init resource succeed
+[04-06 11:12:02.502]map [DreamIsland] ok!
+[04-06 11:12:02.560]map teampk init resource succeed
+[04-06 11:12:02.560]map [teampk] ok!
+[04-06 11:12:02.576]map Hellchapter init resource succeed
+[04-06 11:12:02.576]map [Hellchapter] ok!
+[04-06 11:12:02.583]map chaosicicle init resource succeed
+[04-06 11:12:02.583]map [chaosicicle] ok!
+[04-06 11:12:02.604]map yschurch init resource succeed
+[04-06 11:12:02.604]map [yschurch] ok!
+[04-06 11:12:02.604]execute monster placement script/monster/baiyinlinqu.lua  
+[04-06 11:12:02.606]execute monster placement script/monster/lietinglinqu.lua  
+[04-06 11:12:02.607]execute monster placement script/monster/baiyinyuchang.lua  
+[04-06 11:12:02.607]execute monster placement script/monster/jianazuixiayuchang.lua  
+[04-06 11:12:02.608]execute monster placement script/monster/haifengyuchang.lua  
+[04-06 11:12:02.608]execute monster placement script/monster/jianayunshi.lua  
+[04-06 11:12:02.608]execute monster placement script/monster/bycduizhang.lua  
+[04-06 11

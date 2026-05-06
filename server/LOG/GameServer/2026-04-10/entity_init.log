@@ -1,0 +1,69 @@
+[04-10 00:34:17.620]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  225065  281984  0  1  2231  2827  0  
+[04-10 00:34:17.620]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  326048  330919  -10  5  3260  3280  0  
+[04-10 00:34:17.620]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  230572  112347  -10  6  2273  1122  0  
+[04-10 00:34:17.620]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  363213  74776  -10  7  3590  755  0  
+[04-10 00:34:17.620]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  105831  133151  -10  2  1058  1323  0  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Missing Tool Box  456  3  159319  275344  129  3973  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Missing Tool Box  456  3  163363  265076  69  3973  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Missing Tool Box  456  3  161248  271701  84  3973  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Missing Tool Box  457  3  154428  270697  99  3974  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Missing Tool Box  457  3  154428  270697  99  3974  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Missing Tool Box  457  3  153274  274001  144  3974  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Missing Tool Box  456  3  163737  277868  189  3975  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Missing Tool Box  456  3  157172  267995  204  3975  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Missing Tool Box  456  3  154788  264604  159  3975  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Unknown Barrel  457  3  221750  254779  144  3977  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Fearsome Tortoise Lair  458  3  97144  266563  144  4073  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Fearsome Tortoise Lair  458  3  91154  263547  99  4073  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Fearsome Tortoise Lair  458  3  90400  266712  84  4073  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Grassland Tortoise Lair  458  3  114500  314300  84  4089  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Grassland Tortoise Lair  458  3  117200  315300  84  4089  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Grassland Tortoise Lair  458  3  121400  315100  84  4089  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Grassland Tortoise Lair  458  3  122800  310700  84  4089  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Grassland Tortoise Lair  458  3  115500  308700  84  4089  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Grassland Tortoise Lair  458  3  120500  305000  84  4089  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Lucky Magical Stone  468  3  109800  257200  84  4092  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Lucky Magical Stone  468  3  107800  260200  84  4092  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Lucky Magical Stone  468  3  112800  257000  84  4092  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Owlie Lair  463  3  126372  296071  114  4086  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Owlie Lair  463  3  124400  293900  114  4086  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Owlie Lair  463  3  126825  306083  144  4086  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Barbaric Bee Hive  466  3  154462  313471  96  4085  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Barbaric Bee Hive  466  3  156862  318303  174  4085  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Barbaric Bee Hive  466  3  161567  315811  -34  4085  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Forsaken Fearsome Tortoise Lair  458  3  88300  257200  99  4093  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Forsaken Fearsome Tortoise Lair  458  3  99100  265200  99  4093  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Forsaken Fearsome Tortoise Lair  458  3  102400  251600  99  4093  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Money Chest of the Bandits  456  3  102584  306100  144  4087  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Expensive Herbs  220  3  132343  264215  249  4090  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Expensive Herbs  220  3  126478  266233  -154  4090  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Expensive Herbs  220  3  120307  262026  294  4090  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Lizard Lair  458  3  68592  263459  39  4094  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Lizard Lair  458  3  68303  270607  9  4094  1  180  
+[04-10 00:34:17.620]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Lizard Lair  458  3  73415  268141  144  4094  1  180  
+[04-10 00:34:18.350]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  84421  368426  -10  3  829  3687  0  
+[04-10 00:34:18.350]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  236937  75485  -10  8  2376  725  0  
+[04-10 00:34:18.350]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  176139  377241  -10  9  1730  3775  0  
+[04-10 00:34:18.350]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  252668  237595  -10  10  2529  2406  0  
+[04-10 00:34:18.350]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Fungus Spore  472  3  129900  341800  129  4100  1  180  
+[04-10 00:34:18.350]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Fungus Spore  472  3  123800  342800  129  4100  1  180  
+[04-10 00:34:18.350]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Fungus Spore  472  3  127800  346700  129  4100  1  180  
+[04-10 00:34:18.350]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Stolen Chest  456  3  65021  332061  144  4099  1  180  
+[04-10 00:34:18.350]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Money Box  456  3  106647  295511  144  4101  1  180  
+[04-10 00:34:18.446]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  63614  91411  -10  12  631  927  0  
+[04-10 00:34:18.446]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  65411  100611  -10  12  658  993  0  
+[04-10 00:34:18.446]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  62411  62811  -10  12  612  622  0  
+[04-10 00:34:18.446]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  38011  15611  -10  12  370  165  0  
+[04-10 00:34:18.446]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  108200  22500  -10  12  1082  211  0  
+[04-10 00:34:19.154]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  121219  65899  -10  4  1239  623  0  
+[04-10 00:34:19.154]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  165629  199648  -10  11  1631  1974  0  
+[04-10 00:34:19.154]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  341582  256209  -10  13  3406  2564  0  
+[04-10 00:34:19.154]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  366585  262979  -10  14  3681  2652  0  
+[04-10 00:34:19.154]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  333114  355062  -10  15  3341  3526  0  
+[04-10 00:34:19.154]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Snow Crystal  208  3  86500  59500  129  4106  1  180  
+[04-10 00:34:19.154]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Snow Crystal  208  3  90200  61000  129  4106  1  180  
+[04-10 00:34:19.154]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Snow Crystal  208  3  95000  55800  129  4106  1  180  
+[04-10 00:34:19.154]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Snow Crystal  208  3  98900  58700  129  4106  1  180  
+[04-10 00:34:19.154]CreateResourceEntity:name, cid, infoid, xpos, ypos, dir, itemid, count, time Sword in Stone  467  3  216800  60200  129  4109  1  180  
+[04-10 00:34:19.571]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  30225  32576  0  12  303  305  0  
+[04-10 00:34:19.673]CreateBerthEntity:name, cid, infoid, xpos1, ypos1, dir1, berth, xpos2, ypos2, dir2 Docked  455  2  31221  36919  0  12  310  347  0  

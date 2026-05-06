@@ -1,0 +1,19 @@
+Missing functions that need to be added to DataBaseCtrl.cpp:
+
+1. UserLoginMap(string strUserName, string strPassport)
+   - Called from main.cpp when user enters map
+   - Parameters: username, passport (map name like "Enter_Map")
+   - Purpose: Log user entering a map
+
+2. UserLogoutMap(string strUserName)
+   - Called from main.cpp when user leaves map
+   - Parameters: username
+   - Purpose: Log user leaving a map
+
+3. OperAccountBan(string strActName, int iban)
+   - Called from AccountServer2.cpp
+   - Parameters: account name, ban flag (0=unban, 1=ban)
+   - Already migrated to stored procedure but signature wrong
+   - Purpose: Ban/unban account
+
+Need to implement UserLoginMap and UserLogoutMap, and fix OperAccountBan signature.

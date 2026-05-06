@@ -1,0 +1,53 @@
+# BossLastHit.txt - Boss Last-Hit Drop Ownership
+# Bosses listed here give drop ownership to the killer (last hitter)
+# instead of the default team-based drop system.
+#
+# Format: One ChaID per line
+#
+# This list is INDEPENDENT from BossTracked.txt (respawn timers).
+# A boss can be in one, both, or neither list.
+
+# Devil
+1423
+
+# Half-beast Man
+1414
+
+# Aqua Tiger
+1413
+
+# Aries Guardian
+1009
+
+# Black Dragon
+789
+
+# Firm Guard
+1105
+
+# Fury Kara
+1109
+
+# Morpheus Abyss Demon
+1117
+
+# Vicious Relic Protector
+1113
+
+# Hell Demon
+1418
+
+# Hell Prisoner
+1417
+
+# Hell Mud Monster
+1416
+
+# Hell Knight
+1415
+
+# Wandering Soul
+679
+
+# Snowman Warlord
+678

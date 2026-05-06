@@ -1,0 +1,97 @@
+[04-10 00:34:20.213]GameServer= [127.0.0.1] come,Socket num= 1
+[04-10 00:34:20.222]recieve GameServer [GameServer] map string [garner;ctf;garner2;PKmap;shalan2;leiting2;lonetower;L4MAP;LostCity;magicsea;jialebi;hell;hell2;hell3;hell4;hell5;darkblue;eastgoaf;winterland;mjing1;mjing2;mjing3;mjing4;starena13;starena23;starena33;abandonedcity;abandonedcity2;abandonedcity3;darkswamp;puzzleworld;puzzleworld2;DreamIsland;teampk;Hellchapter;chaosicicle;yschurch;] total [37]
+[04-10 00:34:20.222]not found [garner] map!!!
+[04-10 00:34:20.222]not found [ctf] map!!!
+[04-10 00:34:20.222]not found [garner2] map!!!
+[04-10 00:34:20.222]not found [PKmap] map!!!
+[04-10 00:34:20.222]not found [shalan2] map!!!
+[04-10 00:34:20.222]not found [leiting2] map!!!
+[04-10 00:34:20.222]not found [lonetower] map!!!
+[04-10 00:34:20.222]not found [L4MAP] map!!!
+[04-10 00:34:20.222]not found [LostCity] map!!!
+[04-10 00:34:20.222]not found [magicsea] map!!!
+[04-10 00:34:20.222]not found [jialebi] map!!!
+[04-10 00:34:20.222]not found [hell] map!!!
+[04-10 00:34:20.222]not found [hell2] map!!!
+[04-10 00:34:20.222]not found [hell3] map!!!
+[04-10 00:34:20.222]not found [hell4] map!!!
+[04-10 00:34:20.222]not found [hell5] map!!!
+[04-10 00:34:20.222]not found [darkblue] map!!!
+[04-10 00:34:20.222]not found [eastgoaf] map!!!
+[04-10 00:34:20.222]not found [winterland] map!!!
+[04-10 00:34:20.222]not found [mjing1] map!!!
+[04-10 00:34:20.222]not found [mjing2] map!!!
+[04-10 00:34:20.222]not found [mjing3] map!!!
+[04-10 00:34:20.222]not found [mjing4] map!!!
+[04-10 00:34:20.222]not found [starena13] map!!!
+[04-10 00:34:20.222]not found [starena23] map!!!
+[04-10 00:34:20.222]not found [starena33] map!!!
+[04-10 00:34:20.222]not found [abandonedcity] map!!!
+[04-10 00:34:20.222]not found [abandonedcity2] map!!!
+[04-10 00:34:20.222]not found [abandonedcity3] map!!!
+[04-10 00:34:20.222]not found [darkswamp] map!!!
+[04-10 00:34:20.222]not found [puzzleworld] map!!!
+[04-10 00:34:20.222]not found [puzzleworld2] map!!!
+[04-10 00:34:20.222]not found [DreamIsland] map!!!
+[04-10 00:34:20.222]not found [teampk] map!!!
+[04-10 00:34:20.222]not found [Hellchapter] map!!!
+[04-10 00:34:20.222]not found [chaosicicle] map!!!
+[04-10 00:34:20.222]not found [yschurch] map!!!
+[04-10 00:34:20.222]add GameServer [GameServer] ok
+[04-10 00:34:20.222]add [GameServer]  [garner] map ok
+[04-10 00:34:20.222]add [GameServer]  [ctf] map ok
+[04-10 00:34:20.222]add [GameServer]  [garner2] map ok
+[04-10 00:34:20.222]add [GameServer]  [PKmap] map ok
+[04-10 00:34:20.222]add [GameServer]  [shalan2] map ok
+[04-10 00:34:20.222]add [GameServer]  [leiting2] map ok
+[04-10 00:34:20.222]add [GameServer]  [lonetower] map ok
+[04-10 00:34:20.222]add [GameServer]  [L4MAP] map ok
+[04-10 00:34:20.222]add [GameServer]  [LostCity] map ok
+[04-10 00:34:20.222]add [GameServer]  [magicsea] map ok
+[04-10 00:34:20.222]add [GameServer]  [jialebi] map ok
+[04-10 00:34:20.222]add [GameServer]  [hell] map ok
+[04-10 00:34:20.222]add [GameServer]  [hell2] map ok
+[04-10 00:34:20.222]add [GameServer]  [hell3] map ok
+[04-10 00:34:20.222]add [GameServer]  [hell4] map ok
+[04-10 00:34:20.222]add [GameServer]  [hell5] map ok
+[04-10 00:34:20.222]add [GameServer]  [darkblue] map ok
+[04-10 00:34:20.222]add [GameServer]  [eastgoaf] map ok
+[04-10 00:34:20.222]add [GameServer]  [winterland] map ok
+[04-10 00:34:20.222]add [GameServer]  [mjing1] map ok
+[04-10 00:34:20.222]add [GameServer]  [mjing2] map ok
+[04-10 00:34:20.222]add [GameServer]  [mjing3] map ok
+[04-10 00:34:20.222]add [GameServer]  [mjing4] map ok
+[04-10 00:34:20.222]add [GameServer]  [starena13] map ok
+[04-10 00:34:20.222]add [GameServer]  [starena23] map ok
+[04-10 00:34:20.222]add [GameServer]  [starena33] map ok
+[04-10 00:34:20.222]add [GameServer]  [abandonedcity] map ok
+[04-10 00:34:20.222]add [GameServer]  [abandonedcity2] map ok
+[04-10 00:34:20.222]add [GameServer]  [abandonedcity3] map ok
+[04-10 00:34:20.222]add [GameServer]  [darkswamp] map ok
+[04-10 00:34:20.222]add [GameServer]  [puzzleworld] map ok
+[04-10 00:34:20.222]add [GameServer]  [puzzleworld2] map ok
+[04-10 00:34:20.222]add [GameServer]  [DreamIsland] map ok
+[04-10 00:34:20.222]add [GameServer]  [teampk] map ok
+[04-10 00:34:20.222]add [GameServer]  [Hellchapter] map ok
+[04-10 00:34:20.222]add [GameServer]  [chaosicicle] map ok
+[04-10 00:34:20.222]add [GameServer]  [yschurch] map ok
+[04-10 00:34:48.846]client: 127.0.0.1	come...Socket num: 1
+[04-10 00:34:49.329]client: 127.0.0.1	login error, error:1104
+[04-10 00:34:49.435]client: 127.0.0.1 gone...Socket num: 0 ,reason=user login error.
+[04-10 00:34:52.179]client: 127.0.0.1	come...Socket num: 1
+[04-10 00:34:52.626]client: 127.0.0.1	login ok.
+[04-10 00:34:59.715]client: 127.0.0.1	come...Socket num: 2
+[04-10 00:35:00.058]client: 127.0.0.1	login error, error:1104
+[04-10 00:35:00.152]client: 127.0.0.1 gone...Socket num: 1 ,reason=user login error.
+[04-10 00:35:02.625]client: 127.0.0.1	come...Socket num: 2
+[04-10 00:35:02.967]client: 127.0.0.1	login ok.
+[04-10 00:35:05.966]client: 127.0.0.1:53030	BeginPlay entry map,Gate to[127.0.0.1]send EnterMap command,dbid:5187,Gate address:1C9D70DB060
+[04-10 00:35:06.013]Client: 127.0.0.1:53030 receive Gate from [127.0.0.1] success EnterMap command, Game address:1AB415F6048, Gate address:1C9D70DB060
+[04-10 00:37:01.864]Client: 127.0.0.1:53030 receive Gate from [127.0.0.1] success EnterMap command, Game address:1AB415F6048, Gate address:1C9D70DB060
+[04-10 03:00:32.594]Client: 127.0.0.1:53030 receive Gate from [127.0.0.1] success EnterMap command, Game address:1AB415F6048, Gate address:1C9D70DB060
+[04-10 03:01:06.391]Client: 127.0.0.1:53030 receive Gate from [127.0.0.1] success EnterMap command, Game address:1AB415F6048, Gate address:1C9D70DB060
+[04-10 03:01:15.777]Client: 127.0.0.1:53030 receive Gate from [127.0.0.1] success EnterMap command, Game address:1AB415F6048, Gate address:1C9D70DB060
+[04-10 03:01:18.904]client: 127.0.0.1:53032	BeginPlay entry map,Gate to[127.0.0.1]send EnterMap command,dbid:5188,Gate address:1C9D70DB400
+[04-10 03:01:18.952]Client: 127.0.0.1:53032 receive Gate from [127.0.0.1] success EnterMap command, Game address:1AB415F9DE8, Gate address:1C9D70DB400
+[04-10 03:01:29.309]Client: 127.0.0.1:53032 receive Gate from [127.0.0.1] success EnterMap command, Game address:1AB415F9DE8, Gate address:1C9D70DB400
+[04-10 03:01:49.566]Client: 127.0.0.1:53030 receive Gate from [127.0.0.1] success EnterMap command, Game address:1AB415F6048, Gate address:1C9D70DB060

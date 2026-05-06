@@ -1,0 +1,241 @@
+[04-06 10:32:20.387]add weather area[9], occur time limit = 8, duration = 40, location = 1217 1400, 40 40
+[04-06 10:32:20.387]add weather area[11], occur time limit = 8, duration = 40, location = 1123 1480, 40 40
+[04-06 10:32:20.387]add weather area[9], occur time limit = 8, duration = 40, location = 595 570, 40 40
+[04-06 10:32:20.387]add weather area[11], occur time limit = 8, duration = 40, location = 580 700, 40 40
+[04-06 10:32:21.104]add weather area[9], occur time limit = 15, duration = 40, location = 325 1850, 40 40
+[04-06 10:32:21.104]add weather area[11], occur time limit = 15, duration = 40, location = 450 1900, 40 40
+[04-06 10:32:21.104]add weather area[10], occur time limit = 15, duration = 40, location = 1300 190, 40 40
+[04-06 10:32:21.104]add weather area[10], occur time limit = 15, duration = 40, location = 1300 400, 40 40
+[04-06 10:32:21.104]add weather area[10], occur time limit = 15, duration = 40, location = 1350 1100, 40 40
+[04-06 10:32:21.104]add weather area[10], occur time limit = 15, duration = 40, location = 1100 1050, 40 40
+[04-06 10:32:21.952]add weather area[9], occur time limit = 15, duration = 40, location = 550 475, 40 40
+[04-06 10:32:21.952]add weather area[11], occur time limit = 15, duration = 40, location = 750 450, 40 40
+[04-06 10:35:49.141][garner]predict[Weather: Current sea (2478,2854) nearby will occur Thunderstorm], time = 727417
+[04-06 10:35:49.141][garner]predict[Weather: Current sea (2254,3004) nearby will occur Tornado], time = 727417
+[04-06 10:40:17.075]add weather area[9], occur time limit = 8, duration = 40, location = 1217 1400, 40 40
+[04-06 10:40:17.075]add weather area[11], occur time limit = 8, duration = 40, location = 1123 1480, 40 40
+[04-06 10:40:17.075]add weather area[9], occur time limit = 8, duration = 40, location = 595 570, 40 40
+[04-06 10:40:17.075]add weather area[11], occur time limit = 8, duration = 40, location = 580 700, 40 40
+[04-06 10:40:17.620]add weather area[9], occur time limit = 15, duration = 40, location = 325 1850, 40 40
+[04-06 10:40:17.620]add weather area[11], occur time limit = 15, duration = 40, location = 450 1900, 40 40
+[04-06 10:40:17.620]add weather area[10], occur time limit = 15, duration = 40, location = 1300 190, 40 40
+[04-06 10:40:17.620]add weather area[10], occur time limit = 15, duration = 40, location = 1300 400, 40 40
+[04-06 10:40:17.620]add weather area[10], occur time limit = 15, duration = 40, location = 1350 1100, 40 40
+[04-06 10:40:17.620]add weather area[10], occur time limit = 15, duration = 40, location = 1100 1050, 40 40
+[04-06 10:40:18.215]add weather area[9], occur time limit = 15, duration = 40, location = 550 475, 40 40
+[04-06 10:40:18.215]add weather area[11], occur time limit = 15, duration = 40, location = 750 450, 40 40
+[04-06 10:40:24.015][garner]predict[Weather: Current sea (2488,2802) nearby will occur Thunderstorm], time = 727692
+[04-06 10:40:24.015][garner]predict[Weather: Current sea (2290,3014) nearby will occur Tornado], time = 727692
+[04-06 10:45:43.285][garner]predict[Weather: Current sea (1190,1440) nearby will occur Tornado], time = 728011
+[04-06 10:45:48.176][garner]predict[Weather: Current sea (1258,1146) nearby will occur Thunderstorm], time = 728016
+[04-06 10:46:08.430]add weather area[9], occur time limit = 8, duration = 40, location = 1217 1400, 40 40
+[04-06 10:46:08.430]add weather area[11], occur time limit = 8, duration = 40, location = 1123 1480, 40 40
+[04-06 10:46:08.430]add weather area[9], occur time limit = 8, duration = 40, location = 595 570, 40 40
+[04-06 10:46:08.430]add weather area[11], occur time limit = 8, duration = 40, location = 580 700, 40 40
+[04-06 10:46:08.900]add weather area[9], occur time limit = 15, duration = 40, location = 325 1850, 40 40
+[04-06 10:46:08.900]add weather area[11], occur time limit = 15, duration = 40, location = 450 1900, 40 40
+[04-06 10:46:08.900]add weather area[10], occur time limit = 15, duration = 40, location = 1300 190, 40 40
+[04-06 10:46:08.900]add weather area[10], occur time limit = 15, duration = 40, location = 1300 400, 40 40
+[04-06 10:46:08.900]add weather area[10], occur time limit = 15, duration = 40, location = 1350 1100, 40 40
+[04-06 10:46:08.900]add weather area[10], occur time limit = 15, duration = 40, location = 1100 1050, 40 40
+[04-06 10:46:09.424]add weather area[9], occur time limit = 15, duration = 40, location = 550 475, 40 40
+[04-06 10:46:09.424]add weather area[11], occur time limit = 15, duration = 40, location = 750 450, 40 40
+[04-06 10:46:11.310][garner]predict[Weather: Current sea (2442,2876) nearby will occur Thunderstorm], time = 728039
+[04-06 10:46:11.310][garner]predict[Weather: Current sea (2294,3010) nearby will occur Tornado], time = 728039
+[04-06 10:50:16.527]add weather area[9], occur time limit = 8, duration = 40, location = 1217 1400, 40 40
+[04-06 10:50:16.527]add weather area[11], occur time limit = 8, duration = 40, location = 1123 1480, 40 40
+[04-06 10:50:16.527]add weather area[9], occur time limit = 8, duration = 40, location = 595 570, 40 40
+[04-06 10:50:16.527]add weather area[11], occur time limit = 8, duration = 40, location = 580 700, 40 40
+[04-06 10:50:17.224]add weather area[9], occur time limit = 15, duration = 40, location = 325 1850, 40 40
+[04-06 10:50:17.224]add weather area[11], occur time limit = 15, duration = 40, location = 450 1900, 40 40
+[04-06 10:50:17.224]add weather area[10], occur time limit = 15, duration = 40, location = 1300 190, 40 40
+[04-06 10:50:17.224]add weather area[10], occur time limit = 15, duration = 40, location = 1300 400, 40 40
+[04-06 10:50:17.224]add weather area[10], occur time limit = 15, duration = 40, location = 1350 1100, 40 40
+[04-06 10:50:17.224]add weather area[10], occur time limit = 15, duration = 40, location = 1100 1050, 40 40
+[04-06 10:50:17.926]add weather area[9], occur time limit = 15, duration = 40, location = 550 475, 40 40
+[04-06 10:50:17.926]add weather area[11], occur time limit = 15, duration = 40, location = 750 450, 40 40
+[04-06 10:50:21.685][garner]predict[Weather: Current sea (2442,2876) nearby will occur Thunderstorm], time = 728290
+[04-06 10:50:21.686][garner]predict[Weather: Current sea (2294,3010) nearby will occur Tornado], time = 728290
+[04-06 10:56:07.927]add weather area[9], occur time limit = 8, duration = 40, location = 1217 1400, 40 40
+[04-06 10:56:07.928]add weather area[11], occur time limit = 8, duration = 40, location = 1123 1480, 40 40
+[04-06 10:56:07.928]add weather area[9], occur time limit = 8, duration = 40, location = 595 570, 40 40
+[04-06 10:56:07.928]add weather area[11], occur time limit = 8, duration = 40, location = 580 700, 40 40
+[04-06 10:56:08.498]add weather area[9], occur time limit = 15, duration = 40, location = 325 1850, 40 40
+[04-06 10:56:08.498]add weather area[11], occur time limit = 15, duration = 40, location = 450 1900, 40 40
+[04-06 10:56:08.498]add weather area[10], occur time limit = 15, duration = 40, location = 1300 190, 40 40
+[04-06 10:56:08.498]add weather area[10], occur time limit = 15, duration = 40, location = 1300 400, 40 40
+[04-06 10:56:08.498]add weather area[10], occur time limit = 15, duration = 40, location = 1350 1100, 40 40
+[04-06 10:56:08.498]add weather area[10], occur time limit = 15, duration = 40, location = 1100 1050, 40 40
+[04-06 10:56:09.127]add weather area[9], occur time limit = 15, duration = 40, location = 550 475, 40 40
+[04-06 10:56:09.127]add weather area[11], occur time limit = 15, duration = 40, location = 750 450, 40 40
+[04-06 10:56:48.691][garner]predict[Weather: Current sea (2488,2802) nearby will occur Thunderstorm], time = 728677
+[04-06 10:56:48.691][garner]predict[Weather: Current sea (2290,3014) nearby will occur Tornado], time = 728677
+[04-06 11:00:56.111]add weather area[9], occur time limit = 8, duration = 40, location = 1217 1400, 40 40
+[04-06 11:00:56.111]add weather area[11], occur time limit = 8, duration = 40, location = 1123 1480, 40 40
+[04-06 11:00:56.111]add weather area[9], occur time limit = 8, duration = 40, location = 595 570, 40 40
+[04-06 11:00:56.111]add weather area[11], occur time limit = 8, duration = 40, location = 580 700, 40 40
+[04-06 11:00:56.613]add weather area[9], occur time limit = 15, duration = 40, location = 325 1850, 40 40
+[04-06 11:00:56.613]add weather area[11], occur time limit = 15, duration = 40, location = 450 1900, 40 40
+[04-06 11:00:56.613]add weather area[10], occur time limit = 15, duration = 40, location = 1300 190, 40 40
+[04-06 11:00:56.613]add weather area[10], occur time limit = 15, duration = 40, location = 1300 400, 40 40
+[04-06 11:00:56.613]add weather area[10], occur time limit = 15, duration = 40, location = 1350 1100, 40 40
+[04-06 11:00:56.613]add weather area[10], occur time limit = 15, duration = 40, location = 1100 1050, 40 40
+[04-06 11:00:57.166]add weather area[9], occur time limit = 15, duration = 40, location = 550 475, 40 40
+[04-06 11:00:57.166]add weather area[11], occur time limit = 15, duration = 40, location = 750 450, 40 40
+[04-06 11:02:13.306]add weather area[9], occur time limit = 8, duration = 40, location = 1217 1400, 40 40
+[04-06 11:02:13.306]add weather area[11], occur time limit = 8, duration = 40, location = 1123 1480, 40 40
+[04-06 11:02:13.306]add weather area[9], occur time limit = 8, duration = 40, location = 595 570, 40 40
+[04-06 11:02:13.306]add weather area[11], occur time limit = 8, duration = 40, location = 580 700, 40 40
+[04-06 11:02:13.847]add weather area[9], occur time limit = 15, duration = 40, location = 325 1850, 40 40
+[04-06 11:02:13.847]add weather area[11], occur time limit = 15, duration = 40, location = 450 1900, 40 40
+[04-06 11:02:13.847]add weather area[10], occur time limit = 15, duration = 40, location = 1300 190, 40 40
+[04-06 11:02:13.847]add weather area[10], occur time limit = 15, duration = 40, location = 1300 400, 40 40
+[04-06 11:02:13.847]add weather area[10], occur time limit = 15, duration = 40, location = 1350 1100, 40 40
+[04-06 11:02:13.847]add weather area[10], occur time limit = 15, duration = 40, location = 1100 1050, 40 40
+[04-06 11:02:14.415]add weather area[9], occur time limit = 15, duration = 40, location = 550 475, 40 40
+[04-06 11:02:14.415]add weather area[11], occur time limit = 15, duration = 40, location = 750 450, 40 40
+[04-06 11:02:26.090][garner]predict[Weather: Current sea (2488,2802) nearby will occur Thunderstorm], time = 729014
+[04-06 11:02:26.090][garner]predict[Weather: Current sea (2290,3014) nearby will occur Tornado], time = 729014
+[04-06 11:07:45.453][garner]predict[Weather: Current sea (1232,1416) nearby will occur Tornado], time = 729334
+[04-06 11:07:50.279][garner]predict[Weather: Current sea (1220,1172) nearby will occur Thunderstorm], time = 729338
+[04-06 11:12:00.663]add weather area[9], occur time limit = 8, duration = 40, location = 1217 1400, 40 40
+[04-06 11:12:00.663]add weather area[11], occur time limit = 8, duration = 40, location = 1123 1480, 40 40
+[04-06 11:12:00.663]add weather area[9], occur time limit = 8, duration = 40, location = 595 570, 40 40
+[04-06 11:12:00.663]add weather area[11], occur time limit = 8, duration = 40, location = 580 700, 40 40
+[04-06 11:12:01.286]add weather area[9], occur time limit = 15, duration = 40, location = 325 1850, 40 40
+[04-06 11:12:01.286]add weather area[11], occur time limit = 15, duration = 40, location = 450 1900, 40 40
+[04-06 11:12:01.286]add weather area[10], occur time limit = 15, duration = 40, location = 1300 190, 40 40
+[04-06 11:12:01.286]add weather area[10], occur time limit = 15, duration = 40, location = 1300 400, 40 40
+[04-06 11:12:01.286]add weather area[10], occur time limit = 15, duration = 40, location = 1350 1100, 40 40
+[04-06 11:12:01.286]add weather area[10], occur time limit = 15, duration = 40, location = 1100 1050, 40 40
+[04-06 11:12:02.024]add weather area[9], occur time limit = 15, duration = 40, location = 550 475, 40 40
+[04-06 11:12:02.024]add weather area[11], occur time limit = 15, duration = 40, location = 750 450, 40 40
+[04-06 11:12:13.819][garner]predict[Weather: Current sea (2488,2802) nearby will occur Thunderstorm], time = 729602
+[04-06 11:12:13.820][garner]predict[Weather: Current sea (2290,3014) nearby will occur Tornado], time = 729602
+[04-06 11:17:33.162][garner]predict[Weather: Current sea (1212,1446) nearby will occur Tornado], time = 729921
+[04-06 11:17:38.039][garner]predict[Weather: Current sea (1198,1172) nearby will occur Thunderstorm], time = 729926
+[04-06 11:22:43.091][garner]predict[Weather: Current sea (2508,2860) nearby will occur Thunderstorm], time = 730231
+[04-06 11:22:52.456][garner]predict[Weather: Current sea (1232,1406) nearby will occur Tornado], time = 730241
+[04-06 11:27:50.450][garner]predict[Weather: Current sea (1258,1146) nearby will occur Thunderstorm], time = 730539
+[04-06 11:28:11.641][garner]predict[Weather: Current sea (1234,1452) nearby will occur Tornado], time = 730560
+[04-06 11:33:12.448][garner]predict[Weather: Current sea (2508,2878) nearby will occur Thunderstorm], time = 730861
+[04-06 11:33:30.862][garner]predict[Weather: Current sea (1228,1404) nearby will occur Tornado], time = 730879
+[04-06 11:38:38.877][garner]predict[Weather: Current sea (1248,1144) nearby will occur Thunderstorm], time = 731187
+[04-06 11:38:50.117][garner]predict[Weather: Current sea (1196,1418) nearby will occur Tornado], time = 731198
+[04-06 11:43:41.803][garner]predict[Weather: Current sea (2440,2812) nearby will occur Thunderstorm], time = 731490
+[04-06 11:44:09.432][garner]predict[Weather: Current sea (1218,1462) nearby will occur Tornado], time = 731518
+[04-06 11:48:51.148][garner]predict[Weather: Current sea (1198,1166) nearby will occur Thunderstorm], time = 731799
+[04-06 11:49:28.701][garner]predict[Weather: Current sea (1178,1414) nearby will occur Tornado], time = 731837
+[04-06 11:54:11.221][garner]predict[Weather: Current sea (2478,2846) nearby will occur Thunderstorm], time = 732119
+[04-06 11:54:47.968][garner]predict[Weather: Current sea (1176,1422) nearby will occur Tornado], time = 732156
+[04-06 11:59:39.586][garner]predict[Weather: Current sea (1208,1184) nearby will occur Thunderstorm], time = 732448
+[04-06 12:00:07.301][garner]predict[Weather: Current sea (1192,1422) nearby will occur Tornado], time = 732475
+[04-06 12:04:40.583][garner]predict[Weather: Current sea (2504,2878) nearby will occur Thunderstorm], time = 732749
+[04-06 12:05:26.611][garner]predict[Weather: Current sea (1236,1462) nearby will occur Tornado], time = 732795
+[04-06 12:09:52.028][garner]predict[Weather: Current sea (1228,1156) nearby will occur Thunderstorm], time = 733060
+[04-06 12:10:45.834][garner]predict[Weather: Current sea (1198,1410) nearby will occur Tornado], time = 733114
+[04-06 12:15:10.023][garner]predict[Weather: Current sea (2440,2814) nearby will occur Thunderstorm], time = 733378
+[04-06 12:16:05.051][garner]predict[Weather: Current sea (1208,1402) nearby will occur Tornado], time = 733433
+[04-06 12:20:40.401][garner]predict[Weather: Current sea (1212,1140) nearby will occur Thunderstorm], time = 733709
+[04-06 12:21:24.292][garner]predict[Weather: Current sea (1238,1438) nearby will occur Tornado], time = 733752
+[04-06 12:26:04.654][garner]predict[Weather: Current sea (1268,1146) nearby will occur Thunderstorm], time = 734033
+[04-06 12:26:24.932][garner]predict[Weather: Current sea (2306,3014) nearby will occur Tornado], time = 734053
+[04-06 12:31:12.688][garner]predict[Weather: Current sea (2480,2856) nearby will occur Thunderstorm], time = 734341
+[04-06 12:31:33.783][garner]predict[Weather: Current sea (1236,1408) nearby will occur Tornado], time = 734362
+[04-06 12:36:17.072][garner]predict[Weather: Current sea (1192,1180) nearby will occur Thunderstorm], time = 734645
+[04-06 12:36:53.053][garner]predict[Weather: Current sea (1190,1460) nearby will occur Tornado], time = 734681
+[04-06 12:41:41.290][garner]predict[Weather: Current sea (1224,1152) nearby will occur Thunderstorm], time = 734969
+[04-06 12:41:53.529][garner]predict[Weather: Current sea (2262,3020) nearby will occur Tornado], time = 734982
+[04-06 12:47:02.409][garner]predict[Weather: Current sea (1212,1454) nearby will occur Tornado], time = 735291
+[04-06 12:47:05.497][garner]predict[Weather: Current sea (1240,1212) nearby will occur Thunderstorm], time = 735294
+[04-06 12:52:11.389][garner]predict[Weather: Current sea (2508,2826) nearby will occur Thunderstorm], time = 735600
+[04-06 12:52:21.618][garner]predict[Weather: Current sea (1160,1448) nearby will occur Tornado], time = 735610
+[04-06 12:57:17.854][garner]predict[Weather: Current sea (1268,1168) nearby will occur Thunderstorm], time = 735906
+[04-06 12:57:22.224][garner]predict[Weather: Current sea (2246,3010) nearby will occur Tornado], time = 735910
+[04-06 13:02:31.190][garner]predict[Weather: Current sea (1160,1424) nearby will occur Tornado], time = 736219
+[04-06 13:02:40.660][garner]predict[Weather: Current sea (2472,2876) nearby will occur Thunderstorm], time = 736229
+[04-06 13:07:50.456][garner]predict[Weather: Current sea (1224,1408) nearby will occur Tornado], time = 736539
+[04-06 13:08:06.243][garner]predict[Weather: Current sea (1252,1214) nearby will occur Thunderstorm], time = 736554
+[04-06 13:12:50.961][garner]predict[Weather: Current sea (2246,2980) nearby will occur Tornado], time = 736839
+[04-06 13:13:10.136][garner]predict[Weather: Current sea (2466,2802) nearby will occur Thunderstorm], time = 736858
+[04-06 13:17:59.877][garner]predict[Weather: Current sea (1214,1426) nearby will occur Tornado], time = 737148
+[04-06 13:18:18.598][garner]predict[Weather: Current sea (1200,1200) nearby will occur Thunderstorm], time = 737167
+[04-06 13:23:19.198][garner]predict[Weather: Current sea (1234,1466) nearby will occur Tornado], time = 737467
+[04-06 13:23:39.569][garner]predict[Weather: Current sea (2492,2804) nearby will occur Thunderstorm], time = 737488
+[04-06 13:28:19.593][garner]predict[Weather: Current sea (2276,2962) nearby will occur Tornado], time = 737768
+[04-06 13:29:06.986][garner]predict[Weather: Current sea (1266,1174) nearby will occur Thunderstorm], time = 737815
+[04-06 13:33:28.588][garner]predict[Weather: Current sea (1168,1402) nearby will occur Tornado], time = 738077
+[04-06 13:34:08.962][garner]predict[Weather: Current sea (2488,2878) nearby will occur Thunderstorm], time = 738117
+[04-06 13:38:47.751][garner]predict[Weather: Current sea (1218,1450) nearby will occur Tornado], time = 738396
+[04-06 13:39:19.283][garner]predict[Weather: Current sea (1240,1196) nearby will occur Thunderstorm], time = 738427
+[04-06 13:43:48.278][garner]predict[Weather: Current sea (2274,3006) nearby will occur Tornado], time = 738696
+[04-06 13:44:38.287][garner]predict[Weather: Current sea (2454,2824) nearby will occur Thunderstorm], time = 738746
+[04-06 13:48:57.218][garner]predict[Weather: Current sea (1172,1434) nearby will occur Tornado], time = 739005
+[04-06 13:50:07.683][garner]predict[Weather: Current sea (1198,1152) nearby will occur Thunderstorm], time = 739076
+[04-06 13:54:16.367][garner]predict[Weather: Current sea (1230,1418) nearby will occur Tornado], time = 739325
+[04-06 13:55:31.874][garner]predict[Weather: Current sea (1190,1142) nearby will occur Thunderstorm], time = 739400
+[04-06 13:59:16.700][garner]predict[Weather: Current sea (2264,3028) nearby will occur Tornado], time = 739625
+[04-06 14:00:40.790][garner]predict[Weather: Current sea (2480,2864) nearby will occur Thunderstorm], time = 739709
+[04-06 14:04:25.905][garner]predict[Weather: Current sea (1164,1404) nearby will occur Tornado], time = 739934
+[04-06 14:05:44.306][garner]predict[Weather: Current sea (1248,1180) nearby will occur Thunderstorm], time = 740012
+[04-06 14:09:45.220][garner]predict[Weather: Current sea (1216,1466) nearby will occur Tornado], time = 740253
+[04-06 14:11:08.590][garner]predict[Weather: Current sea (1196,1184) nearby will occur Thunderstorm], time = 740337
+[04-06 14:14:45.322][garner]predict[Weather: Current sea (2318,3038) nearby will occur Tornado], time = 740553
+[04-06 14:16:32.802][garner]predict[Weather: Current sea (1240,1178) nearby will occur Thunderstorm], time = 740661
+[04-06 14:19:54.807][garner]predict[Weather: Current sea (1172,1432) nearby will occur Tornado], time = 740863
+[04-06 14:21:39.405][garner]predict[Weather: Current sea (2446,2870) nearby will occur Thunderstorm], time = 740968
+[04-06 14:25:14.061][garner]predict[Weather: Current sea (1200,1458) nearby will occur Tornado], time = 741182
+[04-06 14:26:45.179][garner]predict[Weather: Current sea (1216,1146) nearby will occur Thunderstorm], time = 741273
+[04-06 14:30:33.464][garner]predict[Weather: Current sea (1182,1474) nearby will occur Tornado], time = 741502
+[04-06 14:32:08.905][garner]predict[Weather: Current sea (2504,2816) nearby will occur Thunderstorm], time = 741597
+[04-06 14:35:34.328][garner]predict[Weather: Current sea (2296,2992) nearby will occur Tornado], time = 741802
+[04-06 14:37:33.654][garner]predict[Weather: Current sea (1242,1176) nearby will occur Thunderstorm], time = 741922
+[04-06 14:40:42.883][garner]predict[Weather: Current sea (1228,1440) nearby will occur Tornado], time = 742111
+[04-06 14:42:38.227][garner]predict[Weather: Current sea (2476,2852) nearby will occur Thunderstorm], time = 742226
+[04-06 14:46:02.260][garner]predict[Weather: Current sea (1160,1478) nearby will occur Tornado], time = 742430
+[04-06 14:47:46.076][garner]predict[Weather: Current sea (1238,1194) nearby will occur Thunderstorm], time = 742534
+[04-06 14:51:02.811][garner]predict[Weather: Current sea (2304,3012) nearby will occur Tornado], time = 742731
+[04-06 14:53:07.679][garner]predict[Weather: Current sea (2498,2812) nearby will occur Thunderstorm], time = 742856
+[04-06 14:56:11.811][garner]predict[Weather: Current sea (1204,1462) nearby will occur Tornado], time = 743040
+[04-06 14:58:34.510][garner]predict[Weather: Current sea (1232,1212) nearby will occur Thunderstorm], time = 743183
+[04-06 15:01:30.961][garner]predict[Weather: Current sea (1232,1452) nearby will occur Tornado], time = 743359
+[04-06 15:03:37.184][garner]predict[Weather: Current sea (2466,2836) nearby will occur Thunderstorm], time = 743485
+[04-06 15:06:31.478][garner]predict[Weather: Current sea (2266,2974) nearby will occur Tornado], time = 743660
+[04-06 15:08:46.970][garner]predict[Weather: Current sea (1244,1202) nearby will occur Thunderstorm], time = 743795
+[04-06 15:11:40.471][garner]predict[Weather: Current sea (1228,1446) nearby will occur Tornado], time = 743969
+[04-06 15:14:06.607][garner]predict[Weather: Current sea (2436,2844) nearby will occur Thunderstorm], time = 744115
+[04-06 15:16:59.744][garner]predict[Weather: Current sea (1214,1478) nearby will occur Tornado], time = 744288
+[04-06 15:19:35.446][garner]predict[Weather: Current sea (1210,1146) nearby will occur Thunderstorm], time = 744444
+[04-06 15:22:00.433][garner]predict[Weather: Current sea (2318,3016) nearby will occur Tornado], time = 744589
+[04-06 15:24:36.077][garner]predict[Weather: Current sea (2484,2820) nearby will occur Thunderstorm], time = 744744
+[04-06 15:27:09.104][garner]predict[Weather: Current sea (1232,1408) nearby will occur Tornado], time = 744897
+[04-06 15:29:47.727][garner]predict[Weather: Current sea (1210,1192) nearby will occur Thunderstorm], time = 745056
+[04-06 15:32:28.367][garner]predict[Weather: Current sea (1172,1418) nearby will occur Tornado], time = 745217
+[04-06 15:35:05.408][garner]predict[Weather: Current sea (2442,2816) nearby will occur Thunderstorm], time = 745374
+[04-06 15:37:28.945][garner]predict[Weather: Current sea (2268,3032) nearby will occur Tornado], time = 745517
+[04-06 15:40:36.160][garner]predict[Weather: Current sea (1266,1206) nearby will occur Thunderstorm], time = 745704
+[04-06 15:42:37.908][garner]predict[Weather: Current sea (1232,1446) nearby will occur Tornado], time = 745826
+[04-06 15:46:00.387][garner]predict[Weather: Current sea (1262,1178) nearby will occur Thunderstorm], time = 746029
+[04-06 15:47:57.097][garner]predict[Weather: Current sea (1208,1416) nearby will occur Tornado], time = 746145
+[04-06 15:51:08.086][garner]predict[Weather: Current sea (2504,2822) nearby will occur Thunderstorm], time = 746336
+[04-06 15:52:57.760][garner]predict[Weather: Current sea (2276,3028) nearby will occur Tornado], time = 746446
+[04-06 15:56:12.780][garner]predict[Weather: Current sea (1244,1210) nearby will occur Thunderstorm], time = 746641
+[04-06 15:58:06.457][garner]predict[Weather: Current sea (1220,1400) nearby will occur Tornado], time = 746755
+[04-06 16:01:36.876][garner]predict[Weather: Current sea (1236,1210) nearby will occur Thunderstorm], time = 746965
+[04-06 16:03:25.723][garner]predict[Weather: Current sea (1198,1410) nearby will occur Tornado], time = 747074
+[04-06 16:07:01.071][garner]predict[Weather: Current sea (1194,1170) nearby will occur Thunderstorm], time = 747289
+[04-06 16:08:26.489][garner]predict[Weather: Current sea (2270,3002) nearby will occur Tornado], time = 747375
+[04-06 16:12:07.023][garner]predict[Weather: Current sea (2494,2868) nearby will occur Thunderstorm], time = 747595
+[04-06 16:13:35.177][garner]predict[Weather: Current sea (1168,1402) nearby will occur Tornado], time = 747683
+[04-06 16:17:13.454][garner]predict[Weather: Current sea (1216,1158) nearby will occur Thunderstorm], time = 747902
+[04-06 16:18:54.399][garner]predict[Weather: Current sea (1212,1470) nearby will occur Tornado], time = 748003
+[04-06 16:22:36.461][garner]predict[Weather: Current sea (2486,2878) nearby will occur Thunderstorm], time = 748225
+[04-06 16:23:55.222][garner]predict[Weather: Current sea (2294,3022) nearby will occur Tornado], time = 748303
+[04-06 16:28:01.796][garner]predict[Weather: Current sea (1232,1162) nearby will occur Thunderstorm], time = 748550
+[04-06 16:29:03.806][garner]predict[Weather: Current sea (1206,1434) nearby will occur Tornado], time = 748612
+[04-06 16:33:05.755][garner]predict[Weather: Current sea (2438,2824) nearby will occur Thunderstorm], time = 748854
+[04-06 16:34:23.133][garner]predict[Weather: Current sea (1184,1462) nearby will occur Tornado], time = 748931
+[04-06 16:38:14.097][garner]predict[Weather: Current sea (1260,1198) nearby will occur Thunderstorm], time = 749162
+[04-06 16:39:23.863][garner]predict[Weather: Current sea (2272,3026) nearby will occur Tornado], time = 749232
+[04-06 16:43:35.074][garner]predict[Weather: Current sea (2492,2804) nearby will occur Thunderstorm], time = 749483
+[04-06 16:44:32.686][garner]predict[Weather: Current sea (1216,1424) nearby will occur Tornado], time = 749541

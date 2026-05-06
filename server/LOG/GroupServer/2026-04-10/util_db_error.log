@@ -1,0 +1,2 @@
+[04-10 00:34:06.248]SQL Error State:42000, Native Error Code: 1FD2, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure CharacterZeroAddr has no parameters and arguments were supplied.
+[04-10 00:34:06.248][STMT:0xb89e2b0][SQLERR]: [CharacterZeroAddr]

@@ -1,0 +1,6 @@
+[04-07 16:09:12.237]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-07 16:09:12.237][STMT:0x440dddf0][SQLERR]: [SaveAllData]
+[04-07 16:18:51.104]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-07 16:18:51.104][STMT:0x776dc9b0][SQLERR]: [SaveAllData]
+[04-07 16:22:58.834]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-07 16:22:58.834][STMT:0xd801cf90][SQLERR]: [SaveAllData]

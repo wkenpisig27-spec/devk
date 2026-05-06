@@ -1,0 +1,8 @@
+[04-10 00:34:49.314]recieved kick acctid:[2160] command (not in play list) - clearing stale session
+[04-10 00:34:52.617](127.0.0.1):[admin3]login success, 	 nline/total:1/0
+[04-10 00:35:00.043]recieved kick acctid:[2161] command (not in play list) - clearing stale session
+[04-10 00:35:02.954](127.0.0.1):[admin4]login success, 	 nline/total:2/0
+[04-10 00:35:05.920](127.0.0.1):[admin3]select char[tempra]begin paly...,	 online/total:2/0
+[04-10 00:35:06.034](127.0.0.1):[admin3] char [tempra]entry map server begin play...!	 online/total:2/1
+[04-10 03:01:18.869](127.0.0.1):[admin4]select char[sads]begin paly...,	 online/total:2/1
+[04-10 03:01:18.971](127.0.0.1):[admin4] char [sads]entry map server begin play...!	 online/total:2/2

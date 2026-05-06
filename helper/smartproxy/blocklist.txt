@@ -1,0 +1,12 @@
+# PKO Smart Proxy - Blocklist
+# One IP per line
+# Lines starting with # are comments
+#
+# This file is loaded at startup and can be reloaded by sending SIGHUP:
+#   kill -HUP $(pgrep -f "node proxy.js")
+#
+# You can also load the HAProxy blocklist here by copying it
+
+# Example blocked IPs:
+# 1.2.3.4
+# 5.6.7.8

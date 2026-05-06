@@ -1,0 +1,122 @@
+-- Font definitions for PKODev
+-- Use native function for x64 compatibility, fall back to CLU_Call for x86
+-- dwStyle: 0x0001=bold, 0x0002=italic, 0x0004=underline
+function UI_CreateFont( font, size800, size1024, dwStyle )
+	if UI_CreateFont_Native then
+		return UI_CreateFont_Native(font, size800, size1024, dwStyle)
+	else
+		return CLU_Call("UI_CreateFont", font, size800, size1024, dwStyle)
+	end
+end
+
+-- ============================================================================
+-- FONT NAMING CONVENTION
+-- ============================================================================
+-- The font name IS the filename (no size suffix added)
+-- "gamedefaultsm" -> loads "font/gamedefaultsm.fnt"
+-- "gamedefaultbig" -> loads "font/gamedefaultbig.fnt"
+-- 
+-- Available fonts (based on your .fnt files):
+--   gamedefaultsm   = Small (12pt equivalent)
+--   gamedefaultsm2  = Small variant 2
+--   gamedefaultmid  = Medium (14-16pt equivalent)
+--   gamedefaultmid2 = Medium variant 2
+--   gamedefaultbig  = Big (20pt equivalent)
+--   gamedefaulthuge = Huge (28pt+ equivalent)
+--   big             = Alternative big font
+--
+-- PRE-BAKED OUTLINE FONTS (optimized - single draw call):
+--   nameoutline     = 14pt Black with 1px black outline (character names)
+--   namesmoutline   = 12pt Black with 1px black outline (smaller names)
+--   titleoutline    = 28pt Black with 2px black outline (map banners)
+--   splashoutline   = 40pt Black with 2px black outline (level up text)
+--   hintoutline     = 12pt Regular with 1px black outline (UI hints)
+-- ============================================================================
+
+-- ============================================================================
+-- STANDARD GAME FONTS
+-- Maps legacy font constants to new bitmap font files
+-- ============================================================================
+
+-- Small fonts (dialogs, system messages, hints, chat)
+DEFAULT_FONT = UI_CreateFont( "gamedefaultsm", 12, 12, 0 )
+
+-- Item name font (14pt Black weight - used by hint tooltips for item names)
+-- Index 1 is used by PushHint(..., 1) calls in UIItemCommand.cpp
+FONT12 = UI_CreateFont( "gamedefaultmidblack", 14, 14, 0 )
+
+-- Medium fonts (labels, buttons, menus)
+FONT14 = UI_CreateFont( "gamedefaultmid", 14, 14, 0 )
+FONT16 = UI_CreateFont( "gamedefaultmid", 16, 16, 0 )
+
+-- Big fonts (titles, headers, player names)
+FONT20 = UI_CreateFont( "gamedefaultbig", 20, 20, 0 )
+BIGFONT = UI_CreateFont( "gamedefaultbig", 20, 20, 0 )
+
+-- Huge fonts (large titles, splash text)
+FONT28 = UI_CreateFont( "gamedefaulthuge", 28, 28, 0 )
+HUGEFONT = UI_CreateFont( "gamedefaulthuge", 28, 28, 0 )
+
+-- Title font (40pt Black weight - for map banners, level up text)
+TITLEFONT = UI_CreateFont( "titleblack", 40, 40, 0 )
+
+-- SemiBold fonts (Metropolis SemiBold - between Regular and Black)
+FONT12_SEMIBOLD = UI_CreateFont( "gamedefaultsmsemibold", 12, 12, 0 )
+FONT14_SEMIBOLD = UI_CreateFont( "gamedefaultmidsemibold", 14, 14, 0 )
+
+-- ============================================================================
+-- PRE-BAKED OUTLINE FONTS (OPTIMIZED)
+-- ============================================================================
+-- These fonts have the outline BAKED INTO THE TEXTURE for 9x faster rendering.
+-- Use regular Render() instead of ORender() for these fonts.
+--
+-- Performance comparison (50 players with 10-char names):
+--   ORender(): 4,500 draw calls (9 passes per name)
+--   Outline fonts: 500 draw calls (1 pass per name)
+-- ============================================================================
+
+-- Outline font for UI hints/tooltips (12pt with black outline)
+HINT_OUTLINE_FONT = UI_CreateFont( "hintoutline", 12, 12, 0 )
+
+-- Title font with outline (28pt for map banners)
+TITLE_OUTLINE_FONT = UI_CreateFont( "titleoutline", 28, 28, 0 )
+
+-- Splash font with outline (40pt for level up text)
+SPLASH_OUTLINE_FONT = UI_CreateFont( "splashoutline", 40, 40, 0 )
+
+-- ============================================================================
+-- CHARACTER/NPC NAME FONT (rendered above heads)
+-- This is read by C++ to initialize s_NameFont
+-- 
+-- IMPORTANT: Bitmap fonts have FIXED sizes baked into the .fnt file!
+-- The size is determined by which font file you use, NOT by a size parameter.
+--
+-- OPTION 1: Use pre-baked outline font (RECOMMENDED - 9x faster)
+--   NAME_FONT = "nameoutline"
+--   NAME_FONT_HAS_OUTLINE = true
+--   C++ will use Render() instead of ORender() (single draw call)
+--
+-- OPTION 2: Use regular font with runtime outline (slower)
+--   NAME_FONT = "gamedefaultmidblack"
+--   NAME_FONT_HAS_OUTLINE = false
+--   C++ will use ORender() (draws text 9 times)
+--
+-- Available name fonts:
+--   nameoutline        = 14pt Black with pre-baked outline (FAST)
+--   namesmoutline      = 12pt Black with pre-baked outline (smaller, FAST)
+--   gamedefaultmidblack= 14pt Black, no outline (use with ORender)
+--   gamedefaultsmblack = 12pt Black, no outline (use with ORender)
+-- ============================================================================
+NAME_FONT = "gamedefaultmidblack"
+NAME_FONT_HAS_OUTLINE = false  -- Use runtime outline (ORender draws 9 passes)
+
+-- ============================================================================
+-- WEIGHT-BASED FONTS (for future use)
+-- If you create bold/light versions, add them here:
+-- ============================================================================
+-- BOLD_FONT = UI_CreateFont( "gamedefaultbold", 14, 14, 0 )
+-- LIGHT_FONT = UI_CreateFont( "gamedefaultlight", 12, 12, 0 )
+
+-- Legacy references (commented out)
+-- DEFAULT_FONT = UI_CreateFont( "simsun", 12, 12, 0 )
+-- ARIAL_FONT = UI_CreateFont( "Arial", 12, 12, 0 )

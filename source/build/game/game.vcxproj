@@ -1,0 +1,758 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Editor|x64">
+      <Configuration>Editor</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Publish|x64">
+      <Configuration>Publish</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>Game</ProjectName>
+    <ProjectGuid>{04B1BD43-C7C7-4910-ACF6-8FB4BFF300D2}</ProjectGuid>
+    <RootNamespace>game</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Publish|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Editor|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Publish|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Editor|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>16.0.30427.251</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(ProjectDir)..\..\bin\$(Configuration)\game\</OutDir>
+    <IntDir>$(ProjectDir)..\..\tmp\game\$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <TargetName>$(ProjectName)_D</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)..\..\bin\$(Configuration)\game\</OutDir>
+    <IntDir>$(ProjectDir)..\..\tmp\game\$(Configuration)\</IntDir>
+    <IgnoreImportLibrary>false</IgnoreImportLibrary>
+    <LinkIncremental>false</LinkIncremental>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Editor|x64'">
+    <OutDir>$(ProjectDir)..\..\bin\$(Configuration)\game\</OutDir>
+    <IntDir>$(ProjectDir)..\..\tmp\game\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Publish|x64'">
+    <OutDir>$(ProjectDir)..\..\bin\$(Configuration)\game\</OutDir>
+    <IntDir>$(ProjectDir)..\..\tmp\game\$(Configuration)\</IntDir>
+    <IgnoreImportLibrary>false</IgnoreImportLibrary>
+    <LinkIncremental>false</LinkIncremental>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalOptions>/GR
+/EHa %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\src\game;..\..\include\game;..\..\include\engine;..\..\include\status;..\..\include\enclib;..\..\include\serversdk;..\..\include\calua;..\..\include\common;..\..\include\util;..\..\include\audiosdl;..\..\include\sdl;..\..\include\discord;..\..\include\directx;..\..\include\unicode;..\..\include\icuhelper;..\..\include\luajit;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>USE_DX_VERSION;LW_USE_DX9;DIRECT3D_VERSION=0x0900;_WIN64;_DEBUG;_WINDOWS;_LUA_GAME;MINDPOWER_USE_DLL;_WIN32_WINNT=0x0500;NOMINMAX;TABLE_ENCRYPTION_ENABLED=1;BOTAN_FUTURE_INTERNAL_HEADER_OK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <FunctionLevelLinking>
+      </FunctionLevelLinking>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <RuntimeTypeInfo>
+      </RuntimeTypeInfo>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <DiagnosticsFormat>Column</DiagnosticsFormat>
+      <SDLCheck>false</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <SupportJustMyCode>true</SupportJustMyCode>
+      <ConformanceMode>false</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>AudioSDL_D.lib;MindPower3D_D9D.lib;d3dx9d.lib;Ws2_32.lib;lua51.lib;CaLua.lib;LIBDBC_D.lib;util_D.lib;Common_D.lib;dxguid.lib;ddraw.lib;atls.lib;Status_D.lib;SDL.lib;SDL_mixer.lib;SDLmain.lib;ICUHelper_D.lib;icudt.lib;icuucd.lib;icuind.lib;Psapi.lib;discord-rpc.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>NotSet</ShowProgress>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\$(Configuration);$(ProjectDir)..\..\lib\Release;$(ProjectDir)..\..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libci.lib</IgnoreSpecificDefaultLibraries>
+      <DelayLoadDLLs>
+      </DelayLoadDLLs>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AssemblyDebug>true</AssemblyDebug>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <GenerateMapFile>false</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>false</OptimizeReferences>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <TargetMachine>MachineX64</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <OmitFramePointers>false</OmitFramePointers>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <AdditionalIncludeDirectories>..\..\src\game;..\..\include\game;..\..\include\engine;..\..\include\status;..\..\include\enclib;..\..\include\serversdk;..\..\include\calua;..\..\include\common;..\..\include\util;..\..\include\audiosdl;..\..\include\sdl;..\..\include\discord;..\..\include\directx;..\..\include\unicode;..\..\include\icuhelper;..\..\include\luajit;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>USE_DX_VERSION;LW_USE_DX9;DIRECT3D_VERSION=0x0900;_LUA_GAME;__SOUND__;LIGHTENGINE_USE_DLL;NOMINMAX;_WIN64;NDEBUG;_NOSERVER;_CONSOLE;WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP);MINDPOWER_USE_DLL;TABLE_ENCRYPTION_ENABLED=1;BOTAN_FUTURE_INTERNAL_HEADER_OK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <RuntimeTypeInfo>
+      </RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <BrowseInformation>false</BrowseInformation>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ShowIncludes>false</ShowIncludes>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <SDLCheck>false</SDLCheck>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <ConformanceMode>false</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <RegisterOutput>false</RegisterOutput>
+      <AdditionalDependencies>AudioSDL.lib;MindPower3D_D9R.lib;lua51.lib;CaLua.lib;d3dx9.lib;Ws2_32.lib;botan.lib;LIBDBC.lib;util.lib;Common.lib;dxguid.lib;atls.lib;Status.lib;SDL.lib;SDL_mixer.lib;SDLmain.lib;ddraw.lib;Psapi.lib;discord-rpc.lib;legacy_stdio_definitions.lib;ICUHelper.lib;icudt.lib;icuuc.lib;icuin.lib;EncLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>NotSet</ShowProgress>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\$(Configuration);$(ProjectDir)..\..\lib\Release;$(ProjectDir)..\..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>libci.lib;</IgnoreSpecificDefaultLibraries>
+      <DelayLoadDLLs>
+      </DelayLoadDLLs>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AssemblyDebug />
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <GenerateMapFile>false</GenerateMapFile>
+      <MapExports>false</MapExports>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <SetChecksum>true</SetChecksum>
+      <TargetMachine>MachineX64</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Editor|x64'">
+    <ClCompile>
+      <AdditionalOptions>/GR
+/EHa %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\include\game;..\..\include\engine;..\..\include\status;..\..\include\enclib;..\..\include\serversdk;..\..\include\calua;..\..\include\common;..\..\include\util;..\..\include\audiosdl;..\..\include\sdl;..\..\include\discord;..\..\include\directx;..\..\include\unicode;..\..\include\icuhelper;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WIN64;NDEBUG;_WINDOWS;_LUA_GAME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ShowIncludes>false</ShowIncludes>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>MindPower3D_D9R.lib;CaLua.lib;d3dx9.lib;Ws2_32.lib;LIBDBC_CL.lib;util.lib;Common.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\$(Configuration);$(ProjectDir)..\..\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libci.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <DelayLoadDLLs>d3d8.dll;dinput8.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Publish|x64'">
+    <ClCompile>
+      <AdditionalOptions>/GR
+/EHa %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MaxSpeed</Optimization>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>..\..\include\game;..\..\include\engine;..\..\include\status;..\..\include\enclib;..\..\include\serversdk;..\..\include\calua;..\..\include\common;..\..\include\util;..\..\include\audiosdl;..\..\include\sdl;..\..\include\discord;..\..\include\directx;..\..\include\unicode;..\..\include\icuhelper;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>USE_DX_VERSION;LW_USE_DX9;DIRECT3D_VERSION=0x0900;_WIN64;NDEBUG;_WINDOWS;_LUA_GAME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ExceptionHandling />
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <BrowseInformation />
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <DebugInformationFormat />
+      <ShowIncludes>false</ShowIncludes>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <RegisterOutput>false</RegisterOutput>
+      <AdditionalDependencies>MindPower3D_D9R.lib;CaLua.lib;d3dx9.lib;Ws2_32.lib;LIBDBC_CL.lib;util.lib;Common.lib;dxguid.lib;atls.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>NotSet</ShowProgress>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\$(Configuration);$(ProjectDir)..\..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>libc.lib;libcmt.lib;msvcrt.lib;libcd.lib;msvcrtd.lib;LIBCI.LIB;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <DelayLoadDLLs>d3d9.dll;dinput8.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AssemblyDebug />
+      <GenerateMapFile>false</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <SetChecksum>true</SetChecksum>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\game\Actor.cpp" />
+    <ClCompile Include="..\..\src\game\Algo.cpp" />
+    <ClCompile Include="..\..\src\game\AppScript.cpp" />
+    <ClCompile Include="..\..\src\game\ArcTrack.cpp" />
+    <ClCompile Include="..\..\src\game\AudioThread.cpp" />
+    <ClCompile Include="..\..\src\game\AutoAttack.cpp" />
+    <ClCompile Include="..\..\src\game\CameraCtrl.cpp" />
+    <ClCompile Include="..\..\src\game\Character.cpp" />
+    <ClCompile Include="..\..\src\game\CharacterAction.cpp" />
+    <ClCompile Include="..\..\src\game\CharacterModel.cpp" />
+    <ClCompile Include="..\..\src\game\ChaScript.cpp" />
+    <ClCompile Include="..\..\src\game\ChaState.cpp" />
+    <ClCompile Include="..\..\src\game\ChatRecord.cpp" />
+    <ClCompile Include="..\..\src\game\Connection.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_From_Release|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Editor|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Publish|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\CRCircle.cpp" />
+    <ClCompile Include="..\..\src\game\CRCursor.cpp" />
+    <ClCompile Include="..\..\src\game\CRCursorObj.cpp" />
+    <ClCompile Include="..\..\src\game\CreateChaScene.cpp" />
+    <ClCompile Include="..\..\src\game\d3des.cpp" />
+    <ClCompile Include="..\..\src\game\DiscordPresence.cpp" />
+    <ClCompile Include="..\..\src\game\DrawPointList.cpp" />
+    <ClCompile Include="..\..\src\game\DSoundInstance.cpp" />
+    <ClCompile Include="..\..\src\game\DSoundManager.cpp" />
+    <ClCompile Include="..\..\src\game\EffDelay.cpp" />
+    <ClCompile Include="..\..\src\game\EffectObj.cpp" />
+    <ClCompile Include="..\..\src\game\Event.cpp" />
+    <ClCompile Include="..\..\src\game\FindPath.cpp" />
+    <ClCompile Include="..\..\src\game\FrndInviteFormMgr.cpp" />
+    <ClCompile Include="..\..\src\game\GameAppFrameMove.cpp" />
+    <ClCompile Include="..\..\src\game\GameAppInit.cpp" />
+    <ClCompile Include="..\..\src\game\GameAppInterface.cpp" />
+    <ClCompile Include="..\..\src\game\GameAppMsg.cpp" />
+    <ClCompile Include="..\..\src\game\GameAppNet.cpp" />
+    <ClCompile Include="..\..\src\game\GameAppRender.cpp" />
+    <ClCompile Include="..\..\src\game\GameConfig.cpp" />
+    <ClCompile Include="..\..\src\game\GameLoading.cpp" />
+    <ClCompile Include="..\..\src\game\GameMovie.cpp" />
+    <ClCompile Include="..\..\src\game\GameWG.cpp" />
+    <ClCompile Include="..\..\src\game\GlobalVar.cpp" />
+    <ClCompile Include="..\..\src\game\GuildData.cpp" />
+    <ClCompile Include="..\..\src\game\GuildListData.cpp" />
+    <ClCompile Include="..\..\src\game\GuildListMgr.cpp" />
+    <ClCompile Include="..\..\src\game\GuildMemberData.cpp" />
+    <ClCompile Include="..\..\src\game\GuildMembersMgr.cpp" />
+    <ClCompile Include="..\..\src\game\HairTool.cpp" />
+    <ClCompile Include="..\..\src\game\HMAttack.cpp" />
+    <ClCompile Include="..\..\src\game\HMManage.cpp" />
+    <ClCompile Include="..\..\src\game\HMSynchroObj.cpp" />
+    <ClCompile Include="..\..\src\game\IsSkillUse.cpp" />
+    <ClCompile Include="..\..\src\game\ItemLit.cpp" />
+    <ClCompile Include="..\..\src\game\ItemLitAnim.cpp" />
+    <ClCompile Include="..\..\src\game\Language.cpp" />
+    <ClCompile Include="..\..\src\game\LitLoad.cpp" />
+    <ClCompile Include="..\..\src\game\LoginScene.cpp" />
+    <ClCompile Include="..\..\src\game\LootFilter.cpp" />
+    <ClCompile Include="..\..\src\game\lua_platform.cpp" />
+    <ClCompile Include="..\..\src\game\Main.cpp" />
+    <ClCompile Include="..\..\src\game\MouseDown.cpp" />
+    <ClCompile Include="..\..\src\game\MPEditor.cpp" />
+    <ClCompile Include="..\..\src\game\MusicThread.cpp" />
+    <ClCompile Include="..\..\src\game\NetChat.cpp" />
+    <ClCompile Include="..\..\src\game\NetGuild.cpp" />
+    <ClCompile Include="..\..\src\game\NetIF.cpp" />
+    <ClCompile Include="..\..\src\game\NetPkChat.cpp" />
+    <ClCompile Include="..\..\src\game\NetPkGuild.cpp" />
+    <ClCompile Include="..\..\src\game\NetProtocol.cpp" />
+    <ClCompile Include="..\..\src\game\NPCHelper.cpp" />
+    <ClCompile Include="..\..\src\game\PacketCmd_CS.cpp" />
+    <ClCompile Include="..\..\src\game\PacketCmd_SC.cpp" />
+    <ClCompile Include="..\..\src\game\PackFile.cpp" />
+    <ClCompile Include="..\..\src\game\ProCirculateCC.cpp" />
+    <ClCompile Include="..\..\src\game\ProCirculateCS.cpp" />
+    <ClCompile Include="..\..\src\game\RecruitMemberData.cpp" />
+    <ClCompile Include="..\..\src\game\RecruitMembersMgr.cpp" />
+    <ClCompile Include="..\..\src\game\RenderStateMgr.cpp" />
+    <ClCompile Include="..\..\src\game\Scene.cpp" />
+    <ClCompile Include="..\..\src\game\SceneArea.cpp" />
+    <ClCompile Include="..\..\src\game\SceneCreateNode.cpp" />
+    <ClCompile Include="..\..\src\game\SceneFrameMove.cpp" />
+    <ClCompile Include="..\..\src\game\SceneItem.cpp" />
+    <ClCompile Include="..\..\src\game\SceneLight.cpp" />
+    <ClCompile Include="..\..\src\game\SceneMsg.cpp" />
+    <ClCompile Include="..\..\src\game\SceneNode.cpp" />
+    <ClCompile Include="..\..\src\game\SceneObj.cpp" />
+    <ClCompile Include="..\..\src\game\SceneObjFile.cpp" />
+    <ClCompile Include="..\..\src\game\SceneRender.cpp" />
+    <ClCompile Include="..\..\src\game\SceneScript.cpp" />
+    <ClCompile Include="..\..\src\game\SceneSign.cpp" />
+    <ClCompile Include="..\..\src\game\Script.cpp" />
+    <ClCompile Include="..\..\src\game\SelectChaScene.cpp" />
+    <ClCompile Include="..\..\src\game\ShipFactory.cpp" />
+    <ClCompile Include="..\..\src\game\SMallMap.cpp" />
+    <ClCompile Include="..\..\src\game\SoundCommon.cpp" />
+    <ClCompile Include="..\..\src\game\state_reading.cpp" />
+    <ClCompile Include="..\..\src\game\STAttack.cpp" />
+    <ClCompile Include="..\..\src\game\stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Publish|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Editor|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\SteadyFrame.cpp" />
+    <ClCompile Include="..\..\src\game\STMove.cpp" />
+    <ClCompile Include="..\..\src\game\STNpcTalk.cpp" />
+    <ClCompile Include="..\..\src\game\STPose.cpp" />
+    <ClCompile Include="..\..\src\game\STReadyDie.cpp" />
+    <ClCompile Include="..\..\src\game\STSeat.cpp" />
+    <ClCompile Include="..\..\src\game\STStateObj.cpp" />
+    <ClCompile Include="..\..\src\game\TalkSessionFormMgr.cpp" />
+    <ClCompile Include="..\..\src\game\TeamInviteFormMgr.cpp" />
+    <ClCompile Include="..\..\src\game\TestDemo.cpp" />
+    <ClCompile Include="..\..\src\game\ThreadBase.cpp" />
+    <ClCompile Include="..\..\src\game\Tools.cpp" />
+    <ClCompile Include="..\..\src\game\UI3DCompent.cpp" />
+    <ClCompile Include="..\..\src\game\UIBankForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIBoatForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIBoothForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIBourseForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIBoxForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIBreakForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIChat.cpp" />
+    <ClCompile Include="..\..\src\game\UICheckBox.cpp" />
+    <ClCompile Include="..\..\src\game\UICheckBoxItem.cpp" />
+    <ClCompile Include="..\..\src\game\UIChurchChallenge.cpp" />
+    <ClCompile Include="..\..\src\game\UIKnowledgeBase.cpp" />
+    <ClCompile Include="..\..\src\game\UICloneForm.cpp" />
+    <ClCompile Include="..\..\src\game\UICombo.cpp" />
+    <ClCompile Include="..\..\src\game\UICommand.cpp" />
+    <ClCompile Include="..\..\src\game\UICommandCompent.cpp" />
+    <ClCompile Include="..\..\src\game\UICompent.cpp" />
+    <ClCompile Include="..\..\src\game\UIComposeForm.cpp" />
+    <ClCompile Include="..\..\src\game\UICookingForm.cpp" />
+    <ClCompile Include="..\..\src\game\UICozeForm.cpp" />
+    <ClCompile Include="..\..\src\game\UICursor.cpp" />
+    <ClCompile Include="..\..\src\game\UIDoublePwdForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIDragTitle.cpp" />
+    <ClCompile Include="..\..\src\game\UIEdit.cpp" />
+    <ClCompile Include="..\..\src\game\UIEditData.cpp" />
+    <ClCompile Include="..\..\src\game\UIEditKey.cpp" />
+    <ClCompile Include="..\..\src\game\UIEditor.cpp" />
+    <ClCompile Include="..\..\src\game\UIEditStrategy.cpp" />
+    <ClCompile Include="..\..\src\game\UIEquipForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIFastCommand.cpp" />
+    <ClCompile Include="..\..\src\game\UIFindTeamForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIBossTimerForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIFont.cpp" />
+    <ClCompile Include="..\..\src\game\BitmapFontAdapter.cpp" />
+    <ClCompile Include="..\..\src\game\UIForgeForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIFormMgr.cpp" />
+    <ClCompile Include="..\..\src\game\UIFoundForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIGlobalVar.cpp" />
+    <ClCompile Include="..\..\src\game\UIGoodsGrid.cpp" />
+    <ClCompile Include="..\..\src\game\UIGraph.cpp" />
+    <ClCompile Include="..\..\src\game\UIGrid.cpp" />
+    <ClCompile Include="..\..\src\game\UIGuiData.cpp" />
+    <ClCompile Include="..\..\src\game\UIGuildApply.cpp" />
+    <ClCompile Include="..\..\src\game\UIGuildBankForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIGuildChallengeForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIGuildList.cpp" />
+    <ClCompile Include="..\..\src\game\UIGuildMgr.cpp" />
+    <ClCompile Include="..\..\src\game\UIHaircutForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIHeadSay.cpp" />
+    <ClCompile Include="..\..\src\game\UIHelpInfoForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIImage.cpp" />
+    <ClCompile Include="..\..\src\game\UIImeInput.cpp" />
+    <ClCompile Include="..\..\src\game\UIItem.cpp" />
+    <ClCompile Include="..\..\src\game\UIItemCommand.cpp" />
+    <ClCompile Include="..\..\src\game\UILabel.cpp" />
+    <ClCompile Include="..\..\src\game\UIList.cpp" />
+    <ClCompile Include="..\..\src\game\UIListView.cpp" />
+    <ClCompile Include="..\..\src\game\UIMailForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIMakeEquipForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIMemo.cpp" />
+    <ClCompile Include="..\..\src\game\UIMenu.cpp" />
+    <ClCompile Include="..\..\src\game\UIMinimapForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIMisLogForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIMissionForm.cpp" />
+    <ClCompile Include="..\..\src\game\UINpcTalkForm.cpp" />
+    <ClCompile Include="..\..\src\game\UINpcTradeForm.cpp" />
+    <ClCompile Include="..\..\src\game\UINumAnswer.cpp" />
+    <ClCompile Include="..\..\src\game\UIPage.cpp" />
+    <ClCompile Include="..\..\src\game\UIPicList.cpp" />
+    <ClCompile Include="..\..\src\game\UIPicture.cpp" />
+    <ClCompile Include="..\..\src\game\UIPKDialog.cpp" />
+    <ClCompile Include="..\..\src\game\UIPKSilverForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIProgressBar.cpp" />
+    <ClCompile Include="..\..\src\game\UIPurifyForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIRender.cpp" />
+    <ClCompile Include="..\..\src\game\UIRichEdit.cpp" />
+    <ClCompile Include="..\..\src\game\UIScript.cpp" />
+    <ClCompile Include="..\..\src\game\UIScriptNative.cpp" />
+    <ClCompile Include="..\..\src\game\UIScroll.cpp" />
+    <ClCompile Include="..\..\src\game\UISkillCommand.cpp" />
+    <ClCompile Include="..\..\src\game\UISkillList.cpp" />
+    <ClCompile Include="..\..\src\game\UISpiritForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIStartForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIStateForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIStoreForm.cpp" />
+    <ClCompile Include="..\..\src\game\UISystemForm.cpp" />
+    <ClCompile Include="..\..\src\game\UITeam.cpp" />
+    <ClCompile Include="..\..\src\game\UITextButton.cpp" />
+    <ClCompile Include="..\..\src\game\UITextParse.cpp" />
+    <ClCompile Include="..\..\src\game\UITitle.cpp" />
+    <ClCompile Include="..\..\src\game\UITradeForm.cpp" />
+    <ClCompile Include="..\..\src\game\UITreeView.cpp" />
+    <ClCompile Include="..\..\src\game\WorldScene.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\game\Actor.h" />
+    <ClInclude Include="..\..\src\game\Algo.h" />
+    <ClInclude Include="..\..\src\game\ArcTrack.h" />
+    <ClInclude Include="..\..\src\game\AudioThread.h" />
+    <ClInclude Include="..\..\src\game\AutoAttack.h" />
+    <ClInclude Include="..\..\src\game\BoolSet.h" />
+    <ClInclude Include="..\..\src\game\CameraCtrl.h" />
+    <ClInclude Include="..\..\src\game\ChaClientAttr.h" />
+    <ClInclude Include="..\..\src\game\ChaCreateSet.h" />
+    <ClInclude Include="..\..\src\game\Character.h" />
+    <ClInclude Include="..\..\src\game\CharacterAction.h" />
+    <ClInclude Include="..\..\src\game\CharacterModel.h" />
+    <ClInclude Include="..\..\src\game\CharacterPoseSet.h" />
+    <ClInclude Include="..\..\src\game\ChaState.h" />
+    <ClInclude Include="..\..\src\game\ChatIconSet.h" />
+    <ClInclude Include="..\..\src\game\ChatRecord.h" />
+    <ClInclude Include="..\..\src\game\Connection.h" />
+    <ClInclude Include="..\..\src\game\CRCircle.h" />
+    <ClInclude Include="..\..\src\game\CRCursor.h" />
+    <ClInclude Include="..\..\src\game\CRCursorObj.h" />
+    <ClInclude Include="..\..\src\game\CreateChaScene.h" />
+    <ClInclude Include="..\..\src\game\d3des.h" />
+    <ClInclude Include="..\..\src\game\DrawPointList.h" />
+    <ClInclude Include="..\..\src\game\DSoundInstance.h" />
+    <ClInclude Include="..\..\src\game\DSoundManager.h" />
+    <ClInclude Include="..\..\src\game\EffDelay.h" />
+    <ClInclude Include="..\..\src\game\EffectObj.h" />
+    <ClInclude Include="..\..\src\game\EffectSet.h" />
+    <ClInclude Include="..\..\src\game\ElfSkillSet.h" />
+    <ClInclude Include="..\..\src\game\Event.h" />
+    <ClInclude Include="..\..\src\game\EventSoundSet.h" />
+    <ClInclude Include="..\..\src\game\FindPath.h" />
+    <ClInclude Include="..\..\src\game\FrndInviteFormMgr.h" />
+    <ClInclude Include="..\..\src\game\GameApp.h" />
+    <ClInclude Include="..\..\src\game\GameAppMsg.h" />
+    <ClInclude Include="..\..\src\game\GameConfig.h" />
+    <ClInclude Include="..\..\src\game\GameLoading.h" />
+    <ClInclude Include="..\..\src\game\GameMovie.h" />
+    <ClInclude Include="..\..\src\game\GameWG.h" />
+    <ClInclude Include="..\..\src\game\GlobalVar.h" />
+    <ClInclude Include="..\..\src\game\GuildData.h" />
+    <ClInclude Include="..\..\src\game\GuildListData.h" />
+    <ClInclude Include="..\..\src\game\GuildListMgr.h" />
+    <ClInclude Include="..\..\src\game\GuildMemberData.h" />
+    <ClInclude Include="..\..\src\game\GuildMembersMgr.h" />
+    <ClInclude Include="..\..\src\game\HairTool.h" />
+    <ClInclude Include="..\..\src\game\helpinfoset.h" />
+    <ClInclude Include="..\..\src\game\HMAttack.h" />
+    <ClInclude Include="..\..\src\game\HMManage.h" />
+    <ClInclude Include="..\..\src\game\HMSynchroObj.h" />
+    <ClInclude Include="..\..\src\game\InputBox.h" />
+    <ClInclude Include="..\..\src\game\IsSkillUse.h" />
+    <ClInclude Include="..\..\src\game\ItemLit.h" />
+    <ClInclude Include="..\..\src\game\ItemLitAnim.h" />
+    <ClInclude Include="..\..\src\game\ItemPreSet.h" />
+    <ClInclude Include="..\..\src\game\ItemRefineEffectSet.h" />
+    <ClInclude Include="..\..\src\game\ItemRefineSet.h" />
+    <ClInclude Include="..\..\src\game\ItemTypeSet.h" />
+    <ClInclude Include="..\..\src\game\Language.h" />
+    <ClInclude Include="..\..\src\game\LitLoad.h" />
+    <ClInclude Include="..\..\src\game\LoginScene.h" />
+    <ClInclude Include="..\..\src\game\LootFilter.h" />
+    <ClInclude Include="..\..\src\game\LuaInterface.h" />
+    <ClInclude Include="..\..\src\game\lua_app.h" />
+    <ClInclude Include="..\..\src\game\lua_camera.h" />
+    <ClInclude Include="..\..\src\game\lua_input.h" />
+    <ClInclude Include="..\..\src\game\lua_network.h" />
+    <ClInclude Include="..\..\src\game\lua_object.h" />
+    <ClInclude Include="..\..\src\game\lua_platform.h" />
+    <ClInclude Include="..\..\src\game\lua_scene.h" />
+    <ClInclude Include="..\..\src\game\lua_ui.h" />
+    <ClInclude Include="..\..\src\game\lua_util.h" />
+    <ClInclude Include="..\..\src\game\Main.h" />
+    <ClInclude Include="..\..\src\game\MapSet.h" />
+    <ClInclude Include="..\..\src\game\MonsterSet.h" />
+    <ClInclude Include="..\..\src\game\MouseDown.h" />
+    <ClInclude Include="..\..\src\game\MPEditor.h" />
+    <ClInclude Include="..\..\src\game\MusicSet.h" />
+    <ClInclude Include="..\..\src\game\NetChat.h" />
+    <ClInclude Include="..\..\src\game\NetGuild.h" />
+    <ClInclude Include="..\..\src\game\NetIF.h" />
+    <ClInclude Include="..\..\src\game\NetProtocol.h" />
+    <ClInclude Include="..\..\src\game\notifyset.h" />
+    <ClInclude Include="..\..\src\game\NPCHelper.h" />
+    <ClInclude Include="..\..\src\game\PacketCmd.h" />
+    <ClInclude Include="..\..\src\game\PackFile.h" />
+    <ClInclude Include="..\..\src\game\ProCirculate.h" />
+    <ClInclude Include="..\..\src\game\publicfun.h" />
+    <ClInclude Include="..\..\src\game\RecruitMemberData.h" />
+    <ClInclude Include="..\..\src\game\RecruitMembersMgr.h" />
+    <ClInclude Include="..\..\src\game\RenderStateMgr.h" />
+    <ClInclude Include="..\..\src\game\Resource.h" />
+    <ClInclude Include="..\..\src\game\Scene.h" />
+    <ClInclude Include="..\..\src\game\SceneArea.h" />
+    <ClInclude Include="..\..\src\game\SceneHeight.h" />
+    <ClInclude Include="..\..\src\game\SceneItem.h" />
+    <ClInclude Include="..\..\src\game\SceneItemSet.h" />
+    <ClInclude Include="..\..\src\game\SceneLight.h" />
+    <ClInclude Include="..\..\src\game\SceneNode.h" />
+    <ClInclude Include="..\..\src\game\SceneObj.h" />
+    <ClInclude Include="..\..\src\game\SceneObjFile.h" />
+    <ClInclude Include="..\..\src\game\SceneObjSet.h" />
+    <ClInclude Include="..\..\src\game\SceneSign.h" />
+    <ClInclude Include="..\..\src\game\Script.h" />
+    <ClInclude Include="..\..\src\game\SelectChaScene.h" />
+    <ClInclude Include="..\..\src\game\ServerSet.h" />
+    <ClInclude Include="..\..\src\game\ShipFactory.h" />
+    <ClInclude Include="..\..\src\game\SMallMap.h" />
+    <ClInclude Include="..\..\src\game\SoundCommon.h" />
+    <ClInclude Include="..\..\src\game\SoundInstance.h" />
+    <ClInclude Include="..\..\src\game\SoundManager.h" />
+    <ClInclude Include="..\..\src\game\state_reading.h" />
+    <ClInclude Include="..\..\src\game\STAttack.h" />
+    <ClInclude Include="..\..\src\game\stdafx.h" />
+    <ClInclude Include="..\..\src\game\SteadyFrame.h" />
+    <ClInclude Include="..\..\src\game\STMove.h" />
+    <ClInclude Include="..\..\src\game\STNpcTalk.h" />
+    <ClInclude Include="..\..\src\game\StoneSet.h" />
+    <ClInclude Include="..\..\src\game\STPose.h" />
+    <ClInclude Include="..\..\src\game\STReadyDie.h" />
+    <ClInclude Include="..\..\src\game\STSeat.h" />
+    <ClInclude Include="..\..\src\game\STStateObj.h" />
+    <ClInclude Include="..\..\src\game\TalkSessionFormMgr.h" />
+    <ClInclude Include="..\..\src\game\TeamInviteFormMgr.h" />
+    <ClInclude Include="..\..\src\game\TestDemo.h" />
+    <ClInclude Include="..\..\src\game\ThreadBase.h" />
+    <ClInclude Include="..\..\src\game\Tools.h" />
+    <ClInclude Include="..\..\src\game\Track.h" />
+    <ClInclude Include="..\..\src\game\UI3DCompent.h" />
+    <ClInclude Include="..\..\src\game\UIBankForm.h" />
+    <ClInclude Include="..\..\src\game\UIBoatForm.h" />
+    <ClInclude Include="..\..\src\game\UIBoothForm.h" />
+    <ClInclude Include="..\..\src\game\UIBourseForm.h" />
+    <ClInclude Include="..\..\src\game\UIBoxForm.h" />
+    <ClInclude Include="..\..\src\game\UIBreakForm.h" />
+    <ClInclude Include="..\..\src\game\UIChat.h" />
+    <ClInclude Include="..\..\src\game\UICheckBox.h" />
+    <ClInclude Include="..\..\src\game\UICheckBoxItem.h" />
+    <ClInclude Include="..\..\src\game\UIChurchChallenge.h" />
+    <ClInclude Include="..\..\include\game\UIKnowledgeBase.h" />
+    <ClInclude Include="..\..\src\game\UICloneForm.h" />
+    <ClInclude Include="..\..\src\game\UICombo.h" />
+    <ClInclude Include="..\..\src\game\UICommand.h" />
+    <ClInclude Include="..\..\src\game\UICommandCompent.h" />
+    <ClInclude Include="..\..\src\game\UICompent.h" />
+    <ClInclude Include="..\..\src\game\UIComposeForm.h" />
+    <ClInclude Include="..\..\src\game\UICookingForm.h" />
+    <ClInclude Include="..\..\src\game\UICozeForm.h" />
+    <ClInclude Include="..\..\src\game\UICursor.h" />
+    <ClInclude Include="..\..\src\game\UIDoublePwdForm.h" />
+    <ClInclude Include="..\..\src\game\UIDragTitle.h" />
+    <ClInclude Include="..\..\src\game\UIEdit.h" />
+    <ClInclude Include="..\..\src\game\UIEditData.h" />
+    <ClInclude Include="..\..\src\game\UIEditKey.h" />
+    <ClInclude Include="..\..\src\game\UIEditor.h" />
+    <ClInclude Include="..\..\src\game\UIEditStrategy.h" />
+    <ClInclude Include="..\..\src\game\UIEquipForm.h" />
+    <ClInclude Include="..\..\src\game\UIFastCommand.h" />
+    <ClInclude Include="..\..\src\game\UIFindTeamForm.h" />
+    <ClInclude Include="..\..\src\game\UIBossTimerForm.h" />
+    <ClInclude Include="..\..\src\game\UIFont.h" />
+    <ClInclude Include="..\..\include\game\BitmapFontAdapter.h" />
+    <ClInclude Include="..\..\src\game\UIForgeForm.h" />
+    <ClInclude Include="..\..\src\game\UIForm.h" />
+    <ClInclude Include="..\..\src\game\UIFormMgr.h" />
+    <ClInclude Include="..\..\src\game\UIFoundForm.h" />
+    <ClInclude Include="..\..\src\game\UIGlobalVar.h" />
+    <ClInclude Include="..\..\src\game\UIGoodsGrid.h" />
+    <ClInclude Include="..\..\src\game\UIGraph.h" />
+    <ClInclude Include="..\..\src\game\UIGrid.h" />
+    <ClInclude Include="..\..\src\game\UIGuiData.h" />
+    <ClInclude Include="..\..\src\game\UIGuildApply.h" />
+    <ClInclude Include="..\..\src\game\UIGuildBankForm.h" />
+    <ClInclude Include="..\..\src\game\UIGuildChallengeForm.h" />
+    <ClInclude Include="..\..\src\game\UIGuildList.h" />
+    <ClInclude Include="..\..\src\game\UIGuildMgr.h" />
+    <ClInclude Include="..\..\src\game\UIHaircutForm.h" />
+    <ClInclude Include="..\..\src\game\UIHeadSay.h" />
+    <ClInclude Include="..\..\src\game\UIHelpInfoForm.h" />
+    <ClInclude Include="..\..\src\game\UIImage.h" />
+    <ClInclude Include="..\..\src\game\UIImeInput.h" />
+    <ClInclude Include="..\..\src\game\UIItem.h" />
+    <ClInclude Include="..\..\src\game\UIItemCommand.h" />
+    <ClInclude Include="..\..\src\game\UILabel.h" />
+    <ClInclude Include="..\..\src\game\UIList.h" />
+    <ClInclude Include="..\..\src\game\UIListView.h" />
+    <ClInclude Include="..\..\src\game\UIMailForm.h" />
+    <ClInclude Include="..\..\src\game\UIMakeEquipForm.h" />
+    <ClInclude Include="..\..\src\game\UIMemo.h" />
+    <ClInclude Include="..\..\src\game\UIMenu.h" />
+    <ClInclude Include="..\..\src\game\UIMinimapForm.h" />
+    <ClInclude Include="..\..\src\game\UIMisLogForm.h" />
+    <ClInclude Include="..\..\src\game\UIMissionForm.h" />
+    <ClInclude Include="..\..\src\game\UINpcTalkForm.h" />
+    <ClInclude Include="..\..\src\game\UINpcTradeForm.h" />
+    <ClInclude Include="..\..\src\game\UINumAnswer.h" />
+    <ClInclude Include="..\..\src\game\UIPage.h" />
+    <ClInclude Include="..\..\src\game\UIPicList.h" />
+    <ClInclude Include="..\..\src\game\UIPicture.h" />
+    <ClInclude Include="..\..\src\game\UIPKDialog.h" />
+    <ClInclude Include="..\..\src\game\UIPKSilverForm.h" />
+    <ClInclude Include="..\..\src\game\UIProgressBar.h" />
+    <ClInclude Include="..\..\src\game\UIPurifyForm.h" />
+    <ClInclude Include="..\..\src\game\UIRender.h" />
+    <ClInclude Include="..\..\src\game\UIRichEdit.h" />
+    <ClInclude Include="..\..\src\game\UIScript.h" />
+    <ClInclude Include="..\..\src\game\UIScriptNative.h" />
+    <ClInclude Include="..\..\src\game\UIScroll.h" />
+    <ClInclude Include="..\..\src\game\UISkillCommand.h" />
+    <ClInclude Include="..\..\src\game\UISkillList.h" />
+    <ClInclude Include="..\..\src\game\UISpiritForm.h" />
+    <ClInclude Include="..\..\src\game\UIStartForm.h" />
+    <ClInclude Include="..\..\src\game\UIStateForm.h" />
+    <ClInclude Include="..\..\src\game\UIStep.h" />
+    <ClInclude Include="..\..\src\game\UIStoreForm.h" />
+    <ClInclude Include="..\..\src\game\UISystemForm.h" />
+    <ClInclude Include="..\..\src\game\UITeam.h" />
+    <ClInclude Include="..\..\src\game\UITemplete.h" />
+    <ClInclude Include="..\..\src\game\UITextButton.h" />
+    <ClInclude Include="..\..\src\game\UITextParse.h" />
+    <ClInclude Include="..\..\src\game\UITitle.h" />
+    <ClInclude Include="..\..\src\game\UITradeForm.h" />
+    <ClInclude Include="..\..\src\game\UITreeView.h" />
+    <ClInclude Include="..\..\src\game\WorldScene.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\src\game\GameApp????.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\src\game\kop.ico" />
+    <Image Include="..\..\src\game\small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="kop.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\util\Util.vcxproj">
+      <Project>{9c47fd3b-3c9f-4ebf-9019-12c111111111}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\common\Common.vcxproj">
+      <Project>{58b6753c-75da-449a-97f9-3b26da4b6fb5}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ServerSDK\LIBDBC.vcxproj">
+      <Project>{c9b950bb-f1b8-4274-b077-e07b16a16f1b}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Status\Status.vcxproj">
+      <Project>{1bda542a-fafb-4b7b-b7bd-3ad14bb78768}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ICUHelper\ICUHelper.vcxproj">
+      <Project>{3a1c94cd-ccba-4f62-9af1-919b10c582e3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\audiosdl\AudioSDL.vcxproj">
+      <Project>{3a1c94cd-ccba-4f62-9af1-919b10c582e6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\engine\MindPower3D.vcxproj">
+      <Project>{8661b70a-8d22-4082-9e71-00312294df0f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\calua\CaLua.vcxproj">
+      <Project>{c2367211-6b3d-4ecc-9bd1-31a4e10ca7b9}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

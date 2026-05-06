@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Application Layer">
+      <UniqueIdentifier>{e533b565-9110-44ef-9ee1-4c8ce2452eff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Network Layer">
+      <UniqueIdentifier>{8dbe35b9-cf06-4db9-a335-8eb572c9e03c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\status\UdpClient.cpp" />
+    <ClCompile Include="..\..\src\status\UdpManage.cpp" />
+    <ClCompile Include="..\..\src\status\UdpSocket.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\status\UdpClient.h" />
+    <ClInclude Include="..\..\include\status\UdpManage.h" />
+    <ClInclude Include="..\..\include\status\UdpSocket.h" />
+  </ItemGroup>
+</Project>

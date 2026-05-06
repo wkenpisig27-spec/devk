@@ -1,0 +1,364 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Guild">
+      <UniqueIdentifier>{ba94c926-d979-4c20-b4a8-2d66fb815133}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Other">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="PictureResource">
+      <UniqueIdentifier>{59280883-6df8-4420-9d5b-9f7c38f83236}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MapManagementUnit">
+      <UniqueIdentifier>{7769d0f8-e819-473f-b3b9-5d5b29411f1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity">
+      <UniqueIdentifier>{9cb8af5c-843d-4ffa-9cdf-3bc5d82d4535}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity\Other">
+      <UniqueIdentifier>{94d27cc3-d0c4-4d97-aa20-e1af861b461b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity\Roles">
+      <UniqueIdentifier>{4dcce806-17c7-41f8-a8f7-253b648eee6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity\Roles\NPC">
+      <UniqueIdentifier>{83010672-095c-4eb1-9625-45bf9274d655}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity\Roles\Eudemon">
+      <UniqueIdentifier>{3e0bb2ee-c583-46e9-a6b9-9ada6ead4476}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity\Roles\Event Entity">
+      <UniqueIdentifier>{c8ebc88f-992a-4434-a4b0-d65dcbaf6c24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity\Base Class">
+      <UniqueIdentifier>{bd774fd7-93fd-4276-80b9-277c2650969c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity\Roles\Player">
+      <UniqueIdentifier>{4e61c4ee-847e-42cf-8da8-3fc24b0a8637}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity\Roles\Behavior Control">
+      <UniqueIdentifier>{65549a00-40b2-4ffd-8048-50bb3a1d5d13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity\Roles\SuperCmd">
+      <UniqueIdentifier>{77ccace3-2dce-4d2d-af6e-8bec5f49da13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity\Props">
+      <UniqueIdentifier>{f01a126e-54a6-4f57-a979-e0c57f464086}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ToolLibrary">
+      <UniqueIdentifier>{a746e6af-f346-4562-be99-1423a186bbc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ToolLibrary\Math">
+      <UniqueIdentifier>{a21eef6e-9727-4a58-875a-0efa1e8fcae7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ToolLibrary\Other">
+      <UniqueIdentifier>{23038529-0e21-4343-88cf-aafe128d1232}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AppFramework">
+      <UniqueIdentifier>{6bc2da4f-04d0-4cdb-86d8-cf9dd4f97ae3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AppFramework\EventHandling">
+      <UniqueIdentifier>{2bffc817-e184-4bc5-8970-5a1bcff666fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AppFramework\ServerConfig">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx</Extensions>
+    </Filter>
+    <Filter Include="Database">
+      <UniqueIdentifier>{fbb9eb8c-a64d-47c9-88f6-27d2ccc47e25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Bidding">
+      <UniqueIdentifier>{95f3d3d9-b213-4c9c-8550-e14dbd587035}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SystemReport">
+      <UniqueIdentifier>{a7de8378-d757-48bf-8ee1-8afc6995edc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Network2">
+      <UniqueIdentifier>{ec390115-fcaf-4d7e-b35c-2b387dc48d24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Network1">
+      <UniqueIdentifier>{d3172770-6332-430d-81eb-f0c8f5e6011c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Script System">
+      <UniqueIdentifier>{dc8a8dd8-46a7-402d-b823-bd994ccab452}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Script System\Mission System">
+      <UniqueIdentifier>{5ab260f3-7673-414f-8c5d-dec2f0d826d0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\gameserver\Action.h" />
+    <ClInclude Include="..\..\src\gameserver\Attachable.h" />
+    <ClInclude Include="..\..\src\gameserver\AttachManage.h" />
+    <ClInclude Include="..\..\src\gameserver\Auction.h" />
+    <ClInclude Include="..\..\src\gameserver\AuctionItem.h" />
+    <ClInclude Include="..\..\src\gameserver\Birthplace.h" />
+    <ClInclude Include="..\..\src\gameserver\CallStack.h" />
+    <ClInclude Include="..\..\src\gameserver\cfl_iocp.h" />
+    <ClInclude Include="..\..\src\gameserver\cfl_lock.h" />
+    <ClInclude Include="..\..\src\gameserver\cfl_mempool.h" />
+    <ClInclude Include="..\..\src\gameserver\cfl_pkt.h" />
+    <ClInclude Include="..\..\src\gameserver\Character.h" />
+    <ClInclude Include="..\..\src\gameserver\CharBoat.h" />
+    <ClInclude Include="..\..\src\gameserver\CharForge.h" />
+    <ClInclude Include="..\..\src\gameserver\CharScript.h" />
+    <ClInclude Include="..\..\src\gameserver\CharStall.h" />
+    <ClInclude Include="..\..\src\gameserver\CharTrade.h" />
+    <ClInclude Include="..\..\src\gameserver\Config.h" />
+    <ClInclude Include="..\..\src\gameserver\Entity.h" />
+    <ClInclude Include="..\..\src\gameserver\EntityAlloc.h" />
+    <ClInclude Include="..\..\src\gameserver\EntityScript.h" />
+    <ClInclude Include="..\..\src\gameserver\EntitySpawn.h" />
+    <ClInclude Include="..\..\src\gameserver\Event.h" />
+    <ClInclude Include="..\..\src\gameserver\EventEntity.h" />
+    <ClInclude Include="..\..\src\gameserver\EventHandler.h" />
+    <ClInclude Include="..\..\src\gameserver\Expand.h" />
+    <ClInclude Include="..\..\src\gameserver\EyeshotCell.h" />
+    <ClInclude Include="..\..\src\gameserver\FightAble.h" />
+    <ClInclude Include="..\..\src\gameserver\FindPath.h" />
+    <ClInclude Include="..\..\src\gameserver\GameApp.h" />
+    <ClInclude Include="..\..\src\gameserver\GameAppNet.h" />
+    <ClInclude Include="..\..\src\gameserver\GameDB.h" />
+    <ClInclude Include="..\..\src\gameserver\GameServerApp.h" />
+    <ClInclude Include="..\..\src\gameserver\gmsvr.h" />
+    <ClInclude Include="..\..\src\gameserver\gtplayer.h" />
+    <ClInclude Include="..\..\src\gameserver\Guild.h" />
+    <ClInclude Include="..\..\src\gameserver\HarmRec.h" />
+    <ClInclude Include="..\..\src\gameserver\Identity.h" />
+    <ClInclude Include="..\..\src\gameserver\Item.h" />
+    <ClInclude Include="..\..\src\gameserver\lua_gamectrl.h" />
+    <ClInclude Include="..\..\src\gameserver\lua_gamectrl2.h" />
+    <ClInclude Include="..\..\src\gameserver\MapEntry.h" />
+    <ClInclude Include="..\..\src\gameserver\MapRes.h" />
+    <ClInclude Include="..\..\src\gameserver\MapTrigger.h" />
+    <ClInclude Include="..\..\src\gameserver\Mission.h" />
+    <ClInclude Include="..\..\src\gameserver\MoveAble.h" />
+    <ClInclude Include="..\..\src\gameserver\MsgQueue.h" />
+    <ClInclude Include="..\..\src\gameserver\NPC.h" />
+    <ClInclude Include="..\..\src\gameserver\NpcScript.h" />
+    <ClInclude Include="..\..\src\gameserver\Parser.h" />
+    <ClInclude Include="..\..\src\gameserver\PicSet.h" />
+    <ClInclude Include="..\..\src\gameserver\Picture.h" />
+    <ClInclude Include="..\..\src\gameserver\Player.h" />
+    <ClInclude Include="..\..\src\gameserver\Range.h" />
+    <ClInclude Include="..\..\src\gameserver\RoleData.h" />
+    <ClInclude Include="..\..\src\gameserver\Script.h" />
+    <ClInclude Include="..\..\src\gameserver\SkillState.h" />
+    <ClInclude Include="..\..\src\gameserver\SkillTemp.h" />
+    <ClInclude Include="..\..\src\gameserver\StackWalker.h" />
+    <ClInclude Include="..\..\src\gameserver\StateCell.h" />
+    <ClInclude Include="..\..\src\gameserver\stdafx.h" />
+    <ClInclude Include="..\..\src\gameserver\SubMap.h" />
+    <ClInclude Include="..\..\src\gameserver\SystemDialog.h" />
+    <ClInclude Include="..\..\src\gameserver\Timer.h" />
+    <ClInclude Include="..\..\src\gameserver\TradeLogDB.h" />
+    <ClInclude Include="..\..\src\gameserver\Usage.h" />
+    <ClInclude Include="..\..\src\gameserver\Weather.h" />
+    <ClInclude Include="..\..\src\gameserver\WorldEudemon.h" />
+    <ClInclude Include="..\..\src\gameserver\xString.h" />
+    <ClInclude Include="..\..\include\gameserver\resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\gameserver\Action.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\Attachable.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\AttachManage.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\Auction.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\AuctionItem.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\Birthplace.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\cfl_iocp.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\cfl_lock.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\Character.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\CharacterAI.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\CharacterAIState.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\CharacterCmd.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\CharacterPacket.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\CharacterPrl.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\CharacterRun.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\CharacterSuperCmd.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\CharBoat.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\CharForge.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\CharScript.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\CharStall.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\CharTrade.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\Config.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\Entity.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\EntityAlloc.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\EntityScript.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\EntitySpawn.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\EventCalculate.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\EventEntity.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\EventHandler.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\EyeshotCell.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\FightAble.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\FindPath.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\GameApp.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\GameAppNet.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\GameDB.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\GameServerApp.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\GameSMain.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\gmsvr.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\Guild.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\HarmRec.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\Item.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\lua_gamectrl.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\MapEntry.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\MapRes.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\MapTrigger.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\Mission.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\MoveAble.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\NPC.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\NpcScript.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\Parser.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\PicSet.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\Picture.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\Player.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\Script.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\StackWalker.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\StateCell.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\stdafx.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\SubMap.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\SystemDialog.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\TradeLogDB.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\Weather.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\WorldEudemon.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gameserver\xString.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GameServer.rc">
+      <Filter>Other</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt">
+      <Filter>Other</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

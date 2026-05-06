@@ -1,0 +1,106 @@
+[04-08 15:06:27.543]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:06:27.543][STMT:0x87861eb0][SQLERR]: [SaveAllData]
+[04-08 15:06:32.562]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:06:32.562][STMT:0x87861eb0][SQLERR]: [SaveAllData]
+[04-08 15:06:58.776]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllDataWithoutPos' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:06:58.780][STMT:0x87861eb0][SQLERR]: [SaveAllDataWithoutPos]
+[04-08 15:07:00.597]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:07:00.597][STMT:0x87861eb0][SQLERR]: [SaveAllData]
+[04-08 15:07:19.474]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllDataWithoutPos' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:07:19.474][STMT:0x87862710][SQLERR]: [SaveAllDataWithoutPos]
+[04-08 15:09:28.653]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:09:28.653][STMT:0x87861eb0][SQLERR]: [SaveAllData]
+[04-08 15:09:37.813]SQL Error State:08004, Native Error Code: 394, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]The server principal "pko_game" is not able to access the database "AccountServer" under the current security context.
+[04-08 15:09:37.813][STMT:0x87861eb0][SQLERR]: [{CALL dbo.GetPlayerLoginInfo(?)}]
+[04-08 15:09:37.816]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:09:37.816][STMT:0x87861eb0][SQLERR]: [SaveAllData]
+[04-08 15:09:41.344]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllDataWithoutPos' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:09:41.344][STMT:0x87861eb0][SQLERR]: [SaveAllDataWithoutPos]
+[04-08 15:10:02.526]SQL Error State:08004, Native Error Code: 394, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]The server principal "pko_game" is not able to access the database "AccountServer" under the current security context.
+[04-08 15:10:02.526][STMT:0x87861eb0][SQLERR]: [{CALL dbo.GetPlayerLoginInfo(?)}]
+[04-08 15:10:02.531]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllDataWithoutPos' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:10:02.531][STMT:0x87861eb0][SQLERR]: [SaveAllDataWithoutPos]
+[04-08 15:11:22.349]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:11:22.349][STMT:0x87861eb0][SQLERR]: [SaveAllData]
+[04-08 15:25:35.822]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:25:35.822][STMT:0x87861eb0][SQLERR]: [SaveAllData]
+[04-08 15:26:32.287]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllDataWithoutPos' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:26:32.287][STMT:0x87861eb0][SQLERR]: [SaveAllDataWithoutPos]
+[04-08 15:45:04.979]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllDataWithoutPos' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:45:04.979][STMT:0x87861eb0][SQLERR]: [SaveAllDataWithoutPos]
+[04-08 15:46:05.204]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:46:05.204][STMT:0x87861eb0][SQLERR]: [SaveAllData]
+[04-08 15:46:12.323]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:46:12.323][STMT:0x87861eb0][SQLERR]: [SaveAllData]
+[04-08 15:46:14.002]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:46:14.002][STMT:0x87861eb0][SQLERR]: [SaveAllData]
+[04-08 17:00:26.263]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 17:00:26.263][STMT:0x1c3a2490][SQLERR]: [SaveAllData]
+[04-08 17:00:31.187]SQL Error State:08004, Native Error Code: 394, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]The server principal "pko_game" is not able to access the database "AccountServer" under the current security context.
+[04-08 17:00:31.187][STMT:0x1c3a2490][SQLERR]: [{CALL dbo.GetPlayerLoginInfo(?)}]
+[04-08 17:00:36.939]SQL Error State:08004, Native Error Code: 394, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]The server principal "pko_game" is not able to access the database "AccountServer" under the current security context.
+[04-08 17:00:36.939][STMT:0x1c3a2490][SQLERR]: [{CALL dbo.GetPlayerLoginInfo(?)}]
+[04-08 17:00:36.948]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 17:00:36.948][STMT:0x1c3a2490][SQLERR]: [SaveAllData]
+[04-08 17:00:40.503]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 17:00:40.503][STMT:0x1c3a2490][SQLERR]: [SaveAllData]
+[04-08 17:01:43.164]SQL Error State:08004, Native Error Code: 394, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]The server principal "pko_game" is not able to access the database "AccountServer" under the current security context.
+[04-08 17:01:43.164][STMT:0x1c3a2490][SQLERR]: [{CALL dbo.GetPlayerLoginInfo(?)}]
+[04-08 17:01:43.284]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllDataWithoutPos' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 17:01:43.284][STMT:0x1c3a2490][SQLERR]: [SaveAllDataWithoutPos]
+[04-08 15:00:04.227]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllDataWithoutPos' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:00:04.227][STMT:0x1c3a1eb0][SQLERR]: [SaveAllDataWithoutPos]
+[04-08 15:00:17.439]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:00:17.439][STMT:0x1c3a1eb0][SQLERR]: [SaveAllData]
+[04-08 15:00:31.100]SQL Error State:08004, Native Error Code: 394, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]The server principal "pko_game" is not able to access the database "AccountServer" under the current security context.
+[04-08 15:00:31.100][STMT:0x1c3a2490][SQLERR]: [{CALL dbo.GetPlayerLoginInfo(?)}]
+[04-08 15:00:31.101]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:00:31.101][STMT:0x1c3a2490][SQLERR]: [SaveAllData]
+[04-08 15:00:34.137]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:00:34.137][STMT:0x1c3a2490][SQLERR]: [SaveAllData]
+[04-08 15:01:05.953]SQL Error State:08004, Native Error Code: 394, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]The server principal "pko_game" is not able to access the database "AccountServer" under the current security context.
+[04-08 15:01:05.953][STMT:0x1c3a2490][SQLERR]: [{CALL dbo.GetPlayerLoginInfo(?)}]
+[04-08 15:01:05.954]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllDataWithoutPos' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:01:05.954][STMT:0x1c3a2490][SQLERR]: [SaveAllDataWithoutPos]
+[04-08 15:16:22.797]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:16:22.797][STMT:0x1c3a1eb0][SQLERR]: [SaveAllData]
+[04-08 15:16:30.367]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllDataWithoutPos' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:16:30.367][STMT:0x1c3a1eb0][SQLERR]: [SaveAllDataWithoutPos]
+[04-08 15:21:20.695]SQL Error State:08004, Native Error Code: 394, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]The server principal "pko_game" is not able to access the database "AccountServer" under the current security context.
+[04-08 15:21:20.695][STMT:0x1c3a1eb0][SQLERR]: [{CALL dbo.GetPlayerLoginInfo(?)}]
+[04-08 15:21:20.696]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:21:20.696][STMT:0x1c3a1eb0][SQLERR]: [SaveAllData]
+[04-08 15:21:41.962]SQL Error State:08004, Native Error Code: 394, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]The server principal "pko_game" is not able to access the database "AccountServer" under the current security context.
+[04-08 15:21:41.962][STMT:0x1c3a1eb0][SQLERR]: [{CALL dbo.GetPlayerLoginInfo(?)}]
+[04-08 15:21:41.964]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllDataWithoutPos' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:21:41.964][STMT:0x1c3a1eb0][SQLERR]: [SaveAllDataWithoutPos]
+[04-08 15:21:47.446]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:21:47.446][STMT:0x1c3a1eb0][SQLERR]: [SaveAllData]
+[04-08 15:22:05.310]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:22:05.310][STMT:0x1c3a1eb0][SQLERR]: [SaveAllData]
+[04-08 15:22:15.687]SQL Error State:08004, Native Error Code: 394, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]The server principal "pko_game" is not able to access the database "AccountServer" under the current security context.
+[04-08 15:22:15.687][STMT:0x1c3a1eb0][SQLERR]: [{CALL dbo.GetPlayerLoginInfo(?)}]
+[04-08 15:22:15.688]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllDataWithoutPos' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:22:15.688][STMT:0x1c3a1eb0][SQLERR]: [SaveAllDataWithoutPos]
+[04-08 15:22:40.864]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:22:40.864][STMT:0x1c3a1eb0][SQLERR]: [SaveAllData]
+[04-08 15:22:50.912]SQL Error State:08004, Native Error Code: 394, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]The server principal "pko_game" is not able to access the database "AccountServer" under the current security context.
+[04-08 15:22:50.912][STMT:0x1c3a1eb0][SQLERR]: [{CALL dbo.GetPlayerLoginInfo(?)}]
+[04-08 15:22:50.913]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllDataWithoutPos' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:22:50.913][STMT:0x1c3a1eb0][SQLERR]: [SaveAllDataWithoutPos]
+[04-08 15:36:41.864]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllDataWithoutPos' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:36:41.864][STMT:0x1c3a1eb0][SQLERR]: [SaveAllDataWithoutPos]
+[04-08 15:42:49.407]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:42:49.407][STMT:0x1c3a1eb0][SQLERR]: [SaveAllData]
+[04-08 15:44:57.603]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllData' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:44:57.603][STMT:0x1c3a1eb0][SQLERR]: [SaveAllData]
+[04-08 15:44:57.815]SQL Error State:42000, Native Error Code: C9, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure or function 'SaveAllDataWithoutPos' expects parameter '@_CHA_ID', which was not supplied.
+[04-08 15:44:57.815][STMT:0x1c3a2710][SQLERR]: [SaveAllDataWithoutPos]
+[04-08 15:44:57.815]SQL Error State:HY000, Native Error Code: 0, ODBC Error: [Microsoft][ODBC SQL Server Driver]Connection is busy with results for another hstmt
+[04-08 15:44:57.815][STMT:0x1c3a2d60][SQLERR]: [SaveAllDataWithoutPos]
+[04-08 15:44:57.815]SQL Error State:HY000, Native Error Code: 0, ODBC Error: [Microsoft][ODBC SQL Server Driver]Connection is busy with results for another hstmt
+[04-08 15:44:57.815][STMT:0x1c3a2d60][SQLERR]: [SaveResourceContent]
+[04-08 15:44:57.815]SQL Error State:HY000, Native Error Code: 0, ODBC Error: [Microsoft][ODBC SQL Server Driver]Connection is busy with results for another hstmt
+[04-08 15:44:57.815][STMT:0x1c3a2d60][SQLERR]: [SaveResourceContent]
+[04-08 15:44:57.826]SQL Error State:HY000, Native Error Code: 0, ODBC Error: [Microsoft][ODBC SQL Server Driver]Connection is busy with results for another hstmt
+[04-08 15:44:57.826][STMT:0x1c3a2710][SQLERR]: [SavePos]

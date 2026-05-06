@@ -1,0 +1,67 @@
+# BossTracked.txt - Boss Timer Configuration
+# Format: ChaID,RespawnSeconds
+# RespawnSeconds: Time in seconds before boss can respawn after death
+#
+# The timer is REAL-TIME based - it counts down even when server is offline.
+# If the server restarts after the timer has expired, the boss will spawn immediately.
+#
+# Examples:
+#   1 hour  = 3600 seconds
+#   2 hours = 7200 seconds
+#   4 hours = 14400 seconds
+#   8 hours = 28800 seconds
+#   24 hours = 86400 seconds
+#
+# Boss list (add your boss ChaIDs and respawn times below):
+
+# Devil
+1423,86400
+
+# Half-beast Man
+1414,86400
+
+# Aqua Tiger
+1413,86400
+
+# Aries Guardian
+1009,1800
+
+# Black Dragon
+789,86400
+
+# Firm Guard
+1105,86400
+
+# Fury Kara
+1109,86400
+
+# Morpheus Abyss Demon
+1117,86400
+
+# Vicious Relic Protector
+1113,86400
+
+# Hell Demon
+1418,86400
+
+# Hell Prisoner
+1417,86400
+
+# Hell Mud Monster
+1416,86400
+
+# Hell Knight
+1415,86400
+
+# Other bosses - add as needed:
+# 1413,7200
+# 1414,7200
+# 1415,14400
+# 1416,14400
+# 1417,28800
+# 1418,28800
+# 1105,7200
+# 1109,7200
+# 1113,14400
+# 1117,14400
+# 1423,86400

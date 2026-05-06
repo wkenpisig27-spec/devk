@@ -1,0 +1,2 @@
+[04-10 03:01:45.701]DoString after_player_kill_player
+[04-10 03:01:45.701]./resource/script\calculate\functions.lua:2272: attempt to perform arithmetic on local 'FightingPoint' (a nil value)

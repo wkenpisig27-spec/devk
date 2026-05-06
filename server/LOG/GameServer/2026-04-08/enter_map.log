@@ -1,0 +1,590 @@
+[04-08 15:05:06.465]start entry map cha_id = 5187 enter--------------------------
+[04-08 15:05:06.465]cha_id = 5187, begin read data from database: 
+[04-08 15:05:06.578]Loading database succeed??_get_row_stored_procedure.
+[04-08 15:05:06.579]Set the whole data succeed.
+[04-08 15:05:06.586]Load kitbag data succeed.
+[04-08 15:05:06.587]Load temp kitbag data succeed.
+[04-08 15:05:06.587]Load bank data succeed.
+[04-08 15:05:06.590]Load big map data succeed.
+[04-08 15:05:06.591]Load the character whole data succeed.
+[04-08 15:05:06.601]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:05:06.601]end up entry map  [Cha-tempra+5187]================
+
+[04-08 15:05:48.937]Start save character assets.
+[04-08 15:05:49.066]finish kitbag save.
+[04-08 15:05:49.066]Save character Cha-tempra+5187(Cha-tempra+5187)assets succeed.
+[04-08 15:06:13.586]start entry map cha_id = 5188 enter--------------------------
+[04-08 15:06:13.586]cha_id = 5188, begin read data from database: 
+[04-08 15:06:13.588]Loading database succeed??_get_row_stored_procedure.
+[04-08 15:06:13.589]Set the whole data succeed.
+[04-08 15:06:13.714]Load kitbag data succeed.
+[04-08 15:06:13.717]Load temp kitbag data succeed.
+[04-08 15:06:13.719]Load bank data succeed.
+[04-08 15:06:13.725]Load big map data succeed.
+[04-08 15:06:13.730]Load the character whole data succeed.
+[04-08 15:06:13.735]finish enter game scene Cha-sads+5188(Cha-sads+5188)
+[04-08 15:06:13.735]end up entry map  [Cha-sads+5188]================
+
+[04-08 15:06:27.414]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map garner，aimmap PKmap)--------
+[04-08 15:06:27.414]character map name garner
+[04-08 15:06:27.414]Local map switch enabled - switching in memory
+[04-08 15:06:27.414]Cha-tempra+5187 start configure save data.
+[04-08 15:06:27.543]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:06:27.545]finish kitbag save.
+[04-08 15:06:27.545]finish save the temp kitbag.
+[04-08 15:06:27.545]finish the whole bank[0->0]save
+[04-08 15:06:27.545]start save big map data!
+[04-08 15:06:27.548]organize big map data succeed!
+[04-08 15:06:27.548]save the whole boat data succeed
+[04-08 15:06:27.557]save data succeed (local switch)
+[04-08 15:06:27.560]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:06:27.560]finish local map switch
+
+[04-08 15:06:32.555]SwitchMap(differ Server map switch，control player name Cha-sads+5188[mainplayer Cha-sads+5188]，formerly map garner，aimmap PKmap)--------
+[04-08 15:06:32.555]character map name garner
+[04-08 15:06:32.555]Local map switch enabled - switching in memory
+[04-08 15:06:32.560]Cha-sads+5188 start configure save data.
+[04-08 15:06:32.562]character Cha-sads+5188	carry out SQL sentence error!
+[04-08 15:06:32.564]finish kitbag save.
+[04-08 15:06:32.564]finish save the temp kitbag.
+[04-08 15:06:32.564]finish the whole bank[0->0]save
+[04-08 15:06:32.564]save the whole boat data succeed
+[04-08 15:06:32.564]save data succeed (local switch)
+[04-08 15:06:32.566]finish enter game scene Cha-sads+5188(Cha-sads+5188)
+[04-08 15:06:32.566]finish local map switch
+
+[04-08 15:06:58.642]SwitchMap(differ Server map switch，control player name Cha-sads+5188[mainplayer Cha-sads+5188]，formerly map PKmap，aimmap garner)--------
+[04-08 15:06:58.642]character map name PKmap
+[04-08 15:06:58.642]Local map switch enabled - switching in memory
+[04-08 15:06:58.642]Cha-sads+5188 start configure save data.
+[04-08 15:06:58.780]character Cha-sads+5188	carry out SQL sentence error!
+[04-08 15:06:58.781]finish kitbag save.
+[04-08 15:06:58.782]finish save the temp kitbag.
+[04-08 15:06:58.782]finish the whole bank[0->0]save
+[04-08 15:06:58.782]save the whole boat data succeed
+[04-08 15:06:58.782]save data succeed (local switch)
+[04-08 15:06:58.783]finish enter game scene Cha-sads+5188(Cha-sads+5188)
+[04-08 15:06:58.783]finish local map switch
+
+[04-08 15:07:00.596]SwitchMap(differ Server map switch，control player name Cha-sads+5188[mainplayer Cha-sads+5188]，formerly map garner，aimmap PKmap)--------
+[04-08 15:07:00.596]character map name garner
+[04-08 15:07:00.596]Local map switch enabled - switching in memory
+[04-08 15:07:00.596]Cha-sads+5188 start configure save data.
+[04-08 15:07:00.597]character Cha-sads+5188	carry out SQL sentence error!
+[04-08 15:07:00.598]finish kitbag save.
+[04-08 15:07:00.598]finish save the temp kitbag.
+[04-08 15:07:00.598]finish the whole bank[0->0]save
+[04-08 15:07:00.598]save the whole boat data succeed
+[04-08 15:07:00.598]save data succeed (local switch)
+[04-08 15:07:00.598]finish enter game scene Cha-sads+5188(Cha-sads+5188)
+[04-08 15:07:00.598]finish local map switch
+
+[04-08 15:07:19.472]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map PKmap，aimmap garner)--------
+[04-08 15:07:19.472]character map name PKmap
+[04-08 15:07:19.472]Local map switch enabled - switching in memory
+[04-08 15:07:19.472]Cha-tempra+5187 start configure save data.
+[04-08 15:07:19.474]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:07:19.474]finish kitbag save.
+[04-08 15:07:19.474]finish save the temp kitbag.
+[04-08 15:07:19.474]finish the whole bank[0->0]save
+[04-08 15:07:19.474]save the whole boat data succeed
+[04-08 15:07:19.478]save data succeed (local switch)
+[04-08 15:07:19.478]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:07:19.478]finish local map switch
+
+[04-08 15:08:34.365]Start save character assets.
+[04-08 15:08:34.373]finish kitbag save.
+[04-08 15:08:34.373]Save character Cha-tempra+5187(Cha-tempra+5187)assets succeed.
+[04-08 15:08:57.574]Start save character assets.
+[04-08 15:08:57.583]finish kitbag save.
+[04-08 15:08:57.583]Save character Cha-tempra+5187(Cha-tempra+5187)assets succeed.
+[04-08 15:09:08.381]Start save character assets.
+[04-08 15:09:08.385]finish kitbag save.
+[04-08 15:09:08.385]Save character Cha-tempra+5187(Cha-tempra+5187)assets succeed.
+[04-08 15:09:15.527]Start save character assets.
+[04-08 15:09:15.528]finish kitbag save.
+[04-08 15:09:15.528]Save character Cha-tempra+5187(Cha-tempra+5187)assets succeed.
+[04-08 15:09:18.895]Start save character assets.
+[04-08 15:09:18.899]finish kitbag save.
+[04-08 15:09:18.899]Save character Cha-tempra+5187(Cha-tempra+5187)assets succeed.
+[04-08 15:09:28.652]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map garner，aimmap darkblue)--------
+[04-08 15:09:28.652]character map name garner
+[04-08 15:09:28.652]Local map switch enabled - switching in memory
+[04-08 15:09:28.652]Cha-tempra+5187 start configure save data.
+[04-08 15:09:28.653]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:09:28.654]finish kitbag save.
+[04-08 15:09:28.654]finish save the temp kitbag.
+[04-08 15:09:28.654]finish the whole bank[0->0]save
+[04-08 15:09:28.654]save the whole boat data succeed
+[04-08 15:09:28.654]save data succeed (local switch)
+[04-08 15:09:28.659]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:09:28.659]finish local map switch
+
+[04-08 15:09:37.814]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map darkblue，aimmap garner2)--------
+[04-08 15:09:37.815]character map name darkblue
+[04-08 15:09:37.815]Local map switch enabled - switching in memory
+[04-08 15:09:37.815]Cha-tempra+5187 start configure save data.
+[04-08 15:09:37.816]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:09:37.816]finish kitbag save.
+[04-08 15:09:37.816]finish save the temp kitbag.
+[04-08 15:09:37.816]finish the whole bank[0->0]save
+[04-08 15:09:37.816]save the whole boat data succeed
+[04-08 15:09:37.816]save data succeed (local switch)
+[04-08 15:09:37.874]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:09:37.874]finish local map switch
+
+[04-08 15:09:41.342]SwitchMap(differ Server map switch，control player name Cha-sads+5188[mainplayer Cha-sads+5188]，formerly map PKmap，aimmap garner2)--------
+[04-08 15:09:41.342]character map name PKmap
+[04-08 15:09:41.342]Local map switch enabled - switching in memory
+[04-08 15:09:41.342]Cha-sads+5188 start configure save data.
+[04-08 15:09:41.344]character Cha-sads+5188	carry out SQL sentence error!
+[04-08 15:09:41.346]finish kitbag save.
+[04-08 15:09:41.347]finish save the temp kitbag.
+[04-08 15:09:41.347]finish the whole bank[0->0]save
+[04-08 15:09:41.347]save the whole boat data succeed
+[04-08 15:09:41.347]save data succeed (local switch)
+[04-08 15:09:41.399]finish enter game scene Cha-sads+5188(Cha-sads+5188)
+[04-08 15:09:41.399]finish local map switch
+
+[04-08 15:10:02.529]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map garner2，aimmap darkblue)--------
+[04-08 15:10:02.529]character map name garner2
+[04-08 15:10:02.529]Local map switch enabled - switching in memory
+[04-08 15:10:02.529]Cha-tempra+5187 start configure save data.
+[04-08 15:10:02.531]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:10:02.532]finish kitbag save.
+[04-08 15:10:02.532]finish save the temp kitbag.
+[04-08 15:10:02.532]finish the whole bank[0->0]save
+[04-08 15:10:02.532]save the whole boat data succeed
+[04-08 15:10:02.532]save data succeed (local switch)
+[04-08 15:10:02.533]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:10:02.533]finish local map switch
+
+[04-08 15:11:22.347]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map darkblue，aimmap garner)--------
+[04-08 15:11:22.347]character map name darkblue
+[04-08 15:11:22.347]Local map switch enabled - switching in memory
+[04-08 15:11:22.347]Cha-tempra+5187 start configure save data.
+[04-08 15:11:22.349]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:11:22.351]finish kitbag save.
+[04-08 15:11:22.351]finish save the temp kitbag.
+[04-08 15:11:22.351]finish the whole bank[0->0]save
+[04-08 15:11:22.351]save the whole boat data succeed
+[04-08 15:11:22.351]save data succeed (local switch)
+[04-08 15:11:22.352]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:11:22.352]finish local map switch
+
+[04-08 15:25:35.821]OnDBUpdate start!
+[04-08 15:25:35.821]Cha-tempra+5187 start configure save data.
+[04-08 15:25:35.822]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:25:35.824]finish kitbag save.
+[04-08 15:25:35.825]finish save the temp kitbag.
+[04-08 15:25:35.825]finish the whole bank[0->0]save
+[04-08 15:25:35.825]save the whole boat data succeed
+[04-08 15:25:35.825]OnDBUpdate end!
+[04-08 15:26:32.285]OnDBUpdate start!
+[04-08 15:26:32.285]Cha-sads+5188 start configure save data.
+[04-08 15:26:32.287]character Cha-sads+5188	carry out SQL sentence error!
+[04-08 15:26:32.288]finish kitbag save.
+[04-08 15:26:32.288]finish save the temp kitbag.
+[04-08 15:26:32.288]finish the whole bank[0->0]save
+[04-08 15:26:32.288]save the whole boat data succeed
+[04-08 15:26:32.288]OnDBUpdate end!
+[04-08 15:45:04.912]map garner2(copyID 0),start delete all character!
+[04-08 15:45:04.912]map garner2 close?clean out sads[sads]!
+[04-08 15:45:04.967]SwitchMap(differ Server map switch，control player name Cha-sads+5188[mainplayer Cha-sads+5188]，formerly map garner2，aimmap garner)--------
+[04-08 15:45:04.967]character map name garner2
+[04-08 15:45:04.967]Local map switch enabled - switching in memory
+[04-08 15:45:04.975]Cha-sads+5188 start configure save data.
+[04-08 15:45:04.979]character Cha-sads+5188	carry out SQL sentence error!
+[04-08 15:45:04.981]finish kitbag save.
+[04-08 15:45:04.981]finish save the temp kitbag.
+[04-08 15:45:04.981]finish the whole bank[0->0]save
+[04-08 15:45:04.981]save the whole boat data succeed
+[04-08 15:45:04.982]save data succeed (local switch)
+[04-08 15:45:04.984]finish enter game scene Cha-sads+5188(Cha-sads+5188)
+[04-08 15:45:04.984]finish local map switch
+
+[04-08 15:45:04.984]map garner2( copyID 0)clean out character succeed!
+[04-08 15:45:04.984]map garner2(copyID 0)?start clean out all monsters
+[04-08 15:45:04.984]map garner2(copyID 0)clean out monster succeed!
+[04-08 15:46:05.198]OnDBUpdate start!
+[04-08 15:46:05.198]Cha-tempra+5187 start configure save data.
+[04-08 15:46:05.204]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:46:05.207]finish kitbag save.
+[04-08 15:46:05.207]finish save the temp kitbag.
+[04-08 15:46:05.207]finish the whole bank[0->0]save
+[04-08 15:46:05.207]save the whole boat data succeed
+[04-08 15:46:05.207]OnDBUpdate end!
+[04-08 15:46:12.320]start leave map--------
+[04-08 15:46:12.320]Delete Player [Cha-tempra+5187]
+[04-08 15:46:12.320]cha_id = 5187, begin goout
+[04-08 15:46:12.320]Cha-tempra+5187 start configure save data.
+[04-08 15:46:12.323]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:46:12.325]finish kitbag save.
+[04-08 15:46:12.325]finish save the temp kitbag.
+[04-08 15:46:12.325]finish the whole bank[0->0]save
+[04-08 15:46:12.325]save the whole boat data succeed
+[04-08 15:46:12.326]SavePlayer[tempra] failed[04-08 15:46:12.326]cha_id = 5187, goout
+[04-08 15:46:12.326]end and leave the map========
+
+[04-08 15:46:13.993]start leave map--------
+[04-08 15:46:13.993]Delete Player [Cha-sads+5188]
+[04-08 15:46:13.993]cha_id = 5188, begin goout
+[04-08 15:46:13.994]Cha-sads+5188 start configure save data.
+[04-08 15:46:14.002]character Cha-sads+5188	carry out SQL sentence error!
+[04-08 15:46:14.006]finish kitbag save.
+[04-08 15:46:14.010]finish save the temp kitbag.
+[04-08 15:46:14.010]finish the whole bank[0->0]save
+[04-08 15:46:14.010]start save big map data!
+[04-08 15:46:14.041]organize big map data succeed!
+[04-08 15:46:14.041]save the whole boat data succeed
+[04-08 15:46:14.041]SavePlayer[sads] failed[04-08 15:46:14.041]cha_id = 5188, goout
+[04-08 15:46:14.041]end and leave the map========
+
+[04-08 15:46:17.523]Begin SaveAllPlayer==============================================================
+[04-08 15:46:17.523]one-off carry out every big map save SQL,totalize[0] piece!
+[04-08 15:46:17.523]End SaveAllPlayer################################################################
+[04-08 15:51:39.589]start entry map cha_id = 5188 enter--------------------------
+[04-08 15:51:39.589]cha_id = 5188, begin read data from database: 
+[04-08 15:51:39.706]Loading database succeed??_get_row_stored_procedure.
+[04-08 15:51:39.707]Set the whole data succeed.
+[04-08 15:51:39.711]Load kitbag data succeed.
+[04-08 15:51:39.712]Load temp kitbag data succeed.
+[04-08 15:51:39.712]Load bank data succeed.
+[04-08 15:51:39.715]Load big map data succeed.
+[04-08 15:51:39.716]Load the character whole data succeed.
+[04-08 15:51:39.765]finish enter game scene Cha-sads+5188(Cha-sads+5188)
+[04-08 15:51:39.765]end up entry map  [Cha-sads+5188]================
+
+[04-08 15:51:41.640]start entry map cha_id = 5187 enter--------------------------
+[04-08 15:51:41.640]cha_id = 5187, begin read data from database: 
+[04-08 15:51:41.642]Loading database succeed??_get_row_stored_procedure.
+[04-08 15:51:41.642]Set the whole data succeed.
+[04-08 15:51:41.643]Load kitbag data succeed.
+[04-08 15:51:41.644]Load temp kitbag data succeed.
+[04-08 15:51:41.645]Load bank data succeed.
+[04-08 15:51:41.646]Load big map data succeed.
+[04-08 15:51:41.647]Load the character whole data succeed.
+[04-08 15:51:41.652]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:51:41.652]end up entry map  [Cha-tempra+5187]================
+
+[04-08 15:52:16.393]Start save character assets.
+[04-08 15:52:16.524]finish kitbag save.
+[04-08 15:52:16.524]Save character Cha-tempra+5187(Cha-tempra+5187)assets succeed.
+[04-08 15:52:19.371]Start save character assets.
+[04-08 15:52:19.372]finish kitbag save.
+[04-08 15:52:19.372]Save character Cha-tempra+5187(Cha-tempra+5187)assets succeed.
+[04-08 15:52:25.060]Start save character assets.
+[04-08 15:52:25.061]finish kitbag save.
+[04-08 15:52:25.061]Save character Cha-tempra+5187(Cha-tempra+5187)assets succeed.
+[04-08 15:52:33.138]Start save character assets.
+[04-08 15:52:33.140]finish kitbag save.
+[04-08 15:52:33.140]Save character Cha-tempra+5187(Cha-tempra+5187)assets succeed.
+[04-08 17:00:25.531]Start save character assets.
+[04-08 17:00:25.536]finish kitbag save.
+[04-08 17:00:25.536]Save character Cha-tempra+5187(Cha-tempra+5187)assets succeed.
+[04-08 17:00:26.120]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map garner，aimmap DreamIsland)--------
+[04-08 17:00:26.120]character map name garner
+[04-08 17:00:26.120]Local map switch enabled - switching in memory
+[04-08 17:00:26.120]Cha-tempra+5187 start configure save data.
+[04-08 17:00:26.263]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 17:00:26.263]finish kitbag save.
+[04-08 17:00:26.263]finish save the temp kitbag.
+[04-08 17:00:26.263]finish the whole bank[0->0]save
+[04-08 17:00:26.263]start save big map data!
+[04-08 17:00:26.274]organize big map data succeed!
+[04-08 17:00:26.274]save the whole boat data succeed
+[04-08 17:00:26.284]save data succeed (local switch)
+[04-08 17:00:26.284]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 17:00:26.284]finish local map switch
+
+[04-08 17:00:36.947]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map DreamIsland，aimmap chaosicicle)--------
+[04-08 17:00:36.947]character map name DreamIsland
+[04-08 17:00:36.947]Local map switch enabled - switching in memory
+[04-08 17:00:36.947]Cha-tempra+5187 start configure save data.
+[04-08 17:00:36.948]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 17:00:36.948]finish kitbag save.
+[04-08 17:00:36.948]finish save the temp kitbag.
+[04-08 17:00:36.948]finish the whole bank[0->0]save
+[04-08 17:00:36.948]save the whole boat data succeed
+[04-08 17:00:36.952]save data succeed (local switch)
+[04-08 17:00:37.005]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 17:00:37.005]finish local map switch
+
+[04-08 17:00:40.503]SwitchMap(differ Server map switch，control player name Cha-sads+5188[mainplayer Cha-sads+5188]，formerly map garner，aimmap chaosicicle)--------
+[04-08 17:00:40.503]character map name garner
+[04-08 17:00:40.503]Local map switch enabled - switching in memory
+[04-08 17:00:40.503]Cha-sads+5188 start configure save data.
+[04-08 17:00:40.504]character Cha-sads+5188	carry out SQL sentence error!
+[04-08 17:00:40.508]finish kitbag save.
+[04-08 17:00:40.508]finish save the temp kitbag.
+[04-08 17:00:40.508]finish the whole bank[0->0]save
+[04-08 17:00:40.508]save the whole boat data succeed
+[04-08 17:00:40.508]save data succeed (local switch)
+[04-08 17:00:40.572]finish enter game scene Cha-sads+5188(Cha-sads+5188)
+[04-08 17:00:40.572]finish local map switch
+
+[04-08 17:01:43.164]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map chaosicicle，aimmap DreamIsland)--------
+[04-08 17:01:43.164]character map name chaosicicle
+[04-08 17:01:43.164]Local map switch enabled - switching in memory
+[04-08 17:01:43.164]Cha-tempra+5187 start configure save data.
+[04-08 17:01:43.284]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 17:01:43.286]finish kitbag save.
+[04-08 17:01:43.287]finish save the temp kitbag.
+[04-08 17:01:43.287]finish the whole bank[0->0]save
+[04-08 17:01:43.287]save the whole boat data succeed
+[04-08 17:01:43.287]save data succeed (local switch)
+[04-08 17:01:43.288]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 17:01:43.288]finish local map switch
+
+[04-08 15:00:04.175]map chaosicicle(copyID 0),start delete all character!
+[04-08 15:00:04.175]map chaosicicle close?clean out sads[sads]!
+[04-08 15:00:04.225]SwitchMap(differ Server map switch，control player name Cha-sads+5188[mainplayer Cha-sads+5188]，formerly map chaosicicle，aimmap garner)--------
+[04-08 15:00:04.225]character map name chaosicicle
+[04-08 15:00:04.225]Local map switch enabled - switching in memory
+[04-08 15:00:04.226]Cha-sads+5188 start configure save data.
+[04-08 15:00:04.227]character Cha-sads+5188	carry out SQL sentence error!
+[04-08 15:00:04.229]finish kitbag save.
+[04-08 15:00:04.229]finish save the temp kitbag.
+[04-08 15:00:04.229]finish the whole bank[0->0]save
+[04-08 15:00:04.229]save the whole boat data succeed
+[04-08 15:00:04.230]save data succeed (local switch)
+[04-08 15:00:04.230]finish enter game scene Cha-sads+5188(Cha-sads+5188)
+[04-08 15:00:04.230]finish local map switch
+
+[04-08 15:00:04.230]map chaosicicle( copyID 0)clean out character succeed!
+[04-08 15:00:04.230]map chaosicicle(copyID 0)?start clean out all monsters
+[04-08 15:00:04.230]map chaosicicle(copyID 0)clean out monster succeed!
+[04-08 15:00:16.615]Start save character assets.
+[04-08 15:00:16.619]finish kitbag save.
+[04-08 15:00:16.619]Save character Cha-tempra+5187(Cha-tempra+5187)assets succeed.
+[04-08 15:00:17.438]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map DreamIsland，aimmap darkblue)--------
+[04-08 15:00:17.438]character map name DreamIsland
+[04-08 15:00:17.438]Local map switch enabled - switching in memory
+[04-08 15:00:17.438]Cha-tempra+5187 start configure save data.
+[04-08 15:00:17.439]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:00:17.441]finish kitbag save.
+[04-08 15:00:17.441]finish save the temp kitbag.
+[04-08 15:00:17.441]finish the whole bank[0->0]save
+[04-08 15:00:17.441]save the whole boat data succeed
+[04-08 15:00:17.441]save data succeed (local switch)
+[04-08 15:00:17.442]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:00:17.442]finish local map switch
+
+[04-08 15:00:31.101]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map darkblue，aimmap garner2)--------
+[04-08 15:00:31.101]character map name darkblue
+[04-08 15:00:31.101]Local map switch enabled - switching in memory
+[04-08 15:00:31.101]Cha-tempra+5187 start configure save data.
+[04-08 15:00:31.101]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:00:31.102]finish kitbag save.
+[04-08 15:00:31.102]finish save the temp kitbag.
+[04-08 15:00:31.102]finish the whole bank[0->0]save
+[04-08 15:00:31.102]save the whole boat data succeed
+[04-08 15:00:31.102]save data succeed (local switch)
+[04-08 15:00:31.159]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:00:31.159]finish local map switch
+
+[04-08 15:00:34.136]SwitchMap(differ Server map switch，control player name Cha-sads+5188[mainplayer Cha-sads+5188]，formerly map garner，aimmap garner2)--------
+[04-08 15:00:34.136]character map name garner
+[04-08 15:00:34.136]Local map switch enabled - switching in memory
+[04-08 15:00:34.136]Cha-sads+5188 start configure save data.
+[04-08 15:00:34.137]character Cha-sads+5188	carry out SQL sentence error!
+[04-08 15:00:34.137]finish kitbag save.
+[04-08 15:00:34.137]finish save the temp kitbag.
+[04-08 15:00:34.137]finish the whole bank[0->0]save
+[04-08 15:00:34.137]save the whole boat data succeed
+[04-08 15:00:34.137]save data succeed (local switch)
+[04-08 15:00:34.191]finish enter game scene Cha-sads+5188(Cha-sads+5188)
+[04-08 15:00:34.191]finish local map switch
+
+[04-08 15:01:05.953]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map garner2，aimmap darkblue)--------
+[04-08 15:01:05.953]character map name garner2
+[04-08 15:01:05.953]Local map switch enabled - switching in memory
+[04-08 15:01:05.953]Cha-tempra+5187 start configure save data.
+[04-08 15:01:05.954]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:01:05.957]finish kitbag save.
+[04-08 15:01:05.957]finish save the temp kitbag.
+[04-08 15:01:05.957]finish the whole bank[0->0]save
+[04-08 15:01:05.957]save the whole boat data succeed
+[04-08 15:01:05.958]save data succeed (local switch)
+[04-08 15:01:05.958]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:01:05.958]finish local map switch
+
+[04-08 15:16:22.794]OnDBUpdate start!
+[04-08 15:16:22.794]Cha-tempra+5187 start configure save data.
+[04-08 15:16:22.797]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:16:22.798]finish kitbag save.
+[04-08 15:16:22.798]finish save the temp kitbag.
+[04-08 15:16:22.798]finish the whole bank[0->0]save
+[04-08 15:16:22.798]save the whole boat data succeed
+[04-08 15:16:22.799]OnDBUpdate end!
+[04-08 15:16:30.365]OnDBUpdate start!
+[04-08 15:16:30.365]Cha-sads+5188 start configure save data.
+[04-08 15:16:30.367]character Cha-sads+5188	carry out SQL sentence error!
+[04-08 15:16:30.367]finish kitbag save.
+[04-08 15:16:30.367]finish save the temp kitbag.
+[04-08 15:16:30.367]finish the whole bank[0->0]save
+[04-08 15:16:30.367]save the whole boat data succeed
+[04-08 15:16:30.367]OnDBUpdate end!
+[04-08 15:21:20.695]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map darkblue，aimmap garner2)--------
+[04-08 15:21:20.695]character map name darkblue
+[04-08 15:21:20.695]Local map switch enabled - switching in memory
+[04-08 15:21:20.695]Cha-tempra+5187 start configure save data.
+[04-08 15:21:20.696]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:21:20.698]finish kitbag save.
+[04-08 15:21:20.698]finish save the temp kitbag.
+[04-08 15:21:20.698]finish the whole bank[0->0]save
+[04-08 15:21:20.698]save the whole boat data succeed
+[04-08 15:21:20.699]save data succeed (local switch)
+[04-08 15:21:20.748]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:21:20.748]finish local map switch
+
+[04-08 15:21:41.962]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map garner2，aimmap darkblue)--------
+[04-08 15:21:41.962]character map name garner2
+[04-08 15:21:41.962]Local map switch enabled - switching in memory
+[04-08 15:21:41.962]Cha-tempra+5187 start configure save data.
+[04-08 15:21:41.964]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:21:41.964]finish kitbag save.
+[04-08 15:21:41.964]finish save the temp kitbag.
+[04-08 15:21:41.964]finish the whole bank[0->0]save
+[04-08 15:21:41.964]save the whole boat data succeed
+[04-08 15:21:41.965]save data succeed (local switch)
+[04-08 15:21:41.965]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:21:41.965]finish local map switch
+
+[04-08 15:21:47.440]start leave map--------
+[04-08 15:21:47.440]Delete Player [Cha-tempra+5187]
+[04-08 15:21:47.440]cha_id = 5187, begin goout
+[04-08 15:21:47.440]Cha-tempra+5187 start configure save data.
+[04-08 15:21:47.446]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:21:47.452]finish kitbag save.
+[04-08 15:21:47.454]finish save the temp kitbag.
+[04-08 15:21:47.454]finish the whole bank[0->0]save
+[04-08 15:21:47.454]save the whole boat data succeed
+[04-08 15:21:47.458]SavePlayer[tempra] failed[04-08 15:21:47.458]cha_id = 5187, goout
+[04-08 15:21:47.458]end and leave the map========
+
+[04-08 15:21:50.660]start entry map cha_id = 5187 enter--------------------------
+[04-08 15:21:50.660]cha_id = 5187, begin read data from database: 
+[04-08 15:21:50.663]Loading database succeed??_get_row_stored_procedure.
+[04-08 15:21:50.663]Set the whole data succeed.
+[04-08 15:21:50.665]Load kitbag data succeed.
+[04-08 15:21:50.665]Load temp kitbag data succeed.
+[04-08 15:21:50.665]Load bank data succeed.
+[04-08 15:21:50.666]Load big map data succeed.
+[04-08 15:21:50.667]Load the character whole data succeed.
+[04-08 15:21:50.671]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:21:50.671]end up entry map  [Cha-tempra+5187]================
+
+[04-08 15:22:05.308]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map garner，aimmap garner2)--------
+[04-08 15:22:05.308]character map name garner
+[04-08 15:22:05.308]Local map switch enabled - switching in memory
+[04-08 15:22:05.308]Cha-tempra+5187 start configure save data.
+[04-08 15:22:05.310]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:22:05.311]finish kitbag save.
+[04-08 15:22:05.311]finish save the temp kitbag.
+[04-08 15:22:05.311]finish the whole bank[0->0]save
+[04-08 15:22:05.311]save the whole boat data succeed
+[04-08 15:22:05.311]save data succeed (local switch)
+[04-08 15:22:05.359]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:22:05.359]finish local map switch
+
+[04-08 15:22:15.635]start leave map--------
+[04-08 15:22:15.635]Delete Player [Cha-tempra+5187]
+[04-08 15:22:15.687]cha_id = 5187, begin goout
+[04-08 15:22:15.687]Cha-tempra+5187 start configure save data.
+[04-08 15:22:15.688]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:22:15.689]finish kitbag save.
+[04-08 15:22:15.689]finish save the temp kitbag.
+[04-08 15:22:15.689]finish the whole bank[0->0]save
+[04-08 15:22:15.689]save the whole boat data succeed
+[04-08 15:22:15.689]SavePlayer[tempra] failed[04-08 15:22:15.810]cha_id = 5187, goout
+[04-08 15:22:15.810]end and leave the map========
+
+[04-08 15:22:21.866]start entry map cha_id = 5187 enter--------------------------
+[04-08 15:22:21.866]cha_id = 5187, begin read data from database: 
+[04-08 15:22:21.867]Loading database succeed??_get_row_stored_procedure.
+[04-08 15:22:21.869]Set the whole data succeed.
+[04-08 15:22:21.870]Load kitbag data succeed.
+[04-08 15:22:21.870]Load temp kitbag data succeed.
+[04-08 15:22:21.870]Load bank data succeed.
+[04-08 15:22:21.871]Load big map data succeed.
+[04-08 15:22:21.873]Load the character whole data succeed.
+[04-08 15:22:21.880]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:22:21.880]end up entry map  [Cha-tempra+5187]================
+
+[04-08 15:22:32.915]Start save character assets.
+[04-08 15:22:32.918]finish kitbag save.
+[04-08 15:22:32.918]Save character Cha-tempra+5187(Cha-tempra+5187)assets succeed.
+[04-08 15:22:37.968]Start save character assets.
+[04-08 15:22:37.972]finish kitbag save.
+[04-08 15:22:37.972]Save character Cha-tempra+5187(Cha-tempra+5187)assets succeed.
+[04-08 15:22:40.852]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map garner，aimmap garner2)--------
+[04-08 15:22:40.852]character map name garner
+[04-08 15:22:40.852]Local map switch enabled - switching in memory
+[04-08 15:22:40.852]Cha-tempra+5187 start configure save data.
+[04-08 15:22:40.864]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:22:40.865]finish kitbag save.
+[04-08 15:22:40.865]finish save the temp kitbag.
+[04-08 15:22:40.865]finish the whole bank[0->0]save
+[04-08 15:22:40.865]save the whole boat data succeed
+[04-08 15:22:40.865]save data succeed (local switch)
+[04-08 15:22:40.916]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:22:40.916]finish local map switch
+
+[04-08 15:22:50.912]SwitchMap(differ Server map switch，control player name Cha-tempra+5187[mainplayer Cha-tempra+5187]，formerly map garner2，aimmap darkblue)--------
+[04-08 15:22:50.912]character map name garner2
+[04-08 15:22:50.912]Local map switch enabled - switching in memory
+[04-08 15:22:50.912]Cha-tempra+5187 start configure save data.
+[04-08 15:22:50.913]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:22:50.913]finish kitbag save.
+[04-08 15:22:50.913]finish save the temp kitbag.
+[04-08 15:22:50.913]finish the whole bank[0->0]save
+[04-08 15:22:50.913]save the whole boat data succeed
+[04-08 15:22:50.914]save data succeed (local switch)
+[04-08 15:22:50.914]finish enter game scene Cha-tempra+5187(Cha-tempra+5187)
+[04-08 15:22:50.914]finish local map switch
+
+[04-08 15:36:41.863]OnDBUpdate start!
+[04-08 15:36:41.863]Cha-sads+5188 start configure save data.
+[04-08 15:36:41.865]character Cha-sads+5188	carry out SQL sentence error!
+[04-08 15:36:41.866]finish kitbag save.
+[04-08 15:36:41.866]finish save the temp kitbag.
+[04-08 15:36:41.866]finish the whole bank[0->0]save
+[04-08 15:36:41.866]save the whole boat data succeed
+[04-08 15:36:41.866]OnDBUpdate end!
+[04-08 15:42:49.405]OnDBUpdate start!
+[04-08 15:42:49.405]Cha-tempra+5187 start configure save data.
+[04-08 15:42:49.407]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:42:49.408]finish kitbag save.
+[04-08 15:42:49.409]finish save the temp kitbag.
+[04-08 15:42:49.409]finish the whole bank[0->0]save
+[04-08 15:42:49.409]save the whole boat data succeed
+[04-08 15:42:49.409]OnDBUpdate end!
+[04-08 15:44:57.409]cha_id = 5187, begin goout
+[04-08 15:44:57.417]Cha-tempra+5187 start configure save data.
+[04-08 15:44:57.603]character Cha-tempra+5187	carry out SQL sentence error!
+[04-08 15:44:57.643]finish kitbag save.
+[04-08 15:44:57.673]finish save the temp kitbag.
+[04-08 15:44:57.673]finish the whole bank[0->0]save
+[04-08 15:44:57.673]save the whole boat data succeed
+[04-08 15:44:57.677]SavePlayer[tempra] failed[04-08 15:44:57.677]cha_id = 5187, goout
+[04-08 15:44:57.803]Begin SaveAllPlayer==============================================================
+[04-08 15:44:57.803]SaveAllPlayer
+[04-08 15:44:57.809]Cha-sads+5188 start configure save data.
+[04-08 15:44:57.813]cha_id = 5188, begin goout
+[04-08 15:44:57.815]Cha-sads+5188 start configure save data.
+[04-08 15:44:57.815]character Cha-sads+5188	carry out SQL sentence error!
+[04-08 15:44:57.815]character Cha-sads+5188	carry out SQL sentence error!
+[04-08 15:44:57.815]character Cha-sads+5188	 carry out SQL sentence error!
+[04-08 15:44:57.815]character Cha-sads+5188	carry out SQL sentence error!
+[04-08 15:44:57.815]finish the whole bank[0->0]save
+[04-08 15:44:57.815]save the whole boat data succeed
+[04-08 15:44:57.826]SavePlayer[sads] failed[04-08 15:44:57.826]finish kitbag save.
+[04-08 15:44:57.826]character Cha-sads+5188	carry out save position SQL sentence error!
+[04-08 15:44:57.826]cha_id = 5188, goout
+[04-08 15:44:57.827]finish save the temp kitbag.
+[04-08 15:44:57.827]save the whole boat data succeed
+[04-08 15:44:57.828]It's abnormity when saving the character's whole data.
+[04-08 15:44:57.828]
+[04-08 15:44:57.828]one-off carry out every big map save SQL,totalize[0] piece!
+[04-08 15:44:57.828]End SaveAllPlayer################################################################

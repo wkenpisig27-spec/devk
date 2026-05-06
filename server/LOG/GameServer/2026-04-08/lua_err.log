@@ -1,0 +1,10 @@
+[04-08 15:09:59.745]DoString after_player_kill_player
+[04-08 15:09:59.745]./resource/script\calculate\functions.lua:2272: attempt to perform arithmetic on local 'FightingPoint' (a nil value)
+[04-08 17:01:40.317]DoString after_player_kill_player
+[04-08 17:01:40.317]./resource/script\calculate\functions.lua:2272: attempt to perform arithmetic on local 'FightingPoint' (a nil value)
+[04-08 15:01:02.667]DoString after_player_kill_player
+[04-08 15:01:02.667]./resource/script\calculate\functions.lua:2272: attempt to perform arithmetic on local 'FightingPoint' (a nil value)
+[04-08 15:21:39.231]DoString after_player_kill_player
+[04-08 15:21:39.231]./resource/script\calculate\functions.lua:2272: attempt to perform arithmetic on local 'FightingPoint' (a nil value)
+[04-08 15:22:48.124]DoString after_player_kill_player
+[04-08 15:22:48.127]./resource/script\calculate\functions.lua:2272: attempt to perform arithmetic on local 'FightingPoint' (a nil value)

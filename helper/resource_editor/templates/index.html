@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PKODev Resource Editor</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #181c27;
+    --bg3: #1e2336;
+    --border: #2d3555;
+    --accent: #4f8ef7;
+    --accent-hover: #3a7ae8;
+    --danger: #e05555;
+    --success: #3dcc7e;
+    --warn: #f5a623;
+    --text: #e4e8f0;
+    --text-dim: #7a87a8;
+    --header-bg: #242a42;
+    --row-hover: #1e2640;
+    --row-even: #171b2b;
+    --cell-edit: #2a3558;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── Top Bar ─────────────────────────────── */
+  #topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  #topbar .logo {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--accent);
+    letter-spacing: .5px;
+    white-space: nowrap;
+  }
+
+  #topbar .file-name {
+    font-size: 13px;
+    color: var(--text-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+
+  #topbar .dirty-badge {
+    display: none;
+    background: var(--warn);
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+
+  #topbar .dirty-badge.show { display: inline-block; }
+
+  .btn {
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    transition: background .15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-danger { background: var(--danger); color: #fff; }
+
+  /* ─── Layout ──────────────────────────────── */
+  #layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ─── Sidebar ─────────────────────────────── */
+  #sidebar {
+    width: var(--sidebar-w);
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  #sidebar-search {
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  #sidebar-search input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    padding: 6px 10px;
+    font-size: 12px;
+    outline: none;
+  }
+
+  #sidebar-search input:focus { border-color: var(--accent); }
+
+  #file-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 0;
+  }
+
+  .file-item {
+    padding: 7px 14px;
+    cursor: pointer;
+    font-size: 12.5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    border-left: 3px solid transparent;
+    transition: background .1s;
+    user-select: none;
+  }
+
+  .file-item:hover { background: var(--row-hover); }
+
+  .file-item.active {
+    background: var(--bg3);
+    border-left-color: var(--accent);
+    color: #fff;
+  }
+
+  .file-item .fname {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+
+  .file-item .fsize {
+    color: var(--text-dim);
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  /* ─── Main Content ────────────────────────── */
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ─── Toolbar ─────────────────────────────── */
+  #toolbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+
+  #toolbar input[type="text"] {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    padding: 6px 10px;
+    font-size: 13px;
+    outline: none;
+    width: 220px;
+  }
+
+  #toolbar input[type="text"]:focus { border-color: var(--accent); }
+
+  #toolbar select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    padding: 6px 8px;
+    font-size: 12px;
+    outline: none;
+    max-width: 160px;
+  }
+
+  #toolbar .spacer { flex: 1; }
+
+  #stats {
+    font-size: 12px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  /* ─── Table Area ──────────────────────────── */
+  #table-area {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+  }
+
+  #table-area.hidden { display: none; }
+
+  table {
+    border-collapse: collapse;
+    font-size: 12.5px;
+    min-width: 100%;
+    width: max-content;
+  }
+
+  thead tr {
+    background: var(--header-bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  th {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    font-size: 12px;
+  }
+
+  th:hover { background: var(--bg3); }
+
+  th .th-inner {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  th .sort-icon { color: var(--text-dim); font-size: 10px; }
+
+  td {
+    padding: 5px 10px;
+    border: 1px solid #1e2238;
+    white-space: nowrap;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: background .1s;
+  }
+
+  tr:nth-child(even) td { background: var(--row-even); }
+  tr:hover td { background: var(--row-hover) !important; }
+
+  td.editing {
+    padding: 0;
+    background: var(--cell-edit) !important;
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+
+  td.editing input {
+    width: 100%;
+    min-width: 120px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    padding: 5px 10px;
+    font-size: 12.5px;
+    outline: none;
+    font-family: inherit;
+  }
+
+  td.modified { color: var(--warn); }
+
+  /* Row index column */
+  td.row-num {
+    color: var(--text-dim);
+    font-size: 11px;
+    cursor: default;
+    min-width: 40px;
+    text-align: right;
+  }
+
+  /* ─── Raw Editor ──────────────────────────── */
+  #raw-area {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  #raw-area.show {
+    display: flex;
+  }
+
+  #raw-editor {
+    flex: 1;
+    background: #0d0f1a;
+    color: #c9d1e0;
+    border: none;
+    padding: 14px 18px;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 12.5px;
+    resize: none;
+    outline: none;
+    line-height: 1.6;
+    overflow: auto;
+  }
+
+  /* ─── Pagination ──────────────────────────── */
+  #pagination {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    font-size: 13px;
+  }
+
+  #pagination .page-info { color: var(--text-dim); flex: 1; text-align: center; }
+
+  #pagination .btn { padding: 5px 12px; font-size: 12px; }
+
+  #page-jump {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    padding: 4px 8px;
+    width: 55px;
+    font-size: 12px;
+    text-align: center;
+    outline: none;
+  }
+
+  #page-jump:focus { border-color: var(--accent); }
+
+  /* ─── Empty / Loading ─────────────────────── */
+  #placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    color: var(--text-dim);
+    gap: 12px;
+  }
+
+  #placeholder .icon { font-size: 48px; }
+  #placeholder p { font-size: 14px; }
+
+  #loading {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 28px;
+    font-size: 14px;
+    color: var(--text-dim);
+    z-index: 100;
+  }
+
+  /* ─── Toast ───────────────────────────────── */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--success);
+    color: #000;
+    padding: 10px 18px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all .25s;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  #toast.error { background: var(--danger); color: #fff; }
+  #toast.warn { background: var(--warn); color: #000; }
+  #toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ─── Mode Tab ────────────────────────────── */
+  .mode-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg3);
+    border-radius: 6px;
+    padding: 3px;
+    flex-shrink: 0;
+  }
+
+  .mode-tab {
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    transition: all .15s;
+    user-select: none;
+  }
+
+  .mode-tab.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+
+  ::-webkit-scrollbar { width: 7px; height: 7px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+</style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div id="topbar">
+  <div class="logo">⚓ PKODev Editor</div>
+  <div class="file-name" id="current-file-name">No file selected</div>
+  <span class="dirty-badge" id="dirty-badge">UNSAVED</span>
+  <button class="btn btn-primary" id="btn-save" onclick="saveFile()" style="display:none">💾 Save</button>
+  <button class="btn btn-secondary" id="btn-reload" onclick="reloadFile()" style="display:none">↺ Reload</button>
+</div>
+
+<!-- Layout -->
+<div id="layout">
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div id="sidebar-search">
+      <input type="text" id="file-filter" placeholder="Filter files…" oninput="filterFiles(this.value)" />
+    </div>
+    <div id="file-list">
+      <div style="padding: 20px; color: var(--text-dim); font-size: 12px; text-align: center;">Loading files…</div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div id="main">
+    <!-- Toolbar -->
+    <div id="toolbar" style="display:none">
+      <input type="text" id="search-input" placeholder="🔍 Search rows…" oninput="debounceSearch()" />
+      <select id="search-col">
+        <option value="">All columns</option>
+      </select>
+      <div class="mode-tabs">
+        <div class="mode-tab active" id="tab-table" onclick="switchMode('table')">Table</div>
+        <div class="mode-tab" id="tab-raw" onclick="switchMode('raw')">Raw</div>
+      </div>
+      <div class="spacer"></div>
+      <div id="stats"></div>
+    </div>
+
+    <!-- Placeholder -->
+    <div id="placeholder">
+      <div class="icon">📂</div>
+      <p>Select a file from the sidebar to edit</p>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading">Loading…</div>
+
+    <!-- Table Area -->
+    <div id="table-area" class="hidden">
+      <table id="data-table">
+        <thead id="table-head"></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Raw Editor -->
+    <div id="raw-area">
+      <textarea id="raw-editor" oninput="markDirty()" spellcheck="false"></textarea>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" style="display:none">
+      <button class="btn btn-secondary" onclick="gotoPage(currentPage - 1)">‹ Prev</button>
+      <input type="number" id="page-jump" min="1" value="1" onchange="gotoPage(parseInt(this.value))" />
+      <button class="btn btn-secondary" onclick="gotoPage(currentPage + 1)">Next ›</button>
+      <div class="page-info" id="page-info"></div>
+      <select id="page-size-sel" onchange="changePageSize()" style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:5px 8px;font-size:12px;outline:none;">
+        <option value="100">100 rows</option>
+        <option value="200" selected>200 rows</option>
+        <option value="500">500 rows</option>
+        <option value="1000">1000 rows</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────
+let allFiles = [];
+let currentFile = null;
+let currentMode = 'table'; // 'table' | 'raw'
+let isDirty = false;
+let currentPage = 1;
+let totalPages = 1;
+let pageSize = 200;
+let totalRows = 0;
+let totalAllRows = 0;
+let currentSearch = '';
+let currentSearchCol = '';
+let currentHeaders = [];
+let pendingEdits = {}; // {rowGlobalIndex: rowArray} for unsaved edits
+let pageRowMap = []; // maps table row display index -> global row index
+let currentFileData = null; // full data if loaded for save
+let sortCol = -1;
+let sortAsc = true;
+let searchTimer = null;
+
+// ─── Init ─────────────────────────────────────────────────────────────────
+async function init() {
+  const resp = await fetch('/api/files');
+  allFiles = await resp.json();
+  renderFileList(allFiles);
+}
+
+function renderFileList(files) {
+  const list = document.getElementById('file-list');
+  if (!files.length) {
+    list.innerHTML = '<div style="padding:16px;color:var(--text-dim);font-size:12px;text-align:center">No .txt files found</div>';
+    return;
+  }
+  list.innerHTML = files.map(f => `
+    <div class="file-item${f.name === currentFile ? ' active' : ''}" onclick="openFile('${f.name}')">
+      <span class="fname">${f.name}</span>
+      <span class="fsize">${f.size_kb}KB</span>
+    </div>
+  `).join('');
+}
+
+function filterFiles(val) {
+  const q = val.toLowerCase();
+  renderFileList(allFiles.filter(f => f.name.toLowerCase().includes(q)));
+}
+
+// ─── Open File ─────────────────────────────────────────────────────────────
+async function openFile(filename) {
+  if (isDirty && currentFile) {
+    if (!confirm('You have unsaved changes. Discard them?')) return;
+  }
+
+  currentFile = filename;
+  isDirty = false;
+  pendingEdits = {};
+  currentPage = 1;
+  currentSearch = '';
+  currentFileData = null;
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-col').innerHTML = '<option value="">All columns</option>';
+
+  document.getElementById('current-file-name').textContent = filename;
+  document.getElementById('dirty-badge').classList.remove('show');
+  document.getElementById('btn-save').style.display = 'flex';
+  document.getElementById('btn-reload').style.display = 'flex';
+  document.getElementById('toolbar').style.display = 'flex';
+  document.getElementById('pagination').style.display = 'flex';
+  document.getElementById('placeholder').style.display = 'none';
+  document.getElementById('tab-table').click();
+
+  // Highlight in sidebar
+  document.querySelectorAll('.file-item').forEach(el => {
+    el.classList.toggle('active', el.querySelector('.fname').textContent === filename);
+  });
+
+  await loadPage(1);
+}
+
+async function loadPage(page) {
+  if (!currentFile) return;
+  showLoading(true);
+  currentPage = page;
+
+  const url = `/api/file/${encodeURIComponent(currentFile)}?page=${page}&page_size=${pageSize}` +
+    (currentSearch ? `&search=${encodeURIComponent(currentSearch)}` : '') +
+    (currentSearchCol ? `&col=${encodeURIComponent(currentSearchCol)}` : '');
+
+  try {
+    const resp = await fetch(url);
+    const data = await resp.json();
+
+    if (data.mode === 'raw') {
+      showRawMode(data.content);
+    } else {
+      showTableMode(data);
+    }
+    updateStats();
+  } catch (e) {
+    showToast('Failed to load file: ' + e.message, 'error');
+  } finally {
+    showLoading(false);
+  }
+}
+
+function showTableMode(data) {
+  currentHeaders = data.headers;
+  totalPages = data.total_pages;
+  totalRows = data.total;
+  totalAllRows = data.total_all;
+  pageRowMap = [];
+
+  document.getElementById('table-area').classList.remove('hidden');
+  document.getElementById('raw-area').classList.remove('show');
+  document.getElementById('pagination').style.display = 'flex';
+
+  // Build column filter select
+  const sel = document.getElementById('search-col');
+  sel.innerHTML = '<option value="">All columns</option>' +
+    currentHeaders.map(h => `<option value="${escHtml(h)}"${h === currentSearchCol ? ' selected' : ''}>${escHtml(h)}</option>`).join('');
+
+  // Header
+  const thead = document.getElementById('table-head');
+  thead.innerHTML = `<tr>
+    <th><div class="th-inner">#</div></th>
+    ${currentHeaders.map((h, i) => `
+      <th onclick="sortByCol(${i})" title="${escHtml(h)}">
+        <div class="th-inner">
+          ${escHtml(h)}
+          <span class="sort-icon">${sortCol === i ? (sortAsc ? '▲' : '▼') : '⇅'}</span>
+        </div>
+      </th>`).join('')}
+  </tr>`;
+
+  // Body
+  const tbody = document.getElementById('table-body');
+  const rowIndices = data.row_indices; // original row indices from backend
+  tbody.innerHTML = data.rows.map((row, ri) => {
+    const globalIdx = rowIndices[ri];
+    pageRowMap.push(globalIdx);
+    const cells = currentHeaders.map((_, ci) => {
+      const val = row[ci] !== undefined ? row[ci] : '';
+      return `<td data-row="${ri}" data-col="${ci}" onclick="startEdit(this)">${escHtml(val)}</td>`;
+    });
+    return `<tr data-row="${ri}">
+      <td class="row-num">${globalIdx + 1}</td>
+      ${cells.join('')}
+    </tr>`;
+  }).join('');
+
+  // Page info
+  document.getElementById('page-jump').value = currentPage;
+  document.getElementById('page-jump').max = totalPages;
+  updateStats();
+}
+
+function showRawMode(content) {
+  currentMode = 'raw';
+  document.getElementById('table-area').classList.add('hidden');
+  document.getElementById('raw-area').classList.add('show');
+  document.getElementById('pagination').style.display = 'none';
+  document.getElementById('raw-editor').value = content;
+  document.getElementById('tab-raw').classList.add('active');
+  document.getElementById('tab-table').classList.remove('active');
+}
+
+function updateStats() {
+  const el = document.getElementById('stats');
+  if (!currentFile) return;
+  const searchInfo = currentSearch ? ` (${totalRows} matched)` : '';
+  el.textContent = `${totalAllRows.toLocaleString()} rows total${searchInfo} | Page ${currentPage}/${totalPages}`;
+}
+
+function updatePageInfo() {
+  const start = (currentPage - 1) * pageSize + 1;
+  const end = Math.min(currentPage * pageSize, totalRows);
+  document.getElementById('page-info').textContent =
+    `Rows ${start.toLocaleString()}–${end.toLocaleString()} of ${totalRows.toLocaleString()}`;
+}
+
+// ─── Inline Editing ─────────────────────────────────────────────────────────
+function startEdit(td) {
+  if (td.classList.contains('editing')) return;
+  // Close other edits
+  document.querySelectorAll('td.editing').forEach(commitEdit);
+
+  const val = td.textContent;
+  td.classList.add('editing');
+  td.innerHTML = `<input type="text" value="${escAttr(val)}" />`;
+  const input = td.querySelector('input');
+  input.focus();
+  input.select();
+
+  input.addEventListener('blur', () => commitEdit(td));
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      commitEdit(td);
+      // Move to next row same column
+      const row = parseInt(td.dataset.row);
+      const col = parseInt(td.dataset.col);
+      const nextTd = document.querySelector(`td[data-row="${row + 1}"][data-col="${col}"]`);
+      if (nextTd) startEdit(nextTd);
+    }
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      commitEdit(td);
+      const row = parseInt(td.dataset.row);
+      const col = parseInt(td.dataset.col);
+      const nextCol = e.shiftKey ? col - 1 : col + 1;
+      const nextTd = document.querySelector(`td[data-row="${row}"][data-col="${nextCol}"]`);
+      if (nextTd) startEdit(nextTd);
+    }
+    if (e.key === 'Escape') {
+      td.classList.remove('editing');
+      td.innerHTML = escHtml(val);
+    }
+  });
+}
+
+function commitEdit(td) {
+  if (!td.classList.contains('editing')) return;
+  const input = td.querySelector('input');
+  if (!input) return;
+  const newVal = input.value;
+  td.classList.remove('editing');
+
+  const ri = parseInt(td.dataset.row);
+  const ci = parseInt(td.dataset.col);
+  const globalIdx = pageRowMap[ri];
+
+  td.textContent = newVal;
+  td.classList.add('modified');
+
+  // Track edit
+  if (!pendingEdits[globalIdx]) {
+    // Snapshot original row from DOM
+    const rowTds = document.querySelectorAll(`td[data-row="${ri}"]`);
+    const row = Array.from(rowTds).map(c => c.textContent);
+    pendingEdits[globalIdx] = row;
+  }
+  pendingEdits[globalIdx][ci] = newVal;
+
+  markDirty();
+}
+
+// ─── Save ─────────────────────────────────────────────────────────────────
+async function saveFile() {
+  if (!currentFile) return;
+
+  if (currentMode === 'raw') {
+    await saveRaw();
+    return;
+  }
+
+  // Only send the edited rows, not the entire file
+  if (Object.keys(pendingEdits).length === 0) {
+    showToast('No changes to save', 'warn');
+    return;
+  }
+
+  showLoading(true);
+  try {
+    const saveResp = await fetch(`/api/file/${encodeURIComponent(currentFile)}/patch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ edits: pendingEdits }),
+    });
+    const result = await saveResp.json();
+
+    if (result.ok) {
+      pendingEdits = {};
+      isDirty = false;
+      document.getElementById('dirty-badge').classList.remove('show');
+      document.querySelectorAll('td.modified').forEach(td => td.classList.remove('modified'));
+      showToast(result.message || 'Saved!');
+    } else {
+      showToast('Save failed: ' + result.error, 'error');
+    }
+  } catch (e) {
+    showToast('Save error: ' + e.message, 'error');
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function saveRaw() {
+  const content = document.getElementById('raw-editor').value;
+  showLoading(true);
+  try {
+    const resp = await fetch(`/api/file/${encodeURIComponent(currentFile)}/raw`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    });
+    const result = await resp.json();
+    if (result.ok) {
+      isDirty = false;
+      document.getElementById('dirty-badge').classList.remove('show');
+      showToast('Saved!');
+    } else {
+      showToast('Save failed: ' + result.error, 'error');
+    }
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function reloadFile() {
+  if (isDirty) {
+    if (!confirm('Reload will discard unsaved changes. Continue?')) return;
+  }
+  isDirty = false;
+  pendingEdits = {};
+  document.getElementById('dirty-badge').classList.remove('show');
+  await loadPage(currentPage);
+}
+
+// ─── Search ────────────────────────────────────────────────────────────────
+function debounceSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    currentSearch = document.getElementById('search-input').value.trim();
+    currentSearchCol = document.getElementById('search-col').value;
+    loadPage(1);
+  }, 350);
+}
+
+// ─── Sort ──────────────────────────────────────────────────────────────────
+function sortByCol(colIdx) {
+  if (sortCol === colIdx) {
+    sortAsc = !sortAsc;
+  } else {
+    sortCol = colIdx;
+    sortAsc = true;
+  }
+  // Re-render with sort using search (sorting is server-side would need API change;
+  // for client-side sort of current page only)
+  const tbody = document.getElementById('table-body');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  rows.sort((a, b) => {
+    const aVal = a.querySelectorAll('td')[colIdx + 1]?.textContent ?? '';
+    const bVal = b.querySelectorAll('td')[colIdx + 1]?.textContent ?? '';
+    const aNum = parseFloat(aVal);
+    const bNum = parseFloat(bVal);
+    if (!isNaN(aNum) && !isNaN(bNum)) {
+      return sortAsc ? aNum - bNum : bNum - aNum;
+    }
+    return sortAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+  });
+  rows.forEach(r => tbody.appendChild(r));
+
+  // Update sort icons
+  document.querySelectorAll('th .sort-icon').forEach((el, i) => {
+    el.textContent = i === colIdx + 1 ? (sortAsc ? '▲' : '▼') : '⇅';
+  });
+}
+
+// ─── Mode Switch ───────────────────────────────────────────────────────────
+async function switchMode(mode) {
+  if (mode === currentMode) return;
+  if (isDirty) {
+    if (!confirm('Switching mode will reload the file. Unsaved changes will be lost. Continue?')) return;
+    isDirty = false;
+    pendingEdits = {};
+    document.getElementById('dirty-badge').classList.remove('show');
+  }
+
+  currentMode = mode;
+  document.getElementById('tab-table').classList.toggle('active', mode === 'table');
+  document.getElementById('tab-raw').classList.toggle('active', mode === 'raw');
+
+  if (mode === 'raw') {
+    const resp = await fetch(`/api/file/${encodeURIComponent(currentFile)}/raw`);
+    const data = await resp.json();
+    document.getElementById('table-area').classList.add('hidden');
+    document.getElementById('raw-area').classList.add('show');
+    document.getElementById('pagination').style.display = 'none';
+    document.getElementById('raw-editor').value = data.content;
+  } else {
+    document.getElementById('raw-area').classList.remove('show');
+    document.getElementById('pagination').style.display = 'flex';
+    await loadPage(1);
+  }
+}
+
+// ─── Pagination ────────────────────────────────────────────────────────────
+function gotoPage(page) {
+  page = Math.max(1, Math.min(page, totalPages));
+  if (page === currentPage) return;
+  loadPage(page);
+}
+
+function changePageSize() {
+  pageSize = parseInt(document.getElementById('page-size-sel').value);
+  loadPage(1);
+}
+
+// ─── Keyboard Shortcuts ────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    saveFile();
+  }
+});
+
+// ─── Dirty State ──────────────────────────────────────────────────────────
+function markDirty() {
+  isDirty = true;
+  document.getElementById('dirty-badge').classList.add('show');
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function escAttr(str) {
+  return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function showLoading(show) {
+  document.getElementById('loading').style.display = show ? 'block' : 'none';
+}
+
+let toastTimer = null;
+function showToast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = type === 'error' ? 'error show' : type === 'warn' ? 'warn show' : 'show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    el.classList.remove('show');
+  }, 3000);
+}
+
+// ─── Boot ──────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

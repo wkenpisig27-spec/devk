@@ -1,0 +1,1458 @@
+[04-06 10:32:19.601]AddNpcInfo:npcid = 1name = Argent Secretary - Salviermapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 2name = Blacksmith - Goldiemapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 3name = Citizen - Margaretmapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 4name = Granny Beldimapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 5name = Little Danielmapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 6name = Trader - Chiroromapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 7name = Physican - Dittomapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 8name = Banker - Monicamapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 9name = Innkeeper - Marriammapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 10name = Forbeimapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 11name = Sailer - Coddymapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 12name = General - Williammapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 13name = Nurse - Ginamapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 14name = Shaitan Ambassador - Xibamapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 15name = Argent Chairman - Ronniemapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 16name = Oldman - Blurrymapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 17name = Grocery - Jimberrymapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 18name = Tailor - Granny Nilamapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 19name = Assistant - Rourimapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 20name = Barmaid - Donnamapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 21name = Drunkyard - Anthonymapid = 1areaid = 1 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 22name = Youth - Tommymapid = 1areaid = 3 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 23name = Manufacturer - Desmondmapid = 1areaid = 3 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 24name = D EDITION - SMUGGLING BUNNYmapid = 1areaid = 3 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 25name = Navy Commander - Dessaromapid = 1areaid = 8 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 26name = Bar Waitress - Monamapid = 1areaid = 10 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 27name = Sailor - Diomapid = 1areaid = 10 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 28name = Trader - Sanjaymapid = 1areaid = 10 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 29name = Doctor - Masamapid = 1areaid = 8 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 30name = Banker - Macurdomapid = 1areaid = 8 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 31name = Blacksmith - Furlingtonmapid = 1areaid = 8 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 32name = Girl - Cindymapid = 1areaid = 8 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 33name = Shaitan Ambassador - Alixmapid = 1areaid = 8 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 34name = Tools - Wesleymapid = 1areaid = 8 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 35name = Innkeeper - Granny Mayamapid = 1areaid = 8 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 36name = Tailor - Dittermapid = 1areaid = 8 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 37name = Argent Ambassador - Yatamapid = 1areaid = 8 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 38name = Guard Captain - Mallackmapid = 1areaid = 8 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 39name = Grocer - Kudumapid = 1areaid = 8 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 40name = Girl - Riolimapid = 1areaid = 10 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 41name = Navy HQ - General Kenmapid = 1areaid = 8 
+[04-06 10:32:19.601]AddNpcInfo:npcid = 42name = Navy HQ - Colonel Maximapid = 1areaid = 8 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 43name = Morpheus - Freyamapid = 1areaid = 8 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 44name = Guard - Nissonmapid = 1areaid = 8 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 45name = Guard - Sonnymapid = 1areaid = 8 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 46name = Tourist - Barbimapid = 1areaid = 12 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 47name = Patrol - Marcusamapid = 1areaid = 3 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 48name = Doctor - Chivomapid = 1areaid = 54 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 49name = Doctor - Minosevamapid = 1areaid = 53 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 50name = Fukeimapid = 1areaid = 3 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 51name = Xitronmapid = 1areaid = 3 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 52name = Kentaromapid = 1areaid = 55 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 53name = Bubumapid = 1areaid = 3 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 54name = Melissamapid = 1areaid = 3 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 55name = Gadormapid = 1areaid = 58 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 56name = Little Cuwenmapid = 1areaid = 3 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 57name = Aunt Marymapid = 1areaid = 3 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 58name = Waalamapid = 1areaid = 61 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 59name = Alexandismapid = 1areaid = 58 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 60name = Old Cuwenmapid = 1areaid = 63 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 61name = Maritime Assistant -  Alenamapid = 1areaid = 1 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 62name = Builder - Sinbadmapid = 1areaid = 1 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 63name = Harbor Operator - Shirleymapid = 1areaid = 1 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 64name = Durianmapid = 1areaid = 58 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 65name = Leynamapid = 1areaid = 58 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 66name = Don Pittmapid = 1areaid = 61 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 67name = Professor Fennymapid = 1areaid = 61 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 68name = Guideriusmapid = 1areaid = 61 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 69name = Security - Kalmapid = 1areaid = 55 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 70name = Berrymapid = 1areaid = 55 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 71name = Geliyamapid = 1areaid = 55 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 72name = Gregmapid = 1areaid = 55 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 73name = Lindamapid = 1areaid = 63 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 74name = Dadamapid = 1areaid = 63 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 75name = Greggmapid = 1areaid = 63 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 76name = Clan Chief - Albudamapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 77name = Tools - Ouyamapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 78name = Tailor - Moyamapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 79name = Banker - Judismapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 80name = Coaster Guard - Francomapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 81name = Blacksmith - Smithymapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 82name = Girl - Lenamapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 83name = Grocery - Amosmapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 84name = Innkeeper - Harkenmapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 85name = Nurse - Landymapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 86name = Pirate Deckymapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 87name = Builder - Franklinmapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 88name = Navy HQ - Admiral Nicmapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 89name = Shaitan Chairman - Guilemapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 90name = Tourist - Wowomapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 91name = Assistant - Tintinmapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 92name = Sand Bandit - Supermunmapid = 2areaid = 15 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 93name = Merman Prince - Hassanmapid = 2areaid = 16 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 94name = Musician - Shamelmapid = 2areaid = 16 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 95name = Holy Priestess - Adamapid = 2areaid = 14 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 96name = Tourist - Fairumapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 97name = Guildmaster - Forlanmapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 98name = Guard - Michaelmapid = 2areaid = 16 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 99name = Physician - Shalamapid = 2areaid = 13 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 100name = Minellimapid = 2areaid = 62 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 101name = Augustanmapid = 2areaid = 16 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 102name = Jeynaamapid = 2areaid = 16 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 103name = Ditaromapid = 2areaid = 57 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 104name = Ruben Actusmapid = 2areaid = 15 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 105name = Merrixmapid = 2areaid = 15 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 106name = Gudasmapid = 2areaid = 15 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 107name = Kavoskymapid = 2areaid = 57 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 108name = Beckmapid = 2areaid = 16 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 109name = Hammapid = 2areaid = 14 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 110name = Love Yurimapid = 2areaid = 16 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 111name = Robinmapid = 2areaid = 16 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 112name = Harbor Operator - Markmapid = 2areaid = 16 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 113name = Solarumapid = 2areaid = 62 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 114name = Odessismapid = 2areaid = 62 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 115name = Momomapid = 2areaid = 62 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 116name = Wenonamapid = 2areaid = 57 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 117name = Fey Feymapid = 2areaid = 57 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 118name = Marcusmapid = 2areaid = 57 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 119name = Blacksmith - Bashmapid = 3areaid = 20 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 120name = Grocer - Palpinmapid = 3areaid = 20 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 121name = Physican - Daishamapid = 3areaid = 20 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 122name = Nurse - Annemapid = 3areaid = 20 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 123name = Icicle Chairman - Reynomapid = 3areaid = 20 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 124name = Icicle Royal - Masmapid = 3areaid = 20 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 125name = Banker - Belindamapid = 3areaid = 20 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 126name = Waitress - Babaramapid = 3areaid = 20 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 127name = Tailor - Hannahmapid = 3areaid = 20 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 128name = Innkeeper - Yaskeymapid = 3areaid = 20 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 129name = Patrol - Little Momapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 130name = Wynnemapid = 3areaid = 19 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 131name = Lessiemapid = 3areaid = 19 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 132name = Dodomapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 133name = Lamutmapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 134name = Irisismapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 135name = Elunamapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 136name = Sheredamapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 137name = Ciaomapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 138name = Strawberrymapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 139name = Evemapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 140name = Susanamapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 141name = Carolinemapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 142name = Jamesonmapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 143name = Lucymapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 144name = Yulandormapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 145name = Ketanmapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 146name = Missy Elenemapid = 3areaid = 20 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 147name = Harbor Operator - Silionmapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 148name = Builder - Georgemapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 149name = Sailor - Ajaxmapid = 3areaid = 21 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 150name = Willimapid = 3areaid = 59 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 151name = Zurbimapid = 3areaid = 59 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 152name = Gasardismapid = 3areaid = 59 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 153name = Julie Burnmapid = 3areaid = 59 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 154name = Ulkarmapid = 3areaid = 59 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 155name = Oracle - Moonlightmapid = 3areaid = 60 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 156name = Xeusmapid = 3areaid = 60 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 157name = Hohomapid = 3areaid = 60 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 158name = Neilamapid = 3areaid = 64 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 159name = Lulumapid = 3areaid = 64 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 160name = Mekkilonmapid = 3areaid = 64 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 161name = Fardeymapid = 3areaid = 64 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 162name = Jernismapid = 3areaid = 56 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 163name = Granny Dongmapid = 3areaid = 56 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 164name = Nanamapid = 3areaid = 56 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 165name = Weird Grampamapid = 3areaid = 56 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 166name = Freight - Huradarmapid = 1areaid = 55 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 167name = Freight - Mokenmapid = 1areaid = 58 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 168name = Harbor Operator - Domorumapid = 2areaid = 77 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 169name = Harbor Operator - Barosmapid = 2areaid = 79 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 170name = Harbor Operator - Luigimapid = 2areaid = 75 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 171name = Harbor Operator - Didanemapid = 2areaid = 80 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 172name = Harbor Operator - Dannismapid = 2areaid = 81 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 173name = Harbor Operator - Darukamapid = 1areaid = 72 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 174name = Freight - Alkinsmapid = 3areaid = 59 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 175name = Taemapid = 3areaid = 60 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 176name = Harbor Operator - Fardellmapid = 1areaid = 74 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 177name = Harbor Operator - Whitcombemapid = 1areaid = 73 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 178name = Harbor Operator - Gregorymapid = 3areaid = 83 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 179name = Harbor Operator - Whitneymapid = 1areaid = 71 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 180name = Harbor Operator - Bunimapid = 2areaid = 76 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 181name = Harbor Operator - Ramusmapid = 3areaid = 85 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 182name = Harbor Operator - Socmapid = 2areaid = 82 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 183name = Harbor Operator - Tebamapid = 2areaid = 78 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 184name = Castle Guard - Petermapid = 1areaid = 1 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 185name = Icicle Swordsman - Raymapid = 3areaid = 20 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 186name = Harbor Operator - Odiemapid = 3areaid = 84 
+[04-06 10:32:19.602]AddNpcInfo:npcid = 187name = High Priest - Gannonmapid = 2areaid = 13 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 1name = Argent Secretary - Salviermapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 2name = Blacksmith - Goldiemapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 3name = Citizen - Margaretmapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 4name = Granny Beldimapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 5name = Little Danielmapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 6name = Trader - Chiroromapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 7name = Physican - Dittomapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 8name = Banker - Monicamapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 9name = Innkeeper - Marriammapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 10name = Forbeimapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 11name = Sailer - Coddymapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 12name = General - Williammapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 13name = Nurse - Ginamapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 14name = Shaitan Ambassador - Xibamapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 15name = Argent Chairman - Ronniemapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 16name = Oldman - Blurrymapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 17name = Grocery - Jimberrymapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 18name = Tailor - Granny Nilamapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 19name = Assistant - Rourimapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 20name = Barmaid - Donnamapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 21name = Drunkyard - Anthonymapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 22name = Youth - Tommymapid = 1areaid = 3 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 23name = Manufacturer - Desmondmapid = 1areaid = 3 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 24name = D EDITION - SMUGGLING BUNNYmapid = 1areaid = 3 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 25name = Navy Commander - Dessaromapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 26name = Bar Waitress - Monamapid = 1areaid = 10 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 27name = Sailor - Diomapid = 1areaid = 10 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 28name = Trader - Sanjaymapid = 1areaid = 10 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 29name = Doctor - Masamapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 30name = Banker - Macurdomapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 31name = Blacksmith - Furlingtonmapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 32name = Girl - Cindymapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 33name = Shaitan Ambassador - Alixmapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 34name = Tools - Wesleymapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 35name = Innkeeper - Granny Mayamapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 36name = Tailor - Dittermapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 37name = Argent Ambassador - Yatamapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 38name = Guard Captain - Mallackmapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 39name = Grocer - Kudumapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 40name = Girl - Riolimapid = 1areaid = 10 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 41name = Navy HQ - General Kenmapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 42name = Navy HQ - Colonel Maximapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 43name = Morpheus - Freyamapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 44name = Guard - Nissonmapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 45name = Guard - Sonnymapid = 1areaid = 8 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 46name = Tourist - Barbimapid = 1areaid = 12 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 47name = Patrol - Marcusamapid = 1areaid = 3 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 48name = Doctor - Chivomapid = 1areaid = 54 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 49name = Doctor - Minosevamapid = 1areaid = 53 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 50name = Fukeimapid = 1areaid = 3 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 51name = Xitronmapid = 1areaid = 3 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 52name = Kentaromapid = 1areaid = 55 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 53name = Bubumapid = 1areaid = 3 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 54name = Melissamapid = 1areaid = 3 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 55name = Gadormapid = 1areaid = 58 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 56name = Little Cuwenmapid = 1areaid = 3 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 57name = Aunt Marymapid = 1areaid = 3 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 58name = Waalamapid = 1areaid = 61 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 59name = Alexandismapid = 1areaid = 58 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 60name = Old Cuwenmapid = 1areaid = 63 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 61name = Maritime Assistant -  Alenamapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 62name = Builder - Sinbadmapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 63name = Harbor Operator - Shirleymapid = 1areaid = 1 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 64name = Durianmapid = 1areaid = 58 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 65name = Leynamapid = 1areaid = 58 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 66name = Don Pittmapid = 1areaid = 61 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 67name = Professor Fennymapid = 1areaid = 61 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 68name = Guideriusmapid = 1areaid = 61 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 69name = Security - Kalmapid = 1areaid = 55 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 70name = Berrymapid = 1areaid = 55 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 71name = Geliyamapid = 1areaid = 55 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 72name = Gregmapid = 1areaid = 55 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 73name = Lindamapid = 1areaid = 63 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 74name = Dadamapid = 1areaid = 63 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 75name = Greggmapid = 1areaid = 63 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 76name = Clan Chief - Albudamapid = 2areaid = 13 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 77name = Tools - Ouyamapid = 2areaid = 13 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 78name = Tailor - Moyamapid = 2areaid = 13 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 79name = Banker - Judismapid = 2areaid = 13 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 80name = Coaster Guard - Francomapid = 2areaid = 13 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 81name = Blacksmith - Smithymapid = 2areaid = 13 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 82name = Girl - Lenamapid = 2areaid = 13 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 83name = Grocery - Amosmapid = 2areaid = 13 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 84name = Innkeeper - Harkenmapid = 2areaid = 13 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 85name = Nurse - Landymapid = 2areaid = 13 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 86name = Pirate Deckymapid = 2areaid = 13 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 87name = Builder - Franklinmapid = 2areaid = 13 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 88name = Navy HQ - Admiral Nicmapid = 2areaid = 13 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 89name = Shaitan Chairman - Guilemapid = 2areaid = 13 
+[04-06 10:40:16.365]AddNpcInfo:npcid = 90name = Tourist - Wowomapid = 2areaid = 13 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 91name = Assistant - Tintinmapid = 2areaid = 13 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 92name = Sand Bandit - Supermunmapid = 2areaid = 15 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 93name = Merman Prince - Hassanmapid = 2areaid = 16 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 94name = Musician - Shamelmapid = 2areaid = 16 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 95name = Holy Priestess - Adamapid = 2areaid = 14 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 96name = Tourist - Fairumapid = 2areaid = 13 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 97name = Guildmaster - Forlanmapid = 2areaid = 13 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 98name = Guard - Michaelmapid = 2areaid = 16 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 99name = Physician - Shalamapid = 2areaid = 13 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 100name = Minellimapid = 2areaid = 62 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 101name = Augustanmapid = 2areaid = 16 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 102name = Jeynaamapid = 2areaid = 16 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 103name = Ditaromapid = 2areaid = 57 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 104name = Ruben Actusmapid = 2areaid = 15 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 105name = Merrixmapid = 2areaid = 15 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 106name = Gudasmapid = 2areaid = 15 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 107name = Kavoskymapid = 2areaid = 57 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 108name = Beckmapid = 2areaid = 16 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 109name = Hammapid = 2areaid = 14 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 110name = Love Yurimapid = 2areaid = 16 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 111name = Robinmapid = 2areaid = 16 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 112name = Harbor Operator - Markmapid = 2areaid = 16 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 113name = Solarumapid = 2areaid = 62 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 114name = Odessismapid = 2areaid = 62 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 115name = Momomapid = 2areaid = 62 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 116name = Wenonamapid = 2areaid = 57 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 117name = Fey Feymapid = 2areaid = 57 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 118name = Marcusmapid = 2areaid = 57 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 119name = Blacksmith - Bashmapid = 3areaid = 20 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 120name = Grocer - Palpinmapid = 3areaid = 20 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 121name = Physican - Daishamapid = 3areaid = 20 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 122name = Nurse - Annemapid = 3areaid = 20 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 123name = Icicle Chairman - Reynomapid = 3areaid = 20 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 124name = Icicle Royal - Masmapid = 3areaid = 20 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 125name = Banker - Belindamapid = 3areaid = 20 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 126name = Waitress - Babaramapid = 3areaid = 20 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 127name = Tailor - Hannahmapid = 3areaid = 20 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 128name = Innkeeper - Yaskeymapid = 3areaid = 20 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 129name = Patrol - Little Momapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 130name = Wynnemapid = 3areaid = 19 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 131name = Lessiemapid = 3areaid = 19 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 132name = Dodomapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 133name = Lamutmapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 134name = Irisismapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 135name = Elunamapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 136name = Sheredamapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 137name = Ciaomapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 138name = Strawberrymapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 139name = Evemapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 140name = Susanamapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 141name = Carolinemapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 142name = Jamesonmapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 143name = Lucymapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 144name = Yulandormapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 145name = Ketanmapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 146name = Missy Elenemapid = 3areaid = 20 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 147name = Harbor Operator - Silionmapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 148name = Builder - Georgemapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 149name = Sailor - Ajaxmapid = 3areaid = 21 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 150name = Willimapid = 3areaid = 59 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 151name = Zurbimapid = 3areaid = 59 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 152name = Gasardismapid = 3areaid = 59 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 153name = Julie Burnmapid = 3areaid = 59 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 154name = Ulkarmapid = 3areaid = 59 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 155name = Oracle - Moonlightmapid = 3areaid = 60 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 156name = Xeusmapid = 3areaid = 60 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 157name = Hohomapid = 3areaid = 60 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 158name = Neilamapid = 3areaid = 64 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 159name = Lulumapid = 3areaid = 64 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 160name = Mekkilonmapid = 3areaid = 64 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 161name = Fardeymapid = 3areaid = 64 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 162name = Jernismapid = 3areaid = 56 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 163name = Granny Dongmapid = 3areaid = 56 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 164name = Nanamapid = 3areaid = 56 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 165name = Weird Grampamapid = 3areaid = 56 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 166name = Freight - Huradarmapid = 1areaid = 55 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 167name = Freight - Mokenmapid = 1areaid = 58 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 168name = Harbor Operator - Domorumapid = 2areaid = 77 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 169name = Harbor Operator - Barosmapid = 2areaid = 79 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 170name = Harbor Operator - Luigimapid = 2areaid = 75 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 171name = Harbor Operator - Didanemapid = 2areaid = 80 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 172name = Harbor Operator - Dannismapid = 2areaid = 81 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 173name = Harbor Operator - Darukamapid = 1areaid = 72 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 174name = Freight - Alkinsmapid = 3areaid = 59 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 175name = Taemapid = 3areaid = 60 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 176name = Harbor Operator - Fardellmapid = 1areaid = 74 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 177name = Harbor Operator - Whitcombemapid = 1areaid = 73 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 178name = Harbor Operator - Gregorymapid = 3areaid = 83 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 179name = Harbor Operator - Whitneymapid = 1areaid = 71 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 180name = Harbor Operator - Bunimapid = 2areaid = 76 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 181name = Harbor Operator - Ramusmapid = 3areaid = 85 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 182name = Harbor Operator - Socmapid = 2areaid = 82 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 183name = Harbor Operator - Tebamapid = 2areaid = 78 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 184name = Castle Guard - Petermapid = 1areaid = 1 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 185name = Icicle Swordsman - Raymapid = 3areaid = 20 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 186name = Harbor Operator - Odiemapid = 3areaid = 84 
+[04-06 10:40:16.366]AddNpcInfo:npcid = 187name = High Priest - Gannonmapid = 2areaid = 13 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 1name = Argent Secretary - Salviermapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 2name = Blacksmith - Goldiemapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 3name = Citizen - Margaretmapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 4name = Granny Beldimapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 5name = Little Danielmapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 6name = Trader - Chiroromapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 7name = Physican - Dittomapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 8name = Banker - Monicamapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 9name = Innkeeper - Marriammapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 10name = Forbeimapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 11name = Sailer - Coddymapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 12name = General - Williammapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 13name = Nurse - Ginamapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 14name = Shaitan Ambassador - Xibamapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 15name = Argent Chairman - Ronniemapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 16name = Oldman - Blurrymapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 17name = Grocery - Jimberrymapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 18name = Tailor - Granny Nilamapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 19name = Assistant - Rourimapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 20name = Barmaid - Donnamapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 21name = Drunkyard - Anthonymapid = 1areaid = 1 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 22name = Youth - Tommymapid = 1areaid = 3 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 23name = Manufacturer - Desmondmapid = 1areaid = 3 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 24name = D EDITION - SMUGGLING BUNNYmapid = 1areaid = 3 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 25name = Navy Commander - Dessaromapid = 1areaid = 8 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 26name = Bar Waitress - Monamapid = 1areaid = 10 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 27name = Sailor - Diomapid = 1areaid = 10 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 28name = Trader - Sanjaymapid = 1areaid = 10 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 29name = Doctor - Masamapid = 1areaid = 8 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 30name = Banker - Macurdomapid = 1areaid = 8 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 31name = Blacksmith - Furlingtonmapid = 1areaid = 8 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 32name = Girl - Cindymapid = 1areaid = 8 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 33name = Shaitan Ambassador - Alixmapid = 1areaid = 8 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 34name = Tools - Wesleymapid = 1areaid = 8 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 35name = Innkeeper - Granny Mayamapid = 1areaid = 8 
+[04-06 10:46:07.816]AddNpcInfo:npcid = 36name = Tailor - Dittermapid = 1areaid = 8 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 37name = Argent Ambassador - Yatamapid = 1areaid = 8 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 38name = Guard Captain - Mallackmapid = 1areaid = 8 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 39name = Grocer - Kudumapid = 1areaid = 8 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 40name = Girl - Riolimapid = 1areaid = 10 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 41name = Navy HQ - General Kenmapid = 1areaid = 8 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 42name = Navy HQ - Colonel Maximapid = 1areaid = 8 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 43name = Morpheus - Freyamapid = 1areaid = 8 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 44name = Guard - Nissonmapid = 1areaid = 8 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 45name = Guard - Sonnymapid = 1areaid = 8 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 46name = Tourist - Barbimapid = 1areaid = 12 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 47name = Patrol - Marcusamapid = 1areaid = 3 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 48name = Doctor - Chivomapid = 1areaid = 54 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 49name = Doctor - Minosevamapid = 1areaid = 53 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 50name = Fukeimapid = 1areaid = 3 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 51name = Xitronmapid = 1areaid = 3 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 52name = Kentaromapid = 1areaid = 55 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 53name = Bubumapid = 1areaid = 3 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 54name = Melissamapid = 1areaid = 3 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 55name = Gadormapid = 1areaid = 58 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 56name = Little Cuwenmapid = 1areaid = 3 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 57name = Aunt Marymapid = 1areaid = 3 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 58name = Waalamapid = 1areaid = 61 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 59name = Alexandismapid = 1areaid = 58 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 60name = Old Cuwenmapid = 1areaid = 63 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 61name = Maritime Assistant -  Alenamapid = 1areaid = 1 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 62name = Builder - Sinbadmapid = 1areaid = 1 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 63name = Harbor Operator - Shirleymapid = 1areaid = 1 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 64name = Durianmapid = 1areaid = 58 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 65name = Leynamapid = 1areaid = 58 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 66name = Don Pittmapid = 1areaid = 61 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 67name = Professor Fennymapid = 1areaid = 61 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 68name = Guideriusmapid = 1areaid = 61 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 69name = Security - Kalmapid = 1areaid = 55 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 70name = Berrymapid = 1areaid = 55 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 71name = Geliyamapid = 1areaid = 55 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 72name = Gregmapid = 1areaid = 55 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 73name = Lindamapid = 1areaid = 63 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 74name = Dadamapid = 1areaid = 63 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 75name = Greggmapid = 1areaid = 63 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 76name = Clan Chief - Albudamapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 77name = Tools - Ouyamapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 78name = Tailor - Moyamapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 79name = Banker - Judismapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 80name = Coaster Guard - Francomapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 81name = Blacksmith - Smithymapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 82name = Girl - Lenamapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 83name = Grocery - Amosmapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 84name = Innkeeper - Harkenmapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 85name = Nurse - Landymapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 86name = Pirate Deckymapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 87name = Builder - Franklinmapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 88name = Navy HQ - Admiral Nicmapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 89name = Shaitan Chairman - Guilemapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 90name = Tourist - Wowomapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 91name = Assistant - Tintinmapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 92name = Sand Bandit - Supermunmapid = 2areaid = 15 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 93name = Merman Prince - Hassanmapid = 2areaid = 16 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 94name = Musician - Shamelmapid = 2areaid = 16 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 95name = Holy Priestess - Adamapid = 2areaid = 14 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 96name = Tourist - Fairumapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 97name = Guildmaster - Forlanmapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 98name = Guard - Michaelmapid = 2areaid = 16 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 99name = Physician - Shalamapid = 2areaid = 13 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 100name = Minellimapid = 2areaid = 62 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 101name = Augustanmapid = 2areaid = 16 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 102name = Jeynaamapid = 2areaid = 16 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 103name = Ditaromapid = 2areaid = 57 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 104name = Ruben Actusmapid = 2areaid = 15 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 105name = Merrixmapid = 2areaid = 15 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 106name = Gudasmapid = 2areaid = 15 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 107name = Kavoskymapid = 2areaid = 57 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 108name = Beckmapid = 2areaid = 16 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 109name = Hammapid = 2areaid = 14 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 110name = Love Yurimapid = 2areaid = 16 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 111name = Robinmapid = 2areaid = 16 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 112name = Harbor Operator - Markmapid = 2areaid = 16 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 113name = Solarumapid = 2areaid = 62 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 114name = Odessismapid = 2areaid = 62 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 115name = Momomapid = 2areaid = 62 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 116name = Wenonamapid = 2areaid = 57 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 117name = Fey Feymapid = 2areaid = 57 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 118name = Marcusmapid = 2areaid = 57 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 119name = Blacksmith - Bashmapid = 3areaid = 20 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 120name = Grocer - Palpinmapid = 3areaid = 20 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 121name = Physican - Daishamapid = 3areaid = 20 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 122name = Nurse - Annemapid = 3areaid = 20 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 123name = Icicle Chairman - Reynomapid = 3areaid = 20 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 124name = Icicle Royal - Masmapid = 3areaid = 20 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 125name = Banker - Belindamapid = 3areaid = 20 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 126name = Waitress - Babaramapid = 3areaid = 20 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 127name = Tailor - Hannahmapid = 3areaid = 20 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 128name = Innkeeper - Yaskeymapid = 3areaid = 20 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 129name = Patrol - Little Momapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 130name = Wynnemapid = 3areaid = 19 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 131name = Lessiemapid = 3areaid = 19 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 132name = Dodomapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 133name = Lamutmapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 134name = Irisismapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 135name = Elunamapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 136name = Sheredamapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 137name = Ciaomapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 138name = Strawberrymapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 139name = Evemapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 140name = Susanamapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 141name = Carolinemapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 142name = Jamesonmapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 143name = Lucymapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 144name = Yulandormapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 145name = Ketanmapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 146name = Missy Elenemapid = 3areaid = 20 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 147name = Harbor Operator - Silionmapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 148name = Builder - Georgemapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 149name = Sailor - Ajaxmapid = 3areaid = 21 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 150name = Willimapid = 3areaid = 59 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 151name = Zurbimapid = 3areaid = 59 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 152name = Gasardismapid = 3areaid = 59 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 153name = Julie Burnmapid = 3areaid = 59 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 154name = Ulkarmapid = 3areaid = 59 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 155name = Oracle - Moonlightmapid = 3areaid = 60 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 156name = Xeusmapid = 3areaid = 60 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 157name = Hohomapid = 3areaid = 60 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 158name = Neilamapid = 3areaid = 64 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 159name = Lulumapid = 3areaid = 64 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 160name = Mekkilonmapid = 3areaid = 64 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 161name = Fardeymapid = 3areaid = 64 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 162name = Jernismapid = 3areaid = 56 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 163name = Granny Dongmapid = 3areaid = 56 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 164name = Nanamapid = 3areaid = 56 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 165name = Weird Grampamapid = 3areaid = 56 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 166name = Freight - Huradarmapid = 1areaid = 55 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 167name = Freight - Mokenmapid = 1areaid = 58 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 168name = Harbor Operator - Domorumapid = 2areaid = 77 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 169name = Harbor Operator - Barosmapid = 2areaid = 79 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 170name = Harbor Operator - Luigimapid = 2areaid = 75 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 171name = Harbor Operator - Didanemapid = 2areaid = 80 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 172name = Harbor Operator - Dannismapid = 2areaid = 81 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 173name = Harbor Operator - Darukamapid = 1areaid = 72 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 174name = Freight - Alkinsmapid = 3areaid = 59 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 175name = Taemapid = 3areaid = 60 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 176name = Harbor Operator - Fardellmapid = 1areaid = 74 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 177name = Harbor Operator - Whitcombemapid = 1areaid = 73 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 178name = Harbor Operator - Gregorymapid = 3areaid = 83 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 179name = Harbor Operator - Whitneymapid = 1areaid = 71 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 180name = Harbor Operator - Bunimapid = 2areaid = 76 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 181name = Harbor Operator - Ramusmapid = 3areaid = 85 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 182name = Harbor Operator - Socmapid = 2areaid = 82 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 183name = Harbor Operator - Tebamapid = 2areaid = 78 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 184name = Castle Guard - Petermapid = 1areaid = 1 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 185name = Icicle Swordsman - Raymapid = 3areaid = 20 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 186name = Harbor Operator - Odiemapid = 3areaid = 84 
+[04-06 10:46:07.817]AddNpcInfo:npcid = 187name = High Priest - Gannonmapid = 2areaid = 13 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 1name = Argent Secretary - Salviermapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 2name = Blacksmith - Goldiemapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 3name = Citizen - Margaretmapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 4name = Granny Beldimapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 5name = Little Danielmapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 6name = Trader - Chiroromapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 7name = Physican - Dittomapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 8name = Banker - Monicamapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 9name = Innkeeper - Marriammapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 10name = Forbeimapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 11name = Sailer - Coddymapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 12name = General - Williammapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 13name = Nurse - Ginamapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 14name = Shaitan Ambassador - Xibamapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 15name = Argent Chairman - Ronniemapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 16name = Oldman - Blurrymapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 17name = Grocery - Jimberrymapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 18name = Tailor - Granny Nilamapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 19name = Assistant - Rourimapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 20name = Barmaid - Donnamapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 21name = Drunkyard - Anthonymapid = 1areaid = 1 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 22name = Youth - Tommymapid = 1areaid = 3 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 23name = Manufacturer - Desmondmapid = 1areaid = 3 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 24name = D EDITION - SMUGGLING BUNNYmapid = 1areaid = 3 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 25name = Navy Commander - Dessaromapid = 1areaid = 8 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 26name = Bar Waitress - Monamapid = 1areaid = 10 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 27name = Sailor - Diomapid = 1areaid = 10 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 28name = Trader - Sanjaymapid = 1areaid = 10 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 29name = Doctor - Masamapid = 1areaid = 8 
+[04-06 10:50:15.804]AddNpcInfo:npcid = 30name = Banker - Macurdomapid = 1areaid = 8 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 31name = Blacksmith - Furlingtonmapid = 1areaid = 8 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 32name = Girl - Cindymapid = 1areaid = 8 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 33name = Shaitan Ambassador - Alixmapid = 1areaid = 8 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 34name = Tools - Wesleymapid = 1areaid = 8 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 35name = Innkeeper - Granny Mayamapid = 1areaid = 8 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 36name = Tailor - Dittermapid = 1areaid = 8 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 37name = Argent Ambassador - Yatamapid = 1areaid = 8 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 38name = Guard Captain - Mallackmapid = 1areaid = 8 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 39name = Grocer - Kudumapid = 1areaid = 8 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 40name = Girl - Riolimapid = 1areaid = 10 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 41name = Navy HQ - General Kenmapid = 1areaid = 8 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 42name = Navy HQ - Colonel Maximapid = 1areaid = 8 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 43name = Morpheus - Freyamapid = 1areaid = 8 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 44name = Guard - Nissonmapid = 1areaid = 8 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 45name = Guard - Sonnymapid = 1areaid = 8 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 46name = Tourist - Barbimapid = 1areaid = 12 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 47name = Patrol - Marcusamapid = 1areaid = 3 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 48name = Doctor - Chivomapid = 1areaid = 54 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 49name = Doctor - Minosevamapid = 1areaid = 53 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 50name = Fukeimapid = 1areaid = 3 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 51name = Xitronmapid = 1areaid = 3 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 52name = Kentaromapid = 1areaid = 55 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 53name = Bubumapid = 1areaid = 3 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 54name = Melissamapid = 1areaid = 3 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 55name = Gadormapid = 1areaid = 58 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 56name = Little Cuwenmapid = 1areaid = 3 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 57name = Aunt Marymapid = 1areaid = 3 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 58name = Waalamapid = 1areaid = 61 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 59name = Alexandismapid = 1areaid = 58 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 60name = Old Cuwenmapid = 1areaid = 63 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 61name = Maritime Assistant -  Alenamapid = 1areaid = 1 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 62name = Builder - Sinbadmapid = 1areaid = 1 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 63name = Harbor Operator - Shirleymapid = 1areaid = 1 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 64name = Durianmapid = 1areaid = 58 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 65name = Leynamapid = 1areaid = 58 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 66name = Don Pittmapid = 1areaid = 61 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 67name = Professor Fennymapid = 1areaid = 61 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 68name = Guideriusmapid = 1areaid = 61 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 69name = Security - Kalmapid = 1areaid = 55 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 70name = Berrymapid = 1areaid = 55 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 71name = Geliyamapid = 1areaid = 55 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 72name = Gregmapid = 1areaid = 55 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 73name = Lindamapid = 1areaid = 63 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 74name = Dadamapid = 1areaid = 63 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 75name = Greggmapid = 1areaid = 63 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 76name = Clan Chief - Albudamapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 77name = Tools - Ouyamapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 78name = Tailor - Moyamapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 79name = Banker - Judismapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 80name = Coaster Guard - Francomapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 81name = Blacksmith - Smithymapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 82name = Girl - Lenamapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 83name = Grocery - Amosmapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 84name = Innkeeper - Harkenmapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 85name = Nurse - Landymapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 86name = Pirate Deckymapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 87name = Builder - Franklinmapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 88name = Navy HQ - Admiral Nicmapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 89name = Shaitan Chairman - Guilemapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 90name = Tourist - Wowomapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 91name = Assistant - Tintinmapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 92name = Sand Bandit - Supermunmapid = 2areaid = 15 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 93name = Merman Prince - Hassanmapid = 2areaid = 16 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 94name = Musician - Shamelmapid = 2areaid = 16 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 95name = Holy Priestess - Adamapid = 2areaid = 14 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 96name = Tourist - Fairumapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 97name = Guildmaster - Forlanmapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 98name = Guard - Michaelmapid = 2areaid = 16 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 99name = Physician - Shalamapid = 2areaid = 13 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 100name = Minellimapid = 2areaid = 62 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 101name = Augustanmapid = 2areaid = 16 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 102name = Jeynaamapid = 2areaid = 16 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 103name = Ditaromapid = 2areaid = 57 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 104name = Ruben Actusmapid = 2areaid = 15 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 105name = Merrixmapid = 2areaid = 15 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 106name = Gudasmapid = 2areaid = 15 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 107name = Kavoskymapid = 2areaid = 57 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 108name = Beckmapid = 2areaid = 16 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 109name = Hammapid = 2areaid = 14 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 110name = Love Yurimapid = 2areaid = 16 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 111name = Robinmapid = 2areaid = 16 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 112name = Harbor Operator - Markmapid = 2areaid = 16 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 113name = Solarumapid = 2areaid = 62 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 114name = Odessismapid = 2areaid = 62 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 115name = Momomapid = 2areaid = 62 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 116name = Wenonamapid = 2areaid = 57 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 117name = Fey Feymapid = 2areaid = 57 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 118name = Marcusmapid = 2areaid = 57 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 119name = Blacksmith - Bashmapid = 3areaid = 20 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 120name = Grocer - Palpinmapid = 3areaid = 20 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 121name = Physican - Daishamapid = 3areaid = 20 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 122name = Nurse - Annemapid = 3areaid = 20 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 123name = Icicle Chairman - Reynomapid = 3areaid = 20 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 124name = Icicle Royal - Masmapid = 3areaid = 20 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 125name = Banker - Belindamapid = 3areaid = 20 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 126name = Waitress - Babaramapid = 3areaid = 20 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 127name = Tailor - Hannahmapid = 3areaid = 20 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 128name = Innkeeper - Yaskeymapid = 3areaid = 20 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 129name = Patrol - Little Momapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 130name = Wynnemapid = 3areaid = 19 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 131name = Lessiemapid = 3areaid = 19 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 132name = Dodomapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 133name = Lamutmapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 134name = Irisismapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 135name = Elunamapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 136name = Sheredamapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 137name = Ciaomapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 138name = Strawberrymapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 139name = Evemapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 140name = Susanamapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 141name = Carolinemapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 142name = Jamesonmapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 143name = Lucymapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 144name = Yulandormapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 145name = Ketanmapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 146name = Missy Elenemapid = 3areaid = 20 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 147name = Harbor Operator - Silionmapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 148name = Builder - Georgemapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 149name = Sailor - Ajaxmapid = 3areaid = 21 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 150name = Willimapid = 3areaid = 59 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 151name = Zurbimapid = 3areaid = 59 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 152name = Gasardismapid = 3areaid = 59 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 153name = Julie Burnmapid = 3areaid = 59 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 154name = Ulkarmapid = 3areaid = 59 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 155name = Oracle - Moonlightmapid = 3areaid = 60 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 156name = Xeusmapid = 3areaid = 60 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 157name = Hohomapid = 3areaid = 60 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 158name = Neilamapid = 3areaid = 64 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 159name = Lulumapid = 3areaid = 64 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 160name = Mekkilonmapid = 3areaid = 64 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 161name = Fardeymapid = 3areaid = 64 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 162name = Jernismapid = 3areaid = 56 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 163name = Granny Dongmapid = 3areaid = 56 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 164name = Nanamapid = 3areaid = 56 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 165name = Weird Grampamapid = 3areaid = 56 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 166name = Freight - Huradarmapid = 1areaid = 55 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 167name = Freight - Mokenmapid = 1areaid = 58 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 168name = Harbor Operator - Domorumapid = 2areaid = 77 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 169name = Harbor Operator - Barosmapid = 2areaid = 79 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 170name = Harbor Operator - Luigimapid = 2areaid = 75 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 171name = Harbor Operator - Didanemapid = 2areaid = 80 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 172name = Harbor Operator - Dannismapid = 2areaid = 81 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 173name = Harbor Operator - Darukamapid = 1areaid = 72 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 174name = Freight - Alkinsmapid = 3areaid = 59 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 175name = Taemapid = 3areaid = 60 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 176name = Harbor Operator - Fardellmapid = 1areaid = 74 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 177name = Harbor Operator - Whitcombemapid = 1areaid = 73 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 178name = Harbor Operator - Gregorymapid = 3areaid = 83 
+[04-06 10:50:15.805]AddNpcInfo:npcid = 179name = Harbor Operator - Whitneymapid = 1areaid = 71 
+[04-06 10:50:15.806]AddNpcInfo:npcid = 180name = Harbor Operator - Bunimapid = 2areaid = 76 
+[04-06 10:50:15.806]AddNpcInfo:npcid = 181name = Harbor Operator - Ramusmapid = 3areaid = 85 
+[04-06 10:50:15.806]AddNpcInfo:npcid = 182name = Harbor Operator - Socmapid = 2areaid = 82 
+[04-06 10:50:15.806]AddNpcInfo:npcid = 183name = Harbor Operator - Tebamapid = 2areaid = 78 
+[04-06 10:50:15.806]AddNpcInfo:npcid = 184name = Castle Guard - Petermapid = 1areaid = 1 
+[04-06 10:50:15.806]AddNpcInfo:npcid = 185name = Icicle Swordsman - Raymapid = 3areaid = 20 
+[04-06 10:50:15.806]AddNpcInfo:npcid = 186name = Harbor Operator - Odiemapid = 3areaid = 84 
+[04-06 10:50:15.806]AddNpcInfo:npcid = 187name = High Priest - Gannonmapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 1name = Argent Secretary - Salviermapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 2name = Blacksmith - Goldiemapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 3name = Citizen - Margaretmapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 4name = Granny Beldimapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 5name = Little Danielmapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 6name = Trader - Chiroromapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 7name = Physican - Dittomapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 8name = Banker - Monicamapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 9name = Innkeeper - Marriammapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 10name = Forbeimapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 11name = Sailer - Coddymapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 12name = General - Williammapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 13name = Nurse - Ginamapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 14name = Shaitan Ambassador - Xibamapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 15name = Argent Chairman - Ronniemapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 16name = Oldman - Blurrymapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 17name = Grocery - Jimberrymapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 18name = Tailor - Granny Nilamapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 19name = Assistant - Rourimapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 20name = Barmaid - Donnamapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 21name = Drunkyard - Anthonymapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 22name = Youth - Tommymapid = 1areaid = 3 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 23name = Manufacturer - Desmondmapid = 1areaid = 3 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 24name = D EDITION - SMUGGLING BUNNYmapid = 1areaid = 3 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 25name = Navy Commander - Dessaromapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 26name = Bar Waitress - Monamapid = 1areaid = 10 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 27name = Sailor - Diomapid = 1areaid = 10 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 28name = Trader - Sanjaymapid = 1areaid = 10 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 29name = Doctor - Masamapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 30name = Banker - Macurdomapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 31name = Blacksmith - Furlingtonmapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 32name = Girl - Cindymapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 33name = Shaitan Ambassador - Alixmapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 34name = Tools - Wesleymapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 35name = Innkeeper - Granny Mayamapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 36name = Tailor - Dittermapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 37name = Argent Ambassador - Yatamapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 38name = Guard Captain - Mallackmapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 39name = Grocer - Kudumapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 40name = Girl - Riolimapid = 1areaid = 10 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 41name = Navy HQ - General Kenmapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 42name = Navy HQ - Colonel Maximapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 43name = Morpheus - Freyamapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 44name = Guard - Nissonmapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 45name = Guard - Sonnymapid = 1areaid = 8 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 46name = Tourist - Barbimapid = 1areaid = 12 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 47name = Patrol - Marcusamapid = 1areaid = 3 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 48name = Doctor - Chivomapid = 1areaid = 54 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 49name = Doctor - Minosevamapid = 1areaid = 53 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 50name = Fukeimapid = 1areaid = 3 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 51name = Xitronmapid = 1areaid = 3 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 52name = Kentaromapid = 1areaid = 55 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 53name = Bubumapid = 1areaid = 3 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 54name = Melissamapid = 1areaid = 3 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 55name = Gadormapid = 1areaid = 58 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 56name = Little Cuwenmapid = 1areaid = 3 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 57name = Aunt Marymapid = 1areaid = 3 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 58name = Waalamapid = 1areaid = 61 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 59name = Alexandismapid = 1areaid = 58 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 60name = Old Cuwenmapid = 1areaid = 63 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 61name = Maritime Assistant -  Alenamapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 62name = Builder - Sinbadmapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 63name = Harbor Operator - Shirleymapid = 1areaid = 1 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 64name = Durianmapid = 1areaid = 58 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 65name = Leynamapid = 1areaid = 58 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 66name = Don Pittmapid = 1areaid = 61 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 67name = Professor Fennymapid = 1areaid = 61 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 68name = Guideriusmapid = 1areaid = 61 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 69name = Security - Kalmapid = 1areaid = 55 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 70name = Berrymapid = 1areaid = 55 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 71name = Geliyamapid = 1areaid = 55 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 72name = Gregmapid = 1areaid = 55 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 73name = Lindamapid = 1areaid = 63 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 74name = Dadamapid = 1areaid = 63 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 75name = Greggmapid = 1areaid = 63 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 76name = Clan Chief - Albudamapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 77name = Tools - Ouyamapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 78name = Tailor - Moyamapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 79name = Banker - Judismapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 80name = Coaster Guard - Francomapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 81name = Blacksmith - Smithymapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 82name = Girl - Lenamapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 83name = Grocery - Amosmapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 84name = Innkeeper - Harkenmapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 85name = Nurse - Landymapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 86name = Pirate Deckymapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 87name = Builder - Franklinmapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 88name = Navy HQ - Admiral Nicmapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 89name = Shaitan Chairman - Guilemapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 90name = Tourist - Wowomapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 91name = Assistant - Tintinmapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 92name = Sand Bandit - Supermunmapid = 2areaid = 15 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 93name = Merman Prince - Hassanmapid = 2areaid = 16 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 94name = Musician - Shamelmapid = 2areaid = 16 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 95name = Holy Priestess - Adamapid = 2areaid = 14 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 96name = Tourist - Fairumapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 97name = Guildmaster - Forlanmapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 98name = Guard - Michaelmapid = 2areaid = 16 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 99name = Physician - Shalamapid = 2areaid = 13 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 100name = Minellimapid = 2areaid = 62 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 101name = Augustanmapid = 2areaid = 16 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 102name = Jeynaamapid = 2areaid = 16 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 103name = Ditaromapid = 2areaid = 57 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 104name = Ruben Actusmapid = 2areaid = 15 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 105name = Merrixmapid = 2areaid = 15 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 106name = Gudasmapid = 2areaid = 15 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 107name = Kavoskymapid = 2areaid = 57 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 108name = Beckmapid = 2areaid = 16 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 109name = Hammapid = 2areaid = 14 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 110name = Love Yurimapid = 2areaid = 16 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 111name = Robinmapid = 2areaid = 16 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 112name = Harbor Operator - Markmapid = 2areaid = 16 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 113name = Solarumapid = 2areaid = 62 
+[04-06 10:56:07.174]AddNpcInfo:npcid = 114name = Odessismapid = 2areaid = 62 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 115name = Momomapid = 2areaid = 62 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 116name = Wenonamapid = 2areaid = 57 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 117name = Fey Feymapid = 2areaid = 57 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 118name = Marcusmapid = 2areaid = 57 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 119name = Blacksmith - Bashmapid = 3areaid = 20 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 120name = Grocer - Palpinmapid = 3areaid = 20 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 121name = Physican - Daishamapid = 3areaid = 20 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 122name = Nurse - Annemapid = 3areaid = 20 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 123name = Icicle Chairman - Reynomapid = 3areaid = 20 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 124name = Icicle Royal - Masmapid = 3areaid = 20 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 125name = Banker - Belindamapid = 3areaid = 20 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 126name = Waitress - Babaramapid = 3areaid = 20 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 127name = Tailor - Hannahmapid = 3areaid = 20 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 128name = Innkeeper - Yaskeymapid = 3areaid = 20 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 129name = Patrol - Little Momapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 130name = Wynnemapid = 3areaid = 19 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 131name = Lessiemapid = 3areaid = 19 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 132name = Dodomapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 133name = Lamutmapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 134name = Irisismapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 135name = Elunamapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 136name = Sheredamapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 137name = Ciaomapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 138name = Strawberrymapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 139name = Evemapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 140name = Susanamapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 141name = Carolinemapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 142name = Jamesonmapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 143name = Lucymapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 144name = Yulandormapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 145name = Ketanmapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 146name = Missy Elenemapid = 3areaid = 20 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 147name = Harbor Operator - Silionmapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 148name = Builder - Georgemapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 149name = Sailor - Ajaxmapid = 3areaid = 21 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 150name = Willimapid = 3areaid = 59 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 151name = Zurbimapid = 3areaid = 59 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 152name = Gasardismapid = 3areaid = 59 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 153name = Julie Burnmapid = 3areaid = 59 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 154name = Ulkarmapid = 3areaid = 59 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 155name = Oracle - Moonlightmapid = 3areaid = 60 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 156name = Xeusmapid = 3areaid = 60 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 157name = Hohomapid = 3areaid = 60 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 158name = Neilamapid = 3areaid = 64 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 159name = Lulumapid = 3areaid = 64 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 160name = Mekkilonmapid = 3areaid = 64 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 161name = Fardeymapid = 3areaid = 64 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 162name = Jernismapid = 3areaid = 56 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 163name = Granny Dongmapid = 3areaid = 56 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 164name = Nanamapid = 3areaid = 56 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 165name = Weird Grampamapid = 3areaid = 56 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 166name = Freight - Huradarmapid = 1areaid = 55 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 167name = Freight - Mokenmapid = 1areaid = 58 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 168name = Harbor Operator - Domorumapid = 2areaid = 77 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 169name = Harbor Operator - Barosmapid = 2areaid = 79 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 170name = Harbor Operator - Luigimapid = 2areaid = 75 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 171name = Harbor Operator - Didanemapid = 2areaid = 80 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 172name = Harbor Operator - Dannismapid = 2areaid = 81 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 173name = Harbor Operator - Darukamapid = 1areaid = 72 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 174name = Freight - Alkinsmapid = 3areaid = 59 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 175name = Taemapid = 3areaid = 60 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 176name = Harbor Operator - Fardellmapid = 1areaid = 74 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 177name = Harbor Operator - Whitcombemapid = 1areaid = 73 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 178name = Harbor Operator - Gregorymapid = 3areaid = 83 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 179name = Harbor Operator - Whitneymapid = 1areaid = 71 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 180name = Harbor Operator - Bunimapid = 2areaid = 76 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 181name = Harbor Operator - Ramusmapid = 3areaid = 85 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 182name = Harbor Operator - Socmapid = 2areaid = 82 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 183name = Harbor Operator - Tebamapid = 2areaid = 78 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 184name = Castle Guard - Petermapid = 1areaid = 1 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 185name = Icicle Swordsman - Raymapid = 3areaid = 20 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 186name = Harbor Operator - Odiemapid = 3areaid = 84 
+[04-06 10:56:07.175]AddNpcInfo:npcid = 187name = High Priest - Gannonmapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 1name = Argent Secretary - Salviermapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 2name = Blacksmith - Goldiemapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 3name = Citizen - Margaretmapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 4name = Granny Beldimapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 5name = Little Danielmapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 6name = Trader - Chiroromapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 7name = Physican - Dittomapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 8name = Banker - Monicamapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 9name = Innkeeper - Marriammapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 10name = Forbeimapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 11name = Sailer - Coddymapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 12name = General - Williammapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 13name = Nurse - Ginamapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 14name = Shaitan Ambassador - Xibamapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 15name = Argent Chairman - Ronniemapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 16name = Oldman - Blurrymapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 17name = Grocery - Jimberrymapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 18name = Tailor - Granny Nilamapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 19name = Assistant - Rourimapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 20name = Barmaid - Donnamapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 21name = Drunkyard - Anthonymapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 22name = Youth - Tommymapid = 1areaid = 3 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 23name = Manufacturer - Desmondmapid = 1areaid = 3 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 24name = D EDITION - SMUGGLING BUNNYmapid = 1areaid = 3 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 25name = Navy Commander - Dessaromapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 26name = Bar Waitress - Monamapid = 1areaid = 10 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 27name = Sailor - Diomapid = 1areaid = 10 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 28name = Trader - Sanjaymapid = 1areaid = 10 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 29name = Doctor - Masamapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 30name = Banker - Macurdomapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 31name = Blacksmith - Furlingtonmapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 32name = Girl - Cindymapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 33name = Shaitan Ambassador - Alixmapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 34name = Tools - Wesleymapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 35name = Innkeeper - Granny Mayamapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 36name = Tailor - Dittermapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 37name = Argent Ambassador - Yatamapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 38name = Guard Captain - Mallackmapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 39name = Grocer - Kudumapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 40name = Girl - Riolimapid = 1areaid = 10 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 41name = Navy HQ - General Kenmapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 42name = Navy HQ - Colonel Maximapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 43name = Morpheus - Freyamapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 44name = Guard - Nissonmapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 45name = Guard - Sonnymapid = 1areaid = 8 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 46name = Tourist - Barbimapid = 1areaid = 12 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 47name = Patrol - Marcusamapid = 1areaid = 3 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 48name = Doctor - Chivomapid = 1areaid = 54 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 49name = Doctor - Minosevamapid = 1areaid = 53 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 50name = Fukeimapid = 1areaid = 3 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 51name = Xitronmapid = 1areaid = 3 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 52name = Kentaromapid = 1areaid = 55 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 53name = Bubumapid = 1areaid = 3 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 54name = Melissamapid = 1areaid = 3 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 55name = Gadormapid = 1areaid = 58 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 56name = Little Cuwenmapid = 1areaid = 3 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 57name = Aunt Marymapid = 1areaid = 3 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 58name = Waalamapid = 1areaid = 61 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 59name = Alexandismapid = 1areaid = 58 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 60name = Old Cuwenmapid = 1areaid = 63 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 61name = Maritime Assistant -  Alenamapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 62name = Builder - Sinbadmapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 63name = Harbor Operator - Shirleymapid = 1areaid = 1 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 64name = Durianmapid = 1areaid = 58 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 65name = Leynamapid = 1areaid = 58 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 66name = Don Pittmapid = 1areaid = 61 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 67name = Professor Fennymapid = 1areaid = 61 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 68name = Guideriusmapid = 1areaid = 61 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 69name = Security - Kalmapid = 1areaid = 55 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 70name = Berrymapid = 1areaid = 55 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 71name = Geliyamapid = 1areaid = 55 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 72name = Gregmapid = 1areaid = 55 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 73name = Lindamapid = 1areaid = 63 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 74name = Dadamapid = 1areaid = 63 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 75name = Greggmapid = 1areaid = 63 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 76name = Clan Chief - Albudamapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 77name = Tools - Ouyamapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 78name = Tailor - Moyamapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 79name = Banker - Judismapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 80name = Coaster Guard - Francomapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 81name = Blacksmith - Smithymapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 82name = Girl - Lenamapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 83name = Grocery - Amosmapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 84name = Innkeeper - Harkenmapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 85name = Nurse - Landymapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 86name = Pirate Deckymapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 87name = Builder - Franklinmapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 88name = Navy HQ - Admiral Nicmapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 89name = Shaitan Chairman - Guilemapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 90name = Tourist - Wowomapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 91name = Assistant - Tintinmapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 92name = Sand Bandit - Supermunmapid = 2areaid = 15 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 93name = Merman Prince - Hassanmapid = 2areaid = 16 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 94name = Musician - Shamelmapid = 2areaid = 16 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 95name = Holy Priestess - Adamapid = 2areaid = 14 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 96name = Tourist - Fairumapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 97name = Guildmaster - Forlanmapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 98name = Guard - Michaelmapid = 2areaid = 16 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 99name = Physician - Shalamapid = 2areaid = 13 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 100name = Minellimapid = 2areaid = 62 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 101name = Augustanmapid = 2areaid = 16 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 102name = Jeynaamapid = 2areaid = 16 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 103name = Ditaromapid = 2areaid = 57 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 104name = Ruben Actusmapid = 2areaid = 15 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 105name = Merrixmapid = 2areaid = 15 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 106name = Gudasmapid = 2areaid = 15 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 107name = Kavoskymapid = 2areaid = 57 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 108name = Beckmapid = 2areaid = 16 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 109name = Hammapid = 2areaid = 14 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 110name = Love Yurimapid = 2areaid = 16 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 111name = Robinmapid = 2areaid = 16 
+[04-06 11:00:55.473]AddNpcInfo:npcid = 112name = Harbor Operator - Markmapid = 2areaid = 16 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 113name = Solarumapid = 2areaid = 62 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 114name = Odessismapid = 2areaid = 62 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 115name = Momomapid = 2areaid = 62 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 116name = Wenonamapid = 2areaid = 57 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 117name = Fey Feymapid = 2areaid = 57 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 118name = Marcusmapid = 2areaid = 57 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 119name = Blacksmith - Bashmapid = 3areaid = 20 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 120name = Grocer - Palpinmapid = 3areaid = 20 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 121name = Physican - Daishamapid = 3areaid = 20 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 122name = Nurse - Annemapid = 3areaid = 20 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 123name = Icicle Chairman - Reynomapid = 3areaid = 20 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 124name = Icicle Royal - Masmapid = 3areaid = 20 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 125name = Banker - Belindamapid = 3areaid = 20 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 126name = Waitress - Babaramapid = 3areaid = 20 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 127name = Tailor - Hannahmapid = 3areaid = 20 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 128name = Innkeeper - Yaskeymapid = 3areaid = 20 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 129name = Patrol - Little Momapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 130name = Wynnemapid = 3areaid = 19 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 131name = Lessiemapid = 3areaid = 19 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 132name = Dodomapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 133name = Lamutmapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 134name = Irisismapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 135name = Elunamapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 136name = Sheredamapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 137name = Ciaomapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 138name = Strawberrymapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 139name = Evemapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 140name = Susanamapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 141name = Carolinemapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 142name = Jamesonmapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 143name = Lucymapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 144name = Yulandormapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 145name = Ketanmapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 146name = Missy Elenemapid = 3areaid = 20 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 147name = Harbor Operator - Silionmapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 148name = Builder - Georgemapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 149name = Sailor - Ajaxmapid = 3areaid = 21 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 150name = Willimapid = 3areaid = 59 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 151name = Zurbimapid = 3areaid = 59 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 152name = Gasardismapid = 3areaid = 59 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 153name = Julie Burnmapid = 3areaid = 59 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 154name = Ulkarmapid = 3areaid = 59 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 155name = Oracle - Moonlightmapid = 3areaid = 60 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 156name = Xeusmapid = 3areaid = 60 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 157name = Hohomapid = 3areaid = 60 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 158name = Neilamapid = 3areaid = 64 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 159name = Lulumapid = 3areaid = 64 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 160name = Mekkilonmapid = 3areaid = 64 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 161name = Fardeymapid = 3areaid = 64 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 162name = Jernismapid = 3areaid = 56 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 163name = Granny Dongmapid = 3areaid = 56 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 164name = Nanamapid = 3areaid = 56 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 165name = Weird Grampamapid = 3areaid = 56 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 166name = Freight - Huradarmapid = 1areaid = 55 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 167name = Freight - Mokenmapid = 1areaid = 58 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 168name = Harbor Operator - Domorumapid = 2areaid = 77 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 169name = Harbor Operator - Barosmapid = 2areaid = 79 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 170name = Harbor Operator - Luigimapid = 2areaid = 75 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 171name = Harbor Operator - Didanemapid = 2areaid = 80 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 172name = Harbor Operator - Dannismapid = 2areaid = 81 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 173name = Harbor Operator - Darukamapid = 1areaid = 72 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 174name = Freight - Alkinsmapid = 3areaid = 59 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 175name = Taemapid = 3areaid = 60 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 176name = Harbor Operator - Fardellmapid = 1areaid = 74 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 177name = Harbor Operator - Whitcombemapid = 1areaid = 73 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 178name = Harbor Operator - Gregorymapid = 3areaid = 83 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 179name = Harbor Operator - Whitneymapid = 1areaid = 71 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 180name = Harbor Operator - Bunimapid = 2areaid = 76 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 181name = Harbor Operator - Ramusmapid = 3areaid = 85 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 182name = Harbor Operator - Socmapid = 2areaid = 82 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 183name = Harbor Operator - Tebamapid = 2areaid = 78 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 184name = Castle Guard - Petermapid = 1areaid = 1 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 185name = Icicle Swordsman - Raymapid = 3areaid = 20 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 186name = Harbor Operator - Odiemapid = 3areaid = 84 
+[04-06 11:00:55.474]AddNpcInfo:npcid = 187name = High Priest - Gannonmapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 1name = Argent Secretary - Salviermapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 2name = Blacksmith - Goldiemapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 3name = Citizen - Margaretmapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 4name = Granny Beldimapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 5name = Little Danielmapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 6name = Trader - Chiroromapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 7name = Physican - Dittomapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 8name = Banker - Monicamapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 9name = Innkeeper - Marriammapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 10name = Forbeimapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 11name = Sailer - Coddymapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 12name = General - Williammapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 13name = Nurse - Ginamapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 14name = Shaitan Ambassador - Xibamapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 15name = Argent Chairman - Ronniemapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 16name = Oldman - Blurrymapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 17name = Grocery - Jimberrymapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 18name = Tailor - Granny Nilamapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 19name = Assistant - Rourimapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 20name = Barmaid - Donnamapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 21name = Drunkyard - Anthonymapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 22name = Youth - Tommymapid = 1areaid = 3 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 23name = Manufacturer - Desmondmapid = 1areaid = 3 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 24name = D EDITION - SMUGGLING BUNNYmapid = 1areaid = 3 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 25name = Navy Commander - Dessaromapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 26name = Bar Waitress - Monamapid = 1areaid = 10 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 27name = Sailor - Diomapid = 1areaid = 10 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 28name = Trader - Sanjaymapid = 1areaid = 10 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 29name = Doctor - Masamapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 30name = Banker - Macurdomapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 31name = Blacksmith - Furlingtonmapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 32name = Girl - Cindymapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 33name = Shaitan Ambassador - Alixmapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 34name = Tools - Wesleymapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 35name = Innkeeper - Granny Mayamapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 36name = Tailor - Dittermapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 37name = Argent Ambassador - Yatamapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 38name = Guard Captain - Mallackmapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 39name = Grocer - Kudumapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 40name = Girl - Riolimapid = 1areaid = 10 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 41name = Navy HQ - General Kenmapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 42name = Navy HQ - Colonel Maximapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 43name = Morpheus - Freyamapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 44name = Guard - Nissonmapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 45name = Guard - Sonnymapid = 1areaid = 8 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 46name = Tourist - Barbimapid = 1areaid = 12 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 47name = Patrol - Marcusamapid = 1areaid = 3 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 48name = Doctor - Chivomapid = 1areaid = 54 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 49name = Doctor - Minosevamapid = 1areaid = 53 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 50name = Fukeimapid = 1areaid = 3 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 51name = Xitronmapid = 1areaid = 3 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 52name = Kentaromapid = 1areaid = 55 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 53name = Bubumapid = 1areaid = 3 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 54name = Melissamapid = 1areaid = 3 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 55name = Gadormapid = 1areaid = 58 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 56name = Little Cuwenmapid = 1areaid = 3 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 57name = Aunt Marymapid = 1areaid = 3 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 58name = Waalamapid = 1areaid = 61 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 59name = Alexandismapid = 1areaid = 58 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 60name = Old Cuwenmapid = 1areaid = 63 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 61name = Maritime Assistant -  Alenamapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 62name = Builder - Sinbadmapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 63name = Harbor Operator - Shirleymapid = 1areaid = 1 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 64name = Durianmapid = 1areaid = 58 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 65name = Leynamapid = 1areaid = 58 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 66name = Don Pittmapid = 1areaid = 61 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 67name = Professor Fennymapid = 1areaid = 61 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 68name = Guideriusmapid = 1areaid = 61 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 69name = Security - Kalmapid = 1areaid = 55 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 70name = Berrymapid = 1areaid = 55 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 71name = Geliyamapid = 1areaid = 55 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 72name = Gregmapid = 1areaid = 55 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 73name = Lindamapid = 1areaid = 63 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 74name = Dadamapid = 1areaid = 63 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 75name = Greggmapid = 1areaid = 63 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 76name = Clan Chief - Albudamapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 77name = Tools - Ouyamapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 78name = Tailor - Moyamapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 79name = Banker - Judismapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 80name = Coaster Guard - Francomapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 81name = Blacksmith - Smithymapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 82name = Girl - Lenamapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 83name = Grocery - Amosmapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 84name = Innkeeper - Harkenmapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 85name = Nurse - Landymapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 86name = Pirate Deckymapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 87name = Builder - Franklinmapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 88name = Navy HQ - Admiral Nicmapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 89name = Shaitan Chairman - Guilemapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 90name = Tourist - Wowomapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 91name = Assistant - Tintinmapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 92name = Sand Bandit - Supermunmapid = 2areaid = 15 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 93name = Merman Prince - Hassanmapid = 2areaid = 16 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 94name = Musician - Shamelmapid = 2areaid = 16 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 95name = Holy Priestess - Adamapid = 2areaid = 14 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 96name = Tourist - Fairumapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 97name = Guildmaster - Forlanmapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 98name = Guard - Michaelmapid = 2areaid = 16 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 99name = Physician - Shalamapid = 2areaid = 13 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 100name = Minellimapid = 2areaid = 62 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 101name = Augustanmapid = 2areaid = 16 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 102name = Jeynaamapid = 2areaid = 16 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 103name = Ditaromapid = 2areaid = 57 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 104name = Ruben Actusmapid = 2areaid = 15 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 105name = Merrixmapid = 2areaid = 15 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 106name = Gudasmapid = 2areaid = 15 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 107name = Kavoskymapid = 2areaid = 57 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 108name = Beckmapid = 2areaid = 16 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 109name = Hammapid = 2areaid = 14 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 110name = Love Yurimapid = 2areaid = 16 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 111name = Robinmapid = 2areaid = 16 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 112name = Harbor Operator - Markmapid = 2areaid = 16 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 113name = Solarumapid = 2areaid = 62 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 114name = Odessismapid = 2areaid = 62 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 115name = Momomapid = 2areaid = 62 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 116name = Wenonamapid = 2areaid = 57 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 117name = Fey Feymapid = 2areaid = 57 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 118name = Marcusmapid = 2areaid = 57 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 119name = Blacksmith - Bashmapid = 3areaid = 20 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 120name = Grocer - Palpinmapid = 3areaid = 20 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 121name = Physican - Daishamapid = 3areaid = 20 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 122name = Nurse - Annemapid = 3areaid = 20 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 123name = Icicle Chairman - Reynomapid = 3areaid = 20 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 124name = Icicle Royal - Masmapid = 3areaid = 20 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 125name = Banker - Belindamapid = 3areaid = 20 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 126name = Waitress - Babaramapid = 3areaid = 20 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 127name = Tailor - Hannahmapid = 3areaid = 20 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 128name = Innkeeper - Yaskeymapid = 3areaid = 20 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 129name = Patrol - Little Momapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 130name = Wynnemapid = 3areaid = 19 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 131name = Lessiemapid = 3areaid = 19 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 132name = Dodomapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 133name = Lamutmapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 134name = Irisismapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 135name = Elunamapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 136name = Sheredamapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 137name = Ciaomapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 138name = Strawberrymapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 139name = Evemapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 140name = Susanamapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 141name = Carolinemapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 142name = Jamesonmapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 143name = Lucymapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 144name = Yulandormapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 145name = Ketanmapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 146name = Missy Elenemapid = 3areaid = 20 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 147name = Harbor Operator - Silionmapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 148name = Builder - Georgemapid = 3areaid = 21 
+[04-06 11:02:12.643]AddNpcInfo:npcid = 149name = Sailor - Ajaxmapid = 3areaid = 21 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 150name = Willimapid = 3areaid = 59 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 151name = Zurbimapid = 3areaid = 59 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 152name = Gasardismapid = 3areaid = 59 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 153name = Julie Burnmapid = 3areaid = 59 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 154name = Ulkarmapid = 3areaid = 59 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 155name = Oracle - Moonlightmapid = 3areaid = 60 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 156name = Xeusmapid = 3areaid = 60 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 157name = Hohomapid = 3areaid = 60 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 158name = Neilamapid = 3areaid = 64 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 159name = Lulumapid = 3areaid = 64 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 160name = Mekkilonmapid = 3areaid = 64 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 161name = Fardeymapid = 3areaid = 64 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 162name = Jernismapid = 3areaid = 56 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 163name = Granny Dongmapid = 3areaid = 56 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 164name = Nanamapid = 3areaid = 56 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 165name = Weird Grampamapid = 3areaid = 56 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 166name = Freight - Huradarmapid = 1areaid = 55 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 167name = Freight - Mokenmapid = 1areaid = 58 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 168name = Harbor Operator - Domorumapid = 2areaid = 77 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 169name = Harbor Operator - Barosmapid = 2areaid = 79 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 170name = Harbor Operator - Luigimapid = 2areaid = 75 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 171name = Harbor Operator - Didanemapid = 2areaid = 80 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 172name = Harbor Operator - Dannismapid = 2areaid = 81 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 173name = Harbor Operator - Darukamapid = 1areaid = 72 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 174name = Freight - Alkinsmapid = 3areaid = 59 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 175name = Taemapid = 3areaid = 60 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 176name = Harbor Operator - Fardellmapid = 1areaid = 74 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 177name = Harbor Operator - Whitcombemapid = 1areaid = 73 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 178name = Harbor Operator - Gregorymapid = 3areaid = 83 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 179name = Harbor Operator - Whitneymapid = 1areaid = 71 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 180name = Harbor Operator - Bunimapid = 2areaid = 76 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 181name = Harbor Operator - Ramusmapid = 3areaid = 85 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 182name = Harbor Operator - Socmapid = 2areaid = 82 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 183name = Harbor Operator - Tebamapid = 2areaid = 78 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 184name = Castle Guard - Petermapid = 1areaid = 1 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 185name = Icicle Swordsman - Raymapid = 3areaid = 20 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 186name = Harbor Operator - Odiemapid = 3areaid = 84 
+[04-06 11:02:12.644]AddNpcInfo:npcid = 187name = High Priest - Gannonmapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 1name = Argent Secretary - Salviermapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 2name = Blacksmith - Goldiemapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 3name = Citizen - Margaretmapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 4name = Granny Beldimapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 5name = Little Danielmapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 6name = Trader - Chiroromapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 7name = Physican - Dittomapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 8name = Banker - Monicamapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 9name = Innkeeper - Marriammapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 10name = Forbeimapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 11name = Sailer - Coddymapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 12name = General - Williammapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 13name = Nurse - Ginamapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 14name = Shaitan Ambassador - Xibamapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 15name = Argent Chairman - Ronniemapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 16name = Oldman - Blurrymapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 17name = Grocery - Jimberrymapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 18name = Tailor - Granny Nilamapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 19name = Assistant - Rourimapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 20name = Barmaid - Donnamapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 21name = Drunkyard - Anthonymapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 22name = Youth - Tommymapid = 1areaid = 3 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 23name = Manufacturer - Desmondmapid = 1areaid = 3 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 24name = D EDITION - SMUGGLING BUNNYmapid = 1areaid = 3 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 25name = Navy Commander - Dessaromapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 26name = Bar Waitress - Monamapid = 1areaid = 10 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 27name = Sailor - Diomapid = 1areaid = 10 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 28name = Trader - Sanjaymapid = 1areaid = 10 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 29name = Doctor - Masamapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 30name = Banker - Macurdomapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 31name = Blacksmith - Furlingtonmapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 32name = Girl - Cindymapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 33name = Shaitan Ambassador - Alixmapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 34name = Tools - Wesleymapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 35name = Innkeeper - Granny Mayamapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 36name = Tailor - Dittermapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 37name = Argent Ambassador - Yatamapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 38name = Guard Captain - Mallackmapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 39name = Grocer - Kudumapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 40name = Girl - Riolimapid = 1areaid = 10 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 41name = Navy HQ - General Kenmapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 42name = Navy HQ - Colonel Maximapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 43name = Morpheus - Freyamapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 44name = Guard - Nissonmapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 45name = Guard - Sonnymapid = 1areaid = 8 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 46name = Tourist - Barbimapid = 1areaid = 12 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 47name = Patrol - Marcusamapid = 1areaid = 3 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 48name = Doctor - Chivomapid = 1areaid = 54 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 49name = Doctor - Minosevamapid = 1areaid = 53 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 50name = Fukeimapid = 1areaid = 3 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 51name = Xitronmapid = 1areaid = 3 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 52name = Kentaromapid = 1areaid = 55 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 53name = Bubumapid = 1areaid = 3 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 54name = Melissamapid = 1areaid = 3 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 55name = Gadormapid = 1areaid = 58 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 56name = Little Cuwenmapid = 1areaid = 3 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 57name = Aunt Marymapid = 1areaid = 3 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 58name = Waalamapid = 1areaid = 61 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 59name = Alexandismapid = 1areaid = 58 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 60name = Old Cuwenmapid = 1areaid = 63 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 61name = Maritime Assistant -  Alenamapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 62name = Builder - Sinbadmapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 63name = Harbor Operator - Shirleymapid = 1areaid = 1 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 64name = Durianmapid = 1areaid = 58 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 65name = Leynamapid = 1areaid = 58 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 66name = Don Pittmapid = 1areaid = 61 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 67name = Professor Fennymapid = 1areaid = 61 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 68name = Guideriusmapid = 1areaid = 61 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 69name = Security - Kalmapid = 1areaid = 55 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 70name = Berrymapid = 1areaid = 55 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 71name = Geliyamapid = 1areaid = 55 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 72name = Gregmapid = 1areaid = 55 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 73name = Lindamapid = 1areaid = 63 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 74name = Dadamapid = 1areaid = 63 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 75name = Greggmapid = 1areaid = 63 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 76name = Clan Chief - Albudamapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 77name = Tools - Ouyamapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 78name = Tailor - Moyamapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 79name = Banker - Judismapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 80name = Coaster Guard - Francomapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 81name = Blacksmith - Smithymapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 82name = Girl - Lenamapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 83name = Grocery - Amosmapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 84name = Innkeeper - Harkenmapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 85name = Nurse - Landymapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 86name = Pirate Deckymapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 87name = Builder - Franklinmapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 88name = Navy HQ - Admiral Nicmapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 89name = Shaitan Chairman - Guilemapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 90name = Tourist - Wowomapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 91name = Assistant - Tintinmapid = 2areaid = 13 
+[04-06 11:11:59.943]AddNpcInfo:npcid = 92name = Sand Bandit - Supermunmapid = 2areaid = 15 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 93name = Merman Prince - Hassanmapid = 2areaid = 16 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 94name = Musician - Shamelmapid = 2areaid = 16 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 95name = Holy Priestess - Adamapid = 2areaid = 14 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 96name = Tourist - Fairumapid = 2areaid = 13 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 97name = Guildmaster - Forlanmapid = 2areaid = 13 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 98name = Guard - Michaelmapid = 2areaid = 16 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 99name = Physician - Shalamapid = 2areaid = 13 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 100name = Minellimapid = 2areaid = 62 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 101name = Augustanmapid = 2areaid = 16 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 102name = Jeynaamapid = 2areaid = 16 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 103name = Ditaromapid = 2areaid = 57 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 104name = Ruben Actusmapid = 2areaid = 15 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 105name = Merrixmapid = 2areaid = 15 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 106name = Gudasmapid = 2areaid = 15 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 107name = Kavoskymapid = 2areaid = 57 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 108name = Beckmapid = 2areaid = 16 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 109name = Hammapid = 2areaid = 14 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 110name = Love Yurimapid = 2areaid = 16 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 111name = Robinmapid = 2areaid = 16 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 112name = Harbor Operator - Markmapid = 2areaid = 16 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 113name = Solarumapid = 2areaid = 62 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 114name = Odessismapid = 2areaid = 62 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 115name = Momomapid = 2areaid = 62 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 116name = Wenonamapid = 2areaid = 57 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 117name = Fey Feymapid = 2areaid = 57 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 118name = Marcusmapid = 2areaid = 57 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 119name = Blacksmith - Bashmapid = 3areaid = 20 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 120name = Grocer - Palpinmapid = 3areaid = 20 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 121name = Physican - Daishamapid = 3areaid = 20 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 122name = Nurse - Annemapid = 3areaid = 20 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 123name = Icicle Chairman - Reynomapid = 3areaid = 20 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 124name = Icicle Royal - Masmapid = 3areaid = 20 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 125name = Banker - Belindamapid = 3areaid = 20 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 126name = Waitress - Babaramapid = 3areaid = 20 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 127name = Tailor - Hannahmapid = 3areaid = 20 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 128name = Innkeeper - Yaskeymapid = 3areaid = 20 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 129name = Patrol - Little Momapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 130name = Wynnemapid = 3areaid = 19 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 131name = Lessiemapid = 3areaid = 19 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 132name = Dodomapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 133name = Lamutmapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 134name = Irisismapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 135name = Elunamapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 136name = Sheredamapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 137name = Ciaomapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 138name = Strawberrymapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 139name = Evemapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 140name = Susanamapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 141name = Carolinemapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 142name = Jamesonmapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 143name = Lucymapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 144name = Yulandormapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 145name = Ketanmapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 146name = Missy Elenemapid = 3areaid = 20 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 147name = Harbor Operator - Silionmapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 148name = Builder - Georgemapid = 3areaid = 21 
+[04-06 11:11:59.944]AddNpcInfo:npcid = 149name = Sailor - Ajaxmapid = 3areaid

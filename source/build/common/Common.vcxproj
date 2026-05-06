@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Long_Struct_Debug|x64">
+      <Configuration>Long_Struct_Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Long_Struct_Release|x64">
+      <Configuration>Long_Struct_Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{58B6753C-75DA-449A-97F9-3B26DA4B6FB5}</ProjectGuid>
+    <RootNamespace>Common</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Long_Struct_Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Long_Struct_Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Long_Struct_Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Long_Struct_Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>16.0.30427.251</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)..\..\lib\Release\</OutDir>
+    <IntDir>$(ProjectDir)..\..\tmp\common\Release\</IntDir>
+    <ExtensionsToDeleteOnClean>*.obj%3b*.ilk%3b*.tlb%3b*.tli%3b*.tlh%3b*.tmp%3b*.rsp%3b*.bat%3b$(TargetPath)</ExtensionsToDeleteOnClean>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(ProjectDir)..\..\lib\Debug\</OutDir>
+    <IntDir>$(ProjectDir)..\..\tmp\common\Debug\</IntDir>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <TargetName>$(ProjectName)_D</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Long_Struct_Release|x64'">
+    <OutDir>$(ProjectDir)..\..\lib\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\..\tmp\common\$(Configuration)\</IntDir>
+    <ExtensionsToDeleteOnClean>*.obj%3b*.ilk%3b*.tlb%3b*.tli%3b*.tlh%3b*.tmp%3b*.rsp%3b*.bat%3b$(TargetPath)</ExtensionsToDeleteOnClean>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Long_Struct_Debug|x64'">
+    <OutDir>$(ProjectDir)..\..\lib\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\..\tmp\common\$(Configuration)\</IntDir>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <TargetName>$(ProjectName)_D</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalOptions>/EHa %(AdditionalOptions)</AdditionalOptions>
+
+      <Optimization>MaxSpeed</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include\Common;$(ProjectDir)..\..\include\CaLua;$(ProjectDir)..\..\include\ServerSDK;$(ProjectDir)..\..\include\Util;$(ProjectDir)..\..\include\EncLib;$(ProjectDir)..\..\include\ICUHelper;$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN64;NDEBUG;_LIB;WINDOWS_IGNORE_PACKING_MISMATCH;BOTAN_FUTURE_INTERNAL_HEADER_OK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <PrecompiledHeader />
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Lib />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include\Common;$(ProjectDir)..\..\include\CaLua;$(ProjectDir)..\..\include\ServerSDK;$(ProjectDir)..\..\include\Util;$(ProjectDir)..\..\include\EncLib;$(ProjectDir)..\..\include\ICUHelper;$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN64;_DEBUG;_LIB;BOTAN_FUTURE_INTERNAL_HEADER_OK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <PrecompiledHeader />
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <DiagnosticsFormat>Caret</DiagnosticsFormat>
+      <SDLCheck>false</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Lib>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\ICUHelper\lib;$(ProjectDir)..\..\icu\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Long_Struct_Release|x64'">
+    <ClCompile>
+      <AdditionalOptions>/EHa %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MaxSpeed</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include\Common;$(ProjectDir)..\..\include\CaLua;$(ProjectDir)..\..\include\ServerSDK;$(ProjectDir)..\..\include\Util;$(ProjectDir)..\..\include\EncLib;$(ProjectDir)..\..\include\ICUHelper;$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN64;NDEBUG;_LIB;WINDOWS_IGNORE_PACKING_MISMATCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <PrecompiledHeader />
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Lib />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Long_Struct_Debug|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include\Common;$(ProjectDir)..\..\include\CaLua;$(ProjectDir)..\..\include\ServerSDK;$(ProjectDir)..\..\include\Util;$(ProjectDir)..\..\include\EncLib;$(ProjectDir)..\..\include\ICUHelper;$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN64;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <PrecompiledHeader />
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <DiagnosticsFormat>Caret</DiagnosticsFormat>
+      <SDLCheck>false</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Lib>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\ICUHelper\lib;$(ProjectDir)..\..\icu\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\common\ChaAttr.cpp" />
+    <ClCompile Include="..\..\src\common\TableObfuscation.cpp" />
+    <ClCompile Include="..\..\src\common\ChaMask.cpp" />
+    <ClCompile Include="..\..\src\common\CharacterRecord.cpp" />
+    <ClCompile Include="..\..\src\common\CommFunc.cpp" />
+    <ClCompile Include="..\..\src\common\EventRecord.cpp" />
+    <ClCompile Include="..\..\src\common\ForgeRecord.cpp" />
+    <ClCompile Include="..\..\src\common\HairRecord.cpp" />
+    <ClCompile Include="..\..\src\common\ItemAttr.cpp" />
+    <ClCompile Include="..\..\src\common\ItemContent.cpp" />
+    <ClCompile Include="..\..\src\common\ItemRecord.cpp" />
+    <ClCompile Include="..\..\src\common\JobInitEquip.cpp" />
+    <ClCompile Include="..\..\src\common\Kitbag.cpp" />
+    <ClCompile Include="..\..\src\common\LevelRecord.cpp" />
+    <ClCompile Include="..\..\src\common\LifeLvRecord.cpp" />
+    <ClCompile Include="..\..\src\common\LogFile.cpp" />
+    <ClCompile Include="..\..\src\common\MonRefRecord.cpp" />
+    <ClCompile Include="..\..\src\common\NpcRecord.cpp" />
+    <ClCompile Include="..\..\src\common\SailLvRecord.cpp" />
+    <ClCompile Include="..\..\src\common\ShipSet.cpp" />
+    <ClCompile Include="..\..\src\common\SkillRecord.cpp" />
+    <ClCompile Include="..\..\src\common\SkillStateRecord.cpp" />
+    <ClCompile Include="..\..\src\common\StringLib.cpp" />
+    <ClCompile Include="..\..\src\common\SwitchMapRecord.cpp" />
+    <ClCompile Include="..\..\src\common\TerrainAttrib.cpp" />
+    <ClCompile Include="..\..\src\common\LicenseValidator.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\AreaRecord.h" />
+    <ClInclude Include="..\include\ChaAction.h" />
+    <ClInclude Include="..\include\ChaAttr.h" />
+    <ClInclude Include="..\include\ChaAttrType.h" />
+    <ClInclude Include="..\include\ChaMask.h" />
+    <ClInclude Include="..\include\CharacterRecord.h" />
+    <ClInclude Include="..\include\CommFunc.h" />
+    <ClInclude Include="..\include\CompCommand.h" />
+    <ClInclude Include="conformity.h" />
+    <ClInclude Include="..\include\discord_register.h" />
+    <ClInclude Include="..\include\discord_rpc.h" />
+    <ClInclude Include="..\include\EventRecord.h" />
+    <ClInclude Include="..\include\ForgeRecord.h" />
+    <ClInclude Include="..\include\GameCommon.h" />
+    <ClInclude Include="..\include\HairRecord.h" />
+    <ClInclude Include="..\include\ItemAttr.h" />
+    <ClInclude Include="..\include\ItemAttrType.h" />
+    <ClInclude Include="..\include\ItemContent.h" />
+    <ClInclude Include="..\include\ItemRecord.h" />
+    <ClInclude Include="..\include\JobInitEquip.h" />
+    <ClInclude Include="..\include\JobType.h" />
+    <ClInclude Include="..\include\Kitbag.h" />
+    <ClInclude Include="..\include\LevelRecord.h" />
+    <ClInclude Include="..\include\LifeLvRecord.h" />
+    <ClInclude Include="..\include\LogFile.h" />
+    <ClInclude Include="..\include\MonRefRecord.h" />
+    <ClInclude Include="..\include\MountRecord.h" />
+    <ClInclude Include="..\include\NetCommand.h" />
+    <ClInclude Include="..\include\NetRetCode.h" />
+    <ClInclude Include="..\include\NpcRecord.h" />
+    <ClInclude Include="..\include\RoleCommon.h" />
+    <ClInclude Include="..\include\SailLvRecord.h" />
+    <ClInclude Include="..\include\ShipSet.h" />
+    <ClInclude Include="..\include\SkillBag.h" />
+    <ClInclude Include="..\include\SkillRecord.h" />
+    <ClInclude Include="..\include\SkillStateRecord.h" />
+    <ClInclude Include="..\include\SkillStateType.h" />
+    <ClInclude Include="..\include\StringLib.h" />
+    <ClInclude Include="..\include\SwitchMapRecord.h" />
+    <ClInclude Include="..\include\TableData.h" />
+    <ClInclude Include="..\include\TerrainAttrib.h" />
+    <ClInclude Include="..\include\ToolClass.h" />
+    <ClInclude Include="..\include\LicenseValidator.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

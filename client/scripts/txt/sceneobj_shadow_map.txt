@@ -1,0 +1,14 @@
+# Scene object projected shadow overrides
+# Format:
+# objTypeID | textureNameWithoutOrWithExt | opacity | scale | softOpacityMultiplier | softScaleMultiplier
+#
+# Notes:
+# - objTypeID is the scene object type ID used by GetSceneObjInfo(typeID).
+# - textureName is resolved via CMPResManger::GetTextureID and may omit extension.
+# - Place textures under texture/shadow/... and reference relative texture key.
+# - If an entry exists, it also forces shadow casting for that objTypeID.
+#
+# Example entries (replace IDs/textures with real project values):
+# 1001 | texture/shadow/sceneobj/tree_oak_shadow | 0.55 | 2.80 | 0.30 | 1.25
+# 1002 | texture/shadow/sceneobj/palm_large_shadow | 0.50 | 3.40 | 0.28 | 1.35
+# 1003 | texture/shadow/sceneobj/bush_dense_shadow | 0.62 | 1.70 | 0.40 | 1.15

@@ -1,0 +1,335 @@
+[04-06 10:56:09.726]GameServer= [127.0.0.1] come,Socket num= 1
+[04-06 10:56:09.736]recieve GameServer [GameServer] map string [garner;ctf;garner2;PKmap;shalan2;leiting2;lonetower;L4MAP;LostCity;magicsea;jialebi;hell;hell2;hell3;hell4;hell5;darkblue;eastgoaf;winterland;mjing1;mjing2;mjing3;mjing4;starena13;starena23;starena33;abandonedcity;abandonedcity2;abandonedcity3;darkswamp;puzzleworld;puzzleworld2;DreamIsland;teampk;Hellchapter;chaosicicle;yschurch;] total [37]
+[04-06 10:56:09.736]not found [garner] map!!!
+[04-06 10:56:09.736]not found [ctf] map!!!
+[04-06 10:56:09.736]not found [garner2] map!!!
+[04-06 10:56:09.736]not found [PKmap] map!!!
+[04-06 10:56:09.736]not found [shalan2] map!!!
+[04-06 10:56:09.736]not found [leiting2] map!!!
+[04-06 10:56:09.736]not found [lonetower] map!!!
+[04-06 10:56:09.736]not found [L4MAP] map!!!
+[04-06 10:56:09.736]not found [LostCity] map!!!
+[04-06 10:56:09.736]not found [magicsea] map!!!
+[04-06 10:56:09.736]not found [jialebi] map!!!
+[04-06 10:56:09.736]not found [hell] map!!!
+[04-06 10:56:09.736]not found [hell2] map!!!
+[04-06 10:56:09.736]not found [hell3] map!!!
+[04-06 10:56:09.736]not found [hell4] map!!!
+[04-06 10:56:09.736]not found [hell5] map!!!
+[04-06 10:56:09.736]not found [darkblue] map!!!
+[04-06 10:56:09.736]not found [eastgoaf] map!!!
+[04-06 10:56:09.736]not found [winterland] map!!!
+[04-06 10:56:09.736]not found [mjing1] map!!!
+[04-06 10:56:09.736]not found [mjing2] map!!!
+[04-06 10:56:09.736]not found [mjing3] map!!!
+[04-06 10:56:09.736]not found [mjing4] map!!!
+[04-06 10:56:09.736]not found [starena13] map!!!
+[04-06 10:56:09.736]not found [starena23] map!!!
+[04-06 10:56:09.736]not found [starena33] map!!!
+[04-06 10:56:09.736]not found [abandonedcity] map!!!
+[04-06 10:56:09.736]not found [abandonedcity2] map!!!
+[04-06 10:56:09.736]not found [abandonedcity3] map!!!
+[04-06 10:56:09.736]not found [darkswamp] map!!!
+[04-06 10:56:09.736]not found [puzzleworld] map!!!
+[04-06 10:56:09.736]not found [puzzleworld2] map!!!
+[04-06 10:56:09.736]not found [DreamIsland] map!!!
+[04-06 10:56:09.736]not found [teampk] map!!!
+[04-06 10:56:09.736]not found [Hellchapter] map!!!
+[04-06 10:56:09.736]not found [chaosicicle] map!!!
+[04-06 10:56:09.736]not found [yschurch] map!!!
+[04-06 10:56:09.736]add GameServer [GameServer] ok
+[04-06 10:56:09.736]add [GameServer]  [garner] map ok
+[04-06 10:56:09.736]add [GameServer]  [ctf] map ok
+[04-06 10:56:09.736]add [GameServer]  [garner2] map ok
+[04-06 10:56:09.736]add [GameServer]  [PKmap] map ok
+[04-06 10:56:09.736]add [GameServer]  [shalan2] map ok
+[04-06 10:56:09.736]add [GameServer]  [leiting2] map ok
+[04-06 10:56:09.736]add [GameServer]  [lonetower] map ok
+[04-06 10:56:09.736]add [GameServer]  [L4MAP] map ok
+[04-06 10:56:09.736]add [GameServer]  [LostCity] map ok
+[04-06 10:56:09.736]add [GameServer]  [magicsea] map ok
+[04-06 10:56:09.736]add [GameServer]  [jialebi] map ok
+[04-06 10:56:09.736]add [GameServer]  [hell] map ok
+[04-06 10:56:09.736]add [GameServer]  [hell2] map ok
+[04-06 10:56:09.736]add [GameServer]  [hell3] map ok
+[04-06 10:56:09.736]add [GameServer]  [hell4] map ok
+[04-06 10:56:09.736]add [GameServer]  [hell5] map ok
+[04-06 10:56:09.736]add [GameServer]  [darkblue] map ok
+[04-06 10:56:09.736]add [GameServer]  [eastgoaf] map ok
+[04-06 10:56:09.736]add [GameServer]  [winterland] map ok
+[04-06 10:56:09.736]add [GameServer]  [mjing1] map ok
+[04-06 10:56:09.736]add [GameServer]  [mjing2] map ok
+[04-06 10:56:09.736]add [GameServer]  [mjing3] map ok
+[04-06 10:56:09.736]add [GameServer]  [mjing4] map ok
+[04-06 10:56:09.736]add [GameServer]  [starena13] map ok
+[04-06 10:56:09.736]add [GameServer]  [starena23] map ok
+[04-06 10:56:09.736]add [GameServer]  [starena33] map ok
+[04-06 10:56:09.736]add [GameServer]  [abandonedcity] map ok
+[04-06 10:56:09.736]add [GameServer]  [abandonedcity2] map ok
+[04-06 10:56:09.736]add [GameServer]  [abandonedcity3] map ok
+[04-06 10:56:09.736]add [GameServer]  [darkswamp] map ok
+[04-06 10:56:09.736]add [GameServer]  [puzzleworld] map ok
+[04-06 10:56:09.736]add [GameServer]  [puzzleworld2] map ok
+[04-06 10:56:09.736]add [GameServer]  [DreamIsland] map ok
+[04-06 10:56:09.736]add [GameServer]  [teampk] map ok
+[04-06 10:56:09.736]add [GameServer]  [Hellchapter] map ok
+[04-06 10:56:09.736]add [GameServer]  [chaosicicle] map ok
+[04-06 10:56:09.736]add [GameServer]  [yschurch] map ok
+[04-06 10:56:44.053]client: 127.0.0.1	come...Socket num: 1
+[04-06 10:56:44.833]client: 127.0.0.1	login ok.
+[04-06 10:56:48.551]client: 127.0.0.1:64630	BeginPlay entry map,Gate to[127.0.0.1]send EnterMap command,dbid:5187,Gate address:1D733ED5F90
+[04-06 10:56:48.692]Client: 127.0.0.1:64630 receive Gate from [127.0.0.1] success EnterMap command, Game address:22E0321B048, Gate address:1D733ED5F90
+[04-06 11:00:19.537]client: 127.0.0.1:64630	GoOut map,Gate to[127.0.0.1] send GoOutMap command,dbid:5187,Gate address:1D733ED5F90,Game address:2396644290632
+[04-06 11:00:19.537]CMD_TP_ENDPLAY: l_ply=000001D733ED5F90 gp_addr=0x21a6b776dd0
+[04-06 11:00:19.706]CMD_TP_ENDPLAY: SyncCall returned err=0
+[04-06 11:00:57.720]GameServer= [127.0.0.1] come,Socket num= 1
+[04-06 11:00:57.722]recieve GameServer [GameServer] map string [garner;ctf;garner2;PKmap;shalan2;leiting2;lonetower;L4MAP;LostCity;magicsea;jialebi;hell;hell2;hell3;hell4;hell5;darkblue;eastgoaf;winterland;mjing1;mjing2;mjing3;mjing4;starena13;starena23;starena33;abandonedcity;abandonedcity2;abandonedcity3;darkswamp;puzzleworld;puzzleworld2;DreamIsland;teampk;Hellchapter;chaosicicle;yschurch;] total [37]
+[04-06 11:00:57.722]not found [garner] map!!!
+[04-06 11:00:57.722]not found [ctf] map!!!
+[04-06 11:00:57.722]not found [garner2] map!!!
+[04-06 11:00:57.722]not found [PKmap] map!!!
+[04-06 11:00:57.722]not found [shalan2] map!!!
+[04-06 11:00:57.722]not found [leiting2] map!!!
+[04-06 11:00:57.722]not found [lonetower] map!!!
+[04-06 11:00:57.722]not found [L4MAP] map!!!
+[04-06 11:00:57.722]not found [LostCity] map!!!
+[04-06 11:00:57.722]not found [magicsea] map!!!
+[04-06 11:00:57.722]not found [jialebi] map!!!
+[04-06 11:00:57.722]not found [hell] map!!!
+[04-06 11:00:57.722]not found [hell2] map!!!
+[04-06 11:00:57.722]not found [hell3] map!!!
+[04-06 11:00:57.722]not found [hell4] map!!!
+[04-06 11:00:57.722]not found [hell5] map!!!
+[04-06 11:00:57.722]not found [darkblue] map!!!
+[04-06 11:00:57.722]not found [eastgoaf] map!!!
+[04-06 11:00:57.722]not found [winterland] map!!!
+[04-06 11:00:57.722]not found [mjing1] map!!!
+[04-06 11:00:57.722]not found [mjing2] map!!!
+[04-06 11:00:57.722]not found [mjing3] map!!!
+[04-06 11:00:57.722]not found [mjing4] map!!!
+[04-06 11:00:57.722]not found [starena13] map!!!
+[04-06 11:00:57.722]not found [starena23] map!!!
+[04-06 11:00:57.722]not found [starena33] map!!!
+[04-06 11:00:57.722]not found [abandonedcity] map!!!
+[04-06 11:00:57.722]not found [abandonedcity2] map!!!
+[04-06 11:00:57.722]not found [abandonedcity3] map!!!
+[04-06 11:00:57.722]not found [darkswamp] map!!!
+[04-06 11:00:57.722]not found [puzzleworld] map!!!
+[04-06 11:00:57.722]not found [puzzleworld2] map!!!
+[04-06 11:00:57.722]not found [DreamIsland] map!!!
+[04-06 11:00:57.722]not found [teampk] map!!!
+[04-06 11:00:57.722]not found [Hellchapter] map!!!
+[04-06 11:00:57.722]not found [chaosicicle] map!!!
+[04-06 11:00:57.722]not found [yschurch] map!!!
+[04-06 11:00:57.722]add GameServer [GameServer] ok
+[04-06 11:00:57.722]add [GameServer]  [garner] map ok
+[04-06 11:00:57.722]add [GameServer]  [ctf] map ok
+[04-06 11:00:57.722]add [GameServer]  [garner2] map ok
+[04-06 11:00:57.722]add [GameServer]  [PKmap] map ok
+[04-06 11:00:57.722]add [GameServer]  [shalan2] map ok
+[04-06 11:00:57.722]add [GameServer]  [leiting2] map ok
+[04-06 11:00:57.722]add [GameServer]  [lonetower] map ok
+[04-06 11:00:57.722]add [GameServer]  [L4MAP] map ok
+[04-06 11:00:57.722]add [GameServer]  [LostCity] map ok
+[04-06 11:00:57.722]add [GameServer]  [magicsea] map ok
+[04-06 11:00:57.722]add [GameServer]  [jialebi] map ok
+[04-06 11:00:57.722]add [GameServer]  [hell] map ok
+[04-06 11:00:57.722]add [GameServer]  [hell2] map ok
+[04-06 11:00:57.722]add [GameServer]  [hell3] map ok
+[04-06 11:00:57.722]add [GameServer]  [hell4] map ok
+[04-06 11:00:57.722]add [GameServer]  [hell5] map ok
+[04-06 11:00:57.722]add [GameServer]  [darkblue] map ok
+[04-06 11:00:57.722]add [GameServer]  [eastgoaf] map ok
+[04-06 11:00:57.722]add [GameServer]  [winterland] map ok
+[04-06 11:00:57.722]add [GameServer]  [mjing1] map ok
+[04-06 11:00:57.722]add [GameServer]  [mjing2] map ok
+[04-06 11:00:57.722]add [GameServer]  [mjing3] map ok
+[04-06 11:00:57.722]add [GameServer]  [mjing4] map ok
+[04-06 11:00:57.722]add [GameServer]  [starena13] map ok
+[04-06 11:00:57.722]add [GameServer]  [starena23] map ok
+[04-06 11:00:57.722]add [GameServer]  [starena33] map ok
+[04-06 11:00:57.722]add [GameServer]  [abandonedcity] map ok
+[04-06 11:00:57.722]add [GameServer]  [abandonedcity2] map ok
+[04-06 11:00:57.722]add [GameServer]  [abandonedcity3] map ok
+[04-06 11:00:57.722]add [GameServer]  [darkswamp] map ok
+[04-06 11:00:57.722]add [GameServer]  [puzzleworld] map ok
+[04-06 11:00:57.722]add [GameServer]  [puzzleworld2] map ok
+[04-06 11:00:57.722]add [GameServer]  [DreamIsland] map ok
+[04-06 11:00:57.722]add [GameServer]  [teampk] map ok
+[04-06 11:00:57.722]add [GameServer]  [Hellchapter] map ok
+[04-06 11:00:57.722]add [GameServer]  [chaosicicle] map ok
+[04-06 11:00:57.722]add [GameServer]  [yschurch] map ok
+[04-06 11:00:59.137]client: 127.0.0.1	come, groupserver isn't ready, force disconnect...
+[04-06 11:01:03.812]client: 127.0.0.1	come, groupserver isn't ready, force disconnect...
+[04-06 11:01:08.902]client: 127.0.0.1	come, groupserver isn't ready, force disconnect...
+[04-06 11:01:30.520]client: 127.0.0.1	come, groupserver isn't ready, force disconnect...
+[04-06 11:02:15.068]GameServer= [127.0.0.1] come,Socket num= 1
+[04-06 11:02:15.079]recieve GameServer [GameServer] map string [garner;ctf;garner2;PKmap;shalan2;leiting2;lonetower;L4MAP;LostCity;magicsea;jialebi;hell;hell2;hell3;hell4;hell5;darkblue;eastgoaf;winterland;mjing1;mjing2;mjing3;mjing4;starena13;starena23;starena33;abandonedcity;abandonedcity2;abandonedcity3;darkswamp;puzzleworld;puzzleworld2;DreamIsland;teampk;Hellchapter;chaosicicle;yschurch;] total [37]
+[04-06 11:02:15.079]not found [garner] map!!!
+[04-06 11:02:15.079]not found [ctf] map!!!
+[04-06 11:02:15.079]not found [garner2] map!!!
+[04-06 11:02:15.079]not found [PKmap] map!!!
+[04-06 11:02:15.079]not found [shalan2] map!!!
+[04-06 11:02:15.079]not found [leiting2] map!!!
+[04-06 11:02:15.079]not found [lonetower] map!!!
+[04-06 11:02:15.079]not found [L4MAP] map!!!
+[04-06 11:02:15.079]not found [LostCity] map!!!
+[04-06 11:02:15.079]not found [magicsea] map!!!
+[04-06 11:02:15.079]not found [jialebi] map!!!
+[04-06 11:02:15.079]not found [hell] map!!!
+[04-06 11:02:15.079]not found [hell2] map!!!
+[04-06 11:02:15.079]not found [hell3] map!!!
+[04-06 11:02:15.079]not found [hell4] map!!!
+[04-06 11:02:15.079]not found [hell5] map!!!
+[04-06 11:02:15.079]not found [darkblue] map!!!
+[04-06 11:02:15.079]not found [eastgoaf] map!!!
+[04-06 11:02:15.079]not found [winterland] map!!!
+[04-06 11:02:15.079]not found [mjing1] map!!!
+[04-06 11:02:15.079]not found [mjing2] map!!!
+[04-06 11:02:15.079]not found [mjing3] map!!!
+[04-06 11:02:15.079]not found [mjing4] map!!!
+[04-06 11:02:15.079]not found [starena13] map!!!
+[04-06 11:02:15.079]not found [starena23] map!!!
+[04-06 11:02:15.079]not found [starena33] map!!!
+[04-06 11:02:15.079]not found [abandonedcity] map!!!
+[04-06 11:02:15.079]not found [abandonedcity2] map!!!
+[04-06 11:02:15.079]not found [abandonedcity3] map!!!
+[04-06 11:02:15.079]not found [darkswamp] map!!!
+[04-06 11:02:15.079]not found [puzzleworld] map!!!
+[04-06 11:02:15.079]not found [puzzleworld2] map!!!
+[04-06 11:02:15.079]not found [DreamIsland] map!!!
+[04-06 11:02:15.079]not found [teampk] map!!!
+[04-06 11:02:15.079]not found [Hellchapter] map!!!
+[04-06 11:02:15.079]not found [chaosicicle] map!!!
+[04-06 11:02:15.079]not found [yschurch] map!!!
+[04-06 11:02:15.079]add GameServer [GameServer] ok
+[04-06 11:02:15.079]add [GameServer]  [garner] map ok
+[04-06 11:02:15.079]add [GameServer]  [ctf] map ok
+[04-06 11:02:15.079]add [GameServer]  [garner2] map ok
+[04-06 11:02:15.079]add [GameServer]  [PKmap] map ok
+[04-06 11:02:15.079]add [GameServer]  [shalan2] map ok
+[04-06 11:02:15.079]add [GameServer]  [leiting2] map ok
+[04-06 11:02:15.079]add [GameServer]  [lonetower] map ok
+[04-06 11:02:15.079]add [GameServer]  [L4MAP] map ok
+[04-06 11:02:15.079]add [GameServer]  [LostCity] map ok
+[04-06 11:02:15.079]add [GameServer]  [magicsea] map ok
+[04-06 11:02:15.079]add [GameServer]  [jialebi] map ok
+[04-06 11:02:15.079]add [GameServer]  [hell] map ok
+[04-06 11:02:15.079]add [GameServer]  [hell2] map ok
+[04-06 11:02:15.079]add [GameServer]  [hell3] map ok
+[04-06 11:02:15.079]add [GameServer]  [hell4] map ok
+[04-06 11:02:15.079]add [GameServer]  [hell5] map ok
+[04-06 11:02:15.079]add [GameServer]  [darkblue] map ok
+[04-06 11:02:15.079]add [GameServer]  [eastgoaf] map ok
+[04-06 11:02:15.079]add [GameServer]  [winterland] map ok
+[04-06 11:02:15.079]add [GameServer]  [mjing1] map ok
+[04-06 11:02:15.079]add [GameServer]  [mjing2] map ok
+[04-06 11:02:15.079]add [GameServer]  [mjing3] map ok
+[04-06 11:02:15.079]add [GameServer]  [mjing4] map ok
+[04-06 11:02:15.079]add [GameServer]  [starena13] map ok
+[04-06 11:02:15.079]add [GameServer]  [starena23] map ok
+[04-06 11:02:15.079]add [GameServer]  [starena33] map ok
+[04-06 11:02:15.079]add [GameServer]  [abandonedcity] map ok
+[04-06 11:02:15.079]add [GameServer]  [abandonedcity2] map ok
+[04-06 11:02:15.079]add [GameServer]  [abandonedcity3] map ok
+[04-06 11:02:15.079]add [GameServer]  [darkswamp] map ok
+[04-06 11:02:15.079]add [GameServer]  [puzzleworld] map ok
+[04-06 11:02:15.079]add [GameServer]  [puzzleworld2] map ok
+[04-06 11:02:15.079]add [GameServer]  [DreamIsland] map ok
+[04-06 11:02:15.079]add [GameServer]  [teampk] map ok
+[04-06 11:02:15.079]add [GameServer]  [Hellchapter] map ok
+[04-06 11:02:15.079]add [GameServer]  [chaosicicle] map ok
+[04-06 11:02:15.079]add [GameServer]  [yschurch] map ok
+[04-06 11:02:20.594]client: 127.0.0.1	come...Socket num: 1
+[04-06 11:02:21.054]client: 127.0.0.1	login error, error:1104
+[04-06 11:02:21.146]client: 127.0.0.1 gone...Socket num: 0 ,reason=user login error.
+[04-06 11:02:22.475]client: 127.0.0.1	come...Socket num: 1
+[04-06 11:02:22.925]client: 127.0.0.1	login ok.
+[04-06 11:02:26.012]client: 127.0.0.1:54878	BeginPlay entry map,Gate to[127.0.0.1]send EnterMap command,dbid:5187,Gate address:15B7701F580
+[04-06 11:02:26.058]Client: 127.0.0.1:54878 receive Gate from [127.0.0.1] success EnterMap command, Game address:22081C1D048, Gate address:15B7701F580
+[04-06 11:06:31.306]Client: 127.0.0.1:54878 receive Gate from [127.0.0.1] success EnterMap command, Game address:22081C1D048, Gate address:15B7701F580
+[04-06 11:12:02.699]GameServer= [127.0.0.1] come,Socket num= 1
+[04-06 11:12:02.702]recieve GameServer [GameServer] map string [garner;ctf;garner2;PKmap;shalan2;leiting2;lonetower;L4MAP;LostCity;magicsea;jialebi;hell;hell2;hell3;hell4;hell5;darkblue;eastgoaf;winterland;mjing1;mjing2;mjing3;mjing4;starena13;starena23;starena33;abandonedcity;abandonedcity2;abandonedcity3;darkswamp;puzzleworld;puzzleworld2;DreamIsland;teampk;Hellchapter;chaosicicle;yschurch;] total [37]
+[04-06 11:12:02.702]not found [garner] map!!!
+[04-06 11:12:02.702]not found [ctf] map!!!
+[04-06 11:12:02.702]not found [garner2] map!!!
+[04-06 11:12:02.702]not found [PKmap] map!!!
+[04-06 11:12:02.702]not found [shalan2] map!!!
+[04-06 11:12:02.702]not found [leiting2] map!!!
+[04-06 11:12:02.702]not found [lonetower] map!!!
+[04-06 11:12:02.702]not found [L4MAP] map!!!
+[04-06 11:12:02.702]not found [LostCity] map!!!
+[04-06 11:12:02.702]not found [magicsea] map!!!
+[04-06 11:12:02.702]not found [jialebi] map!!!
+[04-06 11:12:02.702]not found [hell] map!!!
+[04-06 11:12:02.702]not found [hell2] map!!!
+[04-06 11:12:02.702]not found [hell3] map!!!
+[04-06 11:12:02.702]not found [hell4] map!!!
+[04-06 11:12:02.702]not found [hell5] map!!!
+[04-06 11:12:02.702]not found [darkblue] map!!!
+[04-06 11:12:02.702]not found [eastgoaf] map!!!
+[04-06 11:12:02.702]not found [winterland] map!!!
+[04-06 11:12:02.702]not found [mjing1] map!!!
+[04-06 11:12:02.702]not found [mjing2] map!!!
+[04-06 11:12:02.702]not found [mjing3] map!!!
+[04-06 11:12:02.702]not found [mjing4] map!!!
+[04-06 11:12:02.702]not found [starena13] map!!!
+[04-06 11:12:02.702]not found [starena23] map!!!
+[04-06 11:12:02.702]not found [starena33] map!!!
+[04-06 11:12:02.702]not found [abandonedcity] map!!!
+[04-06 11:12:02.702]not found [abandonedcity2] map!!!
+[04-06 11:12:02.702]not found [abandonedcity3] map!!!
+[04-06 11:12:02.702]not found [darkswamp] map!!!
+[04-06 11:12:02.702]not found [puzzleworld] map!!!
+[04-06 11:12:02.702]not found [puzzleworld2] map!!!
+[04-06 11:12:02.702]not found [DreamIsland] map!!!
+[04-06 11:12:02.702]not found [teampk] map!!!
+[04-06 11:12:02.702]not found [Hellchapter] map!!!
+[04-06 11:12:02.702]not found [chaosicicle] map!!!
+[04-06 11:12:02.702]not found [yschurch] map!!!
+[04-06 11:12:02.702]add GameServer [GameServer] ok
+[04-06 11:12:02.702]add [GameServer]  [garner] map ok
+[04-06 11:12:02.702]add [GameServer]  [ctf] map ok
+[04-06 11:12:02.702]add [GameServer]  [garner2] map ok
+[04-06 11:12:02.702]add [GameServer]  [PKmap] map ok
+[04-06 11:12:02.702]add [GameServer]  [shalan2] map ok
+[04-06 11:12:02.702]add [GameServer]  [leiting2] map ok
+[04-06 11:12:02.702]add [GameServer]  [lonetower] map ok
+[04-06 11:12:02.702]add [GameServer]  [L4MAP] map ok
+[04-06 11:12:02.702]add [GameServer]  [LostCity] map ok
+[04-06 11:12:02.702]add [GameServer]  [magicsea] map ok
+[04-06 11:12:02.702]add [GameServer]  [jialebi] map ok
+[04-06 11:12:02.702]add [GameServer]  [hell] map ok
+[04-06 11:12:02.702]add [GameServer]  [hell2] map ok
+[04-06 11:12:02.702]add [GameServer]  [hell3] map ok
+[04-06 11:12:02.702]add [GameServer]  [hell4] map ok
+[04-06 11:12:02.702]add [GameServer]  [hell5] map ok
+[04-06 11:12:02.702]add [GameServer]  [darkblue] map ok
+[04-06 11:12:02.702]add [GameServer]  [eastgoaf] map ok
+[04-06 11:12:02.702]add [GameServer]  [winterland] map ok
+[04-06 11:12:02.702]add [GameServer]  [mjing1] map ok
+[04-06 11:12:02.702]add [GameServer]  [mjing2] map ok
+[04-06 11:12:02.702]add [GameServer]  [mjing3] map ok
+[04-06 11:12:02.702]add [GameServer]  [mjing4] map ok
+[04-06 11:12:02.702]add [GameServer]  [starena13] map ok
+[04-06 11:12:02.702]add [GameServer]  [starena23] map ok
+[04-06 11:12:02.702]add [GameServer]  [starena33] map ok
+[04-06 11:12:02.702]add [GameServer]  [abandonedcity] map ok
+[04-06 11:12:02.702]add [GameServer]  [abandonedcity2] map ok
+[04-06 11:12:02.702]add [GameServer]  [abandonedcity3] map ok
+[04-06 11:12:02.702]add [GameServer]  [darkswamp] map ok
+[04-06 11:12:02.702]add [GameServer]  [puzzleworld] map ok
+[04-06 11:12:02.702]add [GameServer]  [puzzleworld2] map ok
+[04-06 11:12:02.702]add [GameServer]  [DreamIsland] map ok
+[04-06 11:12:02.702]add [GameServer]  [teampk] map ok
+[04-06 11:12:02.702]add [GameServer]  [Hellchapter] map ok
+[04-06 11:12:02.702]add [GameServer]  [chaosicicle] map ok
+[04-06 11:12:02.702]add [GameServer]  [yschurch] map ok
+[04-06 11:12:07.045]client: 127.0.0.1	come...Socket num: 1
+[04-06 11:12:07.510]client: 127.0.0.1	login error, error:1104
+[04-06 11:12:07.603]client: 127.0.0.1 gone...Socket num: 0 ,reason=user login error.
+[04-06 11:12:09.957]client: 127.0.0.1	come...Socket num: 1
+[04-06 11:12:10.389]client: 127.0.0.1	login ok.
+[04-06 11:12:13.675]client: 127.0.0.1:59362	BeginPlay entry map,Gate to[127.0.0.1]send EnterMap command,dbid:5187,Gate address:20D235C5CA0
+[04-06 11:12:13.828]Client: 127.0.0.1:59362 receive Gate from [127.0.0.1] success EnterMap command, Game address:15C88DA1048, Gate address:20D235C5CA0
+[04-06 11:16:50.350]client: 127.0.0.1:59362	GoOut map,Gate to [127.0.0.1]send GoOutMap command,dbid:5187,Gate address:20D235C5CA0,Game address:1496944611400

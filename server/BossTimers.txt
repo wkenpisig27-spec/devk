@@ -1,0 +1,2 @@
+# BossTimer State File - DO NOT EDIT
+# Format: ChaID,MapName,DeathTimestamp

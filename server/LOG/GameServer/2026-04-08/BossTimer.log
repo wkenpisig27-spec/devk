@@ -1,0 +1,38 @@
+[04-08 15:02:24.388]=== BossTimer Initializing ===
+[04-08 15:02:24.395]Tracking boss 1423 (Devil) - respawn: 86400 seconds
+[04-08 15:02:24.395]Tracking boss 1414 (Half-beast Man) - respawn: 86400 seconds
+[04-08 15:02:24.395]Tracking boss 1413 (Aqua Tiger) - respawn: 86400 seconds
+[04-08 15:02:24.395]Tracking boss 1009 (Aries Guardian) - respawn: 1800 seconds
+[04-08 15:02:24.395]Tracking boss 789 (Black Dragon) - respawn: 86400 seconds
+[04-08 15:02:24.395]Tracking boss 1105 (Firm Guard) - respawn: 86400 seconds
+[04-08 15:02:24.395]Tracking boss 1109 (Fury Kara) - respawn: 86400 seconds
+[04-08 15:02:24.395]Tracking boss 1117 (Morpheus Abyss Demon) - respawn: 86400 seconds
+[04-08 15:02:24.395]Tracking boss 1113 (Vicious Relic Protector) - respawn: 86400 seconds
+[04-08 15:02:24.395]Tracking boss 1418 (Hell Demon) - respawn: 86400 seconds
+[04-08 15:02:24.395]Tracking boss 1417 (Hell Prisoner) - respawn: 86400 seconds
+[04-08 15:02:24.395]Tracking boss 1416 (Hell Mud Monster) - respawn: 86400 seconds
+[04-08 15:02:24.395]Tracking boss 1415 (Hell Knight) - respawn: 86400 seconds
+[04-08 15:02:24.395]Loaded 13 boss configurations from BossTracked.txt
+[04-08 15:02:24.401]Loaded 0 active timers, 0 expired
+[04-08 15:02:24.401]=== BossTimer Ready ===
+[04-08 15:46:17.522]Shutting down - saving state
+[04-08 15:46:17.523]Saved 0 boss states to BossTimers.txt
+[04-08 15:50:50.372]=== BossTimer Initializing ===
+[04-08 15:50:50.372]Tracking boss 1423 (Devil) - respawn: 86400 seconds
+[04-08 15:50:50.372]Tracking boss 1414 (Half-beast Man) - respawn: 86400 seconds
+[04-08 15:50:50.372]Tracking boss 1413 (Aqua Tiger) - respawn: 86400 seconds
+[04-08 15:50:50.372]Tracking boss 1009 (Aries Guardian) - respawn: 1800 seconds
+[04-08 15:50:50.372]Tracking boss 789 (Black Dragon) - respawn: 86400 seconds
+[04-08 15:50:50.372]Tracking boss 1105 (Firm Guard) - respawn: 86400 seconds
+[04-08 15:50:50.372]Tracking boss 1109 (Fury Kara) - respawn: 86400 seconds
+[04-08 15:50:50.372]Tracking boss 1117 (Morpheus Abyss Demon) - respawn: 86400 seconds
+[04-08 15:50:50.372]Tracking boss 1113 (Vicious Relic Protector) - respawn: 86400 seconds
+[04-08 15:50:50.372]Tracking boss 1418 (Hell Demon) - respawn: 86400 seconds
+[04-08 15:50:50.372]Tracking boss 1417 (Hell Prisoner) - respawn: 86400 seconds
+[04-08 15:50:50.372]Tracking boss 1416 (Hell Mud Monster) - respawn: 86400 seconds
+[04-08 15:50:50.372]Tracking boss 1415 (Hell Knight) - respawn: 86400 seconds
+[04-08 15:50:50.372]Loaded 13 boss configurations from BossTracked.txt
+[04-08 15:50:50.372]Loaded 0 active timers, 0 expired
+[04-08 15:50:50.372]=== BossTimer Ready ===
+[04-08 15:44:57.802]Shutting down - saving state
+[04-08 15:44:57.803]Saved 0 boss states to BossTimers.txt

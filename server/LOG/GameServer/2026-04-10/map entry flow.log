@@ -1,0 +1,24 @@
+[04-10 00:34:22.757]receive request to create entry??position leiting2 --> garner[60000, 210600]??script line 53
+[04-10 00:34:22.757]create entry success??position leiting2 --> garner[60000, 210600] 
+[04-10 00:34:22.789]receive entry create success ??position garner --> leiting2
+[04-10 00:34:24.428]receive request to create entry??position mjing1 --> darkblue[129900, 53800]??script line 22
+[04-10 00:34:24.428]create entry success??position mjing1 --> darkblue[129900, 53800] 
+[04-10 00:34:24.428]receive request to create entry??position mjing2 --> mjing1[37400, 38700]??script line 16
+[04-10 00:34:24.428]create entry success??position mjing2 --> mjing1[37400, 38700] 
+[04-10 00:34:24.459]receive entry create success ??position darkblue --> mjing1
+[04-10 00:34:24.459]receive entry create success ??position mjing1 --> mjing2
+[04-10 00:34:24.490]receive request to create entry??position mjing3 --> darkblue[129900, 54300]??script line 23
+[04-10 00:34:24.490]create entry success??position mjing3 --> darkblue[129900, 54300] 
+[04-10 00:34:24.522]receive entry create success ??position darkblue --> mjing3
+[04-10 00:34:24.537]receive request to create entry??position mjing4 --> mjing3[34600, 12700]??script line 17
+[04-10 00:34:24.537]create entry success??position mjing4 --> mjing3[34600, 12700] 
+[04-10 00:34:24.569]receive entry create success ??position mjing3 --> mjing4
+[04-10 00:34:24.928]receive request to create entry??position teampk --> garner[10000, 10000]??script line 89
+[04-10 00:34:24.928]create entry success??position teampk --> garner[10000, 10000] 
+[04-10 00:34:24.959]receive entry create success ??position garner --> teampk
+[04-10 00:34:25.053]receive request to create entry??position Hellchapter --> garner[220300, 278000]??script line 44
+[04-10 00:34:25.053]create entry success??position Hellchapter --> garner[220300, 278000] 
+[04-10 00:34:25.085]receive entry create success ??position garner --> Hellchapter
+[04-10 03:00:23.063]receive request to create entry??position garner2 --> darkblue[137200, 53100]??script line 75
+[04-10 03:00:23.063]create entry success??position garner2 --> darkblue[137200, 53100] 
+[04-10 03:00:23.093]receive entry create success ??position darkblue --> garner2

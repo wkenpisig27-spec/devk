@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8661B70A-8D22-4082-9E71-00312294DF0F}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v145</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>16.0.30427.251</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(ProjectDir)..\..\bin\$(Configuration)\mindpower3d\</OutDir>
+    <IntDir>$(ProjectDir)..\..\tmp\engine\$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <TargetName>$(ProjectName)_D9D</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)..\..\bin\$(Configuration)\mindpower3d\</OutDir>
+    <IntDir>$(ProjectDir)..\..\tmp\engine\$(Configuration)\</IntDir>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <TargetName>$(ProjectName)_D9R</TargetName>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\include\engine;..\..\src\engine;$(ProjectDir)..\..\src\Engine;$(ProjectDir)..\..\include\Engine;$(ProjectDir)..\..\include\Common;$(ProjectDir)..\..\include\Util;$(ProjectDir)..\..\include\directx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>USE_DX_VERSION;LW_USE_DX9;DIRECT3D_VERSION=0x0900;_UNLOADRES;_WIN64;NDEBUG;_WINDOWS;USE_MINDPOWER;MINDPOWER_USE_DLL;MINDPOWER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <SDLCheck>false</SDLCheck>
+      <DiagnosticsFormat>Caret</DiagnosticsFormat>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>d3d9.lib;d3dx9d.lib;dxguid.lib;util_D.lib;Common_D.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\$(Configuration);$(ProjectDir)..\..\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libci.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <ImportLibrary>$(ProjectDir)..\..\lib\$(Configuration)\$(TargetName).lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <Optimization>MaxSpeed</Optimization>
+      <AdditionalIncludeDirectories>..\..\include\engine;..\..\src\engine;$(ProjectDir)..\..\src\Engine;$(ProjectDir)..\..\include\Engine;$(ProjectDir)..\..\include\Common;$(ProjectDir)..\..\include\Util;$(ProjectDir)..\..\include\directx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>USE_DX_VERSION;LW_USE_DX9;DIRECT3D_VERSION=0x0900;_WIN64;NDEBUG;_WINDOWS;USE_MINDPOWER;MINDPOWER_USE_DLL;MINDPOWER_EXPORTS;TABLE_ENCRYPTION_ENABLED=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <SDLCheck>false</SDLCheck>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <ConformanceMode>false</ConformanceMode>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>d3d9.lib;d3dx9.lib;dxguid.lib;Common.lib;util.lib;botan.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\$(Configuration);$(ProjectDir)..\..\lib\Release;$(ProjectDir)..\..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libci.lib</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <ImportLibrary>$(ProjectDir)..\..\lib\$(Configuration)\$(TargetName).lib</ImportLibrary>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\engine\d3dutil.h" />
+    <ClInclude Include="..\..\include\engine\dxutil.h" />
+    <ClInclude Include="..\..\include\engine\EffectFile.h" />
+    <ClInclude Include="..\..\include\engine\GlobalInc.h" />
+    <ClInclude Include="..\..\include\engine\I_Effect.h" />
+    <ClInclude Include="..\..\include\engine\lwClassDecl.h" />
+    <ClInclude Include="..\..\include\engine\lwD3D.h" />
+    <ClInclude Include="..\..\include\engine\lwDirectX.h" />
+    <ClInclude Include="..\..\include\engine\lwErrorCode.h" />
+    <ClInclude Include="..\..\include\engine\lwFrontAPI.h" />
+    <ClInclude Include="..\..\include\engine\lwGuidObj.h" />
+    <ClInclude Include="..\..\include\engine\lwHeader.h" />
+    <ClInclude Include="..\..\include\engine\lwIFunc.h" />
+    <ClInclude Include="..\..\include\engine\lwInterface.h" />
+    <ClInclude Include="..\..\include\engine\lwITypes.h" />
+    <ClInclude Include="..\..\include\engine\lwITypes2.h" />
+    <ClInclude Include="..\..\include\engine\lwIUtil.h" />
+    <ClInclude Include="..\..\include\engine\lwMath.h" />
+    <ClInclude Include="..\..\include\engine\lwObjectMethod.h" />
+    <ClInclude Include="..\..\include\engine\lwShaderTypes.h" />
+    <ClInclude Include="..\..\include\engine\lwStdInc.h" />
+    <ClInclude Include="..\..\include\engine\MindPower.h" />
+    <ClInclude Include="..\..\include\engine\MindPowerAPI.h" />
+    <ClInclude Include="..\..\include\engine\MPCamera.h" />
+    <ClInclude Include="..\..\include\engine\MPCharacter.h" />
+    <ClInclude Include="..\..\include\engine\MPColorValue.h" />
+    <ClInclude Include="..\..\include\engine\MPConsole.h" />
+    <ClInclude Include="..\..\include\engine\MPDataStream.h" />
+    <ClInclude Include="..\..\include\engine\MPEffectAsmMath.h" />
+    <ClInclude Include="..\..\include\engine\MPEffectCtrl.h" />
+    <ClInclude Include="..\..\include\engine\MPEffectMath.h" />
+    <ClInclude Include="..\..\include\engine\MPEffPrerequisites.h" />
+    <ClInclude Include="..\..\include\engine\MPEffQuaternion.h" />
+    <ClInclude Include="..\..\include\engine\MPEffVector3.h" />
+    <ClInclude Include="..\..\include\engine\MPFactoryObj.h" />
+    <ClInclude Include="..\..\include\engine\MPFont.h" />
+    <ClInclude Include="..\..\include\engine\BitmapFont.h" />
+    <ClInclude Include="..\..\include\engine\MPGameApp.h" />
+    <ClInclude Include="..\..\include\engine\MPInterface.h" />
+    <ClInclude Include="..\..\include\engine\MPIteratorWrappers.h" />
+    <ClInclude Include="..\..\include\engine\MPMap.h" />
+    <ClInclude Include="..\..\include\engine\MPMath.h" />
+    <ClInclude Include="..\..\include\engine\MPModelEff.h" />
+    <ClInclude Include="..\..\include\engine\MPParameterInterface.h" />
+    <ClInclude Include="..\..\include\engine\MPParticleAffector.h" />
+    <ClInclude Include="..\..\include\engine\MPParticleAffectorFactory.h" />
+    <ClInclude Include="..\..\include\engine\MPParticleCtrl.h" />
+    <ClInclude Include="..\..\include\engine\MPParticleEmitterFactory.h" />
+    <ClInclude Include="..\..\include\engine\MPParticleSys.h" />
+    <ClInclude Include="..\..\include\engine\MPRender.h" />
+    <ClInclude Include="..\..\include\engine\MPResManger.h" />
+    <ClInclude Include="..\..\include\engine\MPResourceSet.h" />
+    <ClInclude Include="..\..\include\engine\MPSceneItem.h" />
+    <ClInclude Include="..\..\include\engine\MPSceneObject.h" />
+    <ClInclude Include="..\..\include\engine\MPScriptLoader.h" />
+    <ClInclude Include="..\..\include\engine\MPShadeMap.h" />
+    <ClInclude Include="..\..\include\engine\MPShadowMap.h" />
+    <ClInclude Include="..\..\include\engine\MPSharedPtr.h" />
+    <ClInclude Include="..\..\include\engine\MPSingleton.h" />
+    <ClInclude Include="..\..\include\engine\MPStringUtil.h" />
+    <ClInclude Include="..\..\include\engine\MPStringVector.h" />
+    <ClInclude Include="..\..\include\engine\MPTerrainSet.h" />
+    <ClInclude Include="..\..\include\engine\MPTextureSet.h" />
+    <ClInclude Include="..\..\include\engine\MPTile.h" />
+    <ClInclude Include="..\..\include\engine\mygraph.h" />
+    <ClInclude Include="..\..\include\engine\ShaderLoad.h" />
+    <ClInclude Include="..\..\include\engine\STLprerequisite.h" />
+    <ClInclude Include="..\..\include\engine\ZRBlock.h" />
+    <ClInclude Include="..\src\Blk.h" />
+    <ClInclude Include="..\src\lwAnimCtrl.h" />
+    <ClInclude Include="..\src\lwAnimCtrlObj.h" />
+    <ClInclude Include="..\src\lwAnimKeySetPRS.h" />
+    <ClInclude Include="..\src\lwBitmap.h" />
+    <ClInclude Include="..\src\lwCamera.h" />
+    <ClInclude Include="..\src\lwConsole.h" />
+    <ClInclude Include="..\src\lwCoordinateSys.h" />
+    <ClInclude Include="..\src\lwD3DSettings.h" />
+    <ClInclude Include="..\src\lwDDS.h" />
+    <ClInclude Include="..\src\lwDDSFile.h" />
+    <ClInclude Include="..\src\lwDeviceObject.h" />
+    <ClInclude Include="..\src\lwDirectoryBrowser.h" />
+    <ClInclude Include="..\src\lwEfxTrack.h" />
+    <ClInclude Include="..\src\lwExpObj.h" />
+    <ClInclude Include="..\src\lwFile.h" />
+    <ClInclude Include="..\src\lwFileEncode.h" />
+    <ClInclude Include="..\src\lwFileStream.h" />
+    <ClInclude Include="..\src\lwFileutil.h" />
+    <ClInclude Include="..\src\lwgraphics.h" />
+    <ClInclude Include="..\src\lwgraphicsutil.h" />
+    <ClInclude Include="..\src\lwHeap.h" />
+    <ClInclude Include="..\src\lwHelperGeometry.h" />
+    <ClInclude Include="..\src\lwInterfaceExt.h" />
+    <ClInclude Include="..\src\lwItem.h" />
+    <ClInclude Include="..\src\lwLinkCtrl.h" />
+    <ClInclude Include="..\src\lwMisc.h" />
+    <ClInclude Include="..\src\lwModel.h" />
+    <ClInclude Include="..\src\lwNodeObject.h" />
+    <ClInclude Include="..\src\lwObjectPool.h" />
+    <ClInclude Include="..\src\lwPathInfo.h" />
+    <ClInclude Include="..\src\lwPhysique.h" />
+    <ClInclude Include="..\src\lwPoseCtrl.h" />
+    <ClInclude Include="..\src\lwPreDefinition.h" />
+    <ClInclude Include="..\src\lwPrimitive.h" />
+    <ClInclude Include="..\src\lwPrimitiveHelper.h" />
+    <ClInclude Include="..\src\lwRenderCtrlEmb.h" />
+    <ClInclude Include="..\src\lwRenderImp.h" />
+    <ClInclude Include="..\src\lwResourceMgr.h" />
+    <ClInclude Include="..\src\lwSceneMgr.h" />
+    <ClInclude Include="..\src\lwShaderDeclMgr.h" />
+    <ClInclude Include="..\src\lwShaderMgr.h" />
+    <ClInclude Include="..\src\lwStreamObj.h" />
+    <ClInclude Include="..\src\lwSyncObj.h" />
+    <ClInclude Include="..\src\lwSysCharacter.h" />
+    <ClInclude Include="..\src\lwSysGraphics.h" />
+    <ClInclude Include="..\src\lwSystem.h" />
+    <ClInclude Include="..\src\lwSystemInfo.h" />
+    <ClInclude Include="..\src\lwThreadPool.h" />
+    <ClInclude Include="..\src\lwTimer.h" />
+    <ClInclude Include="..\src\lwTreeNode.h" />
+    <ClInclude Include="..\src\lwutilsexp.h" />
+    <ClInclude Include="..\src\lwViewFrustum.h" />
+    <ClInclude Include="..\src\lwxRenderCtrlVS.h" />
+    <ClInclude Include="..\src\stdafx.h" />
+    <ClInclude Include="..\src\TgaCore.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\engine\Blk.cpp" />
+    <ClCompile Include="..\..\src\engine\d3dutil.cpp" />
+    <ClCompile Include="..\..\src\engine\dxutil.cpp" />
+    <ClCompile Include="..\..\src\engine\EffectFile.cpp" />
+    <ClCompile Include="..\..\src\engine\I_Effect.cpp" />
+    <ClCompile Include="..\..\src\engine\lwAnimCtrl.cpp" />
+    <ClCompile Include="..\..\src\engine\lwAnimCtrlObj.cpp" />
+    <ClCompile Include="..\..\src\engine\lwAnimKeySetPRS.cpp" />
+    <ClCompile Include="..\..\src\engine\lwBitmap.cpp" />
+    <ClCompile Include="..\..\src\engine\lwCamera.cpp" />
+    <ClCompile Include="..\..\src\engine\lwConsole.cpp" />
+    <ClCompile Include="..\..\src\engine\lwCoordinateSys.cpp" />
+    <ClCompile Include="..\..\src\engine\lwD3DSettings.cpp" />
+    <ClCompile Include="..\..\src\engine\lwDDSFile.cpp" />
+    <ClCompile Include="..\..\src\engine\lwDeviceObject.cpp" />
+    <ClCompile Include="..\..\src\engine\lwDirectoryBrowser.cpp" />
+    <ClCompile Include="..\..\src\engine\lwEfxTrack.cpp" />
+    <ClCompile Include="..\..\src\engine\lwExpObj.cpp" />
+    <ClCompile Include="..\..\src\engine\lwFile.cpp" />
+    <ClCompile Include="..\..\src\engine\lwFileEncode.cpp" />
+    <ClCompile Include="..\..\src\engine\lwFileStream.cpp" />
+    <ClCompile Include="..\..\src\engine\lwFileutil.cpp" />
+    <ClCompile Include="..\..\src\engine\lwgraphicsutil.cpp" />
+    <ClCompile Include="..\..\src\engine\lwGuidObj.cpp" />
+    <ClCompile Include="..\..\src\engine\lwHeap.cpp" />
+    <ClCompile Include="..\..\src\engine\lwHelperGeometry.cpp" />
+    <ClCompile Include="..\..\src\engine\lwIFunc.cpp" />
+    <ClCompile Include="..\..\src\engine\lwInterface.cpp" />
+    <ClCompile Include="..\..\src\engine\lwItem.cpp" />
+    <ClCompile Include="..\..\src\engine\lwIUtil.cpp" />
+    <ClCompile Include="..\..\src\engine\lwmath.cpp" />
+    <ClCompile Include="..\..\src\engine\lwMisc.cpp" />
+    <ClCompile Include="..\..\src\engine\lwModel.cpp" />
+    <ClCompile Include="..\..\src\engine\lwNodeObject.cpp" />
+    <ClCompile Include="..\..\src\engine\lwObjectMethod.cpp" />
+    <ClCompile Include="..\..\src\engine\lwObjectPool.cpp" />
+    <ClCompile Include="..\..\src\engine\lwPathInfo.cpp" />
+    <ClCompile Include="..\..\src\engine\lwPhysique.cpp" />
+    <ClCompile Include="..\..\src\engine\lwPoseCtrl.cpp" />
+    <ClCompile Include="..\..\src\engine\lwPrimitive.cpp" />
+    <ClCompile Include="..\..\src\engine\lwPrimitiveHelper.cpp" />
+    <ClCompile Include="..\..\src\engine\lwRenderCtrlEmb.cpp" />
+    <ClCompile Include="..\..\src\engine\lwRenderImp.cpp" />
+    <ClCompile Include="..\..\src\engine\lwResourceMgr.cpp" />
+    <ClCompile Include="..\..\src\engine\lwSceneMgr.cpp" />
+    <ClCompile Include="..\..\src\engine\lwShaderDeclMgr.cpp" />
+    <ClCompile Include="..\..\src\engine\lwShaderMgr.cpp" />
+    <ClCompile Include="..\..\src\engine\lwStreamObj.cpp" />
+    <ClCompile Include="..\..\src\engine\lwSysCharacter.cpp" />
+    <ClCompile Include="..\..\src\engine\lwSysGraphics.cpp" />
+    <ClCompile Include="..\..\src\engine\lwSystem.cpp" />
+    <ClCompile Include="..\..\src\engine\lwSystemInfo.cpp" />
+    <ClCompile Include="..\..\src\engine\lwThreadPool.cpp" />
+    <ClCompile Include="..\..\src\engine\lwTimer.cpp" />
+    <ClCompile Include="..\..\src\engine\lwTreeNode.cpp" />
+    <ClCompile Include="..\..\src\engine\lwViewFrustum.cpp" />
+    <ClCompile Include="..\..\src\engine\lwxRenderCtrVS.cpp" />
+    <ClCompile Include="..\..\src\engine\MPCamera.cpp" />
+    <ClCompile Include="..\..\src\engine\MPCharacter.cpp" />
+    <ClCompile Include="..\..\src\engine\MPColorValue.cpp" />
+    <ClCompile Include="..\..\src\engine\MPConsole.cpp" />
+    <ClCompile Include="..\..\src\engine\MPDataStream.cpp" />
+    <ClCompile Include="..\..\src\engine\MPEffectCtrl.cpp" />
+    <ClCompile Include="..\..\src\engine\MPEffectMath.cpp" />
+    <ClCompile Include="..\..\src\engine\MPEffQuaternion.cpp" />
+    <ClCompile Include="..\..\src\engine\MPEffVector3.cpp" />
+    <ClCompile Include="..\..\src\engine\MPFont.cpp" />
+    <ClCompile Include="..\..\src\engine\BitmapFont.cpp" />
+    <ClCompile Include="..\..\src\engine\MPGameApp.cpp" />
+    <ClCompile Include="..\..\src\engine\MPMap.cpp" />
+    <ClCompile Include="..\..\src\engine\MPMapData.cpp" />
+    <ClCompile Include="..\..\src\engine\MPMath.cpp" />
+    <ClCompile Include="..\..\src\engine\MPModelEff.cpp" />
+    <ClCompile Include="..\..\src\engine\MPParticleCtrl.cpp" />
+    <ClCompile Include="..\..\src\engine\MPParticleSys.cpp" />
+    <ClCompile Include="..\..\src\engine\MPRender.cpp" />
+    <ClCompile Include="..\..\src\engine\MPResManger.cpp" />
+    <ClCompile Include="..\..\src\engine\MPSceneItem.cpp" />
+    <ClCompile Include="..\..\src\engine\MPSceneObject.cpp" />
+    <ClCompile Include="..\..\src\engine\MPShadeMap.cpp" />
+    <ClCompile Include="..\..\src\engine\MPShadowMap.cpp" />
+    <ClCompile Include="..\..\src\engine\MPStringUtil.cpp" />
+    <ClCompile Include="..\..\src\engine\MPTile.cpp" />
+    <ClCompile Include="..\..\src\engine\mygraph.cpp" />
+    <ClCompile Include="..\..\src\engine\ShaderLoad.cpp" />
+    <ClCompile Include="..\..\src\engine\Singleton.cpp" />
+    <ClCompile Include="..\..\src\engine\stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\src\engine\TgaCore.cpp" />
+    <ClCompile Include="..\..\src\engine\ZRBlock.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\include\lwMath.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\common\Common.vcxproj">
+      <Project>{58b6753c-75da-449a-97f9-3b26da4b6fb5}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\util\Util.vcxproj">
+      <Project>{9c47fd3b-3c9f-4ebf-9019-12c111111111}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

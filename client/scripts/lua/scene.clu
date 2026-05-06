@@ -1,0 +1,51 @@
+--[[
+    x64 Native Scene Functions
+
+    All scene functions are registered natively by UIScriptNative.cpp.
+    CLU_Call wrappers have been REMOVED.
+    Lua calls native C++ functions directly.
+]]--
+
+-------------------------------------------------------------
+-- Equipment slot constants
+-------------------------------------------------------------
+enumEQUIP_HEAD      = 0     -- Head
+enumEQUIP_FACE      = 1     -- Face
+enumEQUIP_BODY      = 2     -- Body
+enumEQUIP_GLOVE     = 3     -- Gloves
+enumEQUIP_SHOES     = 4     -- Shoes
+enumEQUIP_NECK      = 5     -- Neck (necklace)
+enumEQUIP_LHAND     = 6     -- Left hand
+enumEQUIP_HAND1     = 7     -- Ring 1
+enumEQUIP_HAND2     = 8     -- Ring 2
+enumEQUIP_RHAND     = 9     -- Right hand
+enumEQUIP_Jewelry1  = 10
+enumEQUIP_Jewelry2  = 11
+enumEQUIP_Jewelry3  = 12
+enumEQUIP_Jewelry4  = 13
+enumEQUIP_WING      = 14
+
+-------------------------------------------------------------
+-- Animation play types
+-------------------------------------------------------------
+PLAY_ONCE = 1
+PLAY_LOOP = 2
+PLAY_FRAME = 3
+PLAY_ONCE_SMOOTH = 4
+PLAY_LOOP_SMOOTH = 5
+PLAY_PAUSE = 6
+PLAY_CONTINUE = 7
+PLAY_INVALID = 0
+
+-------------------------------------------------------------
+-- Scene types
+-------------------------------------------------------------
+enumLoginScene      = 0
+enumWorldScene      = 1     -- Game scene
+enumSelectChaScene  = 2     -- Character select
+enumCreateChaScene  = 3     -- Character create
+
+-------------------------------------------------------------
+-- Initialization
+-------------------------------------------------------------
+SN_SetAttackChaColor(255, 180, 180)

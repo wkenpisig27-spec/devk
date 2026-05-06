@@ -1,0 +1,11 @@
+# Requirements for the standalone Windows desktop app
+# Install with: pip install -r requirements_win.txt
+
+# Web framework (same as base requirements)
+flask>=3.0.0
+
+# Native window wrapper (uses Edge WebView2 – built-in on Windows 10/11)
+pywebview>=5.0.0
+
+# Packager – only needed to build ResourceEditor.exe, not to run in dev mode
+pyinstaller>=6.0.0

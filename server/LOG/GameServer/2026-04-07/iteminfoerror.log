@@ -1,0 +1,3479 @@
+[04-07 16:03:54.906]135,Arrow 01,cha ID:1
+[04-07 16:03:54.945]200,Left Plaster Glove,cha ID:1
+[04-07 16:03:54.945]201,Left Brawler Glove,cha ID:1
+[04-07 16:03:54.946]202,Left Master Glove,cha ID:1
+[04-07 16:03:54.947]203,Left Jagged Blade,cha ID:1
+[04-07 16:03:54.947]204,Left Cosmo Blade,cha ID:1
+[04-07 16:03:54.947]205,Left Tiger Glove,cha ID:1
+[04-07 16:03:54.948]206,Left Hand of Death,cha ID:1
+[04-07 16:03:54.961]228,Raging Bull Tattoo,cha ID:3
+[04-07 16:03:54.962]229,Savage Bull Tattoo,cha ID:3
+[04-07 16:03:54.962]230,Primal Tattoo,cha ID:3
+[04-07 16:03:54.995]290,Husk Armor,cha ID:4
+[04-07 16:03:54.995]291,Thick Armor,cha ID:4
+[04-07 16:03:54.996]292,Leather Armor,cha ID:4
+[04-07 16:03:54.996]293,Rhino Hide Armor,cha ID:4
+[04-07 16:03:54.997]294,Tiger Hide Armor,cha ID:4
+[04-07 16:03:54.997]295,Breast Plate,cha ID:4
+[04-07 16:03:54.998]296,Soft Leather Armor,cha ID:4
+[04-07 16:03:54.999]297,Heavy Leather Armor,cha ID:4
+[04-07 16:03:55.000]298,Strong Leather Armor,cha ID:4
+[04-07 16:03:55.000]299,Mithril Platemail,cha ID:4
+[04-07 16:03:55.001]300,Chain Mail,cha ID:3
+[04-07 16:03:55.001]301,Strong Platemail,cha ID:3
+[04-07 16:03:55.002]302,Light Platemail,cha ID:4
+[04-07 16:03:55.002]303,Silver Platemail,cha ID:4
+[04-07 16:03:55.003]304,Ceremonial Platemail,cha ID:4
+[04-07 16:03:55.003]305,Coarse Vest,cha ID:2
+[04-07 16:03:55.004]306,Canvas Vest,cha ID:2
+[04-07 16:03:55.004]307,Exquisite Vest,cha ID:2
+[04-07 16:03:55.005]308,Leather Vest,cha ID:2
+[04-07 16:03:55.005]309,Warrior Frock,cha ID:2
+[04-07 16:03:55.006]310,Feather Vest,cha ID:2
+[04-07 16:03:55.007]311,Safari Vest,cha ID:2
+[04-07 16:03:55.007]312,Emerald Vest,cha ID:2
+[04-07 16:03:55.007]313,Hunter Vest,cha ID:2
+[04-07 16:03:55.008]314,Slick Vest,cha ID:2
+[04-07 16:03:55.008]315,Peacock Vest,cha ID:2
+[04-07 16:03:55.009]316,Ringdove Vest,cha ID:2
+[04-07 16:03:55.009]317,Raptor Vest,cha ID:2
+[04-07 16:03:55.020]335,Cloth Shirt,cha ID:2
+[04-07 16:03:55.021]336,Tough Vest,cha ID:2
+[04-07 16:03:55.021]337,Explorer Vest,cha ID:2
+[04-07 16:03:55.022]338,Adventure Vest,cha ID:2
+[04-07 16:03:55.022]339,Helmsman Vest,cha ID:2
+[04-07 16:03:55.023]340,Oarsman Vest,cha ID:2
+[04-07 16:03:55.023]341,Deckman Vest,cha ID:2
+[04-07 16:03:55.024]342,Mastman Vest,cha ID:2
+[04-07 16:03:55.024]343,Hurricane Vest,cha ID:2
+[04-07 16:03:55.025]344,Whirlpool Vest,cha ID:2
+[04-07 16:03:55.025]345,Wind Vest,cha ID:2
+[04-07 16:03:55.029]350,Crabby Costume,cha ID:1
+[04-07 16:03:55.029]351,Rooroo Costume,cha ID:1
+[04-07 16:03:55.030]352,Playful Racoon Costume,cha ID:1
+[04-07 16:03:55.030]353,Duckling Costume,cha ID:1
+[04-07 16:03:55.031]354,Big Crab Costume,cha ID:1
+[04-07 16:03:55.031]355,Lobster Costume,cha ID:1
+[04-07 16:03:55.032]356,Ducky Costume,cha ID:1
+[04-07 16:03:55.033]357,Prawn Costume,cha ID:1
+[04-07 16:03:55.033]358,Pincer Costume,cha ID:1
+[04-07 16:03:55.034]359,Sheepy Costume,cha ID:1
+[04-07 16:03:55.034]360,Meowy Costume,cha ID:1
+[04-07 16:03:55.035]361,Owl Costume,cha ID:1
+[04-07 16:03:55.035]362,Hopperoo Costume,cha ID:1
+[04-07 16:03:55.036]363,Clever Otter Costume,cha ID:1
+[04-07 16:03:55.036]364,Lucky Otter Costume,cha ID:1
+[04-07 16:03:55.037]365,Medic Robe,cha ID:1
+[04-07 16:03:55.037]366,Foster Robe,cha ID:1
+[04-07 16:03:55.038]367,Travel Robe,cha ID:1
+[04-07 16:03:55.038]368,Nurse Robe,cha ID:1
+[04-07 16:03:55.039]369,Garcon Robe,cha ID:1
+[04-07 16:03:55.039]370,Holy Robe,cha ID:1
+[04-07 16:03:55.040]371,Follower Robe,cha ID:1
+[04-07 16:03:55.040]372,Attendant Robe,cha ID:1
+[04-07 16:03:55.041]373,Scholar Robe,cha ID:1
+[04-07 16:03:55.041]374,Emergency Robe,cha ID:1
+[04-07 16:03:55.042]375,Passage Robe,cha ID:1
+[04-07 16:03:55.043]376,Healer Robe,cha ID:1
+[04-07 16:03:55.043]377,Protector Robe,cha ID:1
+[04-07 16:03:55.044]378,Piety Robe,cha ID:1
+[04-07 16:03:55.044]379,Blessed Robe,cha ID:1
+[04-07 16:03:55.045]380,Mousey Costume,cha ID:1
+[04-07 16:03:55.045]381,Kitty Costume,cha ID:1
+[04-07 16:03:55.046]382,Loopy Bunny Costume,cha ID:1
+[04-07 16:03:55.046]383,Goaty Costume,cha ID:1
+[04-07 16:03:55.047]384,Deer Costume,cha ID:1
+[04-07 16:03:55.048]385,Otter Costume,cha ID:1
+[04-07 16:03:55.048]386,Racoon Costume,cha ID:1
+[04-07 16:03:55.053]388,Happy Bunny Costume,cha ID:1
+[04-07 16:03:55.054]389,Night Owl Costume,cha ID:1
+[04-07 16:03:55.055]390,Kangaroo Costume,cha ID:1
+[04-07 16:03:55.055]391,Joyful Bunny Costume,cha ID:1
+[04-07 16:03:55.056]392,Bunny Baby Costume,cha ID:1
+[04-07 16:03:55.056]393,Lucky Bunny Costume,cha ID:1
+[04-07 16:03:55.057]394,Heavenly Vest,cha ID:1
+[04-07 16:03:55.057]395,Armor of Night,cha ID:2
+[04-07 16:03:55.058]396,Armor of Secrets,cha ID:2
+[04-07 16:03:55.059]397,Armor of Hercules,cha ID:1
+[04-07 16:03:55.059]398,Armor of Olympus,cha ID:1
+[04-07 16:03:55.060]399,Vest of Marksmanship,cha ID:2
+[04-07 16:03:55.060]400,Vest of Apollo,cha ID:2
+[04-07 16:03:55.061]401,Robe of the Wise,cha ID:1
+[04-07 16:03:55.061]402,Robe of the Sage,cha ID:1
+[04-07 16:03:55.062]403,Happy Panda Costume,cha ID:1
+[04-07 16:03:55.063]404,Mystic Panda Costume,cha ID:1
+[04-07 16:03:55.063]405,Fairy Robe,cha ID:1
+[04-07 16:03:55.064]406,Faerie Robe,cha ID:1
+[04-07 16:03:55.065]407,Gold Fish Costume,cha ID:1
+[04-07 16:03:55.065]408,Fish Fairy Costume,cha ID:1
+[04-07 16:03:55.066]409,Tidal Robe,cha ID:2
+[04-07 16:03:55.066]410,Bear Costume,cha ID:1
+[04-07 16:03:55.067]411,Tsunami Robe,cha ID:2
+[04-07 16:03:55.067]412,Dragon Costume,cha ID:1
+[04-07 16:03:55.067]413,Dragon Lord Costume,cha ID:1
+[04-07 16:03:55.097]466,Husk Gloves,cha ID:4
+[04-07 16:03:55.098]467,Thick Gloves,cha ID:4
+[04-07 16:03:55.098]468,Leather Gloves,cha ID:4
+[04-07 16:03:55.099]469,Rhino Hide Gloves,cha ID:4
+[04-07 16:03:55.100]470,Tiger Hide Gloves,cha ID:4
+[04-07 16:03:55.100]471,Gauntlets,cha ID:4
+[04-07 16:03:55.101]472,Soft Leather Gloves,cha ID:4
+[04-07 16:03:55.101]473,Heavy Leather Gloves,cha ID:4
+[04-07 16:03:55.102]474,Strong Leather Gloves,cha ID:4
+[04-07 16:03:55.102]475,Mithril Gauntlets,cha ID:4
+[04-07 16:03:55.103]476,Chain Gauntlets,cha ID:3
+[04-07 16:03:55.103]477,Strong Gauntlets,cha ID:3
+[04-07 16:03:55.104]478,Light Gauntlets,cha ID:4
+[04-07 16:03:55.104]479,Silver Gauntlets,cha ID:4
+[04-07 16:03:55.105]480,Ceremonial Gauntlets,cha ID:4
+[04-07 16:03:55.105]481,Coarse Gloves,cha ID:2
+[04-07 16:03:55.106]482,Canvas Gloves,cha ID:2
+[04-07 16:03:55.106]483,Exquisite Gloves,cha ID:2
+[04-07 16:03:55.108]484,Leather Gloves,cha ID:2
+[04-07 16:03:55.108]485,Warrior Gloves,cha ID:2
+[04-07 16:03:55.109]486,Feather Gloves,cha ID:2
+[04-07 16:03:55.109]487,Safari Gloves,cha ID:2
+[04-07 16:03:55.110]488,Emerald Gloves,cha ID:2
+[04-07 16:03:55.110]489,Hunter Gloves,cha ID:2
+[04-07 16:03:55.111]490,Slick Gloves,cha ID:2
+[04-07 16:03:55.111]491,Peacock Gloves,cha ID:2
+[04-07 16:03:55.112]492,Ringdove Gloves,cha ID:2
+[04-07 16:03:55.112]493,Raptor Gloves,cha ID:2
+[04-07 16:03:55.123]511,Cloth Gloves,cha ID:2
+[04-07 16:03:55.123]512,Tough Gloves,cha ID:2
+[04-07 16:03:55.124]513,Explorer Gloves,cha ID:2
+[04-07 16:03:55.125]514,Adventure Gloves,cha ID:2
+[04-07 16:03:55.126]515,Helmsman Gloves,cha ID:2
+[04-07 16:03:55.126]516,Oarsman Gloves,cha ID:2
+[04-07 16:03:55.127]517,Deckman Gloves,cha ID:2
+[04-07 16:03:55.127]518,Mastman Gloves,cha ID:2
+[04-07 16:03:55.128]519,Hurricane Gloves,cha ID:2
+[04-07 16:03:55.128]520,Whirlpool Gloves,cha ID:2
+[04-07 16:03:55.129]521,Wind Gloves,cha ID:2
+[04-07 16:03:55.131]526,Crabby Gloves,cha ID:1
+[04-07 16:03:55.132]527,Rooroo Muffs,cha ID:1
+[04-07 16:03:55.133]528,Playful Racoon Muffs,cha ID:1
+[04-07 16:03:55.133]529,Duckling Muffs,cha ID:1
+[04-07 16:03:55.134]530,Big Crab Muffs,cha ID:1
+[04-07 16:03:55.134]531,Lobster Muffs,cha ID:1
+[04-07 16:03:55.135]532,Ducky Muffs,cha ID:1
+[04-07 16:03:55.135]533,Prawn Muffs,cha ID:1
+[04-07 16:03:55.136]534,Pincer Muffs,cha ID:1
+[04-07 16:03:55.136]535,Sheepy Muffs,cha ID:1
+[04-07 16:03:55.136]536,Meowy Muffs,cha ID:1
+[04-07 16:03:55.138]537,Owl Muffs,cha ID:1
+[04-07 16:03:55.139]538,Hopperoo Muffs,cha ID:1
+[04-07 16:03:55.139]539,Clever Otter Muffs,cha ID:1
+[04-07 16:03:55.140]540,Lucky Otter Muffs,cha ID:1
+[04-07 16:03:55.141]541,Medic Gloves,cha ID:1
+[04-07 16:03:55.141]542,Foster Gloves,cha ID:1
+[04-07 16:03:55.142]543,Travel Gloves,cha ID:1
+[04-07 16:03:55.143]544,Nurse Gloves,cha ID:1
+[04-07 16:03:55.143]545,Garcon Gloves,cha ID:1
+[04-07 16:03:55.144]546,Holy Gloves,cha ID:1
+[04-07 16:03:55.144]547,Follower Gloves,cha ID:1
+[04-07 16:03:55.145]548,Attendant Gloves,cha ID:1
+[04-07 16:03:55.145]549,Scholar Gloves,cha ID:1
+[04-07 16:03:55.146]550,Emergency Gloves,cha ID:1
+[04-07 16:03:55.146]551,Passage Gloves,cha ID:1
+[04-07 16:03:55.147]552,Healer Gloves,cha ID:1
+[04-07 16:03:55.148]553,Protector Gloves,cha ID:1
+[04-07 16:03:55.149]554,Piety Gloves,cha ID:1
+[04-07 16:03:55.149]555,Blessed Gloves,cha ID:1
+[04-07 16:03:55.150]556,Mousey Muffs,cha ID:1
+[04-07 16:03:55.150]557,Kitty Muffs,cha ID:1
+[04-07 16:03:55.151]558,Loopy Bunny Muffs,cha ID:1
+[04-07 16:03:55.151]559,Goaty Muffs,cha ID:1
+[04-07 16:03:55.152]560,Deer Muffs,cha ID:1
+[04-07 16:03:55.153]561,Otter Muffs,cha ID:1
+[04-07 16:03:55.153]562,Racoon Muffs,cha ID:1
+[04-07 16:03:55.154]564,Happy Bunny Muffs,cha ID:1
+[04-07 16:03:55.155]565,Night Owl Muffs,cha ID:1
+[04-07 16:03:55.155]566,Kangaroo Muffs,cha ID:1
+[04-07 16:03:55.156]567,Joyful Bunny Muffs,cha ID:1
+[04-07 16:03:55.156]568,Bunny Baby Muffs,cha ID:1
+[04-07 16:03:55.157]569,Lucky Bunny Muffs,cha ID:1
+[04-07 16:03:55.157]570,Heavenly Gloves,cha ID:1
+[04-07 16:03:55.166]586,Bear Gloves,cha ID:1
+[04-07 16:03:55.167]587,Gloves of Night,cha ID:2
+[04-07 16:03:55.168]588,Gloves of Secrets,cha ID:2
+[04-07 16:03:55.169]589,Gloves of Marksmanship,cha ID:2
+[04-07 16:03:55.169]590,Gloves of Apollo,cha ID:2
+[04-07 16:03:55.170]591,Gloves of the Wise,cha ID:1
+[04-07 16:03:55.170]592,Gloves of the Sage,cha ID:1
+[04-07 16:03:55.171]593,Happy Panda Gloves,cha ID:1
+[04-07 16:03:55.171]594,Mystic Panda Gloves,cha ID:1
+[04-07 16:03:55.172]595,Fairy Gloves,cha ID:1
+[04-07 16:03:55.173]596,Faerie Gloves,cha ID:1
+[04-07 16:03:55.173]597,Gold Fish Muffs,cha ID:1
+[04-07 16:03:55.174]598,Fish Fairy Muffs,cha ID:1
+[04-07 16:03:55.175]599,Tidal Gloves,cha ID:2
+[04-07 16:03:55.175]600,Tsunami Gloves,cha ID:2
+[04-07 16:03:55.176]601,Dragon Muffs,cha ID:1
+[04-07 16:03:55.176]602,Dragon Lord Muffs,cha ID:1
+[04-07 16:03:55.177]603,Gauntlets of Hercules,cha ID:1
+[04-07 16:03:55.177]604,Gauntlets of Olympus,cha ID:1
+[04-07 16:03:55.195]635,Lv 1 Strike Coral,cha ID:2
+[04-07 16:03:55.195]636,Lv 2 Strike Coral,cha ID:2
+[04-07 16:03:55.196]637,Lv 3 Strike Coral,cha ID:2
+[04-07 16:03:55.196]638,Lv 4 Strike Coral,cha ID:2
+[04-07 16:03:55.197]639,Lv 5 Strike Coral,cha ID:2
+[04-07 16:03:55.199]642,Husk Boots,cha ID:4
+[04-07 16:03:55.200]643,Thick Boots,cha ID:4
+[04-07 16:03:55.200]644,Leather Boots,cha ID:4
+[04-07 16:03:55.201]645,Rhino Hide Boots,cha ID:4
+[04-07 16:03:55.201]646,Tiger Hide Boots,cha ID:4
+[04-07 16:03:55.202]647,Greaves,cha ID:4
+[04-07 16:03:55.202]648,Soft Leather Boots,cha ID:4
+[04-07 16:03:55.203]649,Heavy Leather Boots,cha ID:4
+[04-07 16:03:55.204]650,Strong Leather Boots,cha ID:4
+[04-07 16:03:55.204]651,Mithril Greaves,cha ID:4
+[04-07 16:03:55.205]652,Chain Greaves,cha ID:3
+[04-07 16:03:55.205]653,Strong Greaves,cha ID:3
+[04-07 16:03:55.206]654,Light Greaves,cha ID:4
+[04-07 16:03:55.206]655,Silver Greaves,cha ID:4
+[04-07 16:03:55.207]656,Ceremonial Greaves,cha ID:4
+[04-07 16:03:55.207]657,Coarse Boots,cha ID:2
+[04-07 16:03:55.207]658,Canvas Boots,cha ID:2
+[04-07 16:03:55.208]659,Exquisite Boots,cha ID:2
+[04-07 16:03:55.209]660,Leather Boots,cha ID:2
+[04-07 16:03:55.209]661,Warrior Boots,cha ID:2
+[04-07 16:03:55.210]662,Feather Boots,cha ID:2
+[04-07 16:03:55.210]663,Safari Boots,cha ID:2
+[04-07 16:03:55.211]664,Emerald Boots,cha ID:2
+[04-07 16:03:55.211]665,Hunter Boots,cha ID:2
+[04-07 16:03:55.212]666,Slick Boots,cha ID:2
+[04-07 16:03:55.213]667,Peacock Boots,cha ID:2
+[04-07 16:03:55.213]668,Ringdove Boots,cha ID:2
+[04-07 16:03:55.214]669,Raptor Boots,cha ID:2
+[04-07 16:03:55.224]687,Cloth Boots,cha ID:2
+[04-07 16:03:55.225]688,Tough Boots,cha ID:2
+[04-07 16:03:55.226]689,Explorer Boots,cha ID:2
+[04-07 16:03:55.226]690,Adventure Boots,cha ID:2
+[04-07 16:03:55.227]691,Helmsman Boots,cha ID:2
+[04-07 16:03:55.227]692,Oarsman Boots,cha ID:2
+[04-07 16:03:55.227]693,Deckman Boots,cha ID:2
+[04-07 16:03:55.228]694,Mastman Boots,cha ID:2
+[04-07 16:03:55.229]695,Hurricane Boots,cha ID:2
+[04-07 16:03:55.229]696,Whirlpool Boots,cha ID:2
+[04-07 16:03:55.230]697,Wind Boots,cha ID:2
+[04-07 16:03:55.233]702,Crabby Shoes,cha ID:1
+[04-07 16:03:55.233]703,Rooroo Shoes,cha ID:1
+[04-07 16:03:55.234]704,Playful Racoon Shoes,cha ID:1
+[04-07 16:03:55.234]705,Duckling Shoes,cha ID:1
+[04-07 16:03:55.235]706,Big Crab Shoes,cha ID:1
+[04-07 16:03:55.236]707,Lobster Shoes,cha ID:1
+[04-07 16:03:55.236]708,Ducky Shoes,cha ID:1
+[04-07 16:03:55.237]709,Prawn Shoes,cha ID:1
+[04-07 16:03:55.238]710,Pincer Shoes,cha ID:1
+[04-07 16:03:55.239]711,Sheepy Shoes,cha ID:1
+[04-07 16:03:55.240]712,Meowy Shoes,cha ID:1
+[04-07 16:03:55.240]713,Owl Shoes,cha ID:1
+[04-07 16:03:55.241]714,Hopperoo Shoes,cha ID:1
+[04-07 16:03:55.241]715,Clever Otter Shoes,cha ID:1
+[04-07 16:03:55.242]716,Lucky Otter Shoes,cha ID:1
+[04-07 16:03:55.243]717,Medic Boots,cha ID:1
+[04-07 16:03:55.243]718,Foster Boots,cha ID:1
+[04-07 16:03:55.244]719,Travel Boots,cha ID:1
+[04-07 16:03:55.244]720,Nurse Boots,cha ID:1
+[04-07 16:03:55.245]721,Garcon Boots,cha ID:1
+[04-07 16:03:55.245]722,Holy Boots,cha ID:1
+[04-07 16:03:55.246]723,Follower Boots,cha ID:1
+[04-07 16:03:55.247]724,Attendant Boots,cha ID:1
+[04-07 16:03:55.247]725,Scholar Boots,cha ID:1
+[04-07 16:03:55.247]726,Emergency Boots,cha ID:1
+[04-07 16:03:55.248]727,Passage Boots,cha ID:1
+[04-07 16:03:55.248]728,Healer Boots,cha ID:1
+[04-07 16:03:55.249]729,Protector Boots,cha ID:1
+[04-07 16:03:55.249]730,Piety Boots,cha ID:1
+[04-07 16:03:55.250]731,Blessed Boots,cha ID:1
+[04-07 16:03:55.251]732,Mousey Shoes,cha ID:1
+[04-07 16:03:55.251]733,Kitty Shoes,cha ID:1
+[04-07 16:03:55.252]734,Loopy Bunny Shoes,cha ID:1
+[04-07 16:03:55.253]735,Goaty Shoes,cha ID:1
+[04-07 16:03:55.254]736,Deer Shoes,cha ID:1
+[04-07 16:03:55.254]737,Otter Shoes,cha ID:1
+[04-07 16:03:55.255]738,Racoon Shoes,cha ID:1
+[04-07 16:03:55.256]740,Happy Bunny Shoes,cha ID:1
+[04-07 16:03:55.257]741,Night Owl Shoes,cha ID:1
+[04-07 16:03:55.257]742,Kangaroo Shoes,cha ID:1
+[04-07 16:03:55.258]743,Joyful Bunny Shoes,cha ID:1
+[04-07 16:03:55.259]744,Bunny Baby Shoes,cha ID:1
+[04-07 16:03:55.259]745,Lucky Bunny Shoes,cha ID:1
+[04-07 16:03:55.260]746,Heavenly Shoes,cha ID:1
+[04-07 16:03:55.261]747,Boots of Night,cha ID:2
+[04-07 16:03:55.261]748,Boots of Secrets,cha ID:2
+[04-07 16:03:55.262]749,Boots of Marksmanship,cha ID:2
+[04-07 16:03:55.262]750,Boots of Apollo,cha ID:2
+[04-07 16:03:55.263]751,Boots of the Wise,cha ID:1
+[04-07 16:03:55.263]752,Boots of the Sage,cha ID:1
+[04-07 16:03:55.264]753,Happy Panda Shoes,cha ID:1
+[04-07 16:03:55.264]754,Mystic Panda Shoes,cha ID:1
+[04-07 16:03:55.265]755,Fairy Shoes,cha ID:1
+[04-07 16:03:55.266]756,Faerie Shoes,cha ID:1
+[04-07 16:03:55.266]757,Gold Fish Shoes,cha ID:1
+[04-07 16:03:55.267]758,Fish Fairy Shoes,cha ID:1
+[04-07 16:03:55.267]759,Tidal Shoes,cha ID:2
+[04-07 16:03:55.267]760,Tsunami Shoes,cha ID:2
+[04-07 16:03:55.268]761,Dragon Shoes,cha ID:1
+[04-07 16:03:55.269]762,Bear Shoes,cha ID:1
+[04-07 16:03:55.269]763,Armor of Revenant,cha ID:4
+[04-07 16:03:55.270]764,Tattoo of the Cursed Warrior,cha ID:3
+[04-07 16:03:55.270]765,Tattoo of Evanescence,cha ID:3
+[04-07 16:03:55.271]766,Tattoo of Enigma,cha ID:3
+[04-07 16:03:55.271]767,Platemail of the Cursed Soul,cha ID:4
+[04-07 16:03:55.272]768,Armor of Evanescence,cha ID:4
+[04-07 16:03:55.272]769,Armor of Enigma,cha ID:4
+[04-07 16:03:55.277]777,Robe of Death,cha ID:2
+[04-07 16:03:55.277]778,Corset of Incantation,cha ID:2
+[04-07 16:03:55.278]779,Coat of Evanescence,cha ID:2
+[04-07 16:03:55.279]780,Mantle of Enigma,cha ID:2
+[04-07 16:03:55.283]789,Robe of the Venom Witch,cha ID:1
+[04-07 16:03:55.284]790,Coat of Invocation,cha ID:1
+[04-07 16:03:55.284]791,Robe of the Arcane,cha ID:1
+[04-07 16:03:55.285]792,Robe of Enigma,cha ID:1
+[04-07 16:03:55.287]796,Robe of Abraxas,cha ID:1
+[04-07 16:03:55.288]797,Robe of Malediction,cha ID:1
+[04-07 16:03:55.289]798,Robe of the Sphinx,cha ID:1
+[04-07 16:03:55.291]803,Mantle of the Naga,cha ID:2
+[04-07 16:03:55.292]804,Mantle of the Cursed Flame,cha ID:2
+[04-07 16:03:55.293]805,Cloak of Evanescence,cha ID:2
+[04-07 16:03:55.293]806,Mantle of the Sphinx,cha ID:2
+[04-07 16:03:55.294]807,Gauntlets of Evanescence,cha ID:4
+[04-07 16:03:55.294]808,Greaves of Evanescence,cha ID:4
+[04-07 16:03:55.295]809,Gloves of Evanescence,cha ID:2
+[04-07 16:03:55.295]810,Shoes of Evanescence,cha ID:2
+[04-07 16:03:55.296]811,Gloves of Malediction,cha ID:1
+[04-07 16:03:55.296]812,Gloves of the Arcane,cha ID:1
+[04-07 16:03:55.297]813,Boots of Malediction,cha ID:1
+[04-07 16:03:55.297]814,Boots of the of the Arcane,cha ID:1
+[04-07 16:03:55.298]815,Heavy Gloves of Evanescence,cha ID:2
+[04-07 16:03:55.303]824,Dragon Lord Shoes,cha ID:1
+[04-07 16:03:55.306]829,Greaves of Hercules,cha ID:1
+[04-07 16:03:55.306]830,Greaves of Olympus,cha ID:1
+[04-07 16:03:55.334]877,Boots of Evanescence,cha ID:2
+[04-07 16:03:55.463]1115,Grandiose Helm,cha ID:2
+[04-07 16:03:55.464]1116,Grandiose Armor,cha ID:2
+[04-07 16:03:55.464]1117,Grandiose Gauntlets,cha ID:2
+[04-07 16:03:55.465]1118,Grandiose Boots,cha ID:2
+[04-07 16:03:55.468]1124,Chaos Framestone,cha ID:1
+[04-07 16:03:55.468]1125,Chaos Clawstone,cha ID:1
+[04-07 16:03:55.469]1126,Chaos Pawstone,cha ID:1
+[04-07 16:03:55.920]1884,Undead Sealed Armor of Revenant,cha ID:4
+[04-07 16:03:55.921]1885,Earth Sealed Tattoo of the Cursed Warrior,cha ID:3
+[04-07 16:03:55.921]1886,Fire Sealed Tattoo of Evanescence,cha ID:3
+[04-07 16:03:55.922]1887,Ice Sealed Tattoo of Enigma,cha ID:3
+[04-07 16:03:55.923]1888,Earth Sealed Platemail of the Cursed Soul,cha ID:4
+[04-07 16:03:55.923]1889,Fire Sealed Armor of Evanescence,cha ID:4
+[04-07 16:03:55.924]1890,Ice Sealed Armor of Enigma,cha ID:4
+[04-07 16:03:55.929]1898,Undead Sealed Robe of Death,cha ID:2
+[04-07 16:03:55.929]1899,Earth Sealed Corset of Incantation,cha ID:2
+[04-07 16:03:55.930]1900,Fire Sealed Coat of Evanescence,cha ID:2
+[04-07 16:03:55.930]1901,Ice Sealed Mantle of Enigma,cha ID:2
+[04-07 16:03:55.935]1910,Undead Sealed Robe of the Venom Witch,cha ID:1
+[04-07 16:03:55.936]1911,Earth Sealed Coat of Invocation,cha ID:1
+[04-07 16:03:55.936]1912,Fire Sealed Robe of the Arcane,cha ID:1
+[04-07 16:03:55.937]1913,Ice Sealed Robe of Enigma,cha ID:1
+[04-07 16:03:55.939]1917,Earth Sealed Robe of Abraxas,cha ID:1
+[04-07 16:03:55.939]1918,Fire Sealed Robe of Malediction,cha ID:1
+[04-07 16:03:55.940]1919,Ice Sealed Robe of the Sphinx,cha ID:1
+[04-07 16:03:55.942]1924,Undead Sealed Mantle of the Naga,cha ID:2
+[04-07 16:03:55.943]1925,Earth Sealed Mantle of the Cursed Flame,cha ID:2
+[04-07 16:03:55.943]1926,Fire Sealed Cloak of Evanescence,cha ID:2
+[04-07 16:03:55.944]1927,Ice Sealed Mantle of the Sphinx,cha ID:2
+[04-07 16:03:55.944]1928,Battle Armor of Crimson Flame,cha ID:4
+[04-07 16:03:55.945]1929,Battle Armor of the Tempest,cha ID:4
+[04-07 16:03:55.946]1930,Battle Armor of Sistine,cha ID:4
+[04-07 16:03:55.946]1931,Battle Armor of the Kylin,cha ID:4
+[04-07 16:03:55.947]1932,Battle Armor of Nature,cha ID:3
+[04-07 16:03:55.947]1933,Tattoo of Gallon,cha ID:3
+[04-07 16:03:55.948]1934,Tattoo of the Tortoise,cha ID:3
+[04-07 16:03:55.949]1935,Gauntlets of Crimson Flame,cha ID:4
+[04-07 16:03:55.949]1936,Gauntlets of the Tempest,cha ID:4
+[04-07 16:03:55.950]1937,Gauntlets of Sistine,cha ID:4
+[04-07 16:03:55.950]1938,Gauntlets of the Kylin,cha ID:4
+[04-07 16:03:55.951]1939,Greaves of Crimson Flame,cha ID:4
+[04-07 16:03:55.951]1940,Greaves of the Tempest,cha ID:4
+[04-07 16:03:55.952]1941,Greaves of Sistine,cha ID:4
+[04-07 16:03:55.952]1942,Greaves of the Kylin,cha ID:4
+[04-07 16:03:55.953]1943,Vest of Clarion Mist,cha ID:2
+[04-07 16:03:55.954]1944,Flaming Coat,cha ID:2
+[04-07 16:03:55.954]1945,Mantle of Darwin,cha ID:2
+[04-07 16:03:55.955]1946,Coat of the White Tiger,cha ID:2
+[04-07 16:03:55.955]1947,Gloves of Clarion Mist,cha ID:2
+[04-07 16:03:55.956]1948,Flaming Gloves,cha ID:2
+[04-07 16:03:55.956]1949,Gloves of Darwin,cha ID:2
+[04-07 16:03:55.957]1950,Gloves of the White Tiger,cha ID:2
+[04-07 16:03:55.957]1951,Boots of Clarion Mist,cha ID:2
+[04-07 16:03:55.957]1952,Flaming Boots,cha ID:2
+[04-07 16:03:55.958]1953,Boots of Darwin,cha ID:2
+[04-07 16:03:55.959]1954,Boots of the White Tiger,cha ID:2
+[04-07 16:03:55.959]1955,Emerald Vine Robe,cha ID:1
+[04-07 16:03:55.960]1956,Coat of Frozen Crescent,cha ID:1
+[04-07 16:03:55.960]1957,Coat of Udine,cha ID:1
+[04-07 16:03:55.961]1958,Coat of the Peacock,cha ID:1
+[04-07 16:03:55.961]1959,Glory Coat,cha ID:1
+[04-07 16:03:55.962]1960,Coat of Hope,cha ID:1
+[04-07 16:03:55.962]1961,Coat of the Phoenix,cha ID:1
+[04-07 16:03:55.963]1962,Emerald Vine Gloves,cha ID:1
+[04-07 16:03:55.963]1963,Gloves of Frozen Crescent,cha ID:1
+[04-07 16:03:55.964]1964,Gloves of Udine,cha ID:1
+[04-07 16:03:55.965]1965,Gloves of the Peacock,cha ID:1
+[04-07 16:03:55.965]1966,Glory Gloves,cha ID:1
+[04-07 16:03:55.966]1967,Gloves of Hope,cha ID:1
+[04-07 16:03:55.966]1968,Gloves of the Phoenix,cha ID:1
+[04-07 16:03:55.967]1969,Emerald Vine Boots,cha ID:1
+[04-07 16:03:55.967]1970,Boots of Frozen Crescent,cha ID:1
+[04-07 16:03:55.968]1971,Boots of Udine,cha ID:1
+[04-07 16:03:55.969]1972,Boots of the Peacock,cha ID:1
+[04-07 16:03:55.969]1973,Glory Boots,cha ID:1
+[04-07 16:03:55.970]1974,Boots of Hope,cha ID:1
+[04-07 16:03:55.971]1975,Boots of the Phoenix,cha ID:1
+[04-07 16:03:55.971]1976,Robe of the Mist,cha ID:2
+[04-07 16:03:55.972]1977,Coat of the Tempest,cha ID:2
+[04-07 16:03:55.972]1978,Robe of Forlorn,cha ID:2
+[04-07 16:03:55.973]1979,Coat of the Green Dragon,cha ID:2
+[04-07 16:03:55.973]1980,Gloves of the Mist,cha ID:2
+[04-07 16:03:55.974]1981,Gloves of the Tempest,cha ID:2
+[04-07 16:03:55.974]1982,Gloves of Forlorn,cha ID:2
+[04-07 16:03:55.975]1983,Gloves of the Green Dragon,cha ID:2
+[04-07 16:03:55.975]1984,Boots of the Mist,cha ID:2
+[04-07 16:03:55.976]1985,Boots of the Tempest,cha ID:2
+[04-07 16:03:55.977]1986,Boots of Forlorn,cha ID:2
+[04-07 16:03:55.977]1987,Boots of the Green Dragon,cha ID:2
+[04-07 16:03:55.978]1988,Fire Sealed Gauntlets of Evanescence,cha ID:4
+[04-07 16:03:55.978]1989,Fire Sealed Greaves of Evanescence,cha ID:4
+[04-07 16:03:55.978]1990,Fire Sealed Gloves of Evanescence,cha ID:2
+[04-07 16:03:55.979]1991,Fire Sealed Shoes of Evanescence,cha ID:2
+[04-07 16:03:55.979]1992,Fire Sealed Gloves of Malediction,cha ID:1
+[04-07 16:03:55.980]1993,Fire Sealed Gloves of the Arcane,cha ID:1
+[04-07 16:03:55.980]1994,Fire Sealed Boots of Malediction,cha ID:1
+[04-07 16:03:55.981]1995,Fire Sealed Boots of the of the Arcane,cha ID:1
+[04-07 16:03:55.982]1996,Fire Sealed Heavy Gloves of Evanescence,cha ID:2
+[04-07 16:03:55.983]1997,Fire Sealed Boots of Evanescence,cha ID:2
+[04-07 16:03:55.984]1999,Lance Failed Hairdo 1,cha ID:2
+[04-07 16:03:55.984]2000,Hairdo 1,cha ID:2
+[04-07 16:03:55.985]2001,Hairdo 2,cha ID:2
+[04-07 16:03:55.985]2002,Hairdo 3,cha ID:2
+[04-07 16:03:55.986]2003,Hairdo 4,cha ID:2
+[04-07 16:03:55.986]2004,Hairdo 5,cha ID:2
+[04-07 16:03:55.987]2005,Hairdo 6,cha ID:2
+[04-07 16:03:55.988]2006,Hairdo 7,cha ID:2
+[04-07 16:03:55.989]2007,Hairdo 8,cha ID:2
+[04-07 16:03:55.989]2008,Event Commissioner,cha ID:2
+[04-07 16:03:55.990]2009,Hairdo 1,cha ID:2
+[04-07 16:03:55.990]2010,Hairdo 1,cha ID:2
+[04-07 16:03:55.991]2011,Hairdo 1,cha ID:2
+[04-07 16:03:55.991]2012,Hairdo 1,cha ID:2
+[04-07 16:03:55.992]2013,Hairdo 1,cha ID:2
+[04-07 16:03:55.992]2014,Hairdo 1,cha ID:2
+[04-07 16:03:55.993]2015,Hairdo 2,cha ID:2
+[04-07 16:03:55.993]2016,Hairdo 2,cha ID:2
+[04-07 16:03:55.994]2017,Hairdo 2,cha ID:2
+[04-07 16:03:55.995]2018,Hairdo 2,cha ID:2
+[04-07 16:03:55.995]2019,Hairdo 2,cha ID:2
+[04-07 16:03:55.996]2020,Hairdo 2,cha ID:2
+[04-07 16:03:55.996]2021,Hairdo 3,cha ID:2
+[04-07 16:03:55.997]2022,Hairdo 3,cha ID:2
+[04-07 16:03:55.997]2023,Hairdo 3,cha ID:2
+[04-07 16:03:55.997]2024,Hairdo 3,cha ID:2
+[04-07 16:03:55.998]2025,Hairdo 3,cha ID:2
+[04-07 16:03:55.998]2026,Hairdo 3,cha ID:2
+[04-07 16:03:55.999]2027,Hairdo 4,cha ID:2
+[04-07 16:03:56.000]2028,Hairdo 4,cha ID:2
+[04-07 16:03:56.000]2029,Hairdo 4,cha ID:2
+[04-07 16:03:56.001]2030,Hairdo 4,cha ID:2
+[04-07 16:03:56.001]2031,Hairdo 4,cha ID:2
+[04-07 16:03:56.002]2032,Hairdo 4,cha ID:2
+[04-07 16:03:56.002]2033,Hairdo 5,cha ID:2
+[04-07 16:03:56.003]2034,Hairdo 5,cha ID:2
+[04-07 16:03:56.003]2035,Hairdo 5,cha ID:2
+[04-07 16:03:56.004]2036,Hairdo 5,cha ID:2
+[04-07 16:03:56.004]2037,Hairdo 5,cha ID:2
+[04-07 16:03:56.005]2038,Hairdo 5,cha ID:2
+[04-07 16:03:56.006]2039,Hairdo 5,cha ID:2
+[04-07 16:03:56.006]2040,Hairdo 6,cha ID:2
+[04-07 16:03:56.007]2041,Hairdo 6,cha ID:2
+[04-07 16:03:56.007]2042,Hairdo 6,cha ID:2
+[04-07 16:03:56.008]2043,Hairdo 6,cha ID:2
+[04-07 16:03:56.009]2044,Hairdo 6,cha ID:2
+[04-07 16:03:56.009]2045,Hairdo 6,cha ID:2
+[04-07 16:03:56.010]2046,Hairdo 6,cha ID:2
+[04-07 16:03:56.011]2047,Hairdo 7,cha ID:2
+[04-07 16:03:56.011]2048,Hairdo 7,cha ID:2
+[04-07 16:03:56.012]2049,Hairdo 7,cha ID:2
+[04-07 16:03:56.012]2050,Hairdo 7,cha ID:2
+[04-07 16:03:56.013]2051,Hairdo 7,cha ID:2
+[04-07 16:03:56.013]2052,Hairdo 7,cha ID:2
+[04-07 16:03:56.014]2053,Hairdo 7,cha ID:2
+[04-07 16:03:56.014]2054,Hairdo 8,cha ID:2
+[04-07 16:03:56.015]2055,Hairdo 8,cha ID:2
+[04-07 16:03:56.015]2056,Hairdo 8,cha ID:2
+[04-07 16:03:56.016]2057,Hairdo 8,cha ID:2
+[04-07 16:03:56.016]2058,Hairdo 8,cha ID:2
+[04-07 16:03:56.017]2059,Hairdo 8,cha ID:2
+[04-07 16:03:56.017]2060,Guy 1 Bald Hairdo,cha ID:2
+[04-07 16:03:56.018]2061,Lance Failed Hairdo 2,cha ID:2
+[04-07 16:03:56.018]2062,Hairdo 1,cha ID:1
+[04-07 16:03:56.019]2063,Hairdo 2,cha ID:1
+[04-07 16:03:56.019]2064,Hairdo 3,cha ID:1
+[04-07 16:03:56.020]2065,Hairdo 4,cha ID:1
+[04-07 16:03:56.020]2066,Hairdo 5,cha ID:1
+[04-07 16:03:56.021]2067,Hairdo 6,cha ID:1
+[04-07 16:03:56.021]2068,Hairdo 7,cha ID:1
+[04-07 16:03:56.022]2069,Hairdo 8,cha ID:1
+[04-07 16:03:56.022]2070,Event Commissioner,cha ID:1
+[04-07 16:03:56.023]2071,Hairdo 1,cha ID:1
+[04-07 16:03:56.024]2072,Hairdo 1,cha ID:1
+[04-07 16:03:56.024]2073,Hairdo 1,cha ID:1
+[04-07 16:03:56.025]2074,Hairdo 1,cha ID:1
+[04-07 16:03:56.025]2075,Hairdo 1,cha ID:1
+[04-07 16:03:56.026]2076,Hairdo 1,cha ID:1
+[04-07 16:03:56.026]2077,Hairdo 1,cha ID:1
+[04-07 16:03:56.027]2078,Hairdo 2,cha ID:1
+[04-07 16:03:56.027]2079,Hairdo 2,cha ID:1
+[04-07 16:03:56.028]2080,Hairdo 2,cha ID:1
+[04-07 16:03:56.029]2081,Hairdo 2,cha ID:1
+[04-07 16:03:56.030]2082,Hairdo 2,cha ID:1
+[04-07 16:03:56.030]2083,Hairdo 2,cha ID:1
+[04-07 16:03:56.031]2084,Hairdo 3,cha ID:1
+[04-07 16:03:56.031]2085,Hairdo 3,cha ID:1
+[04-07 16:03:56.032]2086,Hairdo 3,cha ID:1
+[04-07 16:03:56.032]2087,Hairdo 3,cha ID:1
+[04-07 16:03:56.033]2088,Hairdo 3,cha ID:1
+[04-07 16:03:56.033]2089,Hairdo 3,cha ID:1
+[04-07 16:03:56.034]2090,Hairdo 4,cha ID:1
+[04-07 16:03:56.034]2091,Hairdo 4,cha ID:1
+[04-07 16:03:56.035]2092,Hairdo 4,cha ID:1
+[04-07 16:03:56.035]2093,Hairdo 4,cha ID:1
+[04-07 16:03:56.036]2094,Hairdo 4,cha ID:1
+[04-07 16:03:56.037]2095,Hairdo 4,cha ID:1
+[04-07 16:03:56.037]2096,Hairdo 4,cha ID:1
+[04-07 16:03:56.037]2097,Hairdo 5,cha ID:1
+[04-07 16:03:56.038]2098,Hairdo 5,cha ID:1
+[04-07 16:03:56.038]2099,Hairdo 5,cha ID:1
+[04-07 16:03:56.039]2100,Hairdo 5,cha ID:1
+[04-07 16:03:56.039]2101,Hairdo 6,cha ID:1
+[04-07 16:03:56.040]2102,Hairdo 6,cha ID:1
+[04-07 16:03:56.040]2103,Hairdo 6,cha ID:1
+[04-07 16:03:56.041]2104,Hairdo 6,cha ID:1
+[04-07 16:03:56.042]2105,Hairdo 6,cha ID:1
+[04-07 16:03:56.042]2106,Hairdo 6,cha ID:1
+[04-07 16:03:56.043]2107,Hairdo 6,cha ID:1
+[04-07 16:03:56.043]2108,Hairdo 7,cha ID:1
+[04-07 16:03:56.044]2109,Hairdo 7,cha ID:1
+[04-07 16:03:56.044]2110,Hairdo 7,cha ID:1
+[04-07 16:03:56.045]2111,Hairdo 7,cha ID:1
+[04-07 16:03:56.045]2112,Hairdo 7,cha ID:1
+[04-07 16:03:56.046]2113,Hairdo 7,cha ID:1
+[04-07 16:03:56.046]2114,Hairdo 8,cha ID:1
+[04-07 16:03:56.047]2115,Hairdo 8,cha ID:1
+[04-07 16:03:56.048]2116,Hairdo 8,cha ID:1
+[04-07 16:03:56.049]2117,Hairdo 8,cha ID:1
+[04-07 16:03:56.049]2118,Hairdo 8,cha ID:1
+[04-07 16:03:56.050]2119,Hairdo 8,cha ID:1
+[04-07 16:03:56.050]2120,Hairdo 8,cha ID:1
+[04-07 16:03:56.051]2121,Carsise Failed Hairdo 1,cha ID:1
+[04-07 16:03:56.051]2122,Guy 2 Bald Hairdo,cha ID:1
+[04-07 16:03:56.052]2123,Carsise Failed Hairdo 2,cha ID:1
+[04-07 16:03:56.052]2124,Hairdo 1,cha ID:1
+[04-07 16:03:56.053]2125,Hairdo 2,cha ID:1
+[04-07 16:03:56.054]2126,Hairdo 3,cha ID:1
+[04-07 16:03:56.054]2127,Hairdo 4,cha ID:1
+[04-07 16:03:56.055]2128,Hairdo 5,cha ID:1
+[04-07 16:03:56.055]2129,Hairdo 6,cha ID:1
+[04-07 16:03:56.056]2130,Hairdo 7,cha ID:1
+[04-07 16:03:56.056]2131,Hairdo 8,cha ID:1
+[04-07 16:03:56.057]2132,Event Commissioner,cha ID:1
+[04-07 16:03:56.057]2133,Hairdo 1,cha ID:1
+[04-07 16:03:56.058]2134,Hairdo 1,cha ID:1
+[04-07 16:03:56.059]2135,Hairdo 1,cha ID:1
+[04-07 16:03:56.059]2136,Hairdo 1,cha ID:1
+[04-07 16:03:56.060]2137,Hairdo 1,cha ID:1
+[04-07 16:03:56.061]2138,Hairdo 1,cha ID:1
+[04-07 16:03:56.061]2139,Hairdo 1,cha ID:1
+[04-07 16:03:56.062]2140,Hairdo 2,cha ID:1
+[04-07 16:03:56.062]2141,Hairdo 2,cha ID:1
+[04-07 16:03:56.063]2142,Hairdo 2,cha ID:1
+[04-07 16:03:56.063]2143,Hairdo 2,cha ID:1
+[04-07 16:03:56.064]2144,Hairdo 2,cha ID:1
+[04-07 16:03:56.064]2145,Hairdo 2,cha ID:1
+[04-07 16:03:56.065]2146,Hairdo 3,cha ID:1
+[04-07 16:03:56.065]2147,Hairdo 3,cha ID:1
+[04-07 16:03:56.066]2148,Hairdo 3,cha ID:1
+[04-07 16:03:56.067]2149,Hairdo 3,cha ID:1
+[04-07 16:03:56.067]2150,Hairdo 3,cha ID:1
+[04-07 16:03:56.067]2151,Hairdo 3,cha ID:1
+[04-07 16:03:56.068]2152,Hairdo 4,cha ID:1
+[04-07 16:03:56.068]2153,Hairdo 4,cha ID:1
+[04-07 16:03:56.069]2154,Hairdo 4,cha ID:1
+[04-07 16:03:56.069]2155,Hairdo 4,cha ID:1
+[04-07 16:03:56.070]2156,Hairdo 4,cha ID:1
+[04-07 16:03:56.070]2157,Hairdo 4,cha ID:1
+[04-07 16:03:56.071]2158,Hairdo 5,cha ID:1
+[04-07 16:03:56.071]2159,Hairdo 5,cha ID:1
+[04-07 16:03:56.072]2160,Hairdo 5,cha ID:1
+[04-07 16:03:56.073]2161,Hairdo 5,cha ID:1
+[04-07 16:03:56.073]2162,Hairdo 5,cha ID:1
+[04-07 16:03:56.074]2163,Hairdo 5,cha ID:1
+[04-07 16:03:56.074]2164,Hairdo 6,cha ID:1
+[04-07 16:03:56.075]2165,Hairdo 6,cha ID:1
+[04-07 16:03:56.075]2166,Hairdo 6,cha ID:1
+[04-07 16:03:56.076]2167,Hairdo 6,cha ID:1
+[04-07 16:03:56.076]2168,Hairdo 6,cha ID:1
+[04-07 16:03:56.077]2169,Hairdo 6,cha ID:1
+[04-07 16:03:56.077]2170,Hairdo 7,cha ID:1
+[04-07 16:03:56.079]2171,Hairdo 7,cha ID:1
+[04-07 16:03:56.079]2172,Hairdo 7,cha ID:1
+[04-07 16:03:56.080]2173,Hairdo 7,cha ID:1
+[04-07 16:03:56.080]2174,Hairdo 7,cha ID:1
+[04-07 16:03:56.081]2175,Hairdo 7,cha ID:1
+[04-07 16:03:56.081]2176,Hairdo 8,cha ID:1
+[04-07 16:03:56.082]2177,Hairdo 8,cha ID:1
+[04-07 16:03:56.082]2178,Hairdo 8,cha ID:1
+[04-07 16:03:56.082]2179,Hairdo 8,cha ID:1
+[04-07 16:03:56.083]2180,Hairdo 8,cha ID:1
+[04-07 16:03:56.083]2181,Hairdo 8,cha ID:1
+[04-07 16:03:56.084]2182,Phyllis Failed Hairdo 1,cha ID:1
+[04-07 16:03:56.085]2183,Phyllis Failed Hairdo 2,cha ID:1
+[04-07 16:03:56.085]2184,Girl 1 Bald Hairdo,cha ID:1
+[04-07 16:03:56.086]2185,Girl 1 Hair Makeup 01,cha ID:1
+[04-07 16:03:56.086]2186,Girl 2 Hair 00,cha ID:1
+[04-07 16:03:56.135]2275,Lance Trendy Hairdo 1,cha ID:4
+[04-07 16:03:56.136]2276,Lance Trendy Hairdo 2,cha ID:4
+[04-07 16:03:56.136]2277,Lance Trendy Hairdo 3,cha ID:4
+[04-07 16:03:56.137]2278,Lance Trendy Hairdo 4,cha ID:4
+[04-07 16:03:56.137]2279,Carsise Trendy Hairdo 1,cha ID:4
+[04-07 16:03:56.138]2280,Carsise Trendy Hairdo 2,cha ID:4
+[04-07 16:03:56.139]2281,Carsise Trendy Hairdo 3,cha ID:4
+[04-07 16:03:56.139]2282,Carsise Trendy Hairdo 4,cha ID:4
+[04-07 16:03:56.140]2283,Phyllis Trendy Hairdo 1,cha ID:4
+[04-07 16:03:56.140]2284,Phyllis Trendy Hairdo 2,cha ID:4
+[04-07 16:03:56.141]2285,Phyllis Trendy Hairdo 3,cha ID:4
+[04-07 16:03:56.142]2286,Phyllis Trendy Hairdo 4,cha ID:4
+[04-07 16:03:56.223]2434,Arrow 02,cha ID:1
+[04-07 16:03:56.231]2448,Gunpowder 02,cha ID:1
+[04-07 16:03:56.260]2499,Left Plaster Glove,cha ID:1
+[04-07 16:03:56.261]2500,Left Brawler Glove,cha ID:1
+[04-07 16:03:56.261]2501,Left Master Glove,cha ID:1
+[04-07 16:03:56.262]2502,Left Jagged Blade,cha ID:1
+[04-07 16:03:56.262]2503,Left Cosmo Blade,cha ID:1
+[04-07 16:03:56.263]2504,Left Tiger Glove,cha ID:1
+[04-07 16:03:56.263]2505,Left Hand of Death,cha ID:1
+[04-07 16:03:56.270]2517,UPO Cap,cha ID:1
+[04-07 16:03:56.275]2527,Raging Bull Tattoo,cha ID:3
+[04-07 16:03:56.275]2528,Savage Bull Tattoo,cha ID:3
+[04-07 16:03:56.276]2529,Primal Tattoo,cha ID:3
+[04-07 16:03:56.276]2530,Hephaestus Framestone,cha ID:1
+[04-07 16:03:56.277]2531,Hephaestus Clawstone,cha ID:1
+[04-07 16:03:56.277]2532,Hephaestus Pawstone,cha ID:1
+[04-07 16:03:56.277]2533,Hermes Framestone,cha ID:1
+[04-07 16:03:56.278]2534,Hermes Clawstone,cha ID:1
+[04-07 16:03:56.279]2535,Hermes Pawstone,cha ID:1
+[04-07 16:03:56.279]2536,Apollo Framestone,cha ID:1
+[04-07 16:03:56.280]2537,Apollo Clawstone,cha ID:1
+[04-07 16:03:56.280]2538,Apollo Pawstone,cha ID:1
+[04-07 16:03:56.280]2539,Poseidon Framestone,cha ID:1
+[04-07 16:03:56.282]2540,Poseidon Clawstone,cha ID:1
+[04-07 16:03:56.282]2541,Poseidon Pawstone,cha ID:1
+[04-07 16:03:56.283]2542,Hestia Framestone,cha ID:1
+[04-07 16:03:56.284]2543,Hestia Clawstone,cha ID:1
+[04-07 16:03:56.284]2544,Hestia Pawstone,cha ID:1
+[04-07 16:03:56.285]2545,Athena Framestone,cha ID:1
+[04-07 16:03:56.285]2546,Athena Clawstone,cha ID:1
+[04-07 16:03:56.286]2547,Athena Pawstone,cha ID:1
+[04-07 16:03:56.286]2548,Artemis Crownstone,cha ID:4
+[04-07 16:03:56.288]2552,Corporeal Kylin Cap,cha ID:1
+[04-07 16:03:56.551]3061,Bear Shoes,cha ID:1
+[04-07 16:03:56.679]3285,Calculator,cha ID:1
+[04-07 16:03:56.680]3287,Serious study book,cha ID:1
+[04-07 16:03:56.871]3612,Virgo's Shadow,cha ID:2
+[04-07 16:03:56.871]3613,Virgo's Touch,cha ID:2
+[04-07 16:03:56.872]3614,Virgo's Trace,cha ID:2
+[04-07 16:03:56.873]3617,Virgo's Bind,cha ID:1
+[04-07 16:03:56.874]3618,Virgo's Claw,cha ID:1
+[04-07 16:03:56.874]3619,Virgo's Print,cha ID:1
+[04-07 16:03:56.876]3622,Virgo's Protection,cha ID:2
+[04-07 16:03:56.877]3623,Virgo's Caress,cha ID:2
+[04-07 16:03:56.877]3624,Virgo's Dance,cha ID:2
+[04-07 16:03:56.878]3627,Virgo's Possession,cha ID:1
+[04-07 16:03:56.879]3628,Virgo's Death,cha ID:1
+[04-07 16:03:56.879]3629,Virgo's Trail,cha ID:1
+[04-07 16:03:56.881]3632,Virgo's Torso,cha ID:1
+[04-07 16:03:56.881]3633,Virgo's Span,cha ID:1
+[04-07 16:03:56.883]3634,Virgo's Wanderer,cha ID:1
+[04-07 16:03:56.885]3638,Virgo's Seal,cha ID:2
+[04-07 16:03:56.885]3639,Virgo's Hand,cha ID:2
+[04-07 16:03:56.886]3640,Virgo's Brace,cha ID:2
+[04-07 16:03:57.186]4147,Spirit Beast Tattoo,cha ID:3
+[04-07 16:03:57.187]4148,Arcane Beast Tattoo,cha ID:3
+[04-07 16:03:57.188]4149,Capricious Battle Armor,cha ID:4
+[04-07 16:03:57.188]4150,Sagacious Battle Armor,cha ID:4
+[04-07 16:03:57.188]4151,Robe of Perception,cha ID:2
+[04-07 16:03:57.189]4152,Robe of Gallant,cha ID:2
+[04-07 16:03:57.190]4153,Nautical Coat,cha ID:2
+[04-07 16:03:57.190]4154,Arcane Lobster Costume,cha ID:1
+[04-07 16:03:57.191]4155,Robe of Stride,cha ID:2
+[04-07 16:03:57.193]4156,Pique Lobster Costume,cha ID:1
+[04-07 16:03:57.193]4157,Robe of Melody,cha ID:1
+[04-07 16:03:57.194]4158,Arcane Bunny Costume,cha ID:1
+[04-07 16:03:57.194]4159,Robe of Spirit,cha ID:1
+[04-07 16:03:57.195]4160,Pique Bunny Costume,cha ID:1
+[04-07 16:03:57.196]4161,Robe of Vengence,cha ID:1
+[04-07 16:03:57.196]4162,Arcane Otter Costume,cha ID:1
+[04-07 16:03:57.197]4163,Robe of Amercement,cha ID:1
+[04-07 16:03:57.197]4164,Pique Otter Costume,cha ID:1
+[04-07 16:03:57.197]4165,Capricious Battle Gauntlets,cha ID:4
+[04-07 16:03:57.198]4166,Sagacious Battle Gauntlets,cha ID:4
+[04-07 16:03:57.199]4167,Gloves of Perception,cha ID:2
+[04-07 16:03:57.199]4168,Gloves of Gallant,cha ID:2
+[04-07 16:03:57.200]4169,Nautical Gloves,cha ID:2
+[04-07 16:03:57.200]4170,Arcane Lobster Muffs,cha ID:1
+[04-07 16:03:57.201]4171,Gloves of Stride,cha ID:2
+[04-07 16:03:57.202]4172,Pique Lobster Muffs,cha ID:1
+[04-07 16:03:57.202]4173,Gloves of Melody,cha ID:1
+[04-07 16:03:57.203]4174,Arcane Bunny Muffs,cha ID:1
+[04-07 16:03:57.203]4175,Gloves of Spirit,cha ID:1
+[04-07 16:03:57.204]4176,Pique Bunny Muffs,cha ID:1
+[04-07 16:03:57.205]4177,Gloves of Vengence,cha ID:1
+[04-07 16:03:57.205]4178,Arcane Otter Muffs,cha ID:1
+[04-07 16:03:57.206]4179,Gloves of Amercement,cha ID:1
+[04-07 16:03:57.206]4180,Pique Otter Muffs,cha ID:1
+[04-07 16:03:57.207]4181,Capricious Battle Greaves,cha ID:4
+[04-07 16:03:57.208]4182,Sagacious Battle Greaves,cha ID:4
+[04-07 16:03:57.209]4183,Boots of Perception,cha ID:2
+[04-07 16:03:57.209]4184,Boots of Gallant,cha ID:2
+[04-07 16:03:57.210]4185,Nautical Boots,cha ID:2
+[04-07 16:03:57.210]4186,Arcane Lobster Shoes,cha ID:1
+[04-07 16:03:57.211]4187,Boots of Stride,cha ID:2
+[04-07 16:03:57.212]4188,Pique Lobster Shoes,cha ID:1
+[04-07 16:03:57.212]4189,Boots of Melody,cha ID:1
+[04-07 16:03:57.213]4190,Arcane Bunny Shoes,cha ID:1
+[04-07 16:03:57.214]4191,Boots of Spirit,cha ID:1
+[04-07 16:03:57.214]4192,Pique Bunny Shoes,cha ID:1
+[04-07 16:03:57.215]4193,Boots of Vengence,cha ID:1
+[04-07 16:03:57.215]4194,Arcane Otter Shoes,cha ID:1
+[04-07 16:03:57.216]4195,Boots of Amercement,cha ID:1
+[04-07 16:03:57.217]4196,Pique Otter Shoes,cha ID:1
+[04-07 16:03:58.320]6144,Forest Battle Robe,cha ID:2
+[04-07 16:03:58.320]6145,Forest Battle Gloves,cha ID:2
+[04-07 16:03:58.321]6146,Forest Battle Boots,cha ID:2
+[04-07 16:03:58.321]6147,Holy Armor,cha ID:2
+[04-07 16:03:58.322]6148,Holy Armor Gloves,cha ID:2
+[04-07 16:03:58.322]6149,Holy Armor Boots,cha ID:2
+[04-07 16:03:58.323]6150,Savage Armor,cha ID:1
+[04-07 16:03:58.323]6151,Savage Armor Gloves,cha ID:1
+[04-07 16:03:58.324]6152,Savage Armor Boots,cha ID:1
+[04-07 16:03:58.325]6154,Ice Battle Armor,cha ID:2
+[04-07 16:03:58.325]6155,Ice Battle Gloves,cha ID:2
+[04-07 16:03:58.326]6156,Ice Battle Boots,cha ID:2
+[04-07 16:03:58.327]6158,Ice Holy Robe,cha ID:1
+[04-07 16:03:58.328]6159,Ice Holy Gloves,cha ID:1
+[04-07 16:03:58.329]6160,Ice Holy Boots,cha ID:1
+[04-07 16:03:58.330]6162,Ice Magic Robe,cha ID:1
+[04-07 16:03:58.330]6163,Ice Spirit Gloves,cha ID:1
+[04-07 16:03:58.331]6164,Ice Spirit Boots,cha ID:1
+[04-07 16:03:58.336]6174,Sealed Guard of Epic Prowess,cha ID:2
+[04-07 16:03:58.337]6175,Sealed Bless of Epic Prowess,cha ID:2
+[04-07 16:03:58.337]6176,Sealed Mercy of Epic Prowess,cha ID:2
+[04-07 16:03:58.338]6178,Sealed Guard of Honor,cha ID:2
+[04-07 16:03:58.339]6179,Sealed Bless of Honor,cha ID:2
+[04-07 16:03:58.339]6180,Sealed Mercy of Honor,cha ID:2
+[04-07 16:03:58.340]6182,Sealed Guard of Sacrifice,cha ID:1
+[04-07 16:03:58.341]6183,Sealed Bless of Sacrifice,cha ID:1
+[04-07 16:03:58.341]6184,Sealed Mercy of Sacrifice,cha ID:1
+[04-07 16:03:58.342]6186,Sealed Guard of Justice,cha ID:2
+[04-07 16:03:58.343]6187,Sealed Bless of Justice,cha ID:2
+[04-07 16:03:58.343]6188,Sealed Mercy of Justice,cha ID:2
+[04-07 16:03:58.344]6190,Sealed Guard of Empathy,cha ID:1
+[04-07 16:03:58.345]6191,Sealed Bless of Empathy,cha ID:1
+[04-07 16:03:58.346]6192,Sealed Mercy of Empathy,cha ID:1
+[04-07 16:03:58.347]6194,Sealed Guard of Inspiration,cha ID:1
+[04-07 16:03:58.347]6195,Sealed Bless of Inspiration,cha ID:1
+[04-07 16:03:58.348]6196,Sealed Mercy of Inspiration,cha ID:1
+[04-07 16:03:58.644]7096,Kylin Helm,cha ID:1
+[04-07 16:03:58.651]7108,Frozen Kylin Helm,cha ID:1
+[04-07 16:03:58.651]7109,Dark Kylin Helm,cha ID:1
+[04-07 16:03:58.652]7110,Holy Kylin Helm,cha ID:1
+[04-07 16:03:58.665]7132,Black Dragon Lord's Helm,cha ID:1
+[04-07 16:03:58.685]7166,Undead Kylin Helm,cha ID:1
+[04-07 16:03:58.698]7205,Champion's Bind,cha ID:1
+[04-07 16:03:58.699]7206,Champion's Touch,cha ID:1
+[04-07 16:03:58.700]7207,Champion's Print,cha ID:1
+[04-07 16:03:58.700]7208,Crusader's Shadow,cha ID:2
+[04-07 16:03:58.701]7209,Crusader's Touch,cha ID:2
+[04-07 16:03:58.701]7210,Crusader's Trace,cha ID:2
+[04-07 16:03:58.702]7211,Sharpshooter's Seal,cha ID:2
+[04-07 16:03:58.703]7212,Sharpshooter's Hand,cha ID:2
+[04-07 16:03:58.703]7213,Sharpshooter's Brace,cha ID:2
+[04-07 16:03:58.704]7214,Voyager's Protection,cha ID:2
+[04-07 16:03:58.705]7215,Voyager's Caress,cha ID:2
+[04-07 16:03:58.705]7216,Voyager's Dance,cha ID:2
+[04-07 16:03:58.706]7217,Cleric's Possession,cha ID:1
+[04-07 16:03:58.706]7218,Cleric Hands of Healing,cha ID:1
+[04-07 16:03:58.708]7219,Cleric's Trail,cha ID:1
+[04-07 16:03:58.708]7220,Sealmaster's Torso,cha ID:1
+[04-07 16:03:58.708]7221,Sealmaster's Span,cha ID:1
+[04-07 16:03:58.709]7222,Sealmaster's Wanderer,cha ID:1
+[04-07 16:03:58.709]7223,Hairdo 1,cha ID:2
+[04-07 16:03:58.710]7224,Hairdo 1,cha ID:2
+[04-07 16:03:58.710]7225,Hairdo 3,cha ID:2
+[04-07 16:03:58.711]7226,Hairdo 4,cha ID:2
+[04-07 16:03:58.712]7227,Hairdo 5,cha ID:2
+[04-07 16:03:58.712]7228,Hairdo 8,cha ID:2
+[04-07 16:03:58.713]7229,Lance Trendy Hairdo 4,cha ID:4
+[04-07 16:03:58.713]7230,Hairdo 1,cha ID:2
+[04-07 16:03:58.714]7231,Hairdo 1,cha ID:2
+[04-07 16:03:58.714]7232,Hairdo 2,cha ID:2
+[04-07 16:03:58.715]7233,Hairdo 2,cha ID:2
+[04-07 16:03:58.715]7234,Hairdo 3,cha ID:2
+[04-07 16:03:58.716]7235,Hairdo 4,cha ID:2
+[04-07 16:03:58.716]7236,Hairdo 4,cha ID:2
+[04-07 16:03:58.722]7245,Terra's Undead Kylin Helm,cha ID:1
+[04-07 16:03:58.826]7501,Lance Trendy Hairdo 3,cha ID:4
+[04-07 16:03:58.826]7502,Lance Trendy Hairdo 4,cha ID:4
+[04-07 16:03:58.827]7503,Lance Trendy Hairdo 5,cha ID:4
+[04-07 16:03:58.827]7504,Lance Trendy Hairdo 6,cha ID:4
+[04-07 16:03:58.828]7505,Lance Trendy Hairdo 7,cha ID:4
+[04-07 16:03:58.828]7506,Lance Trendy Hairdo 8,cha ID:4
+[04-07 16:03:58.829]7507,Lance Trendy Hairdo 9,cha ID:4
+[04-07 16:03:58.829]7508,Lance Trendy Hairdo 10,cha ID:4
+[04-07 16:03:58.830]7509,Lance Trendy Hairdo 11,cha ID:2
+[04-07 16:03:58.830]7510,Lance Trendy Hairdo 12,cha ID:2
+[04-07 16:03:58.831]7511,Lance Trendy Hairdo 13,cha ID:2
+[04-07 16:03:58.832]7512,Lance Trendy Hairdo 14,cha ID:2
+[04-07 16:03:58.832]7513,Lance Trendy Hairdo 15,cha ID:2
+[04-07 16:03:58.833]7514,Lance Trendy Hairdo 16,cha ID:2
+[04-07 16:03:58.833]7515,Lance Trendy Hairdo 17,cha ID:2
+[04-07 16:03:58.834]7516,Lance Trendy Hairdo 18,cha ID:2
+[04-07 16:03:58.834]7517,Phyllis Trendy Hairdo 3,cha ID:4
+[04-07 16:03:58.836]7518,Phyllis Trendy Hairdo 4,cha ID:4
+[04-07 16:03:58.836]7519,Phyllis Trendy Hairdo 5,cha ID:4
+[04-07 16:03:58.837]7520,Phyllis Trendy Hairdo 6,cha ID:4
+[04-07 16:03:58.837]7521,Phyllis Trendy Hairdo 7,cha ID:4
+[04-07 16:03:58.838]7522,Phyllis Trendy Hairdo 8,cha ID:4
+[04-07 16:03:58.838]7523,Phyllis Trendy Hairdo 9,cha ID:4
+[04-07 16:03:58.839]7524,Phyllis Trendy Hairdo 10,cha ID:4
+[04-07 16:03:59.287]9700,Tattoo of Evanescence,cha ID:3
+[04-07 16:03:59.288]9704,Armor of Evanescence,cha ID:4
+[04-07 16:03:59.289]9706,Gauntlets of Evanescence,cha ID:4
+[04-07 16:03:59.290]9707,Greaves of Evanescence,cha ID:4
+[04-07 16:03:59.290]9708,Coat of Evanescence,cha ID:2
+[04-07 16:03:59.292]9710,Gloves of Evanescence,cha ID:2
+[04-07 16:03:59.292]9711,Shoes of Evanescence,cha ID:2
+[04-07 16:03:59.293]9712,Robe of the Arcane,cha ID:1
+[04-07 16:03:59.294]9714,Gloves of the Arcane,cha ID:1
+[04-07 16:03:59.294]9715,Boots of the of the Arcane,cha ID:1
+[04-07 16:03:59.295]9716,Robe of Malediction,cha ID:1
+[04-07 16:03:59.296]9718,Gloves of Malediction,cha ID:1
+[04-07 16:03:59.297]9719,Boots of Malediction,cha ID:1
+[04-07 16:03:59.297]9720,Cloak of Evanescence,cha ID:2
+[04-07 16:03:59.299]9722,Heavy Gloves of Evanescence,cha ID:2
+[04-07 16:03:59.299]9723,Boots of Evanescence,cha ID:2
+[04-07 16:03:59.300]9724,Tattoo of Enigma,cha ID:3
+[04-07 16:03:59.300]9725,Armor of Enigma,cha ID:4
+[04-07 16:03:59.302]9728,Mantle of Enigma,cha ID:2
+[04-07 16:03:59.304]9731,Robe of Enigma,cha ID:1
+[04-07 16:03:59.305]9733,Robe of the Sphinx,cha ID:1
+[04-07 16:03:59.306]9735,Mantle of the Sphinx,cha ID:2
+[04-07 16:03:59.307]9736,Tattoo of the Cursed Warrior,cha ID:3
+[04-07 16:03:59.307]9737,Platemail of the Cursed Soul,cha ID:4
+[04-07 16:03:59.309]9740,Corset of Incantation,cha ID:2
+[04-07 16:03:59.311]9743,Coat of Invocation,cha ID:1
+[04-07 16:03:59.312]9745,Robe of Abraxas,cha ID:1
+[04-07 16:03:59.313]9747,Mantle of the Cursed Flame,cha ID:2
+[04-07 16:09:46.737]135,Arrow 01,cha ID:1
+[04-07 16:09:46.799]200,Left Plaster Glove,cha ID:1
+[04-07 16:09:46.799]201,Left Brawler Glove,cha ID:1
+[04-07 16:09:46.799]202,Left Master Glove,cha ID:1
+[04-07 16:09:46.799]203,Left Jagged Blade,cha ID:1
+[04-07 16:09:46.799]204,Left Cosmo Blade,cha ID:1
+[04-07 16:09:46.799]205,Left Tiger Glove,cha ID:1
+[04-07 16:09:46.799]206,Left Hand of Death,cha ID:1
+[04-07 16:09:46.815]228,Raging Bull Tattoo,cha ID:3
+[04-07 16:09:46.815]229,Savage Bull Tattoo,cha ID:3
+[04-07 16:09:46.815]230,Primal Tattoo,cha ID:3
+[04-07 16:09:46.862]290,Husk Armor,cha ID:4
+[04-07 16:09:46.862]291,Thick Armor,cha ID:4
+[04-07 16:09:46.862]292,Leather Armor,cha ID:4
+[04-07 16:09:46.862]293,Rhino Hide Armor,cha ID:4
+[04-07 16:09:46.878]294,Tiger Hide Armor,cha ID:4
+[04-07 16:09:46.879]295,Breast Plate,cha ID:4
+[04-07 16:09:46.879]296,Soft Leather Armor,cha ID:4
+[04-07 16:09:46.880]297,Heavy Leather Armor,cha ID:4
+[04-07 16:09:46.881]298,Strong Leather Armor,cha ID:4
+[04-07 16:09:46.882]299,Mithril Platemail,cha ID:4
+[04-07 16:09:46.883]300,Chain Mail,cha ID:3
+[04-07 16:09:46.884]301,Strong Platemail,cha ID:3
+[04-07 16:09:46.884]302,Light Platemail,cha ID:4
+[04-07 16:09:46.885]303,Silver Platemail,cha ID:4
+[04-07 16:09:46.886]304,Ceremonial Platemail,cha ID:4
+[04-07 16:09:46.887]305,Coarse Vest,cha ID:2
+[04-07 16:09:46.888]306,Canvas Vest,cha ID:2
+[04-07 16:09:46.889]307,Exquisite Vest,cha ID:2
+[04-07 16:09:46.890]308,Leather Vest,cha ID:2
+[04-07 16:09:46.890]309,Warrior Frock,cha ID:2
+[04-07 16:09:46.891]310,Feather Vest,cha ID:2
+[04-07 16:09:46.892]311,Safari Vest,cha ID:2
+[04-07 16:09:46.893]312,Emerald Vest,cha ID:2
+[04-07 16:09:46.894]313,Hunter Vest,cha ID:2
+[04-07 16:09:46.895]314,Slick Vest,cha ID:2
+[04-07 16:09:46.896]315,Peacock Vest,cha ID:2
+[04-07 16:09:46.896]316,Ringdove Vest,cha ID:2
+[04-07 16:09:46.897]317,Raptor Vest,cha ID:2
+[04-07 16:09:46.908]335,Cloth Shirt,cha ID:2
+[04-07 16:09:46.908]336,Tough Vest,cha ID:2
+[04-07 16:09:46.908]337,Explorer Vest,cha ID:2
+[04-07 16:09:46.908]338,Adventure Vest,cha ID:2
+[04-07 16:09:46.908]339,Helmsman Vest,cha ID:2
+[04-07 16:09:46.908]340,Oarsman Vest,cha ID:2
+[04-07 16:09:46.908]341,Deckman Vest,cha ID:2
+[04-07 16:09:46.908]342,Mastman Vest,cha ID:2
+[04-07 16:09:46.908]343,Hurricane Vest,cha ID:2
+[04-07 16:09:46.908]344,Whirlpool Vest,cha ID:2
+[04-07 16:09:46.908]345,Wind Vest,cha ID:2
+[04-07 16:09:46.908]350,Crabby Costume,cha ID:1
+[04-07 16:09:46.908]351,Rooroo Costume,cha ID:1
+[04-07 16:09:46.908]352,Playful Racoon Costume,cha ID:1
+[04-07 16:09:46.908]353,Duckling Costume,cha ID:1
+[04-07 16:09:46.924]354,Big Crab Costume,cha ID:1
+[04-07 16:09:46.924]355,Lobster Costume,cha ID:1
+[04-07 16:09:46.924]356,Ducky Costume,cha ID:1
+[04-07 16:09:46.924]357,Prawn Costume,cha ID:1
+[04-07 16:09:46.924]358,Pincer Costume,cha ID:1
+[04-07 16:09:46.924]359,Sheepy Costume,cha ID:1
+[04-07 16:09:46.924]360,Meowy Costume,cha ID:1
+[04-07 16:09:46.924]361,Owl Costume,cha ID:1
+[04-07 16:09:46.924]362,Hopperoo Costume,cha ID:1
+[04-07 16:09:46.924]363,Clever Otter Costume,cha ID:1
+[04-07 16:09:46.924]364,Lucky Otter Costume,cha ID:1
+[04-07 16:09:46.924]365,Medic Robe,cha ID:1
+[04-07 16:09:46.924]366,Foster Robe,cha ID:1
+[04-07 16:09:46.924]367,Travel Robe,cha ID:1
+[04-07 16:09:46.924]368,Nurse Robe,cha ID:1
+[04-07 16:09:46.924]369,Garcon Robe,cha ID:1
+[04-07 16:09:46.924]370,Holy Robe,cha ID:1
+[04-07 16:09:46.924]371,Follower Robe,cha ID:1
+[04-07 16:09:46.939]372,Attendant Robe,cha ID:1
+[04-07 16:09:46.939]373,Scholar Robe,cha ID:1
+[04-07 16:09:46.939]374,Emergency Robe,cha ID:1
+[04-07 16:09:46.939]375,Passage Robe,cha ID:1
+[04-07 16:09:46.939]376,Healer Robe,cha ID:1
+[04-07 16:09:46.939]377,Protector Robe,cha ID:1
+[04-07 16:09:46.939]378,Piety Robe,cha ID:1
+[04-07 16:09:46.939]379,Blessed Robe,cha ID:1
+[04-07 16:09:46.939]380,Mousey Costume,cha ID:1
+[04-07 16:09:46.939]381,Kitty Costume,cha ID:1
+[04-07 16:09:46.939]382,Loopy Bunny Costume,cha ID:1
+[04-07 16:09:46.939]383,Goaty Costume,cha ID:1
+[04-07 16:09:46.939]384,Deer Costume,cha ID:1
+[04-07 16:09:46.951]385,Otter Costume,cha ID:1
+[04-07 16:09:46.951]386,Racoon Costume,cha ID:1
+[04-07 16:09:46.951]388,Happy Bunny Costume,cha ID:1
+[04-07 16:09:46.951]389,Night Owl Costume,cha ID:1
+[04-07 16:09:46.955]390,Kangaroo Costume,cha ID:1
+[04-07 16:09:46.955]391,Joyful Bunny Costume,cha ID:1
+[04-07 16:09:46.955]392,Bunny Baby Costume,cha ID:1
+[04-07 16:09:46.957]393,Lucky Bunny Costume,cha ID:1
+[04-07 16:09:46.957]394,Heavenly Vest,cha ID:1
+[04-07 16:09:46.957]395,Armor of Night,cha ID:2
+[04-07 16:09:46.957]396,Armor of Secrets,cha ID:2
+[04-07 16:09:46.957]397,Armor of Hercules,cha ID:1
+[04-07 16:09:46.957]398,Armor of Olympus,cha ID:1
+[04-07 16:09:46.957]399,Vest of Marksmanship,cha ID:2
+[04-07 16:09:46.957]400,Vest of Apollo,cha ID:2
+[04-07 16:09:46.957]401,Robe of the Wise,cha ID:1
+[04-07 16:09:46.957]402,Robe of the Sage,cha ID:1
+[04-07 16:09:46.957]403,Happy Panda Costume,cha ID:1
+[04-07 16:09:46.957]404,Mystic Panda Costume,cha ID:1
+[04-07 16:09:46.957]405,Fairy Robe,cha ID:1
+[04-07 16:09:46.957]406,Faerie Robe,cha ID:1
+[04-07 16:09:46.957]407,Gold Fish Costume,cha ID:1
+[04-07 16:09:46.957]408,Fish Fairy Costume,cha ID:1
+[04-07 16:09:46.971]409,Tidal Robe,cha ID:2
+[04-07 16:09:46.971]410,Bear Costume,cha ID:1
+[04-07 16:09:46.971]411,Tsunami Robe,cha ID:2
+[04-07 16:09:46.971]412,Dragon Costume,cha ID:1
+[04-07 16:09:46.971]413,Dragon Lord Costume,cha ID:1
+[04-07 16:09:47.019]466,Husk Gloves,cha ID:4
+[04-07 16:09:47.019]467,Thick Gloves,cha ID:4
+[04-07 16:09:47.020]468,Leather Gloves,cha ID:4
+[04-07 16:09:47.021]469,Rhino Hide Gloves,cha ID:4
+[04-07 16:09:47.021]470,Tiger Hide Gloves,cha ID:4
+[04-07 16:09:47.022]471,Gauntlets,cha ID:4
+[04-07 16:09:47.023]472,Soft Leather Gloves,cha ID:4
+[04-07 16:09:47.023]473,Heavy Leather Gloves,cha ID:4
+[04-07 16:09:47.024]474,Strong Leather Gloves,cha ID:4
+[04-07 16:09:47.025]475,Mithril Gauntlets,cha ID:4
+[04-07 16:09:47.025]476,Chain Gauntlets,cha ID:3
+[04-07 16:09:47.026]477,Strong Gauntlets,cha ID:3
+[04-07 16:09:47.027]478,Light Gauntlets,cha ID:4
+[04-07 16:09:47.027]479,Silver Gauntlets,cha ID:4
+[04-07 16:09:47.028]480,Ceremonial Gauntlets,cha ID:4
+[04-07 16:09:47.029]481,Coarse Gloves,cha ID:2
+[04-07 16:09:47.029]482,Canvas Gloves,cha ID:2
+[04-07 16:09:47.030]483,Exquisite Gloves,cha ID:2
+[04-07 16:09:47.031]484,Leather Gloves,cha ID:2
+[04-07 16:09:47.031]485,Warrior Gloves,cha ID:2
+[04-07 16:09:47.032]486,Feather Gloves,cha ID:2
+[04-07 16:09:47.033]487,Safari Gloves,cha ID:2
+[04-07 16:09:47.033]488,Emerald Gloves,cha ID:2
+[04-07 16:09:47.034]489,Hunter Gloves,cha ID:2
+[04-07 16:09:47.034]490,Slick Gloves,cha ID:2
+[04-07 16:09:47.034]491,Peacock Gloves,cha ID:2
+[04-07 16:09:47.034]492,Ringdove Gloves,cha ID:2
+[04-07 16:09:47.034]493,Raptor Gloves,cha ID:2
+[04-07 16:09:47.051]511,Cloth Gloves,cha ID:2
+[04-07 16:09:47.051]512,Tough Gloves,cha ID:2
+[04-07 16:09:47.051]513,Explorer Gloves,cha ID:2
+[04-07 16:09:47.051]514,Adventure Gloves,cha ID:2
+[04-07 16:09:47.051]515,Helmsman Gloves,cha ID:2
+[04-07 16:09:47.051]516,Oarsman Gloves,cha ID:2
+[04-07 16:09:47.051]517,Deckman Gloves,cha ID:2
+[04-07 16:09:47.051]518,Mastman Gloves,cha ID:2
+[04-07 16:09:47.051]519,Hurricane Gloves,cha ID:2
+[04-07 16:09:47.051]520,Whirlpool Gloves,cha ID:2
+[04-07 16:09:47.051]521,Wind Gloves,cha ID:2
+[04-07 16:09:47.065]526,Crabby Gloves,cha ID:1
+[04-07 16:09:47.065]527,Rooroo Muffs,cha ID:1
+[04-07 16:09:47.066]528,Playful Racoon Muffs,cha ID:1
+[04-07 16:09:47.067]529,Duckling Muffs,cha ID:1
+[04-07 16:09:47.068]530,Big Crab Muffs,cha ID:1
+[04-07 16:09:47.068]531,Lobster Muffs,cha ID:1
+[04-07 16:09:47.069]532,Ducky Muffs,cha ID:1
+[04-07 16:09:47.070]533,Prawn Muffs,cha ID:1
+[04-07 16:09:47.070]534,Pincer Muffs,cha ID:1
+[04-07 16:09:47.070]535,Sheepy Muffs,cha ID:1
+[04-07 16:09:47.070]536,Meowy Muffs,cha ID:1
+[04-07 16:09:47.070]537,Owl Muffs,cha ID:1
+[04-07 16:09:47.070]538,Hopperoo Muffs,cha ID:1
+[04-07 16:09:47.070]539,Clever Otter Muffs,cha ID:1
+[04-07 16:09:47.070]540,Lucky Otter Muffs,cha ID:1
+[04-07 16:09:47.070]541,Medic Gloves,cha ID:1
+[04-07 16:09:47.070]542,Foster Gloves,cha ID:1
+[04-07 16:09:47.070]543,Travel Gloves,cha ID:1
+[04-07 16:09:47.070]544,Nurse Gloves,cha ID:1
+[04-07 16:09:47.070]545,Garcon Gloves,cha ID:1
+[04-07 16:09:47.070]546,Holy Gloves,cha ID:1
+[04-07 16:09:47.070]547,Follower Gloves,cha ID:1
+[04-07 16:09:47.070]548,Attendant Gloves,cha ID:1
+[04-07 16:09:47.070]549,Scholar Gloves,cha ID:1
+[04-07 16:09:47.070]550,Emergency Gloves,cha ID:1
+[04-07 16:09:47.086]551,Passage Gloves,cha ID:1
+[04-07 16:09:47.086]552,Healer Gloves,cha ID:1
+[04-07 16:09:47.086]553,Protector Gloves,cha ID:1
+[04-07 16:09:47.086]554,Piety Gloves,cha ID:1
+[04-07 16:09:47.086]555,Blessed Gloves,cha ID:1
+[04-07 16:09:47.086]556,Mousey Muffs,cha ID:1
+[04-07 16:09:47.086]557,Kitty Muffs,cha ID:1
+[04-07 16:09:47.086]558,Loopy Bunny Muffs,cha ID:1
+[04-07 16:09:47.086]559,Goaty Muffs,cha ID:1
+[04-07 16:09:47.086]560,Deer Muffs,cha ID:1
+[04-07 16:09:47.086]561,Otter Muffs,cha ID:1
+[04-07 16:09:47.086]562,Racoon Muffs,cha ID:1
+[04-07 16:09:47.086]564,Happy Bunny Muffs,cha ID:1
+[04-07 16:09:47.086]565,Night Owl Muffs,cha ID:1
+[04-07 16:09:47.086]566,Kangaroo Muffs,cha ID:1
+[04-07 16:09:47.086]567,Joyful Bunny Muffs,cha ID:1
+[04-07 16:09:47.086]568,Bunny Baby Muffs,cha ID:1
+[04-07 16:09:47.102]569,Lucky Bunny Muffs,cha ID:1
+[04-07 16:09:47.103]570,Heavenly Gloves,cha ID:1
+[04-07 16:09:47.116]586,Bear Gloves,cha ID:1
+[04-07 16:09:47.117]587,Gloves of Night,cha ID:2
+[04-07 16:09:47.118]588,Gloves of Secrets,cha ID:2
+[04-07 16:09:47.119]589,Gloves of Marksmanship,cha ID:2
+[04-07 16:09:47.120]590,Gloves of Apollo,cha ID:2
+[04-07 16:09:47.120]591,Gloves of the Wise,cha ID:1
+[04-07 16:09:47.121]592,Gloves of the Sage,cha ID:1
+[04-07 16:09:47.122]593,Happy Panda Gloves,cha ID:1
+[04-07 16:09:47.123]594,Mystic Panda Gloves,cha ID:1
+[04-07 16:09:47.124]595,Fairy Gloves,cha ID:1
+[04-07 16:09:47.125]596,Faerie Gloves,cha ID:1
+[04-07 16:09:47.126]597,Gold Fish Muffs,cha ID:1
+[04-07 16:09:47.127]598,Fish Fairy Muffs,cha ID:1
+[04-07 16:09:47.127]599,Tidal Gloves,cha ID:2
+[04-07 16:09:47.127]600,Tsunami Gloves,cha ID:2
+[04-07 16:09:47.127]601,Dragon Muffs,cha ID:1
+[04-07 16:09:47.127]602,Dragon Lord Muffs,cha ID:1
+[04-07 16:09:47.127]603,Gauntlets of Hercules,cha ID:1
+[04-07 16:09:47.127]604,Gauntlets of Olympus,cha ID:1
+[04-07 16:09:47.158]635,Lv 1 Strike Coral,cha ID:2
+[04-07 16:09:47.158]636,Lv 2 Strike Coral,cha ID:2
+[04-07 16:09:47.158]637,Lv 3 Strike Coral,cha ID:2
+[04-07 16:09:47.158]638,Lv 4 Strike Coral,cha ID:2
+[04-07 16:09:47.158]639,Lv 5 Strike Coral,cha ID:2
+[04-07 16:09:47.158]642,Husk Boots,cha ID:4
+[04-07 16:09:47.158]643,Thick Boots,cha ID:4
+[04-07 16:09:47.158]644,Leather Boots,cha ID:4
+[04-07 16:09:47.158]645,Rhino Hide Boots,cha ID:4
+[04-07 16:09:47.158]646,Tiger Hide Boots,cha ID:4
+[04-07 16:09:47.158]647,Greaves,cha ID:4
+[04-07 16:09:47.158]648,Soft Leather Boots,cha ID:4
+[04-07 16:09:47.158]649,Heavy Leather Boots,cha ID:4
+[04-07 16:09:47.158]650,Strong Leather Boots,cha ID:4
+[04-07 16:09:47.158]651,Mithril Greaves,cha ID:4
+[04-07 16:09:47.158]652,Chain Greaves,cha ID:3
+[04-07 16:09:47.158]653,Strong Greaves,cha ID:3
+[04-07 16:09:47.174]654,Light Greaves,cha ID:4
+[04-07 16:09:47.174]655,Silver Greaves,cha ID:4
+[04-07 16:09:47.174]656,Ceremonial Greaves,cha ID:4
+[04-07 16:09:47.174]657,Coarse Boots,cha ID:2
+[04-07 16:09:47.174]658,Canvas Boots,cha ID:2
+[04-07 16:09:47.174]659,Exquisite Boots,cha ID:2
+[04-07 16:09:47.174]660,Leather Boots,cha ID:2
+[04-07 16:09:47.174]661,Warrior Boots,cha ID:2
+[04-07 16:09:47.174]662,Feather Boots,cha ID:2
+[04-07 16:09:47.174]663,Safari Boots,cha ID:2
+[04-07 16:09:47.174]664,Emerald Boots,cha ID:2
+[04-07 16:09:47.174]665,Hunter Boots,cha ID:2
+[04-07 16:09:47.174]666,Slick Boots,cha ID:2
+[04-07 16:09:47.174]667,Peacock Boots,cha ID:2
+[04-07 16:09:47.174]668,Ringdove Boots,cha ID:2
+[04-07 16:09:47.174]669,Raptor Boots,cha ID:2
+[04-07 16:09:47.190]687,Cloth Boots,cha ID:2
+[04-07 16:09:47.190]688,Tough Boots,cha ID:2
+[04-07 16:09:47.190]689,Explorer Boots,cha ID:2
+[04-07 16:09:47.190]690,Adventure Boots,cha ID:2
+[04-07 16:09:47.190]691,Helmsman Boots,cha ID:2
+[04-07 16:09:47.190]692,Oarsman Boots,cha ID:2
+[04-07 16:09:47.190]693,Deckman Boots,cha ID:2
+[04-07 16:09:47.190]694,Mastman Boots,cha ID:2
+[04-07 16:09:47.205]695,Hurricane Boots,cha ID:2
+[04-07 16:09:47.205]696,Whirlpool Boots,cha ID:2
+[04-07 16:09:47.205]697,Wind Boots,cha ID:2
+[04-07 16:09:47.205]702,Crabby Shoes,cha ID:1
+[04-07 16:09:47.205]703,Rooroo Shoes,cha ID:1
+[04-07 16:09:47.205]704,Playful Racoon Shoes,cha ID:1
+[04-07 16:09:47.205]705,Duckling Shoes,cha ID:1
+[04-07 16:09:47.205]706,Big Crab Shoes,cha ID:1
+[04-07 16:09:47.205]707,Lobster Shoes,cha ID:1
+[04-07 16:09:47.205]708,Ducky Shoes,cha ID:1
+[04-07 16:09:47.205]709,Prawn Shoes,cha ID:1
+[04-07 16:09:47.205]710,Pincer Shoes,cha ID:1
+[04-07 16:09:47.205]711,Sheepy Shoes,cha ID:1
+[04-07 16:09:47.205]712,Meowy Shoes,cha ID:1
+[04-07 16:09:47.221]713,Owl Shoes,cha ID:1
+[04-07 16:09:47.222]714,Hopperoo Shoes,cha ID:1
+[04-07 16:09:47.222]715,Clever Otter Shoes,cha ID:1
+[04-07 16:09:47.223]716,Lucky Otter Shoes,cha ID:1
+[04-07 16:09:47.223]717,Medic Boots,cha ID:1
+[04-07 16:09:47.224]718,Foster Boots,cha ID:1
+[04-07 16:09:47.224]719,Travel Boots,cha ID:1
+[04-07 16:09:47.225]720,Nurse Boots,cha ID:1
+[04-07 16:09:47.226]721,Garcon Boots,cha ID:1
+[04-07 16:09:47.227]722,Holy Boots,cha ID:1
+[04-07 16:09:47.228]723,Follower Boots,cha ID:1
+[04-07 16:09:47.228]724,Attendant Boots,cha ID:1
+[04-07 16:09:47.229]725,Scholar Boots,cha ID:1
+[04-07 16:09:47.230]726,Emergency Boots,cha ID:1
+[04-07 16:09:47.230]727,Passage Boots,cha ID:1
+[04-07 16:09:47.231]728,Healer Boots,cha ID:1
+[04-07 16:09:47.232]729,Protector Boots,cha ID:1
+[04-07 16:09:47.233]730,Piety Boots,cha ID:1
+[04-07 16:09:47.233]731,Blessed Boots,cha ID:1
+[04-07 16:09:47.234]732,Mousey Shoes,cha ID:1
+[04-07 16:09:47.235]733,Kitty Shoes,cha ID:1
+[04-07 16:09:47.236]734,Loopy Bunny Shoes,cha ID:1
+[04-07 16:09:47.236]735,Goaty Shoes,cha ID:1
+[04-07 16:09:47.236]736,Deer Shoes,cha ID:1
+[04-07 16:09:47.236]737,Otter Shoes,cha ID:1
+[04-07 16:09:47.236]738,Racoon Shoes,cha ID:1
+[04-07 16:09:47.236]740,Happy Bunny Shoes,cha ID:1
+[04-07 16:09:47.236]741,Night Owl Shoes,cha ID:1
+[04-07 16:09:47.236]742,Kangaroo Shoes,cha ID:1
+[04-07 16:09:47.236]743,Joyful Bunny Shoes,cha ID:1
+[04-07 16:09:47.236]744,Bunny Baby Shoes,cha ID:1
+[04-07 16:09:47.236]745,Lucky Bunny Shoes,cha ID:1
+[04-07 16:09:47.236]746,Heavenly Shoes,cha ID:1
+[04-07 16:09:47.236]747,Boots of Night,cha ID:2
+[04-07 16:09:47.236]748,Boots of Secrets,cha ID:2
+[04-07 16:09:47.236]749,Boots of Marksmanship,cha ID:2
+[04-07 16:09:47.236]750,Boots of Apollo,cha ID:2
+[04-07 16:09:47.236]751,Boots of the Wise,cha ID:1
+[04-07 16:09:47.251]752,Boots of the Sage,cha ID:1
+[04-07 16:09:47.251]753,Happy Panda Shoes,cha ID:1
+[04-07 16:09:47.252]754,Mystic Panda Shoes,cha ID:1
+[04-07 16:09:47.252]755,Fairy Shoes,cha ID:1
+[04-07 16:09:47.252]756,Faerie Shoes,cha ID:1
+[04-07 16:09:47.252]757,Gold Fish Shoes,cha ID:1
+[04-07 16:09:47.252]758,Fish Fairy Shoes,cha ID:1
+[04-07 16:09:47.252]759,Tidal Shoes,cha ID:2
+[04-07 16:09:47.252]760,Tsunami Shoes,cha ID:2
+[04-07 16:09:47.252]761,Dragon Shoes,cha ID:1
+[04-07 16:09:47.252]762,Bear Shoes,cha ID:1
+[04-07 16:09:47.252]763,Armor of Revenant,cha ID:4
+[04-07 16:09:47.252]764,Tattoo of the Cursed Warrior,cha ID:3
+[04-07 16:09:47.252]765,Tattoo of Evanescence,cha ID:3
+[04-07 16:09:47.252]766,Tattoo of Enigma,cha ID:3
+[04-07 16:09:47.252]767,Platemail of the Cursed Soul,cha ID:4
+[04-07 16:09:47.252]768,Armor of Evanescence,cha ID:4
+[04-07 16:09:47.252]769,Armor of Enigma,cha ID:4
+[04-07 16:09:47.268]777,Robe of Death,cha ID:2
+[04-07 16:09:47.268]778,Corset of Incantation,cha ID:2
+[04-07 16:09:47.268]779,Coat of Evanescence,cha ID:2
+[04-07 16:09:47.268]780,Mantle of Enigma,cha ID:2
+[04-07 16:09:47.268]789,Robe of the Venom Witch,cha ID:1
+[04-07 16:09:47.268]790,Coat of Invocation,cha ID:1
+[04-07 16:09:47.268]791,Robe of the Arcane,cha ID:1
+[04-07 16:09:47.268]792,Robe of Enigma,cha ID:1
+[04-07 16:09:47.284]796,Robe of Abraxas,cha ID:1
+[04-07 16:09:47.284]797,Robe of Malediction,cha ID:1
+[04-07 16:09:47.284]798,Robe of the Sphinx,cha ID:1
+[04-07 16:09:47.293]803,Mantle of the Naga,cha ID:2
+[04-07 16:09:47.294]804,Mantle of the Cursed Flame,cha ID:2
+[04-07 16:09:47.294]805,Cloak of Evanescence,cha ID:2
+[04-07 16:09:47.295]806,Mantle of the Sphinx,cha ID:2
+[04-07 16:09:47.296]807,Gauntlets of Evanescence,cha ID:4
+[04-07 16:09:47.297]808,Greaves of Evanescence,cha ID:4
+[04-07 16:09:47.298]809,Gloves of Evanescence,cha ID:2
+[04-07 16:09:47.299]810,Shoes of Evanescence,cha ID:2
+[04-07 16:09:47.299]811,Gloves of Malediction,cha ID:1
+[04-07 16:09:47.300]812,Gloves of the Arcane,cha ID:1
+[04-07 16:09:47.301]813,Boots of Malediction,cha ID:1
+[04-07 16:09:47.302]814,Boots of the of the Arcane,cha ID:1
+[04-07 16:09:47.303]815,Heavy Gloves of Evanescence,cha ID:2
+[04-07 16:09:47.304]824,Dragon Lord Shoes,cha ID:1
+[04-07 16:09:47.304]829,Greaves of Hercules,cha ID:1
+[04-07 16:09:47.304]830,Greaves of Olympus,cha ID:1
+[04-07 16:09:47.345]877,Boots of Evanescence,cha ID:2
+[04-07 16:09:47.520]1115,Grandiose Helm,cha ID:2
+[04-07 16:09:47.520]1116,Grandiose Armor,cha ID:2
+[04-07 16:09:47.520]1117,Grandiose Gauntlets,cha ID:2
+[04-07 16:09:47.520]1118,Grandiose Boots,cha ID:2
+[04-07 16:09:47.539]1124,Chaos Framestone,cha ID:1
+[04-07 16:09:47.539]1125,Chaos Clawstone,cha ID:1
+[04-07 16:09:47.540]1126,Chaos Pawstone,cha ID:1
+[04-07 16:09:48.159]1884,Undead Sealed Armor of Revenant,cha ID:4
+[04-07 16:09:48.159]1885,Earth Sealed Tattoo of the Cursed Warrior,cha ID:3
+[04-07 16:09:48.159]1886,Fire Sealed Tattoo of Evanescence,cha ID:3
+[04-07 16:09:48.159]1887,Ice Sealed Tattoo of Enigma,cha ID:3
+[04-07 16:09:48.159]1888,Earth Sealed Platemail of the Cursed Soul,cha ID:4
+[04-07 16:09:48.159]1889,Fire Sealed Armor of Evanescence,cha ID:4
+[04-07 16:09:48.159]1890,Ice Sealed Armor of Enigma,cha ID:4
+[04-07 16:09:48.159]1898,Undead Sealed Robe of Death,cha ID:2
+[04-07 16:09:48.159]1899,Earth Sealed Corset of Incantation,cha ID:2
+[04-07 16:09:48.175]1900,Fire Sealed Coat of Evanescence,cha ID:2
+[04-07 16:09:48.175]1901,Ice Sealed Mantle of Enigma,cha ID:2
+[04-07 16:09:48.175]1910,Undead Sealed Robe of the Venom Witch,cha ID:1
+[04-07 16:09:48.175]1911,Earth Sealed Coat of Invocation,cha ID:1
+[04-07 16:09:48.175]1912,Fire Sealed Robe of the Arcane,cha ID:1
+[04-07 16:09:48.175]1913,Ice Sealed Robe of Enigma,cha ID:1
+[04-07 16:09:48.175]1917,Earth Sealed Robe of Abraxas,cha ID:1
+[04-07 16:09:48.190]1918,Fire Sealed Robe of Malediction,cha ID:1
+[04-07 16:09:48.190]1919,Ice Sealed Robe of the Sphinx,cha ID:1
+[04-07 16:09:48.190]1924,Undead Sealed Mantle of the Naga,cha ID:2
+[04-07 16:09:48.190]1925,Earth Sealed Mantle of the Cursed Flame,cha ID:2
+[04-07 16:09:48.190]1926,Fire Sealed Cloak of Evanescence,cha ID:2
+[04-07 16:09:48.190]1927,Ice Sealed Mantle of the Sphinx,cha ID:2
+[04-07 16:09:48.190]1928,Battle Armor of Crimson Flame,cha ID:4
+[04-07 16:09:48.190]1929,Battle Armor of the Tempest,cha ID:4
+[04-07 16:09:48.190]1930,Battle Armor of Sistine,cha ID:4
+[04-07 16:09:48.190]1931,Battle Armor of the Kylin,cha ID:4
+[04-07 16:09:48.190]1932,Battle Armor of Nature,cha ID:3
+[04-07 16:09:48.190]1933,Tattoo of Gallon,cha ID:3
+[04-07 16:09:48.190]1934,Tattoo of the Tortoise,cha ID:3
+[04-07 16:09:48.190]1935,Gauntlets of Crimson Flame,cha ID:4
+[04-07 16:09:48.190]1936,Gauntlets of the Tempest,cha ID:4
+[04-07 16:09:48.190]1937,Gauntlets of Sistine,cha ID:4
+[04-07 16:09:48.190]1938,Gauntlets of the Kylin,cha ID:4
+[04-07 16:09:48.190]1939,Greaves of Crimson Flame,cha ID:4
+[04-07 16:09:48.190]1940,Greaves of the Tempest,cha ID:4
+[04-07 16:09:48.206]1941,Greaves of Sistine,cha ID:4
+[04-07 16:09:48.207]1942,Greaves of the Kylin,cha ID:4
+[04-07 16:09:48.208]1943,Vest of Clarion Mist,cha ID:2
+[04-07 16:09:48.209]1944,Flaming Coat,cha ID:2
+[04-07 16:09:48.209]1945,Mantle of Darwin,cha ID:2
+[04-07 16:09:48.210]1946,Coat of the White Tiger,cha ID:2
+[04-07 16:09:48.211]1947,Gloves of Clarion Mist,cha ID:2
+[04-07 16:09:48.212]1948,Flaming Gloves,cha ID:2
+[04-07 16:09:48.213]1949,Gloves of Darwin,cha ID:2
+[04-07 16:09:48.214]1950,Gloves of the White Tiger,cha ID:2
+[04-07 16:09:48.215]1951,Boots of Clarion Mist,cha ID:2
+[04-07 16:09:48.216]1952,Flaming Boots,cha ID:2
+[04-07 16:09:48.217]1953,Boots of Darwin,cha ID:2
+[04-07 16:09:48.217]1954,Boots of the White Tiger,cha ID:2
+[04-07 16:09:48.218]1955,Emerald Vine Robe,cha ID:1
+[04-07 16:09:48.219]1956,Coat of Frozen Crescent,cha ID:1
+[04-07 16:09:48.220]1957,Coat of Udine,cha ID:1
+[04-07 16:09:48.221]1958,Coat of the Peacock,cha ID:1
+[04-07 16:09:48.221]1959,Glory Coat,cha ID:1
+[04-07 16:09:48.221]1960,Coat of Hope,cha ID:1
+[04-07 16:09:48.221]1961,Coat of the Phoenix,cha ID:1
+[04-07 16:09:48.221]1962,Emerald Vine Gloves,cha ID:1
+[04-07 16:09:48.221]1963,Gloves of Frozen Crescent,cha ID:1
+[04-07 16:09:48.221]1964,Gloves of Udine,cha ID:1
+[04-07 16:09:48.221]1965,Gloves of the Peacock,cha ID:1
+[04-07 16:09:48.221]1966,Glory Gloves,cha ID:1
+[04-07 16:09:48.221]1967,Gloves of Hope,cha ID:1
+[04-07 16:09:48.221]1968,Gloves of the Phoenix,cha ID:1
+[04-07 16:09:48.221]1969,Emerald Vine Boots,cha ID:1
+[04-07 16:09:48.221]1970,Boots of Frozen Crescent,cha ID:1
+[04-07 16:09:48.221]1971,Boots of Udine,cha ID:1
+[04-07 16:09:48.221]1972,Boots of the Peacock,cha ID:1
+[04-07 16:09:48.221]1973,Glory Boots,cha ID:1
+[04-07 16:09:48.221]1974,Boots of Hope,cha ID:1
+[04-07 16:09:48.237]1975,Boots of the Phoenix,cha ID:1
+[04-07 16:09:48.237]1976,Robe of the Mist,cha ID:2
+[04-07 16:09:48.237]1977,Coat of the Tempest,cha ID:2
+[04-07 16:09:48.237]1978,Robe of Forlorn,cha ID:2
+[04-07 16:09:48.237]1979,Coat of the Green Dragon,cha ID:2
+[04-07 16:09:48.237]1980,Gloves of the Mist,cha ID:2
+[04-07 16:09:48.237]1981,Gloves of the Tempest,cha ID:2
+[04-07 16:09:48.237]1982,Gloves of Forlorn,cha ID:2
+[04-07 16:09:48.237]1983,Gloves of the Green Dragon,cha ID:2
+[04-07 16:09:48.237]1984,Boots of the Mist,cha ID:2
+[04-07 16:09:48.237]1985,Boots of the Tempest,cha ID:2
+[04-07 16:09:48.237]1986,Boots of Forlorn,cha ID:2
+[04-07 16:09:48.237]1987,Boots of the Green Dragon,cha ID:2
+[04-07 16:09:48.237]1988,Fire Sealed Gauntlets of Evanescence,cha ID:4
+[04-07 16:09:48.237]1989,Fire Sealed Greaves of Evanescence,cha ID:4
+[04-07 16:09:48.237]1990,Fire Sealed Gloves of Evanescence,cha ID:2
+[04-07 16:09:48.237]1991,Fire Sealed Shoes of Evanescence,cha ID:2
+[04-07 16:09:48.251]1992,Fire Sealed Gloves of Malediction,cha ID:1
+[04-07 16:09:48.251]1993,Fire Sealed Gloves of the Arcane,cha ID:1
+[04-07 16:09:48.253]1994,Fire Sealed Boots of Malediction,cha ID:1
+[04-07 16:09:48.253]1995,Fire Sealed Boots of the of the Arcane,cha ID:1
+[04-07 16:09:48.253]1996,Fire Sealed Heavy Gloves of Evanescence,cha ID:2
+[04-07 16:09:48.253]1997,Fire Sealed Boots of Evanescence,cha ID:2
+[04-07 16:09:48.255]1999,Lance Failed Hairdo 1,cha ID:2
+[04-07 16:09:48.255]2000,Hairdo 1,cha ID:2
+[04-07 16:09:48.255]2001,Hairdo 2,cha ID:2
+[04-07 16:09:48.255]2002,Hairdo 3,cha ID:2
+[04-07 16:09:48.255]2003,Hairdo 4,cha ID:2
+[04-07 16:09:48.255]2004,Hairdo 5,cha ID:2
+[04-07 16:09:48.255]2005,Hairdo 6,cha ID:2
+[04-07 16:09:48.255]2006,Hairdo 7,cha ID:2
+[04-07 16:09:48.255]2007,Hairdo 8,cha ID:2
+[04-07 16:09:48.255]2008,Event Commissioner,cha ID:2
+[04-07 16:09:48.255]2009,Hairdo 1,cha ID:2
+[04-07 16:09:48.255]2010,Hairdo 1,cha ID:2
+[04-07 16:09:48.255]2011,Hairdo 1,cha ID:2
+[04-07 16:09:48.255]2012,Hairdo 1,cha ID:2
+[04-07 16:09:48.269]2013,Hairdo 1,cha ID:2
+[04-07 16:09:48.269]2014,Hairdo 1,cha ID:2
+[04-07 16:09:48.269]2015,Hairdo 2,cha ID:2
+[04-07 16:09:48.269]2016,Hairdo 2,cha ID:2
+[04-07 16:09:48.269]2017,Hairdo 2,cha ID:2
+[04-07 16:09:48.269]2018,Hairdo 2,cha ID:2
+[04-07 16:09:48.269]2019,Hairdo 2,cha ID:2
+[04-07 16:09:48.269]2020,Hairdo 2,cha ID:2
+[04-07 16:09:48.269]2021,Hairdo 3,cha ID:2
+[04-07 16:09:48.269]2022,Hairdo 3,cha ID:2
+[04-07 16:09:48.269]2023,Hairdo 3,cha ID:2
+[04-07 16:09:48.269]2024,Hairdo 3,cha ID:2
+[04-07 16:09:48.269]2025,Hairdo 3,cha ID:2
+[04-07 16:09:48.269]2026,Hairdo 3,cha ID:2
+[04-07 16:09:48.269]2027,Hairdo 4,cha ID:2
+[04-07 16:09:48.269]2028,Hairdo 4,cha ID:2
+[04-07 16:09:48.269]2029,Hairdo 4,cha ID:2
+[04-07 16:09:48.269]2030,Hairdo 4,cha ID:2
+[04-07 16:09:48.269]2031,Hairdo 4,cha ID:2
+[04-07 16:09:48.285]2032,Hairdo 4,cha ID:2
+[04-07 16:09:48.285]2033,Hairdo 5,cha ID:2
+[04-07 16:09:48.285]2034,Hairdo 5,cha ID:2
+[04-07 16:09:48.285]2035,Hairdo 5,cha ID:2
+[04-07 16:09:48.285]2036,Hairdo 5,cha ID:2
+[04-07 16:09:48.285]2037,Hairdo 5,cha ID:2
+[04-07 16:09:48.285]2038,Hairdo 5,cha ID:2
+[04-07 16:09:48.285]2039,Hairdo 5,cha ID:2
+[04-07 16:09:48.285]2040,Hairdo 6,cha ID:2
+[04-07 16:09:48.285]2041,Hairdo 6,cha ID:2
+[04-07 16:09:48.285]2042,Hairdo 6,cha ID:2
+[04-07 16:09:48.285]2043,Hairdo 6,cha ID:2
+[04-07 16:09:48.285]2044,Hairdo 6,cha ID:2
+[04-07 16:09:48.285]2045,Hairdo 6,cha ID:2
+[04-07 16:09:48.285]2046,Hairdo 6,cha ID:2
+[04-07 16:09:48.285]2047,Hairdo 7,cha ID:2
+[04-07 16:09:48.285]2048,Hairdo 7,cha ID:2
+[04-07 16:09:48.285]2049,Hairdo 7,cha ID:2
+[04-07 16:09:48.285]2050,Hairdo 7,cha ID:2
+[04-07 16:09:48.300]2051,Hairdo 7,cha ID:2
+[04-07 16:09:48.300]2052,Hairdo 7,cha ID:2
+[04-07 16:09:48.300]2053,Hairdo 7,cha ID:2
+[04-07 16:09:48.300]2054,Hairdo 8,cha ID:2
+[04-07 16:09:48.300]2055,Hairdo 8,cha ID:2
+[04-07 16:09:48.300]2056,Hairdo 8,cha ID:2
+[04-07 16:09:48.300]2057,Hairdo 8,cha ID:2
+[04-07 16:09:48.300]2058,Hairdo 8,cha ID:2
+[04-07 16:09:48.300]2059,Hairdo 8,cha ID:2
+[04-07 16:09:48.300]2060,Guy 1 Bald Hairdo,cha ID:2
+[04-07 16:09:48.300]2061,Lance Failed Hairdo 2,cha ID:2
+[04-07 16:09:48.300]2062,Hairdo 1,cha ID:1
+[04-07 16:09:48.300]2063,Hairdo 2,cha ID:1
+[04-07 16:09:48.300]2064,Hairdo 3,cha ID:1
+[04-07 16:09:48.300]2065,Hairdo 4,cha ID:1
+[04-07 16:09:48.300]2066,Hairdo 5,cha ID:1
+[04-07 16:09:48.300]2067,Hairdo 6,cha ID:1
+[04-07 16:09:48.300]2068,Hairdo 7,cha ID:1
+[04-07 16:09:48.316]2069,Hairdo 8,cha ID:1
+[04-07 16:09:48.316]2070,Event Commissioner,cha ID:1
+[04-07 16:09:48.317]2071,Hairdo 1,cha ID:1
+[04-07 16:09:48.318]2072,Hairdo 1,cha ID:1
+[04-07 16:09:48.319]2073,Hairdo 1,cha ID:1
+[04-07 16:09:48.320]2074,Hairdo 1,cha ID:1
+[04-07 16:09:48.321]2075,Hairdo 1,cha ID:1
+[04-07 16:09:48.322]2076,Hairdo 1,cha ID:1
+[04-07 16:09:48.323]2077,Hairdo 1,cha ID:1
+[04-07 16:09:48.324]2078,Hairdo 2,cha ID:1
+[04-07 16:09:48.325]2079,Hairdo 2,cha ID:1
+[04-07 16:09:48.325]2080,Hairdo 2,cha ID:1
+[04-07 16:09:48.326]2081,Hairdo 2,cha ID:1
+[04-07 16:09:48.327]2082,Hairdo 2,cha ID:1
+[04-07 16:09:48.328]2083,Hairdo 2,cha ID:1
+[04-07 16:09:48.329]2084,Hairdo 3,cha ID:1
+[04-07 16:09:48.330]2085,Hairdo 3,cha ID:1
+[04-07 16:09:48.330]2086,Hairdo 3,cha ID:1
+[04-07 16:09:48.330]2087,Hairdo 3,cha ID:1
+[04-07 16:09:48.330]2088,Hairdo 3,cha ID:1
+[04-07 16:09:48.330]2089,Hairdo 3,cha ID:1
+[04-07 16:09:48.330]2090,Hairdo 4,cha ID:1
+[04-07 16:09:48.330]2091,Hairdo 4,cha ID:1
+[04-07 16:09:48.330]2092,Hairdo 4,cha ID:1
+[04-07 16:09:48.330]2093,Hairdo 4,cha ID:1
+[04-07 16:09:48.330]2094,Hairdo 4,cha ID:1
+[04-07 16:09:48.330]2095,Hairdo 4,cha ID:1
+[04-07 16:09:48.330]2096,Hairdo 4,cha ID:1
+[04-07 16:09:48.330]2097,Hairdo 5,cha ID:1
+[04-07 16:09:48.330]2098,Hairdo 5,cha ID:1
+[04-07 16:09:48.330]2099,Hairdo 5,cha ID:1
+[04-07 16:09:48.330]2100,Hairdo 5,cha ID:1
+[04-07 16:09:48.330]2101,Hairdo 6,cha ID:1
+[04-07 16:09:48.330]2102,Hairdo 6,cha ID:1
+[04-07 16:09:48.346]2103,Hairdo 6,cha ID:1
+[04-07 16:09:48.346]2104,Hairdo 6,cha ID:1
+[04-07 16:09:48.346]2105,Hairdo 6,cha ID:1
+[04-07 16:09:48.348]2106,Hairdo 6,cha ID:1
+[04-07 16:09:48.348]2107,Hairdo 6,cha ID:1
+[04-07 16:09:48.348]2108,Hairdo 7,cha ID:1
+[04-07 16:09:48.348]2109,Hairdo 7,cha ID:1
+[04-07 16:09:48.351]2110,Hairdo 7,cha ID:1
+[04-07 16:09:48.351]2111,Hairdo 7,cha ID:1
+[04-07 16:09:48.351]2112,Hairdo 7,cha ID:1
+[04-07 16:09:48.351]2113,Hairdo 7,cha ID:1
+[04-07 16:09:48.351]2114,Hairdo 8,cha ID:1
+[04-07 16:09:48.351]2115,Hairdo 8,cha ID:1
+[04-07 16:09:48.351]2116,Hairdo 8,cha ID:1
+[04-07 16:09:48.351]2117,Hairdo 8,cha ID:1
+[04-07 16:09:48.351]2118,Hairdo 8,cha ID:1
+[04-07 16:09:48.351]2119,Hairdo 8,cha ID:1
+[04-07 16:09:48.351]2120,Hairdo 8,cha ID:1
+[04-07 16:09:48.362]2121,Carsise Failed Hairdo 1,cha ID:1
+[04-07 16:09:48.362]2122,Guy 2 Bald Hairdo,cha ID:1
+[04-07 16:09:48.362]2123,Carsise Failed Hairdo 2,cha ID:1
+[04-07 16:09:48.362]2124,Hairdo 1,cha ID:1
+[04-07 16:09:48.362]2125,Hairdo 2,cha ID:1
+[04-07 16:09:48.362]2126,Hairdo 3,cha ID:1
+[04-07 16:09:48.362]2127,Hairdo 4,cha ID:1
+[04-07 16:09:48.362]2128,Hairdo 5,cha ID:1
+[04-07 16:09:48.362]2129,Hairdo 6,cha ID:1
+[04-07 16:09:48.362]2130,Hairdo 7,cha ID:1
+[04-07 16:09:48.362]2131,Hairdo 8,cha ID:1
+[04-07 16:09:48.362]2132,Event Commissioner,cha ID:1
+[04-07 16:09:48.362]2133,Hairdo 1,cha ID:1
+[04-07 16:09:48.362]2134,Hairdo 1,cha ID:1
+[04-07 16:09:48.362]2135,Hairdo 1,cha ID:1
+[04-07 16:09:48.362]2136,Hairdo 1,cha ID:1
+[04-07 16:09:48.362]2137,Hairdo 1,cha ID:1
+[04-07 16:09:48.362]2138,Hairdo 1,cha ID:1
+[04-07 16:09:48.362]2139,Hairdo 1,cha ID:1
+[04-07 16:09:48.377]2140,Hairdo 2,cha ID:1
+[04-07 16:09:48.377]2141,Hairdo 2,cha ID:1
+[04-07 16:09:48.377]2142,Hairdo 2,cha ID:1
+[04-07 16:09:48.377]2143,Hairdo 2,cha ID:1
+[04-07 16:09:48.377]2144,Hairdo 2,cha ID:1
+[04-07 16:09:48.377]2145,Hairdo 2,cha ID:1
+[04-07 16:09:48.377]2146,Hairdo 3,cha ID:1
+[04-07 16:09:48.377]2147,Hairdo 3,cha ID:1
+[04-07 16:09:48.377]2148,Hairdo 3,cha ID:1
+[04-07 16:09:48.377]2149,Hairdo 3,cha ID:1
+[04-07 16:09:48.377]2150,Hairdo 3,cha ID:1
+[04-07 16:09:48.377]2151,Hairdo 3,cha ID:1
+[04-07 16:09:48.377]2152,Hairdo 4,cha ID:1
+[04-07 16:09:48.377]2153,Hairdo 4,cha ID:1
+[04-07 16:09:48.377]2154,Hairdo 4,cha ID:1
+[04-07 16:09:48.377]2155,Hairdo 4,cha ID:1
+[04-07 16:09:48.377]2156,Hairdo 4,cha ID:1
+[04-07 16:09:48.377]2157,Hairdo 4,cha ID:1
+[04-07 16:09:48.377]2158,Hairdo 5,cha ID:1
+[04-07 16:09:48.393]2159,Hairdo 5,cha ID:1
+[04-07 16:09:48.393]2160,Hairdo 5,cha ID:1
+[04-07 16:09:48.393]2161,Hairdo 5,cha ID:1
+[04-07 16:09:48.393]2162,Hairdo 5,cha ID:1
+[04-07 16:09:48.393]2163,Hairdo 5,cha ID:1
+[04-07 16:09:48.393]2164,Hairdo 6,cha ID:1
+[04-07 16:09:48.393]2165,Hairdo 6,cha ID:1
+[04-07 16:09:48.393]2166,Hairdo 6,cha ID:1
+[04-07 16:09:48.393]2167,Hairdo 6,cha ID:1
+[04-07 16:09:48.393]2168,Hairdo 6,cha ID:1
+[04-07 16:09:48.393]2169,Hairdo 6,cha ID:1
+[04-07 16:09:48.393]2170,Hairdo 7,cha ID:1
+[04-07 16:09:48.393]2171,Hairdo 7,cha ID:1
+[04-07 16:09:48.393]2172,Hairdo 7,cha ID:1
+[04-07 16:09:48.393]2173,Hairdo 7,cha ID:1
+[04-07 16:09:48.393]2174,Hairdo 7,cha ID:1
+[04-07 16:09:48.393]2175,Hairdo 7,cha ID:1
+[04-07 16:09:48.393]2176,Hairdo 8,cha ID:1
+[04-07 16:09:48.409]2177,Hairdo 8,cha ID:1
+[04-07 16:09:48.409]2178,Hairdo 8,cha ID:1
+[04-07 16:09:48.409]2179,Hairdo 8,cha ID:1
+[04-07 16:09:48.409]2180,Hairdo 8,cha ID:1
+[04-07 16:09:48.409]2181,Hairdo 8,cha ID:1
+[04-07 16:09:48.409]2182,Phyllis Failed Hairdo 1,cha ID:1
+[04-07 16:09:48.409]2183,Phyllis Failed Hairdo 2,cha ID:1
+[04-07 16:09:48.409]2184,Girl 1 Bald Hairdo,cha ID:1
+[04-07 16:09:48.409]2185,Girl 1 Hair Makeup 01,cha ID:1
+[04-07 16:09:48.409]2186,Girl 2 Hair 00,cha ID:1
+[04-07 16:09:48.487]2275,Lance Trendy Hairdo 1,cha ID:4
+[04-07 16:09:48.487]2276,Lance Trendy Hairdo 2,cha ID:4
+[04-07 16:09:48.487]2277,Lance Trendy Hairdo 3,cha ID:4
+[04-07 16:09:48.487]2278,Lance Trendy Hairdo 4,cha ID:4
+[04-07 16:09:48.487]2279,Carsise Trendy Hairdo 1,cha ID:4
+[04-07 16:09:48.487]2280,Carsise Trendy Hairdo 2,cha ID:4
+[04-07 16:09:48.487]2281,Carsise Trendy Hairdo 3,cha ID:4
+[04-07 16:09:48.487]2282,Carsise Trendy Hairdo 4,cha ID:4
+[04-07 16:09:48.487]2283,Phyllis Trendy Hairdo 1,cha ID:4
+[04-07 16:09:48.487]2284,Phyllis Trendy Hairdo 2,cha ID:4
+[04-07 16:09:48.487]2285,Phyllis Trendy Hairdo 3,cha ID:4
+[04-07 16:09:48.487]2286,Phyllis Trendy Hairdo 4,cha ID:4
+[04-07 16:09:48.612]2434,Arrow 02,cha ID:1
+[04-07 16:09:48.627]2448,Gunpowder 02,cha ID:1
+[04-07 16:09:48.675]2499,Left Plaster Glove,cha ID:1
+[04-07 16:09:48.675]2500,Left Brawler Glove,cha ID:1
+[04-07 16:09:48.675]2501,Left Master Glove,cha ID:1
+[04-07 16:09:48.675]2502,Left Jagged Blade,cha ID:1
+[04-07 16:09:48.675]2503,Left Cosmo Blade,cha ID:1
+[04-07 16:09:48.675]2504,Left Tiger Glove,cha ID:1
+[04-07 16:09:48.675]2505,Left Hand of Death,cha ID:1
+[04-07 16:09:48.690]2517,UPO Cap,cha ID:1
+[04-07 16:09:48.690]2527,Raging Bull Tattoo,cha ID:3
+[04-07 16:09:48.690]2528,Savage Bull Tattoo,cha ID:3
+[04-07 16:09:48.690]2529,Primal Tattoo,cha ID:3
+[04-07 16:09:48.690]2530,Hephaestus Framestone,cha ID:1
+[04-07 16:09:48.690]2531,Hephaestus Clawstone,cha ID:1
+[04-07 16:09:48.690]2532,Hephaestus Pawstone,cha ID:1
+[04-07 16:09:48.690]2533,Hermes Framestone,cha ID:1
+[04-07 16:09:48.690]2534,Hermes Clawstone,cha ID:1
+[04-07 16:09:48.690]2535,Hermes Pawstone,cha ID:1
+[04-07 16:09:48.690]2536,Apollo Framestone,cha ID:1
+[04-07 16:09:48.690]2537,Apollo Clawstone,cha ID:1
+[04-07 16:09:48.706]2538,Apollo Pawstone,cha ID:1
+[04-07 16:09:48.706]2539,Poseidon Framestone,cha ID:1
+[04-07 16:09:48.706]2540,Poseidon Clawstone,cha ID:1
+[04-07 16:09:48.706]2541,Poseidon Pawstone,cha ID:1
+[04-07 16:09:48.706]2542,Hestia Framestone,cha ID:1
+[04-07 16:09:48.706]2543,Hestia Clawstone,cha ID:1
+[04-07 16:09:48.706]2544,Hestia Pawstone,cha ID:1
+[04-07 16:09:48.706]2545,Athena Framestone,cha ID:1
+[04-07 16:09:48.706]2546,Athena Clawstone,cha ID:1
+[04-07 16:09:48.706]2547,Athena Pawstone,cha ID:1
+[04-07 16:09:48.706]2548,Artemis Crownstone,cha ID:4
+[04-07 16:09:48.706]2552,Corporeal Kylin Cap,cha ID:1
+[04-07 16:09:49.092]3061,Bear Shoes,cha ID:1
+[04-07 16:09:49.268]3285,Calculator,cha ID:1
+[04-07 16:09:49.268]3287,Serious study book,cha ID:1
+[04-07 16:09:49.556]3612,Virgo's Shadow,cha ID:2
+[04-07 16:09:49.557]3613,Virgo's Touch,cha ID:2
+[04-07 16:09:49.558]3614,Virgo's Trace,cha ID:2
+[04-07 16:09:49.560]3617,Virgo's Bind,cha ID:1
+[04-07 16:09:49.561]3618,Virgo's Claw,cha ID:1
+[04-07 16:09:49.562]3619,Virgo's Print,cha ID:1
+[04-07 16:09:49.565]3622,Virgo's Protection,cha ID:2
+[04-07 16:09:49.565]3623,Virgo's Caress,cha ID:2
+[04-07 16:09:49.565]3624,Virgo's Dance,cha ID:2
+[04-07 16:09:49.565]3627,Virgo's Possession,cha ID:1
+[04-07 16:09:49.565]3628,Virgo's Death,cha ID:1
+[04-07 16:09:49.565]3629,Virgo's Trail,cha ID:1
+[04-07 16:09:49.565]3632,Virgo's Torso,cha ID:1
+[04-07 16:09:49.565]3633,Virgo's Span,cha ID:1
+[04-07 16:09:49.565]3634,Virgo's Wanderer,cha ID:1
+[04-07 16:09:49.565]3638,Virgo's Seal,cha ID:2
+[04-07 16:09:49.565]3639,Virgo's Hand,cha ID:2
+[04-07 16:09:49.565]3640,Virgo's Brace,cha ID:2
+[04-07 16:09:50.005]4147,Spirit Beast Tattoo,cha ID:3
+[04-07 16:09:50.005]4148,Arcane Beast Tattoo,cha ID:3
+[04-07 16:09:50.006]4149,Capricious Battle Armor,cha ID:4
+[04-07 16:09:50.006]4150,Sagacious Battle Armor,cha ID:4
+[04-07 16:09:50.006]4151,Robe of Perception,cha ID:2
+[04-07 16:09:50.008]4152,Robe of Gallant,cha ID:2
+[04-07 16:09:50.009]4153,Nautical Coat,cha ID:2
+[04-07 16:09:50.010]4154,Arcane Lobster Costume,cha ID:1
+[04-07 16:09:50.010]4155,Robe of Stride,cha ID:2
+[04-07 16:09:50.010]4156,Pique Lobster Costume,cha ID:1
+[04-07 16:09:50.012]4157,Robe of Melody,cha ID:1
+[04-07 16:09:50.013]4158,Arcane Bunny Costume,cha ID:1
+[04-07 16:09:50.013]4159,Robe of Spirit,cha ID:1
+[04-07 16:09:50.014]4160,Pique Bunny Costume,cha ID:1
+[04-07 16:09:50.014]4161,Robe of Vengence,cha ID:1
+[04-07 16:09:50.015]4162,Arcane Otter Costume,cha ID:1
+[04-07 16:09:50.015]4163,Robe of Amercement,cha ID:1
+[04-07 16:09:50.016]4164,Pique Otter Costume,cha ID:1
+[04-07 16:09:50.017]4165,Capricious Battle Gauntlets,cha ID:4
+[04-07 16:09:50.018]4166,Sagacious Battle Gauntlets,cha ID:4
+[04-07 16:09:50.020]4167,Gloves of Perception,cha ID:2
+[04-07 16:09:50.020]4168,Gloves of Gallant,cha ID:2
+[04-07 16:09:50.022]4169,Nautical Gloves,cha ID:2
+[04-07 16:09:50.022]4170,Arcane Lobster Muffs,cha ID:1
+[04-07 16:09:50.023]4171,Gloves of Stride,cha ID:2
+[04-07 16:09:50.023]4172,Pique Lobster Muffs,cha ID:1
+[04-07 16:09:50.024]4173,Gloves of Melody,cha ID:1
+[04-07 16:09:50.025]4174,Arcane Bunny Muffs,cha ID:1
+[04-07 16:09:50.026]4175,Gloves of Spirit,cha ID:1
+[04-07 16:09:50.027]4176,Pique Bunny Muffs,cha ID:1
+[04-07 16:09:50.027]4177,Gloves of Vengence,cha ID:1
+[04-07 16:09:50.027]4178,Arcane Otter Muffs,cha ID:1
+[04-07 16:09:50.027]4179,Gloves of Amercement,cha ID:1
+[04-07 16:09:50.027]4180,Pique Otter Muffs,cha ID:1
+[04-07 16:09:50.027]4181,Capricious Battle Greaves,cha ID:4
+[04-07 16:09:50.027]4182,Sagacious Battle Greaves,cha ID:4
+[04-07 16:09:50.033]4183,Boots of Perception,cha ID:2
+[04-07 16:09:50.034]4184,Boots of Gallant,cha ID:2
+[04-07 16:09:50.035]4185,Nautical Boots,cha ID:2
+[04-07 16:09:50.036]4186,Arcane Lobster Shoes,cha ID:1
+[04-07 16:09:50.037]4187,Boots of Stride,cha ID:2
+[04-07 16:09:50.038]4188,Pique Lobster Shoes,cha ID:1
+[04-07 16:09:50.039]4189,Boots of Melody,cha ID:1
+[04-07 16:09:50.039]4190,Arcane Bunny Shoes,cha ID:1
+[04-07 16:09:50.040]4191,Boots of Spirit,cha ID:1
+[04-07 16:09:50.041]4192,Pique Bunny Shoes,cha ID:1
+[04-07 16:09:50.042]4193,Boots of Vengence,cha ID:1
+[04-07 16:09:50.043]4194,Arcane Otter Shoes,cha ID:1
+[04-07 16:09:50.044]4195,Boots of Amercement,cha ID:1
+[04-07 16:09:50.045]4196,Pique Otter Shoes,cha ID:1
+[04-07 16:09:51.660]6144,Forest Battle Robe,cha ID:2
+[04-07 16:09:51.661]6145,Forest Battle Gloves,cha ID:2
+[04-07 16:09:51.661]6146,Forest Battle Boots,cha ID:2
+[04-07 16:09:51.662]6147,Holy Armor,cha ID:2
+[04-07 16:09:51.663]6148,Holy Armor Gloves,cha ID:2
+[04-07 16:09:51.665]6149,Holy Armor Boots,cha ID:2
+[04-07 16:09:51.665]6150,Savage Armor,cha ID:1
+[04-07 16:09:51.666]6151,Savage Armor Gloves,cha ID:1
+[04-07 16:09:51.667]6152,Savage Armor Boots,cha ID:1
+[04-07 16:09:51.668]6154,Ice Battle Armor,cha ID:2
+[04-07 16:09:51.669]6155,Ice Battle Gloves,cha ID:2
+[04-07 16:09:51.670]6156,Ice Battle Boots,cha ID:2
+[04-07 16:09:51.672]6158,Ice Holy Robe,cha ID:1
+[04-07 16:09:51.673]6159,Ice Holy Gloves,cha ID:1
+[04-07 16:09:51.674]6160,Ice Holy Boots,cha ID:1
+[04-07 16:09:51.675]6162,Ice Magic Robe,cha ID:1
+[04-07 16:09:51.676]6163,Ice Spirit Gloves,cha ID:1
+[04-07 16:09:51.677]6164,Ice Spirit Boots,cha ID:1
+[04-07 16:09:51.686]6174,Sealed Guard of Epic Prowess,cha ID:2
+[04-07 16:09:51.687]6175,Sealed Bless of Epic Prowess,cha ID:2
+[04-07 16:09:51.688]6176,Sealed Mercy of Epic Prowess,cha ID:2
+[04-07 16:09:51.689]6178,Sealed Guard of Honor,cha ID:2
+[04-07 16:09:51.689]6179,Sealed Bless of Honor,cha ID:2
+[04-07 16:09:51.689]6180,Sealed Mercy of Honor,cha ID:2
+[04-07 16:09:51.693]6182,Sealed Guard of Sacrifice,cha ID:1
+[04-07 16:09:51.694]6183,Sealed Bless of Sacrifice,cha ID:1
+[04-07 16:09:51.695]6184,Sealed Mercy of Sacrifice,cha ID:1
+[04-07 16:09:51.696]6186,Sealed Guard of Justice,cha ID:2
+[04-07 16:09:51.696]6187,Sealed Bless of Justice,cha ID:2
+[04-07 16:09:51.696]6188,Sealed Mercy of Justice,cha ID:2
+[04-07 16:09:51.700]6190,Sealed Guard of Empathy,cha ID:1
+[04-07 16:09:51.701]6191,Sealed Bless of Empathy,cha ID:1
+[04-07 16:09:51.702]6192,Sealed Mercy of Empathy,cha ID:1
+[04-07 16:09:51.703]6194,Sealed Guard of Inspiration,cha ID:1
+[04-07 16:09:51.703]6195,Sealed Bless of Inspiration,cha ID:1
+[04-07 16:09:51.703]6196,Sealed Mercy of Inspiration,cha ID:1
+[04-07 16:09:52.030]7096,Kylin Helm,cha ID:1
+[04-07 16:09:52.038]7108,Frozen Kylin Helm,cha ID:1
+[04-07 16:09:52.038]7109,Dark Kylin Helm,cha ID:1
+[04-07 16:09:52.039]7110,Holy Kylin Helm,cha ID:1
+[04-07 16:09:52.051]7132,Black Dragon Lord's Helm,cha ID:1
+[04-07 16:09:52.071]7166,Undead Kylin Helm,cha ID:1
+[04-07 16:09:52.086]7205,Champion's Bind,cha ID:1
+[04-07 16:09:52.086]7206,Champion's Touch,cha ID:1
+[04-07 16:09:52.087]7207,Champion's Print,cha ID:1
+[04-07 16:09:52.087]7208,Crusader's Shadow,cha ID:2
+[04-07 16:09:52.088]7209,Crusader's Touch,cha ID:2
+[04-07 16:09:52.089]7210,Crusader's Trace,cha ID:2
+[04-07 16:09:52.089]7211,Sharpshooter's Seal,cha ID:2
+[04-07 16:09:52.089]7212,Sharpshooter's Hand,cha ID:2
+[04-07 16:09:52.089]7213,Sharpshooter's Brace,cha ID:2
+[04-07 16:09:52.089]7214,Voyager's Protection,cha ID:2
+[04-07 16:09:52.089]7215,Voyager's Caress,cha ID:2
+[04-07 16:09:52.092]7216,Voyager's Dance,cha ID:2
+[04-07 16:09:52.092]7217,Cleric's Possession,cha ID:1
+[04-07 16:09:52.092]7218,Cleric Hands of Healing,cha ID:1
+[04-07 16:09:52.092]7219,Cleric's Trail,cha ID:1
+[04-07 16:09:52.094]7220,Sealmaster's Torso,cha ID:1
+[04-07 16:09:52.094]7221,Sealmaster's Span,cha ID:1
+[04-07 16:09:52.096]7222,Sealmaster's Wanderer,cha ID:1
+[04-07 16:09:52.097]7223,Hairdo 1,cha ID:2
+[04-07 16:09:52.097]7224,Hairdo 1,cha ID:2
+[04-07 16:09:52.098]7225,Hairdo 3,cha ID:2
+[04-07 16:09:52.098]7226,Hairdo 4,cha ID:2
+[04-07 16:09:52.099]7227,Hairdo 5,cha ID:2
+[04-07 16:09:52.099]7228,Hairdo 8,cha ID:2
+[04-07 16:09:52.100]7229,Lance Trendy Hairdo 4,cha ID:4
+[04-07 16:09:52.100]7230,Hairdo 1,cha ID:2
+[04-07 16:09:52.101]7231,Hairdo 1,cha ID:2
+[04-07 16:09:52.101]7232,Hairdo 2,cha ID:2
+[04-07 16:09:52.102]7233,Hairdo 2,cha ID:2
+[04-07 16:09:52.103]7234,Hairdo 3,cha ID:2
+[04-07 16:09:52.103]7235,Hairdo 4,cha ID:2
+[04-07 16:09:52.104]7236,Hairdo 4,cha ID:2
+[04-07 16:09:52.109]7245,Terra's Undead Kylin Helm,cha ID:1
+[04-07 16:09:52.213]7501,Lance Trendy Hairdo 3,cha ID:4
+[04-07 16:09:52.213]7502,Lance Trendy Hairdo 4,cha ID:4
+[04-07 16:09:52.214]7503,Lance Trendy Hairdo 5,cha ID:4
+[04-07 16:09:52.214]7504,Lance Trendy Hairdo 6,cha ID:4
+[04-07 16:09:52.215]7505,Lance Trendy Hairdo 7,cha ID:4
+[04-07 16:09:52.216]7506,Lance Trendy Hairdo 8,cha ID:4
+[04-07 16:09:52.216]7507,Lance Trendy Hairdo 9,cha ID:4
+[04-07 16:09:52.217]7508,Lance Trendy Hairdo 10,cha ID:4
+[04-07 16:09:52.217]7509,Lance Trendy Hairdo 11,cha ID:2
+[04-07 16:09:52.218]7510,Lance Trendy Hairdo 12,cha ID:2
+[04-07 16:09:52.218]7511,Lance Trendy Hairdo 13,cha ID:2
+[04-07 16:09:52.219]7512,Lance Trendy Hairdo 14,cha ID:2
+[04-07 16:09:52.219]7513,Lance Trendy Hairdo 15,cha ID:2
+[04-07 16:09:52.220]7514,Lance Trendy Hairdo 16,cha ID:2
+[04-07 16:09:52.220]7515,Lance Trendy Hairdo 17,cha ID:2
+[04-07 16:09:52.221]7516,Lance Trendy Hairdo 18,cha ID:2
+[04-07 16:09:52.222]7517,Phyllis Trendy Hairdo 3,cha ID:4
+[04-07 16:09:52.222]7518,Phyllis Trendy Hairdo 4,cha ID:4
+[04-07 16:09:52.223]7519,Phyllis Trendy Hairdo 5,cha ID:4
+[04-07 16:09:52.223]7520,Phyllis Trendy Hairdo 6,cha ID:4
+[04-07 16:09:52.224]7521,Phyllis Trendy Hairdo 7,cha ID:4
+[04-07 16:09:52.224]7522,Phyllis Trendy Hairdo 8,cha ID:4
+[04-07 16:09:52.225]7523,Phyllis Trendy Hairdo 9,cha ID:4
+[04-07 16:09:52.225]7524,Phyllis Trendy Hairdo 10,cha ID:4
+[04-07 16:09:52.696]9700,Tattoo of Evanescence,cha ID:3
+[04-07 16:09:52.697]9704,Armor of Evanescence,cha ID:4
+[04-07 16:09:52.698]9706,Gauntlets of Evanescence,cha ID:4
+[04-07 16:09:52.699]9707,Greaves of Evanescence,cha ID:4
+[04-07 16:09:52.700]9708,Coat of Evanescence,cha ID:2
+[04-07 16:09:52.701]9710,Gloves of Evanescence,cha ID:2
+[04-07 16:09:52.701]9711,Shoes of Evanescence,cha ID:2
+[04-07 16:09:52.702]9712,Robe of the Arcane,cha ID:1
+[04-07 16:09:52.703]9714,Gloves of the Arcane,cha ID:1
+[04-07 16:09:52.703]9715,Boots of the of the Arcane,cha ID:1
+[04-07 16:09:52.704]9716,Robe of Malediction,cha ID:1
+[04-07 16:09:52.705]9718,Gloves of Malediction,cha ID:1
+[04-07 16:09:52.706]9719,Boots of Malediction,cha ID:1
+[04-07 16:09:52.706]9720,Cloak of Evanescence,cha ID:2
+[04-07 16:09:52.707]9722,Heavy Gloves of Evanescence,cha ID:2
+[04-07 16:09:52.708]9723,Boots of Evanescence,cha ID:2
+[04-07 16:09:52.708]9724,Tattoo of Enigma,cha ID:3
+[04-07 16:09:52.709]9725,Armor of Enigma,cha ID:4
+[04-07 16:09:52.711]9728,Mantle of Enigma,cha ID:2
+[04-07 16:09:52.712]9731,Robe of Enigma,cha ID:1
+[04-07 16:09:52.714]9733,Robe of the Sphinx,cha ID:1
+[04-07 16:09:52.715]9735,Mantle of the Sphinx,cha ID:2
+[04-07 16:09:52.715]9736,Tattoo of the Cursed Warrior,cha ID:3
+[04-07 16:09:52.716]9737,Platemail of the Cursed Soul,cha ID:4
+[04-07 16:09:52.718]9740,Corset of Incantation,cha ID:2
+[04-07 16:09:52.719]9743,Coat of Invocation,cha ID:1
+[04-07 16:09:52.720]9745,Robe of Abraxas,cha ID:1
+[04-07 16:09:52.722]9747,Mantle of the Cursed Flame,cha ID:2
+[04-07 16:21:17.936]135,Arrow 01,cha ID:1
+[04-07 16:21:17.993]200,Left Plaster Glove,cha ID:1
+[04-07 16:21:17.994]201,Left Brawler Glove,cha ID:1
+[04-07 16:21:17.994]202,Left Master Glove,cha ID:1
+[04-07 16:21:17.995]203,Left Jagged Blade,cha ID:1
+[04-07 16:21:17.997]204,Left Cosmo Blade,cha ID:1
+[04-07 16:21:17.997]205,Left Tiger Glove,cha ID:1
+[04-07 16:21:17.998]206,Left Hand of Death,cha ID:1
+[04-07 16:21:18.017]228,Raging Bull Tattoo,cha ID:3
+[04-07 16:21:18.018]229,Savage Bull Tattoo,cha ID:3
+[04-07 16:21:18.019]230,Primal Tattoo,cha ID:3
+[04-07 16:21:18.069]290,Husk Armor,cha ID:4
+[04-07 16:21:18.070]291,Thick Armor,cha ID:4
+[04-07 16:21:18.071]292,Leather Armor,cha ID:4
+[04-07 16:21:18.072]293,Rhino Hide Armor,cha ID:4
+[04-07 16:21:18.072]294,Tiger Hide Armor,cha ID:4
+[04-07 16:21:18.073]295,Breast Plate,cha ID:4
+[04-07 16:21:18.074]296,Soft Leather Armor,cha ID:4
+[04-07 16:21:18.075]297,Heavy Leather Armor,cha ID:4
+[04-07 16:21:18.076]298,Strong Leather Armor,cha ID:4
+[04-07 16:21:18.077]299,Mithril Platemail,cha ID:4
+[04-07 16:21:18.078]300,Chain Mail,cha ID:3
+[04-07 16:21:18.078]301,Strong Platemail,cha ID:3
+[04-07 16:21:18.079]302,Light Platemail,cha ID:4
+[04-07 16:21:18.080]303,Silver Platemail,cha ID:4
+[04-07 16:21:18.081]304,Ceremonial Platemail,cha ID:4
+[04-07 16:21:18.082]305,Coarse Vest,cha ID:2
+[04-07 16:21:18.082]306,Canvas Vest,cha ID:2
+[04-07 16:21:18.083]307,Exquisite Vest,cha ID:2
+[04-07 16:21:18.084]308,Leather Vest,cha ID:2
+[04-07 16:21:18.085]309,Warrior Frock,cha ID:2
+[04-07 16:21:18.086]310,Feather Vest,cha ID:2
+[04-07 16:21:18.087]311,Safari Vest,cha ID:2
+[04-07 16:21:18.088]312,Emerald Vest,cha ID:2
+[04-07 16:21:18.089]313,Hunter Vest,cha ID:2
+[04-07 16:21:18.090]314,Slick Vest,cha ID:2
+[04-07 16:21:18.090]315,Peacock Vest,cha ID:2
+[04-07 16:21:18.091]316,Ringdove Vest,cha ID:2
+[04-07 16:21:18.092]317,Raptor Vest,cha ID:2
+[04-07 16:21:18.108]335,Cloth Shirt,cha ID:2
+[04-07 16:21:18.108]336,Tough Vest,cha ID:2
+[04-07 16:21:18.108]337,Explorer Vest,cha ID:2
+[04-07 16:21:18.108]338,Adventure Vest,cha ID:2
+[04-07 16:21:18.108]339,Helmsman Vest,cha ID:2
+[04-07 16:21:18.108]340,Oarsman Vest,cha ID:2
+[04-07 16:21:18.108]341,Deckman Vest,cha ID:2
+[04-07 16:21:18.108]342,Mastman Vest,cha ID:2
+[04-07 16:21:18.108]343,Hurricane Vest,cha ID:2
+[04-07 16:21:18.108]344,Whirlpool Vest,cha ID:2
+[04-07 16:21:18.108]345,Wind Vest,cha ID:2
+[04-07 16:21:18.120]350,Crabby Costume,cha ID:1
+[04-07 16:21:18.121]351,Rooroo Costume,cha ID:1
+[04-07 16:21:18.121]352,Playful Racoon Costume,cha ID:1
+[04-07 16:21:18.121]353,Duckling Costume,cha ID:1
+[04-07 16:21:18.121]354,Big Crab Costume,cha ID:1
+[04-07 16:21:18.121]355,Lobster Costume,cha ID:1
+[04-07 16:21:18.121]356,Ducky Costume,cha ID:1
+[04-07 16:21:18.121]357,Prawn Costume,cha ID:1
+[04-07 16:21:18.121]358,Pincer Costume,cha ID:1
+[04-07 16:21:18.128]359,Sheepy Costume,cha ID:1
+[04-07 16:21:18.128]360,Meowy Costume,cha ID:1
+[04-07 16:21:18.128]361,Owl Costume,cha ID:1
+[04-07 16:21:18.128]362,Hopperoo Costume,cha ID:1
+[04-07 16:21:18.128]363,Clever Otter Costume,cha ID:1
+[04-07 16:21:18.132]364,Lucky Otter Costume,cha ID:1
+[04-07 16:21:18.132]365,Medic Robe,cha ID:1
+[04-07 16:21:18.134]366,Foster Robe,cha ID:1
+[04-07 16:21:18.134]367,Travel Robe,cha ID:1
+[04-07 16:21:18.134]368,Nurse Robe,cha ID:1
+[04-07 16:21:18.134]369,Garcon Robe,cha ID:1
+[04-07 16:21:18.134]370,Holy Robe,cha ID:1
+[04-07 16:21:18.134]371,Follower Robe,cha ID:1
+[04-07 16:21:18.134]372,Attendant Robe,cha ID:1
+[04-07 16:21:18.134]373,Scholar Robe,cha ID:1
+[04-07 16:21:18.141]374,Emergency Robe,cha ID:1
+[04-07 16:21:18.141]375,Passage Robe,cha ID:1
+[04-07 16:21:18.141]376,Healer Robe,cha ID:1
+[04-07 16:21:18.141]377,Protector Robe,cha ID:1
+[04-07 16:21:18.141]378,Piety Robe,cha ID:1
+[04-07 16:21:18.141]379,Blessed Robe,cha ID:1
+[04-07 16:21:18.141]380,Mousey Costume,cha ID:1
+[04-07 16:21:18.148]381,Kitty Costume,cha ID:1
+[04-07 16:21:18.148]382,Loopy Bunny Costume,cha ID:1
+[04-07 16:21:18.149]383,Goaty Costume,cha ID:1
+[04-07 16:21:18.150]384,Deer Costume,cha ID:1
+[04-07 16:21:18.151]385,Otter Costume,cha ID:1
+[04-07 16:21:18.152]386,Racoon Costume,cha ID:1
+[04-07 16:21:18.154]388,Happy Bunny Costume,cha ID:1
+[04-07 16:21:18.155]389,Night Owl Costume,cha ID:1
+[04-07 16:21:18.155]390,Kangaroo Costume,cha ID:1
+[04-07 16:21:18.156]391,Joyful Bunny Costume,cha ID:1
+[04-07 16:21:18.157]392,Bunny Baby Costume,cha ID:1
+[04-07 16:21:18.158]393,Lucky Bunny Costume,cha ID:1
+[04-07 16:21:18.159]394,Heavenly Vest,cha ID:1
+[04-07 16:21:18.160]395,Armor of Night,cha ID:2
+[04-07 16:21:18.161]396,Armor of Secrets,cha ID:2
+[04-07 16:21:18.162]397,Armor of Hercules,cha ID:1
+[04-07 16:21:18.162]398,Armor of Olympus,cha ID:1
+[04-07 16:21:18.163]399,Vest of Marksmanship,cha ID:2
+[04-07 16:21:18.164]400,Vest of Apollo,cha ID:2
+[04-07 16:21:18.165]401,Robe of the Wise,cha ID:1
+[04-07 16:21:18.166]402,Robe of the Sage,cha ID:1
+[04-07 16:21:18.167]403,Happy Panda Costume,cha ID:1
+[04-07 16:21:18.168]404,Mystic Panda Costume,cha ID:1
+[04-07 16:21:18.169]405,Fairy Robe,cha ID:1
+[04-07 16:21:18.169]406,Faerie Robe,cha ID:1
+[04-07 16:21:18.171]407,Gold Fish Costume,cha ID:1
+[04-07 16:21:18.171]408,Fish Fairy Costume,cha ID:1
+[04-07 16:21:18.172]409,Tidal Robe,cha ID:2
+[04-07 16:21:18.173]410,Bear Costume,cha ID:1
+[04-07 16:21:18.174]411,Tsunami Robe,cha ID:2
+[04-07 16:21:18.175]412,Dragon Costume,cha ID:1
+[04-07 16:21:18.176]413,Dragon Lord Costume,cha ID:1
+[04-07 16:21:18.222]466,Husk Gloves,cha ID:4
+[04-07 16:21:18.223]467,Thick Gloves,cha ID:4
+[04-07 16:21:18.224]468,Leather Gloves,cha ID:4
+[04-07 16:21:18.225]469,Rhino Hide Gloves,cha ID:4
+[04-07 16:21:18.226]470,Tiger Hide Gloves,cha ID:4
+[04-07 16:21:18.227]471,Gauntlets,cha ID:4
+[04-07 16:21:18.228]472,Soft Leather Gloves,cha ID:4
+[04-07 16:21:18.229]473,Heavy Leather Gloves,cha ID:4
+[04-07 16:21:18.230]474,Strong Leather Gloves,cha ID:4
+[04-07 16:21:18.231]475,Mithril Gauntlets,cha ID:4
+[04-07 16:21:18.231]476,Chain Gauntlets,cha ID:3
+[04-07 16:21:18.232]477,Strong Gauntlets,cha ID:3
+[04-07 16:21:18.233]478,Light Gauntlets,cha ID:4
+[04-07 16:21:18.234]479,Silver Gauntlets,cha ID:4
+[04-07 16:21:18.235]480,Ceremonial Gauntlets,cha ID:4
+[04-07 16:21:18.235]481,Coarse Gloves,cha ID:2
+[04-07 16:21:18.236]482,Canvas Gloves,cha ID:2
+[04-07 16:21:18.237]483,Exquisite Gloves,cha ID:2
+[04-07 16:21:18.237]484,Leather Gloves,cha ID:2
+[04-07 16:21:18.239]485,Warrior Gloves,cha ID:2
+[04-07 16:21:18.240]486,Feather Gloves,cha ID:2
+[04-07 16:21:18.241]487,Safari Gloves,cha ID:2
+[04-07 16:21:18.242]488,Emerald Gloves,cha ID:2
+[04-07 16:21:18.243]489,Hunter Gloves,cha ID:2
+[04-07 16:21:18.244]490,Slick Gloves,cha ID:2
+[04-07 16:21:18.245]491,Peacock Gloves,cha ID:2
+[04-07 16:21:18.245]492,Ringdove Gloves,cha ID:2
+[04-07 16:21:18.246]493,Raptor Gloves,cha ID:2
+[04-07 16:21:18.262]511,Cloth Gloves,cha ID:2
+[04-07 16:21:18.263]512,Tough Gloves,cha ID:2
+[04-07 16:21:18.263]513,Explorer Gloves,cha ID:2
+[04-07 16:21:18.264]514,Adventure Gloves,cha ID:2
+[04-07 16:21:18.265]515,Helmsman Gloves,cha ID:2
+[04-07 16:21:18.266]516,Oarsman Gloves,cha ID:2
+[04-07 16:21:18.268]517,Deckman Gloves,cha ID:2
+[04-07 16:21:18.269]518,Mastman Gloves,cha ID:2
+[04-07 16:21:18.269]519,Hurricane Gloves,cha ID:2
+[04-07 16:21:18.270]520,Whirlpool Gloves,cha ID:2
+[04-07 16:21:18.271]521,Wind Gloves,cha ID:2
+[04-07 16:21:18.276]526,Crabby Gloves,cha ID:1
+[04-07 16:21:18.276]527,Rooroo Muffs,cha ID:1
+[04-07 16:21:18.277]528,Playful Racoon Muffs,cha ID:1
+[04-07 16:21:18.278]529,Duckling Muffs,cha ID:1
+[04-07 16:21:18.279]530,Big Crab Muffs,cha ID:1
+[04-07 16:21:18.280]531,Lobster Muffs,cha ID:1
+[04-07 16:21:18.280]532,Ducky Muffs,cha ID:1
+[04-07 16:21:18.281]533,Prawn Muffs,cha ID:1
+[04-07 16:21:18.282]534,Pincer Muffs,cha ID:1
+[04-07 16:21:18.283]535,Sheepy Muffs,cha ID:1
+[04-07 16:21:18.285]536,Meowy Muffs,cha ID:1
+[04-07 16:21:18.286]537,Owl Muffs,cha ID:1
+[04-07 16:21:18.287]538,Hopperoo Muffs,cha ID:1
+[04-07 16:21:18.287]539,Clever Otter Muffs,cha ID:1
+[04-07 16:21:18.288]540,Lucky Otter Muffs,cha ID:1
+[04-07 16:21:18.289]541,Medic Gloves,cha ID:1
+[04-07 16:21:18.289]542,Foster Gloves,cha ID:1
+[04-07 16:21:18.290]543,Travel Gloves,cha ID:1
+[04-07 16:21:18.291]544,Nurse Gloves,cha ID:1
+[04-07 16:21:18.292]545,Garcon Gloves,cha ID:1
+[04-07 16:21:18.294]546,Holy Gloves,cha ID:1
+[04-07 16:21:18.294]547,Follower Gloves,cha ID:1
+[04-07 16:21:18.295]548,Attendant Gloves,cha ID:1
+[04-07 16:21:18.296]549,Scholar Gloves,cha ID:1
+[04-07 16:21:18.296]550,Emergency Gloves,cha ID:1
+[04-07 16:21:18.297]551,Passage Gloves,cha ID:1
+[04-07 16:21:18.298]552,Healer Gloves,cha ID:1
+[04-07 16:21:18.299]553,Protector Gloves,cha ID:1
+[04-07 16:21:18.301]554,Piety Gloves,cha ID:1
+[04-07 16:21:18.302]555,Blessed Gloves,cha ID:1
+[04-07 16:21:18.302]556,Mousey Muffs,cha ID:1
+[04-07 16:21:18.303]557,Kitty Muffs,cha ID:1
+[04-07 16:21:18.304]558,Loopy Bunny Muffs,cha ID:1
+[04-07 16:21:18.305]559,Goaty Muffs,cha ID:1
+[04-07 16:21:18.305]560,Deer Muffs,cha ID:1
+[04-07 16:21:18.306]561,Otter Muffs,cha ID:1
+[04-07 16:21:18.307]562,Racoon Muffs,cha ID:1
+[04-07 16:21:18.308]564,Happy Bunny Muffs,cha ID:1
+[04-07 16:21:18.308]565,Night Owl Muffs,cha ID:1
+[04-07 16:21:18.308]566,Kangaroo Muffs,cha ID:1
+[04-07 16:21:18.308]567,Joyful Bunny Muffs,cha ID:1
+[04-07 16:21:18.308]568,Bunny Baby Muffs,cha ID:1
+[04-07 16:21:18.308]569,Lucky Bunny Muffs,cha ID:1
+[04-07 16:21:18.308]570,Heavenly Gloves,cha ID:1
+[04-07 16:21:18.322]586,Bear Gloves,cha ID:1
+[04-07 16:21:18.322]587,Gloves of Night,cha ID:2
+[04-07 16:21:18.322]588,Gloves of Secrets,cha ID:2
+[04-07 16:21:18.322]589,Gloves of Marksmanship,cha ID:2
+[04-07 16:21:18.322]590,Gloves of Apollo,cha ID:2
+[04-07 16:21:18.322]591,Gloves of the Wise,cha ID:1
+[04-07 16:21:18.322]592,Gloves of the Sage,cha ID:1
+[04-07 16:21:18.322]593,Happy Panda Gloves,cha ID:1
+[04-07 16:21:18.322]594,Mystic Panda Gloves,cha ID:1
+[04-07 16:21:18.322]595,Fairy Gloves,cha ID:1
+[04-07 16:21:18.322]596,Faerie Gloves,cha ID:1
+[04-07 16:21:18.322]597,Gold Fish Muffs,cha ID:1
+[04-07 16:21:18.322]598,Fish Fairy Muffs,cha ID:1
+[04-07 16:21:18.322]599,Tidal Gloves,cha ID:2
+[04-07 16:21:18.339]600,Tsunami Gloves,cha ID:2
+[04-07 16:21:18.339]601,Dragon Muffs,cha ID:1
+[04-07 16:21:18.339]602,Dragon Lord Muffs,cha ID:1
+[04-07 16:21:18.339]603,Gauntlets of Hercules,cha ID:1
+[04-07 16:21:18.339]604,Gauntlets of Olympus,cha ID:1
+[04-07 16:21:18.371]635,Lv 1 Strike Coral,cha ID:2
+[04-07 16:21:18.371]636,Lv 2 Strike Coral,cha ID:2
+[04-07 16:21:18.372]637,Lv 3 Strike Coral,cha ID:2
+[04-07 16:21:18.373]638,Lv 4 Strike Coral,cha ID:2
+[04-07 16:21:18.374]639,Lv 5 Strike Coral,cha ID:2
+[04-07 16:21:18.376]642,Husk Boots,cha ID:4
+[04-07 16:21:18.377]643,Thick Boots,cha ID:4
+[04-07 16:21:18.378]644,Leather Boots,cha ID:4
+[04-07 16:21:18.379]645,Rhino Hide Boots,cha ID:4
+[04-07 16:21:18.380]646,Tiger Hide Boots,cha ID:4
+[04-07 16:21:18.381]647,Greaves,cha ID:4
+[04-07 16:21:18.382]648,Soft Leather Boots,cha ID:4
+[04-07 16:21:18.382]649,Heavy Leather Boots,cha ID:4
+[04-07 16:21:18.383]650,Strong Leather Boots,cha ID:4
+[04-07 16:21:18.384]651,Mithril Greaves,cha ID:4
+[04-07 16:21:18.385]652,Chain Greaves,cha ID:3
+[04-07 16:21:18.386]653,Strong Greaves,cha ID:3
+[04-07 16:21:18.387]654,Light Greaves,cha ID:4
+[04-07 16:21:18.387]655,Silver Greaves,cha ID:4
+[04-07 16:21:18.387]656,Ceremonial Greaves,cha ID:4
+[04-07 16:21:18.387]657,Coarse Boots,cha ID:2
+[04-07 16:21:18.387]658,Canvas Boots,cha ID:2
+[04-07 16:21:18.387]659,Exquisite Boots,cha ID:2
+[04-07 16:21:18.387]660,Leather Boots,cha ID:2
+[04-07 16:21:18.387]661,Warrior Boots,cha ID:2
+[04-07 16:21:18.387]662,Feather Boots,cha ID:2
+[04-07 16:21:18.387]663,Safari Boots,cha ID:2
+[04-07 16:21:18.387]664,Emerald Boots,cha ID:2
+[04-07 16:21:18.387]665,Hunter Boots,cha ID:2
+[04-07 16:21:18.387]666,Slick Boots,cha ID:2
+[04-07 16:21:18.387]667,Peacock Boots,cha ID:2
+[04-07 16:21:18.387]668,Ringdove Boots,cha ID:2
+[04-07 16:21:18.387]669,Raptor Boots,cha ID:2
+[04-07 16:21:18.408]687,Cloth Boots,cha ID:2
+[04-07 16:21:18.408]688,Tough Boots,cha ID:2
+[04-07 16:21:18.408]689,Explorer Boots,cha ID:2
+[04-07 16:21:18.418]690,Adventure Boots,cha ID:2
+[04-07 16:21:18.418]691,Helmsman Boots,cha ID:2
+[04-07 16:21:18.418]692,Oarsman Boots,cha ID:2
+[04-07 16:21:18.418]693,Deckman Boots,cha ID:2
+[04-07 16:21:18.418]694,Mastman Boots,cha ID:2
+[04-07 16:21:18.418]695,Hurricane Boots,cha ID:2
+[04-07 16:21:18.418]696,Whirlpool Boots,cha ID:2
+[04-07 16:21:18.418]697,Wind Boots,cha ID:2
+[04-07 16:21:18.418]702,Crabby Shoes,cha ID:1
+[04-07 16:21:18.418]703,Rooroo Shoes,cha ID:1
+[04-07 16:21:18.418]704,Playful Racoon Shoes,cha ID:1
+[04-07 16:21:18.418]705,Duckling Shoes,cha ID:1
+[04-07 16:21:18.418]706,Big Crab Shoes,cha ID:1
+[04-07 16:21:18.434]707,Lobster Shoes,cha ID:1
+[04-07 16:21:18.434]708,Ducky Shoes,cha ID:1
+[04-07 16:21:18.434]709,Prawn Shoes,cha ID:1
+[04-07 16:21:18.434]710,Pincer Shoes,cha ID:1
+[04-07 16:21:18.434]711,Sheepy Shoes,cha ID:1
+[04-07 16:21:18.434]712,Meowy Shoes,cha ID:1
+[04-07 16:21:18.434]713,Owl Shoes,cha ID:1
+[04-07 16:21:18.434]714,Hopperoo Shoes,cha ID:1
+[04-07 16:21:18.434]715,Clever Otter Shoes,cha ID:1
+[04-07 16:21:18.434]716,Lucky Otter Shoes,cha ID:1
+[04-07 16:21:18.434]717,Medic Boots,cha ID:1
+[04-07 16:21:18.434]718,Foster Boots,cha ID:1
+[04-07 16:21:18.434]719,Travel Boots,cha ID:1
+[04-07 16:21:18.434]720,Nurse Boots,cha ID:1
+[04-07 16:21:18.434]721,Garcon Boots,cha ID:1
+[04-07 16:21:18.434]722,Holy Boots,cha ID:1
+[04-07 16:21:18.434]723,Follower Boots,cha ID:1
+[04-07 16:21:18.434]724,Attendant Boots,cha ID:1
+[04-07 16:21:18.450]725,Scholar Boots,cha ID:1
+[04-07 16:21:18.450]726,Emergency Boots,cha ID:1
+[04-07 16:21:18.450]727,Passage Boots,cha ID:1
+[04-07 16:21:18.450]728,Healer Boots,cha ID:1
+[04-07 16:21:18.450]729,Protector Boots,cha ID:1
+[04-07 16:21:18.450]730,Piety Boots,cha ID:1
+[04-07 16:21:18.450]731,Blessed Boots,cha ID:1
+[04-07 16:21:18.450]732,Mousey Shoes,cha ID:1
+[04-07 16:21:18.450]733,Kitty Shoes,cha ID:1
+[04-07 16:21:18.450]734,Loopy Bunny Shoes,cha ID:1
+[04-07 16:21:18.450]735,Goaty Shoes,cha ID:1
+[04-07 16:21:18.450]736,Deer Shoes,cha ID:1
+[04-07 16:21:18.450]737,Otter Shoes,cha ID:1
+[04-07 16:21:18.450]738,Racoon Shoes,cha ID:1
+[04-07 16:21:18.450]740,Happy Bunny Shoes,cha ID:1
+[04-07 16:21:18.450]741,Night Owl Shoes,cha ID:1
+[04-07 16:21:18.450]742,Kangaroo Shoes,cha ID:1
+[04-07 16:21:18.466]743,Joyful Bunny Shoes,cha ID:1
+[04-07 16:21:18.467]744,Bunny Baby Shoes,cha ID:1
+[04-07 16:21:18.467]745,Lucky Bunny Shoes,cha ID:1
+[04-07 16:21:18.467]746,Heavenly Shoes,cha ID:1
+[04-07 16:21:18.468]747,Boots of Night,cha ID:2
+[04-07 16:21:18.469]748,Boots of Secrets,cha ID:2
+[04-07 16:21:18.470]749,Boots of Marksmanship,cha ID:2
+[04-07 16:21:18.471]750,Boots of Apollo,cha ID:2
+[04-07 16:21:18.472]751,Boots of the Wise,cha ID:1
+[04-07 16:21:18.472]752,Boots of the Sage,cha ID:1
+[04-07 16:21:18.473]753,Happy Panda Shoes,cha ID:1
+[04-07 16:21:18.474]754,Mystic Panda Shoes,cha ID:1
+[04-07 16:21:18.475]755,Fairy Shoes,cha ID:1
+[04-07 16:21:18.476]756,Faerie Shoes,cha ID:1
+[04-07 16:21:18.477]757,Gold Fish Shoes,cha ID:1
+[04-07 16:21:18.478]758,Fish Fairy Shoes,cha ID:1
+[04-07 16:21:18.478]759,Tidal Shoes,cha ID:2
+[04-07 16:21:18.480]760,Tsunami Shoes,cha ID:2
+[04-07 16:21:18.481]761,Dragon Shoes,cha ID:1
+[04-07 16:21:18.481]762,Bear Shoes,cha ID:1
+[04-07 16:21:18.482]763,Armor of Revenant,cha ID:4
+[04-07 16:21:18.482]764,Tattoo of the Cursed Warrior,cha ID:3
+[04-07 16:21:18.482]765,Tattoo of Evanescence,cha ID:3
+[04-07 16:21:18.482]766,Tattoo of Enigma,cha ID:3
+[04-07 16:21:18.482]767,Platemail of the Cursed Soul,cha ID:4
+[04-07 16:21:18.482]768,Armor of Evanescence,cha ID:4
+[04-07 16:21:18.482]769,Armor of Enigma,cha ID:4
+[04-07 16:21:18.482]777,Robe of Death,cha ID:2
+[04-07 16:21:18.482]778,Corset of Incantation,cha ID:2
+[04-07 16:21:18.497]779,Coat of Evanescence,cha ID:2
+[04-07 16:21:18.497]780,Mantle of Enigma,cha ID:2
+[04-07 16:21:18.498]789,Robe of the Venom Witch,cha ID:1
+[04-07 16:21:18.498]790,Coat of Invocation,cha ID:1
+[04-07 16:21:18.508]791,Robe of the Arcane,cha ID:1
+[04-07 16:21:18.508]792,Robe of Enigma,cha ID:1
+[04-07 16:21:18.508]796,Robe of Abraxas,cha ID:1
+[04-07 16:21:18.508]797,Robe of Malediction,cha ID:1
+[04-07 16:21:18.514]798,Robe of the Sphinx,cha ID:1
+[04-07 16:21:18.514]803,Mantle of the Naga,cha ID:2
+[04-07 16:21:18.514]804,Mantle of the Cursed Flame,cha ID:2
+[04-07 16:21:18.514]805,Cloak of Evanescence,cha ID:2
+[04-07 16:21:18.514]806,Mantle of the Sphinx,cha ID:2
+[04-07 16:21:18.514]807,Gauntlets of Evanescence,cha ID:4
+[04-07 16:21:18.514]808,Greaves of Evanescence,cha ID:4
+[04-07 16:21:18.514]809,Gloves of Evanescence,cha ID:2
+[04-07 16:21:18.514]810,Shoes of Evanescence,cha ID:2
+[04-07 16:21:18.514]811,Gloves of Malediction,cha ID:1
+[04-07 16:21:18.514]812,Gloves of the Arcane,cha ID:1
+[04-07 16:21:18.514]813,Boots of Malediction,cha ID:1
+[04-07 16:21:18.514]814,Boots of the of the Arcane,cha ID:1
+[04-07 16:21:18.514]815,Heavy Gloves of Evanescence,cha ID:2
+[04-07 16:21:18.530]824,Dragon Lord Shoes,cha ID:1
+[04-07 16:21:18.530]829,Greaves of Hercules,cha ID:1
+[04-07 16:21:18.530]830,Greaves of Olympus,cha ID:1
+[04-07 16:21:18.584]877,Boots of Evanescence,cha ID:2
+[04-07 16:21:18.772]1115,Grandiose Helm,cha ID:2
+[04-07 16:21:18.773]1116,Grandiose Armor,cha ID:2
+[04-07 16:21:18.774]1117,Grandiose Gauntlets,cha ID:2
+[04-07 16:21:18.774]1118,Grandiose Boots,cha ID:2
+[04-07 16:21:18.777]1124,Chaos Framestone,cha ID:1
+[04-07 16:21:18.778]1125,Chaos Clawstone,cha ID:1
+[04-07 16:21:18.779]1126,Chaos Pawstone,cha ID:1
+[04-07 16:21:19.371]1884,Undead Sealed Armor of Revenant,cha ID:4
+[04-07 16:21:19.371]1885,Earth Sealed Tattoo of the Cursed Warrior,cha ID:3
+[04-07 16:21:19.373]1886,Fire Sealed Tattoo of Evanescence,cha ID:3
+[04-07 16:21:19.374]1887,Ice Sealed Tattoo of Enigma,cha ID:3
+[04-07 16:21:19.375]1888,Earth Sealed Platemail of the Cursed Soul,cha ID:4
+[04-07 16:21:19.375]1889,Fire Sealed Armor of Evanescence,cha ID:4
+[04-07 16:21:19.376]1890,Ice Sealed Armor of Enigma,cha ID:4
+[04-07 16:21:19.383]1898,Undead Sealed Robe of Death,cha ID:2
+[04-07 16:21:19.384]1899,Earth Sealed Corset of Incantation,cha ID:2
+[04-07 16:21:19.385]1900,Fire Sealed Coat of Evanescence,cha ID:2
+[04-07 16:21:19.386]1901,Ice Sealed Mantle of Enigma,cha ID:2
+[04-07 16:21:19.393]1910,Undead Sealed Robe of the Venom Witch,cha ID:1
+[04-07 16:21:19.393]1911,Earth Sealed Coat of Invocation,cha ID:1
+[04-07 16:21:19.394]1912,Fire Sealed Robe of the Arcane,cha ID:1
+[04-07 16:21:19.394]1913,Ice Sealed Robe of Enigma,cha ID:1
+[04-07 16:21:19.397]1917,Earth Sealed Robe of Abraxas,cha ID:1
+[04-07 16:21:19.397]1918,Fire Sealed Robe of Malediction,cha ID:1
+[04-07 16:21:19.398]1919,Ice Sealed Robe of the Sphinx,cha ID:1
+[04-07 16:21:19.401]1924,Undead Sealed Mantle of the Naga,cha ID:2
+[04-07 16:21:19.402]1925,Earth Sealed Mantle of the Cursed Flame,cha ID:2
+[04-07 16:21:19.402]1926,Fire Sealed Cloak of Evanescence,cha ID:2
+[04-07 16:21:19.403]1927,Ice Sealed Mantle of the Sphinx,cha ID:2
+[04-07 16:21:19.403]1928,Battle Armor of Crimson Flame,cha ID:4
+[04-07 16:21:19.404]1929,Battle Armor of the Tempest,cha ID:4
+[04-07 16:21:19.405]1930,Battle Armor of Sistine,cha ID:4
+[04-07 16:21:19.405]1931,Battle Armor of the Kylin,cha ID:4
+[04-07 16:21:19.406]1932,Battle Armor of Nature,cha ID:3
+[04-07 16:21:19.406]1933,Tattoo of Gallon,cha ID:3
+[04-07 16:21:19.407]1934,Tattoo of the Tortoise,cha ID:3
+[04-07 16:21:19.407]1935,Gauntlets of Crimson Flame,cha ID:4
+[04-07 16:21:19.409]1936,Gauntlets of the Tempest,cha ID:4
+[04-07 16:21:19.410]1937,Gauntlets of Sistine,cha ID:4
+[04-07 16:21:19.411]1938,Gauntlets of the Kylin,cha ID:4
+[04-07 16:21:19.412]1939,Greaves of Crimson Flame,cha ID:4
+[04-07 16:21:19.413]1940,Greaves of the Tempest,cha ID:4
+[04-07 16:21:19.413]1941,Greaves of Sistine,cha ID:4
+[04-07 16:21:19.414]1942,Greaves of the Kylin,cha ID:4
+[04-07 16:21:19.415]1943,Vest of Clarion Mist,cha ID:2
+[04-07 16:21:19.416]1944,Flaming Coat,cha ID:2
+[04-07 16:21:19.417]1945,Mantle of Darwin,cha ID:2
+[04-07 16:21:19.418]1946,Coat of the White Tiger,cha ID:2
+[04-07 16:21:19.419]1947,Gloves of Clarion Mist,cha ID:2
+[04-07 16:21:19.420]1948,Flaming Gloves,cha ID:2
+[04-07 16:21:19.421]1949,Gloves of Darwin,cha ID:2
+[04-07 16:21:19.421]1950,Gloves of the White Tiger,cha ID:2
+[04-07 16:21:19.422]1951,Boots of Clarion Mist,cha ID:2
+[04-07 16:21:19.422]1952,Flaming Boots,cha ID:2
+[04-07 16:21:19.424]1953,Boots of Darwin,cha ID:2
+[04-07 16:21:19.424]1954,Boots of the White Tiger,cha ID:2
+[04-07 16:21:19.424]1955,Emerald Vine Robe,cha ID:1
+[04-07 16:21:19.426]1956,Coat of Frozen Crescent,cha ID:1
+[04-07 16:21:19.426]1957,Coat of Udine,cha ID:1
+[04-07 16:21:19.426]1958,Coat of the Peacock,cha ID:1
+[04-07 16:21:19.428]1959,Glory Coat,cha ID:1
+[04-07 16:21:19.428]1960,Coat of Hope,cha ID:1
+[04-07 16:21:19.428]1961,Coat of the Phoenix,cha ID:1
+[04-07 16:21:19.430]1962,Emerald Vine Gloves,cha ID:1
+[04-07 16:21:19.430]1963,Gloves of Frozen Crescent,cha ID:1
+[04-07 16:21:19.431]1964,Gloves of Udine,cha ID:1
+[04-07 16:21:19.431]1965,Gloves of the Peacock,cha ID:1
+[04-07 16:21:19.433]1966,Glory Gloves,cha ID:1
+[04-07 16:21:19.433]1967,Gloves of Hope,cha ID:1
+[04-07 16:21:19.434]1968,Gloves of the Phoenix,cha ID:1
+[04-07 16:21:19.434]1969,Emerald Vine Boots,cha ID:1
+[04-07 16:21:19.435]1970,Boots of Frozen Crescent,cha ID:1
+[04-07 16:21:19.435]1971,Boots of Udine,cha ID:1
+[04-07 16:21:19.436]1972,Boots of the Peacock,cha ID:1
+[04-07 16:21:19.436]1973,Glory Boots,cha ID:1
+[04-07 16:21:19.438]1974,Boots of Hope,cha ID:1
+[04-07 16:21:19.439]1975,Boots of the Phoenix,cha ID:1
+[04-07 16:21:19.439]1976,Robe of the Mist,cha ID:2
+[04-07 16:21:19.440]1977,Coat of the Tempest,cha ID:2
+[04-07 16:21:19.440]1978,Robe of Forlorn,cha ID:2
+[04-07 16:21:19.441]1979,Coat of the Green Dragon,cha ID:2
+[04-07 16:21:19.442]1980,Gloves of the Mist,cha ID:2
+[04-07 16:21:19.443]1981,Gloves of the Tempest,cha ID:2
+[04-07 16:21:19.444]1982,Gloves of Forlorn,cha ID:2
+[04-07 16:21:19.445]1983,Gloves of the Green Dragon,cha ID:2
+[04-07 16:21:19.446]1984,Boots of the Mist,cha ID:2
+[04-07 16:21:19.447]1985,Boots of the Tempest,cha ID:2
+[04-07 16:21:19.448]1986,Boots of Forlorn,cha ID:2
+[04-07 16:21:19.449]1987,Boots of the Green Dragon,cha ID:2
+[04-07 16:21:19.449]1988,Fire Sealed Gauntlets of Evanescence,cha ID:4
+[04-07 16:21:19.450]1989,Fire Sealed Greaves of Evanescence,cha ID:4
+[04-07 16:21:19.451]1990,Fire Sealed Gloves of Evanescence,cha ID:2
+[04-07 16:21:19.452]1991,Fire Sealed Shoes of Evanescence,cha ID:2
+[04-07 16:21:19.453]1992,Fire Sealed Gloves of Malediction,cha ID:1
+[04-07 16:21:19.455]1993,Fire Sealed Gloves of the Arcane,cha ID:1
+[04-07 16:21:19.455]1994,Fire Sealed Boots of Malediction,cha ID:1
+[04-07 16:21:19.456]1995,Fire Sealed Boots of the of the Arcane,cha ID:1
+[04-07 16:21:19.457]1996,Fire Sealed Heavy Gloves of Evanescence,cha ID:2
+[04-07 16:21:19.457]1997,Fire Sealed Boots of Evanescence,cha ID:2
+[04-07 16:21:19.458]1999,Lance Failed Hairdo 1,cha ID:2
+[04-07 16:21:19.459]2000,Hairdo 1,cha ID:2
+[04-07 16:21:19.460]2001,Hairdo 2,cha ID:2
+[04-07 16:21:19.460]2002,Hairdo 3,cha ID:2
+[04-07 16:21:19.461]2003,Hairdo 4,cha ID:2
+[04-07 16:21:19.461]2004,Hairdo 5,cha ID:2
+[04-07 16:21:19.462]2005,Hairdo 6,cha ID:2
+[04-07 16:21:19.463]2006,Hairdo 7,cha ID:2
+[04-07 16:21:19.464]2007,Hairdo 8,cha ID:2
+[04-07 16:21:19.465]2008,Event Commissioner,cha ID:2
+[04-07 16:21:19.465]2009,Hairdo 1,cha ID:2
+[04-07 16:21:19.466]2010,Hairdo 1,cha ID:2
+[04-07 16:21:19.467]2011,Hairdo 1,cha ID:2
+[04-07 16:21:19.467]2012,Hairdo 1,cha ID:2
+[04-07 16:21:19.468]2013,Hairdo 1,cha ID:2
+[04-07 16:21:19.469]2014,Hairdo 1,cha ID:2
+[04-07 16:21:19.469]2015,Hairdo 2,cha ID:2
+[04-07 16:21:19.470]2016,Hairdo 2,cha ID:2
+[04-07 16:21:19.470]2017,Hairdo 2,cha ID:2
+[04-07 16:21:19.471]2018,Hairdo 2,cha ID:2
+[04-07 16:21:19.472]2019,Hairdo 2,cha ID:2
+[04-07 16:21:19.472]2020,Hairdo 2,cha ID:2
+[04-07 16:21:19.473]2021,Hairdo 3,cha ID:2
+[04-07 16:21:19.473]2022,Hairdo 3,cha ID:2
+[04-07 16:21:19.474]2023,Hairdo 3,cha ID:2
+[04-07 16:21:19.475]2024,Hairdo 3,cha ID:2
+[04-07 16:21:19.475]2025,Hairdo 3,cha ID:2
+[04-07 16:21:19.476]2026,Hairdo 3,cha ID:2
+[04-07 16:21:19.476]2027,Hairdo 4,cha ID:2
+[04-07 16:21:19.477]2028,Hairdo 4,cha ID:2
+[04-07 16:21:19.478]2029,Hairdo 4,cha ID:2
+[04-07 16:21:19.478]2030,Hairdo 4,cha ID:2
+[04-07 16:21:19.479]2031,Hairdo 4,cha ID:2
+[04-07 16:21:19.479]2032,Hairdo 4,cha ID:2
+[04-07 16:21:19.480]2033,Hairdo 5,cha ID:2
+[04-07 16:21:19.481]2034,Hairdo 5,cha ID:2
+[04-07 16:21:19.481]2035,Hairdo 5,cha ID:2
+[04-07 16:21:19.482]2036,Hairdo 5,cha ID:2
+[04-07 16:21:19.482]2037,Hairdo 5,cha ID:2
+[04-07 16:21:19.483]2038,Hairdo 5,cha ID:2
+[04-07 16:21:19.483]2039,Hairdo 5,cha ID:2
+[04-07 16:21:19.484]2040,Hairdo 6,cha ID:2
+[04-07 16:21:19.484]2041,Hairdo 6,cha ID:2
+[04-07 16:21:19.484]2042,Hairdo 6,cha ID:2
+[04-07 16:21:19.488]2043,Hairdo 6,cha ID:2
+[04-07 16:21:19.488]2044,Hairdo 6,cha ID:2
+[04-07 16:21:19.488]2045,Hairdo 6,cha ID:2
+[04-07 16:21:19.490]2046,Hairdo 6,cha ID:2
+[04-07 16:21:19.490]2047,Hairdo 7,cha ID:2
+[04-07 16:21:19.492]2048,Hairdo 7,cha ID:2
+[04-07 16:21:19.492]2049,Hairdo 7,cha ID:2
+[04-07 16:21:19.494]2050,Hairdo 7,cha ID:2
+[04-07 16:21:19.494]2051,Hairdo 7,cha ID:2
+[04-07 16:21:19.494]2052,Hairdo 7,cha ID:2
+[04-07 16:21:19.494]2053,Hairdo 7,cha ID:2
+[04-07 16:21:19.494]2054,Hairdo 8,cha ID:2
+[04-07 16:21:19.494]2055,Hairdo 8,cha ID:2
+[04-07 16:21:19.499]2056,Hairdo 8,cha ID:2
+[04-07 16:21:19.500]2057,Hairdo 8,cha ID:2
+[04-07 16:21:19.500]2058,Hairdo 8,cha ID:2
+[04-07 16:21:19.500]2059,Hairdo 8,cha ID:2
+[04-07 16:21:19.502]2060,Guy 1 Bald Hairdo,cha ID:2
+[04-07 16:21:19.502]2061,Lance Failed Hairdo 2,cha ID:2
+[04-07 16:21:19.504]2062,Hairdo 1,cha ID:1
+[04-07 16:21:19.504]2063,Hairdo 2,cha ID:1
+[04-07 16:21:19.506]2064,Hairdo 3,cha ID:1
+[04-07 16:21:19.506]2065,Hairdo 4,cha ID:1
+[04-07 16:21:19.506]2066,Hairdo 5,cha ID:1
+[04-07 16:21:19.509]2067,Hairdo 6,cha ID:1
+[04-07 16:21:19.509]2068,Hairdo 7,cha ID:1
+[04-07 16:21:19.511]2069,Hairdo 8,cha ID:1
+[04-07 16:21:19.511]2070,Event Commissioner,cha ID:1
+[04-07 16:21:19.513]2071,Hairdo 1,cha ID:1
+[04-07 16:21:19.513]2072,Hairdo 1,cha ID:1
+[04-07 16:21:19.515]2073,Hairdo 1,cha ID:1
+[04-07 16:21:19.515]2074,Hairdo 1,cha ID:1
+[04-07 16:21:19.516]2075,Hairdo 1,cha ID:1
+[04-07 16:21:19.516]2076,Hairdo 1,cha ID:1
+[04-07 16:21:19.518]2077,Hairdo 1,cha ID:1
+[04-07 16:21:19.518]2078,Hairdo 2,cha ID:1
+[04-07 16:21:19.520]2079,Hairdo 2,cha ID:1
+[04-07 16:21:19.520]2080,Hairdo 2,cha ID:1
+[04-07 16:21:19.522]2081,Hairdo 2,cha ID:1
+[04-07 16:21:19.522]2082,Hairdo 2,cha ID:1
+[04-07 16:21:19.522]2083,Hairdo 2,cha ID:1
+[04-07 16:21:19.524]2084,Hairdo 3,cha ID:1
+[04-07 16:21:19.524]2085,Hairdo 3,cha ID:1
+[04-07 16:21:19.526]2086,Hairdo 3,cha ID:1
+[04-07 16:21:19.526]2087,Hairdo 3,cha ID:1
+[04-07 16:21:19.528]2088,Hairdo 3,cha ID:1
+[04-07 16:21:19.528]2089,Hairdo 3,cha ID:1
+[04-07 16:21:19.530]2090,Hairdo 4,cha ID:1
+[04-07 16:21:19.530]2091,Hairdo 4,cha ID:1
+[04-07 16:21:19.532]2092,Hairdo 4,cha ID:1
+[04-07 16:21:19.532]2093,Hairdo 4,cha ID:1
+[04-07 16:21:19.534]2094,Hairdo 4,cha ID:1
+[04-07 16:21:19.534]2095,Hairdo 4,cha ID:1
+[04-07 16:21:19.536]2096,Hairdo 4,cha ID:1
+[04-07 16:21:19.537]2097,Hairdo 5,cha ID:1
+[04-07 16:21:19.537]2098,Hairdo 5,cha ID:1
+[04-07 16:21:19.538]2099,Hairdo 5,cha ID:1
+[04-07 16:21:19.538]2100,Hairdo 5,cha ID:1
+[04-07 16:21:19.538]2101,Hairdo 6,cha ID:1
+[04-07 16:21:19.538]2102,Hairdo 6,cha ID:1
+[04-07 16:21:19.541]2103,Hairdo 6,cha ID:1
+[04-07 16:21:19.541]2104,Hairdo 6,cha ID:1
+[04-07 16:21:19.543]2105,Hairdo 6,cha ID:1
+[04-07 16:21:19.544]2106,Hairdo 6,cha ID:1
+[04-07 16:21:19.545]2107,Hairdo 6,cha ID:1
+[04-07 16:21:19.545]2108,Hairdo 7,cha ID:1
+[04-07 16:21:19.546]2109,Hairdo 7,cha ID:1
+[04-07 16:21:19.546]2110,Hairdo 7,cha ID:1
+[04-07 16:21:19.547]2111,Hairdo 7,cha ID:1
+[04-07 16:21:19.548]2112,Hairdo 7,cha ID:1
+[04-07 16:21:19.548]2113,Hairdo 7,cha ID:1
+[04-07 16:21:19.549]2114,Hairdo 8,cha ID:1
+[04-07 16:21:19.549]2115,Hairdo 8,cha ID:1
+[04-07 16:21:19.550]2116,Hairdo 8,cha ID:1
+[04-07 16:21:19.551]2117,Hairdo 8,cha ID:1
+[04-07 16:21:19.551]2118,Hairdo 8,cha ID:1
+[04-07 16:21:19.552]2119,Hairdo 8,cha ID:1
+[04-07 16:21:19.552]2120,Hairdo 8,cha ID:1
+[04-07 16:21:19.553]2121,Carsise Failed Hairdo 1,cha ID:1
+[04-07 16:21:19.553]2122,Guy 2 Bald Hairdo,cha ID:1
+[04-07 16:21:19.554]2123,Carsise Failed Hairdo 2,cha ID:1
+[04-07 16:21:19.555]2124,Hairdo 1,cha ID:1
+[04-07 16:21:19.555]2125,Hairdo 2,cha ID:1
+[04-07 16:21:19.556]2126,Hairdo 3,cha ID:1
+[04-07 16:21:19.556]2127,Hairdo 4,cha ID:1
+[04-07 16:21:19.557]2128,Hairdo 5,cha ID:1
+[04-07 16:21:19.558]2129,Hairdo 6,cha ID:1
+[04-07 16:21:19.558]2130,Hairdo 7,cha ID:1
+[04-07 16:21:19.558]2131,Hairdo 8,cha ID:1
+[04-07 16:21:19.558]2132,Event Commissioner,cha ID:1
+[04-07 16:21:19.558]2133,Hairdo 1,cha ID:1
+[04-07 16:21:19.558]2134,Hairdo 1,cha ID:1
+[04-07 16:21:19.558]2135,Hairdo 1,cha ID:1
+[04-07 16:21:19.558]2136,Hairdo 1,cha ID:1
+[04-07 16:21:19.558]2137,Hairdo 1,cha ID:1
+[04-07 16:21:19.558]2138,Hairdo 1,cha ID:1
+[04-07 16:21:19.558]2139,Hairdo 1,cha ID:1
+[04-07 16:21:19.558]2140,Hairdo 2,cha ID:1
+[04-07 16:21:19.558]2141,Hairdo 2,cha ID:1
+[04-07 16:21:19.558]2142,Hairdo 2,cha ID:1
+[04-07 16:21:19.558]2143,Hairdo 2,cha ID:1
+[04-07 16:21:19.558]2144,Hairdo 2,cha ID:1
+[04-07 16:21:19.558]2145,Hairdo 2,cha ID:1
+[04-07 16:21:19.558]2146,Hairdo 3,cha ID:1
+[04-07 16:21:19.558]2147,Hairdo 3,cha ID:1
+[04-07 16:21:19.558]2148,Hairdo 3,cha ID:1
+[04-07 16:21:19.558]2149,Hairdo 3,cha ID:1
+[04-07 16:21:19.558]2150,Hairdo 3,cha ID:1
+[04-07 16:21:19.558]2151,Hairdo 3,cha ID:1
+[04-07 16:21:19.558]2152,Hairdo 4,cha ID:1
+[04-07 16:21:19.558]2153,Hairdo 4,cha ID:1
+[04-07 16:21:19.558]2154,Hairdo 4,cha ID:1
+[04-07 16:21:19.558]2155,Hairdo 4,cha ID:1
+[04-07 16:21:19.558]2156,Hairdo 4,cha ID:1
+[04-07 16:21:19.574]2157,Hairdo 4,cha ID:1
+[04-07 16:21:19.574]2158,Hairdo 5,cha ID:1
+[04-07 16:21:19.576]2159,Hairdo 5,cha ID:1
+[04-07 16:21:19.577]2160,Hairdo 5,cha ID:1
+[04-07 16:21:19.577]2161,Hairdo 5,cha ID:1
+[04-07 16:21:19.579]2162,Hairdo 5,cha ID:1
+[04-07 16:21:19.579]2163,Hairdo 5,cha ID:1
+[04-07 16:21:19.579]2164,Hairdo 6,cha ID:1
+[04-07 16:21:19.579]2165,Hairdo 6,cha ID:1
+[04-07 16:21:19.579]2166,Hairdo 6,cha ID:1
+[04-07 16:21:19.582]2167,Hairdo 6,cha ID:1
+[04-07 16:21:19.582]2168,Hairdo 6,cha ID:1
+[04-07 16:21:19.582]2169,Hairdo 6,cha ID:1
+[04-07 16:21:19.584]2170,Hairdo 7,cha ID:1
+[04-07 16:21:19.584]2171,Hairdo 7,cha ID:1
+[04-07 16:21:19.584]2172,Hairdo 7,cha ID:1
+[04-07 16:21:19.585]2173,Hairdo 7,cha ID:1
+[04-07 16:21:19.586]2174,Hairdo 7,cha ID:1
+[04-07 16:21:19.586]2175,Hairdo 7,cha ID:1
+[04-07 16:21:19.587]2176,Hairdo 8,cha ID:1
+[04-07 16:21:19.588]2177,Hairdo 8,cha ID:1
+[04-07 16:21:19.589]2178,Hairdo 8,cha ID:1
+[04-07 16:21:19.589]2179,Hairdo 8,cha ID:1
+[04-07 16:21:19.590]2180,Hairdo 8,cha ID:1
+[04-07 16:21:19.591]2181,Hairdo 8,cha ID:1
+[04-07 16:21:19.591]2182,Phyllis Failed Hairdo 1,cha ID:1
+[04-07 16:21:19.592]2183,Phyllis Failed Hairdo 2,cha ID:1
+[04-07 16:21:19.594]2184,Girl 1 Bald Hairdo,cha ID:1
+[04-07 16:21:19.594]2185,Girl 1 Hair Makeup 01,cha ID:1
+[04-07 16:21:19.595]2186,Girl 2 Hair 00,cha ID:1
+[04-07 16:21:19.642]2275,Lance Trendy Hairdo 1,cha ID:4
+[04-07 16:21:19.642]2276,Lance Trendy Hairdo 2,cha ID:4
+[04-07 16:21:19.642]2277,Lance Trendy Hairdo 3,cha ID:4
+[04-07 16:21:19.642]2278,Lance Trendy Hairdo 4,cha ID:4
+[04-07 16:21:19.642]2279,Carsise Trendy Hairdo 1,cha ID:4
+[04-07 16:21:19.642]2280,Carsise Trendy Hairdo 2,cha ID:4
+[04-07 16:21:19.642]2281,Carsise Trendy Hairdo 3,cha ID:4
+[04-07 16:21:19.642]2282,Carsise Trendy Hairdo 4,cha ID:4
+[04-07 16:21:19.642]2283,Phyllis Trendy Hairdo 1,cha ID:4
+[04-07 16:21:19.642]2284,Phyllis Trendy Hairdo 2,cha ID:4
+[04-07 16:21:19.642]2285,Phyllis Trendy Hairdo 3,cha ID:4
+[04-07 16:21:19.642]2286,Phyllis Trendy Hairdo 4,cha ID:4
+[04-07 16:21:19.741]2434,Arrow 02,cha ID:1
+[04-07 16:21:19.749]2448,Gunpowder 02,cha ID:1
+[04-07 16:21:19.785]2499,Left Plaster Glove,cha ID:1
+[04-07 16:21:19.785]2500,Left Brawler Glove,cha ID:1
+[04-07 16:21:19.786]2501,Left Master Glove,cha ID:1
+[04-07 16:21:19.787]2502,Left Jagged Blade,cha ID:1
+[04-07 16:21:19.787]2503,Left Cosmo Blade,cha ID:1
+[04-07 16:21:19.788]2504,Left Tiger Glove,cha ID:1
+[04-07 16:21:19.788]2505,Left Hand of Death,cha ID:1
+[04-07 16:21:19.796]2517,UPO Cap,cha ID:1
+[04-07 16:21:19.800]2527,Raging Bull Tattoo,cha ID:3
+[04-07 16:21:19.801]2528,Savage Bull Tattoo,cha ID:3
+[04-07 16:21:19.802]2529,Primal Tattoo,cha ID:3
+[04-07 16:21:19.802]2530,Hephaestus Framestone,cha ID:1
+[04-07 16:21:19.803]2531,Hephaestus Clawstone,cha ID:1
+[04-07 16:21:19.803]2532,Hephaestus Pawstone,cha ID:1
+[04-07 16:21:19.804]2533,Hermes Framestone,cha ID:1
+[04-07 16:21:19.805]2534,Hermes Clawstone,cha ID:1
+[04-07 16:21:19.805]2535,Hermes Pawstone,cha ID:1
+[04-07 16:21:19.806]2536,Apollo Framestone,cha ID:1
+[04-07 16:21:19.806]2537,Apollo Clawstone,cha ID:1
+[04-07 16:21:19.807]2538,Apollo Pawstone,cha ID:1
+[04-07 16:21:19.807]2539,Poseidon Framestone,cha ID:1
+[04-07 16:21:19.808]2540,Poseidon Clawstone,cha ID:1
+[04-07 16:21:19.809]2541,Poseidon Pawstone,cha ID:1
+[04-07 16:21:19.809]2542,Hestia Framestone,cha ID:1
+[04-07 16:21:19.809]2543,Hestia Clawstone,cha ID:1
+[04-07 16:21:19.810]2544,Hestia Pawstone,cha ID:1
+[04-07 16:21:19.811]2545,Athena Framestone,cha ID:1
+[04-07 16:21:19.811]2546,Athena Clawstone,cha ID:1
+[04-07 16:21:19.812]2547,Athena Pawstone,cha ID:1
+[04-07 16:21:19.812]2548,Artemis Crownstone,cha ID:4
+[04-07 16:21:19.815]2552,Corporeal Kylin Cap,cha ID:1
+[04-07 16:21:20.123]3061,Bear Shoes,cha ID:1
+[04-07 16:21:20.268]3285,Calculator,cha ID:1
+[04-07 16:21:20.268]3287,Serious study book,cha ID:1
+[04-07 16:21:20.509]3612,Virgo's Shadow,cha ID:2
+[04-07 16:21:20.509]3613,Virgo's Touch,cha ID:2
+[04-07 16:21:20.509]3614,Virgo's Trace,cha ID:2
+[04-07 16:21:20.509]3617,Virgo's Bind,cha ID:1
+[04-07 16:21:20.509]3618,Virgo's Claw,cha ID:1
+[04-07 16:21:20.509]3619,Virgo's Print,cha ID:1
+[04-07 16:21:20.509]3622,Virgo's Protection,cha ID:2
+[04-07 16:21:20.509]3623,Virgo's Caress,cha ID:2
+[04-07 16:21:20.509]3624,Virgo's Dance,cha ID:2
+[04-07 16:21:20.509]3627,Virgo's Possession,cha ID:1
+[04-07 16:21:20.509]3628,Virgo's Death,cha ID:1
+[04-07 16:21:20.522]3629,Virgo's Trail,cha ID:1
+[04-07 16:21:20.524]3632,Virgo's Torso,cha ID:1
+[04-07 16:21:20.524]3633,Virgo's Span,cha ID:1
+[04-07 16:21:20.526]3634,Virgo's Wanderer,cha ID:1
+[04-07 16:21:20.528]3638,Virgo's Seal,cha ID:2
+[04-07 16:21:20.530]3639,Virgo's Hand,cha ID:2
+[04-07 16:21:20.530]3640,Virgo's Brace,cha ID:2
+[04-07 16:21:20.881]4147,Spirit Beast Tattoo,cha ID:3
+[04-07 16:21:20.881]4148,Arcane Beast Tattoo,cha ID:3
+[04-07 16:21:20.881]4149,Capricious Battle Armor,cha ID:4
+[04-07 16:21:20.883]4150,Sagacious Battle Armor,cha ID:4
+[04-07 16:21:20.883]4151,Robe of Perception,cha ID:2
+[04-07 16:21:20.883]4152,Robe of Gallant,cha ID:2
+[04-07 16:21:20.883]4153,Nautical Coat,cha ID:2
+[04-07 16:21:20.885]4154,Arcane Lobster Costume,cha ID:1
+[04-07 16:21:20.885]4155,Robe of Stride,cha ID:2
+[04-07 16:21:20.885]4156,Pique Lobster Costume,cha ID:1
+[04-07 16:21:20.887]4157,Robe of Melody,cha ID:1
+[04-07 16:21:20.887]4158,Arcane Bunny Costume,cha ID:1
+[04-07 16:21:20.887]4159,Robe of Spirit,cha ID:1
+[04-07 16:21:20.889]4160,Pique Bunny Costume,cha ID:1
+[04-07 16:21:20.889]4161,Robe of Vengence,cha ID:1
+[04-07 16:21:20.889]4162,Arcane Otter Costume,cha ID:1
+[04-07 16:21:20.889]4163,Robe of Amercement,cha ID:1
+[04-07 16:21:20.891]4164,Pique Otter Costume,cha ID:1
+[04-07 16:21:20.891]4165,Capricious Battle Gauntlets,cha ID:4
+[04-07 16:21:20.891]4166,Sagacious Battle Gauntlets,cha ID:4
+[04-07 16:21:20.893]4167,Gloves of Perception,cha ID:2
+[04-07 16:21:20.893]4168,Gloves of Gallant,cha ID:2
+[04-07 16:21:20.895]4169,Nautical Gloves,cha ID:2
+[04-07 16:21:20.896]4170,Arcane Lobster Muffs,cha ID:1
+[04-07 16:21:20.896]4171,Gloves of Stride,cha ID:2
+[04-07 16:21:20.897]4172,Pique Lobster Muffs,cha ID:1
+[04-07 16:21:20.898]4173,Gloves of Melody,cha ID:1
+[04-07 16:21:20.898]4174,Arcane Bunny Muffs,cha ID:1
+[04-07 16:21:20.899]4175,Gloves of Spirit,cha ID:1
+[04-07 16:21:20.899]4176,Pique Bunny Muffs,cha ID:1
+[04-07 16:21:20.900]4177,Gloves of Vengence,cha ID:1
+[04-07 16:21:20.900]4178,Arcane Otter Muffs,cha ID:1
+[04-07 16:21:20.901]4179,Gloves of Amercement,cha ID:1
+[04-07 16:21:20.902]4180,Pique Otter Muffs,cha ID:1
+[04-07 16:21:20.902]4181,Capricious Battle Greaves,cha ID:4
+[04-07 16:21:20.903]4182,Sagacious Battle Greaves,cha ID:4
+[04-07 16:21:20.903]4183,Boots of Perception,cha ID:2
+[04-07 16:21:20.904]4184,Boots of Gallant,cha ID:2
+[04-07 16:21:20.905]4185,Nautical Boots,cha ID:2
+[04-07 16:21:20.905]4186,Arcane Lobster Shoes,cha ID:1
+[04-07 16:21:20.906]4187,Boots of Stride,cha ID:2
+[04-07 16:21:20.906]4188,Pique Lobster Shoes,cha ID:1
+[04-07 16:21:20.907]4189,Boots of Melody,cha ID:1
+[04-07 16:21:20.908]4190,Arcane Bunny Shoes,cha ID:1
+[04-07 16:21:20.908]4191,Boots of Spirit,cha ID:1
+[04-07 16:21:20.909]4192,Pique Bunny Shoes,cha ID:1
+[04-07 16:21:20.909]4193,Boots of Vengence,cha ID:1
+[04-07 16:21:20.910]4194,Arcane Otter Shoes,cha ID:1
+[04-07 16:21:20.910]4195,Boots of Amercement,cha ID:1
+[04-07 16:21:20.910]4196,Pique Otter Shoes,cha ID:1
+[04-07 16:21:22.238]6144,Forest Battle Robe,cha ID:2
+[04-07 16:21:22.239]6145,Forest Battle Gloves,cha ID:2
+[04-07 16:21:22.240]6146,Forest Battle Boots,cha ID:2
+[04-07 16:21:22.241]6147,Holy Armor,cha ID:2
+[04-07 16:21:22.242]6148,Holy Armor Gloves,cha ID:2
+[04-07 16:21:22.243]6149,Holy Armor Boots,cha ID:2
+[04-07 16:21:22.243]6150,Savage Armor,cha ID:1
+[04-07 16:21:22.244]6151,Savage Armor Gloves,cha ID:1
+[04-07 16:21:22.245]6152,Savage Armor Boots,cha ID:1
+[04-07 16:21:22.246]6154,Ice Battle Armor,cha ID:2
+[04-07 16:21:22.247]6155,Ice Battle Gloves,cha ID:2
+[04-07 16:21:22.248]6156,Ice Battle Boots,cha ID:2
+[04-07 16:21:22.249]6158,Ice Holy Robe,cha ID:1
+[04-07 16:21:22.249]6159,Ice Holy Gloves,cha ID:1
+[04-07 16:21:22.250]6160,Ice Holy Boots,cha ID:1
+[04-07 16:21:22.251]6162,Ice Magic Robe,cha ID:1
+[04-07 16:21:22.252]6163,Ice Spirit Gloves,cha ID:1
+[04-07 16:21:22.252]6164,Ice Spirit Boots,cha ID:1
+[04-07 16:21:22.259]6174,Sealed Guard of Epic Prowess,cha ID:2
+[04-07 16:21:22.259]6175,Sealed Bless of Epic Prowess,cha ID:2
+[04-07 16:21:22.260]6176,Sealed Mercy of Epic Prowess,cha ID:2
+[04-07 16:21:22.261]6178,Sealed Guard of Honor,cha ID:2
+[04-07 16:21:22.262]6179,Sealed Bless of Honor,cha ID:2
+[04-07 16:21:22.262]6180,Sealed Mercy of Honor,cha ID:2
+[04-07 16:21:22.264]6182,Sealed Guard of Sacrifice,cha ID:1
+[04-07 16:21:22.264]6183,Sealed Bless of Sacrifice,cha ID:1
+[04-07 16:21:22.265]6184,Sealed Mercy of Sacrifice,cha ID:1
+[04-07 16:21:22.266]6186,Sealed Guard of Justice,cha ID:2
+[04-07 16:21:22.267]6187,Sealed Bless of Justice,cha ID:2
+[04-07 16:21:22.267]6188,Sealed Mercy of Justice,cha ID:2
+[04-07 16:21:22.268]6190,Sealed Guard of Empathy,cha ID:1
+[04-07 16:21:22.269]6191,Sealed Bless of Empathy,cha ID:1
+[04-07 16:21:22.270]6192,Sealed Mercy of Empathy,cha ID:1
+[04-07 16:21:22.271]6194,Sealed Guard of Inspiration,cha ID:1
+[04-07 16:21:22.271]6195,Sealed Bless of Inspiration,cha ID:1
+[04-07 16:21:22.272]6196,Sealed Mercy of Inspiration,cha ID:1
+[04-07 16:21:22.657]7096,Kylin Helm,cha ID:1
+[04-07 16:21:22.664]7108,Frozen Kylin Helm,cha ID:1
+[04-07 16:21:22.665]7109,Dark Kylin Helm,cha ID:1
+[04-07 16:21:22.665]7110,Holy Kylin Helm,cha ID:1
+[04-07 16:21:22.679]7132,Black Dragon Lord's Helm,cha ID:1
+[04-07 16:21:22.700]7166,Undead Kylin Helm,cha ID:1
+[04-07 16:21:22.715]7205,Champion's Bind,cha ID:1
+[04-07 16:21:22.715]7206,Champion's Touch,cha ID:1
+[04-07 16:21:22.715]7207,Champion's Print,cha ID:1
+[04-07 16:21:22.715]7208,Crusader's Shadow,cha ID:2
+[04-07 16:21:22.715]7209,Crusader's Touch,cha ID:2
+[04-07 16:21:22.715]7210,Crusader's Trace,cha ID:2
+[04-07 16:21:22.715]7211,Sharpshooter's Seal,cha ID:2
+[04-07 16:21:22.715]7212,Sharpshooter's Hand,cha ID:2
+[04-07 16:21:22.715]7213,Sharpshooter's Brace,cha ID:2
+[04-07 16:21:22.715]7214,Voyager's Protection,cha ID:2
+[04-07 16:21:22.715]7215,Voyager's Caress,cha ID:2
+[04-07 16:21:22.731]7216,Voyager's Dance,cha ID:2
+[04-07 16:21:22.731]7217,Cleric's Possession,cha ID:1
+[04-07 16:21:22.732]7218,Cleric Hands of Healing,cha ID:1
+[04-07 16:21:22.732]7219,Cleric's Trail,cha ID:1
+[04-07 16:21:22.733]7220,Sealmaster's Torso,cha ID:1
+[04-07 16:21:22.734]7221,Sealmaster's Span,cha ID:1
+[04-07 16:21:22.734]7222,Sealmaster's Wanderer,cha ID:1
+[04-07 16:21:22.735]7223,Hairdo 1,cha ID:2
+[04-07 16:21:22.735]7224,Hairdo 1,cha ID:2
+[04-07 16:21:22.736]7225,Hairdo 3,cha ID:2
+[04-07 16:21:22.737]7226,Hairdo 4,cha ID:2
+[04-07 16:21:22.737]7227,Hairdo 5,cha ID:2
+[04-07 16:21:22.738]7228,Hairdo 8,cha ID:2
+[04-07 16:21:22.738]7229,Lance Trendy Hairdo 4,cha ID:4
+[04-07 16:21:22.739]7230,Hairdo 1,cha ID:2
+[04-07 16:21:22.740]7231,Hairdo 1,cha ID:2
+[04-07 16:21:22.740]7232,Hairdo 2,cha ID:2
+[04-07 16:21:22.741]7233,Hairdo 2,cha ID:2
+[04-07 16:21:22.741]7234,Hairdo 3,cha ID:2
+[04-07 16:21:22.742]7235,Hairdo 4,cha ID:2
+[04-07 16:21:22.743]7236,Hairdo 4,cha ID:2
+[04-07 16:21:22.748]7245,Terra's Undead Kylin Helm,cha ID:1
+[04-07 16:21:22.877]7501,Lance Trendy Hairdo 3,cha ID:4
+[04-07 16:21:22.877]7502,Lance Trendy Hairdo 4,cha ID:4
+[04-07 16:21:22.877]7503,Lance Trendy Hairdo 5,cha ID:4
+[04-07 16:21:22.877]7504,Lance Trendy Hairdo 6,cha ID:4
+[04-07 16:21:22.877]7505,Lance Trendy Hairdo 7,cha ID:4
+[04-07 16:21:22.877]7506,Lance Trendy Hairdo 8,cha ID:4
+[04-07 16:21:22.877]7507,Lance Trendy Hairdo 9,cha ID:4
+[04-07 16:21:22.877]7508,Lance Trendy Hairdo 10,cha ID:4
+[04-07 16:21:22.877]7509,Lance Trendy Hairdo 11,cha ID:2
+[04-07 16:21:22.893]7510,Lance Trendy Hairdo 12,cha ID:2
+[04-07 16:21:22.893]7511,Lance Trendy Hairdo 13,cha ID:2
+[04-07 16:21:22.893]7512,Lance Trendy Hairdo 14,cha ID:2
+[04-07 16:21:22.893]7513,Lance Trendy Hairdo 15,cha ID:2
+[04-07 16:21:22.893]7514,Lance Trendy Hairdo 16,cha ID:2
+[04-07 16:21:22.893]7515,Lance Trendy Hairdo 17,cha ID:2
+[04-07 16:21:22.893]7516,Lance Trendy Hairdo 18,cha ID:2
+[04-07 16:21:22.893]7517,Phyllis Trendy Hairdo 3,cha ID:4
+[04-07 16:21:22.893]7518,Phyllis Trendy Hairdo 4,cha ID:4
+[04-07 16:21:22.893]7519,Phyllis Trendy Hairdo 5,cha ID:4
+[04-07 16:21:22.893]7520,Phyllis Trendy Hairdo 6,cha ID:4
+[04-07 16:21:22.893]7521,Phyllis Trendy Hairdo 7,cha ID:4
+[04-07 16:21:22.893]7522,Phyllis Trendy Hairdo 8,cha ID:4
+[04-07 16:21:22.893]7523,Phyllis Trendy Hairdo 9,cha ID:4
+[04-07 16:21:22.893]7524,Phyllis Trendy Hairdo 10,cha ID:4
+[04-07 16:21:23.439]9700,Tattoo of Evanescence,cha ID:3
+[04-07 16:21:23.439]9704,Armor of Evanescence,cha ID:4
+[04-07 16:21:23.449]9706,Gauntlets of Evanescence,cha ID:4
+[04-07 16:21:23.451]9707,Greaves of Evanescence,cha ID:4
+[04-07 16:21:23.451]9708,Coat of Evanescence,cha ID:2
+[04-07 16:21:23.453]9710,Gloves of Evanescence,cha ID:2
+[04-07 16:21:23.453]9711,Shoes of Evanescence,cha ID:2
+[04-07 16:21:23.455]9712,Robe of the Arcane,cha ID:1
+[04-07 16:21:23.457]9714,Gloves of the Arcane,cha ID:1
+[04-07 16:21:23.457]9715,Boots of the of the Arcane,cha ID:1
+[04-07 16:21:23.457]9716,Robe of Malediction,cha ID:1
+[04-07 16:21:23.459]9718,Gloves of Malediction,cha ID:1
+[04-07 16:21:23.461]9719,Boots of Malediction,cha ID:1
+[04-07 16:21:23.461]9720,Cloak of Evanescence,cha ID:2
+[04-07 16:21:23.463]9722,Heavy Gloves of Evanescence,cha ID:2
+[04-07 16:21:23.463]9723,Boots of Evanescence,cha ID:2
+[04-07 16:21:23.465]9724,Tattoo of Enigma,cha ID:3
+[04-07 16:21:23.465]9725,Armor of Enigma,cha ID:4
+[04-07 16:21:23.469]9728,Mantle of Enigma,cha ID:2
+[04-07 16:21:23.471]9731,Robe of Enigma,cha ID:1
+[04-07 16:21:23.471]9733,Robe of the Sphinx,cha ID:1
+[04-07 16:21:23.471]9735,Mantle of the Sphinx,cha ID:2
+[04-07 16:21:23.475]9736,Tattoo of the Cursed Warrior,cha ID:3
+[04-07 16:21:23.475]9737,Platemail of the Cursed Soul,cha ID:4
+[04-07 16:21:23.477]9740,Corset of Incantation,cha ID:2
+[04-07 16:21:23.479]9743,Coat of Invocation,cha ID:1
+[04-07 16:21:23.480]9745,Robe of Abraxas,cha ID:1
+[04-07 16:21:23.481]9747,Mantle of the Cursed Flame,cha ID:2
+[04-07 16:27:32.911]135,Arrow 01,cha ID:1
+[04-07 16:27:32.947]200,Left Plaster Glove,cha ID:1
+[04-07 16:27:32.948]201,Left Brawler Glove,cha ID:1
+[04-07 16:27:32.948]202,Left Master Glove,cha ID:1
+[04-07 16:27:32.949]203,Left Jagged Blade,cha ID:1
+[04-07 16:27:32.949]204,Left Cosmo Blade,cha ID:1
+[04-07 16:27:32.950]205,Left Tiger Glove,cha ID:1
+[04-07 16:27:32.950]206,Left Hand of Death,cha ID:1
+[04-07 16:27:32.964]228,Raging Bull Tattoo,cha ID:3
+[04-07 16:27:32.964]229,Savage Bull Tattoo,cha ID:3
+[04-07 16:27:32.965]230,Primal Tattoo,cha ID:3
+[04-07 16:27:32.998]290,Husk Armor,cha ID:4
+[04-07 16:27:32.999]291,Thick Armor,cha ID:4
+[04-07 16:27:32.999]292,Leather Armor,cha ID:4
+[04-07 16:27:33.000]293,Rhino Hide Armor,cha ID:4
+[04-07 16:27:33.000]294,Tiger Hide Armor,cha ID:4
+[04-07 16:27:33.001]295,Breast Plate,cha ID:4
+[04-07 16:27:33.001]296,Soft Leather Armor,cha ID:4
+[04-07 16:27:33.002]297,Heavy Leather Armor,cha ID:4
+[04-07 16:27:33.002]298,Strong Leather Armor,cha ID:4
+[04-07 16:27:33.003]299,Mithril Platemail,cha ID:4
+[04-07 16:27:33.003]300,Chain Mail,cha ID:3
+[04-07 16:27:33.004]301,Strong Platemail,cha ID:3
+[04-07 16:27:33.005]302,Light Platemail,cha ID:4
+[04-07 16:27:33.005]303,Silver Platemail,cha ID:4
+[04-07 16:27:33.006]304,Ceremonial Platemail,cha ID:4
+[04-07 16:27:33.006]305,Coarse Vest,cha ID:2
+[04-07 16:27:33.007]306,Canvas Vest,cha ID:2
+[04-07 16:27:33.007]307,Exquisite Vest,cha ID:2
+[04-07 16:27:33.008]308,Leather Vest,cha ID:2
+[04-07 16:27:33.008]309,Warrior Frock,cha ID:2
+[04-07 16:27:33.009]310,Feather Vest,cha ID:2
+[04-07 16:27:33.009]311,Safari Vest,cha ID:2
+[04-07 16:27:33.010]312,Emerald Vest,cha ID:2
+[04-07 16:27:33.011]313,Hunter Vest,cha ID:2
+[04-07 16:27:33.011]314,Slick Vest,cha ID:2
+[04-07 16:27:33.012]315,Peacock Vest,cha ID:2
+[04-07 16:27:33.012]316,Ringdove Vest,cha ID:2
+[04-07 16:27:33.013]317,Raptor Vest,cha ID:2
+[04-07 16:27:33.023]335,Cloth Shirt,cha ID:2
+[04-07 16:27:33.024]336,Tough Vest,cha ID:2
+[04-07 16:27:33.025]337,Explorer Vest,cha ID:2
+[04-07 16:27:33.025]338,Adventure Vest,cha ID:2
+[04-07 16:27:33.025]339,Helmsman Vest,cha ID:2
+[04-07 16:27:33.027]340,Oarsman Vest,cha ID:2
+[04-07 16:27:33.027]341,Deckman Vest,cha ID:2
+[04-07 16:27:33.028]342,Mastman Vest,cha ID:2
+[04-07 16:27:33.028]343,Hurricane Vest,cha ID:2
+[04-07 16:27:33.029]344,Whirlpool Vest,cha ID:2
+[04-07 16:27:33.030]345,Wind Vest,cha ID:2
+[04-07 16:27:33.032]350,Crabby Costume,cha ID:1
+[04-07 16:27:33.033]351,Rooroo Costume,cha ID:1
+[04-07 16:27:33.033]352,Playful Racoon Costume,cha ID:1
+[04-07 16:27:33.034]353,Duckling Costume,cha ID:1
+[04-07 16:27:33.034]354,Big Crab Costume,cha ID:1
+[04-07 16:27:33.035]355,Lobster Costume,cha ID:1
+[04-07 16:27:33.036]356,Ducky Costume,cha ID:1
+[04-07 16:27:33.037]357,Prawn Costume,cha ID:1
+[04-07 16:27:33.037]358,Pincer Costume,cha ID:1
+[04-07 16:27:33.038]359,Sheepy Costume,cha ID:1
+[04-07 16:27:33.038]360,Meowy Costume,cha ID:1
+[04-07 16:27:33.039]361,Owl Costume,cha ID:1
+[04-07 16:27:33.039]362,Hopperoo Costume,cha ID:1
+[04-07 16:27:33.040]363,Clever Otter Costume,cha ID:1
+[04-07 16:27:33.041]364,Lucky Otter Costume,cha ID:1
+[04-07 16:27:33.041]365,Medic Robe,cha ID:1
+[04-07 16:27:33.042]366,Foster Robe,cha ID:1
+[04-07 16:27:33.042]367,Travel Robe,cha ID:1
+[04-07 16:27:33.043]368,Nurse Robe,cha ID:1
+[04-07 16:27:33.043]369,Garcon Robe,cha ID:1
+[04-07 16:27:33.044]370,Holy Robe,cha ID:1
+[04-07 16:27:33.045]371,Follower Robe,cha ID:1
+[04-07 16:27:33.045]372,Attendant Robe,cha ID:1
+[04-07 16:27:33.046]373,Scholar Robe,cha ID:1
+[04-07 16:27:33.046]374,Emergency Robe,cha ID:1
+[04-07 16:27:33.047]375,Passage Robe,cha ID:1
+[04-07 16:27:33.047]376,Healer Robe,cha ID:1
+[04-07 16:27:33.048]377,Protector Robe,cha ID:1
+[04-07 16:27:33.048]378,Piety Robe,cha ID:1
+[04-07 16:27:33.049]379,Blessed Robe,cha ID:1
+[04-07 16:27:33.050]380,Mousey Costume,cha ID:1
+[04-07 16:27:33.050]381,Kitty Costume,cha ID:1
+[04-07 16:27:33.051]382,Loopy Bunny Costume,cha ID:1
+[04-07 16:27:33.051]383,Goaty Costume,cha ID:1
+[04-07 16:27:33.052]384,Deer Costume,cha ID:1
+[04-07 16:27:33.052]385,Otter Costume,cha ID:1
+[04-07 16:27:33.053]386,Racoon Costume,cha ID:1
+[04-07 16:27:33.054]388,Happy Bunny Costume,cha ID:1
+[04-07 16:27:33.055]389,Night Owl Costume,cha ID:1
+[04-07 16:27:33.055]390,Kangaroo Costume,cha ID:1
+[04-07 16:27:33.055]391,Joyful Bunny Costume,cha ID:1
+[04-07 16:27:33.057]392,Bunny Baby Costume,cha ID:1
+[04-07 16:27:33.058]393,Lucky Bunny Costume,cha ID:1
+[04-07 16:27:33.058]394,Heavenly Vest,cha ID:1
+[04-07 16:27:33.059]395,Armor of Night,cha ID:2
+[04-07 16:27:33.059]396,Armor of Secrets,cha ID:2
+[04-07 16:27:33.060]397,Armor of Hercules,cha ID:1
+[04-07 16:27:33.060]398,Armor of Olympus,cha ID:1
+[04-07 16:27:33.061]399,Vest of Marksmanship,cha ID:2
+[04-07 16:27:33.062]400,Vest of Apollo,cha ID:2
+[04-07 16:27:33.062]401,Robe of the Wise,cha ID:1
+[04-07 16:27:33.063]402,Robe of the Sage,cha ID:1
+[04-07 16:27:33.063]403,Happy Panda Costume,cha ID:1
+[04-07 16:27:33.064]404,Mystic Panda Costume,cha ID:1
+[04-07 16:27:33.064]405,Fairy Robe,cha ID:1
+[04-07 16:27:33.065]406,Faerie Robe,cha ID:1
+[04-07 16:27:33.066]407,Gold Fish Costume,cha ID:1
+[04-07 16:27:33.066]408,Fish Fairy Costume,cha ID:1
+[04-07 16:27:33.067]409,Tidal Robe,cha ID:2
+[04-07 16:27:33.067]410,Bear Costume,cha ID:1
+[04-07 16:27:33.068]411,Tsunami Robe,cha ID:2
+[04-07 16:27:33.068]412,Dragon Costume,cha ID:1
+[04-07 16:27:33.069]413,Dragon Lord Costume,cha ID:1
+[04-07 16:27:33.100]466,Husk Gloves,cha ID:4
+[04-07 16:27:33.101]467,Thick Gloves,cha ID:4
+[04-07 16:27:33.101]468,Leather Gloves,cha ID:4
+[04-07 16:27:33.102]469,Rhino Hide Gloves,cha ID:4
+[04-07 16:27:33.103]470,Tiger Hide Gloves,cha ID:4
+[04-07 16:27:33.103]471,Gauntlets,cha ID:4
+[04-07 16:27:33.105]472,Soft Leather Gloves,cha ID:4
+[04-07 16:27:33.105]473,Heavy Leather Gloves,cha ID:4
+[04-07 16:27:33.106]474,Strong Leather Gloves,cha ID:4
+[04-07 16:27:33.106]475,Mithril Gauntlets,cha ID:4
+[04-07 16:27:33.106]476,Chain Gauntlets,cha ID:3
+[04-07 16:27:33.107]477,Strong Gauntlets,cha ID:3
+[04-07 16:27:33.107]478,Light Gauntlets,cha ID:4
+[04-07 16:27:33.108]479,Silver Gauntlets,cha ID:4
+[04-07 16:27:33.109]480,Ceremonial Gauntlets,cha ID:4
+[04-07 16:27:33.109]481,Coarse Gloves,cha ID:2
+[04-07 16:27:33.110]482,Canvas Gloves,cha ID:2
+[04-07 16:27:33.110]483,Exquisite Gloves,cha ID:2
+[04-07 16:27:33.111]484,Leather Gloves,cha ID:2
+[04-07 16:27:33.111]485,Warrior Gloves,cha ID:2
+[04-07 16:27:33.112]486,Feather Gloves,cha ID:2
+[04-07 16:27:33.112]487,Safari Gloves,cha ID:2
+[04-07 16:27:33.113]488,Emerald Gloves,cha ID:2
+[04-07 16:27:33.114]489,Hunter Gloves,cha ID:2
+[04-07 16:27:33.114]490,Slick Gloves,cha ID:2
+[04-07 16:27:33.115]491,Peacock Gloves,cha ID:2
+[04-07 16:27:33.115]492,Ringdove Gloves,cha ID:2
+[04-07 16:27:33.116]493,Raptor Gloves,cha ID:2
+[04-07 16:27:33.125]511,Cloth Gloves,cha ID:2
+[04-07 16:27:33.127]512,Tough Gloves,cha ID:2
+[04-07 16:27:33.128]513,Explorer Gloves,cha ID:2
+[04-07 16:27:33.128]514,Adventure Gloves,cha ID:2
+[04-07 16:27:33.129]515,Helmsman Gloves,cha ID:2
+[04-07 16:27:33.129]516,Oarsman Gloves,cha ID:2
+[04-07 16:27:33.130]517,Deckman Gloves,cha ID:2
+[04-07 16:27:33.130]518,Mastman Gloves,cha ID:2
+[04-07 16:27:33.131]519,Hurricane Gloves,cha ID:2
+[04-07 16:27:33.132]520,Whirlpool Gloves,cha ID:2
+[04-07 16:27:33.132]521,Wind Gloves,cha ID:2
+[04-07 16:27:33.135]526,Crabby Gloves,cha ID:1
+[04-07 16:27:33.135]527,Rooroo Muffs,cha ID:1
+[04-07 16:27:33.136]528,Playful Racoon Muffs,cha ID:1
+[04-07 16:27:33.137]529,Duckling Muffs,cha ID:1
+[04-07 16:27:33.137]530,Big Crab Muffs,cha ID:1
+[04-07 16:27:33.138]531,Lobster Muffs,cha ID:1
+[04-07 16:27:33.138]532,Ducky Muffs,cha ID:1
+[04-07 16:27:33.139]533,Prawn Muffs,cha ID:1
+[04-07 16:27:33.139]534,Pincer Muffs,cha ID:1
+[04-07 16:27:33.140]535,Sheepy Muffs,cha ID:1
+[04-07 16:27:33.140]536,Meowy Muffs,cha ID:1
+[04-07 16:27:33.141]537,Owl Muffs,cha ID:1
+[04-07 16:27:33.142]538,Hopperoo Muffs,cha ID:1
+[04-07 16:27:33.142]539,Clever Otter Muffs,cha ID:1
+[04-07 16:27:33.143]540,Lucky Otter Muffs,cha ID:1
+[04-07 16:27:33.143]541,Medic Gloves,cha ID:1
+[04-07 16:27:33.144]542,Foster Gloves,cha ID:1
+[04-07 16:27:33.144]543,Travel Gloves,cha ID:1
+[04-07 16:27:33.144]544,Nurse Gloves,cha ID:1
+[04-07 16:27:33.146]545,Garcon Gloves,cha ID:1
+[04-07 16:27:33.146]546,Holy Gloves,cha ID:1
+[04-07 16:27:33.147]547,Follower Gloves,cha ID:1
+[04-07 16:27:33.147]548,Attendant Gloves,cha ID:1
+[04-07 16:27:33.148]549,Scholar Gloves,cha ID:1
+[04-07 16:27:33.149]550,Emergency Gloves,cha ID:1
+[04-07 16:27:33.149]551,Passage Gloves,cha ID:1
+[04-07 16:27:33.150]552,Healer Gloves,cha ID:1
+[04-07 16:27:33.150]553,Protector Gloves,cha ID:1
+[04-07 16:27:33.151]554,Piety Gloves,cha ID:1
+[04-07 16:27:33.151]555,Blessed Gloves,cha ID:1
+[04-07 16:27:33.152]556,Mousey Muffs,cha ID:1
+[04-07 16:27:33.153]557,Kitty Muffs,cha ID:1
+[04-07 16:27:33.153]558,Loopy Bunny Muffs,cha ID:1
+[04-07 16:27:33.154]559,Goaty Muffs,cha ID:1
+[04-07 16:27:33.154]560,Deer Muffs,cha ID:1
+[04-07 16:27:33.155]561,Otter Muffs,cha ID:1
+[04-07 16:27:33.155]562,Racoon Muffs,cha ID:1
+[04-07 16:27:33.156]564,Happy Bunny Muffs,cha ID:1
+[04-07 16:27:33.157]565,Night Owl Muffs,cha ID:1
+[04-07 16:27:33.157]566,Kangaroo Muffs,cha ID:1
+[04-07 16:27:33.159]567,Joyful Bunny Muffs,cha ID:1
+[04-07 16:27:33.159]568,Bunny Baby Muffs,cha ID:1
+[04-07 16:27:33.160]569,Lucky Bunny Muffs,cha ID:1
+[04-07 16:27:33.160]570,Heavenly Gloves,cha ID:1
+[04-07 16:27:33.170]586,Bear Gloves,cha ID:1
+[04-07 16:27:33.170]587,Gloves of Night,cha ID:2
+[04-07 16:27:33.171]588,Gloves of Secrets,cha ID:2
+[04-07 16:27:33.171]589,Gloves of Marksmanship,cha ID:2
+[04-07 16:27:33.172]590,Gloves of Apollo,cha ID:2
+[04-07 16:27:33.173]591,Gloves of the Wise,cha ID:1
+[04-07 16:27:33.173]592,Gloves of the Sage,cha ID:1
+[04-07 16:27:33.174]593,Happy Panda Gloves,cha ID:1
+[04-07 16:27:33.174]594,Mystic Panda Gloves,cha ID:1
+[04-07 16:27:33.175]595,Fairy Gloves,cha ID:1
+[04-07 16:27:33.175]596,Faerie Gloves,cha ID:1
+[04-07 16:27:33.175]597,Gold Fish Muffs,cha ID:1
+[04-07 16:27:33.177]598,Fish Fairy Muffs,cha ID:1
+[04-07 16:27:33.178]599,Tidal Gloves,cha ID:2
+[04-07 16:27:33.178]600,Tsunami Gloves,cha ID:2
+[04-07 16:27:33.179]601,Dragon Muffs,cha ID:1
+[04-07 16:27:33.179]602,Dragon Lord Muffs,cha ID:1
+[04-07 16:27:33.180]603,Gauntlets of Hercules,cha ID:1
+[04-07 16:27:33.180]604,Gauntlets of Olympus,cha ID:1
+[04-07 16:27:33.198]635,Lv 1 Strike Coral,cha ID:2
+[04-07 16:27:33.198]636,Lv 2 Strike Coral,cha ID:2
+[04-07 16:27:33.199]637,Lv 3 Strike Coral,cha ID:2
+[04-07 16:27:33.199]638,Lv 4 Strike Coral,cha ID:2
+[04-07 16:27:33.200]639,Lv 5 Strike Coral,cha ID:2
+[04-07 16:27:33.202]642,Husk Boots,cha ID:4
+[04-07 16:27:33.202]643,Thick Boots,cha ID:4
+[04-07 16:27:33.203]644,Leather Boots,cha ID:4
+[04-07 16:27:33.203]645,Rhino Hide Boots,cha ID:4
+[04-07 16:27:33.204]646,Tiger Hide Boots,cha ID:4
+[04-07 16:27:33.204]647,Greaves,cha ID:4
+[04-07 16:27:33.205]648,Soft Leather Boots,cha ID:4
+[04-07 16:27:33.205]649,Heavy Leather Boots,cha ID:4
+[04-07 16:27:33.207]650,Strong Leather Boots,cha ID:4
+[04-07 16:27:33.207]651,Mithril Greaves,cha ID:4
+[04-07 16:27:33.208]652,Chain Greaves,cha ID:3
+[04-07 16:27:33.208]653,Strong Greaves,cha ID:3
+[04-07 16:27:33.209]654,Light Greaves,cha ID:4
+[04-07 16:27:33.209]655,Silver Greaves,cha ID:4
+[04-07 16:27:33.210]656,Ceremonial Greaves,cha ID:4
+[04-07 16:27:33.210]657,Coarse Boots,cha ID:2
+[04-07 16:27:33.211]658,Canvas Boots,cha ID:2
+[04-07 16:27:33.211]659,Exquisite Boots,cha ID:2
+[04-07 16:27:33.212]660,Leather Boots,cha ID:2
+[04-07 16:27:33.213]661,Warrior Boots,cha ID:2
+[04-07 16:27:33.213]662,Feather Boots,cha ID:2
+[04-07 16:27:33.214]663,Safari Boots,cha ID:2
+[04-07 16:27:33.214]664,Emerald Boots,cha ID:2
+[04-07 16:27:33.215]665,Hunter Boots,cha ID:2
+[04-07 16:27:33.215]666,Slick Boots,cha ID:2
+[04-07 16:27:33.216]667,Peacock Boots,cha ID:2
+[04-07 16:27:33.217]668,Ringdove Boots,cha ID:2
+[04-07 16:27:33.217]669,Raptor Boots,cha ID:2
+[04-07 16:27:33.228]687,Cloth Boots,cha ID:2
+[04-07 16:27:33.228]688,Tough Boots,cha ID:2
+[04-07 16:27:33.229]689,Explorer Boots,cha ID:2
+[04-07 16:27:33.229]690,Adventure Boots,cha ID:2
+[04-07 16:27:33.230]691,Helmsman Boots,cha ID:2
+[04-07 16:27:33.230]692,Oarsman Boots,cha ID:2
+[04-07 16:27:33.231]693,Deckman Boots,cha ID:2
+[04-07 16:27:33.232]694,Mastman Boots,cha ID:2
+[04-07 16:27:33.232]695,Hurricane Boots,cha ID:2
+[04-07 16:27:33.233]696,Whirlpool Boots,cha ID:2
+[04-07 16:27:33.233]697,Wind Boots,cha ID:2
+[04-07 16:27:33.236]702,Crabby Shoes,cha ID:1
+[04-07 16:27:33.237]703,Rooroo Shoes,cha ID:1
+[04-07 16:27:33.237]704,Playful Racoon Shoes,cha ID:1
+[04-07 16:27:33.238]705,Duckling Shoes,cha ID:1
+[04-07 16:27:33.238]706,Big Crab Shoes,cha ID:1
+[04-07 16:27:33.239]707,Lobster Shoes,cha ID:1
+[04-07 16:27:33.239]708,Ducky Shoes,cha ID:1
+[04-07 16:27:33.240]709,Prawn Shoes,cha ID:1
+[04-07 16:27:33.240]710,Pincer Shoes,cha ID:1
+[04-07 16:27:33.241]711,Sheepy Shoes,cha ID:1
+[04-07 16:27:33.241]712,Meowy Shoes,cha ID:1
+[04-07 16:27:33.242]713,Owl Shoes,cha ID:1
+[04-07 16:27:33.243]714,Hopperoo Shoes,cha ID:1
+[04-07 16:27:33.243]715,Clever Otter Shoes,cha ID:1
+[04-07 16:27:33.244]716,Lucky Otter Shoes,cha ID:1
+[04-07 16:27:33.244]717,Medic Boots,cha ID:1
+[04-07 16:27:33.245]718,Foster Boots,cha ID:1
+[04-07 16:27:33.245]719,Travel Boots,cha ID:1
+[04-07 16:27:33.245]720,Nurse Boots,cha ID:1
+[04-07 16:27:33.247]721,Garcon Boots,cha ID:1
+[04-07 16:27:33.248]722,Holy Boots,cha ID:1
+[04-07 16:27:33.248]723,Follower Boots,cha ID:1
+[04-07 16:27:33.249]724,Attendant Boots,cha ID:1
+[04-07 16:27:33.249]725,Scholar Boots,cha ID:1
+[04-07 16:27:33.250]726,Emergency Boots,cha ID:1
+[04-07 16:27:33.250]727,Passage Boots,cha ID:1
+[04-07 16:27:33.251]728,Healer Boots,cha ID:1
+[04-07 16:27:33.252]729,Protector Boots,cha ID:1
+[04-07 16:27:33.252]730,Piety Boots,cha ID:1
+[04-07 16:27:33.253]731,Blessed Boots,cha ID:1
+[04-07 16:27:33.253]732,Mousey Shoes,cha ID:1
+[04-07 16:27:33.254]733,Kitty Shoes,cha ID:1
+[04-07 16:27:33.254]734,Loopy Bunny Shoes,cha ID:1
+[04-07 16:27:33.255]735,Goaty Shoes,cha ID:1
+[04-07 16:27:33.255]736,Deer Shoes,cha ID:1
+[04-07 16:27:33.256]737,Otter Shoes,cha ID:1
+[04-07 16:27:33.257]738,Racoon Shoes,cha ID:1
+[04-07 16:27:33.258]740,Happy Bunny Shoes,cha ID:1
+[04-07 16:27:33.258]741,Night Owl Shoes,cha ID:1
+[04-07 16:27:33.258]742,Kangaroo Shoes,cha ID:1
+[04-07 16:27:33.259]743,Joyful Bunny Shoes,cha ID:1
+[04-07 16:27:33.260]744,Bunny Baby Shoes,cha ID:1
+[04-07 16:27:33.260]745,Lucky Bunny Shoes,cha ID:1
+[04-07 16:27:33.261]746,Heavenly Shoes,cha ID:1
+[04-07 16:27:33.261]747,Boots of Night,cha ID:2
+[04-07 16:27:33.262]748,Boots of Secrets,cha ID:2
+[04-07 16:27:33.262]749,Boots of Marksmanship,cha ID:2
+[04-07 16:27:33.263]750,Boots of Apollo,cha ID:2
+[04-07 16:27:33.263]751,Boots of the Wise,cha ID:1
+[04-07 16:27:33.264]752,Boots of the Sage,cha ID:1
+[04-07 16:27:33.265]753,Happy Panda Shoes,cha ID:1
+[04-07 16:27:33.265]754,Mystic Panda Shoes,cha ID:1
+[04-07 16:27:33.265]755,Fairy Shoes,cha ID:1
+[04-07 16:27:33.267]756,Faerie Shoes,cha ID:1
+[04-07 16:27:33.267]757,Gold Fish Shoes,cha ID:1
+[04-07 16:27:33.268]758,Fish Fairy Shoes,cha ID:1
+[04-07 16:27:33.269]759,Tidal Shoes,cha ID:2
+[04-07 16:27:33.269]760,Tsunami Shoes,cha ID:2
+[04-07 16:27:33.270]761,Dragon Shoes,cha ID:1
+[04-07 16:27:33.270]762,Bear Shoes,cha ID:1
+[04-07 16:27:33.271]763,Armor of Revenant,cha ID:4
+[04-07 16:27:33.271]764,Tattoo of the Cursed Warrior,cha ID:3
+[04-07 16:27:33.272]765,Tattoo of Evanescence,cha ID:3
+[04-07 16:27:33.272]766,Tattoo of Enigma,cha ID:3
+[04-07 16:27:33.273]767,Platemail of the Cursed Soul,cha ID:4
+[04-07 16:27:33.273]768,Armor of Evanescence,cha ID:4
+[04-07 16:27:33.274]769,Armor of Enigma,cha ID:4
+[04-07 16:27:33.279]777,Robe of Death,cha ID:2
+[04-07 16:27:33.279]778,Corset of Incantation,cha ID:2
+[04-07 16:27:33.280]779,Coat of Evanescence,cha ID:2
+[04-07 16:27:33.280]780,Mantle of Enigma,cha ID:2
+[04-07 16:27:33.285]789,Robe of the Venom Witch,cha ID:1
+[04-07 16:27:33.286]790,Coat of Invocation,cha ID:1
+[04-07 16:27:33.287]791,Robe of the Arcane,cha ID:1
+[04-07 16:27:33.287]792,Robe of Enigma,cha ID:1
+[04-07 16:27:33.289]796,Robe of Abraxas,cha ID:1
+[04-07 16:27:33.290]797,Robe of Malediction,cha ID:1
+[04-07 16:27:33.290]798,Robe of the Sphinx,cha ID:1
+[04-07 16:27:33.293]803,Mantle of the Naga,cha ID:2
+[04-07 16:27:33.294]804,Mantle of the Cursed Flame,cha ID:2
+[04-07 16:27:33.294]805,Cloak of Evanescence,cha ID:2
+[04-07 16:27:33.295]806,Mantle of the Sphinx,cha ID:2
+[04-07 16:27:33.295]807,Gauntlets of Evanescence,cha ID:4
+[04-07 16:27:33.296]808,Greaves of Evanescence,cha ID:4
+[04-07 16:27:33.297]809,Gloves of Evanescence,cha ID:2
+[04-07 16:27:33.297]810,Shoes of Evanescence,cha ID:2
+[04-07 16:27:33.298]811,Gloves of Malediction,cha ID:1
+[04-07 16:27:33.298]812,Gloves of the Arcane,cha ID:1
+[04-07 16:27:33.299]813,Boots of Malediction,cha ID:1
+[04-07 16:27:33.299]814,Boots of the of the Arcane,cha ID:1
+[04-07 16:27:33.300]815,Heavy Gloves of Evanescence,cha ID:2
+[04-07 16:27:33.306]824,Dragon Lord Shoes,cha ID:1
+[04-07 16:27:33.308]829,Greaves of Hercules,cha ID:1
+[04-07 16:27:33.309]830,Greaves of Olympus,cha ID:1
+[04-07 16:27:33.336]877,Boots of Evanescence,cha ID:2
+[04-07 16:27:33.470]1115,Grandiose Helm,cha ID:2
+[04-07 16:27:33.471]1116,Grandiose Armor,cha ID:2
+[04-07 16:27:33.471]1117,Grandiose Gauntlets,cha ID:2
+[04-07 16:27:33.472]1118,Grandiose Boots,cha ID:2
+[04-07 16:27:33.475]1124,Chaos Framestone,cha ID:1
+[04-07 16:27:33.476]1125,Chaos Clawstone,cha ID:1
+[04-07 16:27:33.477]1126,Chaos Pawstone,cha ID:1
+[04-07 16:27:33.923]1884,Undead Sealed Armor of Revenant,cha ID:4
+[04-07 16:27:33.924]1885,Earth Sealed Tattoo of the Cursed Warrior,cha ID:3
+[04-07 16:27:33.924]1886,Fire Sealed Tattoo of Evanescence,cha ID:3
+[04-07 16:27:33.925]1887,Ice Sealed Tattoo of Enigma,cha ID:3
+[04-07 16:27:33.926]1888,Earth Sealed Platemail of the Cursed Soul,cha ID:4
+[04-07 16:27:33.926]1889,Fire Sealed Armor of Evanescence,cha ID:4
+[04-07 16:27:33.927]1890,Ice Sealed Armor of Enigma,cha ID:4
+[04-07 16:27:33.931]1898,Undead Sealed Robe of Death,cha ID:2
+[04-07 16:27:33.932]1899,Earth Sealed Corset of Incantation,cha ID:2
+[04-07 16:27:33.932]1900,Fire Sealed Coat of Evanescence,cha ID:2
+[04-07 16:27:33.933]1901,Ice Sealed Mantle of Enigma,cha ID:2
+[04-07 16:27:33.938]1910,Undead Sealed Robe of the Venom Witch,cha ID:1
+[04-07 16:27:33.939]1911,Earth Sealed Coat of Invocation,cha ID:1
+[04-07 16:27:33.940]1912,Fire Sealed Robe of the Arcane,cha ID:1
+[04-07 16:27:33.940]1913,Ice Sealed Robe of Enigma,cha ID:1
+[04-07 16:27:33.943]1917,Earth Sealed Robe of Abraxas,cha ID:1
+[04-07 16:27:33.943]1918,Fire Sealed Robe of Malediction,cha ID:1
+[04-07 16:27:33.944]1919,Ice Sealed Robe of the Sphinx,cha ID:1
+[04-07 16:27:33.947]1924,Undead Sealed Mantle of the Naga,cha ID:2
+[04-07 16:27:33.947]1925,Earth Sealed Mantle of the Cursed Flame,cha ID:2
+[04-07 16:27:33.948]1926,Fire Sealed Cloak of Evanescence,cha ID:2
+[04-07 16:27:33.948]1927,Ice Sealed Mantle of the Sphinx,cha ID:2
+[04-07 16:27:33.949]1928,Battle Armor of Crimson Flame,cha ID:4
+[04-07 16:27:33.949]1929,Battle Armor of the Tempest,cha ID:4
+[04-07 16:27:33.950]1930,Battle Armor of Sistine,cha ID:4
+[04-07 16:27:33.950]1931,Battle Armor of the Kylin,cha ID:4
+[04-07 16:27:33.951]1932,Battle Armor of Nature,cha ID:3
+[04-07 16:27:33.952]1933,Tattoo of Gallon,cha ID:3
+[04-07 16:27:33.952]1934,Tattoo of the Tortoise,cha ID:3
+[04-07 16:27:33.953]1935,Gauntlets of Crimson Flame,cha ID:4
+[04-07 16:27:33.953]1936,Gauntlets of the Tempest,cha ID:4
+[04-07 16:27:33.954]1937,Gauntlets of Sistine,cha ID:4
+[04-07 16:27:33.954]1938,Gauntlets of the Kylin,cha ID:4
+[04-07 16:27:33.955]1939,Greaves of Crimson Flame,cha ID:4
+[04-07 16:27:33.955]1940,Greaves of the Tempest,cha ID:4
+[04-07 16:27:33.957]1941,Greaves of Sistine,cha ID:4
+[04-07 16:27:33.957]1942,Greaves of the Kylin,cha ID:4
+[04-07 16:27:33.958]1943,Vest of Clarion Mist,cha ID:2
+[04-07 16:27:33.958]1944,Flaming Coat,cha ID:2
+[04-07 16:27:33.959]1945,Mantle of Darwin,cha ID:2
+[04-07 16:27:33.959]1946,Coat of the White Tiger,cha ID:2
+[04-07 16:27:33.960]1947,Gloves of Clarion Mist,cha ID:2
+[04-07 16:27:33.960]1948,Flaming Gloves,cha ID:2
+[04-07 16:27:33.961]1949,Gloves of Darwin,cha ID:2
+[04-07 16:27:33.962]1950,Gloves of the White Tiger,cha ID:2
+[04-07 16:27:33.962]1951,Boots of Clarion Mist,cha ID:2
+[04-07 16:27:33.963]1952,Flaming Boots,cha ID:2
+[04-07 16:27:33.963]1953,Boots of Darwin,cha ID:2
+[04-07 16:27:33.964]1954,Boots of the White Tiger,cha ID:2
+[04-07 16:27:33.965]1955,Emerald Vine Robe,cha ID:1
+[04-07 16:27:33.965]1956,Coat of Frozen Crescent,cha ID:1
+[04-07 16:27:33.966]1957,Coat of Udine,cha ID:1
+[04-07 16:27:33.966]1958,Coat of the Peacock,cha ID:1
+[04-07 16:27:33.967]1959,Glory Coat,cha ID:1
+[04-07 16:27:33.967]1960,Coat of Hope,cha ID:1
+[04-07 16:27:33.968]1961,Coat of the Phoenix,cha ID:1
+[04-07 16:27:33.968]1962,Emerald Vine Gloves,cha ID:1
+[04-07 16:27:33.969]1963,Gloves of Frozen Crescent,cha ID:1
+[04-07 16:27:33.970]1964,Gloves of Udine,cha ID:1
+[04-07 16:27:33.970]1965,Gloves of the Peacock,cha ID:1
+[04-07 16:27:33.971]1966,Glory Gloves,cha ID:1
+[04-07 16:27:33.971]1967,Gloves of Hope,cha ID:1
+[04-07 16:27:33.972]1968,Gloves of the Phoenix,cha ID:1
+[04-07 16:27:33.972]1969,Emerald Vine Boots,cha ID:1
+[04-07 16:27:33.973]1970,Boots of Frozen Crescent,cha ID:1
+[04-07 16:27:33.974]1971,Boots of Udine,cha ID:1
+[04-07 16:27:33.974]1972,Boots of the Peacock,cha ID:1
+[04-07 16:27:33.975]1973,Glory Boots,cha ID:1
+[04-07 16:27:33.975]1974,Boots of Hope,cha ID:1
+[04-07 16:27:33.975]1975,Boots of the Phoenix,cha ID:1
+[04-07 16:27:33.977]1976,Robe of the Mist,cha ID:2
+[04-07 16:27:33.978]1977,Coat of the Tempest,cha ID:2
+[04-07 16:27:33.978]1978,Robe of Forlorn,cha ID:2
+[04-07 16:27:33.979]1979,Coat of the Green Dragon,cha ID:2
+[04-07 16:27:33.979]1980,Gloves of the Mist,cha ID:2
+[04-07 16:27:33.980]1981,Gloves of the Tempest,cha ID:2
+[04-07 16:27:33.980]1982,Gloves of Forlorn,cha ID:2
+[04-07 16:27:33.981]1983,Gloves of the Green Dragon,cha ID:2
+[04-07 16:27:33.982]1984,Boots of the Mist,cha ID:2
+[04-07 16:27:33.982]1985,Boots of the Tempest,cha ID:2
+[04-07 16:27:33.983]1986,Boots of Forlorn,cha ID:2
+[04-07 16:27:33.983]1987,Boots of the Green Dragon,cha ID:2
+[04-07 16:27:33.984]1988,Fire Sealed Gauntlets of Evanescence,cha ID:4
+[04-07 16:27:33.984]1989,Fire Sealed Greaves of Evanescence,cha ID:4
+[04-07 16:27:33.985]1990,Fire Sealed Gloves of Evanescence,cha ID:2
+[04-07 16:27:33.985]1991,Fire Sealed Shoes of Evanescence,cha ID:2
+[04-07 16:27:33.986]1992,Fire Sealed Gloves of Malediction,cha ID:1
+[04-07 16:27:33.987]1993,Fire Sealed Gloves of the Arcane,cha ID:1
+[04-07 16:27:33.988]1994,Fire Sealed Boots of Malediction,cha ID:1
+[04-07 16:27:33.988]1995,Fire Sealed Boots of the of the Arcane,cha ID:1
+[04-07 16:27:33.989]1996,Fire Sealed Heavy Gloves of Evanescence,cha ID:2
+[04-07 16:27:33.989]1997,Fire Sealed Boots of Evanescence,cha ID:2
+[04-07 16:27:33.990]1999,Lance Failed Hairdo 1,cha ID:2
+[04-07 16:27:33.991]2000,Hairdo 1,cha ID:2
+[04-07 16:27:33.992]2001,Hairdo 2,cha ID:2
+[04-07 16:27:33.992]2002,Hairdo 3,cha ID:2
+[04-07 16:27:33.993]2003,Hairdo 4,cha ID:2
+[04-07 16:27:33.993]2004,Hairdo 5,cha ID:2
+[04-07 16:27:33.994]2005,Hairdo 6,cha ID:2
+[04-07 16:27:33.994]2006,Hairdo 7,cha ID:2
+[04-07 16:27:33.995]2007,Hairdo 8,cha ID:2
+[04-07 16:27:33.996]2008,Event Commissioner,cha ID:2
+[04-07 16:27:33.996]2009,Hairdo 1,cha ID:2
+[04-07 16:27:33.997]2010,Hairdo 1,cha ID:2
+[04-07 16:27:33.997]2011,Hairdo 1,cha ID:2
+[04-07 16:27:33.998]2012,Hairdo 1,cha ID:2
+[04-07 16:27:33.998]2013,Hairdo 1,cha ID:2
+[04-07 16:27:33.999]2014,Hairdo 1,cha ID:2
+[04-07 16:27:34.000]2015,Hairdo 2,cha ID:2
+[04-07 16:27:34.000]2016,Hairdo 2,cha ID:2
+[04-07 16:27:34.001]2017,Hairdo 2,cha ID:2
+[04-07 16:27:34.001]2018,Hairdo 2,cha ID:2
+[04-07 16:27:34.002]2019,Hairdo 2,cha ID:2
+[04-07 16:27:34.002]2020,Hairdo 2,cha ID:2
+[04-07 16:27:34.003]2021,Hairdo 3,cha ID:2
+[04-07 16:27:34.004]2022,Hairdo 3,cha ID:2
+[04-07 16:27:34.004]2023,Hairdo 3,cha ID:2
+[04-07 16:27:34.005]2024,Hairdo 3,cha ID:2
+[04-07 16:27:34.005]2025,Hairdo 3,cha ID:2
+[04-07 16:27:34.006]2026,Hairdo 3,cha ID:2
+[04-07 16:27:34.006]2027,Hairdo 4,cha ID:2
+[04-07 16:27:34.007]2028,Hairdo 4,cha ID:2
+[04-07 16:27:34.008]2029,Hairdo 4,cha ID:2
+[04-07 16:27:34.008]2030,Hairdo 4,cha ID:2
+[04-07 16:27:34.009]2031,Hairdo 4,cha ID:2
+[04-07 16:27:34.009]2032,Hairdo 4,cha ID:2
+[04-07 16:27:34.010]2033,Hairdo 5,cha ID:2
+[04-07 16:27:34.010]2034,Hairdo 5,cha ID:2
+[04-07 16:27:34.011]2035,Hairdo 5,cha ID:2
+[04-07 16:27:34.012]2036,Hairdo 5,cha ID:2
+[04-07 16:27:34.012]2037,Hairdo 5,cha ID:2
+[04-07 16:27:34.013]2038,Hairdo 5,cha ID:2
+[04-07 16:27:34.013]2039,Hairdo 5,cha ID:2
+[04-07 16:27:34.014]2040,Hairdo 6,cha ID:2
+[04-07 16:27:34.014]2041,Hairdo 6,cha ID:2
+[04-07 16:27:34.015]2042,Hairdo 6,cha ID:2
+[04-07 16:27:34.015]2043,Hairdo 6,cha ID:2
+[04-07 16:27:34.016]2044,Hairdo 6,cha ID:2
+[04-07 16:27:34.017]2045,Hairdo 6,cha ID:2
+[04-07 16:27:34.017]2046,Hairdo 6,cha ID:2
+[04-07 16:27:34.017]2047,Hairdo 7,cha ID:2
+[04-07 16:27:34.018]2048,Hairdo 7,cha ID:2
+[04-07 16:27:34.019]2049,Hairdo 7,cha ID:2
+[04-07 16:27:34.019]2050,Hairdo 7,cha ID:2
+[04-07 16:27:34.020]2051,Hairdo 7,cha ID:2
+[04-07 16:27:34.020]2052,Hairdo 7,cha ID:2
+[04-07 16:27:34.021]2053,Hairdo 7,cha ID:2
+[04-07 16:27:34.021]2054,Hairdo 8,cha ID:2
+[04-07 16:27:34.022]2055,Hairdo 8,cha ID:2
+[04-07 16:27:34.023]2056,Hairdo 8,cha ID:2
+[04-07 16:27:34.023]2057,Hairdo 8,cha ID:2
+[04-07 16:27:34.024]2058,Hairdo 8,cha ID:2
+[04-07 16:27:34.024]2059,Hairdo 8,cha ID:2
+[04-07 16:27:34.025]2060,Guy 1 Bald Hairdo,cha ID:2
+[04-07 16:27:34.025]2061,Lance Failed Hairdo 2,cha ID:2
+[04-07 16:27:34.027]2062,Hairdo 1,cha ID:1
+[04-07 16:27:34.027]2063,Hairdo 2,cha ID:1
+[04-07 16:27:34.028]2064,Hairdo 3,cha ID:1
+[04-07 16:27:34.028]2065,Hairdo 4,cha ID:1
+[04-07 16:27:34.029]2066,Hairdo 5,cha ID:1
+[04-07 16:27:34.029]2067,Hairdo 6,cha ID:1
+[04-07 16:27:34.030]2068,Hairdo 7,cha ID:1
+[04-07 16:27:34.030]2069,Hairdo 8,cha ID:1
+[04-07 16:27:34.031]2070,Event Commissioner,cha ID:1
+[04-07 16:27:34.032]2071,Hairdo 1,cha ID:1
+[04-07 16:27:34.032]2072,Hairdo 1,cha ID:1
+[04-07 16:27:34.033]2073,Hairdo 1,cha ID:1
+[04-07 16:27:34.033]2074,Hairdo 1,cha ID:1
+[04-07 16:27:34.034]2075,Hairdo 1,cha ID:1
+[04-07 16:27:34.034]2076,Hairdo 1,cha ID:1
+[04-07 16:27:34.035]2077,Hairdo 1,cha ID:1
+[04-07 16:27:34.036]2078,Hairdo 2,cha ID:1
+[04-07 16:27:34.036]2079,Hairdo 2,cha ID:1
+[04-07 16:27:34.037]2080,Hairdo 2,cha ID:1
+[04-07 16:27:34.037]2081,Hairdo 2,cha ID:1
+[04-07 16:27:34.038]2082,Hairdo 2,cha ID:1
+[04-07 16:27:34.038]2083,Hairdo 2,cha ID:1
+[04-07 16:27:34.039]2084,Hairdo 3,cha ID:1
+[04-07 16:27:34.040]2085,Hairdo 3,cha ID:1
+[04-07 16:27:34.040]2086,Hairdo 3,cha ID:1
+[04-07 16:27:34.041]2087,Hairdo 3,cha ID:1
+[04-07 16:27:34.041]2088,Hairdo 3,cha ID:1
+[04-07 16:27:34.042]2089,Hairdo 3,cha ID:1
+[04-07 16:27:34.042]2090,Hairdo 4,cha ID:1
+[04-07 16:27:34.043]2091,Hairdo 4,cha ID:1
+[04-07 16:27:34.044]2092,Hairdo 4,cha ID:1
+[04-07 16:27:34.044]2093,Hairdo 4,cha ID:1
+[04-07 16:27:34.045]2094,Hairdo 4,cha ID:1
+[04-07 16:27:34.045]2095,Hairdo 4,cha ID:1
+[04-07 16:27:34.046]2096,Hairdo 4,cha ID:1
+[04-07 16:27:34.047]2097,Hairdo 5,cha ID:1
+[04-07 16:27:34.047]2098,Hairdo 5,cha ID:1
+[04-07 16:27:34.048]2099,Hairdo 5,cha ID:1
+[04-07 16:27:34.049]2100,Hairdo 5,cha ID:1
+[04-07 16:27:34.049]2101,Hairdo 6,cha ID:1
+[04-07 16:27:34.050]2102,Hairdo 6,cha ID:1
+[04-07 16:27:34.050]2103,Hairdo 6,cha ID:1
+[04-07 16:27:34.051]2104,Hairdo 6,cha ID:1
+[04-07 16:27:34.051]2105,Hairdo 6,cha ID:1
+[04-07 16:27:34.052]2106,Hairdo 6,cha ID:1
+[04-07 16:27:34.053]2107,Hairdo 6,cha ID:1
+[04-07 16:27:34.053]2108,Hairdo 7,cha ID:1
+[04-07 16:27:34.054]2109,Hairdo 7,cha ID:1
+[04-07 16:27:34.054]2110,Hairdo 7,cha ID:1
+[04-07 16:27:34.055]2111,Hairdo 7,cha ID:1
+[04-07 16:27:34.055]2112,Hairdo 7,cha ID:1
+[04-07 16:27:34.056]2113,Hairdo 7,cha ID:1
+[04-07 16:27:34.057]2114,Hairdo 8,cha ID:1
+[04-07 16:27:34.057]2115,Hairdo 8,cha ID:1
+[04-07 16:27:34.058]2116,Hairdo 8,cha ID:1
+[04-07 16:27:34.058]2117,Hairdo 8,cha ID:1
+[04-07 16:27:34.059]2118,Hairdo 8,cha ID:1
+[04-07 16:27:34.059]2119,Hairdo 8,cha ID:1
+[04-07 16:27:34.060]2120,Hairdo 8,cha ID:1
+[04-07 16:27:34.061]2121,Carsise Failed Hairdo 1,cha ID:1
+[04-07 16:27:34.061]2122,Guy 2 Bald Hairdo,cha ID:1
+[04-07 16:27:34.062]2123,Carsise Failed Hairdo 2,cha ID:1
+[04-07 16:27:34.062]2124,Hairdo 1,cha ID:1
+[04-07 16:27:34.063]2125,Hairdo 2,cha ID:1
+[04-07 16:27:34.064]2126,Hairdo 3,cha ID:1
+[04-07 16:27:34.064]2127,Hairdo 4,cha ID:1
+[04-07 16:27:34.065]2128,Hairdo 5,cha ID:1
+[04-07 16:27:34.065]2129,Hairdo 6,cha ID:1
+[04-07 16:27:34.066]2130,Hairdo 7,cha ID:1
+[04-07 16:27:34.067]2131,Hairdo 8,cha ID:1
+[04-07 16:27:34.067]2132,Event Commissioner,cha ID:1
+[04-07 16:27:34.068]2133,Hairdo 1,cha ID:1
+[04-07 16:27:34.068]2134,Hairdo 1,cha ID:1
+[04-07 16:27:34.069]2135,Hairdo 1,cha ID:1
+[04-07 16:27:34.069]2136,Hairdo 1,cha ID:1
+[04-07 16:27:34.070]2137,Hairdo 1,cha ID:1
+[04-07 16:27:34.071]2138,Hairdo 1,cha ID:1
+[04-07 16:27:34.071]2139,Hairdo 1,cha ID:1
+[04-07 16:27:34.072]2140,Hairdo 2,cha ID:1
+[04-07 16:27:34.072]2141,Hairdo 2,cha ID:1
+[04-07 16:27:34.073]2142,Hairdo 2,cha ID:1
+[04-07 16:27:34.073]2143,Hairdo 2,cha ID:1
+[04-07 16:27:34.074]2144,Hairdo 2,cha ID:1
+[04-07 16:27:34.075]2145,Hairdo 2,cha ID:1
+[04-07 16:27:34.075]2146,Hairdo 3,cha ID:1
+[04-07 16:27:34.076]2147,Hairdo 3,cha ID:1
+[04-07 16:27:34.076]2148,Hairdo 3,cha ID:1
+[04-07 16:27:34.077]2149,Hairdo 3,cha ID:1
+[04-07 16:27:34.078]2150,Hairdo 3,cha ID:1
+[04-07 16:27:34.079]2151,Hairdo 3,cha ID:1
+[04-07 16:27:34.079]2152,Hairdo 4,cha ID:1
+[04-07 16:27:34.080]2153,Hairdo 4,cha ID:1
+[04-07 16:27:34.080]2154,Hairdo 4,cha ID:1
+[04-07 16:27:34.081]2155,Hairdo 4,cha ID:1
+[04-07 16:27:34.081]2156,Hairdo 4,cha ID:1
+[04-07 16:27:34.082]2157,Hairdo 4,cha ID:1
+[04-07 16:27:34.083]2158,Hairdo 5,cha ID:1
+[04-07 16:27:34.083]2159,Hairdo 5,cha ID:1
+[04-07 16:27:34.084]2160,Hairdo 5,cha ID:1
+[04-07 16:27:34.084]2161,Hairdo 5,cha ID:1
+[04-07 16:27:34.085]2162,Hairdo 5,cha ID:1
+[04-07 16:27:34.085]2163,Hairdo 5,cha ID:1
+[04-07 16:27:34.086]2164,Hairdo 6,cha ID:1
+[04-07 16:27:34.087]2165,Hairdo 6,cha ID:1
+[04-07 16:27:34.087]2166,Hairdo 6,cha ID:1
+[04-07 16:27:34.088]2167,Hairdo 6,cha ID:1
+[04-07 16:27:34.088]2168,Hairdo 6,cha ID:1
+[04-07 16:27:34.089]2169,Hairdo 6,cha ID:1
+[04-07 16:27:34.089]2170,Hairdo 7,cha ID:1
+[04-07 16:27:34.090]2171,Hairdo 7,cha ID:1
+[04-07 16:27:34.091]2172,Hairdo 7,cha ID:1
+[04-07 16:27:34.091]2173,Hairdo 7,cha ID:1
+[04-07 16:27:34.092]2174,Hairdo 7,cha ID:1
+[04-07 16:27:34.092]2175,Hairdo 7,cha ID:1
+[04-07 16:27:34.093]2176,Hairdo 8,cha ID:1
+[04-07 16:27:34.093]2177,Hairdo 8,cha ID:1
+[04-07 16:27:34.094]2178,Hairdo 8,cha ID:1
+[04-07 16:27:34.095]2179,Hairdo 8,cha ID:1
+[04-07 16:27:34.095]2180,Hairdo 8,cha ID:1
+[04-07 16:27:34.096]2181,Hairdo 8,cha ID:1
+[04-07 16:27:34.096]2182,Phyllis Failed Hairdo 1,cha ID:1
+[04-07 16:27:34.097]2183,Phyllis Failed Hairdo 2,cha ID:1
+[04-07 16:27:34.098]2184,Girl 1 Bald Hairdo,cha ID:1
+[04-07 16:27:34.098]2185,Girl 1 Hair Makeup 01,cha ID:1
+[04-07 16:27:34.099]2186,Girl 2 Hair 00,cha ID:1
+[04-07 16:27:34.150]2275,Lance Trendy Hairdo 1,cha ID:4
+[04-07 16:27:34.150]2276,Lance Trendy Hairdo 2,cha ID:4
+[04-07 16:27:34.151]2277,Lance Trendy Hairdo 3,cha ID:4
+[04-07 16:27:34.151]2278,Lance Trendy Hairdo 4,cha ID:4
+[04-07 16:27:34.152]2279,Carsise Trendy Hairdo 1,cha ID:4
+[04-07 16:27:34.152]2280,Carsise Trendy Hairdo 2,cha ID:4
+[04-07 16:27:34.153]2281,Carsise Trendy Hairdo 3,cha ID:4
+[04-07 16:27:34.153]2282,Carsise Trendy Hairdo 4,cha ID:4
+[04-07 16:27:34.154]2283,Phyllis Trendy Hairdo 1,cha ID:4
+[04-07 16:27:34.155]2284,Phyllis Trendy Hairdo 2,cha ID:4
+[04-07 16:27:34.155]2285,Phyllis Trendy Hairdo 3,cha ID:4
+[04-07 16:27:34.155]2286,Phyllis Trendy Hairdo 4,cha ID:4
+[04-07 16:27:34.240]2434,Arrow 02,cha ID:1
+[04-07 16:27:34.249]2448,Gunpowder 02,cha ID:1
+[04-07 16:27:34.280]2499,Left Plaster Glove,cha ID:1
+[04-07 16:27:34.281]2500,Left Brawler Glove,cha ID:1
+[04-07 16:27:34.281]2501,Left Master Glove,cha ID:1
+[04-07 16:27:34.282]2502,Left Jagged Blade,cha ID:1
+[04-07 16:27:34.282]2503,Left Cosmo Blade,cha ID:1
+[04-07 16:27:34.283]2504,Left Tiger Glove,cha ID:1
+[04-07 16:27:34.283]2505,Left Hand of Death,cha ID:1
+[04-07 16:27:34.291]2517,UPO Cap,cha ID:1
+[04-07 16:27:34.295]2527,Raging Bull Tattoo,cha ID:3
+[04-07 16:27:34.296]2528,Savage Bull Tattoo,cha ID:3
+[04-07 16:27:34.297]2529,Primal Tattoo,cha ID:3
+[04-07 16:27:34.297]2530,Hephaestus Framestone,cha ID:1
+[04-07 16:27:34.298]2531,Hephaestus Clawstone,cha ID:1
+[04-07 16:27:34.298]2532,Hephaestus Pawstone,cha ID:1
+[04-07 16:27:34.299]2533,Hermes Framestone,cha ID:1
+[04-07 16:27:34.299]2534,Hermes Clawstone,cha ID:1
+[04-07 16:27:34.300]2535,Hermes Pawstone,cha ID:1
+[04-07 16:27:34.300]2536,Apollo Framestone,cha ID:1
+[04-07 16:27:34.301]2537,Apollo Clawstone,cha ID:1
+[04-07 16:27:34.302]2538,Apollo Pawstone,cha ID:1
+[04-07 16:27:34.302]2539,Poseidon Framestone,cha ID:1
+[04-07 16:27:34.303]2540,Poseidon Clawstone,cha ID:1
+[04-07 16:27:34.303]2541,Poseidon Pawstone,cha ID:1
+[04-07 16:27:34.304]2542,Hestia Framestone,cha ID:1
+[04-07 16:27:34.305]2543,Hestia Clawstone,cha ID:1
+[04-07 16:27:34.305]2544,Hestia Pawstone,cha ID:1
+[04-07 16:27:34.305]2545,Athena Framestone,cha ID:1
+[04-07 16:27:34.307]2546,Athena Clawstone,cha ID:1
+[04-07 16:27:34.307]2547,Athena Pawstone,cha ID:1
+[04-07 16:27:34.308]2548,Artemis Crownstone,cha ID:4
+[04-07 16:27:34.310]2552,Corporeal Kylin Cap,cha ID:1
+[04-07 16:27:34.592]3061,Bear Shoes,cha ID:1
+[04-07 16:27:34.726]3285,Calculator,cha ID:1
+[04-07 16:27:34.727]3287,Serious study book,cha ID:1
+[04-07 16:27:34.922]3612,Virgo's Shadow,cha ID:2
+[04-07 16:27:34.922]3613,Virgo's Touch,cha ID:2
+[04-07 16:27:34.923]3614,Virgo's Trace,cha ID:2
+[04-07 16:27:34.924]3617,Virgo's Bind,cha ID:1
+[04-07 16:27:34.925]3618,Virgo's Claw,cha ID:1
+[04-07 16:27:34.926]3619,Virgo's Print,cha ID:1
+[04-07 16:27:34.927]3622,Virgo's Protection,cha ID:2
+[04-07 16:27:34.928]3623,Virgo's Caress,cha ID:2
+[04-07 16:27:34.928]3624,Virgo's Dance,cha ID:2
+[04-07 16:27:34.930]3627,Virgo's Possession,cha ID:1
+[04-07 16:27:34.931]3628,Virgo's Death,cha ID:1
+[04-07 16:27:34.931]3629,Virgo's Trail,cha ID:1
+[04-07 16:27:34.933]3632,Virgo's Torso,cha ID:1
+[04-07 16:27:34.934]3633,Virgo's Span,cha ID:1
+[04-07 16:27:34.934]3634,Virgo's Wanderer,cha ID:1
+[04-07 16:27:34.936]3638,Virgo's Seal,cha ID:2
+[04-07 16:27:34.937]3639,Virgo's Hand,cha ID:2
+[04-07 16:27:34.938]3640,Virgo's Brace,cha ID:2
+[04-07 16:27:35.235]4147,Spirit Beast Tattoo,cha ID:3
+[04-07 16:27:35.236]4148,Arcane Beast Tattoo,cha ID:3
+[04-07 16:27:35.236]4149,Capricious Battle Armor,cha ID:4
+[04-07 16:27:35.237]4150,Sagacious Battle Armor,cha ID:4
+[04-07 16:27:35.237]4151,Robe of Perception,cha ID:2
+[04-07 16:27:35.238]4152,Robe of Gallant,cha ID:2
+[04-07 16:27:35.239]4153,Nautical Coat,cha ID:2
+[04-07 16:27:35.239]4154,Arcane Lobster Costume,cha ID:1
+[04-07 16:27:35.240]4155,Robe of Stride,cha ID:2
+[04-07 16:27:35.240]4156,Pique Lobster Costume,cha ID:1
+[04-07 16:27:35.241]4157,Robe of Melody,cha ID:1
+[04-07 16:27:35.241]4158,Arcane Bunny Costume,cha ID:1
+[04-07 16:27:35.242]4159,Robe of Spirit,cha ID:1
+[04-07 16:27:35.243]4160,Pique Bunny Costume,cha ID:1
+[04-07 16:27:35.243]4161,Robe of Vengence,cha ID:1
+[04-07 16:27:35.244]4162,Arcane Otter Costume,cha ID:1
+[04-07 16:27:35.244]4163,Robe of Amercement,cha ID:1
+[04-07 16:27:35.245]4164,Pique Otter Costume,cha ID:1
+[04-07 16:27:35.245]4165,Capricious Battle Gauntlets,cha ID:4
+[04-07 16:27:35.246]4166,Sagacious Battle Gauntlets,cha ID:4
+[04-07 16:27:35.247]4167,Gloves of Perception,cha ID:2
+[04-07 16:27:35.247]4168,Gloves of Gallant,cha ID:2
+[04-07 16:27:35.248]4169,Nautical Gloves,cha ID:2
+[04-07 16:27:35.248]4170,Arcane Lobster Muffs,cha ID:1
+[04-07 16:27:35.249]4171,Gloves of Stride,cha ID:2
+[04-07 16:27:35.249]4172,Pique Lobster Muffs,cha ID:1
+[04-07 16:27:35.250]4173,Gloves of Melody,cha ID:1
+[04-07 16:27:35.251]4174,Arcane Bunny Muffs,cha ID:1
+[04-07 16:27:35.251]4175,Gloves of Spirit,cha ID:1
+[04-07 16:27:35.252]4176,Pique Bunny Muffs,cha ID:1
+[04-07 16:27:35.252]4177,Gloves of Vengence,cha ID:1
+[04-07 16:27:35.253]4178,Arcane Otter Muffs,cha ID:1
+[04-07 16:27:35.253]4179,Gloves of Amercement,cha ID:1
+[04-07 16:27:35.254]4180,Pique Otter Muffs,cha ID:1
+[04-07 16:27:35.255]4181,Capricious Battle Greaves,cha ID:4
+[04-07 16:27:35.255]4182,Sagacious Battle Greaves,cha ID:4
+[04-07 16:27:35.255]4183,Boots of Perception,cha ID:2
+[04-07 16:27:35.257]4184,Boots of Gallant,cha ID:2
+[04-07 16:27:35.257]4185,Nautical Boots,cha ID:2
+[04-07 16:27:35.258]4186,Arcane Lobster Shoes,cha ID:1
+[04-07 16:27:35.259]4187,Boots of Stride,cha ID:2
+[04-07 16:27:35.259]4188,Pique Lobster Shoes,cha ID:1
+[04-07 16:27:35.260]4189,Boots of Melody,cha ID:1
+[04-07 16:27:35.260]4190,Arcane Bunny Shoes,cha ID:1
+[04-07 16:27:35.261]4191,Boots of Spirit,cha ID:1
+[04-07 16:27:35.261]4192,Pique Bunny Shoes,cha ID:1
+[04-07 16:27:35.262]4193,Boots of Vengence,cha ID:1
+[04-07 16:27:35.263]4194,Arcane Otter Shoes,cha ID:1
+[04-07 16:27:35.263]4195,Boots of Amercement,cha ID:1
+[04-07 16:27:35.264]4196,Pique Otter Shoes,cha ID:1
+[04-07 16:27:36.382]6144,Forest Battle Robe,cha ID:2
+[04-07 16:27:36.382]6145,Forest Battle Gloves,cha ID:2
+[04-07 16:27:36.383]6146,Forest Battle Boots,cha ID:2
+[04-07 16:27:36.383]6147,Holy Armor,cha ID:2
+[04-07 16:27:36.384]6148,Holy Armor Gloves,cha ID:2
+[04-07 16:27:36.385]6149,Holy Armor Boots,cha ID:2
+[04-07 16:27:36.385]6150,Savage Armor,cha ID:1
+[04-07 16:27:36.386]6151,Savage Armor Gloves,cha ID:1
+[04-07 16:27:36.386]6152,Savage Armor Boots,cha ID:1
+[04-07 16:27:36.387]6154,Ice Battle Armor,cha ID:2
+[04-07 16:27:36.388]6155,Ice Battle Gloves,cha ID:2
+[04-07 16:27:36.388]6156,Ice Battle Boots,cha ID:2
+[04-07 16:27:36.390]6158,Ice Holy Robe,cha ID:1
+[04-07 16:27:36.390]6159,Ice Holy Gloves,cha ID:1
+[04-07 16:27:36.391]6160,Ice Holy Boots,cha ID:1
+[04-07 16:27:36.392]6162,Ice Magic Robe,cha ID:1
+[04-07 16:27:36.392]6163,Ice Spirit Gloves,cha ID:1
+[04-07 16:27:36.393]6164,Ice Spirit Boots,cha ID:1
+[04-07 16:27:36.399]6174,Sealed Guard of Epic Prowess,cha ID:2
+[04-07 16:27:36.400]6175,Sealed Bless of Epic Prowess,cha ID:2
+[04-07 16:27:36.400]6176,Sealed Mercy of Epic Prowess,cha ID:2
+[04-07 16:27:36.401]6178,Sealed Guard of Honor,cha ID:2
+[04-07 16:27:36.402]6179,Sealed Bless of Honor,cha ID:2
+[04-07 16:27:36.402]6180,Sealed Mercy of Honor,cha ID:2
+[04-07 16:27:36.404]6182,Sealed Guard of Sacrifice,cha ID:1
+[04-07 16:27:36.404]6183,Sealed Bless of Sacrifice,cha ID:1
+[04-07 16:27:36.405]6184,Sealed Mercy of Sacrifice,cha ID:1
+[04-07 16:27:36.406]6186,Sealed Guard of Justice,cha ID:2
+[04-07 16:27:36.406]6187,Sealed Bless of Justice,cha ID:2
+[04-07 16:27:36.407]6188,Sealed Mercy of Justice,cha ID:2
+[04-07 16:27:36.408]6190,Sealed Guard of Empathy,cha ID:1
+[04-07 16:27:36.409]6191,Sealed Bless of Empathy,cha ID:1
+[04-07 16:27:36.409]6192,Sealed Mercy of Empathy,cha ID:1
+[04-07 16:27:36.410]6194,Sealed Guard of Inspiration,cha ID:1
+[04-07 16:27:36.411]6195,Sealed Bless of Inspiration,cha ID:1
+[04-07 16:27:36.411]6196,Sealed Mercy of Inspiration,cha ID:1
+[04-07 16:27:36.718]7096,Kylin Helm,cha ID:1
+[04-07 16:27:36.724]7108,Frozen Kylin Helm,cha ID:1
+[04-07 16:27:36.725]7109,Dark Kylin Helm,cha ID:1
+[04-07 16:27:36.725]7110,Holy Kylin Helm,cha ID:1
+[04-07 16:27:36.739]7132,Black Dragon Lord's Helm,cha ID:1
+[04-07 16:27:36.759]7166,Undead Kylin Helm,cha ID:1
+[04-07 16:27:36.773]7205,Champion's Bind,cha ID:1
+[04-07 16:27:36.774]7206,Champion's Touch,cha ID:1
+[04-07 16:27:36.774]7207,Champion's Print,cha ID:1
+[04-07 16:27:36.775]7208,Crusader's Shadow,cha ID:2
+[04-07 16:27:36.775]7209,Crusader's Touch,cha ID:2
+[04-07 16:27:36.777]7210,Crusader's Trace,cha ID:2
+[04-07 16:27:36.777]7211,Sharpshooter's Seal,cha ID:2
+[04-07 16:27:36.778]7212,Sharpshooter's Hand,cha ID:2
+[04-07 16:27:36.778]7213,Sharpshooter's Brace,cha ID:2
+[04-07 16:27:36.779]7214,Voyager's Protection,cha ID:2
+[04-07 16:27:36.780]7215,Voyager's Caress,cha ID:2
+[04-07 16:27:36.780]7216,Voyager's Dance,cha ID:2
+[04-07 16:27:36.781]7217,Cleric's Possession,cha ID:1
+[04-07 16:27:36.781]7218,Cleric Hands of Healing,cha ID:1
+[04-07 16:27:36.782]7219,Cleric's Trail,cha ID:1
+[04-07 16:27:36.782]7220,Sealmaster's Torso,cha ID:1
+[04-07 16:27:36.783]7221,Sealmaster's Span,cha ID:1
+[04-07 16:27:36.784]7222,Sealmaster's Wanderer,cha ID:1
+[04-07 16:27:36.784]7223,Hairdo 1,cha ID:2
+[04-07 16:27:36.785]7224,Hairdo 1,cha ID:2
+[04-07 16:27:36.785]7225,Hairdo 3,cha ID:2
+[04-07 16:27:36.786]7226,Hairdo 4,cha ID:2
+[04-07 16:27:36.787]7227,Hairdo 5,cha ID:2
+[04-07 16:27:36.787]7228,Hairdo 8,cha ID:2
+[04-07 16:27:36.788]7229,Lance Trendy Hairdo 4,cha ID:4
+[04-07 16:27:36.788]7230,Hairdo 1,cha ID:2
+[04-07 16:27:36.789]7231,Hairdo 1,cha ID:2
+[04-07 16:27:36.789]7232,Hairdo 2,

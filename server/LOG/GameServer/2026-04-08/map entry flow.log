@@ -1,0 +1,68 @@
+[04-08 15:02:29.957]receive request to create entry??position garner2 --> darkblue[137200, 53100]??script line 75
+[04-08 15:02:29.958]create entry success??position garner2 --> darkblue[137200, 53100] 
+[04-08 15:02:29.989]receive entry create success ??position darkblue --> garner2
+[04-08 15:02:30.019]receive request to create entry??position leiting2 --> garner[60000, 210600]??script line 53
+[04-08 15:02:30.019]create entry success??position leiting2 --> garner[60000, 210600] 
+[04-08 15:02:30.051]receive entry create success ??position garner --> leiting2
+[04-08 15:02:31.334]receive request to create entry??position mjing1 --> darkblue[129900, 53800]??script line 22
+[04-08 15:02:31.334]create entry success??position mjing1 --> darkblue[129900, 53800] 
+[04-08 15:02:31.334]receive request to create entry??position mjing2 --> mjing1[37400, 38700]??script line 16
+[04-08 15:02:31.334]create entry success??position mjing2 --> mjing1[37400, 38700] 
+[04-08 15:02:31.334]receive request to create entry??position mjing3 --> darkblue[129900, 54300]??script line 23
+[04-08 15:02:31.334]create entry success??position mjing3 --> darkblue[129900, 54300] 
+[04-08 15:02:31.366]receive entry create success ??position darkblue --> mjing1
+[04-08 15:02:31.366]receive entry create success ??position mjing1 --> mjing2
+[04-08 15:02:31.366]receive entry create success ??position darkblue --> mjing3
+[04-08 15:02:31.398]receive request to create entry??position mjing4 --> mjing3[34600, 12700]??script line 17
+[04-08 15:02:31.398]create entry success??position mjing4 --> mjing3[34600, 12700] 
+[04-08 15:02:31.430]receive entry create success ??position mjing3 --> mjing4
+[04-08 15:02:31.585]receive request to create entry??position teampk --> garner[10000, 10000]??script line 89
+[04-08 15:02:31.585]create entry success??position teampk --> garner[10000, 10000] 
+[04-08 15:02:31.616]receive entry create success ??position garner --> teampk
+[04-08 15:02:31.648]receive request to create entry??position Hellchapter --> garner[220300, 278000]??script line 44
+[04-08 15:02:31.648]create entry success??position Hellchapter --> garner[220300, 278000] 
+[04-08 15:02:31.680]receive entry create success ??position garner --> Hellchapter
+[04-08 15:30:04.967]receive request to destroy entry??position garner2 --> darkblue
+[04-08 15:30:04.971]destroy entry success??position garner2 --> darkblue
+[04-08 15:30:04.998]receive entry destroy success??position darkblue --> garner2
+[04-08 15:50:56.382]receive request to create entry??position leiting2 --> garner[60000, 210600]??script line 53
+[04-08 15:50:56.382]create entry success??position leiting2 --> garner[60000, 210600] 
+[04-08 15:50:56.413]receive entry create success ??position garner --> leiting2
+[04-08 15:50:58.613]receive request to create entry??position mjing1 --> darkblue[129900, 53800]??script line 22
+[04-08 15:50:58.613]create entry success??position mjing1 --> darkblue[129900, 53800] 
+[04-08 15:50:58.644]receive entry create success ??position darkblue --> mjing1
+[04-08 15:50:58.676]receive request to create entry??position mjing2 --> mjing1[37400, 38700]??script line 16
+[04-08 15:50:58.676]create entry success??position mjing2 --> mjing1[37400, 38700] 
+[04-08 15:50:58.708]receive entry create success ??position mjing1 --> mjing2
+[04-08 15:50:58.739]receive request to create entry??position mjing3 --> darkblue[129900, 54300]??script line 23
+[04-08 15:50:58.739]create entry success??position mjing3 --> darkblue[129900, 54300] 
+[04-08 15:50:58.771]receive entry create success ??position darkblue --> mjing3
+[04-08 15:50:58.803]receive request to create entry??position mjing4 --> mjing3[34600, 12700]??script line 17
+[04-08 15:50:58.803]create entry success??position mjing4 --> mjing3[34600, 12700] 
+[04-08 15:50:58.834]receive entry create success ??position mjing3 --> mjing4
+[04-08 15:50:59.690]receive request to create entry??position teampk --> garner[10000, 10000]??script line 89
+[04-08 15:50:59.690]create entry success??position teampk --> garner[10000, 10000] 
+[04-08 15:50:59.722]receive entry create success ??position garner --> teampk
+[04-08 15:50:59.754]receive request to create entry??position Hellchapter --> garner[220300, 278000]??script line 44
+[04-08 15:50:59.754]create entry success??position Hellchapter --> garner[220300, 278000] 
+[04-08 15:50:59.786]receive entry create success ??position garner --> Hellchapter
+[04-08 17:00:16.009]receive request to create entry??position puzzleworld2 --> puzzleworld[14700, 38400]??script line 37
+[04-08 17:00:16.009]create entry success??position puzzleworld2 --> puzzleworld[14700, 38400] 
+[04-08 17:00:16.040]receive entry create success ??position puzzleworld --> puzzleworld2
+[04-08 17:00:16.320]receive request to create entry??position chaosicicle --> DreamIsland[33700, 58800]??script line 73
+[04-08 17:00:16.320]create entry success??position chaosicicle --> DreamIsland[33700, 58800] 
+[04-08 17:00:16.352]receive entry create success ??position DreamIsland --> chaosicicle
+[04-08 15:00:03.770]receive request to destroy entry??position puzzleworld2 --> puzzleworld
+[04-08 15:00:03.770]destroy entry success??position puzzleworld2 --> puzzleworld
+[04-08 15:00:03.770]receive request to destroy entry??position puzzleworld2 --> puzzleworld
+[04-08 15:00:03.802]receive entry destroy success??position puzzleworld --> puzzleworld2
+[04-08 15:00:04.144]receive request to destroy entry??position chaosicicle --> DreamIsland
+[04-08 15:00:04.144]destroy entry success??position chaosicicle --> DreamIsland
+[04-08 15:00:04.144]receive request to destroy entry??position chaosicicle --> DreamIsland
+[04-08 15:00:04.175]receive entry destroy success??position DreamIsland --> chaosicicle
+[04-08 15:00:05.496]receive request to create entry??position garner2 --> darkblue[137200, 53100]??script line 75
+[04-08 15:00:05.496]create entry success??position garner2 --> darkblue[137200, 53100] 
+[04-08 15:00:05.528]receive entry create success ??position darkblue --> garner2
+[04-08 15:30:00.474]receive request to destroy entry??position garner2 --> darkblue
+[04-08 15:30:00.474]destroy entry success??position garner2 --> darkblue
+[04-08 15:30:00.505]receive entry destroy success??position darkblue --> garner2

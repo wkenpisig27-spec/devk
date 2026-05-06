@@ -1,0 +1,69 @@
+[04-10 00:35:06.004][EnterMap] Cha-tempra+5187 restoring states from str=''
+[04-10 00:35:06.004][EnterMap] Cha-tempra+5187 states before restore (from equipment): 0
+[04-10 00:35:06.004][EnterMap] Cha-tempra+5187 states after restore: 0
+[04-10 00:37:01.856][SwitchMap-fast] Cha-tempra+5187 serialized states: 0 active, str='0'
+[04-10 00:37:01.856][EnterMap] Cha-tempra+5187 restoring states from str='0'
+[04-10 00:37:01.857][EnterMap] Cha-tempra+5187 states before restore (from equipment): 0
+[04-10 00:37:01.857][Strin2SStateData] Cha-tempra+5187 declared=0 actual=0 restored=0 total_now=0
+[04-10 00:37:01.857][EnterMap] Cha-tempra+5187 states after restore: 0
+[04-10 03:00:32.586][SwitchMap-fast] Cha-tempra+5187 serialized states: 3 active, str='3;109,1,568,3342;102,1,5369,3100;120,1,870,3339'
+[04-10 03:00:32.586]  state[0] id=109 lv=1 onTick=600 srcItem=3342
+[04-10 03:00:32.586]  state[1] id=102 lv=1 onTick=5400 srcItem=3100
+[04-10 03:00:32.586]  state[2] id=120 lv=1 onTick=900 srcItem=3339
+[04-10 03:00:32.586][EnterMap] Cha-tempra+5187 restoring states from str='3;109,1,568,3342;102,1,5369,3100;120,1,870,3339'
+[04-10 03:00:32.586][EnterMap] Cha-tempra+5187 states before restore (from equipment): 0
+[04-10 03:00:32.588][Strin2SStateData] Cha-tempra+5187 declared=3 actual=3 restored=3 total_now=3
+[04-10 03:00:32.588][EnterMap] Cha-tempra+5187 states after restore: 3
+[04-10 03:00:32.588]  state[0] id=109 lv=1 onTick=568 srcItem=3342
+[04-10 03:00:32.588]  state[1] id=102 lv=1 onTick=5369 srcItem=3100
+[04-10 03:00:32.588]  state[2] id=120 lv=1 onTick=870 srcItem=3339
+[04-10 03:01:06.384][SwitchMap-fast] Cha-tempra+5187 serialized states: 3 active, str='3;109,1,535,3342;102,1,5336,3100;120,1,837,3339'
+[04-10 03:01:06.384]  state[0] id=109 lv=1 onTick=568 srcItem=3342
+[04-10 03:01:06.384]  state[1] id=102 lv=1 onTick=5369 srcItem=3100
+[04-10 03:01:06.384]  state[2] id=120 lv=1 onTick=870 srcItem=3339
+[04-10 03:01:06.385][EnterMap] Cha-tempra+5187 restoring states from str='3;109,1,535,3342;102,1,5336,3100;120,1,837,3339'
+[04-10 03:01:06.385][EnterMap] Cha-tempra+5187 states before restore (from equipment): 0
+[04-10 03:01:06.385][Strin2SStateData] Cha-tempra+5187 declared=3 actual=3 restored=3 total_now=3
+[04-10 03:01:06.385][EnterMap] Cha-tempra+5187 states after restore: 3
+[04-10 03:01:06.385]  state[0] id=109 lv=1 onTick=535 srcItem=3342
+[04-10 03:01:06.385]  state[1] id=102 lv=1 onTick=5336 srcItem=3100
+[04-10 03:01:06.385]  state[2] id=120 lv=1 onTick=837 srcItem=3339
+[04-10 03:01:15.772][SwitchMap-fast] Cha-tempra+5187 serialized states: 3 active, str='3;109,1,527,3342;102,1,5328,3100;120,1,829,3339'
+[04-10 03:01:15.772]  state[0] id=109 lv=1 onTick=535 srcItem=3342
+[04-10 03:01:15.772]  state[1] id=102 lv=1 onTick=5336 srcItem=3100
+[04-10 03:01:15.772]  state[2] id=120 lv=1 onTick=837 srcItem=3339
+[04-10 03:01:15.772][EnterMap] Cha-tempra+5187 restoring states from str='3;109,1,527,3342;102,1,5328,3100;120,1,829,3339'
+[04-10 03:01:15.772][EnterMap] Cha-tempra+5187 states before restore (from equipment): 0
+[04-10 03:01:15.772][Strin2SStateData] Cha-tempra+5187 declared=3 actual=3 restored=3 total_now=3
+[04-10 03:01:15.772][EnterMap] Cha-tempra+5187 states after restore: 3
+[04-10 03:01:15.772]  state[0] id=109 lv=1 onTick=527 srcItem=3342
+[04-10 03:01:15.772]  state[1] id=102 lv=1 onTick=5328 srcItem=3100
+[04-10 03:01:15.772]  state[2] id=120 lv=1 onTick=829 srcItem=3339
+[04-10 03:01:18.936][EnterMap] Cha-sads+5188 restoring states from str=''
+[04-10 03:01:18.936][EnterMap] Cha-sads+5188 states before restore (from equipment): 0
+[04-10 03:01:18.936][EnterMap] Cha-sads+5188 states after restore: 0
+[04-10 03:01:29.296][SwitchMap-fast] Cha-sads+5188 serialized states: 0 active, str='0'
+[04-10 03:01:29.296][EnterMap] Cha-sads+5188 restoring states from str='0'
+[04-10 03:01:29.296][EnterMap] Cha-sads+5188 states before restore (from equipment): 0
+[04-10 03:01:29.296][Strin2SStateData] Cha-sads+5188 declared=0 actual=0 restored=0 total_now=0
+[04-10 03:01:29.296][EnterMap] Cha-sads+5188 states after restore: 0
+[04-10 03:01:45.651][SetDie] Cha-tempra+5187 died (PvP), preserved 3 states, total states 3
+[04-10 03:01:45.651]  state[0] id=109 lv=1 remain=498 srcItem=3342
+[04-10 03:01:45.651]  state[1] id=102 lv=1 remain=5299 srcItem=3100
+[04-10 03:01:45.651]  state[2] id=120 lv=1 remain=800 srcItem=3339
+[04-10 03:01:45.651][SetDie] Cha-tempra+5187 restore complete, states now 3
+[04-10 03:01:45.701][Die] Cha-tempra+5187 captured 3 preserved states, total states 3
+[04-10 03:01:45.702][Die] Cha-tempra+5187 restore complete, states now 3
+[04-10 03:01:49.363][OnDie-CITY] Cha-tempra+5187 captured 3 persist states before BackToCity
+[04-10 03:01:49.563][SwitchMap-fast] Cha-tempra+5187 serialized states: 3 active, str='3;109,1,498,3342;102,1,5299,3100;120,1,800,3339'
+[04-10 03:01:49.563]  state[0] id=109 lv=1 onTick=498 srcItem=3342
+[04-10 03:01:49.563]  state[1] id=102 lv=1 onTick=5299 srcItem=3100
+[04-10 03:01:49.563]  state[2] id=120 lv=1 onTick=800 srcItem=3339
+[04-10 03:01:49.563][EnterMap] Cha-tempra+5187 restoring states from str='3;109,1,498,3342;102,1,5299,3100;120,1,800,3339'
+[04-10 03:01:49.563][EnterMap] Cha-tempra+5187 states before restore (from equipment): 0
+[04-10 03:01:49.564][Strin2SStateData] Cha-tempra+5187 declared=3 actual=3 restored=3 total_now=3
+[04-10 03:01:49.564][EnterMap] Cha-tempra+5187 states after restore: 3
+[04-10 03:01:49.564]  state[0] id=109 lv=1 onTick=498 srcItem=3342
+[04-10 03:01:49.564]  state[1] id=102 lv=1 onTick=5299 srcItem=3100
+[04-10 03:01:49.564]  state[2] id=120 lv=1 onTick=800 srcItem=3339
+[04-10 03:01:49.564][OnDie-CITY] Cha-tempra+5187 all 3 persist states survived map switch OK

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c0392b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7b241c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="15" fill="url(#bg)"/>
+  <!-- Sword -->
+  <rect x="70" y="15" width="6" height="50" fill="#C0C0C0" transform="rotate(30 73 40)"/>
+  <rect x="65" y="55" width="16" height="6" rx="2" fill="#8B4513" transform="rotate(30 73 58)"/>
+  <!-- Character -->
+  <circle cx="45" cy="40" r="16" fill="#f5d0a9" stroke="#d4a574" stroke-width="2"/>
+  <ellipse cx="45" cy="72" rx="20" ry="18" fill="#8B0000" stroke="#660000" stroke-width="2"/>
+  <circle cx="40" cy="38" r="2" fill="#333"/>
+  <circle cx="50" cy="38" r="2" fill="#333"/>
+  <path d="M40 45 Q45 48 50 45" stroke="#333" stroke-width="1.5" fill="none"/>
+  <text x="50" y="95" text-anchor="middle" font-family="Arial" font-size="8" fill="white" font-weight="bold">SWORDSMAN</text>
+</svg>

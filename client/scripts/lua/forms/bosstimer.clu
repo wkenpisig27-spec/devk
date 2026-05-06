@@ -1,0 +1,293 @@
+-------------------------------------------------------------------------------
+-- BossTimer Form - Using legacy UI API
+-- Displays boss respawn timers
+-------------------------------------------------------------------------------
+
+-- Boss Timer Data Storage
+BossTimer_Data = {}
+BossTimer_FormVisible = false
+BossTimer_LastUpdate = 0
+
+-------------------------------------------------------------------------------
+-- Data Management (Called from C++ packet handler)
+-------------------------------------------------------------------------------
+function BossTimer_ClearData()
+    BossTimer_Data = {}
+end
+
+function BossTimer_AddEntry(chaId, name, status, remainingSeconds)
+    table.insert(BossTimer_Data, {
+        chaId = chaId,
+        name = name,
+        status = status,  -- 0 = Alive, 1 = Dead (respawning)
+        remaining = remainingSeconds,
+        lastUpdate = os.clock()
+    })
+end
+
+function BossTimer_DataReady()
+    BossTimer_LastUpdate = os.clock()
+    -- Refresh the form if visible
+    if BossTimer_FormVisible then
+        BossTimer_UpdateDisplay()
+    end
+end
+
+-------------------------------------------------------------------------------
+-- Time Formatting
+-------------------------------------------------------------------------------
+function FormatBossTime(seconds)
+    if seconds <= 0 then
+        return "Alive"
+    end
+    
+    local hours = math.floor(seconds / 3600)
+    local mins = math.floor((seconds % 3600) / 60)
+    local secs = seconds % 60
+    
+    if hours > 0 then
+        return string.format("%dh %02dm %02ds", hours, mins, secs)
+    elseif mins > 0 then
+        return string.format("%dm %02ds", mins, secs)
+    else
+        return string.format("%ds", secs)
+    end
+end
+
+-------------------------------------------------------------------------------
+-- Form Definition (Legacy UI API)
+-------------------------------------------------------------------------------
+local FORM_WIDTH = 323
+local FORM_HEIGHT = 325
+local ROW_HEIGHT = 22
+local MAX_VISIBLE_BOSSES = 10
+
+-- Create the main form
+-- UI_CreateForm( name, has_caption, width, height, x, y, is_movable, has_border )
+frmBossTimer = UI_CreateForm( "frmBossTimer", FALSE, FORM_WIDTH, FORM_HEIGHT, 300, 150, TRUE, FALSE )
+UI_ShowForm( frmBossTimer, FALSE )
+UI_AddFormToTemplete( frmBossTimer, FORM_MAIN )
+UI_FormSetIsEscClose( frmBossTimer, TRUE )
+UI_SetIsDrag( frmBossTimer, TRUE )
+
+-- Background image
+imgBossTimerBg = UI_CreateCompent( frmBossTimer, IMAGE_TYPE, "imgBossTimerBg", FORM_WIDTH, FORM_HEIGHT, 0, 0 )
+UI_LoadImage( imgBossTimerBg, "texture/ui/corsairs/BossTimer2.png", NORMAL, FORM_WIDTH, FORM_HEIGHT, 0, 0 )
+
+-- Title label
+labBossTitle = UI_CreateCompent( frmBossTimer, LABELEX_TYPE, "labBossTitle", 260, 20, 100, 5 )
+UI_SetCaption( labBossTitle, "Boss Respawn Timer" )
+UI_SetTextColor( labBossTitle, COLOR_BLACK )
+UI_SetLabelExFont( labBossTitle, DEFAULT_FONT, TRUE, COLOR_WHITE )
+
+-- Header - Monster
+labBossNameHeader = UI_CreateCompent( frmBossTimer, LABELEX_TYPE, "labBossNameHeader", 150, 18, 10, 35 )
+UI_SetCaption( labBossNameHeader, "Monster" )
+UI_SetTextColor( labBossNameHeader, COLOR_BLACK )
+UI_SetLabelExFont( labBossNameHeader, DEFAULT_FONT, TRUE, COLOR_WHITE )
+
+-- Header - Status
+labBossStatusHeader = UI_CreateCompent( frmBossTimer, LABELEX_TYPE, "labBossStatusHeader", 40, 18, 165, 35 )
+UI_SetCaption( labBossStatusHeader, "Status" )
+UI_SetTextColor( labBossStatusHeader, COLOR_BLACK )
+UI_SetLabelExFont( labBossStatusHeader, DEFAULT_FONT, TRUE, COLOR_WHITE )
+
+-- Header - Time
+labBossTimeHeader = UI_CreateCompent( frmBossTimer, LABELEX_TYPE, "labBossTimeHeader", 50, 18, 225, 35 )
+UI_SetCaption( labBossTimeHeader, "Time" )
+UI_SetTextColor( labBossTimeHeader, COLOR_BLACK )
+UI_SetLabelExFont( labBossTimeHeader, DEFAULT_FONT, TRUE, COLOR_WHITE )
+
+-- Create boss entry labels (3 columns: Name, Status, Time)
+BossTimer_NameLabels = {}
+BossTimer_StatusLabels = {}
+BossTimer_TimeLabels = {}
+for i = 1, MAX_VISIBLE_BOSSES do
+    local yPos = 55 + (i - 1) * ROW_HEIGHT
+    
+    -- Monster name column
+    local nameLabel = UI_CreateCompent( frmBossTimer, LABELEX_TYPE, "labBossName" .. i, 150, ROW_HEIGHT - 2, 10, yPos )
+    UI_SetCaption( nameLabel, "" )
+    UI_SetTextColor( nameLabel, COLOR_BLACK )
+    UI_SetLabelExFont( nameLabel, DEFAULT_FONT, FALSE, COLOR_WHITE )
+    UI_SetIsShow( nameLabel, FALSE )
+    BossTimer_NameLabels[i] = nameLabel
+    
+    -- Status column (Dead/Alive)
+    local statusLabel = UI_CreateCompent( frmBossTimer, LABELEX_TYPE, "labBossStatus" .. i, 40, ROW_HEIGHT - 2, 165, yPos )
+    UI_SetCaption( statusLabel, "" )
+    UI_SetTextColor( statusLabel, COLOR_BLACK )
+    UI_SetLabelExFont( statusLabel, DEFAULT_FONT, FALSE, COLOR_WHITE )
+    UI_SetIsShow( statusLabel, FALSE )
+    BossTimer_StatusLabels[i] = statusLabel
+    
+    -- Time column (countdown or -)
+    local timeLabel = UI_CreateCompent( frmBossTimer, LABELEX_TYPE, "labBossTime" .. i, 50, ROW_HEIGHT - 2, 225, yPos )
+    UI_SetCaption( timeLabel, "" )
+    UI_SetTextColor( timeLabel, COLOR_BLACK )
+    UI_SetLabelExFont( timeLabel, DEFAULT_FONT, FALSE, COLOR_WHITE )
+    UI_SetIsShow( timeLabel, FALSE )
+    BossTimer_TimeLabels[i] = timeLabel
+end
+
+-- Close button
+btnBossTimerClose = UI_CreateCompent( frmBossTimer, BUTTON_TYPE, "btnBossTimerClose", 14, 14, FORM_WIDTH - 18, 3 )
+UI_LoadButtonImage( btnBossTimerClose, "texture/ui/PublicC.tga", 14, 14, 116, 175, TRUE )
+UI_SetButtonModalResult( btnBossTimerClose, BUTTON_CLOSE )
+
+-- Refresh button
+btnBossTimerRefresh = UI_CreateCompent( frmBossTimer, BUTTON_TYPE, "btnBossTimerRefresh", 41, 19, 15, FORM_HEIGHT - 35 )
+UI_LoadButtonImage( btnBossTimerRefresh, "texture/ui/corsairs/refresh.png", 41, 19, 0, 0, TRUE )
+UI_SetHint( btnBossTimerRefresh, "Refresh Data" )
+
+-- Scrollbar (vertical, on right side of list area)
+local SCROLL_HEIGHT = MAX_VISIBLE_BOSSES * ROW_HEIGHT
+scrBossTimer = UI_CreateCompent( frmBossTimer, SCROLL_TYPE, "scrBossTimer", 11, SCROLL_HEIGHT, FORM_WIDTH - 16, 55 )
+UI_SetScrollStyle( scrBossTimer, 1 )  -- 1 = Vertical
+UI_LoadImage( scrBossTimer, "texture/ui/PublicC.tga", COMPENT_BACK, 11, 1, 194, 13 )
+
+-- Scrollbar up button
+local scrUp = UI_GetScrollObj( scrBossTimer, SCROLL_UP )
+UI_LoadButtonImage( scrUp, "texture/ui/PublicC.tga", 11, 9, 166, 0, TRUE )
+UI_SetSize( scrUp, 11, 9 )
+
+-- Scrollbar thumb
+local scrThumb = UI_GetScrollObj( scrBossTimer, SCROLL_SCROLL )
+UI_LoadImage( scrThumb, "texture/ui/PublicC.tga", COMPENT_BACK, 11, 43, 166, 10 )
+UI_SetSize( scrThumb, 11, 43 )
+
+-- Scrollbar down button
+local scrDown = UI_GetScrollObj( scrBossTimer, SCROLL_DOWN )
+UI_LoadButtonImage( scrDown, "texture/ui/PublicC.tga", 11, 9, 166, 0, TRUE )
+UI_SetSize( scrDown, 11, 9 )
+
+-- Last update label
+labBossLastUpdate = UI_CreateCompent( frmBossTimer, LABELEX_TYPE, "labBossLastUpdate", 170, 20, 60, FORM_HEIGHT - 32 )
+UI_SetCaption( labBossLastUpdate, "No data" )
+UI_SetTextColor( labBossLastUpdate, COLOR_BLACK )
+UI_SetLabelExFont( labBossLastUpdate, DEFAULT_FONT, FALSE, COLOR_WHITE )
+
+-------------------------------------------------------------------------------
+-- Display Update
+-------------------------------------------------------------------------------
+function BossTimer_UpdateDisplay()
+    -- Update elapsed time for each entry
+    local now = os.clock()
+    local elapsed = now - BossTimer_LastUpdate
+    
+    -- Sort data: dead bosses first (by remaining time), then alive bosses
+    local sortedData = {}
+    for _, entry in ipairs(BossTimer_Data) do
+        table.insert(sortedData, entry)
+    end
+    table.sort(sortedData, function(a, b)
+        if a.status == 1 and b.status == 0 then return true end
+        if a.status == 0 and b.status == 1 then return false end
+        if a.status == 1 and b.status == 1 then
+            return a.remaining < b.remaining  -- Closest to spawn first
+        end
+        return a.name < b.name  -- Alphabetical for alive
+    end)
+    
+    -- Update labels
+    for i = 1, MAX_VISIBLE_BOSSES do
+        local entry = sortedData[i]
+        local nameLabel = BossTimer_NameLabels[i]
+        local statusLabel = BossTimer_StatusLabels[i]
+        
+        if entry then
+            UI_SetIsShow( nameLabel, TRUE )
+            UI_SetIsShow( statusLabel, TRUE )
+            UI_SetCaption( nameLabel, entry.name )
+            
+            if entry.status == 0 then
+                -- Alive
+                UI_SetCaption( statusLabel, "Alive" )
+                UI_SetTextColor( statusLabel, 4278255360 )  -- Green
+                UI_SetTextColor( nameLabel, COLOR_WHITE )
+            else
+                -- Dead - calculate remaining time
+                local adjustedRemaining = math.max(0, entry.remaining - math.floor(elapsed))
+                if adjustedRemaining > 0 then
+                    UI_SetCaption( statusLabel, FormatBossTime(adjustedRemaining) )
+                    UI_SetTextColor( statusLabel, 4278190335 )  -- Red
+                    UI_SetTextColor( nameLabel, 4294952181 )   -- Light red
+                else
+                    -- Timer expired
+                    UI_SetCaption( statusLabel, "Spawning..." )
+                    UI_SetTextColor( statusLabel, 4294967040 )  -- Yellow
+                    UI_SetTextColor( nameLabel, 4294967200 )   -- Light yellow
+                end
+            end
+        else
+            UI_SetIsShow( nameLabel, FALSE )
+            UI_SetIsShow( statusLabel, FALSE )
+        end
+    end
+    
+    -- Update last update text
+    if BossTimer_LastUpdate > 0 then
+        local ago = math.floor(now - BossTimer_LastUpdate)
+        if ago < 2 then
+            UI_SetCaption( labBossLastUpdate, "Just updated" )
+        elseif ago < 60 then
+            UI_SetCaption( labBossLastUpdate, "Updated " .. ago .. "s ago" )
+        else
+            UI_SetCaption( labBossLastUpdate, "Updated " .. math.floor(ago / 60) .. "m ago" )
+        end
+    else
+        UI_SetCaption( labBossLastUpdate, "No data" )
+    end
+end
+
+-------------------------------------------------------------------------------
+-- Form Show/Hide
+-------------------------------------------------------------------------------
+function ShowBossTimerForm()
+    UI_ShowForm( frmBossTimer, TRUE )
+    BossTimer_FormVisible = true
+    -- Request fresh data
+    if uiRequestBossTimerData then
+        uiRequestBossTimerData()
+    end
+end
+
+function HideBossTimerForm()
+    UI_ShowForm( frmBossTimer, FALSE )
+    BossTimer_FormVisible = false
+end
+
+function ToggleBossTimerForm()
+    if BossTimer_FormVisible then
+        HideBossTimerForm()
+    else
+        ShowBossTimerForm()
+    end
+end
+
+-------------------------------------------------------------------------------
+-- Button Click Handlers
+-------------------------------------------------------------------------------
+function frmBossTimer_btnBossTimerRefresh_OnClick()
+    if uiRequestBossTimerData then
+        uiRequestBossTimerData()
+    end
+end
+
+-------------------------------------------------------------------------------
+-- Form Close Handler
+-------------------------------------------------------------------------------
+function frmBossTimer_OnClose()
+    BossTimer_FormVisible = false
+end
+
+-------------------------------------------------------------------------------
+-- Timer Update (called periodically by game loop if available)
+-------------------------------------------------------------------------------
+function BossTimer_OnTimer()
+    if BossTimer_FormVisible then
+        BossTimer_UpdateDisplay()
+    end
+end
+
+LG("scripts", "BossTimer form loaded (legacy API)\n")

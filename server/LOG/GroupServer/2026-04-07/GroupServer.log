@@ -1,0 +1,15 @@
+[04-07 16:05:21.769](127.0.0.1):[admin3]login success, 	 nline/total:1/0
+[04-07 16:05:31.882](127.0.0.1):[admin3]select char[tempra]begin paly...,	 online/total:1/0
+[04-07 16:05:32.097](127.0.0.1):[admin3] char [tempra]entry map server begin play...!	 online/total:1/1
+[04-07 16:09:12.280](127.0.0.1):[admin3]logout,	 online/total:0/0
+[04-07 16:10:40.782](127.0.0.1):[admin3]login success, 	 nline/total:1/0
+[04-07 16:10:48.179](127.0.0.1):[admin3]select char[tempra]begin paly...,	 online/total:1/0
+[04-07 16:10:48.291](127.0.0.1):[admin3] char [tempra]entry map server begin play...!	 online/total:1/1
+[04-07 16:18:51.149](127.0.0.1):[admin3]logout,	 online/total:0/0
+[04-07 16:22:00.134](127.0.0.1):[admin3]login success, 	 nline/total:1/0
+[04-07 16:22:03.922](127.0.0.1):[admin3]select char[tempra]begin paly...,	 online/total:1/0
+[04-07 16:22:04.136](127.0.0.1):[admin3] char [tempra]entry map server begin play...!	 online/total:1/1
+[04-07 16:22:58.866](127.0.0.1):[admin3]logout,	 online/total:0/0
+[04-07 16:27:42.538]ip: 127.0.0.1 username: admin3 login failed, error:1002
+[04-07 16:27:45.389](127.0.0.1):[admin3]login success, 	 nline/total:1/0
+[04-07 16:27:48.930](127.0.0.1):[admin3]select char[tempra]begin paly...,	 online/total:1/0

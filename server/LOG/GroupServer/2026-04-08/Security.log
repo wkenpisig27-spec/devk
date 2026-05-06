@@ -1,0 +1,13 @@
+[04-08 15:02:15.568][Security] IP Whitelist ENABLED with 2 allowed IPs:
+[04-08 15:02:15.569]  - 127.0.0.1
+[04-08 15:02:15.569]  - ::1
+[04-08 15:04:45.660]RegisterPlayer: ptr=0x2D1AE8D7B30 gen=1 total=1
+[04-08 15:04:48.270]RegisterPlayer: ptr=0x2D1AE8D86E0 gen=2 total=2
+[04-08 15:05:20.530]RegisterPlayer: ptr=0x2D1AE8D9290 gen=3 total=3
+[04-08 15:46:12.563]UnregisterPlayer: ptr=0x2D1AE8D86E0 gen=2 remaining=2
+[04-08 15:46:14.018]UnregisterPlayer: ptr=0x2D1AE8D9290 gen=3 remaining=1
+[04-08 15:50:37.689][Security] IP Whitelist ENABLED with 2 allowed IPs:
+[04-08 15:50:37.689]  - 127.0.0.1
+[04-08 15:50:37.689]  - ::1
+[04-08 15:51:27.545]RegisterPlayer: ptr=0x1CDD9668E00 gen=1 total=1
+[04-08 15:51:35.482]RegisterPlayer: ptr=0x1CDD96699B0 gen=2 total=2

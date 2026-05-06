@@ -1,0 +1,19 @@
+[04-07 16:03:51.083][Security] IP Whitelist ENABLED with 2 allowed IPs:
+[04-07 16:03:51.084]  - 127.0.0.1
+[04-07 16:03:51.084]  - ::1
+[04-07 16:05:21.268]RegisterPlayer: ptr=0x1B475D29CC0 gen=1 total=1
+[04-07 16:09:12.280]UnregisterPlayer: ptr=0x1B475D29CC0 gen=1 remaining=0
+[04-07 16:09:42.551][Security] IP Whitelist ENABLED with 2 allowed IPs:
+[04-07 16:09:42.552]  - 127.0.0.1
+[04-07 16:09:42.553]  - ::1
+[04-07 16:10:40.289]RegisterPlayer: ptr=0x20CDAF1A1D0 gen=1 total=1
+[04-07 16:18:51.149]UnregisterPlayer: ptr=0x20CDAF1A1D0 gen=1 remaining=0
+[04-07 16:21:14.378][Security] IP Whitelist ENABLED with 2 allowed IPs:
+[04-07 16:21:14.378]  - 127.0.0.1
+[04-07 16:21:14.378]  - ::1
+[04-07 16:21:59.431]RegisterPlayer: ptr=0x268C6673DF0 gen=1 total=1
+[04-07 16:22:58.868]UnregisterPlayer: ptr=0x268C6673DF0 gen=1 remaining=0
+[04-07 16:27:28.491][Security] IP Whitelist ENABLED with 2 allowed IPs:
+[04-07 16:27:28.492]  - 127.0.0.1
+[04-07 16:27:28.492]  - ::1
+[04-07 16:27:42.179]RegisterPlayer: ptr=0x133AB894D00 gen=1 total=1

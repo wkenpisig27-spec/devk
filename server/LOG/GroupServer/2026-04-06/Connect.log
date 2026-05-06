@@ -1,0 +1,19 @@
+[04-06 10:55:58.056]begin connect database
+[04-06 10:55:58.181]begin init AccountServer connect
+[04-06 10:55:58.181]AccountServer:127.0.0.1,1978 come ! Socket num:1
+[04-06 10:55:58.206]begin read GroupServer.cfg
+[04-06 10:55:58.211]begin load ChaNameFilter.txt
+[04-06 10:55:58.211]begin listen port:1975
+[04-06 10:55:58.211]open listen port:1975 success, init is ok
+[04-06 10:56:01.943]GateServer:127.0.0.1,64627 come ! Socket num:2
+[04-06 10:56:01.958]GateServer:127.0.0.1,64627 TP_LOGIN1\n[04-06 10:56:01.958]GateServer:127.0.0.1,64627 TP_LOGIN2\n[04-06 10:56:01.959]GateServer:127.0.0.1,64627 TP_LOGIN3\n[04-06 11:00:47.175]begin connect database
+[04-06 11:00:47.284]begin init AccountServer connect
+[04-06 11:01:59.423]begin connect database
+[04-06 11:01:59.520]begin init AccountServer connect
+[04-06 11:01:59.521]AccountServer:127.0.0.1,1978 come ! Socket num:1
+[04-06 11:01:59.554]begin read GroupServer.cfg
+[04-06 11:01:59.560]begin load ChaNameFilter.txt
+[04-06 11:01:59.561]begin listen port:1975
+[04-06 11:01:59.561]open listen port:1975 success, init is ok
+[04-06 11:02:04.309]GateServer:127.0.0.1,54873 come ! Socket num:2
+[04-06 11:02:04.324]GateServer:127.0.0.1,54873 TP_LOGIN1\n[04-06 11:02:04.324]GateServer:127.0.0.1,54873 TP_LOGIN2\n[04-06 11:02:04.325]GateServer:127.0.0.1,54873 TP_LOGIN3\n[04-06 11:11:50.789]begin connect database
