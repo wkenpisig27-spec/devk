@@ -1,4 +1,5 @@
 ﻿#include "Character.h"
+#include "lua_bridge.h"
 #include "script.h"
 #include "GameApp.h"
 #include "HarmRec.h"
@@ -113,13 +114,13 @@ inline int lua_SetCurMap(lua_State* L) {
 }
 
 inline int lua_GetChaID(lua_State* L) {
-	BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+	BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (!pCha) {
 		E_LUANULL
 		return 0;
@@ -138,7 +139,7 @@ inline int lua_CreateChaNearPlayer(lua_State* L) {
 		PARAM_ERROR
 		return 0;
 	}
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	int nScriptID = (int)lua_tonumber(L, 2);
 	Point Pos;
 	Pos.x = (int)pCha->GetPos().x;
@@ -149,7 +150,7 @@ inline int lua_CreateChaNearPlayer(lua_State* L) {
 	CCharacter* pCCha = pCha->GetSubMap()->ChaSpawn(nScriptID, enumCHACTRL_NONE, 0, &Pos);
 	if (pCCha) {
 		// pCCha->SetResumeTime(-1);
-		lua_pushlightuserdata(L, pCCha);
+		LB_PushCha(L, pCCha);
 		return 1;
 	} else {
 		// LG("lua_ai", "创建角色失败\n");
@@ -187,7 +188,7 @@ inline int lua_CreateCha(lua_State* L) {
 	CCharacter* pCCha = g_pScriptMap->ChaSpawn(nScriptID, enumCHACTRL_NONE, sAngle, &Pos);
 	if (pCCha) {
 		pCCha->SetResumeTime(lReliveTime * 1000);
-		lua_pushlightuserdata(L, pCCha);
+		LB_PushCha(L, pCCha);
 		return 1;
 	} else {
 		// LG("lua_ai", "创建角色失败\n");
@@ -200,7 +201,7 @@ inline int lua_CreateCha(lua_State* L) {
 inline int lua_CreateChaX(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 6 && lua_isnumber(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isnumber(L, 5) && lua_islightuserdata(L, 6));
+		BOOL bValid = (lua_gettop(L) == 6 && lua_isnumber(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isnumber(L, 5) && lua_isuserdata(L, 6));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
@@ -212,7 +213,7 @@ inline int lua_CreateChaX(lua_State* L) {
 	Pos.y = (int)lua_tonumber(L, 3);
 	short sAngle = (short)lua_tonumber(L, 4);	// 角色出生方向
 	int lReliveTime = (int)lua_tonumber(L, 5); // 死亡后的重生时间
-	CCharacter* pMainCha = (CCharacter*)lua_touserdata(L, 6);
+	CCharacter* pMainCha = LB_GetCha(L, 6);
 
 	// LG("create_chaX", "创建怪物%d  pos = %d %d, angle = %d, rTime = %d\n", nScriptID, Pos.x, Pos.y, sAngle, lReliveTime);
 	LG("create_chaX", "create bugbear%d  pos = %d %d, angle = %d, rTime = %d\n", nScriptID, Pos.x, Pos.y, sAngle, lReliveTime);
@@ -222,7 +223,7 @@ inline int lua_CreateChaX(lua_State* L) {
 	CCharacter* pCCha = pMainCha->m_submap->ChaSpawn(nScriptID, enumCHACTRL_NONE, sAngle, &Pos);
 	if (pCCha) {
 		pCCha->SetResumeTime(lReliveTime * 1000);
-		lua_pushlightuserdata(L, pCCha);
+		LB_PushCha(L, pCCha);
 		return 1;
 	} else {
 		// LG("lua_ai", "创建角色失败\n");
@@ -239,7 +240,7 @@ inline int lua_CreateChaEx(lua_State* L) {
 
 			// 参数合法性判别
 			BOOL bValid = (lua_gettop(L) == 6 && lua_isnumber(L, 1) && lua_isnumber(L, 2) &&
-						   lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isnumber(L, 5) && lua_islightuserdata(L, 6));
+						   lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isnumber(L, 5) && lua_isuserdata(L, 6));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
@@ -264,7 +265,7 @@ inline int lua_CreateChaEx(lua_State* L) {
 	CCharacter* pCCha = pMap->ChaSpawn(nScriptID, enumCHACTRL_NONE, sAngle, &Pos);
 	if (pCCha) {
 		pCCha->SetResumeTime(lReliveTime * 1000);
-		lua_pushlightuserdata(L, pCCha);
+		LB_PushCha(L, pCCha);
 		return 1;
 	} else {
 		// LG("lua_ai", "创建角色失败\n");
@@ -278,13 +279,13 @@ inline int lua_CreateChaEx(lua_State* L) {
 inline int lua_ChaMove(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 3 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3));
+		BOOL bValid = (lua_gettop(L) == 3 && lua_isuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCCha = LB_GetCha(L, 1);
 	if (pCCha) {
 		int x = (int)lua_tonumber(L, 2);
 		int y = (int)lua_tonumber(L, 3);
@@ -306,13 +307,13 @@ inline int lua_ChaMove(lua_State* L) {
 inline int lua_ChaMoveToSleep(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 3 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3));
+		BOOL bValid = (lua_gettop(L) == 3 && lua_isuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCCha = LB_GetCha(L, 1);
 	if (pCCha) {
 		// char szInfo[255]; sprintf(szInfo, "%s回去休眠,ChaMoveToSleep\n", pCCha->GetName());
 		// g_pGameApp->WorldNotice(szInfo);
@@ -338,13 +339,13 @@ inline int lua_ChaMoveToSleep(lua_State* L) {
 inline int lua_GetChaSpawnPos(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		int x = pCha->GetTerritory().centre.x;
 		int y = pCha->GetTerritory().centre.y;
@@ -360,13 +361,13 @@ inline int lua_GetChaSpawnPos(lua_State* L) {
 inline int lua_GetChaPatrolPos(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		int x = pCha->m_nPatrolX;
 		int y = pCha->m_nPatrolY;
@@ -382,13 +383,13 @@ inline int lua_GetChaPatrolPos(lua_State* L) {
 inline int lua_SetChaPatrolState(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha)
 		pCha->m_btPatrolState = ((BYTE)lua_tonumber(L, 2));
 
@@ -400,13 +401,13 @@ inline int lua_SetChaPatrolState(lua_State* L) {
 inline int lua_GetChaPatrolState(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	lua_pushnumber(L, (BYTE)(pCha->m_btPatrolState));
 	return 1;
 	T_E
@@ -418,7 +419,7 @@ inline int lua_GetChaPatrolState(lua_State* L) {
 inline int lua_ChaUseSkill(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_islightuserdata(L, 1) && lua_islightuserdata(L, 2) && lua_isnumber(L, 3));
+		BOOL bValid = (lua_isuserdata(L, 1) && lua_isuserdata(L, 2) && lua_isnumber(L, 3));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
@@ -432,8 +433,8 @@ inline int lua_ChaUseSkill(lua_State* L) {
 	if (nParamNum == 4 && ((int)lua_tonumber(L, 4) != 0)) // 立即执行
 		bExecNow = true;
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
-	CCharacter* pTarget = (CCharacter*)lua_touserdata(L, 2);
+	CCharacter* pCha = LB_GetCha(L, 1);
+	CCharacter* pTarget = LB_GetCha(L, 2);
 	if (pCha && pTarget) {
 		int lSkillID = (int)lua_tonumber(L, 3);
 		if (bExecNow) {
@@ -455,7 +456,7 @@ inline int lua_ChaUseSkill(lua_State* L) {
 inline int lua_ChaUseSkill2(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_islightuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isnumber(L, 5));
+		BOOL bValid = (lua_isuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isnumber(L, 5));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
@@ -469,7 +470,7 @@ inline int lua_ChaUseSkill2(lua_State* L) {
 	if (nParamNum == 6 && ((int)lua_tonumber(L, 6) != 0)) // 立即执行
 		bExecNow = true;
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		int lSkillID = (int)lua_tonumber(L, 2);
 		int lSkillLv = (int)lua_tonumber(L, 3);
@@ -494,13 +495,13 @@ inline int lua_ChaUseSkill2(lua_State* L) {
 inline int lua_QueryChaAttr(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		int nAttr = (int)lua_tonumber(L, 2);
 		lua_pushnumber(L, (LONG64)pCha->getAttr(nAttr));
@@ -515,13 +516,13 @@ inline int lua_QueryChaAttr(lua_State* L) {
 inline int lua_GetChaType(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha)
 		lua_pushnumber(L, pCha->m_pCChaRecord->nID);
 	else
@@ -535,13 +536,13 @@ inline int lua_GetChaType(lua_State* L) {
 inline int lua_GetChaBlockCnt(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha)
 		lua_pushnumber(L, pCha->GetBlockCnt());
 	else
@@ -555,13 +556,13 @@ inline int lua_GetChaBlockCnt(lua_State* L) {
 inline int lua_SetChaBlockCnt(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha)
 		pCha->SetBlockCnt((BYTE)lua_tonumber(L, 2));
 
@@ -573,13 +574,13 @@ inline int lua_SetChaBlockCnt(lua_State* L) {
 inline int lua_GetChaAIType(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha)
 		lua_pushnumber(L, pCha->m_AIType);
 	else
@@ -593,13 +594,13 @@ inline int lua_GetChaAIType(lua_State* L) {
 inline int lua_GetChaChaseRange(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha)
 		lua_pushnumber(L, pCha->m_sChaseRange);
 	else
@@ -613,13 +614,13 @@ inline int lua_GetChaChaseRange(lua_State* L) {
 inline int lua_SetChaChaseRange(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		pCha->m_sChaseRange = (short)lua_tonumber(L, 2);
 	}
@@ -631,13 +632,13 @@ inline int lua_SetChaChaseRange(lua_State* L) {
 inline int lua_SetChaAIType(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		int nType = (int)lua_tonumber(L, 2);
 		pCha->m_AIType = nType;
@@ -654,13 +655,13 @@ inline int lua_SetChaAIType(lua_State* L) {
 inline int lua_GetChaTypeID(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		if (pCha->m_pCChaRecord)
 			lua_pushnumber(L, pCha->m_pCChaRecord->lID);
@@ -676,13 +677,13 @@ inline int lua_GetChaTypeID(lua_State* L) {
 inline int lua_GetChaVision(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		lua_pushnumber(L, pCha->m_pCChaRecord->lVision);
 	}
@@ -693,13 +694,13 @@ inline int lua_GetChaVision(lua_State* L) {
 // 取出角色天生所会的技能数量, 用于怪物AI
 inline int lua_GetChaSkillNum(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+	BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		lua_pushnumber(L, pCha->m_CSkillBag.GetSkillNum());
 		return 1;
@@ -710,13 +711,13 @@ inline int lua_GetChaSkillNum(lua_State* L) {
 // 指定表格位置获得角色技能ID和该技能的使用频率
 inline int lua_GetChaSkillInfo(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+	BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	int nLoc = (int)lua_tonumber(L, 2);
 	if (pCha) {
 		lua_pushnumber(L, pCha->m_pCChaRecord->lSkill[nLoc][0]);
@@ -730,18 +731,18 @@ inline int lua_GetChaSkillInfo(lua_State* L) {
 inline int lua_SetChaTarget(lua_State* L) {
 	T_B
 		// 参数合法性判别, target可以为0, 所以不做参数检查
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	CCharacter* pTarget = nullptr;
 	if (lua_isnumber(L, 2)) {
 		pTarget = nullptr;
 	} else {
-		pTarget = (CCharacter*)lua_touserdata(L, 2);
+		pTarget = LB_GetCha(L, 2);
 	}
 	if (pCha) {
 		if (pTarget) {
@@ -767,15 +768,15 @@ inline int lua_SetChaTarget(lua_State* L) {
 inline int lua_GetChaTarget(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha && pCha->m_AITarget) {
-		lua_pushlightuserdata(L, pCha->m_AITarget);
+		LB_PushCha(L, pCha->m_AITarget);
 		return 1;
 	}
 	return 0;
@@ -786,15 +787,15 @@ inline int lua_GetChaTarget(lua_State* L) {
 inline int lua_GetChaHost(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha && pCha->m_HostCha) {
-		lua_pushlightuserdata(L, pCha->m_HostCha);
+		LB_PushCha(L, pCha->m_HostCha);
 		return 1;
 	}
 	return 0;
@@ -805,18 +806,18 @@ inline int lua_GetChaHost(lua_State* L) {
 inline int lua_SetChaHost(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	CCharacter* pHost = nullptr;
 	if (lua_isnumber(L, 2)) {
 		pHost = nullptr;
 	} else {
-		pHost = (CCharacter*)lua_touserdata(L, 2);
+		pHost = LB_GetCha(L, 2);
 	}
 	if (pCha) {
 		pCha->m_HostCha = pHost;
@@ -832,13 +833,13 @@ inline int lua_SetChaHost(lua_State* L) {
 inline int lua_GetPetNum(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha && pCha->GetPlyMainCha()) {
 		int nPetNum = pCha->GetPlyMainCha()->GetPetNum();
 		lua_pushnumber(L, nPetNum);
@@ -852,17 +853,17 @@ inline int lua_GetPetNum(lua_State* L) {
 // 取得对角色伤害最大的目标
 inline int lua_GetChaFirstTarget(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+	BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		CCharacter* pTarget = pCha->m_pHate->GetCurTarget();
 		if (pTarget) {
-			lua_pushlightuserdata(L, pTarget);
+			LB_PushCha(L, pTarget);
 			// LG("lua_ai", "返回第一个有效目标[%s]\n", pTarget->GetName());
 			return 1;
 		}
@@ -873,13 +874,13 @@ inline int lua_GetChaFirstTarget(lua_State* L) {
 // 取得目标列表里的第一个攻击者
 inline int lua_GetFirstAtker(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+	BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		CCharacter* pFirst = nullptr;
 		DWORD dwMinTime = 0xFFFFFFFF;
@@ -895,7 +896,7 @@ inline int lua_GetFirstAtker(lua_State* L) {
 			}
 		}
 		if (pFirst) {
-			lua_pushlightuserdata(L, pFirst);
+			LB_PushCha(L, pFirst);
 			return 1;
 		}
 	}
@@ -905,20 +906,20 @@ inline int lua_GetFirstAtker(lua_State* L) {
 // 取得目标列表里的指定目标造成的伤害值, 用于决定经验分配
 inline int lua_GetChaHarmByNo(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+	BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		// LG("harm", "脚本查询角色伤害记录: 死亡怪物[%s]\n", pCha->GetName());
 		int nNo = (int)(lua_tonumber(L, 2));
 		SHarmRec* pHarm = pCha->m_pHate->GetHarmRec(nNo);
 		if (pHarm->btValid > 0) {
 			if (pHarm->IsChaValid()) {
-				lua_pushlightuserdata(L, pHarm->pAtk);
+				LB_PushCha(L, pHarm->pAtk);
 			} else {
 				lua_pushnumber(L, 0);
 			}
@@ -934,20 +935,20 @@ inline int lua_GetChaHarmByNo(lua_State* L) {
 // 取得目标列表里的指定目标造成的仇恨度
 inline int lua_GetChaHateByNo(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+	BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		// LG("harm", "脚本查询角色仇恨度: 死亡怪物[%s]\n", pCha->GetName());
 		int nNo = (int)(lua_tonumber(L, 2));
 		SHarmRec* pHarm = pCha->m_pHate->GetHarmRec(nNo);
 		if (pHarm->btValid > 0) {
 			if (pHarm->IsChaValid()) {
-				lua_pushlightuserdata(L, pHarm->pAtk);
+				LB_PushCha(L, pHarm->pAtk);
 			} else {
 				lua_pushnumber(L, 0);
 			}
@@ -963,14 +964,14 @@ inline int lua_GetChaHateByNo(lua_State* L) {
 // 添加仇恨度
 inline int lua_AddHate(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 3 && lua_islightuserdata(L, 1) && lua_islightuserdata(L, 2) && lua_isnumber(L, 3));
+	BOOL bValid = (lua_gettop(L) == 3 && lua_isuserdata(L, 1) && lua_isuserdata(L, 2) && lua_isnumber(L, 3));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pTarget = (CCharacter*)lua_touserdata(L, 1);
-	CCharacter* pAtk = (CCharacter*)lua_touserdata(L, 2);
+	CCharacter* pTarget = LB_GetCha(L, 1);
+	CCharacter* pAtk = LB_GetCha(L, 2);
 	short sHate = (short)lua_tonumber(L, 3);
 	if (pTarget) {
 		pTarget->m_pHate->AddHate(pAtk, sHate, pAtk->GetID());
@@ -982,13 +983,13 @@ inline int lua_GetChaPos(lua_State* L) {
 	T_B
 		// 参数合法性判别
 		int nPNum = lua_gettop(L);
-	BOOL bValid = (nPNum == 1 && lua_islightuserdata(L, 1));
+	BOOL bValid = (nPNum == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		int x = pCha->GetShape().centre.x;
 		int y = pCha->GetShape().centre.y;
@@ -1004,13 +1005,13 @@ inline int lua_GetChaPos(lua_State* L) {
 inline int lua_IsChaFighting(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha && pCha->GetFightState() == enumFSTATE_ON)
 		lua_pushnumber(L, 1);
 	else
@@ -1024,13 +1025,13 @@ inline int lua_IsChaFighting(lua_State* L) {
 inline int lua_IsChaSleeping(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha && pCha->GetExistState() == enumEXISTS_SLEEPING)
 		lua_pushnumber(L, 1);
 	else
@@ -1045,13 +1046,13 @@ inline int lua_IsChaSleeping(lua_State* L) {
 inline int lua_ChaActEyeshot(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	BOOL bActive = (int)lua_tonumber(L, 2);
 	if (pCha)
 		pCha->ActiveEyeshot((bool)bActive);
@@ -1070,7 +1071,7 @@ inline int lua_GetChaByRange(lua_State* L) {
 		return 0;
 	}
 
-	CCharacter* pSelf = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pSelf = LB_GetCha(L, 1);
 
 	SubMap* pMap = nullptr;
 
@@ -1133,7 +1134,7 @@ inline int lua_GetChaByRange(lua_State* L) {
 	}
 	//...
 	if (pCTarget) {
-		lua_pushlightuserdata(L, pCTarget);
+		LB_PushCha(L, pCTarget);
 		return 1;
 	}
 
@@ -1151,7 +1152,7 @@ inline int lua_ClearHideChaByRange(lua_State* L) {
 		return 0;
 	}
 
-	CCharacter* pSelf = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pSelf = LB_GetCha(L, 1);
 
 	SubMap* pMap = nullptr;
 
@@ -1223,7 +1224,7 @@ inline int lua_GetChaSetByRange(lua_State* L) {
 		return 0;
 	}
 
-	CCharacter* pSelf = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pSelf = LB_GetCha(L, 1);
 
 	SubMap* pMap = nullptr;
 
@@ -1278,7 +1279,7 @@ inline int lua_GetChaSetByRange(lua_State* L) {
 	}
 
 	for (int i = 0; i < n; i++) {
-		lua_pushlightuserdata(L, ChaList[i]);
+		LB_PushCha(L, ChaList[i]);
 	}
 	return n;
 	T_E
@@ -1313,13 +1314,13 @@ inline int lua_FindItem(lua_State* L) {
 // 角色捡起道具
 inline int lua_PickItem(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_islightuserdata(L, 2));
+	BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isuserdata(L, 2));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	CItem* pItem = (CItem*)lua_touserdata(L, 2);
 
 	pCha->Cmd_PickupItem(pItem->GetID(), pItem->GetHandle());
@@ -1329,7 +1330,7 @@ inline int lua_PickItem(lua_State* L) {
 // 返回指定道具的坐标
 inline int lua_GetItemPos(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+	BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
@@ -1346,13 +1347,13 @@ inline int lua_GetItemPos(lua_State* L) {
 inline int lua_IsPosValid(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 3 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3));
+		BOOL bValid = (lua_gettop(L) == 3 && lua_isuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	bool bCanMove = false;
 	if (pCha)
 		bCanMove = pCha->GetSubMap()->IsMoveAble(pCha, (int)lua_tonumber(L, 2), (int)lua_tonumber(L, 3));
@@ -1368,7 +1369,7 @@ inline int lua_IsPosValid(lua_State* L) {
 // Check if a game-world position is a blocked (impassable) tile on the map
 inline int lua_IsMapBlock(lua_State* L) {
 	T_B
-	BOOL bValid = (lua_gettop(L) == 3 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3));
+	BOOL bValid = (lua_gettop(L) == 3 && lua_isuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
@@ -1421,13 +1422,13 @@ inline int lua_IsMapBlock(lua_State* L) {
 #define PI 3.1415926
 inline int lua_GetChaFacePos(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+	BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		int x = pCha->GetShape().centre.x;
 		int y = pCha->GetShape().centre.y;
@@ -1445,13 +1446,13 @@ inline int lua_GetChaFacePos(lua_State* L) {
 // 设置怪物的面向角度
 inline int lua_SetChaFaceAngle(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+	BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		pCha->SetAngle((short)lua_tonumber(L, 2));
 	}
@@ -1461,13 +1462,13 @@ inline int lua_SetChaFaceAngle(lua_State* L) {
 // 设置怪物巡逻点
 inline int lua_SetChaPatrolPos(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 3 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3));
+	BOOL bValid = (lua_gettop(L) == 3 && lua_isuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		pCha->m_nPatrolX = (int)lua_tonumber(L, 2);
 		pCha->m_nPatrolY = (int)lua_tonumber(L, 3);
@@ -1478,13 +1479,13 @@ inline int lua_SetChaPatrolPos(lua_State* L) {
 // 怪物产生表情
 inline int lua_SetChaEmotion(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+	BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		g_EventHandler.Event_ChaEmotion(pCha, (int)lua_tonumber(L, 2));
 	}
@@ -1493,13 +1494,13 @@ inline int lua_SetChaEmotion(lua_State* L) {
 
 inline int lua_SetChaLifeTime(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+	BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		pCha->ResetLifeTime((int)lua_tonumber(L, 2));
 	}
@@ -1567,7 +1568,7 @@ inline void lua_AIRun(CCharacter* pCha, DWORD dwResumeExecTime) {
 		lua_pop(g_pLuaState, 1);
 		return;
 	}
-	lua_pushlightuserdata(g_pLuaState, (void*)pCha);
+	LB_PushCha(g_pLuaState, pCha);
 	lua_pushnumber(g_pLuaState, (DWORD)defCHA_SCRIPT_TIMER / 1000);
 	lua_pushnumber(g_pLuaState, (DWORD)dwResumeExecTime);
 	int r = lua_pcall(g_pLuaState, 3, 0, 0);
@@ -1613,7 +1614,7 @@ inline void lua_NPCRun(CCharacter* pCha) {
 		lua_pop(g_pLuaState, 1);
 		return;
 	}
-	lua_pushlightuserdata(g_pLuaState, (void*)pCha);
+	LB_PushCha(g_pLuaState, pCha);
 	int r = lua_pcall(g_pLuaState, 1, 0, 0);
 	if (r != 0) // 执行出错
 	{
@@ -1875,13 +1876,13 @@ inline int lua_EXLG(lua_State* L) {
 }
 
 inline int lua_GetRoleID(lua_State* L) {
-	BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+	BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (!pCha) {
 		E_LUANULL
 		return 0;
@@ -1923,7 +1924,7 @@ inline int lua_UnlockItem(lua_State* L) {
 }
 
 inline int lua_SetMonsterAttr(lua_State* L) {
-	BOOL bValid = (lua_gettop(L) == 3 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3));
+	BOOL bValid = (lua_gettop(L) == 3 && lua_isuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;

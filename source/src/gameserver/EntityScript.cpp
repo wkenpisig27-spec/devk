@@ -28,7 +28,7 @@ inline int lua_GetCurSubmap(lua_State* L) {
 }
 
 inline int lua_CreateEventEntity(lua_State* L) {
-	BOOL bValid = lua_gettop(L) == 8 && lua_isnumber(L, 1) && lua_islightuserdata(L, 2) &&
+	BOOL bValid = lua_gettop(L) == 8 && lua_isnumber(L, 1) && lua_isuserdata(L, 2) &&
 				  lua_isstring(L, 3) && lua_isnumber(L, 4) && lua_isnumber(L, 5) && lua_isnumber(L, 6) &&
 				  lua_isnumber(L, 7) && lua_isnumber(L, 8);
 	if (!bValid) {

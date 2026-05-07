@@ -80,7 +80,7 @@
     <ClCompile>
       <AdditionalOptions>/EHa %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\include\gameserver;..\..\src\gameserver;$(ProjectDir)..\src;$(ProjectDir)..\..\include\serversdk;$(ProjectDir)..\..\include\common;$(ProjectDir)..\..\include\util;$(ProjectDir)..\..\include\luajit;$(ProjectDir)..\..\include\icuhelper;$(ProjectDir)..\..\include;$(ProjectDir)..\..\include\infonet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\gameserver;..\..\src\gameserver;$(ProjectDir)..\src;$(ProjectDir)..\..\include\serversdk;$(ProjectDir)..\..\include\common;$(ProjectDir)..\..\include\util;$(ProjectDir)..\..\include\luajit;$(ProjectDir)..\..\include\icuhelper;$(ProjectDir)..\..\include;$(ProjectDir)..\..\include\infonet;$(ProjectDir)..\..\include\luabridge;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;WIN32;_WIN64;_DEBUG;_CONSOLE;__INFO_NET__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -117,7 +117,7 @@
     <ClCompile>
       <AdditionalOptions>/EHa %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>..\..\include\gameserver;..\..\src\gameserver;$(ProjectDir)..\src;$(ProjectDir)..\..\include\gameserver;$(ProjectDir)..\..\include\serversdk;$(ProjectDir)..\..\include\common;$(ProjectDir)..\..\include\util;$(ProjectDir)..\..\include\infonet;$(ProjectDir)..\..\include\luajit;$(ProjectDir)..\..\include\icuhelper;$(ProjectDir)..\..\include;$(ProjectDir)..\..\include\Botan;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\gameserver;..\..\src\gameserver;$(ProjectDir)..\src;$(ProjectDir)..\..\include\gameserver;$(ProjectDir)..\..\include\serversdk;$(ProjectDir)..\..\include\common;$(ProjectDir)..\..\include\util;$(ProjectDir)..\..\include\infonet;$(ProjectDir)..\..\include\luajit;$(ProjectDir)..\..\include\icuhelper;$(ProjectDir)..\..\include;$(ProjectDir)..\..\include\Botan;$(ProjectDir)..\..\include\luabridge;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN64;NDEBUG;WINDOWS_IGNORE_PACKING_MISMATCH;BOTAN_DLL=;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <StructMemberAlignment>Default</StructMemberAlignment>
@@ -149,7 +149,7 @@
     <ClCompile>
       <AdditionalOptions>/EHa %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src;..\..\include\serversdk;..\..\include\common;..\..\include\util;..\..\include\luajit;..\..\include\icuhelper;..\..\include;..\..\include\infonet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src;..\..\include\serversdk;..\..\include\common;..\..\include\util;..\..\include\luajit;..\..\include\icuhelper;..\..\include;..\..\include\infonet;..\..\include\luabridge;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN64;NDEBUG;USE_IOCP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling />
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -310,6 +310,7 @@
     <ClCompile Include="..\..\src\gameserver\Guild.cpp" />
     <ClCompile Include="..\..\src\gameserver\HarmRec.cpp" />
     <ClCompile Include="..\..\src\gameserver\Item.cpp" />
+    <ClCompile Include="..\..\src\gameserver\lua_bridge.cpp" />
     <ClCompile Include="..\..\src\gameserver\lua_gamectrl.cpp" />
     <ClCompile Include="..\..\src\gameserver\MapEntry.cpp" />
     <ClCompile Include="..\..\src\gameserver\MapRes.cpp" />

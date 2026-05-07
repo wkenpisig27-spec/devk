@@ -240,8 +240,11 @@ int lua_GetMapDataByName(lua_State* L) {
 void RegisterLuaAI(lua_State* L) {
 	T_B
 
-		// 通用
-		REGFN(view);
+		// Register CCharacter as a LuaBridge class (enables OOP in Lua scripts)
+		RegisterCCharacterClass(L);
+
+	// 通用
+	REGFN(view);
 	REGFN(EXLG);
 	REGFN(PRINT);
 	REGFN(GetResPath);

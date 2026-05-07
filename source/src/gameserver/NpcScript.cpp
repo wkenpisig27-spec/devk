@@ -1,4 +1,4 @@
-// NpcScript.cpp Created by knight-gongjian 2004.11.30.
+﻿// NpcScript.cpp Created by knight-gongjian 2004.11.30.
 //---------------------------------------------------------
 #include "stdafx.h"
 #include "NpcScript.h"
@@ -27,7 +27,7 @@ inline int lua_GetPacket(lua_State* L) {
 
 inline int lua_ReadByte(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
@@ -48,7 +48,7 @@ inline int lua_ReadByte(lua_State* L) {
 
 inline int lua_ReadWord(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
@@ -69,7 +69,7 @@ inline int lua_ReadWord(lua_State* L) {
 
 inline int lua_ReadDword(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
@@ -90,7 +90,7 @@ inline int lua_ReadDword(lua_State* L) {
 
 inline int lua_ReadString(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
@@ -112,7 +112,7 @@ inline int lua_ReadString(lua_State* L) {
 
 inline int lua_ReadCmd(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
@@ -133,7 +133,7 @@ inline int lua_ReadCmd(lua_State* L) {
 
 inline int lua_WriteByte(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
@@ -153,7 +153,7 @@ inline int lua_WriteByte(lua_State* L) {
 
 inline int lua_WriteWord(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
@@ -173,7 +173,7 @@ inline int lua_WriteWord(lua_State* L) {
 
 inline int lua_WriteDword(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
@@ -193,7 +193,7 @@ inline int lua_WriteDword(lua_State* L) {
 
 inline int lua_WriteString(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isstring(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isstring(L, 2));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
@@ -213,7 +213,7 @@ inline int lua_WriteString(lua_State* L) {
 
 inline int lua_WriteCmd(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
@@ -233,12 +233,12 @@ inline int lua_WriteCmd(lua_State* L) {
 
 inline int lua_SendPacket(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_islightuserdata(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isuserdata(L, 2));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	WPACKET* pPacket = (WPACKET*)lua_touserdata(L, 2);
 	if (!pChar || !pPacket) {
 		E_LUANULL;
@@ -251,12 +251,12 @@ inline int lua_SendPacket(lua_State* L) {
 }
 
 inline int lua_SynPacket(lua_State* L) {
-	BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_islightuserdata(L, 2));
+	BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isuserdata(L, 2));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	WPACKET* pPacket = (WPACKET*)lua_touserdata(L, 2);
 	if (!pChar || !pPacket) {
 		E_LUANULL;
@@ -269,13 +269,13 @@ inline int lua_SynPacket(lua_State* L) {
 
 inline int lua_GetCharID(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
 
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	if (!pChar) {
 		E_LUANULL;
 		return 0;
@@ -287,12 +287,12 @@ inline int lua_GetCharID(lua_State* L) {
 
 inline int lua_GetCharName(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	if (!pChar) {
 		E_LUANULL;
 		return 0;
@@ -378,13 +378,13 @@ inline int lua_GetAreaName(lua_State* L) {
 
 inline int lua_GetMapName(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
 
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	if (!pChar) {
 		E_LUANULL;
 		return 0;
@@ -403,14 +403,14 @@ inline int lua_GetMapName(lua_State* L) {
 
 inline int lua_MoveTo(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 4 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2) &&
+		BOOL bValid = (lua_gettop(L) == 4 && lua_isuserdata(L, 1) && lua_isnumber(L, 2) &&
 					   lua_isnumber(L, 3) && lua_isstring(L, 4));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
 
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	if (!pChar) {
 		E_LUANULL;
 		return 0;
@@ -433,10 +433,10 @@ inline int lua_MoveCity(lua_State* L) {
 	T_B int nParamNum = lua_gettop(L);
 	BOOL bValid = FALSE;
 	if (nParamNum == 2) {
-		if (lua_islightuserdata(L, 1) && lua_isstring(L, 2))
+		if (lua_isuserdata(L, 1) && lua_isstring(L, 2))
 			bValid = TRUE;
 	} else if (nParamNum == 3) {
-		if (lua_islightuserdata(L, 1) && lua_isstring(L, 2) && lua_isnumber(L, 3))
+		if (lua_isuserdata(L, 1) && lua_isstring(L, 2) && lua_isnumber(L, 3))
 			bValid = TRUE;
 	}
 	if (!bValid) {
@@ -444,7 +444,7 @@ inline int lua_MoveCity(lua_State* L) {
 		return 0;
 	}
 
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	const char* pszData = lua_tostring(L, 2);
 	if (!pChar) {
 		E_LUANULL;
@@ -494,13 +494,13 @@ inline int lua_DebugInfo(lua_State* L) {
 }
 
 inline int lua_BickerNotice(lua_State* L) {
-	BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isstring(L, 2));
+	BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isstring(L, 2));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
 
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	const char* pszData = lua_tostring(L, 2);
 	if (!pChar || !pszData) {
 		E_LUANULL;
@@ -513,13 +513,13 @@ inline int lua_BickerNotice(lua_State* L) {
 
 inline int lua_SystemNotice(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isstring(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isstring(L, 2));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
 
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	const char* pszData = lua_tostring(L, 2);
 	if (!pChar || !pszData) {
 		E_LUANULL;
@@ -533,13 +533,13 @@ inline int lua_SystemNotice(lua_State* L) {
 
 inline int lua_SynTigerString(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isstring(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isstring(L, 2));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
 
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	const char* pszData = lua_tostring(L, 2);
 	if (!pChar || !pszData) {
 		E_LUANULL;
@@ -553,14 +553,14 @@ inline int lua_SynTigerString(lua_State* L) {
 
 inline int lua_SafeBuy(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 4 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2) &&
+		BOOL bValid = (lua_gettop(L) == 4 && lua_isuserdata(L, 1) && lua_isnumber(L, 2) &&
 					   lua_isnumber(L, 3) && lua_isnumber(L, 4));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
 
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	if (!pChar) {
 		E_LUANULL;
 		return 0;
@@ -580,14 +580,14 @@ inline int lua_SafeBuy(lua_State* L) {
 
 inline int lua_ExchangeReq(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 7 && lua_islightuserdata(L, 1) && lua_islightuserdata(L, 2) &&
+		BOOL bValid = (lua_gettop(L) == 7 && lua_isuserdata(L, 1) && lua_isuserdata(L, 2) &&
 					   lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isnumber(L, 5) && lua_isnumber(L, 6) && lua_isnumber(L, 7));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
 
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	CNpc* pNpc = (CNpc*)lua_touserdata(L, 2);
 	short sSrcID = (short)lua_tonumber(L, 3);
 	short sSrcNum = (short)lua_tonumber(L, 4);
@@ -603,14 +603,14 @@ inline int lua_ExchangeReq(lua_State* L) {
 
 inline int lua_SafeSale(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 3 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2) &&
+		BOOL bValid = (lua_gettop(L) == 3 && lua_isuserdata(L, 1) && lua_isnumber(L, 2) &&
 					   lua_isnumber(L, 3));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
 
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	if (!pChar) {
 		E_LUANULL;
 		return 0;
@@ -630,14 +630,14 @@ inline int lua_SafeSale(lua_State* L) {
 }
 
 inline int lua_SafeSaleGoods(lua_State* L) {
-	BOOL bValid = lua_gettop(L) == 5 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2) &&
+	BOOL bValid = lua_gettop(L) == 5 && lua_isuserdata(L, 1) && lua_isnumber(L, 2) &&
 				  lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isnumber(L, 5);
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
 
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	if (!pChar) {
 		E_LUANULL;
 		return 0;
@@ -658,7 +658,7 @@ inline int lua_SafeSaleGoods(lua_State* L) {
 }
 
 inline int lua_SafeBuyGoods(lua_State* L) {
-	BOOL bValid = lua_gettop(L) == 6 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2) &&
+	BOOL bValid = lua_gettop(L) == 6 && lua_isuserdata(L, 1) && lua_isnumber(L, 2) &&
 				  lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isnumber(L, 5) &&
 				  lua_isnumber(L, 6);
 	if (!bValid) {
@@ -666,7 +666,7 @@ inline int lua_SafeBuyGoods(lua_State* L) {
 		return 0;
 	}
 
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	if (!pChar) {
 		E_LUANULL;
 		return 0;
@@ -687,14 +687,14 @@ inline int lua_SafeBuyGoods(lua_State* L) {
 }
 
 inline int lua_GetSaleGoodsItem(lua_State* L) {
-	BOOL bValid = lua_gettop(L) == 3 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2) &&
+	BOOL bValid = lua_gettop(L) == 3 && lua_isuserdata(L, 1) && lua_isnumber(L, 2) &&
 				  lua_isnumber(L, 3);
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
 
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	if (!pChar) {
 		E_LUANULL;
 		return 0;
@@ -713,7 +713,7 @@ inline int lua_GetSaleGoodsItem(lua_State* L) {
 
 inline int lua_SetNpcScriptID(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
@@ -733,7 +733,7 @@ inline int lua_SetNpcScriptID(lua_State* L) {
 
 inline int lua_GetScriptID(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
@@ -774,7 +774,7 @@ inline int lua_FindNpc(lua_State* L) {
 
 	USHORT sID = pNpc->GetScriptID();
 	lua_pushnumber(L, (sID != -1) ? LUA_TRUE : LUA_FALSE);
-	lua_pushlightuserdata(L, pNpc);
+	LB_PushCha(L, pNpc);
 	lua_pushnumber(L, sID);
 	return 3;
 	T_E
@@ -793,7 +793,7 @@ inline int lua_ReloadNpcInfo(lua_State* L) {
 
 inline int lua_SetNpcHasMission(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
@@ -813,7 +813,7 @@ inline int lua_SetNpcHasMission(lua_State* L) {
 
 inline int lua_GetNpcHasMission(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
@@ -832,13 +832,13 @@ inline int lua_GetNpcHasMission(lua_State* L) {
 
 inline int lua_IsInArea(lua_State* L) {
 	T_B
-		BOOL bValid = lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2);
+		BOOL bValid = lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2);
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
 
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	if (!pChar) {
 		E_LUANULL;
 		return 0;
@@ -855,14 +855,14 @@ inline int lua_IsInArea(lua_State* L) {
 
 inline int lua_IsInMap(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 6 && lua_islightuserdata(L, 1) && lua_isstring(L, 2) &&
+		BOOL bValid = (lua_gettop(L) == 6 && lua_isuserdata(L, 1) && lua_isstring(L, 2) &&
 					   lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isnumber(L, 5) && lua_isnumber(L, 6));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
 
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	const char* pszMap = lua_tostring(L, 2);
 	if (!pChar || !pChar->GetSubMap() || !pszMap) {
 		E_LUANULL;
@@ -887,13 +887,13 @@ inline int lua_IsInMap(lua_State* L) {
 
 inline int lua_IsMapChar(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isstring(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isstring(L, 2));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
 
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	const char* pszMap = lua_tostring(L, 2);
 	if (!pChar || !pChar->GetSubMap() || !pszMap) {
 		E_LUANULL;
@@ -907,7 +907,7 @@ inline int lua_IsMapChar(lua_State* L) {
 
 inline int lua_IsMapNpc(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 3 && lua_islightuserdata(L, 1) && lua_isstring(L, 2) &&
+		BOOL bValid = (lua_gettop(L) == 3 && lua_isuserdata(L, 1) && lua_isstring(L, 2) &&
 					   lua_isnumber(L, 3));
 	if (!bValid) {
 		E_LUAPARAM;
@@ -930,7 +930,7 @@ inline int lua_IsMapNpc(lua_State* L) {
 
 inline int lua_AddNpcTrigger(lua_State* L) {
 	T_B
-		BOOL bValid = (lua_gettop(L) == 7 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2) &&
+		BOOL bValid = (lua_gettop(L) == 7 && lua_isuserdata(L, 1) && lua_isnumber(L, 2) &&
 					   lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isnumber(L, 5) &&
 					   lua_isnumber(L, 6) && lua_isnumber(L, 7));
 	if (!bValid) {
@@ -960,7 +960,7 @@ inline int lua_AddNpcTrigger(lua_State* L) {
 }
 
 inline int lua_SetActive(lua_State* L) {
-	BOOL bValid = lua_gettop(L) == 1 && lua_islightuserdata(L, 1);
+	BOOL bValid = lua_gettop(L) == 1 && lua_isuserdata(L, 1);
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
@@ -1006,12 +1006,12 @@ inline int lua_SummonNpc(lua_State* L) {
 }
 
 BOOL lua_ChaPlayEffect(lua_State* L) {
-	BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+	BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		E_LUAPARAM;
 		return 0;
 	}
-	CCharacter* pChar = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pChar = LB_GetCha(L, 1);
 	int nEffectID = (int)lua_tonumber(L, 2);
 	if (!pChar) {
 		E_LUANULL;

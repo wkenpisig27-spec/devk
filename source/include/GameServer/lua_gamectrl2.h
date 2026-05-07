@@ -3,13 +3,13 @@
 // 获得角色的组队成员总数, 如果返回0表示未组队
 inline int lua_IsChaInTeam(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+	BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		CPlayer* pPlayer = pCha->GetPlayer();
 		if (pPlayer) {
@@ -24,13 +24,13 @@ inline int lua_IsChaInTeam(lua_State* L) {
 // 获得角色的组队成员总数, 如果返回0表示未组队
 inline int lua_GetTeamCha(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+	BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (!pCha) {
 		return 0;
 	}
@@ -55,7 +55,7 @@ inline int lua_GetTeamCha(lua_State* L) {
 		return 0;
 	}
 
-	lua_pushlightuserdata(L, pMember->GetCtrlCha());
+	LB_PushCha(L, pMember->GetCtrlCha());
 	// LG("harm", "返回该位置[%d]队员 = [%s]\n", nNo, pMember->GetCtrlCha()->GetName());
 	return 1;
 }
@@ -64,12 +64,12 @@ inline int lua_GetTeamCha(lua_State* L) {
 inline int lua_IsChaInRegion(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+		BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		int nRegionDef = (int)lua_tonumber(L, 2);
 		if (pCha->IsInArea(nRegionDef)) {
@@ -86,13 +86,13 @@ inline int lua_IsChaInRegion(lua_State* L) {
 inline int lua_GetChaDefaultName(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		lua_pushstring(L, pCha->GetName());
 		return 1;
@@ -119,13 +119,13 @@ inline int lua_SetChaAttrI(lua_State* L) {
 inline int lua_IsPlayer(lua_State* L) {
 	T_B
 		// 参数合法性判别
-		BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+		BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha->GetPlayer()) {
 		lua_pushnumber(L, 1);
 	} else {
@@ -206,13 +206,13 @@ inline int lua_ClearMapWeather(lua_State* L) {
 // 设置船只的熟练度记时
 inline int lua_SetBoatCtrlTick(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 2 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2));
+	BOOL bValid = (lua_gettop(L) == 2 && lua_isuserdata(L, 1) && lua_isnumber(L, 2));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		pCha->m_dwBoatCtrlTick = (int)lua_tonumber(L, 2);
 	}
@@ -222,13 +222,13 @@ inline int lua_SetBoatCtrlTick(lua_State* L) {
 // 取出船只的熟练度记时
 inline int lua_GetBoatCtrlTick(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+	BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		lua_pushnumber(L, pCha->m_dwBoatCtrlTick);
 	} else {
@@ -242,13 +242,13 @@ inline int lua_GetBoatCtrlTick(lua_State* L) {
 // 返回 召唤出来的角色指针
 inline int lua_SummonCha(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 3 && lua_islightuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3));
+	BOOL bValid = (lua_gettop(L) == 3 && lua_isuserdata(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pHost = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pHost = LB_GetCha(L, 1);
 	short sType = (short)lua_tonumber(L, 2);
 	short sChaInfoID = (short)lua_tonumber(L, 3);
 
@@ -282,7 +282,7 @@ inline int lua_SummonCha(lua_State* L) {
 		return 0;
 	}
 
-	lua_pushlightuserdata(L, pCha);
+	LB_PushCha(L, pCha);
 	return 1;
 }
 
@@ -291,13 +291,13 @@ inline int lua_SummonCha(lua_State* L) {
 // 返回 无
 inline int lua_DelCha(lua_State* L) {
 	// 参数合法性判别
-	BOOL bValid = (lua_gettop(L) == 1 && lua_islightuserdata(L, 1));
+	BOOL bValid = (lua_gettop(L) == 1 && lua_isuserdata(L, 1));
 	if (!bValid) {
 		PARAM_ERROR
 		return 0;
 	}
 
-	CCharacter* pCTarCha = (CCharacter*)lua_touserdata(L, 1);
+	CCharacter* pCTarCha = LB_GetCha(L, 1);
 	if (!pCTarCha)
 		return 0;
 	if (pCTarCha->IsPlayerCtrlCha()) // 玩家当前控制角色不能删除

@@ -11,6 +11,7 @@
 #include "stdafx.h" //add by alfred.shi 20080304
 
 #include "Character.h"
+#include "lua_bridge.h"
 #include "LogFile.h"
 #include "excp.h"
 #include "Parser.h"
@@ -23,7 +24,7 @@ _DBC_USING
 extern const char* GetResPath(const char* pszRes);
 
 inline int lua_SynLook(lua_State* pLS) {
-	CCharacter* pCha = (CCharacter*)lua_touserdata(pLS, 1);
+	CCharacter* pCha = LB_GetCha(pLS, 1);
 	pCha->SynSkillStateToEyeshot();
 	pCha->SynLook();
 	return 0;
@@ -56,7 +57,7 @@ inline int lua_SetAttributeEditable(lua_State* pLS) {
 // TODO(Ogge): No verification of pointers from lua
 inline int lua_EquipItem(lua_State* pLS) {
 	// todo - check if valid equip?
-	CCharacter* pCha = (CCharacter*)lua_touserdata(pLS, 1);
+	CCharacter* pCha = LB_GetCha(pLS, 1);
 	int chEquipPos = lua_tonumber(pLS, 2);
 	SItemGrid* equip = (SItemGrid*)lua_touserdata(pLS, 3);
 
@@ -72,7 +73,7 @@ inline int lua_EquipItem(lua_State* pLS) {
 inline int lua_EquipStringItem(lua_State* pLS) {
 	/*
 	//todo - check if valid equip?
-	CCharacter *pCha = (CCharacter*)lua_touserdata(pLS, 1);
+	CCharacter *pCha = LB_GetCha(pLS, 1);
 	int chEquipPos = lua_tonumber(pLS, 2);
 	const char* pszData = lua_tostring(pLS, 3);
 	const short csSubNum = 8 + enumITEMDBP_MAXNUM + defITEM_INSTANCE_ATTR_NUM_VER110 * 2 + 1;
@@ -121,17 +122,17 @@ inline int lua_GetChaGuildPermission(lua_State* pLS) {
 	if (nParaNum != 1) {
 		return 0;
 	}
-	CCharacter* pCha = (CCharacter*)lua_touserdata(pLS, 1);
+	CCharacter* pCha = LB_GetCha(pLS, 1);
 	lua_pushnumber(pLS, pCha->guildPermission);
 	return 1;
 	T_E
 }
 
 inline int lua_GetIMP(lua_State* pLS) {
-	if (lua_gettop(pLS) != 1 || !lua_islightuserdata(pLS, 1)) {
+	if (lua_gettop(pLS) != 1 || !lua_isuserdata(pLS, 1)) {
 		return 0;
 	}
-	CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+	CCharacter* pCCha = LB_GetCha(pLS, 1);
 	int IMP = pCCha->GetIMP();
 	lua_pushnumber(pLS, IMP);
 	return 1;
@@ -139,8 +140,8 @@ inline int lua_GetIMP(lua_State* pLS) {
 
 inline int lua_SetIMP(lua_State* pLS) {
 
-	if ((lua_gettop(pLS) == 2 || lua_gettop(pLS) == 3) && lua_islightuserdata(pLS, 1) && lua_isnumber(pLS, 2)) {
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+	if ((lua_gettop(pLS) == 2 || lua_gettop(pLS) == 3) && lua_isuserdata(pLS, 1) && lua_isnumber(pLS, 2)) {
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		int IMP = lua_tonumber(pLS, 2);
 		if (lua_gettop(pLS) == 3) {
 			pCCha->SetIMP(IMP, false);
@@ -163,7 +164,7 @@ inline int lua_GetChaAttr(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		sAttrIndex = (unsigned __int64)lua_tonumber(pLS, 2);
 		if (!pCCha) {
 			bSuccess = false;
@@ -203,7 +204,7 @@ inline int lua_SetChaAttr(lua_State* pLS) {
 	}
 
 	{
-		CCharacter *pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter *pCCha = LB_GetCha(pLS, 1);
 		short sAttrIndex = (int)lua_tonumber(pLS, 2);
 		LONG64 lValue = (LONG64)lua_tonumber(pLS, 3);
 
@@ -251,7 +252,7 @@ inline int lua_CheckChaRole(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败\n");
@@ -304,7 +305,7 @@ inline int lua_GetChaPlayer(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败\n");
@@ -568,7 +569,7 @@ inline int lua_GetSkillLv(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		int nSkillID = (int)lua_tonumber(pLS, 2);
 
 		if (!pCCha) {
@@ -626,7 +627,7 @@ inline int lua_GetChaStateLv(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		unsigned char uchStateID = (unsigned char)lua_tonumber(pLS, 2);
 
 		if (!pCCha) {
@@ -680,7 +681,7 @@ inline int lua_GetObjDire(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败\n");
@@ -729,8 +730,8 @@ inline int lua_AddState(lua_State* pLS) {
 	}
 
 	{
-		CCharacter* pCSrcCha = (CCharacter*)lua_touserdata(pLS, 1);
-		CCharacter* pCTarCha = (CCharacter*)lua_touserdata(pLS, 2);
+		CCharacter* pCSrcCha = LB_GetCha(pLS, 1);
+		CCharacter* pCTarCha = LB_GetCha(pLS, 2);
 		unsigned char uchStateID = (unsigned char)lua_tonumber(pLS, 3);
 		unsigned char uchStateLV = (unsigned char)lua_tonumber(pLS, 4);
 		int nOnTime = (int)lua_tonumber(pLS, 5);
@@ -787,7 +788,7 @@ inline int lua_RemoveState(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		unsigned char uchStateID = (unsigned char)lua_tonumber(pLS, 2);
 
 		if (!pCCha) {
@@ -843,7 +844,7 @@ inline int lua_GetAreaStateLevel(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		unsigned char uchStateID = (unsigned char)lua_tonumber(pLS, 2);
 
 		if (!pCCha) {
@@ -894,7 +895,7 @@ inline int lua_SkillMiss(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败\n");
@@ -940,7 +941,7 @@ inline int lua_SkillCrt(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败\n");
@@ -986,7 +987,7 @@ inline int lua_SkillUnable(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败\n");
@@ -1035,7 +1036,7 @@ inline int lua_AddChaSkill(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		int nSkillID = (int)lua_tonumber(pLS, 2);
 		int nSkillLv = (int)lua_tonumber(pLS, 3);
 		bool bSetLv = (int)lua_tonumber(pLS, 4) == 1 ? true : false;
@@ -1101,7 +1102,7 @@ inline int lua_UseItemFailed(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		g_chUseItemFailed[0] = 1;
 	}
 
@@ -1131,7 +1132,7 @@ End:
 //		goto End;
 //	}
 //
-//	CCharacter	*pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+//	CCharacter	*pCCha = LB_GetCha(pLS, 1);
 //	g_chUseItemGiveMission[0] = 1;
 //
 // End:
@@ -1210,8 +1211,8 @@ inline int lua_BeatBack(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCSrcCha = (CCharacter*)lua_touserdata(pLS, 1);
-		CCharacter* pCTarCha = (CCharacter*)lua_touserdata(pLS, 2);
+		CCharacter* pCSrcCha = LB_GetCha(pLS, 1);
+		CCharacter* pCTarCha = LB_GetCha(pLS, 2);
 		int nBackLen = (int)lua_tonumber(pLS, 3);
 
 		if (!pCSrcCha || !pCTarCha) {
@@ -1273,7 +1274,7 @@ inline int lua_IsInGymkhana(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -1322,7 +1323,7 @@ inline int lua_IsInPK(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -1372,7 +1373,7 @@ inline int lua_CheckBagItem(lua_State* pLS) {
 	}
 
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -1430,7 +1431,7 @@ inline int lua_GetChaFreeTempBagGridNum(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -1475,7 +1476,7 @@ inline int lua_GetChaFreeBagGridNum(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -1524,7 +1525,7 @@ inline int lua_DelBagItem(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -1613,7 +1614,7 @@ inline int lua_DelBagItem2(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -1688,7 +1689,7 @@ inline int lua_RemoveChaItem(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -1757,7 +1758,7 @@ inline int lua_GetChaMapName(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -1815,7 +1816,7 @@ inline int lua_GetChaMapCopyNO(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -1870,7 +1871,7 @@ inline int lua_GetChaMapCopy(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -1920,7 +1921,7 @@ inline int lua_GetMainCha(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha || !pCCha->GetPlayer()) {
 #ifdef defPARSE_LOG
@@ -1944,7 +1945,7 @@ End:
 	if (!pCMainCha)
 		return 0;
 
-	lua_pushlightuserdata(pLS, pCMainCha);
+	LB_PushCha(pLS, pCMainCha);
 	return 1;
 }
 
@@ -1971,7 +1972,7 @@ inline int lua_GetCtrlBoat(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha || !pCCha->GetPlayer()) {
 #ifdef defPARSE_LOG
@@ -1997,7 +1998,7 @@ End:
 	if (!pCCtrlBoat)
 		return 0;
 
-	lua_pushlightuserdata(pLS, pCCtrlBoat);
+	LB_PushCha(pLS, pCCtrlBoat);
 	return 1;
 }
 
@@ -2024,7 +2025,7 @@ inline int lua_ChaIsBoat(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha || !pCCha->GetPlayer()) {
 #ifdef defPARSE_LOG
@@ -2073,7 +2074,7 @@ inline int lua_GetChaItem(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -2124,7 +2125,7 @@ inline int lua_GetChaItem2(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -2160,7 +2161,7 @@ inline int lua_MoveToTemp(lua_State* pLS) {
 		return 1;
 	}
 
-	CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+	CCharacter* pCCha = LB_GetCha(pLS, 1);
 	SItemGrid* pSItem = (SItemGrid*)lua_touserdata(pLS, 2);
 
 	if (!pCCha || !pSItem) {
@@ -2266,7 +2267,7 @@ End:
 
 inline int lua_GetItemStackSize(lua_State* pLS) {
 	int nParaNum = lua_gettop(pLS);
-	if (nParaNum != 1 || !lua_islightuserdata(pLS, 1)) {
+	if (nParaNum != 1 || !lua_isuserdata(pLS, 1)) {
 		return 0;
 	}
 	SItemGrid* pSItem = (SItemGrid*)lua_touserdata(pLS, 1);
@@ -2280,7 +2281,7 @@ inline int lua_GetItemStackSize(lua_State* pLS) {
 
 inline int lua_IsItemLocked(lua_State* pLS) {
 	int nParaNum = lua_gettop(pLS);
-	if (nParaNum != 1 || !lua_islightuserdata(pLS, 1)) {
+	if (nParaNum != 1 || !lua_isuserdata(pLS, 1)) {
 		return 0;
 	}
 	SItemGrid* pSItem = (SItemGrid*)lua_touserdata(pLS, 1);
@@ -2297,7 +2298,7 @@ inline int lua_IsItemLocked(lua_State* pLS) {
 // Returns: 1 if valid, 0 if invalid
 inline int lua_GetItemGridValid(lua_State* pLS) {
 	int nParaNum = lua_gettop(pLS);
-	if (nParaNum != 1 || !lua_islightuserdata(pLS, 1)) {
+	if (nParaNum != 1 || !lua_isuserdata(pLS, 1)) {
 		return 0;
 	}
 	SItemGrid* pSItem = (SItemGrid*)lua_touserdata(pLS, 1);
@@ -2815,7 +2816,7 @@ inline int lua_AddEquipEnergy(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha || !pCCha->GetPlayer()) {
 #ifdef defPARSE_LOG
@@ -2883,8 +2884,8 @@ inline int lua_SetRelive(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCSrcCha = (CCharacter*)lua_touserdata(pLS, 1);
-		CCharacter* pCTarCha = (CCharacter*)lua_touserdata(pLS, 2);
+		CCharacter* pCSrcCha = LB_GetCha(pLS, 1);
+		CCharacter* pCTarCha = LB_GetCha(pLS, 2);
 
 		if (!pCSrcCha || !pCSrcCha->GetPlayer() || !pCTarCha || !pCTarCha->GetPlayer()) {
 #ifdef defPARSE_LOG
@@ -3026,7 +3027,7 @@ inline int lua_ChaNotice(lua_State* pLS) {
 // 参数：地图副本对象，通告内容
 // 返回值：无
 inline int lua_MapCopyNotice(lua_State* pLS) {
-	T_B if (!lua_islightuserdata(pLS, 1) || !lua_isstring(pLS, 2)) return 0;
+	T_B if (!lua_isuserdata(pLS, 1) || !lua_isstring(pLS, 2)) return 0;
 
 	SubMap* pCMapCopy = (SubMap*)lua_touserdata(pLS, 1);
 	const char* cszNotiStr = lua_tostring(pLS, 2);
@@ -3040,7 +3041,7 @@ inline int lua_MapCopyNotice(lua_State* pLS) {
 // 参数：地图对象，副本编号（０为所有副本），通告内容
 // 返回值：无
 inline int lua_MapCopyNotice2(lua_State* pLS) {
-	T_B if (!lua_islightuserdata(pLS, 1) || !lua_isnumber(pLS, 2) || !lua_isstring(pLS, 3)) return 0;
+	T_B if (!lua_isuserdata(pLS, 1) || !lua_isnumber(pLS, 2) || !lua_isstring(pLS, 3)) return 0;
 
 	CMapRes* pCMap = (CMapRes*)lua_touserdata(pLS, 1);
 	pCMap->CopyNotice(lua_tostring(pLS, 3), (short)lua_tonumber(pLS, 2) - 1);
@@ -3075,8 +3076,8 @@ inline int lua_SetItemHost(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCDropCha = (CCharacter*)lua_touserdata(pLS, 1);
-		CCharacter* pCOwnCha = (CCharacter*)lua_touserdata(pLS, 2);
+		CCharacter* pCDropCha = LB_GetCha(pLS, 1);
+		CCharacter* pCOwnCha = LB_GetCha(pLS, 2);
 		if (!pCDropCha || !pCOwnCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败\n");
@@ -3124,7 +3125,7 @@ inline int lua_GetChaName(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败\n");
@@ -3550,8 +3551,8 @@ inline int lua_KillMyMonster(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCha = (CCharacter*)lua_touserdata(pLS, 1);
-		CCharacter* pChaMonster = (CCharacter*)lua_touserdata(pLS, 2);
+		CCharacter* pCha = LB_GetCha(pLS, 1);
+		CCharacter* pChaMonster = LB_GetCha(pLS, 2);
 		if (!pCha || !pChaMonster) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败\n");
@@ -4122,7 +4123,7 @@ inline int lua_GetChaSideID(lua_State* pLS) {
 	}
 
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -4175,7 +4176,7 @@ inline int lua_SetChaSideID(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		int lSideID = (int)lua_tonumber(pLS, 2);
 
 		if (!pCCha) {
@@ -4229,7 +4230,7 @@ inline int lua_GetChaGuildID(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -4281,7 +4282,7 @@ inline int lua_GetChaTeamID(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -4333,7 +4334,7 @@ inline int lua_CheckChaPKState(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -4514,7 +4515,7 @@ inline int lua_SetChaMotto(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		const char* cszMotto = lua_tostring(pLS, 2);
 
 		if (!pCCha) {
@@ -4568,7 +4569,7 @@ inline int lua_IsChaInLand(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 
 		if (!pCCha) {
 #ifdef defPARSE_LOG
@@ -5138,7 +5139,7 @@ End:
 #endif
 	}
 	if (pCCha) {
-		lua_pushlightuserdata(pLS, pCCha);
+		LB_PushCha(pLS, pCCha);
 		return 1;
 	}
 	return 0;
@@ -5167,7 +5168,7 @@ inline int lua_GetChaMapType(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败\n");
@@ -5226,7 +5227,7 @@ inline int lua_SetChaKitbagChange(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败\n");
@@ -5272,7 +5273,7 @@ inline int lua_SynChaKitbag(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败\n");
@@ -5318,7 +5319,7 @@ inline int lua_GetChaMapOpenScale(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败\n");
@@ -5765,7 +5766,7 @@ inline int lua_SetChaEquipValid(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t对象不存在，调用失败\n");
@@ -5822,7 +5823,7 @@ inline int lua_SetChaKbItemValid(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t对象不存在，调用失败\n");
@@ -5873,7 +5874,7 @@ inline int lua_SetChaKbItemValid2(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t对象不存在，调用失败\n");
@@ -6046,7 +6047,7 @@ inline int lua_AddKbCap(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败");
@@ -6098,7 +6099,7 @@ inline int lua_GetKbCap(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败");
@@ -6144,8 +6145,8 @@ inline int lua_IsInSameMap(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha1 = (CCharacter*)lua_touserdata(pLS, 1);
-		CCharacter* pCCha2 = (CCharacter*)lua_touserdata(pLS, 2);
+		CCharacter* pCCha1 = LB_GetCha(pLS, 1);
+		CCharacter* pCCha2 = LB_GetCha(pLS, 2);
 		if (!pCCha1 || !pCCha2) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败");
@@ -6195,8 +6196,8 @@ inline int lua_IsInSameMapCopy(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha1 = (CCharacter*)lua_touserdata(pLS, 1);
-		CCharacter* pCCha2 = (CCharacter*)lua_touserdata(pLS, 2);
+		CCharacter* pCCha1 = LB_GetCha(pLS, 1);
+		CCharacter* pCCha2 = LB_GetCha(pLS, 2);
 		if (!pCCha1 || !pCCha2) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败");
@@ -6246,7 +6247,7 @@ inline int lua_IsChaLiving(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败");
@@ -6292,7 +6293,7 @@ inline int lua_SetChaParam(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败");
@@ -6342,7 +6343,7 @@ inline int lua_GetChaParam(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败");
@@ -6389,7 +6390,7 @@ inline int lua_AddItemEffect(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败");
@@ -6551,9 +6552,9 @@ inline int lua_DisuseLotteryIssue(lua_State* pLS) {
 // 判断是否是注册的合法队伍
 inline int lua_IsValidRegTeam(lua_State* pLS) {
 	T_B int teamID = (int)lua_tonumber(pLS, 1);
-	CCharacter* pCaptain = (CCharacter*)lua_touserdata(pLS, 2);
-	CCharacter* pMember1 = (CCharacter*)lua_touserdata(pLS, 3);
-	CCharacter* pMember2 = (CCharacter*)lua_touserdata(pLS, 4);
+	CCharacter* pCaptain = LB_GetCha(pLS, 2);
+	CCharacter* pMember1 = LB_GetCha(pLS, 3);
+	CCharacter* pMember2 = LB_GetCha(pLS, 4);
 
 	if (game_db.IsValidAmphitheaterTeam(teamID, pCaptain->GetID(), pMember1->GetID(), pMember2->GetID())) {
 		lua_pushnumber(pLS, (int)1);
@@ -6577,7 +6578,7 @@ inline int lua_IsValidTeam(lua_State* pLS) {
 		// 是否是3个人的队伍
 		// 是否是师徒关系
 		// int masterID = (int)lua_tonumber(pLS, 1);
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 	CPlayer* pTeamPlayer = pCCha->GetPlayer();
 	int masterID = pTeamPlayer->GetDBChaId();
 	// CPlayer*	player = g_pGameApp->GetPlayerByDBID(masterID);
@@ -6710,9 +6711,9 @@ inline int lua_GetAmphitheaterNoUseTeamID(lua_State* pLS) {
 // 队伍注册
 inline int lua_AmphitheaterTeamSignUP(lua_State* pLS) {
 	T_B int teamID = (int)lua_tonumber(pLS, 1);
-	CCharacter* pCaptain = (CCharacter*)lua_touserdata(pLS, 2);
-	CCharacter* pMember1 = (CCharacter*)lua_touserdata(pLS, 3);
-	CCharacter* pMember2 = (CCharacter*)lua_touserdata(pLS, 4);
+	CCharacter* pCaptain = LB_GetCha(pLS, 2);
+	CCharacter* pMember1 = LB_GetCha(pLS, 3);
+	CCharacter* pMember2 = LB_GetCha(pLS, 4);
 
 	if (game_db.AmphitheaterTeamSignUP(teamID, pCaptain->GetPlayer()->GetDBChaId(), pMember1->GetPlayer()->GetDBChaId(), pMember2->GetPlayer()->GetDBChaId()))
 		return 1;
@@ -6739,7 +6740,7 @@ inline int lua_AmphitheaterTeamCancel(lua_State* pLS) {
 inline int lua_IsAmphitheaterLogin(lua_State* pLS) {
 	T_B
 		// int characterid = (int)lua_tonumber(pLS,1);
-		CCharacter* pActor = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pActor = LB_GetCha(pLS, 1);
 	if (game_db.IsAmphitheaterLogin(pActor->GetID())) {
 		lua_pushnumber(pLS, (int)0);
 		return 1;
@@ -6768,7 +6769,7 @@ inline int lua_IsMapFull(lua_State* pLS) {
 //  参数 队长角色，地图id
 inline int lua_UpdateMapAfterEnter(lua_State* pLS) {
 	T_B
-		CCharacter* Captain = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* Captain = LB_GetCha(pLS, 1);
 	int CaptainID = Captain->GetID();
 	int MapID = (int)lua_tonumber(pLS, 2);
 
@@ -6882,8 +6883,8 @@ inline int lua_GetCaptainByMapId(lua_State* pLS) {
 			if (pCCha1 == nullptr || pCCha2 == nullptr)
 				return 0;
 		}
-		lua_pushlightuserdata(pLS, pCCha1);
-		lua_pushlightuserdata(pLS, pCCha2);
+		LB_PushCha(pLS, pCCha1);
+		LB_PushCha(pLS, pCCha2);
 		return 2;
 	}
 	return 0;
@@ -6985,7 +6986,7 @@ inline int lua_LookEnergy(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CCharacter* pCCha = (CCharacter*)lua_touserdata(pLS, 1);
+		CCharacter* pCCha = LB_GetCha(pLS, 1);
 		if (!pCCha) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t角色对象不存在，调用失败\n");
