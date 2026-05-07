@@ -244,104 +244,104 @@ void RegisterLuaAI(lua_State* L) {
 		RegisterCCharacterClass(L);
 
 	// 通用
-	REGFN(view);
-	REGFN(EXLG);
-	REGFN(PRINT);
-	REGFN(GetResPath);
+	lua_register(L, "view", lua_view);
+	lua_register(L, "EXLG", lua_EXLG);
+	lua_register(L, "PRINT", lua_PRINT);
+	lua_register(L, "GetResPath", lua_GetResPath);
 
 	// For AI
 
-	REGFN(SetCurMap);
-	REGFN(GetChaID);
-	REGFN(CreateChaNearPlayer);
-	REGFN(CreateCha);
-	REGFN(CreateChaX);
-	REGFN(CreateChaEx);
-	REGFN(QueryChaAttr);
-	REGFN(GetChaAIType);
-	REGFN(SetChaAIType);
-	REGFN(GetChaTypeID);
-	REGFN(GetChaVision);
-	REGFN(GetChaTarget);
-	REGFN(SetChaTarget);
-	REGFN(GetChaHost);
-	REGFN(SetChaHost);
-	REGFN(GetPetNum);
-	REGFN(GetChaFirstTarget);
-	REGFN(GetChaPos);
-	REGFN(GetChaBlockCnt);
-	REGFN(SetChaBlockCnt);
-	REGFN(ChaMove);
-	REGFN(ChaMoveToSleep);
-	REGFN(GetChaSpawnPos);
-	REGFN(SetChaPatrolState);
-	REGFN(GetChaPatrolState);
-	REGFN(GetChaPatrolPos);
-	REGFN(SetChaPatrolPos);
-	REGFN(SetChaFaceAngle);
-	REGFN(GetChaChaseRange);
-	REGFN(SetChaChaseRange);
-	REGFN(ChaUseSkill);
-	REGFN(ChaUseSkill2);
-	REGFN(GetChaByRange);
-	REGFN(GetChaSetByRange);
-	REGFN(ClearHideChaByRange);
-	REGFN(IsChaFighting);
-	REGFN(IsPosValid);
-	REGFN(IsMapBlock);
-	REGFN(IsChaSleeping);
-	REGFN(ChaActEyeshot);
-	REGFN(GetChaFacePos);
-	REGFN(SetChaEmotion);
-	REGFN(FindItem);
-	REGFN(PickItem);
-	REGFN(GetItemPos);
-	REGFN(EnableAI);
-	REGFN(GetChaSkillNum);
-	REGFN(GetChaSkillInfo);
-	REGFN(GetChaHarmByNo);
-	REGFN(GetFirstAtker);
-	REGFN(AddHate);
-	REGFN(GetChaHateByNo);
-	REGFN(HarmLog);
-	REGFN(SummonCha);
-	REGFN(DelCha);
-	REGFN(SetChaLifeTime);
+	lua_register(L, "SetCurMap", lua_SetCurMap);
+	lua_register(L, "GetChaID", lua_GetChaID);
+	lua_register(L, "CreateChaNearPlayer", lua_CreateChaNearPlayer);
+	lua_register(L, "CreateCha", lua_CreateCha);
+	lua_register(L, "CreateChaX", lua_CreateChaX);
+	lua_register(L, "CreateChaEx", lua_CreateChaEx);
+	lua_register(L, "QueryChaAttr", lua_QueryChaAttr);
+	lua_register(L, "GetChaAIType", lua_GetChaAIType);
+	lua_register(L, "SetChaAIType", lua_SetChaAIType);
+	lua_register(L, "GetChaTypeID", lua_GetChaTypeID);
+	lua_register(L, "GetChaVision", lua_GetChaVision);
+	lua_register(L, "GetChaTarget", lua_GetChaTarget);
+	lua_register(L, "SetChaTarget", lua_SetChaTarget);
+	lua_register(L, "GetChaHost", lua_GetChaHost);
+	lua_register(L, "SetChaHost", lua_SetChaHost);
+	lua_register(L, "GetPetNum", lua_GetPetNum);
+	lua_register(L, "GetChaFirstTarget", lua_GetChaFirstTarget);
+	lua_register(L, "GetChaPos", lua_GetChaPos);
+	lua_register(L, "GetChaBlockCnt", lua_GetChaBlockCnt);
+	lua_register(L, "SetChaBlockCnt", lua_SetChaBlockCnt);
+	lua_register(L, "ChaMove", lua_ChaMove);
+	lua_register(L, "ChaMoveToSleep", lua_ChaMoveToSleep);
+	lua_register(L, "GetChaSpawnPos", lua_GetChaSpawnPos);
+	lua_register(L, "SetChaPatrolState", lua_SetChaPatrolState);
+	lua_register(L, "GetChaPatrolState", lua_GetChaPatrolState);
+	lua_register(L, "GetChaPatrolPos", lua_GetChaPatrolPos);
+	lua_register(L, "SetChaPatrolPos", lua_SetChaPatrolPos);
+	lua_register(L, "SetChaFaceAngle", lua_SetChaFaceAngle);
+	lua_register(L, "GetChaChaseRange", lua_GetChaChaseRange);
+	lua_register(L, "SetChaChaseRange", lua_SetChaChaseRange);
+	lua_register(L, "ChaUseSkill", lua_ChaUseSkill);
+	lua_register(L, "ChaUseSkill2", lua_ChaUseSkill2);
+	lua_register(L, "GetChaByRange", lua_GetChaByRange);
+	lua_register(L, "GetChaSetByRange", lua_GetChaSetByRange);
+	lua_register(L, "ClearHideChaByRange", lua_ClearHideChaByRange);
+	lua_register(L, "IsChaFighting", lua_IsChaFighting);
+	lua_register(L, "IsPosValid", lua_IsPosValid);
+	lua_register(L, "IsMapBlock", lua_IsMapBlock);
+	lua_register(L, "IsChaSleeping", lua_IsChaSleeping);
+	lua_register(L, "ChaActEyeshot", lua_ChaActEyeshot);
+	lua_register(L, "GetChaFacePos", lua_GetChaFacePos);
+	lua_register(L, "SetChaEmotion", lua_SetChaEmotion);
+	lua_register(L, "FindItem", lua_FindItem);
+	lua_register(L, "PickItem", lua_PickItem);
+	lua_register(L, "GetItemPos", lua_GetItemPos);
+	lua_register(L, "EnableAI", lua_EnableAI);
+	lua_register(L, "GetChaSkillNum", lua_GetChaSkillNum);
+	lua_register(L, "GetChaSkillInfo", lua_GetChaSkillInfo);
+	lua_register(L, "GetChaHarmByNo", lua_GetChaHarmByNo);
+	lua_register(L, "GetFirstAtker", lua_GetFirstAtker);
+	lua_register(L, "AddHate", lua_AddHate);
+	lua_register(L, "GetChaHateByNo", lua_GetChaHateByNo);
+	lua_register(L, "HarmLog", lua_HarmLog);
+	lua_register(L, "SummonCha", lua_SummonCha);
+	lua_register(L, "DelCha", lua_DelCha);
+	lua_register(L, "SetChaLifeTime", lua_SetChaLifeTime);
 
 	// 数值计算
-	REGFN(SetChaAttrMax);
-	REGFN(GetChaDefaultName);
-	REGFN(SetChaAttrI);
-	REGFN(GetChaAttrI);
-	REGFN(IsPlayer);
-	REGFN(IsChaInRegion);
+	lua_register(L, "SetChaAttrMax", lua_SetChaAttrMax);
+	lua_register(L, "GetChaDefaultName", lua_GetChaDefaultName);
+	lua_register(L, "SetChaAttrI", lua_SetChaAttrI);
+	lua_register(L, "GetChaAttrI", lua_GetChaAttrI);
+	lua_register(L, "IsPlayer", lua_IsPlayer);
+	lua_register(L, "IsChaInRegion", lua_IsChaInRegion);
 
 	// 组队
-	REGFN(IsChaInTeam);
-	REGFN(GetTeamCha);
+	lua_register(L, "IsChaInTeam", lua_IsChaInTeam);
+	lua_register(L, "GetTeamCha", lua_GetTeamCha);
 
 	// 出生地与出生点
-	REGFN(AddBirthPoint);
-	REGFN(ClearAllBirthPoint);
+	lua_register(L, "AddBirthPoint", lua_AddBirthPoint);
+	lua_register(L, "ClearAllBirthPoint", lua_ClearAllBirthPoint);
 
 	// 天气区域
-	REGFN(AddWeatherRegion);
-	REGFN(ClearMapWeather);
+	lua_register(L, "AddWeatherRegion", lua_AddWeatherRegion);
+	lua_register(L, "ClearMapWeather", lua_ClearMapWeather);
 
 	// 帮助NPC
-	REGFN(AddHelpInfo);
-	REGFN(AddHelpNPC);
-	REGFN(ClearHelpNPC);
+	lua_register(L, "AddHelpInfo", lua_AddHelpInfo);
+	lua_register(L, "AddHelpNPC", lua_AddHelpNPC);
+	lua_register(L, "ClearHelpNPC", lua_ClearHelpNPC);
 
 	// 船只计时
-	REGFN(SetBoatCtrlTick);
-	REGFN(GetBoatCtrlTick);
+	lua_register(L, "SetBoatCtrlTick", lua_SetBoatCtrlTick);
+	lua_register(L, "GetBoatCtrlTick", lua_GetBoatCtrlTick);
 
-	REGFN(GetRoleID);
-	REGFN(UnlockItem);
-	REGFN(SetMonsterAttr);
+	lua_register(L, "GetRoleID", lua_GetRoleID);
+	lua_register(L, "UnlockItem", lua_UnlockItem);
+	lua_register(L, "SetMonsterAttr", lua_SetMonsterAttr);
 	// 测试脚本
-	REGFN(TestDBLog);
+	lua_register(L, "TestDBLog", lua_TestDBLog);
 
 	T_E
 }

@@ -5744,311 +5744,311 @@ BOOL RegisterCharScript() {
 		lua_State* L = g_pLuaState;
 
 	// ���ú����Ǽ�
-	REGFN(GetTickCount);
-	REGFN(Msg);
-	REGFN(Exit);
-	REGFN(LG);
-	REGFN(GetSection);
-	REGFN(ToDword);
+	lua_register(L, "GetTickCount", lua_GetTickCount);
+	lua_register(L, "Msg", lua_Msg);
+	lua_register(L, "Exit", lua_Exit);
+	lua_register(L, "LG", lua_LG);
+	lua_register(L, "GetSection", lua_GetSection);
+	lua_register(L, "ToDword", lua_ToDword);
 
 	// ������غ����Ǽ�
-	REGFN(SetMap);
-	REGFN(SetMapGuildWar);
-	REGFN(AddTrigger);
-	REGFN(AddMission);
-	REGFN(HasMission);
-	REGFN(GetMisScriptID);
-	REGFN(SetMissionComplete);
-	REGFN(SetMissionFailure);
-	REGFN(HasMisssionFailure);
-	REGFN(IsMissionFull);
-	REGFN(DeleteTrigger);
-	REGFN(ClearTrigger);
-	REGFN(ClearMission);
-	REGFN(SetFlag);
-	REGFN(ClearFlag);
-	REGFN(IsFlag);
-	REGFN(IsValidFlag);
-	REGFN(SetRecord);
-	REGFN(ClearRecord);
-	REGFN(IsRecord);
-	REGFN(IsValidRecord);
+	lua_register(L, "SetMap", lua_SetMap);
+	lua_register(L, "SetMapGuildWar", lua_SetMapGuildWar);
+	lua_register(L, "AddTrigger", lua_AddTrigger);
+	lua_register(L, "AddMission", lua_AddMission);
+	lua_register(L, "HasMission", lua_HasMission);
+	lua_register(L, "GetMisScriptID", lua_GetMisScriptID);
+	lua_register(L, "SetMissionComplete", lua_SetMissionComplete);
+	lua_register(L, "SetMissionFailure", lua_SetMissionFailure);
+	lua_register(L, "HasMisssionFailure", lua_HasMisssionFailure);
+	lua_register(L, "IsMissionFull", lua_IsMissionFull);
+	lua_register(L, "DeleteTrigger", lua_DeleteTrigger);
+	lua_register(L, "ClearTrigger", lua_ClearTrigger);
+	lua_register(L, "ClearMission", lua_ClearMission);
+	lua_register(L, "SetFlag", lua_SetFlag);
+	lua_register(L, "ClearFlag", lua_ClearFlag);
+	lua_register(L, "IsFlag", lua_IsFlag);
+	lua_register(L, "IsValidFlag", lua_IsValidFlag);
+	lua_register(L, "SetRecord", lua_SetRecord);
+	lua_register(L, "ClearRecord", lua_ClearRecord);
+	lua_register(L, "IsRecord", lua_IsRecord);
+	lua_register(L, "IsValidRecord", lua_IsValidRecord);
 
-	REGFN(IsMissionState);
-	REGFN(GetNumMission);
-	REGFN(GetMissionInfo);
-	REGFN(GetCharMission);
-	REGFN(GetNextMission);
-	REGFN(AddMissionState);
-	REGFN(ResetMissionState);
-	REGFN(GetMissionState);
-	REGFN(SetMissionPage);
-	REGFN(GetMissionPage);
-	REGFN(SetMissionTempInfo);
-	REGFN(GetMissionTempInfo);
+	lua_register(L, "IsMissionState", lua_IsMissionState);
+	lua_register(L, "GetNumMission", lua_GetNumMission);
+	lua_register(L, "GetMissionInfo", lua_GetMissionInfo);
+	lua_register(L, "GetCharMission", lua_GetCharMission);
+	lua_register(L, "GetNextMission", lua_GetNextMission);
+	lua_register(L, "AddMissionState", lua_AddMissionState);
+	lua_register(L, "ResetMissionState", lua_ResetMissionState);
+	lua_register(L, "GetMissionState", lua_GetMissionState);
+	lua_register(L, "SetMissionPage", lua_SetMissionPage);
+	lua_register(L, "GetMissionPage", lua_GetMissionPage);
+	lua_register(L, "SetMissionTempInfo", lua_SetMissionTempInfo);
+	lua_register(L, "GetMissionTempInfo", lua_GetMissionTempInfo);
 
-	REGFN(AddSkill);
-	REGFN(AddExp);
-	REGFN(AddLifeExp);
-	REGFN(AddSailExp);
-	REGFN(AddExpAndType);
-	REGFN(AddMoney);
-	REGFN(TakeMoney);
-	REGFN(HasMoney);
-	REGFN(HasCancelMissionMoney);
-	REGFN(TakeCancelMissionMoney);
-	REGFN(MakeItem);
-	REGFN(GiveItem);
-	REGFN(GiveItemX);
-	REGFN(GiveItemY);
-	REGFN(HasLeaveBagTempGrid);
-	REGFN(TakeItem);
-	REGFN(TakeItemBagTemp);
-	REGFN(HasItem);
-	REGFN(BankHasItem);
-	REGFN(BagTempHasItem);
-	REGFN(EquipHasItem);
-	REGFN(IsEquip);
-	REGFN(KitbagLock);
-	REGFN(GetNumItem);
-	REGFN(GetNeedItemCount);
-	REGFN(IsMisNeedItem);
-	REGFN(HasLeaveBagGrid);
-	REGFN(IsItemValid);
-	REGFN(GetItemP);
-	REGFN(GetEquipItemP);
+	lua_register(L, "AddSkill", lua_AddSkill);
+	lua_register(L, "AddExp", lua_AddExp);
+	lua_register(L, "AddLifeExp", lua_AddLifeExp);
+	lua_register(L, "AddSailExp", lua_AddSailExp);
+	lua_register(L, "AddExpAndType", lua_AddExpAndType);
+	lua_register(L, "AddMoney", lua_AddMoney);
+	lua_register(L, "TakeMoney", lua_TakeMoney);
+	lua_register(L, "HasMoney", lua_HasMoney);
+	lua_register(L, "HasCancelMissionMoney", lua_HasCancelMissionMoney);
+	lua_register(L, "TakeCancelMissionMoney", lua_TakeCancelMissionMoney);
+	lua_register(L, "MakeItem", lua_MakeItem);
+	lua_register(L, "GiveItem", lua_GiveItem);
+	lua_register(L, "GiveItemX", lua_GiveItemX);
+	lua_register(L, "GiveItemY", lua_GiveItemY);
+	lua_register(L, "HasLeaveBagTempGrid", lua_HasLeaveBagTempGrid);
+	lua_register(L, "TakeItem", lua_TakeItem);
+	lua_register(L, "TakeItemBagTemp", lua_TakeItemBagTemp);
+	lua_register(L, "HasItem", lua_HasItem);
+	lua_register(L, "BankHasItem", lua_BankHasItem);
+	lua_register(L, "BagTempHasItem", lua_BagTempHasItem);
+	lua_register(L, "EquipHasItem", lua_EquipHasItem);
+	lua_register(L, "IsEquip", lua_IsEquip);
+	lua_register(L, "KitbagLock", lua_KitbagLock);
+	lua_register(L, "GetNumItem", lua_GetNumItem);
+	lua_register(L, "GetNeedItemCount", lua_GetNeedItemCount);
+	lua_register(L, "IsMisNeedItem", lua_IsMisNeedItem);
+	lua_register(L, "HasLeaveBagGrid", lua_HasLeaveBagGrid);
+	lua_register(L, "IsItemValid", lua_IsItemValid);
+	lua_register(L, "GetItemP", lua_GetItemP);
+	lua_register(L, "GetEquipItemP", lua_GetEquipItemP);
 
 	// ���������
-	REGFN(HasRandMission);
-	REGFN(AddRandMission);
-	REGFN(SetRandMissionData);
-	REGFN(GetRandMission);
-	REGFN(GetRandMissionData);
-	REGFN(HasRandMissionNpc);
-	REGFN(HasRandNpcItemFlag);
-	REGFN(NoRandNpcItemFlag);
-	REGFN(TakeRandNpcItem);
-	REGFN(TakeAllRandItem);
+	lua_register(L, "HasRandMission", lua_HasRandMission);
+	lua_register(L, "AddRandMission", lua_AddRandMission);
+	lua_register(L, "SetRandMissionData", lua_SetRandMissionData);
+	lua_register(L, "GetRandMission", lua_GetRandMission);
+	lua_register(L, "GetRandMissionData", lua_GetRandMissionData);
+	lua_register(L, "HasRandMissionNpc", lua_HasRandMissionNpc);
+	lua_register(L, "HasRandNpcItemFlag", lua_HasRandNpcItemFlag);
+	lua_register(L, "NoRandNpcItemFlag", lua_NoRandNpcItemFlag);
+	lua_register(L, "TakeRandNpcItem", lua_TakeRandNpcItem);
+	lua_register(L, "TakeAllRandItem", lua_TakeAllRandItem);
 
 	// ���������ɼ����ӿ�
-	REGFN(CompleteRandMissionCount);
-	REGFN(FailureRandMissionCount);
-	REGFN(AddRandMissionNum);
-	REGFN(ResetRandMissionCount);
-	REGFN(ResetRandMissionNum);
-	REGFN(HasRandMissionCount);
-	REGFN(GetRandMissionCount);
-	REGFN(GetRandMissionNum);
+	lua_register(L, "CompleteRandMissionCount", lua_CompleteRandMissionCount);
+	lua_register(L, "FailureRandMissionCount", lua_FailureRandMissionCount);
+	lua_register(L, "AddRandMissionNum", lua_AddRandMissionNum);
+	lua_register(L, "ResetRandMissionCount", lua_ResetRandMissionCount);
+	lua_register(L, "ResetRandMissionNum", lua_ResetRandMissionNum);
+	lua_register(L, "HasRandMissionCount", lua_HasRandMissionCount);
+	lua_register(L, "GetRandMissionCount", lua_GetRandMissionCount);
+	lua_register(L, "GetRandMissionNum", lua_GetRandMissionNum);
 
 	// �ָ�����
-	REGFN(ReAll);
-	REGFN(ReAllHp);
-	REGFN(ReHp);
-	REGFN(ReAllSp);
-	REGFN(ReSp);
+	lua_register(L, "ReAll", lua_ReAll);
+	lua_register(L, "ReAllHp", lua_ReAllHp);
+	lua_register(L, "ReHp", lua_ReHp);
+	lua_register(L, "ReAllSp", lua_ReAllSp);
+	lua_register(L, "ReSp", lua_ReSp);
 
 	// ���ý�ɫ������
-	REGFN(SetSpawnPos);
+	lua_register(L, "SetSpawnPos", lua_SetSpawnPos);
 
 	// �ж��Ƿ�ָ��������
-	REGFN(IsSpawnPos);
+	lua_register(L, "IsSpawnPos", lua_IsSpawnPos);
 
 	// �����ɫְҵ����
-	REGFN(SetProfession);
+	lua_register(L, "SetProfession", lua_SetProfession);
 
 	// ���ý�ɫ��ʾ״̬
-	REGFN(Hide);
-	REGFN(Show);
+	lua_register(L, "Hide", lua_Hide);
+	lua_register(L, "Show", lua_Show);
 
 	// �ȽϽ�ɫ����
-	REGFN(GetCharMissionLevel);
-	REGFN(LvEqual);
-	REGFN(LvThan);
-	REGFN(HpEqual);
-	REGFN(HpThan);
-	REGFN(SpEqual);
-	REGFN(SpThan);
-	REGFN(PfEqual);
-	REGFN(LvCheck);
-	REGFN(HpCheck);
-	REGFN(SpCheck);
-	REGFN(IsCategory);
-	REGFN(HasFame);
+	lua_register(L, "GetCharMissionLevel", lua_GetCharMissionLevel);
+	lua_register(L, "LvEqual", lua_LvEqual);
+	lua_register(L, "LvThan", lua_LvThan);
+	lua_register(L, "HpEqual", lua_HpEqual);
+	lua_register(L, "HpThan", lua_HpThan);
+	lua_register(L, "SpEqual", lua_SpEqual);
+	lua_register(L, "SpThan", lua_SpThan);
+	lua_register(L, "PfEqual", lua_PfEqual);
+	lua_register(L, "LvCheck", lua_LvCheck);
+	lua_register(L, "HpCheck", lua_HpCheck);
+	lua_register(L, "SpCheck", lua_SpCheck);
+	lua_register(L, "IsCategory", lua_IsCategory);
+	lua_register(L, "HasFame", lua_HasFame);
 
 	// ��ȡ��ɫ����
-	REGFN(GetProfession);
-	REGFN(GetCategory);
-	REGFN(GetCatAndPf);
-	REGFN(GetChaBody);
+	lua_register(L, "GetProfession", lua_GetProfession);
+	lua_register(L, "GetCategory", lua_GetCategory);
+	lua_register(L, "GetCatAndPf", lua_GetCatAndPf);
+	lua_register(L, "GetChaBody", lua_GetChaBody);
 
 	// �ٻ�����NPC
-	REGFN(ConvoyNpc);
-	REGFN(ClearConvoyNpc);
-	REGFN(ClearAllConvoyNpc);
-	REGFN(HasConvoyNpc);
-	REGFN(IsConvoyNpc);
+	lua_register(L, "ConvoyNpc", lua_ConvoyNpc);
+	lua_register(L, "ClearConvoyNpc", lua_ClearConvoyNpc);
+	lua_register(L, "ClearAllConvoyNpc", lua_ClearAllConvoyNpc);
+	lua_register(L, "HasConvoyNpc", lua_HasConvoyNpc);
+	lua_register(L, "IsConvoyNpc", lua_IsConvoyNpc);
 
-	REGFN(SetPkState);
+	lua_register(L, "SetPkState", lua_SetPkState);
 
 	// �������ݿ�洢
-	REGFN(SaveMissionData);
+	lua_register(L, "SaveMissionData", lua_SaveMissionData);
 
 	// ע�ṫ�ắ��
-	REGFN(HasGuild);
-	REGFN(CreateGuild);
-	REGFN(ListAllGuild);
-	REGFN(ListChallenge);
-	REGFN(HasGuildLevel);
-	REGFN(HasPirateGuild);
-	REGFN(NoPirateGuild);
-	REGFN(HasNavyGuild);
-	REGFN(NoNavyGuild);
+	lua_register(L, "HasGuild", lua_HasGuild);
+	lua_register(L, "CreateGuild", lua_CreateGuild);
+	lua_register(L, "ListAllGuild", lua_ListAllGuild);
+	lua_register(L, "ListChallenge", lua_ListChallenge);
+	lua_register(L, "HasGuildLevel", lua_HasGuildLevel);
+	lua_register(L, "HasPirateGuild", lua_HasPirateGuild);
+	lua_register(L, "NoPirateGuild", lua_NoPirateGuild);
+	lua_register(L, "HasNavyGuild", lua_HasNavyGuild);
+	lua_register(L, "NoNavyGuild", lua_NoNavyGuild);
 
 	// ��ֻ
-	REGFN(IsBoatFull);
-	REGFN(CreateBoat);
-	REGFN(BoatLuanchOut);
-	REGFN(BoatBerth);
-	REGFN(BoatBerthList);
-	REGFN(BoatTrade);
-	REGFN(BoatBuildCheck);
-	REGFN(HasAllBoatInBerth);
-	REGFN(HasBoatInBerth);
-	REGFN(HasDeadBoatInBerth);
-	REGFN(HasLuanchOut);
-	REGFN(GetBoatID);
-	REGFN(RepairBoat);
-	REGFN(SupplyBoat);
-	REGFN(IsNeedSupply);
-	REGFN(IsNeedRepair);
+	lua_register(L, "IsBoatFull", lua_IsBoatFull);
+	lua_register(L, "CreateBoat", lua_CreateBoat);
+	lua_register(L, "BoatLuanchOut", lua_BoatLuanchOut);
+	lua_register(L, "BoatBerth", lua_BoatBerth);
+	lua_register(L, "BoatBerthList", lua_BoatBerthList);
+	lua_register(L, "BoatTrade", lua_BoatTrade);
+	lua_register(L, "BoatBuildCheck", lua_BoatBuildCheck);
+	lua_register(L, "HasAllBoatInBerth", lua_HasAllBoatInBerth);
+	lua_register(L, "HasBoatInBerth", lua_HasBoatInBerth);
+	lua_register(L, "HasDeadBoatInBerth", lua_HasDeadBoatInBerth);
+	lua_register(L, "HasLuanchOut", lua_HasLuanchOut);
+	lua_register(L, "GetBoatID", lua_GetBoatID);
+	lua_register(L, "RepairBoat", lua_RepairBoat);
+	lua_register(L, "SupplyBoat", lua_SupplyBoat);
+	lua_register(L, "IsNeedSupply", lua_IsNeedSupply);
+	lua_register(L, "IsNeedRepair", lua_IsNeedRepair);
 
 	// ó��֤����
-	REGFN(AdjustTradeItemCess);
-	REGFN(SetTradeItemLevel);
-	REGFN(TradeItemLevelCheck);
-	REGFN(GetTradeItemData);
-	REGFN(TradeItemDataCheck);
+	lua_register(L, "AdjustTradeItemCess", lua_AdjustTradeItemCess);
+	lua_register(L, "SetTradeItemLevel", lua_SetTradeItemLevel);
+	lua_register(L, "TradeItemLevelCheck", lua_TradeItemLevelCheck);
+	lua_register(L, "GetTradeItemData", lua_GetTradeItemData);
+	lua_register(L, "TradeItemDataCheck", lua_TradeItemDataCheck);
 
 	// ���մ��
-	REGFN(PackBag);
-	REGFN(PackBagList);
+	lua_register(L, "PackBag", lua_PackBag);
+	lua_register(L, "PackBagList", lua_PackBagList);
 
 	// ��ɫ�ʹ�����ͬ��
-	REGFN(SetAttrChangeFlag);
-	REGFN(SyncBoat);
-	REGFN(SyncChar);
+	lua_register(L, "SetAttrChangeFlag", lua_SetAttrChangeFlag);
+	lua_register(L, "SyncBoat", lua_SyncBoat);
+	lua_register(L, "SyncChar", lua_SyncChar);
 
 	// ���в�������
-	REGFN(OpenBank);
+	lua_register(L, "OpenBank", lua_OpenBank);
 
-	REGFN(OpenRepair);
-	REGFN(OpenForge);
+	lua_register(L, "OpenRepair", lua_OpenRepair);
+	lua_register(L, "OpenForge", lua_OpenForge);
 	// Add by lark.li 20080514
-	REGFN(OpenLottery);
+	lua_register(L, "OpenLottery", lua_OpenLottery);
 	// Add by sunny.sun 20080529
 	// Begin
-	REGFN(GetTicketItemno);
-	REGFN(GetTicketIssue);
-	REGFN(GetSItemGrid);
+	lua_register(L, "GetTicketItemno", lua_GetTicketItemno);
+	lua_register(L, "GetTicketIssue", lua_GetTicketIssue);
+	lua_register(L, "GetSItemGrid", lua_GetSItemGrid);
 	// End
-	REGFN(OpenUnite);
-	REGFN(OpenMilling);
-	REGFN(OpenFusion);
-	REGFN(OpenUpgrade);
-	REGFN(OpenEidolonMetempsychosis);
-	REGFN(OpenEidolonFusion);
-	REGFN(OpenItemTiChun);
-	REGFN(OpenItemFix);
-	REGFN(OpenItemEnergy);
-	REGFN(OpenGetStone);
-	REGFN(OpenTiger);
-	REGFN(OpenGMSend);
-	REGFN(OpenGMRecv);
+	lua_register(L, "OpenUnite", lua_OpenUnite);
+	lua_register(L, "OpenMilling", lua_OpenMilling);
+	lua_register(L, "OpenFusion", lua_OpenFusion);
+	lua_register(L, "OpenUpgrade", lua_OpenUpgrade);
+	lua_register(L, "OpenEidolonMetempsychosis", lua_OpenEidolonMetempsychosis);
+	lua_register(L, "OpenEidolonFusion", lua_OpenEidolonFusion);
+	lua_register(L, "OpenItemTiChun", lua_OpenItemTiChun);
+	lua_register(L, "OpenItemFix", lua_OpenItemFix);
+	lua_register(L, "OpenItemEnergy", lua_OpenItemEnergy);
+	lua_register(L, "OpenGetStone", lua_OpenGetStone);
+	lua_register(L, "OpenTiger", lua_OpenTiger);
+	lua_register(L, "OpenGMSend", lua_OpenGMSend);
+	lua_register(L, "OpenGMRecv", lua_OpenGMRecv);
 
 	// ��������򿪺���
-	REGFN(OpenHair);
+	lua_register(L, "OpenHair", lua_OpenHair);
 
 	// �ۺϵ���
-	REGFN(CheckFusionItem);
-	REGFN(FusionItem);
+	lua_register(L, "CheckFusionItem", lua_CheckFusionItem);
+	lua_register(L, "FusionItem", lua_FusionItem);
 
 	// �����Ϣ�ж�
-	REGFN(IsTeamLeader);
-	REGFN(IsInTeam);
-	REGFN(HasTeammate);
+	lua_register(L, "IsTeamLeader", lua_IsTeamLeader);
+	lua_register(L, "IsInTeam", lua_IsInTeam);
+	lua_register(L, "HasTeammate", lua_HasTeammate);
 
 	// ʦͽ��������
-	REGFN(AddCreditX);
-	REGFN(AddMasterCredit);
-	REGFN(DelCredit);
-	REGFN(GetCredit);
-	REGFN(HasMaster);
+	lua_register(L, "AddCreditX", lua_AddCreditX);
+	lua_register(L, "AddMasterCredit", lua_AddMasterCredit);
+	lua_register(L, "DelCredit", lua_DelCredit);
+	lua_register(L, "GetCredit", lua_GetCredit);
+	lua_register(L, "HasMaster", lua_HasMaster);
 
 	// ��ͼ��Ϣ״̬����
-	REGFN(GetMapPlayer);
-	REGFN(DealAllPlayerInMap);
-	REGFN(GetMapActivePlayer);
-	REGFN(DealAllActivePlayerInMap);
-	REGFN(SetCopySpecialInter);
+	lua_register(L, "GetMapPlayer", lua_GetMapPlayer);
+	lua_register(L, "DealAllPlayerInMap", lua_DealAllPlayerInMap);
+	lua_register(L, "GetMapActivePlayer", lua_GetMapActivePlayer);
+	lua_register(L, "DealAllActivePlayerInMap", lua_DealAllActivePlayerInMap);
+	lua_register(L, "SetCopySpecialInter", lua_SetCopySpecialInter);
 
 	// ��������
-	REGFN(Garner2GetWiner);
-	REGFN(Garner2RequestReorder);
-	REGFN(ClearAllSubMapCha);
-	REGFN(ClearAllSubMapMonster);
-	REGFN(IsGarnerWiner);
+	lua_register(L, "Garner2GetWiner", lua_Garner2GetWiner);
+	lua_register(L, "Garner2RequestReorder", lua_Garner2RequestReorder);
+	lua_register(L, "ClearAllSubMapCha", lua_ClearAllSubMapCha);
+	lua_register(L, "ClearAllSubMapMonster", lua_ClearAllSubMapMonster);
+	lua_register(L, "IsGarnerWiner", lua_IsGarnerWiner);
 	// �����
-	REGFN(LifeSkillBegin);
-	REGFN(ClearAllFightSkill);
-	REGFN(ClearFightSkill);
+	lua_register(L, "LifeSkillBegin", lua_LifeSkillBegin);
+	lua_register(L, "ClearAllFightSkill", lua_ClearAllFightSkill);
+	lua_register(L, "ClearFightSkill", lua_ClearFightSkill);
 
-	REGFN(RefreshCha);
-	REGFN(IsChaStall);
-	REGFN(ChangeJob);
+	lua_register(L, "RefreshCha", lua_RefreshCha);
+	lua_register(L, "IsChaStall", lua_IsChaStall);
+	lua_register(L, "ChangeJob", lua_ChangeJob);
 
-	REGFN(ListAuction);
-	REGFN(StartAuction);
-	REGFN(EndAuction);
+	lua_register(L, "ListAuction", lua_ListAuction);
+	lua_register(L, "StartAuction", lua_StartAuction);
+	lua_register(L, "EndAuction", lua_EndAuction);
 
-	REGFN(GetActName);
-	REGFN(GetActID);
-	REGFN(GetChaDBID);
+	lua_register(L, "GetActName", lua_GetActName);
+	lua_register(L, "GetActID", lua_GetActID);
+	lua_register(L, "GetChaDBID", lua_GetChaDBID);
 	//  ������, �������
-	REGFN(GetExpState);
+	lua_register(L, "GetExpState", lua_GetExpState);
 
-	REGFN(KillCha);
+	lua_register(L, "KillCha", lua_KillCha);
 
 	// ��Դ�ַ������
-	REGFN(GetResString);
+	lua_register(L, "GetResString", lua_GetResString);
 
-	REGFN(GetGmLv);
-	REGFN(SetGmLv);
-	REGFN(GetPlayerByName);
-	REGFN(GetMasterID);
-	REGFN(GetRoleByID);
-	REGFN(DealAllInGuild);
-	REGFN(GetItemQuantity);
-	REGFN(GetOriginalChaTypeID);
-	REGFN(TransformCha);
-	REGFN(GetOnlineCount); // kong@pkodev.net 09.22.2017 end
-	REGFN(PopupNotice);	   // kong@pkodev.net 10.10.2017
-	REGFN(BanActRole);
-	REGFN(BanActName);
-	REGFN(UnbanAct);
-	REGFN(ColourNotice);
-	REGFN(RequestClientPin);
+	lua_register(L, "GetGmLv", lua_GetGmLv);
+	lua_register(L, "SetGmLv", lua_SetGmLv);
+	lua_register(L, "GetPlayerByName", lua_GetPlayerByName);
+	lua_register(L, "GetMasterID", lua_GetMasterID);
+	lua_register(L, "GetRoleByID", lua_GetRoleByID);
+	lua_register(L, "DealAllInGuild", lua_DealAllInGuild);
+	lua_register(L, "GetItemQuantity", lua_GetItemQuantity);
+	lua_register(L, "GetOriginalChaTypeID", lua_GetOriginalChaTypeID);
+	lua_register(L, "TransformCha", lua_TransformCha);
+	lua_register(L, "GetOnlineCount", lua_GetOnlineCount); // kong@pkodev.net 09.22.2017 end
+	lua_register(L, "PopupNotice", lua_PopupNotice);	   // kong@pkodev.net 10.10.2017
+	lua_register(L, "BanActRole", lua_BanActRole);
+	lua_register(L, "BanActName", lua_BanActName);
+	lua_register(L, "UnbanAct", lua_UnbanAct);
+	lua_register(L, "ColourNotice", lua_ColourNotice);
+	lua_register(L, "RequestClientPin", lua_RequestClientPin);
 
-	REGFN(OpenGuildBank);
+	lua_register(L, "OpenGuildBank", lua_OpenGuildBank);
 
-	REGFN(String2Item);
+	lua_register(L, "String2Item", lua_String2Item);
 
-	REGFN(GetPlayerByActName);
-	REGFN(ForcePlayerSave); // @mothannakh
+	lua_register(L, "GetPlayerByActName", lua_GetPlayerByActName);
+	lua_register(L, "ForcePlayerSave", lua_ForcePlayerSave); // @mothannakh
 
-	REGFN(SetGlobalRates);
-	REGFN(GetPlyDropRate);
-	REGFN(GetPlyExpRate);
-	REGFN(GetPlayerLoginInfo);
+	lua_register(L, "SetGlobalRates", lua_SetGlobalRates);
+	lua_register(L, "GetPlyDropRate", lua_GetPlyDropRate);
+	lua_register(L, "GetPlyExpRate", lua_GetPlyExpRate);
+	lua_register(L, "GetPlayerLoginInfo", lua_GetPlayerLoginInfo);
 
 	// AI�����Ǽ�
 	RegisterLuaAI(g_pLuaState);

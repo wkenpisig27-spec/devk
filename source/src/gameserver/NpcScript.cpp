@@ -1031,60 +1031,60 @@ int RegisterNpcScript() {
 	T_B
 		lua_State* L = g_pLuaState;
 
-	REGFN(ReloadNpcInfo);
-	REGFN(FindNpc);
+	lua_register(L, "ReloadNpcInfo", lua_ReloadNpcInfo);
+	lua_register(L, "FindNpc", lua_FindNpc);
 
 	// npc网络函数注册
-	REGFN(ReadCmd);
-	REGFN(ReadByte);
-	REGFN(ReadWord);
-	REGFN(ReadDword);
-	REGFN(ReadString);
+	lua_register(L, "ReadCmd", lua_ReadCmd);
+	lua_register(L, "ReadByte", lua_ReadByte);
+	lua_register(L, "ReadWord", lua_ReadWord);
+	lua_register(L, "ReadDword", lua_ReadDword);
+	lua_register(L, "ReadString", lua_ReadString);
 
-	REGFN(WriteCmd);
-	REGFN(WriteByte);
-	REGFN(WriteWord);
-	REGFN(WriteDword);
-	REGFN(WriteString);
+	lua_register(L, "WriteCmd", lua_WriteCmd);
+	lua_register(L, "WriteByte", lua_WriteByte);
+	lua_register(L, "WriteWord", lua_WriteWord);
+	lua_register(L, "WriteDword", lua_WriteDword);
+	lua_register(L, "WriteString", lua_WriteString);
 
-	REGFN(GetPacket);
-	REGFN(SendPacket);
-	REGFN(SynPacket);
-	REGFN(GetCharID);
-	REGFN(MoveTo);
-	REGFN(MoveCity);
-	REGFN(GetAreaName);
-	REGFN(GetMapName);
-	REGFN(GetCharName);
-	REGFN(GetItemName);
-	REGFN(GetMonsterName);
-	REGFN(Rand);
+	lua_register(L, "GetPacket", lua_GetPacket);
+	lua_register(L, "SendPacket", lua_SendPacket);
+	lua_register(L, "SynPacket", lua_SynPacket);
+	lua_register(L, "GetCharID", lua_GetCharID);
+	lua_register(L, "MoveTo", lua_MoveTo);
+	lua_register(L, "MoveCity", lua_MoveCity);
+	lua_register(L, "GetAreaName", lua_GetAreaName);
+	lua_register(L, "GetMapName", lua_GetMapName);
+	lua_register(L, "GetCharName", lua_GetCharName);
+	lua_register(L, "GetItemName", lua_GetItemName);
+	lua_register(L, "GetMonsterName", lua_GetMonsterName);
+	lua_register(L, "Rand", lua_Rand);
 
-	REGFN(SafeSale);
-	REGFN(SafeBuy);
-	REGFN(SafeSaleGoods);
-	REGFN(SafeBuyGoods);
-	REGFN(GetSaleGoodsItem);
-	REGFN(ExchangeReq);
+	lua_register(L, "SafeSale", lua_SafeSale);
+	lua_register(L, "SafeBuy", lua_SafeBuy);
+	lua_register(L, "SafeSaleGoods", lua_SafeSaleGoods);
+	lua_register(L, "SafeBuyGoods", lua_SafeBuyGoods);
+	lua_register(L, "GetSaleGoodsItem", lua_GetSaleGoodsItem);
+	lua_register(L, "ExchangeReq", lua_ExchangeReq);
 
-	REGFN(SetNpcScriptID);
-	REGFN(GetScriptID);
-	REGFN(SetNpcHasMission);
-	REGFN(GetNpcHasMission);
-	REGFN(IsMapChar);
-	REGFN(IsMapNpc);
-	REGFN(IsInMap);
-	REGFN(IsInArea);
-	REGFN(AddNpcTrigger);
-	REGFN(SetActive);
-	REGFN(GetEudemon);
-	REGFN(SummonNpc);
-	REGFN(ChaPlayEffect);
+	lua_register(L, "SetNpcScriptID", lua_SetNpcScriptID);
+	lua_register(L, "GetScriptID", lua_GetScriptID);
+	lua_register(L, "SetNpcHasMission", lua_SetNpcHasMission);
+	lua_register(L, "GetNpcHasMission", lua_GetNpcHasMission);
+	lua_register(L, "IsMapChar", lua_IsMapChar);
+	lua_register(L, "IsMapNpc", lua_IsMapNpc);
+	lua_register(L, "IsInMap", lua_IsInMap);
+	lua_register(L, "IsInArea", lua_IsInArea);
+	lua_register(L, "AddNpcTrigger", lua_AddNpcTrigger);
+	lua_register(L, "SetActive", lua_SetActive);
+	lua_register(L, "GetEudemon", lua_GetEudemon);
+	lua_register(L, "SummonNpc", lua_SummonNpc);
+	lua_register(L, "ChaPlayEffect", lua_ChaPlayEffect);
 
-	REGFN(DebugInfo);
-	REGFN(SystemNotice);
-	REGFN(SynTigerString);
-	REGFN(BickerNotice);
+	lua_register(L, "DebugInfo", lua_DebugInfo);
+	lua_register(L, "SystemNotice", lua_SystemNotice);
+	lua_register(L, "SynTigerString", lua_SynTigerString);
+	lua_register(L, "BickerNotice", lua_BickerNotice);
 
 	return TRUE;
 	T_E
