@@ -1840,6 +1840,8 @@ bool	CEffectModel::CreateCylinder(int nSeg,float fHei,float fTopRadius,float fBo
 	m_vEffVer = new SEFFECT_VERTEX[_dwVerCount];
 #ifdef USE_MGR
 	m_pRes->CreateMesh(&_lwMesh);
+	if (_lwMesh == NULL)
+		return false;
 	_lwMesh->SetStreamType(STREAM_LOCKABLE);
 
 	lwMeshInfo mi;

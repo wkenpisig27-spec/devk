@@ -23,6 +23,7 @@
 12. [Shaders & Rendering](#shaders--rendering)
 13. [Common Pitfalls & Solutions](#common-pitfalls--solutions)
 14. [Quick Reference](#quick-reference)
+15. [Gameplay Knowledge](#gameplay-knowledge)
 
 ---
 
@@ -901,4 +902,192 @@ Select-String -Path "source\include\**\*.h" -Pattern "<<<<<<<" -Recurse
 - [ ] Server callbacks: no blocking waits
 - [ ] DB operations: use stored procedures, not raw SQL
 - [ ] Binary files copied with `-LiteralPath` if filenames contain `[]`
+
+---
+
+## Gameplay Knowledge
+
+> Derived from a full read of `server/resource/script/` — use this as reference when modifying quests, NPCs, balance, AI, or any server-side Lua.
+
+### Script Directory Layout
+
+```
+server/resource/script/
+├── MisScript/      # NPC definitions, quest scripts, character birth
+├── MisSdk/         # SDK frameworks: MissionSdk.lua, NpcSdk.lua, SystemSDK.lua
+├── ai/             # Monster/NPC AI (ai.lua, ai_base.lua, ai_sdk.lua, ai_define.lua)
+├── birth/          # Character creation defaults
+├── calculate/      # Formulas: AttrCalculate.lua, exp_and_level.lua, forge.lua, JobType.lua, SkillStateType.lua, ItemAttrType.lua, Look.lua, ItemEffect.lua
+├── help/           # In-game help system
+├── monster/        # Per-map spawn definitions (mlist.lua + per-map files)
+└── shop/           # In-game mall (init.lua, fairy.lua, category files)
+```
+
+### Classes & Jobs
+
+**19 classes** in two tiers (file: `calculate/JobType.lua`):
+
+| ID | Class | ID | Class |
+|----|-------|----|-------|
+| 0 | Newbie | 10 | White Knight |
+| 1 | Swordsman | 11 | Animal Tamer |
+| 2 | Hunter | 12 | Sharpshooter |
+| 3 | Sailor | 13 | Cleric |
+| 4 | Explorer | 14 | Seal Master |
+| 5 | Herbalist | 15 | Captain |
+| 6 | Artisan | 16 | Voyager |
+| 7 | Merchant | 17 | Upstart |
+| 8 | Champion | 18 | Engineer |
+| 9 | Crusader | | |
+
+- Stats: **STR, AGI, DEX, CON, STA, LUK** — each class has unique coefficients
+- Advancement: Auto at level 10 (Newbie → Tier 1); further advances via NPC class quests
+- Profession Points (PF) system: 18 professions with unique advancement quests
+
+### Attribute Formulas (Newbie example — file: `calculate/AttrCalculate.lua`)
+
+| Attribute | Formula |
+|-----------|---------|
+| Max HP | CON × 3 + Level × 15 |
+| Max SP | STA × 1 + Level × 3 |
+| Physical ATK | STR × 1.5 + DEX × 0.4 |
+| Defense | CON × 0.1 |
+| Hit Rate | DEX × 0.6 |
+| Dodge/Flee | AGI × 0.6 |
+| Critical | LUK × 0.31 |
+| Magic Factor | LUK × 0.39 |
+
+Damage formula: `Base + (ATK_Stat × Coefficient) ± 10% random`
+
+### Experience & Leveling (file: `calculate/exp_and_level.lua`)
+
+- **Combat XP** — monster kills, PvP
+- **Sailing XP** — ship leveling (own progression track, Level 1–100, exponential curve)
+- **Life Skill XP** — fishing, woodcutting, gathering (supplemental income)
+- Level scaling: Lv1–10 newbie zone → Lv10–30 early game → Lv30–60 mid game → Lv60–100+ end game
+
+### Quest / Mission System (files: `MisScript/MissionScript*.lua`, `MisSdk/MissionSdk.lua`)
+
+**Quest Types:**
+- **Normal** — standard one-time story progression
+- **Random** — daily/repeatable kill, collection, delivery
+- **World** — global story quests (non-repeatable, gated by Records)
+
+**Objective types:** `MIS_NEED_KILL`, `MIS_NEED_ITEM`, `MIS_NEED_SEND`, `MIS_NEED_CONVOY`, `MIS_NEED_EXPLORE`, `MIS_NEED_DESP`
+
+**Triggers:** `TE_NPC`(1), `TE_KILL`(2), `TE_GAMETIME`(3), `TE_CHAT`(4), `TE_GETITEM`(5), `TE_EQUIPITEM`(6), `TE_GOTO_MAP`(7), `TE_LEVELUP`(8), `TE_MAPINIT`(0)
+
+**States:** ACCEPT → (objectives) → DELIVERY → complete; PENDING / IGNORE
+
+**Rewards:** XP, Gold, Fame, Pet XP, Items
+
+**Story tracking:** `SetRecord(id)` / `IsRecord(cha, id)` for permanent flags; `SetFlag` / `HasFlag` for per-quest state
+
+**Scale:** 800+ quest IDs, daily/weekly caps via `QuestFunc()` + `OS.date()` time tracking
+
+### NPC System (files: `MisScript/NpcDefine.lua`, `MisScript/NpcScript*.lua`, `MisSdk/NpcSdk.lua`)
+
+**187+ NPCs** across 3 main cities + 12+ havens. Types:
+- **Quest Givers** — trigger and deliver quests
+- **Merchants** — Blacksmith Goldie, Tailor Granny Nila, Grocer Jimberry, etc.
+- **Bankers** — Monica (Argent), Macurdo — item storage + gold deposit/withdraw
+- **Teleporters** — instant travel between cities and havens (12+ nodes)
+- **Harbor Operators** — Berthing, Repair, Cargo Trade, Salvage, Supply per harbor
+- **Class Trainers** — Skill/job advancement
+- **Innkeepers** — Spawn point recording
+
+Factions: **Navy** (Argent City) vs **Pirate** (Shaitan City)
+
+### AI & Monster System (files: `ai/ai.lua`, `ai/ai_base.lua`, `ai/ai_sdk.lua`)
+
+**7 AI types:** `AI_NONE`(0), `AI_N_ATK`(1), `AI_FLEE`(2), `AI_MOVETOHOST`(4), `AI_R_ATK`(5), `AI_ATK`(10), `AI_ATK_FLEE`(11)
+
+**States:** Idle → Patrol → Chase (vision 400–800 units) → Combat → Flee
+
+**Spawn:** `CreateCha(MonsterID, X, Y, Heading, RespawnTime)` — respawn 20–145 min typical
+
+**Bosses:** Elite tier via `sdBoss01.lua`, multiple unit types per location, distributed respawn positions
+
+**Content:** 300+ monster types across 30+ maps
+
+### World & Map Structure (file: `MisScript/ScriptDefine.lua`, `monster/mlist.lua`)
+
+**41+ playable zones:**
+
+| Category | Maps |
+|----------|------|
+| Starter Cities | Argent (garner), Shaitan (jialebi), Thundoria (leiting2), Icicle (binglang2) |
+| Main Zones | Magical Ocean (magicsea), Deep Blue (darkblue), Garden of Edel (secretgarden), Eastern Goaf, Lone Tower, Dark Swamp |
+| Dungeons | Forsaken City (abandonedcity 1–3), Demonic World (puzzleworld 1–2), Abaddon (hell 1–5) |
+| Special | PK Arena (teampk/PKmap), Sacred War (guildwar 1–4), Black Dragon Lair (heilong 1–2), Dream Island, Winter Island, Prison Island |
+| Havens (Safe) | Abandon Mine, Rockery, Andes Forest, Valhalla, Solace, Chaldea, Oasis, Babul, Icicle, Atlantis, Skeleton, Icespire |
+
+### Ship / Naval System
+
+- Ships level **1–100** (own XP track — exponential curve)
+- **15 named harbors**: Argent, Thundoria, Shaitan, Icicle, Zephyr, Glacier, Outlaw, Chill Harbor, etc.
+- Harbor services: Berthing, Repair, Cargo Trade, Salvage, Supply replenishment
+- **Commerce system**: Buy cargo cheap at one city, sell high at another; **Commerce Permits** (Low/Mid/High tier) reduce trade tax
+- Sailing XP is separate from combat XP
+
+### Pet / Fairy System (files: `shop/fairy.lua`, `calculate/ItemEffect.lua`)
+
+- **10+ fairy types**: Life, Darkness, Virtue, Kudos, Faith, Valor, Hope, Woe, Love, Heart, etc.
+- Obtained from eggs (mall or drops); train via **Fruits** (+STR/AGI/DEX/CON/STA); feed via **Rations**
+- Skills: offensive (Protection, Berserk, Magic) and healing (Recovery, Meditation) — Novice → Standard → higher tiers
+- **Marriage/Breeding**: combine fruits to influence offspring stats
+
+### Equipment & Item System (files: `calculate/ItemAttrType.lua`, `calculate/Look.lua`)
+
+- **34 equipment slots**: Head, Face, Body, Gloves, Shoes, Neck, Weapons (×2), Hands, Jewelry (×4), Wings, Cloak, Fairy, Mount, Rear, 5 Cosmetic appearance slots, special weapon types
+- **49+ item attributes**: Coefficient stats (STR/AGI/DEX/CON/STA/LUK/ASPD) + direct value bonuses + special (Refinement level, Fusion ID, Durability)
+- Item types: Weapons (0), Armor/Defense (1), Other (2), Synthesis materials (3), Gems
+
+### Forging / Crafting System (file: `calculate/forge.lua`)
+
+- Combine 2 same-type/level gems + scroll → higher tier gem
+- Success rates: Lv0=100%, Lv1=90%, Lv7=30%, Lv8=20% (type 49); type 50 starts at 100% and degrades slower
+- Bonus Fruits modify success rate (+10% per fruit level)
+- Equipment enhancement: **Refine** (damage/defense boost), **Socket** (add gem slots), **Upgrade/Transcendence**
+
+### Economy
+
+- **Gold (G)** — primary currency from quests, drops, trading
+- **Crystals (IMP)** — premium currency for in-game mall
+- Mall categories: Fairy, Leveling aids, Equipment, Forging, Tickets, Apparels, Grocery, Mounts, Special items
+- Mall mechanics: stock limits, 30s cooldown after 3 failed purchases, purchase logging per player
+- **Offline stalls** for player market; player-to-player trading; NPC shops
+
+### Status Effects (21 types — file: `calculate/SkillStateType.lua`)
+
+Cut (bleed), Fervor Arrow (buff), Frost Arrow (debuff), Skyrocket (knockback), Murrain (poison), Giddy (confuse), Freeze, Sleep, Bind, Frost (chill), Beat Back (knockback), Unbeatable (invincible), Toxin (poison), Rebound (reflect), Avatar (summon), Titan (power-up), Blindness, Change (transform), Float (levitate), Call (summon), Shield (protection)
+
+### Guild & PvP
+
+- Guild requires: Lv40+, gold cost, item requirements
+- Factions: Navy vs Pirate — affect NPC availability, quests, social standing
+- **Sacred War** (guildwar01–04): territory control guild wars
+- **PK Arenas** (teampk, PKmap): open and team PvP
+- Fame system tied to faction standing
+
+### Special / Event Systems
+
+- **Daily/Weekly quest caps**: `QuestFunc()` + `OS.date()` date tracking
+- **Time-based events**: holiday events (Christmas — 07xmas2), boss hunts (Behemoth — Abandoned Mine 2), hourly game-time triggers
+- **Tutorial system**: auto-guided Lv1–10 (movement, combat, UI, skills, class advancement)
+- Date format used in scripts: `NowDateNum = Year × 1000000 + Month × 10000 + Day × 100 + Hour`
+
+### Key Lua API Quick Reference
+
+| Category | Functions |
+|----------|-----------|
+| Character | `GetChaDefaultName`, `GetChaAttr`, `SetChaAttr`, `GetChaLevel`, `GetCharID`, `GetChaFreeBagGridNum` |
+| Items | `GiveItem(cha, container, item_id, qty, quality)`, `TakeItem`, `CheckBagItem`, `GetChaItem`, `GetItemID`, `GetItemName` |
+| Quests | `AddMission`, `ClearMission`, `HasMission`, `SetRecord`, `IsRecord`, `SetFlag`, `HasFlag` |
+| Dialogue | `Talk(page, text)`, `Text(page, label, cb)`, `AddNpcMission`, `SendTalkPage`, `JumpPage`, `CloseTalk` |
+| Movement | `Teleport(cha, loc)`, `SetSpawnPos(loc)`, `MoveTo(cha, x, y, map)`, `ChaMove(cha, x, y)` |
+| Combat/AI | `GetChaTarget`, `SetChaTarget`, `GetChaFirstTarget`, `GetChaByRange(cha, x, y, range, flag)`, `IsPosValid` |
+| Packets | `GetPacket`, `WriteCmd`, `WriteString`, `WriteDword`, `WriteWord`, `WriteByte`, `SendPacket`, `SystemNotice`, `PopupNotice` |
+| Triggers | `InitTrigger`, `TriggerCondition`, `TriggerAction`, `TriggerFailure`, `AddTrigger`, `RegTrigger`, `GetMultiTrigger` |
+| Utility | `Rand(max)`, `round`, `split`, `trim`, `AddComma(amount)`, `GetTime(seconds)`, `LogFile`, `FileExist`, `FileToArray` |
 
