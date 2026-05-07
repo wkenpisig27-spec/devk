@@ -1,9 +1,0 @@
-[04-10 00:34:20.191]Initializing Offline Stall Manager...
-[04-10 00:34:20.191]Loading all offline stalls from database...
-[04-10 00:34:20.191]LoadOfflineStalls called for map: ALL
-[04-10 00:34:20.191]Executing SQL: EXEC dbo.OfflineStall_LoadAll
-[04-10 00:34:20.213]SQL returned 0 rows
-[04-10 00:34:20.213]Loaded 0 offline stalls from database
-[04-10 00:34:20.213]Loaded 0 offline stalls
-[04-10 00:35:06.002]HasOfflineStall: cha_id=5187, has_stall=0
-[04-10 03:01:18.936]HasOfflineStall: cha_id=5188, has_stall=0

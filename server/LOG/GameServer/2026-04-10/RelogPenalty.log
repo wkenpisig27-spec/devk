@@ -1,5 +1,0 @@
-[04-10 03:00:25.785]CanEnterAllowedExpired name=tempra dbid=5187 map=garner2 
-[04-10 03:01:15.823]MarkEnter name=tempra dbid=5187 map=garner2 
-[04-10 03:01:29.361]MarkEnter name=sads dbid=5188 map=garner2 
-[04-10 03:01:45.700]MarkDeath name=tempra dbid=5187 map=garner2 source=after_player_kill_player 
-[04-10 03:01:49.412]LeaveNoPenaltyDeath name=tempra dbid=5187 map=garner2 

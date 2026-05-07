@@ -1,7 +1,0 @@
-[04-10 00:34:06.296][Security] IP Whitelist ENABLED with 2 allowed IPs:
-[04-10 00:34:06.296]  - 127.0.0.1
-[04-10 00:34:06.296]  - ::1
-[04-10 00:34:48.923]RegisterPlayer: ptr=0x2070B9A5E10 gen=1 total=1
-[04-10 00:34:52.251]RegisterPlayer: ptr=0x2070B9A69C0 gen=2 total=2
-[04-10 00:34:59.793]RegisterPlayer: ptr=0x2070B9A7570 gen=3 total=3
-[04-10 00:35:02.704]RegisterPlayer: ptr=0x2070B9A8120 gen=4 total=4

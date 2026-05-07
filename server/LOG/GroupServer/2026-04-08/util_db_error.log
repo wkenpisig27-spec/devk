@@ -1,4 +1,0 @@
-[04-08 15:02:15.537]SQL Error State:42000, Native Error Code: 1FD2, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure CharacterZeroAddr has no parameters and arguments were supplied.
-[04-08 15:02:15.537][STMT:0xae98e2b0][SQLERR]: [CharacterZeroAddr]
-[04-08 15:50:37.651]SQL Error State:42000, Native Error Code: 1FD2, ODBC Error: [Microsoft][ODBC SQL Server Driver][SQL Server]Procedure CharacterZeroAddr has no parameters and arguments were supplied.
-[04-08 15:50:37.651][STMT:0xd98ce2b0][SQLERR]: [CharacterZeroAddr]

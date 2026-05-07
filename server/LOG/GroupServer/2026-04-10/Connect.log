@@ -1,9 +1,0 @@
-[04-10 00:34:06.169]begin connect database
-[04-10 00:34:06.265]begin init AccountServer connect
-[04-10 00:34:06.265]AccountServer:127.0.0.1,1978 come ! Socket num:1
-[04-10 00:34:06.296]begin read GroupServer.cfg
-[04-10 00:34:06.296]begin load ChaNameFilter.txt
-[04-10 00:34:06.296]begin listen port:1975
-[04-10 00:34:06.296]open listen port:1975 success, init is ok
-[04-10 00:34:10.765]GateServer:127.0.0.1,53024 come ! Socket num:2
-[04-10 00:34:10.780]GateServer:127.0.0.1,53024 TP_LOGIN1\n[04-10 00:34:10.780]GateServer:127.0.0.1,53024 TP_LOGIN2\n[04-10 00:34:10.780]GateServer:127.0.0.1,53024 TP_LOGIN3\n[04-10 03:14:26.254]AccountServer:127.0.0.1,1978 go ! Socket num:1 reason=(-3)���类�Է������رա�
