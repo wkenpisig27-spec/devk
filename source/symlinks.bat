@@ -26,7 +26,6 @@ echo.
 :: ---- Client binaries ----
 call :MKLINK "%CLIENT%\Game.exe"              "%SRC%\game\Game.exe"
 call :MKLINK "%CLIENT%\CaLua.dll"             "%SRC%\calua\CaLua.dll"
-call :MKLINK "%CLIENT%\MindPower3D_D9R.dll"   "%SRC%\mindpower3d\MindPower3D_D9R.dll"
 
 :: ---- Server binaries ----
 call :MKLINK "%SERVER%\AccountServer.exe"     "%SRC%\accountserver\AccountServer.exe"

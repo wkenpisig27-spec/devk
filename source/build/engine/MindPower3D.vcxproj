@@ -17,13 +17,13 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <PlatformToolset>v145</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <EnableASAN>false</EnableASAN>
@@ -42,24 +42,22 @@
     <_ProjectFileVersion>16.0.30427.251</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(ProjectDir)..\..\bin\$(Configuration)\mindpower3d\</OutDir>
+    <OutDir>$(ProjectDir)..\..\lib\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)..\..\tmp\engine\$(Configuration)\</IntDir>
-    <LinkIncremental>true</LinkIncremental>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <TargetName>$(ProjectName)_D9D</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(ProjectDir)..\..\bin\$(Configuration)\mindpower3d\</OutDir>
+    <OutDir>$(ProjectDir)..\..\lib\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)..\..\tmp\engine\$(Configuration)\</IntDir>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <TargetName>$(ProjectName)_D9R</TargetName>
-    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\include\engine;..\..\src\engine;$(ProjectDir)..\..\src\Engine;$(ProjectDir)..\..\include\Engine;$(ProjectDir)..\..\include\Common;$(ProjectDir)..\..\include\Util;$(ProjectDir)..\..\include\directx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>USE_DX_VERSION;LW_USE_DX9;DIRECT3D_VERSION=0x0900;_UNLOADRES;_WIN64;NDEBUG;_WINDOWS;USE_MINDPOWER;MINDPOWER_USE_DLL;MINDPOWER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_DX_VERSION;LW_USE_DX9;DIRECT3D_VERSION=0x0900;_UNLOADRES;_WIN64;NDEBUG;_WINDOWS;USE_MINDPOWER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -72,17 +70,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
-    <Link>
-      <AdditionalDependencies>d3d9.lib;d3dx9d.lib;dxguid.lib;util_D.lib;Common_D.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\$(Configuration);$(ProjectDir)..\..\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>libci.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
-      <ImportLibrary>$(ProjectDir)..\..\lib\$(Configuration)\$(TargetName).lib</ImportLibrary>
+    <Lib>
       <TargetMachine>MachineX64</TargetMachine>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-    </Link>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -90,7 +80,7 @@
       </AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\include\engine;..\..\src\engine;$(ProjectDir)..\..\src\Engine;$(ProjectDir)..\..\include\Engine;$(ProjectDir)..\..\include\Common;$(ProjectDir)..\..\include\Util;$(ProjectDir)..\..\include\directx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>USE_DX_VERSION;LW_USE_DX9;DIRECT3D_VERSION=0x0900;_WIN64;NDEBUG;_WINDOWS;USE_MINDPOWER;MINDPOWER_USE_DLL;MINDPOWER_EXPORTS;TABLE_ENCRYPTION_ENABLED=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_DX_VERSION;LW_USE_DX9;DIRECT3D_VERSION=0x0900;_WIN64;NDEBUG;_WINDOWS;USE_MINDPOWER;TABLE_ENCRYPTION_ENABLED=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
@@ -105,15 +95,9 @@
       <ConformanceMode>false</ConformanceMode>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
-    <Link>
-      <AdditionalDependencies>d3d9.lib;d3dx9.lib;dxguid.lib;Common.lib;util.lib;botan.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\$(Configuration);$(ProjectDir)..\..\lib\Release;$(ProjectDir)..\..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>libci.lib</IgnoreSpecificDefaultLibraries>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <ImportLibrary>$(ProjectDir)..\..\lib\$(Configuration)\$(TargetName).lib</ImportLibrary>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-    </Link>
+    <Lib>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\engine\d3dutil.h" />

@@ -9,10 +9,15 @@
 #include <exception>
 #include <sstream>
 
-#if defined( CLIENT_BUILD )
-#   define _FONT_Export __declspec( dllimport )
+// When not building as a DLL, export/import decorators are not needed.
+#ifdef MINDPOWER_USE_DLL
+#   ifdef CLIENT_BUILD
+#       define _FONT_Export __declspec( dllimport )
+#   else
+#       define _FONT_Export __declspec( dllexport )
+#   endif
 #else
-#	define _FONT_Export __declspec( dllexport )
+#   define _FONT_Export
 #endif
 
 
