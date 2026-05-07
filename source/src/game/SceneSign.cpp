@@ -23,8 +23,7 @@ bool CSceneSign::Init(CGameScene* pScene) {
 	if (_pAttack) {
 		_pAttack->setIsSystem(true);
 		// FPS-aware velocity: halved at 60 FPS to keep target indicator spinning at original speed.
-		const float vel = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 1.0f : 2.0f;
-		_pAttack->PlayObjImpPose(ANIM_CTRL_TYPE_MAT, 0, PLAY_LOOP, 0.0f, vel);
+		const float vel = 2.0f / CSteadyFrame::GetAnimMultiplier();(ANIM_CTRL_TYPE_MAT, 0, PLAY_LOOP, 0.0f, vel);
 	} else {
 		LG("init", RES_STRING(CL_LANGUAGE_MATCH_377));
 		return false;
@@ -46,7 +45,7 @@ bool CSceneSign::Init(CGameScene* pScene) {
 	if (_pMove) {
 		_pMove->setIsSystem(true);
 		// FPS-aware velocity: halved at 60 FPS to keep move indicator spinning at original speed.
-		const float vel = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 1.0f : 2.0f;
+		const float vel = 2.0f / CSteadyFrame::GetAnimMultiplier();
 		_pMove->PlayObjImpPose(ANIM_CTRL_TYPE_MAT, 0, PLAY_LOOP, 0.0f, vel);
 	} else {
 		LG("init", RES_STRING(CL_LANGUAGE_MATCH_379));

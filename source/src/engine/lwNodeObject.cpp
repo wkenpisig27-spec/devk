@@ -10,6 +10,7 @@
 #include "lwHelperGeometry.h"
 
 extern bool g_lw60FpsMode;
+extern float g_lwAnimVelocity;
 
 LW_BEGIN
 
@@ -2229,8 +2230,8 @@ LW_RESULT lwNodeObject_PlayDefaultPose(lwINodeObject* obj)
     ppi.pose = 0;
     ppi.frame = 0.0f;
     ppi.type = PLAY_LOOP;
-    // FPS-aware default pose velocity. See lwPhysique.cpp for g_lw60FpsMode.
-    ppi.velocity = g_lw60FpsMode ? 0.5f : 1.0f;
+    // FPS-aware default pose velocity. See lwPhysique.cpp for g_lwAnimVelocity.
+    ppi.velocity = g_lwAnimVelocity;
 
     if(obj->GetTreeNodeRoot()->EnumTree(__tree_proc_play_pose,(void*)&ppi, TREENODE_PROC_PREORDER)
         != TREENODE_PROC_RET_CONTINUE)

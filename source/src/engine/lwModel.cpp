@@ -750,7 +750,7 @@ LW_RESULT lwModel::SortPrimitiveObj()
     return LW_RET_OK;
 }
 
-LW_RESULT lwModel::PlayDefaultAnimation(bool IsGlitched)
+LW_RESULT lwModel::PlayDefaultAnimation(float velocity)
 {
     lwPlayPoseInfo ppi;
     memset(&ppi, 0, sizeof(ppi));
@@ -762,7 +762,7 @@ LW_RESULT lwModel::PlayDefaultAnimation(bool IsGlitched)
 
     for(DWORD i = 0; i < _obj_num; i++)
     {
-        lwPrimitivePlayDefaultAnimation(_obj_seq[i], IsGlitched);
+        lwPrimitivePlayDefaultAnimation(_obj_seq[i], velocity);
         
     }
 

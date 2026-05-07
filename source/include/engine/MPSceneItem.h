@@ -44,7 +44,7 @@ public:
     void ShowBoundingObject( int show );
 
     LW_RESULT GetObjDummyRunTimeMatrix( lwMatrix44* mat, DWORD id );
-    LW_RESULT PlayDefaultAnimation(bool IsGlitched = false);
+    LW_RESULT PlayDefaultAnimation(float velocity = 1.0f);
     //LW_RESULT ResetItemTexture( const char* file );
     LW_RESULT ResetItemTexture(DWORD subset, lwITex* tex, lwITex** old_tex);
 

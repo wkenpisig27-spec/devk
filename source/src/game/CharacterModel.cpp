@@ -675,8 +675,6 @@ void CCharacterModel::PlayPose(DWORD pose, DWORD type, int time, int fps, DWORD 
 	// but I'm fucking tired of those trees and I just want them gone
 	if (c->GetPoseFrameNum(0) == 83)
 		IsGlitched = true;
-	if (!g_stUISystem.m_sysProp.m_gameOption.bFramerate)
-		IsGlitched = false;
 	// "What if there's something else with 83 frames?"
 	// That seems like your problem mate, not mine :)
 

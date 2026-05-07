@@ -441,7 +441,7 @@ BOOL CTestDemo::Init() {
 	_res_mgr->CreateModel(&_skybox);
 	if (FAILED(_skybox->Load("sky.lmo")))
 		return 0;
-	_skybox->PlayDefaultAnimation(!g_stUISystem.m_sysProp.m_gameOption.bFramerate);
+	_skybox->PlayDefaultAnimation(1.0f / CSteadyFrame::GetAnimMultiplier());
 
 	DWORD num = _skybox->GetPrimitiveNum();
 	for (DWORD i = 0; i < num; i++) {

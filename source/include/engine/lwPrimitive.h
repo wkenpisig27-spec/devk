@@ -99,7 +99,7 @@ public:
     { return _state_ctrl.GetState(state); }
 
     LW_RESULT SetTextureLOD(DWORD level);
-    LW_RESULT PlayDefaultAnimation(bool IsGlitched = false);
+    LW_RESULT PlayDefaultAnimation(float velocity = 1.0f);
     LW_RESULT ResetTexture(DWORD subset, DWORD stage, const char* file, const char* tex_path);
 
 	void setPixelShader( const std::string& filename )
@@ -108,6 +108,6 @@ public:
 	}
 };
 
-LW_RESULT lwPrimitivePlayDefaultAnimation( lwIPrimitive* obj, bool IsGlitched = false );
+LW_RESULT lwPrimitivePlayDefaultAnimation( lwIPrimitive* obj, float velocity = 1.0f );
 
 LW_END

@@ -566,9 +566,9 @@ LW_RESULT lwItem::ClearLinkCtrl()
     return LW_RET_OK;
 }
 
-LW_RESULT lwItem::PlayDefaultAnimation(bool IsGlitched)
+LW_RESULT lwItem::PlayDefaultAnimation(float velocity)
 {
-    return lwPrimitivePlayDefaultAnimation( _obj, IsGlitched );
+    return lwPrimitivePlayDefaultAnimation( _obj, velocity );
 }
 void lwItem::SetOpacity(float opacity)
 {

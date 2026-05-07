@@ -24,6 +24,7 @@
 #include "GlobalVar.h"
 #include "scene.h"
 #include "UICozeForm.h"
+#include "MPRender.h"
 
 #ifndef USE_DSOUND
 #include "AudioThread.h"
@@ -35,6 +36,7 @@ using namespace GUI;
 // Engine-side outline toggle (defined in MindPower3D.dll / lwPhysique.cpp).
 extern "C" __declspec(dllimport) void lwSetOutlineEnabled(int enabled);
 extern "C" __declspec(dllimport) void lwSet60FpsMode(int enabled);
+extern "C" __declspec(dllimport) void lwSetAnimVelocity(float velocity);
 
 extern bool g_IsShowStates;
 extern bool g_IsCameraMode;
@@ -174,148 +176,71 @@ int CSystemProperties::readFromFile(const char* szIniFileName) {
 		return -3;
 	}
 
+	// If the file doesn't exist at all, tell the caller to apply hard-coded defaults.
+	if (GetFileAttributesA(szIniFileName) == INVALID_FILE_ATTRIBUTES)
+		return DEFAULT_NUM;
+
 	int iTemp;
-	// video
-	iTemp = GetPrivateProfileInt("video", "texture", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_videoProp.nTexture = iTemp;
+	// video — use sensible defaults for any key that is missing from the file
+	m_videoProp.nTexture      = GetPrivateProfileInt("video", "texture",      0, szIniFileName);
+	m_videoProp.bAnimation    = int2bool(GetPrivateProfileInt("video", "animation",    1, szIniFileName));
+	m_videoProp.bCameraRotate = int2bool(GetPrivateProfileInt("video", "cameraRotate", 1, szIniFileName));
 
-	iTemp = GetPrivateProfileInt("video", "animation", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_videoProp.bAnimation = int2bool(iTemp);
-
-	iTemp = GetPrivateProfileInt("video", "cameraRotate", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_videoProp.bCameraRotate = int2bool(iTemp);
-
+	// shadowMode: check new key first, fall back to legacy "groundMark"
 	iTemp = GetPrivateProfileInt("video", "shadowMode", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM) {
-		// Backward compatibility for legacy system.ini files that still use "groundMark".
-		const int legacyGroundMark = GetPrivateProfileInt("video", "groundMark", DEFAULT_NUM, szIniFileName);
-		if (legacyGroundMark == DEFAULT_NUM)
-			return DEFAULT_NUM;
-		iTemp = legacyGroundMark != 0 ? 1 : 0;
-	}
+	if (iTemp == DEFAULT_NUM)
+		iTemp = GetPrivateProfileInt("video", "groundMark", 1, szIniFileName) != 0 ? 1 : 0;
 	m_videoProp.nShadowMode = iTemp != 0 ? 1 : 0;
 
-	iTemp = GetPrivateProfileInt("video", "depth32", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_videoProp.bDepth32 = int2bool(iTemp);
-
-	iTemp = GetPrivateProfileInt("video", "quality", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_videoProp.nQuality = iTemp;
-
-	iTemp = GetPrivateProfileInt("video", "fullScreen", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_videoProp.bFullScreen = int2bool(iTemp);
-
-	iTemp = GetPrivateProfileInt("video", "resolution", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_videoProp.bResolution = iTemp;
+	m_videoProp.bDepth32    = int2bool(GetPrivateProfileInt("video", "depth32",    1, szIniFileName));
+	m_videoProp.nQuality    = GetPrivateProfileInt("video", "quality",    0, szIniFileName);
+	m_videoProp.bFullScreen = int2bool(GetPrivateProfileInt("video", "fullScreen", 0, szIniFileName));
+	m_videoProp.bResolution = GetPrivateProfileInt("video", "resolution", 0, szIniFileName);
 
 	// audio
-	iTemp = GetPrivateProfileInt("audio", "musicSound", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_audioProp.nMusicSound = iTemp;
-
-	iTemp = GetPrivateProfileInt("audio", "musicEffect", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_audioProp.nMusicEffect = iTemp;
+	m_audioProp.nMusicSound  = GetPrivateProfileInt("audio", "musicSound",  5, szIniFileName);
+	m_audioProp.nMusicEffect = GetPrivateProfileInt("audio", "musicEffect", 5, szIniFileName);
 
 	// gameOption
-	iTemp = GetPrivateProfileInt("gameOption", "runMode", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_gameOption.bRunMode = int2bool(iTemp);
+	m_gameOption.bRunMode    = int2bool(GetPrivateProfileInt("gameOption", "runMode",    1, szIniFileName));
+	m_gameOption.bHelpMode   = int2bool(GetPrivateProfileInt("gameOption", "helpMode",   1, szIniFileName));
+	m_gameOption.bCameraMode = int2bool(GetPrivateProfileInt("gameOption", "cameraMode", 1, szIniFileName));
+	m_gameOption.bAppMode    = int2bool(GetPrivateProfileInt("gameOption", "apparel",    1, szIniFileName));
+	m_gameOption.bEffMode    = int2bool(GetPrivateProfileInt("gameOption", "effect",     1, szIniFileName));
+	m_gameOption.bStateMode  = int2bool(GetPrivateProfileInt("gameOption", "state",      1, szIniFileName));
 
-	iTemp = GetPrivateProfileInt("gameOption", "helpMode", 1, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_gameOption.bHelpMode = int2bool(iTemp);
-
-	iTemp = GetPrivateProfileInt("gameOption", "cameraMode", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_gameOption.bCameraMode = int2bool(iTemp);
-
-	iTemp = GetPrivateProfileInt("gameOption", "apparel", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_gameOption.bAppMode = int2bool(iTemp);
-
-	iTemp = GetPrivateProfileInt("gameOption", "effect", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_gameOption.bEffMode = int2bool(iTemp);
-
-	iTemp = GetPrivateProfileInt("gameOption", "state", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_gameOption.bStateMode = int2bool(iTemp);
-
-	// Add by Mdr.st May 2020 - FPO alpha
+	// Graceful fallback for newer keys — old ini files may be missing these.
 	iTemp = GetPrivateProfileInt("gameOption", "enemynames", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_gameOption.bEnemyNames = int2bool(iTemp);
+	m_gameOption.bEnemyNames = (iTemp == DEFAULT_NUM) ? false : int2bool(iTemp);
 
-	// Add by Mdr.st May 2020 - FPO alpha
 	iTemp = GetPrivateProfileInt("gameOption", "showbars", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_gameOption.bShowBars = int2bool(iTemp);
-	// Add by Mdr.st May 2020 - FPO alpha
+	m_gameOption.bShowBars = (iTemp == DEFAULT_NUM) ? true : int2bool(iTemp);
+
 	iTemp = GetPrivateProfileInt("gameOption", "showpercentages", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_gameOption.bShowPercentages = int2bool(iTemp);
-	// Add by Mdr.st May 2020 - FPO alpha
+	m_gameOption.bShowPercentages = (iTemp == DEFAULT_NUM) ? false : int2bool(iTemp);
+
 	iTemp = GetPrivateProfileInt("gameOption", "showinfo", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_gameOption.bShowInfo = int2bool(iTemp);
+	m_gameOption.bShowInfo = (iTemp == DEFAULT_NUM) ? true : int2bool(iTemp);
 
 	iTemp = GetPrivateProfileInt("gameOption", "showmounts", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_gameOption.bShowMounts = int2bool(iTemp);
+	m_gameOption.bShowMounts = (iTemp == DEFAULT_NUM) ? true : int2bool(iTemp);
 
 	iTemp = GetPrivateProfileInt("gameOption", "framerate", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_gameOption.bFramerate = int2bool(iTemp);
+	// Backward compat: 0 → 30 fps, 1 → 60 fps, else literal value; missing → 30 fps
+	m_gameOption.nFramerate = (iTemp == DEFAULT_NUM) ? 30 : (iTemp <= 1) ? (iTemp ? 60 : 30) : iTemp;
+
+	iTemp = GetPrivateProfileInt("gameOption", "vsync", 0, szIniFileName);
+	m_gameOption.bVsync = int2bool(iTemp);
 
 	iTemp = GetPrivateProfileInt("gameOption", "disablemelee", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		m_gameOption.bDisableMelee = true;
-	else
-		m_gameOption.bDisableMelee = int2bool(iTemp);
+	m_gameOption.bDisableMelee = (iTemp == DEFAULT_NUM) ? true : int2bool(iTemp);
 
 	iTemp = GetPrivateProfileInt("gameOption", "outline", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		m_gameOption.bOutline = true;
-	else
-		m_gameOption.bOutline = int2bool(iTemp);
+	m_gameOption.bOutline = (iTemp == DEFAULT_NUM) ? true : int2bool(iTemp);
 
-	// Add by lark.li 20080826 begin
-	iTemp = GetPrivateProfileInt("startOption", "first", DEFAULT_NUM, szIniFileName);
-	if (iTemp == DEFAULT_NUM)
-		return DEFAULT_NUM;
-	m_startOption.bFirst = int2bool(iTemp);
+	// startOption
+	m_startOption.bFirst = int2bool(GetPrivateProfileInt("startOption", "first", 1, szIniFileName));
 
-	// End
-
-	// success
 	return 0;
 }
 /**
@@ -333,6 +258,9 @@ int CSystemProperties::writeToFile(const char* szIniFileName) {
 	if ((!szIniFileName) || (strlen(szIniFileName) == 0)) {
 		return -3;
 	}
+
+	// Ensure the user\ directory exists before writing; CreateDirectoryA is a no-op if it already exists.
+	CreateDirectoryA("user", NULL);
 
 	// video
 	if (!WriteInteger("video", "texture", m_videoProp.nTexture, szIniFileName)) {
@@ -390,7 +318,9 @@ int CSystemProperties::writeToFile(const char* szIniFileName) {
 		return OTHER_ERROR;
 	if (!WriteInteger("gameOption", "showmounts", bool2int(m_gameOption.bShowMounts), szIniFileName))
 		return OTHER_ERROR;
-	if (!WriteInteger("gameOption", "framerate", bool2int(m_gameOption.bFramerate), szIniFileName))
+	if (!WriteInteger("gameOption", "framerate", m_gameOption.nFramerate, szIniFileName))
+		return OTHER_ERROR;
+	if (!WriteInteger("gameOption", "vsync", bool2int(m_gameOption.bVsync), szIniFileName))
 		return OTHER_ERROR;
 	if (!WriteInteger("gameOption", "disablemelee", bool2int(m_gameOption.bDisableMelee), szIniFileName))
 		return OTHER_ERROR;
@@ -444,7 +374,9 @@ void CSystemMgr::LoadCustomProp() {
 	// ��ȡϵͳ���ò�Ӧ��(Michael Chen 2005-04-27)
 
 	if (!m_isLoad) {
-		if (m_sysProp.Load("user\\system.ini")) {
+		char szIniPath[MAX_PATH];
+		CSystemProperties::ResolveIniPath("user\\system.ini", szIniPath, MAX_PATH);
+		if (m_sysProp.Load(szIniPath)) {
 			// ��ȡ�����ļ�ʧ��,��Ĭ��ֵ���
 			m_sysProp.m_videoProp.nTexture = 0;
 			m_sysProp.m_videoProp.bAnimation = true;
@@ -469,12 +401,15 @@ void CSystemMgr::LoadCustomProp() {
 			m_sysProp.m_gameOption.bShowBars = false;
 			m_sysProp.m_gameOption.bShowPercentages = false;
 			m_sysProp.m_gameOption.bShowInfo = false;
-			m_sysProp.m_gameOption.bFramerate = false;
+			m_sysProp.m_gameOption.nFramerate = 30;
 			m_sysProp.m_gameOption.bShowMounts = true;
 			m_sysProp.m_gameOption.bDisableMelee = true;
 			m_sysProp.m_gameOption.bOutline = true;
 		}
-		//	m_sysProp.m_gameOption.bRunMode = true;	//�����ļ���������Σ���һ�Ϊtrue����ʱ
+		// Always persist the current config — ensures all keys exist on disk
+		// so the next startup Load() will succeed without falling back to defaults.
+		m_sysProp.Save(szIniPath);
+		//	m_sysProp.m_gameOption.bRunMode = true;//�����ļ���������Σ���һ�Ϊtrue����ʱ
 		m_isLoad = true;
 	}
 	{
@@ -493,7 +428,7 @@ void CSystemMgr::LoadCustomProp() {
 	CHeadSay::SetIsShowBars(m_sysProp.m_gameOption.bShowBars);
 	CHeadSay::SetIsShowPercentages(m_sysProp.m_gameOption.bShowPercentages);
 	CHeadSay::SetIsShowInfo(m_sysProp.m_gameOption.bShowInfo);
-	CSteadyFrame::SetFramerate60(m_sysProp.m_gameOption.bFramerate);
+	g_pGameApp->SetFrame(m_sysProp.m_gameOption.nFramerate);
 
 	// Apply melee lock for caster classes
 	extern bool g_bDisableMeleeForCasters;
@@ -503,7 +438,9 @@ void CSystemMgr::LoadCustomProp() {
 	lwSetOutlineEnabled(m_sysProp.m_gameOption.bOutline ? 1 : 0);
 
 	// Apply 60 FPS animation scaling toggle (engine-side default-pose / TexUV velocity).
-	lwSet60FpsMode(m_sysProp.m_gameOption.bFramerate ? 1 : 0);
+	lwSetAnimVelocity(1.0f / CSteadyFrame::GetAnimMultiplier());
+
+	MPRender::SetVsyncEnabled(m_sysProp.m_gameOption.bVsync);
 }
 bool CSystemMgr::Init() {
 
@@ -678,6 +615,9 @@ bool CSystemMgr::Init() {
 }
 
 void CSystemMgr::End() {
+	char szIniPath[MAX_PATH];
+	CSystemProperties::ResolveIniPath("user\\system.ini", szIniPath, MAX_PATH);
+
 	const char* Value = cboResolution->GetText();
 	int setResolution;
 	if (strcmp("800x600", Value) == 0) {
@@ -742,8 +682,8 @@ void CSystemMgr::End() {
 		m_sysProp.m_gameOption.bShowInfo = cbxShowInfo->GetActiveIndex() == 1 ? true : false;
 	if (cbxFramerate)
 	{
-		m_sysProp.m_gameOption.bFramerate = cbxFramerate->GetActiveIndex() == 1 ? true : false;
-		lwSet60FpsMode(m_sysProp.m_gameOption.bFramerate ? 1 : 0);
+		m_sysProp.m_gameOption.nFramerate = cbxFramerate->GetActiveIndex() == 1 ? 60 : 30;
+		lwSetAnimVelocity(1.0f / CSteadyFrame::GetAnimMultiplier());
 	}
 	if (cbxShowMounts)
 		m_sysProp.m_gameOption.bShowMounts = cbxShowMounts->GetActiveIndex() == 1 ? true : false;
@@ -753,7 +693,7 @@ void CSystemMgr::End() {
 	// if (cbxAppMode)
 	//	m_sysProp.m_gameOption.bAppMode = cbxAppMode->GetActiveIndex() == 0 ? false : true;
 
-	if (m_sysProp.Save("user\\system.ini")) {
+	if (m_sysProp.Save(szIniPath)) {
 		// error when save the system properties.
 	}
 	// end of modifying by Michael Chen
@@ -858,6 +798,24 @@ void CSystemMgr::_evtVideoFormMouseEvent(CCompent* pSender, int nMsgType, int x,
 			format = D3DFMT_D16;
 		}
 		g_pGameApp->ChangeVideoStyle(width, height, format, bWindowed);
+
+		// Sync UI values back to m_sysProp before saving.
+		g_stUISystem.m_sysProp.m_videoProp.nTexture     = nTextureHigh;
+		g_stUISystem.m_sysProp.m_videoProp.bAnimation   = bMovieOn;
+		g_stUISystem.m_sysProp.m_videoProp.nShadowMode  = bShadowOn ? 1 : 0;
+		g_stUISystem.m_sysProp.m_videoProp.bDepth32     = (format == D3DFMT_D24X8);
+		g_stUISystem.m_sysProp.m_videoProp.nQuality     = nQualityIdx;
+		g_stUISystem.m_sysProp.m_videoProp.bFullScreen   = (g_Config.m_bFullScreen == TRUE);
+		g_stUISystem.m_sysProp.m_videoProp.bResolution  = g_stUISystem.cboResolution->GetList()->GetItems()->GetSelect()->GetIndex();
+		// bCameraRotate already set above
+
+		// Persist to disk using absolute path.
+		{
+			char szIniPath[MAX_PATH];
+			CSystemProperties::ResolveIniPath("user\\system.ini", szIniPath, MAX_PATH);
+			g_stUISystem.m_sysProp.Save(szIniPath);
+		}
+
 		pSender->GetForm()->SetIsShow(false);
 
 		g_stUISystem.frmSystem->SetIsShow(false);
@@ -973,6 +931,15 @@ void CSystemMgr::_evtAudioFormMouseEvent(CCompent* pSender, int nMsgType, int x,
 		g_pGameApp->GetCurScene()->SetSoundSize(g_fPosMidi / 10.0f);
 		g_pGameApp->mSoundManager->SetVolume(g_fPosMidi / 10.0f);
 
+		// Persist audio settings to disk.
+		g_stUISystem.m_sysProp.m_audioProp.nMusicSound  = static_cast<int>(g_fPosMusic);
+		g_stUISystem.m_sysProp.m_audioProp.nMusicEffect = static_cast<int>(g_fPosMidi);
+		{
+			char szIniPath[MAX_PATH];
+			CSystemProperties::ResolveIniPath("user\\system.ini", szIniPath, MAX_PATH);
+			g_stUISystem.m_sysProp.Save(szIniPath);
+		}
+
 		g_bChangeAudio = true;
 		pSender->GetForm()->SetIsShow(false);
 		return;
@@ -1056,6 +1023,9 @@ void CSystemMgr::_evtGameOptionFormMouseDown(CCompent* pSender, int nMsgType, in
 	if (name != "btnYes")
 		return;
 
+	char szIniPath[MAX_PATH];
+	CSystemProperties::ResolveIniPath("user\\system.ini", szIniPath, MAX_PATH);
+
 	CCheckGroup* pGroup = g_stUISystem.cbxRunMode;
 	if (pGroup) {
 		const auto v = pGroup->GetActiveIndex() == 0 ? false : true;
@@ -1084,7 +1054,7 @@ void CSystemMgr::_evtGameOptionFormMouseDown(CCompent* pSender, int nMsgType, in
 			if (!bHelpMode)
 				g_stUIStart.ShowLevelUpHelpButton(bHelpMode);
 			g_stUIStart.ShowInfoCenterButton(bHelpMode);
-			::WritePrivateProfileString("gameOption", "helpMode", bHelpMode ? "1" : "0", "./user/system.ini");
+			::WritePrivateProfileString("gameOption", "helpMode", bHelpMode ? "1" : "0", szIniPath);
 		}
 	}
 
@@ -1094,7 +1064,7 @@ void CSystemMgr::_evtGameOptionFormMouseDown(CCompent* pSender, int nMsgType, in
 		if (bCameraMode != g_stUISystem.m_sysProp.m_gameOption.bCameraMode) {
 			g_stUISystem.m_sysProp.m_gameOption.bCameraMode = bCameraMode;
 			g_IsCameraMode = bCameraMode;
-			::WritePrivateProfileString("gameOption", "cameraMode", bCameraMode ? "1" : "0", "./user/system.ini");
+			::WritePrivateProfileString("gameOption", "cameraMode", bCameraMode ? "1" : "0", szIniPath);
 		}
 	}
 
@@ -1121,7 +1091,7 @@ void CSystemMgr::_evtGameOptionFormMouseDown(CCompent* pSender, int nMsgType, in
 			stTeamPart.Convert(pCha->GetPart());
 			g_stUIStart.GetMainCha()->UpdataFace(stTeamPart);
 
-			::WritePrivateProfileString("gameOption", "apparel", bAppMode ? "1" : "0", "./user/system.ini");
+			::WritePrivateProfileString("gameOption", "apparel", bAppMode ? "1" : "0", szIniPath);
 		}
 	}
 
@@ -1144,7 +1114,7 @@ void CSystemMgr::_evtGameOptionFormMouseDown(CCompent* pSender, int nMsgType, in
 				pCha++;
 			}
 
-			::WritePrivateProfileString("gameOption", "effect", bEffMode ? "1" : "0", "./user/system.ini");
+			::WritePrivateProfileString("gameOption", "effect", bEffMode ? "1" : "0", szIniPath);
 		}
 	}
 
@@ -1154,7 +1124,7 @@ void CSystemMgr::_evtGameOptionFormMouseDown(CCompent* pSender, int nMsgType, in
 		if (bStateMode != g_stUISystem.m_sysProp.m_gameOption.bStateMode) {
 			g_stUISystem.m_sysProp.m_gameOption.bStateMode = bStateMode;
 			g_IsShowStates = bStateMode;
-			::WritePrivateProfileString("gameOption", "state", bStateMode ? "1" : "0", "./user/system.ini");
+			::WritePrivateProfileString("gameOption", "state", bStateMode ? "1" : "0", szIniPath);
 		}
 	}
 
@@ -1204,10 +1174,10 @@ void CSystemMgr::_evtGameOptionFormMouseDown(CCompent* pSender, int nMsgType, in
 
 	pGroup = g_stUISystem.cbxFramerate;
 	if (pGroup) {
-		const bool bFramerate = pGroup->GetActiveIndex() == 1 ? true : false;
-		if (bFramerate != g_stUISystem.m_sysProp.m_gameOption.bFramerate) {
-			g_stUISystem.m_sysProp.m_gameOption.bFramerate = bFramerate;
-			g_pGameApp->SetFrame(bFramerate);
+		const int nFramerate = pGroup->GetActiveIndex() == 1 ? 60 : 30;
+		if (nFramerate != g_stUISystem.m_sysProp.m_gameOption.nFramerate) {
+			g_stUISystem.m_sysProp.m_gameOption.nFramerate = nFramerate;
+			g_pGameApp->SetFrame(nFramerate);
 			g_pGameApp->MsgBox("Please switch character to update framerate");
 		}
 	}
@@ -1228,7 +1198,7 @@ void CSystemMgr::_evtGameOptionFormMouseDown(CCompent* pSender, int nMsgType, in
 			g_stUISystem.m_sysProp.m_gameOption.bDisableMelee = bDisableMelee;
 			extern bool g_bDisableMeleeForCasters;
 			g_bDisableMeleeForCasters = bDisableMelee;
-			::WritePrivateProfileString("gameOption", "disablemelee", bDisableMelee ? "1" : "0", "./user/system.ini");
+			::WritePrivateProfileString("gameOption", "disablemelee", bDisableMelee ? "1" : "0", szIniPath);
 		}
 	}
 
@@ -1238,9 +1208,12 @@ void CSystemMgr::_evtGameOptionFormMouseDown(CCompent* pSender, int nMsgType, in
 		if (bOutline != g_stUISystem.m_sysProp.m_gameOption.bOutline) {
 			g_stUISystem.m_sysProp.m_gameOption.bOutline = bOutline;
 			lwSetOutlineEnabled(bOutline ? 1 : 0);
-			::WritePrivateProfileString("gameOption", "outline", bOutline ? "1" : "0", "./user/system.ini");
+			::WritePrivateProfileString("gameOption", "outline", bOutline ? "1" : "0", szIniPath);
 		}
 	}
+
+	// Persist all game option changes to disk (covers fields without individual quick-writes).
+	g_stUISystem.m_sysProp.Save(szIniPath);
 }
 
 void CSystemMgr::_evtGameOptionFormBeforeShow(CForm* pForm, bool& IsShow) {
@@ -1287,7 +1260,7 @@ void CSystemMgr::_evtGameOptionFormBeforeShow(CForm* pForm, bool& IsShow) {
 		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bShowInfo ? 1 : 0);
 	pGroup = g_stUISystem.cbxFramerate;
 	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 1 : 0);
+		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.nFramerate >= 60 ? 1 : 0);
 	pGroup = g_stUISystem.cbxShowMounts;
 	if (pGroup)
 		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bShowMounts ? 1 : 0);

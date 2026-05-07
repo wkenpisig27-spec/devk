@@ -394,7 +394,7 @@ int CCharacter::LoadCha(const LoadChaInfo* info) {
 			LG("error", "msgLoad Ship Power System error!\n");
 			return FALSE;
 		}
-		p->PlayDefaultAnimation(!g_stUISystem.m_sysProp.m_gameOption.bFramerate);
+		p->PlayDefaultAnimation(1.0f / CSteadyFrame::GetAnimMultiplier());
 
 		lwSceneItemLinkInfo ili;
 		ili.data = 99;
@@ -1280,9 +1280,6 @@ bool CCharacter::PlayPose(DWORD pose, DWORD type, int time, int fps, bool isBlen
 	// fps = CGameApp::GetFrameFPS();
 	// LG(getLogName(), "Pose:%d, type:%d, time:%d\n", pose, type, time, fps);
 
-	if (!g_stUISystem.m_sysProp.m_gameOption.bFramerate)
-		IsGlitched = true;
-
 	bool rv = GetCurPoseType() == pose;
 
 	// ?????�????????
@@ -1813,7 +1810,7 @@ void CCharacter::setNpcState(DWORD dwState) {
 		_pNpcStateItem->setIsSystem(true);
 		_pNpcStateItem->setHeightOff((int)(GetDefaultChaInfo()->fHeight * 100.0f));
 		_pNpcStateItem->setPos(GetCurX(), GetCurY());
-		_pNpcStateItem->PlayDefaultAnimation(!g_stUISystem.m_sysProp.m_gameOption.bFramerate);
+		_pNpcStateItem->PlayDefaultAnimation(1.0f / CSteadyFrame::GetAnimMultiplier());
 		_pNpcStateItem->setYaw(0);
 	}
 }

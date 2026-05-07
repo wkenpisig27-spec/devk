@@ -98,7 +98,7 @@ int LoginScene_CreateCha::_CreateArrowItem(const char* file) {
 		return 0;
 
 	_arrow->GetPrimitive()->SetState(STATE_VISIBLE, 0);
-	_arrow->PlayDefaultAnimation(!g_stUISystem.m_sysProp.m_gameOption.bFramerate);
+	_arrow->PlayDefaultAnimation(1.0f / CSteadyFrame::GetAnimMultiplier());
 
 	return 1;
 }
@@ -116,7 +116,7 @@ bool LoginScene_CreateCha::LoadArrowMark(const char* Filename, const lwVector3* 
 			return false;
 
 		_ArrowMarks[Index]->GetPrimitive()->SetState(STATE_VISIBLE, TRUE);
-		_ArrowMarks[Index]->PlayDefaultAnimation(!g_stUISystem.m_sysProp.m_gameOption.bFramerate);
+		_ArrowMarks[Index]->PlayDefaultAnimation(1.0f / CSteadyFrame::GetAnimMultiplier());
 
 		lwMatrix44 matWorld = *(_cha_obj[Index]->GetWorldMatrix());
 		lwMatrix44 matTranslate = lwMatrix44Translate(_ArrowMarksOffset[Index]);
@@ -174,7 +174,7 @@ int LoginScene_CreateCha::_InitChaObjSeq() {
 	play_info.pose = 1;
 	play_info.type = PLAY_LOOP;
 	// FPS-aware idle pose velocity for character-creation race previews.
-	play_info.velocity = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 0.5f : 1.0f;
+	play_info.velocity = 1.0f / CSteadyFrame::GetAnimMultiplier();
 
 	for (DWORD i = 0; i < _cha_num; i++) {
 		lwINodeBoneCtrl* bone_ctrl = (lwINodeBoneCtrl*)_cha_obj[i]->GetParent();
@@ -313,9 +313,7 @@ int LoginScene_CreateCha::LoadModelLXO(const char* file) {
 		DWORD pci_num = 13;
 
 		// FPS scale: original velocities calibrated for 30 FPS. Halve at 60 FPS to keep real-time speed.
-		const float fpsScale = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 0.5f : 1.0f;
-
-		// char end_pose[64];
+		const float fpsScale = 1.0f / CSteadyFrame::GetAnimMultiplier();
 
 		pci[0].pose_id = 41, pci[0].subset = -1, pci[0].stage = -1, pci[0].anim_type = 0, pci[0].play_type = 1, pci[0].velocity = 1.0f * fpsScale;
 		pci[1].pose_id = 41, pci[1].subset = 0, pci[1].stage = -1, pci[1].anim_type = 4, pci[1].play_type = 1, pci[1].velocity = 1.0f * fpsScale;
@@ -408,7 +406,7 @@ int LoginScene_CreateCha::LoadModelLMO(const char* file) {
 	}
 
 	{
-		_model_lmo->PlayDefaultAnimation(!g_stUISystem.m_sysProp.m_gameOption.bFramerate);
+		_model_lmo->PlayDefaultAnimation(1.0f / CSteadyFrame::GetAnimMultiplier());
 
 		int pose_enable = 1;
 		if (pose_enable) {
@@ -417,7 +415,7 @@ int LoginScene_CreateCha::LoadModelLMO(const char* file) {
 			DWORD pci_num = 6;
 
 			// FPS scale: original velocities calibrated for 30 FPS. Halve at 60 FPS to keep real-time speed.
-			const float fpsScale = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 0.5f : 1.0f;
+			const float fpsScale = 1.0f / CSteadyFrame::GetAnimMultiplier();
 
 			pci[0].pose_id = 0, pci[0].subset = -1, pci[0].stage = -1, pci[0].anim_type = 1, pci[0].play_type = 1, pci[0].velocity = 0.5f * fpsScale;
 			pci[1].pose_id = 1, pci[1].subset = -1, pci[1].stage = -1, pci[1].anim_type = 1, pci[1].play_type = 1, pci[1].velocity = 0.5f * fpsScale;
@@ -494,7 +492,7 @@ void LoginScene_CreateCha::OnMouseMove(int flag, int x, int y) {
 	play_info.bit_mask = PPI_MASK_POSE | PPI_MASK_TYPE | PPI_MASK_VELOCITY | PPI_MASK_FRAME;
 	play_info.type = PLAY_LOOP_SMOOTH;
 	// FPS-aware hover-pose velocity (race-preview reaction animation).
-	play_info.velocity = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 0.5f : 1.0f;
+	play_info.velocity = 1.0f / CSteadyFrame::GetAnimMultiplier();
 	play_info.frame = 0.0f;
 
 	BOOL octopus_flag = 0;
@@ -579,7 +577,7 @@ int LoginScene_CreateCha::OnLButtonDown(int flag, int x, int y) {
 	play_info.bit_mask = PPI_MASK_POSE | PPI_MASK_TYPE | PPI_MASK_VELOCITY | PPI_MASK_FRAME;
 	play_info.type = PLAY_LOOP_SMOOTH;
 	// FPS-aware velocity (used by HitTest path; kept consistent with OnMouseMove).
-	play_info.velocity = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 0.5f : 1.0f;
+	play_info.velocity = 1.0f / CSteadyFrame::GetAnimMultiplier();
 	play_info.frame = 0.0f;
 
 	BOOL octopus_flag = 0;

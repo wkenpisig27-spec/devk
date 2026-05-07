@@ -161,7 +161,7 @@ bool CSelectChaScene::_Init() {
 			}
 
 			{
-				pObj->PlayDefaultAnimation(!g_stUISystem.m_sysProp.m_gameOption.bFramerate);
+				pObj->PlayDefaultAnimation(1.0f / CSteadyFrame::GetAnimMultiplier());
 
 				const DWORD p_id_num = 6;
 				DWORD p_id[p_id_num][5] =
@@ -183,7 +183,7 @@ bool CSelectChaScene::_Init() {
 				ppi.frame = 0.0f;
 				ppi.type = PLAY_ONCE;
 				// FPS-aware: halved at 60 FPS to preserve real-time animation speed.
-				ppi.velocity = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 0.5f : 1.0f;
+				ppi.velocity = 1.0f / CSteadyFrame::GetAnimMultiplier();
 
 				lwAnimCtrlObjTypeInfo type_info;
 

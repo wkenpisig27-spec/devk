@@ -7,6 +7,7 @@
 
 // Defined in lwPhysique.cpp. Engine-internal flag for 60 FPS animation scaling.
 extern bool g_lw60FpsMode;
+extern float g_lwAnimVelocity;
 
 LW_BEGIN
 
@@ -530,7 +531,7 @@ LW_RESULT lwPrimitiveTexLit(lwIPrimitive* p, const char* file, const char* tex_p
     lwPlayPoseInfo ppi;
     ppi.bit_mask = PPI_MASK_DEFAULT;
     ppi.type = PLAY_LOOP;
-    ppi.velocity = g_lw60FpsMode ? 0.5f : 1.0f;
+    ppi.velocity = g_lwAnimVelocity;
     ppi.pose = 0;
     ppi.frame = 0;
     ppi.data = 0;
@@ -604,7 +605,7 @@ LW_RESULT lwPrimitiveTexLitC(lwIPrimitive* p, const char* file, const char* tex_
     lwPlayPoseInfo ppi;
     ppi.bit_mask = PPI_MASK_DEFAULT;
     ppi.type = PLAY_LOOP;
-    ppi.velocity = g_lw60FpsMode ? 0.5f : 1.0f; // Mdr.st
+    ppi.velocity = g_lwAnimVelocity; // Mdr.st
     ppi.pose = 0;
     ppi.frame = 0;
     ppi.data = 0;
@@ -736,7 +737,7 @@ LW_RESULT lwPrimitiveTexLitA(lwIPrimitive* p, const char* alpha_file, const char
     lwPlayPoseInfo ppi;
     ppi.bit_mask = PPI_MASK_DEFAULT;
     ppi.type = PLAY_LOOP;
-    ppi.velocity = g_lw60FpsMode ? 0.5f : 1.0f;
+    ppi.velocity = g_lwAnimVelocity;
     ppi.pose = 0;
     ppi.frame = 0;
     ppi.data = 0;
@@ -812,7 +813,7 @@ LW_RESULT lwPrimitiveTexLitA(lwIPrimitive* p, const char* tex_file, const char* 
     lwPlayPoseInfo ppi;
     ppi.bit_mask = PPI_MASK_DEFAULT;
     ppi.type = PLAY_LOOP;
-    ppi.velocity = g_lw60FpsMode ? 0.5f : 1.0f;
+    ppi.velocity = g_lwAnimVelocity;
     ppi.pose = 0;
     ppi.frame = 0;
     ppi.data = 0;

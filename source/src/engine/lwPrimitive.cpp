@@ -946,7 +946,7 @@ __ret:
     return ret;
 
 }
-LW_RESULT lwPrimitive::PlayDefaultAnimation(bool IsGlitched)
+LW_RESULT lwPrimitive::PlayDefaultAnimation(float velocity)
 {
     LW_RESULT ret = LW_RET_FAILED;
 
@@ -956,9 +956,7 @@ LW_RESULT lwPrimitive::PlayDefaultAnimation(bool IsGlitched)
     ppi.pose = 0;
     ppi.frame = 0.0f;
     ppi.type = PLAY_LOOP;
-    // 60 FPS mode advances 0.5 keyframes per tick (matches free-function sibling).
-    // 30 FPS legacy mode advances 1.0 keyframes per tick.
-    ppi.velocity = IsGlitched ? 1.0f : 0.5f;
+    ppi.velocity = velocity;
 
     if(_anim_agent == NULL)
         goto __ret_ok;
@@ -986,7 +984,7 @@ __ret_ok:
     return ret;
 
 }
-LW_RESULT lwPrimitivePlayDefaultAnimation( lwIPrimitive* obj, bool IsGlitched )
+LW_RESULT lwPrimitivePlayDefaultAnimation( lwIPrimitive* obj, float velocity )
 {
     lwPlayPoseInfo ppi;
     memset( &ppi, 0, sizeof( ppi ) );
@@ -994,9 +992,7 @@ LW_RESULT lwPrimitivePlayDefaultAnimation( lwIPrimitive* obj, bool IsGlitched )
     ppi.pose = 0;
     ppi.frame = 0.0f;
     ppi.type = PLAY_LOOP;
-    ppi.velocity = 0.5f;			// This changes ambient animations, but if set to 0.5f trees will glitch
-    if (IsGlitched) ppi.velocity = 1.0f;    // IsGlitched used for 30 FPS
-   
+    ppi.velocity = velocity;
 
     lwIAnimCtrlAgent* anim_agent = obj->GetAnimAgent();
     if(anim_agent == NULL)

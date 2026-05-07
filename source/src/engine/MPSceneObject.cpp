@@ -124,11 +124,11 @@ LW_RESULT MPSceneObject::PlayObjImpPose( DWORD obj_id, DWORD ctrl_type, DWORD po
     return LW_INVALID_INDEX;
 }
 
-LW_RESULT MPSceneObject::PlayDefaultAnimation(bool IsGlitched)
+LW_RESULT MPSceneObject::PlayDefaultAnimation(float velocity)
 {
 	if( _model ) {
        
-    return _model->PlayDefaultAnimation(IsGlitched);
+    return _model->PlayDefaultAnimation(velocity);
 
     }
 	return 0;

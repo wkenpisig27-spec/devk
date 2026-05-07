@@ -189,6 +189,8 @@ public:
     BOOL        IsRealFPS()                 { return _bRealFPS;         }
     void        SetRealFPS(BOOL bRealFPS)   { _bRealFPS = bRealFPS;     }
 
+	static void SetVsyncEnabled(bool enabled);
+
     // Render States
     void        EnableMipmap(BOOL bEnable);
 
@@ -333,6 +335,7 @@ protected:
 	//VIM 
 	FLOAT                           m_fCamTranslation;
 	FLOAT                           m_fCamFixPoint;
+	static bool                     _bVsync;
 };
 
 inline void MPRender::SetTransformView(const D3DXMATRIX* mat)

@@ -1134,7 +1134,7 @@ CSceneItem* NetCreateItem(stNetItemCreate& info) {
 	pItem->lTag = info.lHandle;
 	// FPS-aware spin velocity for dropped items so they rotate at original speed at 60 FPS.
 	pItem->PlayObjImpPose(ANIM_CTRL_TYPE_MAT, 0, PLAY_LOOP, 0.0f,
-		g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 1.0f : 2.0f);
+		2.0f / CSteadyFrame::GetAnimMultiplier());
 
 	if (info.SEvent.usEventID) {
 		info.SEvent.Exec(pItem);

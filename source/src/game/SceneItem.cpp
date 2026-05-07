@@ -208,7 +208,7 @@ HRESULT CSceneItem::LitResetTexture(DWORD item_id, DWORD lit_id) {
 		ppi.type = PLAY_LOOP;
 		ppi.pose = 0;
 		// FPS-aware velocity: halved at 60 FPS to keep real-time speed parity with legacy 30 FPS path.
-		ppi.velocity = g_stUISystem.m_sysProp.m_gameOption.bFramerate ? 0.5f : 1.0f;
+		ppi.velocity = 1.0f / CSteadyFrame::GetAnimMultiplier();
 		ctrlobj_tc->PlayPose(&ppi);
 	}
 

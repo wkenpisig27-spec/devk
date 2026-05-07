@@ -63,9 +63,10 @@ BOOL CSceneObj::_Create(int nScriptID, int nType) {
 */
 	if (pInfo->nID == 184 || pInfo->nID == 188 || pInfo->nID == 183 || pInfo->nID == 175 || pInfo->nID == 83 ||
 		pInfo->nID == 187 || pInfo->nID == 126 || pInfo->nID == 269 || pInfo->nID == 215 || pInfo->nID == 461 ||
-		pInfo->nID == 448 || !g_stUISystem.m_sysProp.m_gameOption.bFramerate)
+		pInfo->nID == 448)
 		IsGlitched = true;
-	PlayDefaultAnimation(IsGlitched);
+	PlayDefaultAnimation(IsGlitched ? 2.0f / CSteadyFrame::GetAnimMultiplier()
+	                                 : 1.0f / CSteadyFrame::GetAnimMultiplier());
 
 	_nMusicID = -1;
 

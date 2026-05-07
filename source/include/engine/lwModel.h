@@ -65,7 +65,7 @@ public:
     LW_RESULT HitTestHelperMesh( lwPickInfo* info, const lwVector3* org, const lwVector3* ray, const char* type_name );
     LW_RESULT HitTestHelperBox( lwPickInfo* info, const lwVector3* org, const lwVector3* ray, const char* type_name ); 
 
-    LW_RESULT PlayDefaultAnimation(bool IsGlitched = false);
+    LW_RESULT PlayDefaultAnimation(float velocity = 1.0f);
 
     LW_RESULT SortPrimitiveObj();
 

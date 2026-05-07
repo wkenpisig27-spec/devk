@@ -200,9 +200,9 @@ lwIPoseCtrl* MPSceneItem::GetObjImpPoseCtrl( DWORD ctrl_type )
     return c->GetPoseCtrl();
 }
 
-LW_RESULT MPSceneItem::PlayDefaultAnimation(bool IsGlitched)
+LW_RESULT MPSceneItem::PlayDefaultAnimation(float velocity)
 {
-    return _obj->PlayDefaultAnimation(IsGlitched);
+    return _obj->PlayDefaultAnimation(velocity);
 }
 
 void MPSceneItem::ShowBoundingObject( int show )

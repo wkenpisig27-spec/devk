@@ -38,10 +38,18 @@ extern "C" __declspec(dllexport) void lwSetOutlineEnabled(int enabled)
 // true  = 60 FPS mode (velocity = 0.5f)
 // false = legacy 30 FPS mode (velocity = 1.0f)
 bool g_lw60FpsMode = true;
+float g_lwAnimVelocity = 0.5f;  // default 60 fps (0.5 = half-speed per-tick for 60 fps)
 
 extern "C" __declspec(dllexport) void lwSet60FpsMode(int enabled)
 {
     g_lw60FpsMode = (enabled != 0);
+    g_lwAnimVelocity = g_lw60FpsMode ? 0.5f : 1.0f;
+}
+
+extern "C" __declspec(dllexport) void lwSetAnimVelocity(float velocity)
+{
+    g_lwAnimVelocity = velocity;
+    g_lw60FpsMode = (velocity <= 0.5f);
 }
 
 LW_BEGIN

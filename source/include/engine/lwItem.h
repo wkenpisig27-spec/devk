@@ -61,7 +61,7 @@ public:
 	const lwMatrix44* GetObjDummyMatrix(DWORD id);
 	const lwMatrix44* GetObjBoneDummyMatrix(DWORD id);
 
-	LW_RESULT PlayDefaultAnimation(bool IsGlitched = false);
+	LW_RESULT PlayDefaultAnimation(float velocity = 1.0f);
 
 	// �������Ƕ���������߾��й�����������dummyֻ�а��ڹ����ϲ�����Ч��
 	LW_RESULT GetDummyMatrix(lwMatrix44* mat, DWORD id);

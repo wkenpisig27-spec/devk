@@ -185,7 +185,7 @@ public:
 	static DWORD GetFrameFPS();
 
 	static CSteadyFrame* GetFrame() { return _pSteady; }
-	static void SetFrame(bool v) { _pSteady->SetFramerate60(v); }
+	static void SetFrame(int fps) { _pSteady->SetTargetFPS((DWORD)fps); }
 	// �����ļ�����ʼ����ǰ������xuedong 2004.09.06 ���ڡ������ϰ���Ϣ�ļ���
 	BOOL CreateCurrentScene(char* szMapName);
 

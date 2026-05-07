@@ -14,6 +14,7 @@ using namespace std;
 MINDPOWER_API DWORD g_dwCurFrameTick = 0;
 MINDPOWER_API float g_fFrameRate = 1.0f;  // Initialize to 1.0 (60 FPS baseline)
 static DWORD g_dwLastFrameMoveTick = 0;
+bool MPRender::_bVsync = false;
 
 // High-resolution timing for smooth animation
 static LARGE_INTEGER g_qpcFrequency = {0};
@@ -52,6 +53,10 @@ void MPRender::SetCurFrameTick(DWORD dwTick) {
 }
 
 bool bUsePixelShader = true;
+
+void MPRender::SetVsyncEnabled(bool enabled) {
+    _bVsync = enabled;
+}
 
 MPRender::MPRender()
     : _hWnd(0),
@@ -187,7 +192,7 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 	}
 
 	d3dcp.present_param.PresentationInterval =
-	    bFullScreen ? D3DPRESENT_INTERVAL_DEFAULT : D3DPRESENT_INTERVAL_IMMEDIATE;
+	    (!_bVsync) ? D3DPRESENT_INTERVAL_IMMEDIATE : D3DPRESENT_INTERVAL_DEFAULT;
 	// ����ֻ�ǲ���vs�İ汾���Ժ�d3d�Ĵ���������Ҫ���ⲿ���
 	if (_d3dCaps.VertexShaderVersion < D3DVS_VERSION(1, 0)) {
 		d3dcp.behavior_flag = D3DCREATE_SOFTWARE_VERTEXPROCESSING;

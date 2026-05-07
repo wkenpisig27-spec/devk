@@ -46,7 +46,8 @@ public:
 		bool bShowBars;
 		bool bShowPercentages;
 		bool bShowInfo;
-		bool bFramerate;
+		int  nFramerate;
+		bool bVsync;
 		bool bShowMounts;
 		bool bDisableMelee;
 		bool bOutline;
@@ -54,7 +55,7 @@ public:
 		SGameOption()
 			: bRunMode(false), bLockMode(false), bHelpMode(false), bCameraMode(false),
 			  bAppMode(true), bEffMode(true), bStateMode(true), bEnemyNames(false),
-			  bShowBars(true), bShowPercentages(false), bShowInfo(true), bFramerate(false), bShowMounts(true),
+			  bShowBars(true), bShowPercentages(false), bShowInfo(true), nFramerate(144), bVsync(false), bShowMounts(true),
 			  bDisableMelee(true), bOutline(true) {}
 
 	} m_gameOption;
@@ -112,6 +113,15 @@ public:
 	 * @return: success Return 0.
 	 */
 	int ApplyGameOption();
+
+	/**
+	 * Converts a relative ini path to an absolute path using the process CWD.
+	 * IMPORTANT: WritePrivateProfileString / GetPrivateProfileInt resolve relative
+	 * paths against C:\Windows, NOT the exe's directory. Always call this first.
+	 */
+	static void ResolveIniPath(const char* relativePath, char* outBuffer, size_t bufferSize) {
+		GetFullPathNameA(relativePath, (DWORD)bufferSize, outBuffer, NULL);
+	}
 
 private:
 	/**
