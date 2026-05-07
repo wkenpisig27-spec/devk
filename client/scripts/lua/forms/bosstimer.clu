@@ -290,4 +290,4 @@ function BossTimer_OnTimer()
     end
 end
 
-LG("scripts", "BossTimer form loaded (legacy API)\n")
+-- BossTimer form loaded

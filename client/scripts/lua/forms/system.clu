@@ -340,6 +340,7 @@ addSystemOption(frmGame,"cbxShowPercentages_p","HP/SP Values","Display mode for 
 addSystemOption(frmGame,"cbxShowInfo_p","Player's Info","Show other player's information","Off","On",266)
 addSystemOption(frmGame,"cbxFramerate_p","Framerate","Set game framerate (requires relogin)","30","60",286) 
 addSystemOption(frmGame,"cbxDisableMelee_p","Melee Lock","Disable melee attack for caster classes","Off","On",306)
+addSystemOption(frmGame,"cbxOutline_p","Outline","Draw cel-shading outline on characters","Off","On",326)
 
 -----------------------------------------------------------------------
 -- switch character settings
