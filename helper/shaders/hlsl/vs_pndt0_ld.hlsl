@@ -1,6 +1,6 @@
 //==============================================================================
 // vs_pndt0_ld.hlsl - Static mesh shader with vertex color and lighting
-// CEL_ENABLE disabled: static meshes use smooth Lambert.
+// Static props: basic ambient+diffuse only, no rim/spec.
 //==============================================================================
 #define CEL_ENABLE 0
 #include "common.hlsli"
@@ -13,9 +13,9 @@ VS_OUTPUT main(VS_INPUT_PNDT input)
     float4 worldPos = float4(input.Position, 1.0);
     output.Position = mul(worldPos, ViewProj);
     
-    // Calculate lighting and modulate with vertex color
+    // Basic ambient+diffuse modulated with vertex color
     float3 normal = normalize(input.Normal);
-    float4 lighting = CalcLightingFull(input.Position, normal);
+    float4 lighting = CalcLighting(normal);
     output.Color = input.Color * lighting;
     
     // Pass through texture coordinates
