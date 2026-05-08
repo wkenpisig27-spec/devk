@@ -466,6 +466,25 @@ void CWorldScene::_FrameMove(DWORD dwTimeParam) {
 		_pShipMgr->FrameMove();
 	}
 
+	// Per-frame: once a magnet arc completes, immediately send the pickup packet.
+	// This is separate from the _IsAutoPick scan so there's no extra delay after the arc.
+	{
+		CCharacter* pMain = CGameScene::GetMainCha();
+		if (pMain) {
+			stNetItemPick info;
+			CSceneItem* pItem = _pSceneItemArray;
+			for (int i = 0; i < _nSceneItemCnt; i++) {
+				if (pItem->IsValid() && pItem->HasPendingMagnetPickup() && !pItem->IsMagneting()) {
+					info.lWorldID = pItem->GetMagnetWorldID();
+					info.lHandle = pItem->GetMagnetHandle();
+					CS_BeginAction(pMain, enumACTION_ITEM_PICK, &info);
+					pItem->ClearMagnetPickup();
+				}
+				pItem++;
+			}
+		}
+	}
+
 	if (_IsAutoPick) {
 		static DWORD dwTime = 0;
 		if (CGameApp::GetCurTick() > dwTime) {
@@ -1567,7 +1586,6 @@ int CWorldScene::PickItem() {
 	// pMain->GetActor()->CancelState();
 
 	int nCount = 0;
-	stNetItemPick info;
 	CSceneItem* pItem = _pSceneItemArray;
 	int dis = defPICKUP_DISTANCE;
 	if (!pMain->GetIsArrive()) {
@@ -1579,24 +1597,21 @@ int CWorldScene::PickItem() {
 	float fPlayerY = (float)pMain->GetServerY() / 100.0f;
 	D3DXVECTOR3 vPlayerPos(fPlayerX, fPlayerY, GetGridHeight(fPlayerX, fPlayerY) + 1.0f);
 
-	// Cap pickup packets per batch to avoid flooding the GateServer.
-	// The server-side rate limiter (50ms) would drop excess pickups anyway,
-	// so sending more than ~20 at once is wasteful and risks disconnect.
+	// Cap items per batch to avoid flooding the GateServer.
 	const int MAX_PICK_PER_BATCH = 20;
 	for (int i = 0; i < _nSceneItemCnt; i++) {
 		if (pItem->IsValid() && !pItem->IsHide() && pItem->getAttachedCharacterID() == -1 && pItem->IsPick()) {
-			// Skip items already flying toward player to avoid duplicate pickup packets.
-			if (pItem->IsMagneting()) {
+			// Skip items already animating or already queued for pickup.
+			if (pItem->IsMagneting() || pItem->HasPendingMagnetPickup()) {
 				pItem++;
 				continue;
 			}
 			if (GetDistance(pMain->GetServerX(), pMain->GetServerY(), pItem->GetCurX(), pItem->GetCurY()) <= dis) {
-				// Play a short arc animation toward the player before the server removes the item.
-				pItem->PlayArcAni(pItem->GetPos(), vPlayerPos, 0.01f, 0.8f, 600);
-
-				info.lWorldID = pItem->getAttachID();
-				info.lHandle = pItem->lTag;
-				CS_BeginAction(pMain, enumACTION_ITEM_PICK, &info);
+				// Store pickup data and start the magnet arc.
+				// The pickup packet is sent by WorldScene::FrameMove once the arc completes,
+				// so the item stays visible and flies to the player before disappearing.
+				pItem->SetMagnetPickup(pItem->getAttachID(), pItem->lTag);
+				pItem->PlayArcAni(pItem->GetPos(), vPlayerPos, 0.01f, 0.8f, 500);
 				// _cMouseDown.ActPickItem( pMain, pItem, false );
 				nCount++;
 				if (nCount >= MAX_PICK_PER_BATCH)

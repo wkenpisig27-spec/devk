@@ -93,6 +93,18 @@ protected:
 
 	DWORD _dwForgeValue;
 
+	// Magnet-pickup: pickup packet is deferred until the arc animation completes.
+	bool _bMagnetPickup;
+	long _lMagnetWorldID;
+	long _lMagnetHandle;
+
+public:
+	void SetMagnetPickup(long worldID, long handle) { _bMagnetPickup = true; _lMagnetWorldID = worldID; _lMagnetHandle = handle; }
+	bool HasPendingMagnetPickup() const { return _bMagnetPickup; }
+	long GetMagnetWorldID() const { return _lMagnetWorldID; }
+	long GetMagnetHandle() const { return _lMagnetHandle; }
+	void ClearMagnetPickup() { _bMagnetPickup = false; }
+
 	// added by clp
 public:
 	CEffectObj* bindEffect(int dummyID, int effectID, bool isLoop, int angle = -1);

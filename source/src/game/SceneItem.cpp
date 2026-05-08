@@ -31,6 +31,7 @@ BOOL ClearItemLit() {
 
 CSceneItem::CSceneItem()
 	: CSceneNode(), _nCharacterID(-1), _fTerrainHeight(0.0f), _IsSystem(false), _IsShowName(false), _IsAlpha(false), _pItemInfo(nullptr), _pArcTrack(nullptr), _pEvent(nullptr), _dwForgeValue(0),
+	  _bMagnetPickup(false), _lMagnetWorldID(0), _lMagnetHandle(0),
 	  mParentCharacter(0), mEffect(0) {
 	_vPos = D3DXVECTOR3(0, 0, 0);
 	_pSceneHeight = new CSceneHeight(this);
@@ -274,7 +275,14 @@ void CSceneItem::FrameMove(DWORD dwTimeParam) {
 			delete _pArcTrack;
 			_pArcTrack = nullptr;
 
-			setPos(_nCurX, _nCurY);
+			if (_bMagnetPickup) {
+				// Magnet arc reached player — hide the item client-side.
+				// The pickup packet is sent by WorldScene::FrameMove, which then
+				// lets the server properly remove the item.
+				SetHide(TRUE);
+			} else {
+				setPos(_nCurX, _nCurY);
+			}
 		}
 	} else if (!IsHide()) {
 		if (_nCharacterID == -1) {
