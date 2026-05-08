@@ -1587,7 +1587,8 @@ int CWorldScene::PickItem() {
 
 	int nCount = 0;
 	CSceneItem* pItem = _pSceneItemArray;
-	int dis = defPICKUP_DISTANCE;
+	// Auto-loot uses a wider radius so fast-moving players don't outrun drops.
+	int dis = defPICKUP_DISTANCE * 2;
 	if (!pMain->GetIsArrive()) {
 		dis += 100;
 	}
@@ -1611,10 +1612,7 @@ int CWorldScene::PickItem() {
 				// The pickup packet is sent by WorldScene::FrameMove once the arc completes,
 				// so the item stays visible and flies to the player before disappearing.
 				pItem->SetMagnetPickup(pItem->getAttachID(), pItem->lTag);
-				// fVel=5.0f matches drop arc speed (3.5f/2000ms); at 5.0f the arc
-				// completes its ~2.5-radian rotation in ~500ms, making it visually smooth.
-				// fHei=2.0f gives a gentle upward arc (drop uses 5.0f for a dramatic bounce).
-				pItem->PlayArcAni(pItem->GetPos(), vPlayerPos, 5.0f, 2.0f, 600);
+				pItem->PlayArcAni(pItem->GetPos(), vPlayerPos, 8.0f, 2.0f, 350);
 				// _cMouseDown.ActPickItem( pMain, pItem, false );
 				nCount++;
 				if (nCount >= MAX_PICK_PER_BATCH)
