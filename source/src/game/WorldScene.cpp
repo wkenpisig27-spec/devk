@@ -1611,7 +1611,10 @@ int CWorldScene::PickItem() {
 				// The pickup packet is sent by WorldScene::FrameMove once the arc completes,
 				// so the item stays visible and flies to the player before disappearing.
 				pItem->SetMagnetPickup(pItem->getAttachID(), pItem->lTag);
-				pItem->PlayArcAni(pItem->GetPos(), vPlayerPos, 0.01f, 0.8f, 500);
+				// fVel=5.0f matches drop arc speed (3.5f/2000ms); at 5.0f the arc
+				// completes its ~2.5-radian rotation in ~500ms, making it visually smooth.
+				// fHei=2.0f gives a gentle upward arc (drop uses 5.0f for a dramatic bounce).
+				pItem->PlayArcAni(pItem->GetPos(), vPlayerPos, 5.0f, 2.0f, 600);
 				// _cMouseDown.ActPickItem( pMain, pItem, false );
 				nCount++;
 				if (nCount >= MAX_PICK_PER_BATCH)
