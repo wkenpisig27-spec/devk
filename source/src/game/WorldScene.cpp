@@ -77,7 +77,7 @@ BYTE CWorldScene::_bAttackRed = 100;
 BYTE CWorldScene::_bAttackGreen = 100;
 BYTE CWorldScene::_bAttackBlue = 100;
 bool CWorldScene::_IsShowPing = false;
-bool CWorldScene::_IsAutoPick = false;
+bool CWorldScene::_IsAutoPick = true;
 bool CWorldScene::_IsShowCameraInfo = false;
 
 CWorldScene::CWorldScene(stSceneInitParam& param)
@@ -469,7 +469,7 @@ void CWorldScene::_FrameMove(DWORD dwTimeParam) {
 	if (_IsAutoPick) {
 		static DWORD dwTime = 0;
 		if (CGameApp::GetCurTick() > dwTime) {
-			dwTime = CGameApp::GetCurTick() + 10000;
+			dwTime = CGameApp::GetCurTick() + 500;
 			PickItem();
 		}
 	}
@@ -1573,13 +1573,27 @@ int CWorldScene::PickItem() {
 	if (!pMain->GetIsArrive()) {
 		dis += 100;
 	}
+
+	// Compute player's 3D world position once for the magnet target.
+	float fPlayerX = (float)pMain->GetServerX() / 100.0f;
+	float fPlayerY = (float)pMain->GetServerY() / 100.0f;
+	D3DXVECTOR3 vPlayerPos(fPlayerX, fPlayerY, GetGridHeight(fPlayerX, fPlayerY) + 1.0f);
+
 	// Cap pickup packets per batch to avoid flooding the GateServer.
 	// The server-side rate limiter (50ms) would drop excess pickups anyway,
 	// so sending more than ~20 at once is wasteful and risks disconnect.
 	const int MAX_PICK_PER_BATCH = 20;
 	for (int i = 0; i < _nSceneItemCnt; i++) {
 		if (pItem->IsValid() && !pItem->IsHide() && pItem->getAttachedCharacterID() == -1 && pItem->IsPick()) {
+			// Skip items already flying toward player to avoid duplicate pickup packets.
+			if (pItem->IsMagneting()) {
+				pItem++;
+				continue;
+			}
 			if (GetDistance(pMain->GetServerX(), pMain->GetServerY(), pItem->GetCurX(), pItem->GetCurY()) <= dis) {
+				// Play a short arc animation toward the player before the server removes the item.
+				pItem->PlayArcAni(pItem->GetPos(), vPlayerPos, 0.01f, 0.8f, 600);
+
 				info.lWorldID = pItem->getAttachID();
 				info.lHandle = pItem->lTag;
 				CS_BeginAction(pMain, enumACTION_ITEM_PICK, &info);

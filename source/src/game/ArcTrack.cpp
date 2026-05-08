@@ -2,7 +2,7 @@
 #include "arctrack.h"
 #include "GameApp.h"
 
-void CArcTrack::Start(const D3DXVECTOR3& vStart, const D3DXVECTOR3& vEnd, float fVel, float fHei) {
+void CArcTrack::Start(const D3DXVECTOR3& vStart, const D3DXVECTOR3& vEnd, float fVel, float fHei, DWORD dwDurationMs) {
 	_vStart = vStart;
 	_vEnd = vEnd;
 	_fHei = fHei;
@@ -13,7 +13,7 @@ void CArcTrack::Start(const D3DXVECTOR3& vStart, const D3DXVECTOR3& vEnd, float 
 	_isEnd = false;
 
 	_dwLastTime = CGameApp::GetCurTick();
-	_dwOverTime = _dwLastTime + 2000; // Edit by Mdr.st
+	_dwOverTime = _dwLastTime + dwDurationMs;
 }
 
 void CArcTrack::FrameMove() {

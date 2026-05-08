@@ -4,7 +4,7 @@ class CArcTrack {
 public:
 	CArcTrack() : _isEnd(true) {}
 
-	void Start(const D3DXVECTOR3& vStart, const D3DXVECTOR3& vEnd, float fVel, float fHei);
+	void Start(const D3DXVECTOR3& vStart, const D3DXVECTOR3& vEnd, float fVel, float fHei, DWORD dwDurationMs = 2000);
 	void FrameMove();
 
 	D3DXVECTOR3 GetPos() { return _vPos; }

@@ -256,10 +256,10 @@ void CSceneItem::Render() {
 	MPSceneItem::Render();
 }
 
-void CSceneItem::PlayArcAni(D3DXVECTOR3 vStart, D3DXVECTOR3 vEnd, float fVel, float fHei) {
+void CSceneItem::PlayArcAni(D3DXVECTOR3 vStart, D3DXVECTOR3 vEnd, float fVel, float fHei, DWORD dwDurationMs) {
 	if (!_pArcTrack)
 		_pArcTrack = new CArcTrack;
-	_pArcTrack->Start(vStart, vEnd, fVel, fHei);
+	_pArcTrack->Start(vStart, vEnd, fVel, fHei, dwDurationMs);
 }
 
 void CSceneItem::FrameMove(DWORD dwTimeParam) {
