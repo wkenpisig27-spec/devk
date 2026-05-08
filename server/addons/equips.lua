@@ -1,7 +1,21 @@
 EQUIPMENT_LV = 30
 
+-- Rarity tiers — determined by how many bonus stats an item rolls (0 = Common, 5 = Legendary)
+RARITY_NAMES = {
+    [0] = "Common",
+    [1] = "Uncommon",
+    [2] = "Rare",
+    [3] = "Epic",
+    [4] = "Legendary",
+    [5] = "Legendary"
+}
+
+function GetItemRarity(title)
+    return RARITY_NAMES[math.max(0, math.min(5, title))] or "Common"
+end
+
 function randomBiased(min, max, bias)
-    local v = math.pow(math.random(), bias)
+    local v = math.random() ^ bias
     return math.floor(v * max) + min
 end
 
@@ -229,54 +243,60 @@ ITEMSTAT = {
     }
 }
 
-BADCHANCE = 0.3
-BIAS = 3.4
+-- Max value scale per rarity tier: defines the hard power ceiling for each tier.
+-- An Uncommon item can never roll a stat higher than 30% of its MaxValue.
+-- A Legendary+ item can roll up to the full MaxValue.
+RARITY_MAX_SCALE = {
+    [1] = 0.30,  -- Uncommon:   up to 30% of stat max
+    [2] = 0.50,  -- Rare:       up to 50% of stat max
+    [3] = 0.70,  -- Epic:       up to 70% of stat max
+    [4] = 0.85,  -- Legendary:  up to 85% of stat max
+    [5] = 1.00,  -- Legendary+: full max, every stat
+}
 
+-- Bias per rarity tier: higher tier = lower bias = values spread toward the tier's ceiling.
+RARITY_BIAS = {
+    [1] = 2.5,  -- Uncommon:   clusters near floor of 30%
+    [2] = 2.0,  -- Rare:       moderate spread within 50%
+    [3] = 1.6,  -- Epic:       decent spread within 70%
+    [4] = 1.3,  -- Legendary:  tends toward 85% ceiling
+    [5] = 1.0,  -- Legendary+: uniform — any value equally likely
+}
+
+-- Two-pass: count fired stats first to know the rarity tier,
+-- then roll values using that tier's scale and bias.
+-- This guarantees higher rarity = more stats AND higher stat values.
 function CalculateExtraStats(Level, ItemStat, StatRate)
-    local Percent = 100
-    local Title = 0
     local ItemRates = {}
-    local StatVar = {}
     for i, v in pairs(ItemStat) do
         ItemRates[#ItemRates + 1] = {Value = i, Rate = v.Rate}
     end
-    for i = 1, 5, 1 do
-        -- Check if we'll add a stat.
+
+    -- Pass 1: count how many stats fire (determines rarity tier)
+    local firedSlots = 0
+    for i = 1, 5 do
         if Percentage_Random(StatRate[i]) == 1 then
-            -- Let's get the stat to be added.
-            local Index = WeightedRandomIndex(ItemRates)
-            StatVar[#StatVar + 1] = {ID = ItemRates[Index].Value, Num = 0, Pos = 1}
-            table.remove(ItemRates, Index)
-            -- Check if it will be a negative stat.
-            if Percentage_Random(BADCHANCE) == 1 then
-                StatVar[#StatVar].Pos = -1
-                Title = Title - 1
-            else
-                Title = Title + 1
-            end
+            firedSlots = firedSlots + 1
         else
-            -- If no stat is added, then exit loop.
             break
         end
     end
-    local X = 2
-    local A = (Title + 6)
-    for i, v in pairs(StatVar) do
-        local MinValue = math.max(A - X, 1) / 11
-        local MaxValue = math.min(A, 11) / 11
-        if v.Pos == -1 then
-            MinValue = math.max(A - X - 3, 1) / 11
-            MaxValue = math.min(math.max(A - 3, 1), 11) / 11
-        end
-        MinValue = math.floor(ItemStat[v.ID].MaxValue * MinValue)
-        MaxValue = math.floor(ItemStat[v.ID].MaxValue * MaxValue)
-        local Value = math.random(MinValue, MaxValue)
-        v.Num = Value * v.Pos
-        if v.Pos == -1 and v.ID == ITEMATTR_VAL_MXATK then
-            v.ID = ITEMATTR_VAL_MNATK
-        end
+
+    -- Pass 2: roll values using rarity-scaled ceiling and bias
+    local scale = RARITY_MAX_SCALE[firedSlots] or 0.30
+    local bias  = RARITY_BIAS[firedSlots]      or 2.5
+    local StatVar = {}
+    for i = 1, firedSlots do
+        local Index  = WeightedRandomIndex(ItemRates)
+        local statID = ItemRates[Index].Value
+        local maxVal = math.max(1, math.floor(ItemStat[statID].MaxValue * scale))
+        local value  = math.max(1, randomBiased(1, maxVal, bias))
+        StatVar[#StatVar + 1] = {ID = statID, Num = value}
+        table.remove(ItemRates, Index)
     end
-    return StatVar, Title
+
+    local title = #StatVar
+    return StatVar, title
 end
 
 ITEMRATE = {
@@ -322,20 +342,17 @@ ITEMRATE = {
     }
 }
 
+-- Item color codes by rarity tier (title = stat count, 0–5)
+-- These map to the client's item name color display.
 ITEMCOLOUR = {
-    [-4] = 0,
-    [-3] = 0,
-    [-2] = 0,
-    [-1] = 0,
-    [0] = 0,
-    [1] = 1,
-    [2] = 3,
-    [3] = 7,
-    [4] = 5,
-    [5] = 9
+    [0] = 0,  -- Common     (white)
+    [1] = 1,  -- Uncommon   (green)
+    [2] = 3,  -- Rare       (blue)
+    [3] = 7,  -- Epic       (purple)
+    [4] = 5,  -- Legendary  (orange)
+    [5] = 9   -- Legendary+ (gold, 5-stat)
 }
 
-Creat_ItemOriginal = Creat_ItemOriginal or Creat_Item
 function Creat_Item(item, item_type, item_lv, item_event)
     if item_lv >= EQUIPMENT_LV and ITEMSTAT[item_type] and ITEMRATE[item_event] then
         Reset_item_add()
@@ -344,10 +361,9 @@ function Creat_Item(item, item_type, item_lv, item_event)
             SetAttributeEditable(item, i - 1, v.ID)
             SetItemAttr(item, v.ID, GetItemAttr(item, v.ID) + v.Num)
         end
-        local prefix = (35 + title) * 10 + (ITEMCOLOUR[title] * 1000)
+        local colour = ITEMCOLOUR[title] or 0
+        local prefix = (35 + title) * 10 + (colour * 1000)
         SetItemAttr(item, ITEMATTR_MAXENERGY, prefix)
-        return 0
-    else
-        return Creat_ItemOriginal(item, item_type, item_lv, item_event)
     end
+    return 0
 end

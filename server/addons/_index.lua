@@ -13,7 +13,7 @@ addon.files			=
 	'guild.lua',
 	'relogpenalty.lua',
 	'reborn.lua',
-	--'equips.lua',
+	'equips.lua',
 }
 
 print("--------------------------------------------------")
