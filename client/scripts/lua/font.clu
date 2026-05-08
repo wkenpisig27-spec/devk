@@ -107,7 +107,7 @@ SPLASH_OUTLINE_FONT = UI_CreateFont( "splashoutline", 40, 40, 0 )
 --   gamedefaultmidblack= 14pt Black, no outline (use with ORender)
 --   gamedefaultsmblack = 12pt Black, no outline (use with ORender)
 -- ============================================================================
-NAME_FONT = "gamedefaultmidblack"
+NAME_FONT = "gamedefaultsmblack"
 NAME_FONT_HAS_OUTLINE = false  -- Use runtime outline (ORender draws 9 passes)
 
 -- ============================================================================
