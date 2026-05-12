@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <atomic>
+#include <chrono>
 #include <thread>
 
 // Frame rate limiter class - supports adaptive FPS up to any target.
@@ -34,7 +35,7 @@ public:
 		long ticks = _lRun.exchange(0, std::memory_order_acquire);
 		if (ticks > 0) {
 			RefreshFPS();
-			_dwCurTime = GetTickCount();
+			_dwCurTime = _NowMs();
 			_dwRunCount++;
 			return true;
 		}
@@ -42,17 +43,25 @@ public:
 	}
 
 	DWORD	GetTick()	{ return _dwCurTime; }
-	void	End()		{ _dwTotalTime += GetTickCount() - _dwCurTime; }
+	void	End()		{ _dwTotalTime += _NowMs() - _dwCurTime; }
 	void	RefreshFPS()	{ if (_dwFPS != _dwRefreshFPS) SetFPS(_dwRefreshFPS); }
 
 private:
 	void _Sleep();
+
+	// Cross-platform millisecond counter — monotonic, no 49-day rollover risk.
+	static DWORD _NowMs() {
+		using namespace std::chrono;
+		auto elapsed = steady_clock::now() - _sStartTime;
+		return static_cast<DWORD>(duration_cast<milliseconds>(elapsed).count());
+	}
 
 private:
 	static DWORD	_dwFPS;
 	static DWORD	_dwTargetFPS;
 	static bool		_bFramerate;
 	static DWORD	_dwTimeSpace;
+	static std::chrono::steady_clock::time_point _sStartTime;
 
 	std::atomic<long> _lRun{0};
 	std::atomic<bool> _bStop{false};

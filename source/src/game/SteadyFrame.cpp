@@ -9,6 +9,7 @@ DWORD CSteadyFrame::_dwFPS = 0;
 DWORD CSteadyFrame::_dwTargetFPS = 30;
 bool  CSteadyFrame::_bFramerate  = false;
 DWORD CSteadyFrame::_dwTimeSpace = 0;
+std::chrono::steady_clock::time_point CSteadyFrame::_sStartTime = std::chrono::steady_clock::now();
 
 bool CSteadyFrame::Init()
 {
@@ -45,14 +46,14 @@ void CSteadyFrame::Exit()
 void CSteadyFrame::_Sleep()
 {
 	int   nCount  = 0;
-	DWORD dwTime  = GetTickCount();
+	DWORD dwTime  = _NowMs();
 	float fRate   = 0.0f;
-	DWORD dwLastTime = GetTickCount();
+	DWORD dwLastTime = _NowMs();
 	DWORD s_dwSlower = 0;
 
 	while (!_bStop.load(std::memory_order_relaxed))
 	{
-		DWORD dwNow     = GetTickCount();
+		DWORD dwNow     = _NowMs();
 		DWORD dwElapsed = dwNow - dwLastTime;
 		dwLastTime = dwNow;
 
@@ -83,7 +84,7 @@ void CSteadyFrame::_Sleep()
 		nCount++;
 		if (nCount >= 60)
 		{
-			DWORD dwCurTime = GetTickCount();
+			DWORD dwCurTime = _NowMs();
 			DWORD dwWindow  = dwCurTime - dwTime;
 			if (dwWindow > 0)
 			{
