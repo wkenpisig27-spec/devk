@@ -125,22 +125,28 @@ float4 PS_ShadowReceive(VS_RECEIVE_OUTPUT In) : COLOR0 {
     float2 edgeDist = saturate((0.5 - abs(shadowUV - 0.5)) / g_fBorderFade);
     float fade = edgeDist.x * edgeDist.y;
 
-    // 12-tap Poisson disk PCF — irregular sampling pattern produces a natural
-    // soft penumbra instead of the structured aliasing of a box kernel.
+    // 12-tap Poisson disk PCF using hardware bilinear filtering.
+    // IMPORTANT: do NOT use a binary threshold (< 0.99 ? 1 : 0).
+    // Instead use (1.0 - sample.r) directly so the GPU's LINEAR sampler
+    // contributes a smooth 0..1 value at shadow edges — this eliminates
+    // the stepped/pixelated silhouette that binary thresholding causes.
+    // shadow texels = black (r≈0) → contribution 1.0
+    // lit texels    = white (r≈1) → contribution 0.0
+    // bilinear edge = smoothly interpolated → smooth penumbra
     float r = g_fPCFRadius * g_fTexelSize;
     float total = 0.0;
-    total += (tex2D(ShadowSampler, shadowUV + float2(-0.326*r, -0.406*r)).r < 0.99 ? 1.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2(-0.840*r, -0.074*r)).r < 0.99 ? 1.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2(-0.696*r,  0.457*r)).r < 0.99 ? 1.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2(-0.203*r,  0.621*r)).r < 0.99 ? 1.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2( 0.962*r, -0.195*r)).r < 0.99 ? 1.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2( 0.473*r, -0.480*r)).r < 0.99 ? 1.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2( 0.519*r,  0.767*r)).r < 0.99 ? 1.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2( 0.185*r, -0.893*r)).r < 0.99 ? 1.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2( 0.507*r,  0.064*r)).r < 0.99 ? 1.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2( 0.896*r,  0.412*r)).r < 0.99 ? 1.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2(-0.321*r, -0.933*r)).r < 0.99 ? 1.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2(-0.791*r,  0.498*r)).r < 0.99 ? 1.0 : 0.0);
+    total += (1.0 - tex2D(ShadowSampler, shadowUV + float2(-0.326*r, -0.406*r)).r);
+    total += (1.0 - tex2D(ShadowSampler, shadowUV + float2(-0.840*r, -0.074*r)).r);
+    total += (1.0 - tex2D(ShadowSampler, shadowUV + float2(-0.696*r,  0.457*r)).r);
+    total += (1.0 - tex2D(ShadowSampler, shadowUV + float2(-0.203*r,  0.621*r)).r);
+    total += (1.0 - tex2D(ShadowSampler, shadowUV + float2( 0.962*r, -0.195*r)).r);
+    total += (1.0 - tex2D(ShadowSampler, shadowUV + float2( 0.473*r, -0.480*r)).r);
+    total += (1.0 - tex2D(ShadowSampler, shadowUV + float2( 0.519*r,  0.767*r)).r);
+    total += (1.0 - tex2D(ShadowSampler, shadowUV + float2( 0.185*r, -0.893*r)).r);
+    total += (1.0 - tex2D(ShadowSampler, shadowUV + float2( 0.507*r,  0.064*r)).r);
+    total += (1.0 - tex2D(ShadowSampler, shadowUV + float2( 0.896*r,  0.412*r)).r);
+    total += (1.0 - tex2D(ShadowSampler, shadowUV + float2(-0.321*r, -0.933*r)).r);
+    total += (1.0 - tex2D(ShadowSampler, shadowUV + float2(-0.791*r,  0.498*r)).r);
 
     float shadow = (total / 12.0) * g_fShadowIntensity * fade;
 
@@ -714,7 +720,7 @@ void CMPShadowMap::RenderGroundOverlay(const D3DXMATRIX& matViewProj) {
     _pShadowEffect->SetFloat("g_fDepthBias", _config.depthBias);
     _pShadowEffect->SetFloat("g_fTexelSize", 1.0f / (float)_config.resolution);
     _pShadowEffect->SetFloat("g_fBorderFade", 0.10f);  // 10% fade zone at each projection edge
-    _pShadowEffect->SetFloat("g_fPCFRadius",  3.0f);   // Poisson kernel spread in texels
+    _pShadowEffect->SetFloat("g_fPCFRadius",  5.0f);   // Poisson kernel spread in texels
     _pShadowEffect->SetTexture("g_texShadowMap", _pShadowTexture);
 
     // Disable Z-test so the overlay renders on top of already-drawn terrain
