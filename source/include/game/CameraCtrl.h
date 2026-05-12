@@ -238,6 +238,8 @@ public:
 	float _fdistshow;
 
 	D3DXVECTOR2 _vLastPos;
+
+	DWORD _lastFrameTime;
 };
 
 // #endif

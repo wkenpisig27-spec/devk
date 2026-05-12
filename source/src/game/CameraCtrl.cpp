@@ -66,6 +66,7 @@ CCameraCtrl::CCameraCtrl(void) {
 
 	m_listHei = 0;
 	m_fHeiVel = 0;
+	m_fLastHei = 0;
 
 	m_bEnableRota = false;
 	m_bEnableUpdown = true;
@@ -82,7 +83,22 @@ CCameraCtrl::CCameraCtrl(void) {
 
 	m_pModel = nullptr;
 
+	// Forward-back impulse (MoveForwardBack sets m_fvel/m_fasscs/m_bFB).
+	// Without explicit zero, m_bFB can catch garbage and the if (m_bFB) in
+	// FrameMove fires on the very first frame, jerking ScroolFB on uninit
+	// m_fvel * m_fasscs.
+	m_bFB = false;
+	m_fvel = 0.0f;
+	m_fasscs = 0.0f;
+
 	m_bRota = FALSE;
+	m_fRotaVel = 0.0f;
+	m_fRotaAss = 0.0f;
+
+	m_fSubVel = 0.0f;
+	m_fLastAngle = 0.0f;
+
+	_lastFrameTime = 0;
 
 	m_fScale = 1.0;
 
@@ -340,7 +356,25 @@ void CCameraCtrl::Scale(float fDist) {
 }
 
 void CCameraCtrl::FrameMove(DWORD dwTailTime) {
-	static DWORD dwTime = dwTailTime;
+	// Compute per-frame delta against the previous call's timestamp.
+	// Guards:
+	// 1) FrameMove(0) is called in several places just to recalculate
+	//    matrices. dwTailTime==0 would cause DWORD underflow (~3 billion ms).
+	// 2) Long pauses (scene load) produce huge deltas; clamp to 100ms (10 FPS)
+	//    to avoid snapping the decay logic by dozens of steps in one frame.
+	DWORD dwTime;
+	if (dwTailTime == 0 || _lastFrameTime == 0) {
+		dwTime = 0;
+	} else if (dwTailTime < _lastFrameTime) {
+		// Timer desync (another call site advanced prev) — skip decay this frame.
+		dwTime = 0;
+	} else {
+		dwTime = dwTailTime - _lastFrameTime;
+		if (dwTime > 100) {
+			dwTime = 100;
+		}
+	}
+	_lastFrameTime = dwTailTime;
 
 	if (g_stUISystem.m_sysProp.m_videoProp.bResolution > 0) {
 		MAX_SCALE = 1.0f + m_fstep1 * 0.3f;
@@ -348,7 +382,6 @@ void CCameraCtrl::FrameMove(DWORD dwTailTime) {
 		MAX_SCALE = 0.8f + m_fstep1 * 0.2f;
 	}
 
-	dwTime = dwTailTime - dwTime;
 	if (m_CamDither.GetState()) {
 		m_CamDither.FrameMove();
 		return;
