@@ -32,9 +32,45 @@ function addSystemOption(frm,compName,cap,hint,cap1,cap2,y)
 	UI_AddGroupBox( cbxEffmodel, chkHelpmodel2 )
 end
 
------------------------------------------------------------------------
--- settings menu (esc)
------------------------------------------------------------------------
+function addSystemOption3(frm,compName,cap,hint,cap1,cap2,cap3,y)
+	labGame = UI_CreateCompent( frm, LABELEX_TYPE, "labGame", 30, 10, 12, y )
+	UI_SetCaption( labGame, cap )
+	UI_SetTextColor( labGame, COLOR_BLACK )
+	UI_SetLabelExFont( labGame, DEFAULT_FONT, TRUE, COLOR_WHITE )
+	UI_SetHint(labGame,hint)
+	
+	labGame = UI_CreateCompent( frm, LABELEX_TYPE, "labGame", 20, 10, 82, y )
+	UI_SetCaption( labGame, cap1 )
+	UI_SetTextColor( labGame, COLOR_BLACK )
+	UI_SetLabelExFont( labGame, DEFAULT_FONT, TRUE, COLOR_WHITE )
+	
+	chkHelpmodel1 = UI_CreateCompent( frm, CHECK_TYPE, "chkHelpmodel1", 10, 10, 100, y )
+	UI_LoadImage( chkHelpmodel1, "texture/ui/QQ2.tga", UNCHECKED, 10, 10, 40, 231 )
+	UI_LoadImage( chkHelpmodel1, "texture/ui/QQ2.tga", CHECKED, 10, 10, 52, 231 )
+	
+	labGame = UI_CreateCompent( frm, LABELEX_TYPE, "labGame", 20, 10, 112, y )
+	UI_SetCaption( labGame, cap2 )
+	UI_SetTextColor( labGame, COLOR_BLACK )
+	UI_SetLabelExFont( labGame, DEFAULT_FONT, TRUE, COLOR_WHITE )
+	
+	chkHelpmodel2 = UI_CreateCompent( frm, CHECK_TYPE, "chkHelpmodel2", 10, 10, 130, y )
+	UI_LoadImage( chkHelpmodel2, "texture/ui/QQ2.tga", UNCHECKED, 10, 10, 40, 231 )
+	UI_LoadImage( chkHelpmodel2, "texture/ui/QQ2.tga", CHECKED, 10, 10, 52, 231 )
+	
+	labGame = UI_CreateCompent( frm, LABELEX_TYPE, "labGame", 25, 10, 142, y )
+	UI_SetCaption( labGame, cap3 )
+	UI_SetTextColor( labGame, COLOR_BLACK )
+	UI_SetLabelExFont( labGame, DEFAULT_FONT, TRUE, COLOR_WHITE )
+	
+	chkHelpmodel3 = UI_CreateCompent( frm, CHECK_TYPE, "chkHelpmodel3", 10, 10, 160, y )
+	UI_LoadImage( chkHelpmodel3, "texture/ui/QQ2.tga", UNCHECKED, 10, 10, 40, 231 )
+	UI_LoadImage( chkHelpmodel3, "texture/ui/QQ2.tga", CHECKED, 10, 10, 52, 231 )
+	
+	cbxEffmodel = UI_CreateCompent( frm, CHECK_GROUP_TYPE, compName, 0, 0, 0, 0 )
+	UI_AddGroupBox( cbxEffmodel, chkHelpmodel1 )
+	UI_AddGroupBox( cbxEffmodel, chkHelpmodel2 )
+	UI_AddGroupBox( cbxEffmodel, chkHelpmodel3 )
+end
 frmSystem = UI_CreateForm( "frmSystem", FALSE, 190, 274, 150, 200, TRUE, FALSE )
 UI_FormSetHotKey( frmSystem, ALT_KEY, HOTKEY_O ) --'O'
 UI_ShowForm( frmSystem, TRUE )
@@ -295,7 +331,7 @@ UI_AddGroupBox( cbxQuality, chkLow )
 -----------------------------------------------------------------------
 -- game settings
 -----------------------------------------------------------------------
-frmGame = UI_CreateForm( "frmGame", FALSE, 190, 370, 150, 150, FALSE, FALSE )
+frmGame = UI_CreateForm( "frmGame", FALSE, 190, 390, 150, 150, FALSE, FALSE )
 --UI_FormSetHotKey( frmGame, ALT_KEY, HOTKEY_Z )
 UI_ShowForm( frmGame, FALSE )
 UI_AddFormToTemplete( frmGame, 1 )
@@ -303,8 +339,8 @@ UI_SetIsDrag( frmGame, TRUE )
 --UI_SetFormStyle( frmGame, 0 )
 --UI_SetAlpha( frmGame, 200 )
 
-imgVideoT = UI_CreateCompent( frmGame, IMAGE_TYPE, "imgVideoT", 190, 370, 0, 0 )
-UI_LoadImage( imgVideoT, "texture/ui/Settings_Game.dds", NORMAL, 190, 370, 0, 0 )
+imgVideoT = UI_CreateCompent( frmGame, IMAGE_TYPE, "imgVideoT", 190, 390, 0, 0 )
+UI_LoadImage( imgVideoT, "texture/ui/Settings_Game.dds", NORMAL, 190, 390, 0, 0 )
 
 btnClose = UI_CreateCompent( frmGame, BUTTON_TYPE, "btnClose", 14, 14, 165, 3 )
 UI_LoadButtonImage( btnClose, "texture/ui/PublicC.tga", 14, 14, 116, 175, TRUE )
@@ -315,11 +351,11 @@ UI_SetCaption( labGame, "Game Settings" )
 UI_SetTextColor( labGame, COLOR_BLACK )
 UI_SetLabelExFont( labGame, DEFAULT_FONT, TRUE, COLOR_WHITE )
 
-btnYes = UI_CreateCompent( frmGame, BUTTON_TYPE, "btnYes", 41, 19, 74, 346 )
+btnYes = UI_CreateCompent( frmGame, BUTTON_TYPE, "btnYes", 41, 19, 74, 366 )
 UI_LoadButtonImage( btnYes, "texture/ui/PublicC.tga", 41, 19, 0, 0, TRUE )
 UI_SetButtonModalResult( btnYes, BUTTON_CLOSE )
 
-btnNo = UI_CreateCompent( frmGame, BUTTON_TYPE, "btnNo", 41, 19, 122, 346 )
+btnNo = UI_CreateCompent( frmGame, BUTTON_TYPE, "btnNo", 41, 19, 122, 366 )
 UI_LoadButtonImage( btnNo, "texture/ui/PublicC.tga", 41, 19, 0, 20, TRUE )
 UI_SetButtonModalResult( btnNo, BUTTON_CLOSE )
 
@@ -338,9 +374,10 @@ addSystemOption(frmGame,"cbxEnemyNames_p","Friend/Enemy","Highlight friendly and
 addSystemOption(frmGame,"cbxShowBars_p","HP/SP Bars","Show HP/SP bars below characters","Hide","Show",226)
 addSystemOption(frmGame,"cbxShowPercentages_p","HP/SP Values","Display mode for HP/SP bars","Raw","%",246) 
 addSystemOption(frmGame,"cbxShowInfo_p","Player's Info","Show other player's information","Off","On",266)
-addSystemOption(frmGame,"cbxFramerate_p","Framerate","Set game framerate (requires relogin)","30","60",286) 
+addSystemOption3(frmGame,"cbxFramerate_p","Framerate","Set game framerate (requires relogin)","30","60","144",286) 
 addSystemOption(frmGame,"cbxDisableMelee_p","Melee Lock","Disable melee attack for caster classes","Off","On",306)
 addSystemOption(frmGame,"cbxOutline_p","Outline","Draw cel-shading outline on characters","Off","On",326)
+addSystemOption(frmGame,"cbxVsync_p","VSync","Enable vertical sync (requires relogin)","Off","On",346)
 
 -----------------------------------------------------------------------
 -- switch character settings

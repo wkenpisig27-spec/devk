@@ -594,6 +594,11 @@ bool CSystemMgr::Init() {
 		return Error(RES_STRING(CL_LANGUAGE_MATCH_45), frmGameOption->GetName(), "cbxOutline_p");
 	}
 
+	cbxVsync = static_cast<CCheckGroup*>(frmGameOption->Find("cbxVsync_p"));
+	if (!cbxVsync) {
+		return Error(RES_STRING(CL_LANGUAGE_MATCH_45), frmGameOption->GetName(), "cbxVsync_p");
+	}
+
 	//////// ����
 	frmAskRelogin = _FindForm("frmAskRelogin");
 	if (frmAskRelogin)
@@ -682,7 +687,8 @@ void CSystemMgr::End() {
 		m_sysProp.m_gameOption.bShowInfo = cbxShowInfo->GetActiveIndex() == 1 ? true : false;
 	if (cbxFramerate)
 	{
-		m_sysProp.m_gameOption.nFramerate = cbxFramerate->GetActiveIndex() == 1 ? 60 : 30;
+		const int frIdx = cbxFramerate->GetActiveIndex();
+		m_sysProp.m_gameOption.nFramerate = frIdx == 2 ? 144 : frIdx == 1 ? 60 : 30;
 		lwSetAnimVelocity(1.0f / CSteadyFrame::GetAnimMultiplier());
 	}
 	if (cbxShowMounts)
@@ -1174,7 +1180,8 @@ void CSystemMgr::_evtGameOptionFormMouseDown(CCompent* pSender, int nMsgType, in
 
 	pGroup = g_stUISystem.cbxFramerate;
 	if (pGroup) {
-		const int nFramerate = pGroup->GetActiveIndex() == 1 ? 60 : 30;
+		const int frIdx = pGroup->GetActiveIndex();
+		const int nFramerate = frIdx == 2 ? 144 : frIdx == 1 ? 60 : 30;
 		if (nFramerate != g_stUISystem.m_sysProp.m_gameOption.nFramerate) {
 			g_stUISystem.m_sysProp.m_gameOption.nFramerate = nFramerate;
 			g_pGameApp->SetFrame(nFramerate);
@@ -1209,6 +1216,16 @@ void CSystemMgr::_evtGameOptionFormMouseDown(CCompent* pSender, int nMsgType, in
 			g_stUISystem.m_sysProp.m_gameOption.bOutline = bOutline;
 			lwSetOutlineEnabled(bOutline ? 1 : 0);
 			::WritePrivateProfileString("gameOption", "outline", bOutline ? "1" : "0", szIniPath);
+		}
+	}
+
+	pGroup = g_stUISystem.cbxVsync;
+	if (pGroup) {
+		const bool bVsync = pGroup->GetActiveIndex() == 1 ? true : false;
+		if (bVsync != g_stUISystem.m_sysProp.m_gameOption.bVsync) {
+			g_stUISystem.m_sysProp.m_gameOption.bVsync = bVsync;
+			MPRender::SetVsyncEnabled(bVsync);
+			::WritePrivateProfileString("gameOption", "vsync", bVsync ? "1" : "0", szIniPath);
 		}
 	}
 
@@ -1259,8 +1276,10 @@ void CSystemMgr::_evtGameOptionFormBeforeShow(CForm* pForm, bool& IsShow) {
 	if (pGroup)
 		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bShowInfo ? 1 : 0);
 	pGroup = g_stUISystem.cbxFramerate;
-	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.nFramerate >= 60 ? 1 : 0);
+	if (pGroup) {
+		const int nFps = g_stUISystem.m_sysProp.m_gameOption.nFramerate;
+		pGroup->SetActiveIndex(nFps >= 144 ? 2 : nFps >= 60 ? 1 : 0);
+	}
 	pGroup = g_stUISystem.cbxShowMounts;
 	if (pGroup)
 		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bShowMounts ? 1 : 0);
@@ -1270,6 +1289,9 @@ void CSystemMgr::_evtGameOptionFormBeforeShow(CForm* pForm, bool& IsShow) {
 	pGroup = g_stUISystem.cbxOutline;
 	if (pGroup)
 		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bOutline ? 1 : 0);
+	pGroup = g_stUISystem.cbxVsync;
+	if (pGroup)
+		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bVsync ? 1 : 0);
 }
 
 void CSystemMgr::CloseForm() {

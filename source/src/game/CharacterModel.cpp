@@ -123,6 +123,13 @@ CCharacterModel::CCharacterModel() : _ModelType(MODEL_INVALID), _PoseType(0), ch
 	_color[0] = _color[1] = _color[2] = 255;
 }
 
+BOOL MPDrunkCtrl::CreateDrunkDummy(const char* file) {
+	dummy_obj = LW_NEW(MPSceneItem);
+	dummy_obj->Load(file);
+	dummy_obj->PlayDefaultAnimation(30.0f / (float)CGameApp::GetFrameFPS());
+	return 1;
+}
+
 void CCharacterModel::FrameMove() {
 #ifdef DYNAMIC_LOADING
 	if (cha_type_id != -1 && IsLoaded()) {
@@ -688,12 +695,15 @@ void CCharacterModel::PlayPose(DWORD pose, DWORD type, int time, int fps, DWORD 
 		return;
 	}
 
+	// Use the actual render FPS so all animations play at correct real-time speed
+	// regardless of whether the engine is running at 30, 60, 144+ FPS.
+	const float renderFPS = (float)CGameApp::GetFrameFPS();
 	float velocity = 1.0f;
 	if (time > 0) {
-		float v = 1000.0f / (float)fps / ((float)time / (float)(pi->end - pi->start));
+		float v = 1000.0f / renderFPS / ((float)time / (float)(pi->end - pi->start));
 		velocity = v;
 	} else {
-		float v = 30.0f / (float)fps;
+		float v = 30.0f / renderFPS;
 		velocity = v;
 	}
 	if (IsGlitched)

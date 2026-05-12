@@ -259,6 +259,7 @@ private:
 	CCheckGroup* cbxShowMounts;
 	CCheckGroup* cbxDisableMelee;
 	CCheckGroup* cbxOutline;
+	CCheckGroup* cbxVsync;
 
 	CForm* frmAskRelogin;
 	CForm* frmAskExit;

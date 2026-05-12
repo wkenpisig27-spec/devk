@@ -83,12 +83,7 @@ public:
 	~MPDrunkCtrl() {
 		LW_SAFE_DELETE(dummy_obj);
 	}
-	BOOL CreateDrunkDummy(const char* file) {
-		dummy_obj = LW_NEW(MPSceneItem);
-		dummy_obj->Load(file);
-		dummy_obj->PlayDefaultAnimation();
-		return 1;
-	}
+	BOOL CreateDrunkDummy(const char* file);
 	void Attach(MPCharacter* cha) {
 		if (cha) {
 			cha_obj = cha;
