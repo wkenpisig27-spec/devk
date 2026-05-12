@@ -30,7 +30,7 @@ struct ShadowMapConfig {
         , farPlane(200.0f)
         , depthBias(0.0005f)
         , slopeScaleBias(1.0f)
-        , shadowIntensity(0.7f)
+        , shadowIntensity(0.55f)
         , lightHeight(100.0f)
         , enabled(true)
     {}

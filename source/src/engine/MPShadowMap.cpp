@@ -23,6 +23,8 @@ float4x4 g_matWorldViewProj;
 float    g_fShadowIntensity;
 float    g_fDepthBias;
 float    g_fTexelSize;     // 1.0 / shadow map resolution
+float    g_fBorderFade;    // Fraction of UV space for edge fade (e.g. 0.10)
+float    g_fPCFRadius;     // Poisson kernel radius in texels (e.g. 3.0)
 
 texture  g_texShadowMap;
 
@@ -117,30 +119,34 @@ float4 PS_ShadowReceive(VS_RECEIVE_OUTPUT In) : COLOR0 {
     // Project shadow UV
     float2 shadowUV = In.ShadowUV.xy / In.ShadowUV.w;
 
-    // 9-tap Gaussian-weighted blur for smooth circular shadow edges.
-    // Weights: center=4, cross=2, diagonal=1  (total max = 16)
-    // Sample .r only — shadow map renders black silhouettes so all channels equal.
-    float t = g_fTexelSize * 1.0;
+    // Edge fade: smoothly dissolve the shadow near the projection boundary
+    // so it doesn't hard-cut when shadow casters leave the frustum.
+    // edgeDist ranges 0 (at UV edge) to 1 (past the fade zone toward center).
+    float2 edgeDist = saturate((0.5 - abs(shadowUV - 0.5)) / g_fBorderFade);
+    float fade = edgeDist.x * edgeDist.y;
+
+    // 12-tap Poisson disk PCF — irregular sampling pattern produces a natural
+    // soft penumbra instead of the structured aliasing of a box kernel.
+    float r = g_fPCFRadius * g_fTexelSize;
     float total = 0.0;
+    total += (tex2D(ShadowSampler, shadowUV + float2(-0.326*r, -0.406*r)).r < 0.99 ? 1.0 : 0.0);
+    total += (tex2D(ShadowSampler, shadowUV + float2(-0.840*r, -0.074*r)).r < 0.99 ? 1.0 : 0.0);
+    total += (tex2D(ShadowSampler, shadowUV + float2(-0.696*r,  0.457*r)).r < 0.99 ? 1.0 : 0.0);
+    total += (tex2D(ShadowSampler, shadowUV + float2(-0.203*r,  0.621*r)).r < 0.99 ? 1.0 : 0.0);
+    total += (tex2D(ShadowSampler, shadowUV + float2( 0.962*r, -0.195*r)).r < 0.99 ? 1.0 : 0.0);
+    total += (tex2D(ShadowSampler, shadowUV + float2( 0.473*r, -0.480*r)).r < 0.99 ? 1.0 : 0.0);
+    total += (tex2D(ShadowSampler, shadowUV + float2( 0.519*r,  0.767*r)).r < 0.99 ? 1.0 : 0.0);
+    total += (tex2D(ShadowSampler, shadowUV + float2( 0.185*r, -0.893*r)).r < 0.99 ? 1.0 : 0.0);
+    total += (tex2D(ShadowSampler, shadowUV + float2( 0.507*r,  0.064*r)).r < 0.99 ? 1.0 : 0.0);
+    total += (tex2D(ShadowSampler, shadowUV + float2( 0.896*r,  0.412*r)).r < 0.99 ? 1.0 : 0.0);
+    total += (tex2D(ShadowSampler, shadowUV + float2(-0.321*r, -0.933*r)).r < 0.99 ? 1.0 : 0.0);
+    total += (tex2D(ShadowSampler, shadowUV + float2(-0.791*r,  0.498*r)).r < 0.99 ? 1.0 : 0.0);
 
-    // Center tap (weight 4)
-    total += (tex2D(ShadowSampler, shadowUV).r < 0.99 ? 4.0 : 0.0);
+    float shadow = (total / 12.0) * g_fShadowIntensity * fade;
 
-    // Cross taps (weight 2 each)
-    total += (tex2D(ShadowSampler, shadowUV + float2( t, 0)).r < 0.99 ? 2.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2(-t, 0)).r < 0.99 ? 2.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2(0,  t)).r < 0.99 ? 2.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2(0, -t)).r < 0.99 ? 2.0 : 0.0);
-
-    // Diagonal taps (weight 1 each)
-    total += (tex2D(ShadowSampler, shadowUV + float2( t,  t)).r < 0.99 ? 1.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2(-t,  t)).r < 0.99 ? 1.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2( t, -t)).r < 0.99 ? 1.0 : 0.0);
-    total += (tex2D(ShadowSampler, shadowUV + float2(-t, -t)).r < 0.99 ? 1.0 : 0.0);
-
-    // Normalize: full shadow = 16/16 = 1.0, edge fades smoothly via circular kernel
-    float shadow = (total / 16.0) * g_fShadowIntensity;
-    return float4(0.0f, 0.0f, 0.0f, shadow);
+    // Subtle blue-gray tint instead of pure black — simulates sky ambient bounce
+    // light filling shadowed areas in an outdoor scene.
+    return float4(0.05, 0.06, 0.12, shadow);
 }
 
 technique ShadowReceive {
