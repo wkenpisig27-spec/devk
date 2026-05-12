@@ -1742,28 +1742,7 @@ CSceneItem* CGameScene::SearchItemByID(unsigned long id) {
 }
 
 bool CGameScene::RecreateShadowMapFromQuality(int nQuality, bool bEnableShadow) {
-	ShadowMapConfig shadowCfg;
-	switch (nQuality) {
-		case 2:  shadowCfg.resolution = SHADOW_QUALITY_LOW;    break; // Low  = 512
-		case 1:  shadowCfg.resolution = SHADOW_QUALITY_MEDIUM; break; // Mid  = 1024
-		default: shadowCfg.resolution = SHADOW_QUALITY_HIGH;   break; // High = 2048
-	}
-
-	if (_pShadowMap) {
-		delete _pShadowMap;
-		_pShadowMap = nullptr;
-	}
-
-	_pShadowMap = new CMPShadowMap();
-	if (!_pShadowMap->Create(g_Render.GetDevice(), shadowCfg)) {
-		LG("shadow", "Failed to initialize shadow map\n");
-		delete _pShadowMap;
-		_pShadowMap = nullptr;
-		CCharacter::SetIsShowShadow(false);
-		return false;
-	}
-
-	_pShadowMap->SetEnabled(bEnableShadow);
+	// Blob shadow system is used — no CMPShadowMap allocation needed.
 	CCharacter::SetIsShowShadow(bEnableShadow);
 	return true;
 }

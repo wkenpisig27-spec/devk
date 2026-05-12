@@ -21,40 +21,7 @@
 #include "cameractrl.h"
 #include "findpath.h"
 #include "event.h"
-#include "MPShadowMap.h"
-
 #include "ui3dcompent.h"
-
-namespace {
-bool ContainsNoCase(const char* text, const char* needle) {
-	if (!text || !needle || !*needle)
-		return false;
-	const size_t nlen = strlen(needle);
-	for (; *text; ++text) {
-		if (_strnicmp(text, needle, nlen) == 0)
-			return true;
-	}
-	return false;
-}
-
-bool ShouldCastSceneObjectShadow(CSceneObj* pObj) {
-	if (!pObj)
-		return false;
-
-	CSceneObjInfo* pInfo = GetSceneObjInfo(pObj->getTypeID());
-	if (!pInfo || pInfo->nType != 0)
-		return false;
-
-	// Style 8 contains the foliage set: trees, grass, flowers, bushes, and similar scene vegetation.
-	if (pInfo->nStyle == 8)
-		return true;
-
-	// Keep a small set of ambient nature props that live outside the foliage style bucket.
-	return ContainsNoCase(pInfo->szName, "butterfly") ||
-		ContainsNoCase(pInfo->szName, "floating leaf") ||
-		ContainsNoCase(pInfo->szName, "fallen leaf");
-}
-}
 
 using namespace std;
 
@@ -182,74 +149,6 @@ void CGameScene::_Render() {
 		}
 	}
 
-	// ============================================================
-	// Shadow Map - Depth Pass
-	// Render shadow-casting characters into the shadow map texture
-	// from the light's point of view before regular scene rendering
-	// ============================================================
-	if (_pShadowMap && _pShadowMap->IsEnabled()) {
-		// Update light direction from the current area
-		CCharacter* pMainCha = GetMainCha();
-		if (pMainCha && _pTerrain) {
-			D3DXVECTOR3 mainPos = pMainCha->GetPos();
-			_pShadowMap->SetFocusPoint(mainPos);
-
-			MPTile* pTile = _pTerrain->GetTile((int)mainPos.x, (int)mainPos.y);
-			if (pTile) {
-				CAreaInfo* pArea = GetAreaInfo(pTile->getIsland());
-				if (pArea) {
-					_pShadowMap->SetLightDirection(
-						pArea->fLightDir[0],
-						pArea->fLightDir[1],
-						pArea->fLightDir[2]
-					);
-				}
-			}
-
-			if (_pShadowMap->BeginShadowPass()) {
-				// Render all visible characters into shadow map.
-				// BeginShadowPass() already swapped device View/Proj to light matrices,
-				// so character rendering uses their own shaders but from the light's POV.
-				_pShadowMap->SetAlphaCutoutCasterMode(false);
-				extern bool g_IsShowModel;
-				if (g_IsShowModel) {
-					for (int si = 0; si < _nChaCnt; si++) {
-						CCharacter* pShadowCha = &_pChaArray[si];
-						if (!pShadowCha->IsValid() || pShadowCha->GetIsForUI() || pShadowCha->IsHide())
-							continue;
-						pShadowCha->Render();
-					}
-				}
-
-				// Render scene objects (trees, buildings, etc.) into shadow map.
-				// Use the raw model render to avoid CSceneNode effects and culling side-effects.
-				if (_bShowSceneObj) {
-					_pShadowMap->SetAlphaCutoutCasterMode(true);
-					float shadowRange = _pShadowMap->GetOrthoSize();
-					for (std::list<int>::iterator sit = _SceneObjIdx[0].begin(); sit != _SceneObjIdx[0].end(); ++sit) {
-						CSceneObj* pObj = &_pSceneObjArray[*sit];
-						if (!pObj->IsValid() || pObj->IsHide())
-							continue;
-						if (!ShouldCastSceneObjectShadow(pObj))
-							continue;
-						// Skip objects outside the shadow projection area
-						D3DXVECTOR3 objPos = pObj->getPos();
-						float dx = objPos.x - mainPos.x;
-						float dy = objPos.y - mainPos.y;
-						if (dx * dx + dy * dy > shadowRange * shadowRange)
-							continue;
-						lwIModel* pModel = pObj->GetObject();
-						if (pModel)
-							pModel->Render();
-					}
-					_pShadowMap->SetAlphaCutoutCasterMode(false);
-				}
-
-				_pShadowMap->EndShadowPass();
-			}
-		}
-	}
-
 	if (m_bShowTerrain) {
 		if (_pTerrain) {
 			// MPTimer tMap;
@@ -262,16 +161,6 @@ void CGameScene::_Render() {
 			_pTerrain->EnableNormalLight(0); // 0 = terrtain lighting : 1 = disable
 			_pTerrain->Render();
 		}
-	}
-
-	// ============================================================
-	// Shadow Map - Ground Overlay Pass
-	// Renders shadow darkening onto the terrain using the shadow map
-	// ============================================================
-	if (_pShadowMap && _pShadowMap->IsEnabled()) {
-		MPIDeviceObject* pDevObj = g_Render.GetInterfaceMgr()->dev_obj;
-		D3DXMATRIX matVP = *(D3DXMATRIX*)pDevObj->GetMatViewProj();
-		_pShadowMap->RenderGroundOverlay(matVP);
 	}
 
 	for (it = _SceneObjIdx[SCENEOBJ_TYPE_POINTLIGHT].begin();

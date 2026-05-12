@@ -66,9 +66,7 @@ int CSystemProperties::ApplyVideo() {
 	g_pGameApp->GetCurScene()->SetTextureLOD(m_videoProp.nTexture);
 	{
 		CGameScene* pApplyScene = dynamic_cast<CGameScene*>(g_pGameApp->GetCurScene());
-		CMPShadowMap* pApplyShadow = pApplyScene ? pApplyScene->GetShadowMap() : nullptr;
 		CCharacter::SetIsShowShadow(m_videoProp.nShadowMode > 0);
-		if (pApplyShadow) pApplyShadow->SetEnabled(m_videoProp.nShadowMode > 0);
 	}
 
 	GetRender().SetIsChangeResolution(true);
@@ -415,9 +413,6 @@ void CSystemMgr::LoadCustomProp() {
 	{
 		int nSM = m_sysProp.m_videoProp.nShadowMode;
 		CCharacter::SetIsShowShadow(nSM > 0);
-		CGameScene* pSc = dynamic_cast<CGameScene*>(g_pGameApp->GetCurScene());
-		CMPShadowMap* pSh = pSc ? pSc->GetShadowMap() : nullptr;
-		if (pSh) pSh->SetEnabled(nSM > 0);
 	}
 	CCharacter::SetIsShowApparel(m_sysProp.m_gameOption.bAppMode);
 	CCharacter::SetIsShowEffects(m_sysProp.m_gameOption.bEffMode);
