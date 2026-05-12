@@ -1156,11 +1156,11 @@ public:
 
 	void	GetRes(CMPResManger	*pCResMagr,std::vector<INT>& vecTex,std::vector<INT>& vecModel);
 
-	void	PlayModel()
+	void	PlayModel(float velocity = 1.0f)
 	{
 		if (!m_pCModel) return;
 		if(m_pCModel->IsItem())
-			m_pCModel->PlayDefaultAnimation();
+			m_pCModel->PlayDefaultAnimation(velocity);
 	}
 	void	ResetModel();
 	void	CopyEffect(I_Effect* pEff);

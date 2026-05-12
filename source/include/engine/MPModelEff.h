@@ -388,10 +388,15 @@ public:
 			m_bLoop = true;
 			m_iTimes = 0;
 		}
+		// Scale animation velocity so item models animate at ~30 anim-frames/sec
+		// regardless of render FPS. m_pfDailTime is actual delta-time in seconds;
+		// multiplying by 30 gives the per-frame advance for a 30-fps reference rate.
+		float modelVelocity = (m_pfDailTime && *m_pfDailTime > 0.0f)
+			? (*m_pfDailTime * 30.0f) : 1.0f;
 		for(int n = 0; n < m_iEffNum; n++)
 		{
 			m_vecCortrol[n]->Play();
-			m_vecEffect[n]->PlayModel();
+			m_vecEffect[n]->PlayModel(modelVelocity);
 		}
 	}
 	void		 Play2(int iTime = 0)	/*iTime: 0 == loop, */	
