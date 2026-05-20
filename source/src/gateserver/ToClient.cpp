@@ -1452,27 +1452,21 @@ void ToClient::OnEncrypt(DataSocket* datasock, char* ciphertext, const char* tex
 	if (_comm_enc > 0) {
 		auto ply = static_cast<Player*>(datasock->GetPointer());
 
-		if (ply && ply->enc) {
+		if (ply && ply->enc && ply->m_enc_cipher) {
 			try {
-				// Use AES-128/CTR for stream encryption (no padding needed)
-				auto aes_enc = Botan::Cipher_Mode::create("AES-128/CTR", Botan::ENCRYPTION);
-				if (!aes_enc) {
-					LG("ErrServer", "[%s] OnEncrypt: Failed to create cipher\n", datasock->GetPeerIP());
-					return;
-				}
-				
-				aes_enc->set_key(ply->m_AESKey, AES_KEY_LENGTH);
-				aes_enc->start(ply->m_IV, AES_IV_LENGTH);
-				
-				// CTR mode doesn't change length, encrypt in place
-				Botan::secure_vector<uint8_t> buffer((uint8_t*)text, (uint8_t*)text + len);
-				aes_enc->finish(buffer);
-				
-				memcpy(ciphertext, buffer.data(), len);
+				memcpy(ciphertext, text, len);
+				MutexArmor lock(ply->m_mtx_enc);
+				ply->m_enc_cipher->process((uint8_t*)ciphertext, len);
 			} catch (const Botan::Exception& e) {
-				LG("ErrServer", "[%s] OnEncrypt Botan Error: %s\n", datasock->GetPeerIP(), e.what());
+				// Wipe the plaintext that was copied before process() failed,
+				// then drop the connection — cipher state is now undefined.
+				memset(ciphertext, 0, len);
+				LG("ErrServer", "[%s] OnEncrypt Botan Error: %s — disconnecting\n", datasock->GetPeerIP(), e.what());
+				Disconnect(datasock, 0, -32);
 			} catch (...) {
-				LG("ErrServer", "[%s] OnEncrypt Unknown Error!\n", datasock->GetPeerIP());
+				memset(ciphertext, 0, len);
+				LG("ErrServer", "[%s] OnEncrypt Unknown Error — disconnecting\n", datasock->GetPeerIP());
+				Disconnect(datasock, 0, -32);
 			}
 		}
 	}
@@ -1485,30 +1479,15 @@ void ToClient::OnDecrypt(DataSocket* datasock, char* ciphertext, uLong& len) {
 
 	if (_comm_enc > 0) {
 		auto ply = static_cast<Player*>(datasock->GetPointer());
-		if (ply && ply->enc) {
+		if (ply && ply->enc && ply->m_dec_cipher) {
 			try {
-				// Use AES-128/CTR for stream decryption (same as encryption in CTR mode)
-				auto aes_dec = Botan::Cipher_Mode::create("AES-128/CTR", Botan::DECRYPTION);
-				if (!aes_dec) {
-					LG("ErrServer", "[%s] OnDecrypt: Failed to create cipher\n", datasock->GetPeerIP());
-					Disconnect(datasock, 0, -32); // Graceful disconnect
-					return;
-				}
-				
-				aes_dec->set_key(ply->m_AESKey, AES_KEY_LENGTH);
-				aes_dec->start(ply->m_IV, AES_IV_LENGTH);
-				
-				// CTR mode doesn't change length, decrypt in place
-				Botan::secure_vector<uint8_t> buffer((uint8_t*)ciphertext, (uint8_t*)ciphertext + len);
-				aes_dec->finish(buffer);
-				
-				memcpy(ciphertext, buffer.data(), len);
+				ply->m_dec_cipher->process((uint8_t*)ciphertext, len);
 			} catch (const Botan::Exception& e) {
 				LG("ErrServer", "[%s] OnDecrypt Botan Error: %s\n", datasock->GetPeerIP(), e.what());
-				Disconnect(datasock, 0, -32); // Graceful disconnect on decryption failure
+				Disconnect(datasock, 0, -32);
 			} catch (...) {
 				LG("ErrServer", "[%s] OnDecrypt Unknown Error!\n", datasock->GetPeerIP());
-				Disconnect(datasock, 0, -32); // Graceful disconnect on error
+				Disconnect(datasock, 0, -32);
 			}
 		}
 	}

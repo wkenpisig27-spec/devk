@@ -5,6 +5,7 @@
 #include "PacketQueue.h"
 #include "Connection.h"
 #include <PacketEncryption.h>
+#include <memory>
 
 class CProCirculate;
 
@@ -91,6 +92,9 @@ public:
 	Botan::Public_Key* m_srvPublicKey;
 	AES_KEY m_AESKey;
 	AES_IV m_IV;
+
+	std::unique_ptr<Botan::Cipher_Mode> m_enc_cipher;
+	std::unique_ptr<Botan::Cipher_Mode> m_dec_cipher;
 
 	bool _enc;	   // �Ƿ����
 	int _comm_enc; // �����㷨����

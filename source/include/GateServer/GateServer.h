@@ -13,6 +13,7 @@
 #include <prealloc.h>
 #include <algo.h>
 #include <PacketEncryption.h>
+#include <memory>
 #include <stdlib.h>
 #include <unordered_map>
 #include <unordered_set>
@@ -268,6 +269,17 @@ public:
 	char m_nonce[12];
 	AES_KEY m_AESKey;
 	AES_IV m_IV;
+
+	// Stateful AES-128/CTR cipher objects — one per traffic direction.
+	// Initialized once in Initially() so keystream advances continuously
+	// across all packets. Never call start() again after init; calling it
+	// would reset the counter to 0, producing the same keystream as packet 1.
+	// m_mtx_enc guards m_enc_cipher: multiple threads can call SendData for
+	// the same player concurrently (GameServer relay + GateServer heartbeat),
+	// and process() on a shared cipher is not thread-safe.
+	std::unique_ptr<Botan::Cipher_Mode> m_enc_cipher; // server → client
+	std::unique_ptr<Botan::Cipher_Mode> m_dec_cipher; // client → server
+	Mutex m_mtx_enc; // protects m_enc_cipher only (dec is single-threaded)
 
 	uLong volatile m_actid{};
 	uLong volatile m_loginID{};

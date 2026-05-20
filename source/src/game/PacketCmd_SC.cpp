@@ -193,6 +193,22 @@ BOOL SC_Login(LPRPACKET pk) {
 
 		DWORD dwFlag = pk.ReadLong(); // 0x3214
 
+		// Initialize stateful AES-CTR ciphers once per session.
+		// Directions use different IVs so C→S and S→C keystreams are never identical.
+		//   Client enc (C→S) / Server dec: IV with first byte flipped (^= 0x01)
+		//   Client dec (S→C) / Server enc: base IV as-is
+		AES_IV cs_iv;
+		memcpy(cs_iv, g_NetIF->m_IV, AES_IV_LENGTH);
+		cs_iv[0] ^= 0x01;
+
+		g_NetIF->m_enc_cipher = Botan::Cipher_Mode::create("AES-128/CTR", Botan::ENCRYPTION);
+		g_NetIF->m_enc_cipher->set_key(g_NetIF->m_AESKey, AES_KEY_LENGTH);
+		g_NetIF->m_enc_cipher->start(cs_iv, AES_IV_LENGTH);  // C→S: modified IV
+
+		g_NetIF->m_dec_cipher = Botan::Cipher_Mode::create("AES-128/CTR", Botan::DECRYPTION);
+		g_NetIF->m_dec_cipher->set_key(g_NetIF->m_AESKey, AES_KEY_LENGTH);
+		g_NetIF->m_dec_cipher->start(g_NetIF->m_IV, AES_IV_LENGTH);  // S→C: base IV
+
 		g_NetIF->_enc = true;
 
 		// ????????  add by Philip.Wu  2006-07-10

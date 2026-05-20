@@ -699,6 +699,8 @@ void NetIF::OnDisconnect(DataSocket* datasock, int reason) {
 
 	if (g_pGameApp) {
 		_enc = false;
+		m_enc_cipher.reset();
+		m_dec_cipher.reset();
 		m_connect.OnDisconnect();
 		g_pGameApp->SendMessage(APP_NET_DISCONNECT, reason);
 
@@ -759,23 +761,10 @@ extern bool decrypt_Noise(int nNoise, char* src, unsigned int src_len);
 
 void NetIF::OnEncrypt(dbc::DataSocket* datasock, char* ciphertext, const char* text, dbc::uLong& len) {
 	TcpCommApp::OnEncrypt(datasock, ciphertext, text, len);
-	if (_comm_enc > 0 && _enc) {
+	if (_comm_enc > 0 && _enc && m_enc_cipher) {
 		try {
-			// Use AES-128/CTR for stream encryption (no padding needed)
-			auto aes_enc = Botan::Cipher_Mode::create("AES-128/CTR", Botan::ENCRYPTION);
-			if (!aes_enc) {
-				LG("enc", "OnEncrypt: Failed to create cipher\n");
-				return;
-			}
-			
-			aes_enc->set_key(m_AESKey, AES_KEY_LENGTH);
-			aes_enc->start(m_IV, AES_IV_LENGTH);
-			
-			// CTR mode doesn't change length, encrypt in place
-			Botan::secure_vector<uint8_t> buffer((uint8_t*)text, (uint8_t*)text + len);
-			aes_enc->finish(buffer);
-			
-			memcpy(ciphertext, buffer.data(), len);
+			memcpy(ciphertext, text, len);
+			m_enc_cipher->process((uint8_t*)ciphertext, len);
 		} catch (const Botan::Exception& e) {
 			LG("enc", "OnEncrypt Botan Error: %s\n", e.what());
 		} catch (...) {
@@ -787,22 +776,8 @@ void NetIF::OnEncrypt(dbc::DataSocket* datasock, char* ciphertext, const char* t
 void NetIF::OnDecrypt(dbc::DataSocket* datasock, char* ciphertext, dbc::uLong& len) {
 	TcpCommApp::OnDecrypt(datasock, ciphertext, len);
 	try {
-		if (_comm_enc > 0 && _enc) {
-			// Use AES-128/CTR for stream decryption (same as encryption in CTR mode)
-			auto aes_dec = Botan::Cipher_Mode::create("AES-128/CTR", Botan::DECRYPTION);
-			if (!aes_dec) {
-				LG("dec", "OnDecrypt: Failed to create cipher\n");
-				return;
-			}
-			
-			aes_dec->set_key(m_AESKey, AES_KEY_LENGTH);
-			aes_dec->start(m_IV, AES_IV_LENGTH);
-			
-			// CTR mode doesn't change length, decrypt in place
-			Botan::secure_vector<uint8_t> buffer((uint8_t*)ciphertext, (uint8_t*)ciphertext + len);
-			aes_dec->finish(buffer);
-			
-			memcpy(ciphertext, buffer.data(), len);
+		if (_comm_enc > 0 && _enc && m_dec_cipher) {
+			m_dec_cipher->process((uint8_t*)ciphertext, len);
 		}
 	} catch (const Botan::Exception& e) {
 		LG("dec", "OnDecrypt Botan Error: %s\n", e.what());
