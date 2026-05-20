@@ -417,8 +417,8 @@ BOOL CGameApp::Init() {
 		return FALSE;
 	}
 
-	// m_Ident.m_maxID = g_Config.m_ulBaseID; //获得ID分配器的基数
-	m_Ident.m_maxID = 0xafffffff; // 获得ID分配器的基数
+	// Use configured base ID if set; fall back to default to avoid zero (which disables the allocator).
+	m_Ident.m_maxID = g_Config.m_ulBaseID ? g_Config.m_ulBaseID : 0xafffffff;
 	if (!m_Ident.m_maxID)
 		// LG("init", "错误的ID基数!!!\n");
 		LG("init", "error ID base!!!\n");

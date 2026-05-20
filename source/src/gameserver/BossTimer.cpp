@@ -16,6 +16,10 @@
 #include <vector>
 #include <algorithm>
 #include <ctime>
+#include <unordered_map>
+#ifdef PKO_PLATFORM_WINDOWS
+#include <windows.h>
+#endif
 
 namespace BossTimer
 {
@@ -33,7 +37,7 @@ namespace BossTimer
 
     // File paths
     static const char* CONFIG_FILE = "BossTracked.txt";
-    static const char* STATE_FILE = "BossTimers.txt";
+    static std::string g_StateFilePath;   // Set per-GS instance in Initialize() — e.g. BossTimers_GS1.txt
 
     //--------------------------------------------------------------------------
     // Helper: Get boss name from ChaRecord
@@ -98,7 +102,7 @@ namespace BossTimer
     {
         g_BossStates.clear();
 
-        std::ifstream file(STATE_FILE);
+        std::ifstream file(g_StateFilePath);
         if (!file.is_open())
         {
             LG("BossTimer", "No state file found - all bosses can spawn\n");
@@ -168,10 +172,10 @@ namespace BossTimer
     static void SaveState()
     {
         // Write directly to state file (no temp+rename to avoid Windows rename failures)
-        std::ofstream file(STATE_FILE, std::ios::out | std::ios::trunc);
+        std::ofstream file(g_StateFilePath, std::ios::out | std::ios::trunc);
         if (!file.is_open())
         {
-            LG("BossTimer", "ERROR: Cannot write to %s\n", STATE_FILE);
+            LG("BossTimer", "ERROR: Cannot write to %s\n", g_StateFilePath.c_str());
             return;
         }
 
@@ -187,7 +191,7 @@ namespace BossTimer
         file.flush();
         file.close();
 
-        LG("BossTimer", "Saved %zu boss states to %s\n", g_BossStates.size(), STATE_FILE);
+        LG("BossTimer", "Saved %zu boss states to %s\n", g_BossStates.size(), g_StateFilePath.c_str());
     }
 
     //--------------------------------------------------------------------------
@@ -200,7 +204,11 @@ namespace BossTimer
             return;
 
         LG("BossTimer", "=== BossTimer Initializing ===\n");
-        
+
+        // Use per-GS state file so multiple GS instances on the same host don't clobber each other.
+        g_StateFilePath = std::string("BossTimers_") + g_Config.m_szName + ".txt";
+        LG("BossTimer", "State file: %s\n", g_StateFilePath.c_str());
+
         LoadConfig();
         LoadState();
         
@@ -339,10 +347,83 @@ namespace BossTimer
         g_StateDirty = false;
     }
 
+    //--------------------------------------------------------------------------
+    // Load and merge boss states from ALL GS state files for UI display.
+    // Scans the current directory for BossTimers_*.txt files, parses each one,
+    // and merges into a single map. If the same boss appears in two files
+    // (shouldn't happen normally), the most-recent death time wins.
+    // This is read-only — it never modifies g_BossStates.
+    //--------------------------------------------------------------------------
+    static std::unordered_map<unsigned int, BossState> LoadAllStatesForDisplay()
+    {
+        std::unordered_map<unsigned int, BossState> merged;
+        time_t now = time(nullptr);
+
+#ifdef PKO_PLATFORM_WINDOWS
+        WIN32_FIND_DATAA fd;
+        HANDLE hFind = FindFirstFileA("BossTimers_*.txt", &fd);
+        if (hFind == INVALID_HANDLE_VALUE)
+            return merged;  // No files yet — all bosses alive
+
+        do
+        {
+            if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+                continue;
+
+            std::ifstream file(fd.cFileName);
+            if (!file.is_open())
+                continue;
+
+            std::string line;
+            while (std::getline(file, line))
+            {
+                if (line.empty() || line[0] == '#' || line[0] == '/')
+                    continue;
+
+                unsigned int chaId = 0;
+                char mapName[128] = {0};
+                long long deathTime = 0;
+                if (sscanf(line.c_str(), "%u,%127[^,],%lld", &chaId, mapName, &deathTime) != 3)
+                    continue;
+
+                auto cfgIt = g_BossConfigs.find(chaId);
+                if (cfgIt == g_BossConfigs.end())
+                    continue;  // Not a tracked boss
+
+                time_t spawnTime = static_cast<time_t>(deathTime) + cfgIt->second.respawnSeconds;
+                if (now >= spawnTime)
+                    continue;  // Already expired — treat as alive
+
+                // Keep whichever record has the most-recent death time
+                auto existing = merged.find(chaId);
+                if (existing == merged.end() || deathTime > static_cast<long long>(existing->second.deathTime))
+                {
+                    BossState state;
+                    state.chaId = chaId;
+                    state.mapName = mapName;
+                    state.deathTime = static_cast<time_t>(deathTime);
+                    merged[chaId] = state;
+                }
+            }
+        }
+        while (FindNextFileA(hFind, &fd));
+
+        FindClose(hFind);
+#else
+        // Linux: fall back to in-memory g_BossStates (single-GS display)
+        merged = g_BossStates;
+#endif
+        return merged;
+    }
+
     void GetDisplayInfo(std::vector<BossDisplayInfo>& outList)
     {
         outList.clear();
         time_t now = time(nullptr);
+
+        // Merge death records from all GS state files so cross-GS bosses
+        // show the correct dead/alive status regardless of which GS the player is on.
+        const auto mergedStates = LoadAllStatesForDisplay();
 
         // Go through ALL tracked bosses
         for (const auto& cfgPair : g_BossConfigs)
@@ -356,9 +437,9 @@ namespace BossTimer
             strncpy(info.name, name, sizeof(info.name) - 1);
             info.name[sizeof(info.name) - 1] = '\0';
 
-            // Check if dead (on cooldown)
-            auto stateIt = g_BossStates.find(config.chaId);
-            if (stateIt != g_BossStates.end())
+            // Check if dead (on cooldown) — uses merged cross-GS state
+            auto stateIt = mergedStates.find(config.chaId);
+            if (stateIt != mergedStates.end())
             {
                 // Boss is dead - calculate remaining time
                 const BossState& state = stateIt->second;
@@ -377,7 +458,7 @@ namespace BossTimer
             }
             else
             {
-                // No death record - boss is alive
+                // No death record across any GS — boss is alive
                 info.status = 0;
                 info.remainingSeconds = 0;
             }
