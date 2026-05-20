@@ -51,7 +51,7 @@ const char cchChaRecordKeyValue = (char)0xff;
 
 #define defCHA_SKIN_NUM 8
 #define defCHA_INIT_SKILL_NUM 11 // 0����,1-10Ϊ��������
-#define defCHA_INIT_ITEM_NUM 15	 // Edit by Mdrst
+#define defCHA_INIT_ITEM_NUM 20 // Increased from 15
 #define defCHA_GUILD_NAME_LEN 33
 #define defCHA_TITLE_NAME_LEN 33
 #define defCHA_JOB_NAME_LEN 17

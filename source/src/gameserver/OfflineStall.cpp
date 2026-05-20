@@ -246,43 +246,48 @@ bool COfflineStallNPC::BuyItem(CCharacter& buyer, BYTE byIndex, BYTE byCount) {
         return false;
     }
     
+    // Copy item data and stall item ID BEFORE modifying stall state.
+    // UpdateAfterPurchase() shifts the items[] array, so we must capture these now.
+    SItemGrid itemGrid = item.itemGrid;
+    itemGrid.sNum = byCount;
+    itemGrid.dwDBID = 0;    // Will get a new DBID when saved to buyer's inventory
+    itemGrid.SetChange(true);
+    short sItemID = item.itemGrid.sID;
+
     // Deduct gold from buyer
     buyer.setAttr(ATTR_GD, buyer.getAttr(ATTR_GD) - llTotalCost);
     buyer.SynAttr(enumATTRSYN_TRADE);
-    
-    // Give item to buyer - copy the FULL item data including all attributes
-    // This preserves forge level, gems, durability, and all other item properties
-    SItemGrid itemGrid = item.itemGrid;  // Copy full item data from stored stall item
-    itemGrid.sNum = byCount;             // Set count to amount being purchased
-    itemGrid.dwDBID = 0;                 // Clear DBID - will get new ID when saved to buyer's inventory
-    itemGrid.SetChange(true);            // Mark as changed for database persistence
-    
-    // Try to add to kitbag using Push()
+
+    // STEP 1: Remove item from stall and persist to DB FIRST.
+    // This prevents the dupe exploit: if the server restarts after the buyer's
+    // inventory is saved but before the stall is updated, the stall would reload
+    // from DB with the item still present while the buyer already has it.
+    // By saving the stall first, a crash results in item loss (not in stall DB,
+    // not yet saved to buyer) — not exploitable, unlike a dupe.
+    UpdateAfterPurchase(byIndex, byCount, llTotalCost);
+
+    // STEP 2: Give item to buyer (memory only)
     short sPosID = defKITBAG_DEFPUSH_POS;
     short sPushRet = buyer.m_CKitbag.Push(&itemGrid, sPosID);
     if (sPushRet != enumKBACT_SUCCESS) {
-        // Failed - refund gold
+        // Stall DB is already updated — item is gone from the stall.
+        // Refund buyer gold; item is unfortunately lost in this rare edge case.
         buyer.setAttr(ATTR_GD, buyer.getAttr(ATTR_GD) + llTotalCost);
         buyer.SynAttr(enumATTRSYN_TRADE);
-        buyer.SystemNotice("Failed to add item to inventory!");
+        buyer.SystemNotice("Failed to add item to inventory! Gold refunded.");
+        LG("offline_stall", "ERROR: Push failed for buyer %s after stall already updated — item lost\n",
+           buyer.GetName());
         return false;
     }
-    
+
     // Update inventory display
     buyer.SynKitbagNew(enumSYN_KITBAG_TRADE);
-    
-    // Save buyer's gold + inventory to DB IMMEDIATELY to prevent rollback/duplication on crash.
-    // Must happen BEFORE SaveStallUpdate() so that if a crash occurs between the two saves,
-    // the buyer has already paid (safer failure mode than gold duplication).
-    // This mirrors how player-to-player trade handles it in CharTrade.cpp.
+
+    // STEP 3: Persist buyer's gold and inventory to DB.
+    // Stall DB was already updated in Step 1, so the item cannot exist in both
+    // the stall and the buyer's inventory simultaneously after any crash.
     extern CGameDB game_db;
     game_db.SaveChaAssets(&buyer);
-    
-    // Store item info before update (for notification)
-    short sItemID = item.itemGrid.sID;
-    
-    // Update stall (modifies item counts, may remove items)
-    UpdateAfterPurchase(byIndex, byCount, llTotalCost);
     
     // Resend full stall data to buyer to refresh their stall UI
     // This is more reliable than trying to send incremental updates
@@ -797,10 +802,12 @@ void COfflineStallMgr::Update(DWORD dwCurTime) {
         
         // Check if player is still online
         CPlayer* pOwner = g_pGameApp->GetPlayerByDBID(pInfo->dwChaID);
-        if (!pOwner) {
-            // Player has disconnected - safe to spawn NPC now!
+        if (!pOwner && pInfo->byItemCount > 0) {
+            // Player disconnected and stall still has items — safe to spawn NPC now
             stallsToActivate.push_back(pInfo);
         }
+        // If byItemCount == 0 the stall was emptied by purchases; keep the record alive
+        // so the seller can claim pending gold on login, but don't respawn the NPC.
     }
     
     // Spawn NPCs for stalls whose owners have disconnected
