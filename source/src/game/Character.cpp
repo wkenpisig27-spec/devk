@@ -2064,14 +2064,19 @@ void CCharacter::ForceMove(int nTargetX, int nTargetY) {
 		}
 	} else {
 		float fDistance = (float)GetDistance(_nCurX, _nCurY, nTargetX, nTargetY);
+
+		// Fix #2: Guard against division by zero when getMoveSpeed() == 0 or distance is negligible.
+		if (getMoveSpeed() <= 0 || fDistance < 0.0001f) {
+			_isArrive = true;
+			return;
+		}
+
 		if (g_Render.IsRealFPS()) {
 			const auto fps = std::max<DWORD>(10, g_Render.GetFPS());
 			_fStep = 1.0f / (fDistance / (float)getMoveSpeed() * (float)(fps + 2));
 		} else {
-			if (CGameApp::GetFrameFPS() == 30)
-				_fStep = 1.0f / (fDistance / (float)getMoveSpeed() * (float)(CGameApp::GetFrameFPS() + 2));
-			else
-				_fStep = 1.0f / (fDistance / (float)getMoveSpeed() * (float)(CGameApp::GetFrameFPS() + 2));
+			// Fix #4: Collapsed identical if/else — both branches had the exact same expression.
+			_fStep = 1.0f / (fDistance / (float)getMoveSpeed() * (float)(CGameApp::GetFrameFPS() + 2));
 		}
 
 		if (_fStep > 1.0) {

@@ -15,6 +15,10 @@
 #include "AreaRecord.h"
 #include "MountRecord.h"
 
+// Fix #8: Declare MOVE_LENGTH at file scope (defined in MouseDown.cpp) instead of
+// inside a function body, which is technically illegal in standard C++.
+extern int MOVE_LENGTH;
+
 //---------------------------------------------------------------------------
 // class CWaitMoveState
 //---------------------------------------------------------------------------
@@ -28,8 +32,7 @@ int CWaitMoveState::MaxPing = 0;
 int CWaitMoveState::MinPing = 5000;
 int CWaitMoveState::LastPing[LAST_NUM] = {0};
 int CWaitMoveState::LastPingCnt = 0;
-int CWaitMoveState::nTotalPing = 0;
-int CWaitMoveState::nTotalPingCnt = 0;
+// Fix #5: nTotalPing and nTotalPingCnt removed — replaced by rolling average from LastPing[].
 float CWaitMoveState::fAveragePing = 0.0f;
 int CWaitMoveState::LastPingShow[LAST_NUM] = {0};
 
@@ -56,9 +59,14 @@ void CWaitMoveState::SetPreMoveTime(long time) {
 	if (LastPingCnt >= LAST_NUM)
 		LastPingCnt = 0;
 
-	nTotalPing += time;
-	nTotalPingCnt++;
-	fAveragePing = (float)nTotalPing / (float)nTotalPingCnt;
+	// Fix #5: Use rolling average from LastPing[] instead of accumulating nTotalPing/nTotalPingCnt
+	// which would overflow int after long play sessions and corrupt fAveragePing / _ulPreMoveTime.
+	{
+		int sum = 0;
+		for (int i = 0; i < LAST_NUM; i++)
+			sum += LastPing[i];
+		fAveragePing = (float)sum / (float)LAST_NUM;
+	}
 
 	static DWORD nTotalFPS = 0;
 	static DWORD nTotalFPSCnt = 0;
@@ -69,8 +77,14 @@ void CWaitMoveState::SetPreMoveTime(long time) {
 		nMaxFPS = g_Render.GetFPS();
 	if (nMinFPS > g_Render.GetFPS())
 		nMinFPS = g_Render.GetFPS();
-	nTotalFPS += g_Render.GetFPS();
-	nTotalFPSCnt++;
+	// Fix #5: Cap FPS accumulators to avoid overflow by resetting once count exceeds window
+	if (nTotalFPSCnt >= 1000) {
+		nTotalFPS = g_Render.GetFPS();
+		nTotalFPSCnt = 1;
+	} else {
+		nTotalFPS += g_Render.GetFPS();
+		nTotalFPSCnt++;
+	}
 	fFPSAverage = (float)nTotalFPS / (float)nTotalFPSCnt;
 	LG("ping", RES_STRING(CL_LANGUAGE_MATCH_404), LastPingShow[0], LastPingShow[1], LastPingShow[2], MaxPing, fAveragePing, MinPing, nMaxFPS, fFPSAverage, nMinFPS);
 }
@@ -184,17 +198,25 @@ bool CMoveState::_Start() {
 	if (!IsAllowMove())
 		return false;
 
-	int serverdis = 0;
+	// Fix #1: isServer was never set to true — the server-position path was computed but
+	// all `if (isServer)` blocks were dead code. Now we correctly set isServer and use
+	// the server-origin path when the client has drifted ahead, reducing server rejections.
 	bool isServer = false;
+	int clientDis = 0;
+	int serverdis = 0;
 	static stNetMoveInfo serverPath;
-	if (g_cFindPath.Find(_pCha->GetScene(), _pCha, _pCha->GetServerX(), _pCha->GetServerY(), _nTargetX, _nTargetY, _IsWalkLine)) {
+
+	bool clientDiverged = (_pCha->GetServerX() != _pCha->GetCurX() || _pCha->GetServerY() != _pCha->GetCurY());
+	if (clientDiverged && g_cFindPath.Find(_pCha->GetScene(), _pCha, _pCha->GetServerX(), _pCha->GetServerY(), _nTargetX, _nTargetY, _IsWalkLine)) {
 		WriteInfo(g_cFindPath.GetResultPath(), serverPath);
 		serverdis = g_cFindPath.GetLength();
+		isServer = true;
 	}
 
 	if (!g_cFindPath.Find(_pCha->GetScene(), _pCha, _pCha->GetCurX(), _pCha->GetCurY(), _nTargetX, _nTargetY, _IsWalkLine)) {
 		return false;
 	}
+	clientDis = g_cFindPath.GetLength();
 
 	WriteInfo(g_cFindPath.GetResultPath(), _stPathInfo);
 
@@ -209,8 +231,8 @@ bool CMoveState::_Start() {
 	}
 
 	float fRate = 1.0f;
-	if (isServer) {
-		fRate = (float)g_cFindPath.GetLength() / (float)serverdis;
+	if (isServer && serverdis > 0) {
+		fRate = (float)clientDis / (float)serverdis;
 
 		if (fRate > 1.10f)
 			fRate = 1.10f;
@@ -218,7 +240,7 @@ bool CMoveState::_Start() {
 			fRate = 0.90f;
 	}
 
-	// Add waypoints with minimal smoothing (only skip obvious duplicates)
+	// Add waypointswith minimal smoothing (only skip obvious duplicates)
 	int n = _stPathInfo.pos_num;
 	for (int i = 2; i < n; i++) {
 		GetMoveList()->PushPoint(_stPathInfo.pos_buf[i].x, _stPathInfo.pos_buf[i].y);
@@ -246,21 +268,23 @@ bool CMoveState::_Start() {
 	return true;
 }
 
-void CMoveState::WriteInfo(S_BVECTOR<D3DXVECTOR3>& path, stNetMoveInfo& info) {
-	char buf[80] = {0};
-
-	int n = path.size();
+// Fix #7: Shared coordinate quantization extracted from both WriteInfo implementations.
+// CMoveState::WriteInfo and COneMoveState::WriteInfo now delegate to this helper.
+static void WriteNetMoveInfo(S_BVECTOR<D3DXVECTOR3>& path, stNetMoveInfo& info, const char* logTag) {
+	int n = (int)path.size();
 	if (n > defMAX_POS_NUM)
 		n = defMAX_POS_NUM;
 	for (int i = 0; i < n; i++) {
 		info.pos_buf[i].x = (long)(path[i]->x * 100.0f) / 50 * 50 + 25;
 		info.pos_buf[i].y = (long)(path[i]->y * 100.0f) / 50 * 50 + 25;
-
-		LG("move_path", "%d, %d\n", info.pos_buf[i].x, info.pos_buf[i].y);
+		LG(logTag, "Path:[%d, %d]\n", info.pos_buf[i].x, info.pos_buf[i].y);
 	}
-
 	info.pos_num = n;
+}
 
+void CMoveState::WriteInfo(S_BVECTOR<D3DXVECTOR3>& path, stNetMoveInfo& info) {
+	// Fix #7: Delegates to shared helper WriteNetMoveInfo (defined below)
+	WriteNetMoveInfo(path, info, "move_path");
 	LG("move_path", "\n\n");
 }
 
@@ -491,7 +515,8 @@ void CBackMoveState::FrameMove() {
 //---------------------------------------------------------------------------
 // class COneMoveState
 //---------------------------------------------------------------------------
-CMoveList COneMoveState::_List;
+// Fix #9: Removed static CMoveList COneMoveState::_List definition.
+// _List is now a stack-local variable in ContinueMove() — see that function.
 
 COneMoveState::COneMoveState(CActor* p)
 	: CWaitMoveState(p), _IsWalkLine(false), _nTargetX(0), _nTargetY(0) {
@@ -529,7 +554,7 @@ bool COneMoveState::ContinueMove(int nTargetX, int nTargetY, bool isWalkLine, bo
 
 	// According to the parameters, the new moving path can be segmented into multiple moving paths
 	int len = -1; // No segment
-	extern int MOVE_LENGTH;
+	// MOVE_LENGTH declared at file scope (fix #8)
 	if (MOVE_LENGTH > 0) {
 		len = _pCha->getMoveSpeed() / 2;
 		if (len < (int)_dwPreMoveDis)
@@ -540,7 +565,9 @@ bool COneMoveState::ContinueMove(int nTargetX, int nTargetY, bool isWalkLine, bo
 			len = MOVE_LENGTH;
 	}
 
-	CompartMoveList(_List, g_cFindPath.GetResultPath(), len);
+	// Fix #9: Use a local CMoveList instead of the former static class member _List.
+	CMoveList localList;
+	CompartMoveList(localList, g_cFindPath.GetResultPath(), len);
 
 	const DWORD MOUSE_TIME = 300;
 	if (!IsCheckTime || (IsCheckTime && CGameApp::GetCurTick() > _dwContinueMoveTime)) {
@@ -548,17 +575,17 @@ bool COneMoveState::ContinueMove(int nTargetX, int nTargetY, bool isWalkLine, bo
 			_dwContinueMoveTime = CGameApp::GetCurTick() + MOUSE_TIME;
 		}
 
-		POINT cur_pt = _List.GetFront();
-		_List.PopFront();
+		POINT cur_pt = localList.GetFront();
+		localList.PopFront();
 		if (!StartMove(cur_pt.x, cur_pt.y, isWalkLine))
 			rv = false;
 	}
 
 	// Cache the movement path requested by the user
 	_cNeedList.clear();
-	while (!_List.IsEmpty()) {
-		POINT pt = _List.GetFront();
-		_List.PopFront();
+	while (!localList.IsEmpty()) {
+		POINT pt = localList.GetFront();
+		localList.PopFront();
 		AddPath(pt.x, pt.y, isWalkLine);
 	}
 	return rv;
@@ -634,9 +661,11 @@ int COneMoveState::GetSyschroDistance() {
 }
 
 void COneMoveState::FrameMove() {
-	// Dynamically adjust the moving speed of the protagonist
-	const float fAddStep = 0.005f;
-	const float fDownStep = 0.05f;
+	// Dynamically adjust the moving speed of the protagonist.
+	// Fix #6: Balance correction steps — previously fAddStep (0.005) was 10x slower than
+	// fDownStep (0.05), making "speed up to catch server" take ~200 frames (~6.5s at 30fps).
+	const float fAddStep = 0.02f;
+	const float fDownStep = 0.02f;
 
 	if (_fMoveRate > _fRate) {
 		_fMoveRate -= fDownStep;
@@ -833,24 +862,20 @@ void COneMoveState::Cancel() {
 }
 
 void COneMoveState::WriteInfo(S_BVECTOR<D3DXVECTOR3>& path, stNetMoveInfo& info) {
-	// Turn the wayfinding point into the protocol content sent to the server
-	int n = path.size();
-	if (n > defMAX_POS_NUM)
-		n = defMAX_POS_NUM;
+	// Turn the wayfinding point into the protocol content sent to the server.
+	// Fix #7: Now delegates to WriteNetMoveInfo (shared with CMoveState::WriteInfo).
+	WriteNetMoveInfo(path, info, "m_path");
+	// Debug: log if quantization changed any coordinate
+	int n = std::min((int)path.size(), (int)defMAX_POS_NUM);
 	for (int i = 0; i < n; i++) {
-		info.pos_buf[i].x = (long)(path[i]->x * 100.0f) / 50 * 50 + 25;
-		info.pos_buf[i].y = (long)(path[i]->y * 100.0f) / 50 * 50 + 25;
-		LG("m_path", "Path:[%d, %d]\n", info.pos_buf[i].x, info.pos_buf[i].y);
 		if (info.pos_buf[i].x != (long)(path[i]->x * 100.0f) || info.pos_buf[i].y != (long)(path[i]->y * 100.0f))
 			LG("m_path", "###########FindPath:[%d, %d]\n", (long)(path[i]->x * 100.0f), (long)(path[i]->y * 100.0f));
 	}
-	info.pos_num = n;
 	LG("m_path", "Count:%d\n", info.pos_num);
 }
 
-bool COneMoveState::IsSameServerPos(int x, int y) {
-	return _nMoveCount <= 1;
-}
+// IsSameServerPos removed (fix #3): ignored x/y parameters, returned only _nMoveCount<=1,
+// and was never called anywhere in the codebase.
 
 void COneMoveState::CompartMoveList(CMoveList& outlist, S_BVECTOR<D3DXVECTOR3>& path, int length) {
 	// For a wayfinding point, the length is divided into multiple segments, less than 0 does not segment

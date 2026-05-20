@@ -51,8 +51,8 @@ private: // 统计的Ping值
 	static int LastPing[LAST_NUM];
 	static int LastPingCnt;
 	static int LastPingShow[LAST_NUM]; // 用于显示最近的ping值
-	static int nTotalPing;
-	static int nTotalPingCnt;
+	// Fix #5: nTotalPing/nTotalPingCnt removed — overflow after long sessions.
+	//         fAveragePing is now computed from the rolling LastPing[] buffer.
 	static float fAveragePing;
 };
 
@@ -148,7 +148,7 @@ public:
 	void SetWalkLine(bool v) { _IsStartWalkLine = v; }
 	bool ContinueMove(int nTargetX, int nTargetY, bool isWalkLine, bool IsCheckTime = false);
 	bool AddPath(int x, int y, bool IsWalkLine);
-	bool IsSameServerPos(int x, int y);
+	// IsSameServerPos removed (fix #3): ignored its x/y parameters and was never called.
 	void SetRate(float r) { _fRate = r; }
 	float GetRate() { return _fRate; }
 	// 对寻路路径分段
@@ -202,5 +202,6 @@ private:
 	typedef std::list<NeedPath> path;
 	path _cNeedList; // 需要移动的点
 
-	static CMoveList _List;
+	// Fix #9: Removed static CMoveList _List — was a shared scratch buffer on the class.
+	// It is now a stack-local variable in ContinueMove() to prevent silent data corruption.
 };
