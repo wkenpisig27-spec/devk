@@ -750,6 +750,7 @@ bool CMouseDown::ActBackMove(CCharacter* pCha, int nScrX, int nScrY, bool isAdd)
 bool g_HaveGameMender = false;
 void CMouseDown::FrameMove() {
 	_pAutoAttack->FrameMove();
+	_pAutoAttack->FrameMoveToggle();
 	return;
 
 	static DWORD dwTime = CGameApp::GetCurTick() + (rand() % 300) * 1000 + 30 * 1000;

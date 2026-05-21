@@ -32,6 +32,7 @@ public:
 	static void DelCommand(CCommandObj* p);
 
 	static CFastCommand* GetFastCommand(int index);									   // ���Ҷ�Ӧ�Ŀ�ݿؼ�
+	static int GetFastCommandCount() { return (int)_fast.size(); }					   // Total number of fast slots
 	static CFastCommand* FintFastCommand(CCommandObj* p, bool checkSecondary = false); // ���Ҷ�Ӧ�Ŀ�ݿؼ�
 	static void FindFastCommandIndexes(CCommandObj* p, int arr[36]);
 	void Exec(bool rightclick = false);

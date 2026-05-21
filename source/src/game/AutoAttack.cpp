@@ -7,6 +7,9 @@
 #include "character.h"
 #include "uistartform.h"
 #include "uiminimapform.h"
+#include "scene.h"
+#include "uifastcommand.h"
+#include "uiskillcommand.h"
 
 #include "stmove.h"
 #include "stattack.h"
@@ -29,6 +32,10 @@ void CAutoAttack::Reset() {
 
 	_eStyle = eNone;
 	_IsStart = false;
+
+	_bToggleEnabled = false;
+	memset(_slotNextCheck, 0, sizeof(_slotNextCheck));
+	_dwMeleeNextCheck = 0;
 }
 
 bool CAutoAttack::AttackStart(CCharacter* pMain, CSkillRecord* pSkill, CCharacter* pCha) {
@@ -221,4 +228,101 @@ bool CAutoAttack::Follow(CCharacter* pMain, CCharacter* pTarget) {
 
 	_IsStart = true;
 	return true;
+}
+
+void CAutoAttack::ToggleAutoAttack() {
+	_bToggleEnabled = !_bToggleEnabled;
+	g_pGameApp->SysInfo(_bToggleEnabled ? "Auto-Attack: ON" : "Auto-Attack: OFF");
+}
+
+void CAutoAttack::FrameMoveToggle() {
+	if (!_bToggleEnabled)
+		return;
+
+	CCharacter* pMain = CGameScene::GetMainCha();
+	if (!pMain || !pMain->IsValid() || !pMain->IsEnabled())
+		return;
+
+	CCharacter* pTarget = g_stUIStart.GetTarget();
+	if (!pTarget || !pTarget->IsValid() || !pTarget->IsEnabled() || pTarget->IsHide())
+		return;
+
+	DWORD dwNow = CGameApp::GetCurTick();
+
+	// Try topBar skill slots in priority order (nTag 24..35 = slots 0..11)
+	int totalSlots = CFastCommand::GetFastCommandCount();
+	for (int tag = (int)(MAX_FAST_COL * 2); tag < (int)(MAX_FAST_COL * 3); ++tag) {
+		int slotIndex = tag - (int)(MAX_FAST_COL * 2); // 0..11
+
+		// Skip until per-slot predicted cooldown expires
+		if (dwNow < _slotNextCheck[slotIndex])
+			continue;
+
+		// Locate the topBar slot with this semantic nTag
+		CFastCommand* pFast = nullptr;
+		for (int vi = 0; vi < totalSlots; ++vi) {
+			CFastCommand* p = CFastCommand::GetFastCommand(vi);
+			if (p && p->topBar && p->nTag == tag) {
+				pFast = p;
+				break;
+			}
+		}
+		if (!pFast)
+			continue;
+
+		CCommandObj* pCmd = pFast->GetCommand();
+		if (!pCmd)
+			continue;
+
+		CSkillCommand* pSkillCmd = dynamic_cast<CSkillCommand*>(pCmd);
+		if (!pSkillCmd)
+			continue;
+
+		CSkillRecord* pSkill = pSkillCmd->GetSkillRecord();
+		if (!pSkill)
+			continue;
+
+		if (!pSkill->IsAttackTime(dwNow))
+			continue;
+
+		// Validate skill usability (SP, state, level) without target-type check.
+		// IsUse() would reject self-buff skills (e.g. Berserk/Stealth) when pTarget is enemy.
+		if (!g_SkillUse.IsValid(pSkill, pMain))
+			continue;
+
+		// Replicate CSkillCommand::IsAtOnce() using public CSkillRecord fields.
+		// IsAtOnce() is protected so we can't call it from here directly.
+		bool isAtOnce = pSkill->GetIsActive() || pSkill->GetDistance() <= 0 ||
+		                pSkill->chApplyTarget == enumSKILL_TYPE_SELF;
+
+		if (isAtOnce) {
+			// Self-targeting or zero-distance skill: directly invoke UseCommand()
+			// → CAttackState targeting self → SetCommand(this) → StartCommand() → AniClock
+			pSkillCmd->UseCommand();
+		} else {
+			// Enemy-targeted skill: prime _pCommand so ActAttackCha's CAttackState
+			// picks it up via GetReadyCommand() → StartCommand() → AniClock
+			CCommandObj::SetReadyCommand(pSkillCmd);
+			_pMouseDown->ActAttackCha(pMain, pSkill, pTarget, false, false, false);
+		}
+
+		// Record when this slot's cooldown is predicted to expire so we don't poll it
+		int fireSpeed = pSkill->GetFireSpeed();
+		_slotNextCheck[slotIndex] = dwNow + (fireSpeed > 0 ? (DWORD)fireSpeed : 500);
+		return;
+	}
+
+	// Fallback: inborn (normal melee) attack
+	if (dwNow < _dwMeleeNextCheck)
+		return;
+
+	CSkillRecord* pInborn = CCharacter::GetDefaultSkillInfo();
+	if (!pInborn || !pInborn->IsAttackTime(dwNow))
+		return;
+
+	if (g_SkillUse.IsUse(pInborn, pMain, pTarget)) {
+		_pMouseDown->ActAttackCha(pMain, pInborn, pTarget, false, false, false);
+		int fireSpeed = pInborn->GetFireSpeed();
+		_dwMeleeNextCheck = dwNow + (fireSpeed > 0 ? (DWORD)fireSpeed : 500);
+	}
 }

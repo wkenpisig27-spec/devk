@@ -170,6 +170,9 @@ private:
 	int pendingChestPreviewItemID{-1};
 
 	CCheckBox* chkLinkEqForm;
+	CCheckBox* _chkAutoAttack{};
+
+	static void _evtAutoAttackChange(CGuiData* pSender);
 
 	CForm* frmItemSpy;						 // 道具表单
 	CGoodsGrid* grdItem;					 // 道具栏

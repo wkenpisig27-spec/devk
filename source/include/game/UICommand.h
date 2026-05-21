@@ -30,6 +30,7 @@ public:
 	static bool UserExec(); // 当用户选择后,等待用户输入执行
 	static void Cancel() { _pCommand = nullptr; }
 	static CCommandObj* GetReadyCommand() { return _pCommand; }
+	static void SetReadyCommand(CCommandObj* p) { _pCommand = p; }
 
 	virtual bool UseCommand(bool value = false); // 使用
 	virtual bool StartCommand() { return false; }

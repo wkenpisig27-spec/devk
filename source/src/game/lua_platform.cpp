@@ -79,6 +79,10 @@ void InitLuaPlatform() {
 	REGFN(SetDisableMeleeForCasters);
 	REGFN(GetDisableMeleeForCasters);
 
+	// Toggle auto-attack mode
+	REGFN(ToggleAutoAttack);
+	REGFN(GetAutoAttackEnabled);
+
 	// scene??????
 	g_luaFNList.push_back("[scene]");
 	REGFN(sceAddObj);

@@ -103,3 +103,30 @@ inline int lua_GetDisableMeleeForCasters(lua_State* L) {
 	lua_pushboolean(L, g_bDisableMeleeForCasters ? 1 : 0);
 	return 1;
 }
+
+#include "autoattack.h"
+
+// Toggle auto-attack mode on/off
+// Lua: ToggleAutoAttack()
+inline int lua_ToggleAutoAttack(lua_State* L) {
+	CWorldScene* pScene = dynamic_cast<CWorldScene*>(g_pGameApp->GetCurScene());
+	if (!pScene) {
+		SCENE_NULL_ERROR
+		return 0;
+	}
+	pScene->GetMouseDown().GetAutoAttack()->ToggleAutoAttack();
+	return 0;
+}
+
+// Query current auto-attack toggle state
+// Lua: local enabled = GetAutoAttackEnabled()
+inline int lua_GetAutoAttackEnabled(lua_State* L) {
+	CWorldScene* pScene = dynamic_cast<CWorldScene*>(g_pGameApp->GetCurScene());
+	if (!pScene) {
+		lua_pushboolean(L, 0);
+		return 1;
+	}
+	bool enabled = pScene->GetMouseDown().GetAutoAttack()->IsToggleEnabled();
+	lua_pushboolean(L, enabled ? 1 : 0);
+	return 1;
+}

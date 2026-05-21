@@ -22,6 +22,12 @@ public:
 	void SetIsStart(bool v) { _IsStart = v; }
 	bool GetIsStart() { return _IsStart; }
 
+	// Toggle auto-attack mode
+	void ToggleAutoAttack();
+	void SetToggleEnabled(bool v) { _bToggleEnabled = v; }
+	bool IsToggleEnabled() const { return _bToggleEnabled; }
+	void FrameMoveToggle();
+
 	// 自动攻击
 	bool AttackStart(CCharacter* pMain, CSkillRecord* pSkill, CCharacter* pCha);
 	bool AttackStart(CCharacter* pMain, CSkillRecord* pSkill, int nScrX, int nScrY);
@@ -42,6 +48,10 @@ private:
 
 	eStyle _eStyle;
 	bool _IsStart;
+
+	bool _bToggleEnabled;
+	DWORD _slotNextCheck[12]; // Per topBar slot predicted next-cast time (one per MAX_FAST_COL slot)
+	DWORD _dwMeleeNextCheck;  // Melee fallback predicted next-cast time
 
 	CCharacter* _pTarget;
 	CCharacter* _pMain;

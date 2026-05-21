@@ -425,6 +425,11 @@ fscMainF221  = UI_CreateCompent( frmFast2, FAST_COMMANG_TYPE, "fscMainF221",  32
 fscMainF222 = UI_CreateCompent( frmFast2, FAST_COMMANG_TYPE, "fscMainF222", 32, 32, 345, 5 )
 fscMainF223 = UI_CreateCompent( frmFast2, FAST_COMMANG_TYPE, "fscMainF223", 32, 32, 379, 5 )
 
+chkAutoAttack = UI_CreateCompent( frmFast2, CHECK_TYPE, "chkAutoAttack", 12, 12, 416, 16 )
+UI_LoadImage( chkAutoAttack, "texture/ui/QQ2.tga", UNCHECKED, 10, 10, 40, 231 )
+UI_LoadImage( chkAutoAttack, "texture/ui/QQ2.tga", CHECKED, 10, 10, 52, 231 )
+UI_SetHint( chkAutoAttack, "Auto-Attack" )
+
 ---------------
 -- Quickslot --
 ---------------

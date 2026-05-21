@@ -33,6 +33,7 @@
 #include "UINpcTradeForm.h"
 #include "WorldScene.h"
 #include "UICozeForm.h"
+#include "autoattack.h"
 #include <algorithm>
 #include <string>
 
@@ -316,6 +317,10 @@ bool CEquipMgr::Init() {
 			_pFastCommands[i]->topBar = true;
 		}
 	}
+
+	_chkAutoAttack = dynamic_cast<CCheckBox*>(frmFast2->Find("chkAutoAttack"));
+	if (_chkAutoAttack)
+		_chkAutoAttack->evtCheckChange = _evtAutoAttackChange;
 
 	//_pActiveFastLabel = dynamic_cast<CLabel*>(frmMain800->Find( "labFast" ) );
 	_ActiveFast(0);
@@ -949,6 +954,8 @@ void CEquipMgr::SwitchMap() {
 	refreshChaModel = true;
 	refreshSpyModel = true;
 	HideChestPreview();
+	if (_chkAutoAttack)
+		_chkAutoAttack->SetIsChecked(false);
 }
 
 void CEquipMgr::RenderModel(int x, int y, CCharacter* original, CCharacter* model, int rotation, bool refresh) {
@@ -1209,6 +1216,20 @@ void CEquipMgr::DelFastCommand(CCommandObj* pObj) {
 			pFast->DelCommand();
 		}
 	}
+}
+
+void CEquipMgr::_evtAutoAttackChange(CGuiData* pSender) {
+	CCheckBox* pChk = dynamic_cast<CCheckBox*>(pSender);
+	if (!pChk)
+		return;
+
+	CWorldScene* pScene = dynamic_cast<CWorldScene*>(g_pGameApp->GetCurScene());
+	if (!pScene)
+		return;
+
+	CAutoAttack* pAA = pScene->GetMouseDown().GetAutoAttack();
+	pAA->SetToggleEnabled(pChk->GetIsChecked());
+	g_pGameApp->SysInfo(pChk->GetIsChecked() ? "Auto-Attack: ON" : "Auto-Attack: OFF");
 }
 
 void CEquipMgr::_evtButtonClickEvent(CGuiData* pSender, int x, int y, DWORD key) {
