@@ -71,19 +71,15 @@ inline CCharacter* LB_GetCha(lua_State* L, int idx)
     return nullptr;
 }
 
-// Push CCharacter* to Lua stack as LuaBridge full userdata.
-// Use everywhere you previously wrote: lua_pushlightuserdata(L, (void*)pCha)
+// Push CCharacter* to Lua stack as lightuserdata for legacy script compatibility.
+// LB_GetCha still accepts both light and full userdata on read.
 inline void LB_PushCha(lua_State* L, CCharacter* p)
 {
     if (!p) {
         lua_pushnil(L);
         return;
     }
-    auto err = luabridge::detail::UserdataPtr::push(L, p);
-    if (err) {
-        // Class not registered yet — fall back to lightuserdata so scripts still work
-        lua_pushlightuserdata(L, static_cast<void*>(p));
-    }
+    lua_pushlightuserdata(L, static_cast<void*>(p));
 }
 
 // Register CCharacter as a LuaBridge class.  Call once from RegisterLuaAI().

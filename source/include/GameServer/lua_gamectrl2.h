@@ -74,6 +74,8 @@ inline int lua_IsChaInRegion(lua_State* L) {
 		int nRegionDef = (int)lua_tonumber(L, 2);
 		if (pCha->IsInArea(nRegionDef)) {
 			lua_pushnumber(L, 1);
+		} else {
+			lua_pushnumber(L, 0);
 		}
 	} else {
 		lua_pushnumber(L, 0);

@@ -7,8 +7,33 @@ vvv = 0
 function debugout(c, info)
 end
 
+-- Local helper: keep host-follow logic off the global namespace so a character
+-- userdata value cannot accidentally replace a global named "ai_host".
+local function check_monster_host(c)
+    if GetChaAIType(c) == AI_NONE then
+        return 0
+    end
+
+    local host = GetChaHost(c)
+
+    if host ~= nil then
+        local dis = get_distance(c, host)
+
+        if dis > 400 then
+            local hx, hy = GetChaPos(host)
+            local rx = 200 - Rand(400)
+            local ry = 200 - Rand(400)
+            ChaMove(c, hx + rx, hy + ry)
+        end
+
+        return 1
+    end
+
+    return 0
+end
+
 function ai_idle(c)
-    if ai_host(c) == 1 then
+    if check_monster_host(c) == 1 then
         return
     end
 
@@ -37,29 +62,6 @@ function ai_idle(c)
             end
         end
     end
-end
-
-function ai_host(c)
-    if GetChaAIType(c) == AI_NONE then
-        return 0
-    end
-
-    local host = GetChaHost(c)
-
-    if host ~= nil then
-        local dis = get_distance(c, host)
-
-        if dis > 400 then
-            local hx, hy = GetChaPos(host)
-            local rx = 200 - Rand(400)
-            local ry = 200 - Rand(400)
-            ChaMove(c, hx + rx, hy + ry)
-        end
-
-        return 1
-    end
-
-    return 0
 end
 
 function ai_block(c, t)
