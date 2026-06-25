@@ -780,9 +780,10 @@ void AuthThread::QueryAccount(DataSocket* datasock, RPacket rpkt) {
 		return;
 	}
 
-	if (isValidMacAddress(m_AcctInfo.strMAC.c_str())) {
-		m_AcctInfo.bExist = false;
-		return;
+	// MAC is stored for tracking purposes; allow any format (including empty)
+	if (!isValidMacAddress(m_AcctInfo.strMAC.c_str())) {
+		LG("AuthDebug", "Non-standard MAC format from account [%s]: [%s] (login still allowed)\n",
+			m_AcctInfo.strName.c_str(), m_AcctInfo.strMAC.c_str());
 	}
 
 	// Query account using stored procedure (like TOP-master)
