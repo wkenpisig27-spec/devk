@@ -448,10 +448,6 @@ void GroupServerApp::CP_SAY2GUD(Player* ply, DataSocket* datasock, RPacket& pk) 
 	l_wpk.WriteString(l_word);
 	l_wpk.WriteLong(ply->m_chatColour[ply->m_currcha]);
 	SendToClient(l_plylst, l_plynum, l_wpk);
-
-	char guild[32];
-	Guild* l_gld = FindGuildByGldID(ply->m_guild[ply->m_currcha]);
-	sprintf(guild, "Guild - %s", l_gld->m_name);
 }
 
 //======================================================================

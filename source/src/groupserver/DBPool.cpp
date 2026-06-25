@@ -49,6 +49,11 @@ bool DBPool::Initialize(int poolSize, const char* ip, const char* db,
 		return false;
 	}
 
+	m_ip = ip;
+	m_db = db;
+	m_login = login;
+	m_passwd = passwd;
+
 	m_poolSize = poolSize;
 	m_connections.resize(poolSize);
 
@@ -76,12 +81,41 @@ bool DBPool::Initialize(int poolSize, const char* ip, const char* db,
 		conn.tblX1        = new friend_tbl(conn.db);
 		conn.tblparam     = new TBLParam(conn.db);
 		conn.in_use       = false;
+		conn.last_used    = std::chrono::steady_clock::now();
 
 		LG("DBPool", "Connection %d/%d established\n", i + 1, poolSize);
 	}
 
 	m_initialized = true;
 	LG("DBPool", "DB connection pool initialized successfully (%d connections)\n", poolSize);
+	return true;
+}
+
+bool DBPool::PingAndReconnect(DBConnection& conn, int index) {
+	auto now = std::chrono::steady_clock::now();
+	auto idleSec = std::chrono::duration_cast<std::chrono::seconds>(now - conn.last_used).count();
+
+	if (idleSec < KEEPALIVE_IDLE_SECONDS) {
+		return true;
+	}
+
+	SQLRETURN pingRet = conn.db->exec_sql_direct("SELECT 1");
+	if (DBOK(pingRet) || DBNODATA(pingRet)) {
+		conn.last_used = now;
+		return true;
+	}
+
+	LG("DBPool", "Connection %d stale (idle %lld sec), reconnecting...\n", index, (long long)idleSec);
+	conn.db->disconn();
+
+	std::string errinfo;
+	if (!conn.db->connect(m_ip.c_str(), m_db.c_str(), m_login.c_str(), m_passwd.c_str(), errinfo)) {
+		LG("DBPool", "ERROR: Reconnect for connection %d failed: %s\n", index, errinfo.c_str());
+		return false;
+	}
+
+	conn.last_used = now;
+	LG("DBPool", "Connection %d reconnected successfully\n", index);
 	return true;
 }
 
@@ -94,7 +128,11 @@ DBConnectionGuard DBPool::GetConnection(unsigned long timeoutMs) {
 		// Try to find a free connection
 		for (int i = 0; i < m_poolSize; i++) {
 			if (!m_connections[i].in_use) {
+				if (!PingAndReconnect(m_connections[i], i)) {
+					continue;
+				}
 				m_connections[i].in_use = true;
+				m_connections[i].last_used = std::chrono::steady_clock::now();
 				return DBConnectionGuard(this, i, &m_connections[i]);
 			}
 		}
@@ -108,7 +146,9 @@ DBConnectionGuard DBPool::GetConnection(unsigned long timeoutMs) {
 				// Check one more time after timeout
 				for (int i = 0; i < m_poolSize; i++) {
 					if (!m_connections[i].in_use) {
+						if (!PingAndReconnect(m_connections[i], i)) continue;
 						m_connections[i].in_use = true;
+						m_connections[i].last_used = std::chrono::steady_clock::now();
 						return DBConnectionGuard(this, i, &m_connections[i]);
 					}
 				}

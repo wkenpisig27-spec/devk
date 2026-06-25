@@ -351,6 +351,49 @@ WPacket GroupServerApp::TP_CHANGEPASS(Player* l_ply, DataSocket* datasock, RPack
 	return l_wpk;
 }
 // this form already has cooldown inside client  , maybe add second one here?
+
+bool GroupServerApp::CheckRegisterRateLimit(const char* ip) {
+	using namespace std::chrono;
+
+	constexpr int  MAX_ATTEMPTS = 5;
+	constexpr auto WINDOW       = seconds(60);
+	constexpr auto BLOCK_DUR    = minutes(5);
+
+	std::lock_guard<std::mutex> lock(m_regRateMutex);
+	auto now = steady_clock::now();
+
+	for (auto it = m_regRateMap.begin(); it != m_regRateMap.end(); ) {
+		if (now - it->second.windowStart > BLOCK_DUR + WINDOW)
+			it = m_regRateMap.erase(it);
+		else
+			++it;
+	}
+
+	auto& info = m_regRateMap[ip];
+
+	if (now < info.blockedUntil) {
+		auto remaining = duration_cast<seconds>(info.blockedUntil - now).count();
+		LG("Security", "[Register] IP %s rate-limited, %lld s remaining\n", ip, (long long)remaining);
+		return false;
+	}
+
+	if (info.attempts == 0 || now - info.windowStart >= WINDOW) {
+		info.windowStart = now;
+		info.attempts    = 0;
+	}
+
+	info.attempts++;
+
+	if (info.attempts > MAX_ATTEMPTS) {
+		info.blockedUntil = now + BLOCK_DUR;
+		LG("Security", "[Register] IP %s exceeded rate limit (%d per min) - blocked 5 minutes\n",
+		   ip, MAX_ATTEMPTS);
+		return false;
+	}
+
+	return true;
+}
+
 WPacket GroupServerApp::TP_REGISTER(DataSocket* datasock, RPacket& pk) {
 	cChar* userName = pk.ReadString();
 	cChar* password = pk.ReadString();
@@ -362,6 +405,22 @@ WPacket GroupServerApp::TP_REGISTER(DataSocket* datasock, RPacket& pk) {
 	int emaillen = strlen(email);
 	WPacket ret_pk = g_gpsvr->GetWPacket();
 	ret_pk.WriteCmd(CMD_PT_REGISTER);
+
+	if (!CheckRegisterRateLimit(datasock->GetPeerIP())) {
+		ret_pk.WriteChar(0);
+		ret_pk.WriteString("Too many registration attempts. Please wait.");
+		return ret_pk;
+	}
+
+	if (m_activeRegistrations.load() >= REG_MAX_CONCURRENT) {
+		LG("Security", "[Register] Concurrent cap hit (%d/%d) from %s\n",
+		   m_activeRegistrations.load(), REG_MAX_CONCURRENT, datasock->GetPeerIP());
+		ret_pk.WriteChar(0);
+		ret_pk.WriteString("Server busy, try again shortly.");
+		return ret_pk;
+	}
+	m_activeRegistrations++;
+	struct RegGuard { std::atomic<int>& ctr; ~RegGuard() { ctr--; } } _reg_guard{ m_activeRegistrations };
 
 	// SANITIZE: Check for dangerous characters in all fields
 	if (!PS::ValidateUsername(userName)) {

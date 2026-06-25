@@ -29,15 +29,21 @@ SQLRETURN Exec_sql_direct(const char* pszSQL, cfl_rs* pTable) {
 //==========TBLSystem===============================
 bool TBLAccounts::IsReady() {
 	char sql[SQL_MAXLEN];
-	strncpy_s(sql, sizeof(sql), "drop trigger [TR_D_Character_Friends]", _TRUNCATE);
+	Exec_sql_direct("SET LOCK_TIMEOUT 5000", this);
+
+	strncpy_s(sql, sizeof(sql),
+		"IF OBJECT_ID('TR_D_Character_Friends','TR') IS NOT NULL DROP TRIGGER [TR_D_Character_Friends]",
+		_TRUNCATE);
 	SQLRETURN l_ret = Exec_sql_direct(sql, this);
-	if (!DBOK(l_ret)) {
-		LG("Database", "SQL:%s execute failed !\n", sql);
+	if (!DBOK(l_ret) && !DBNODATA(l_ret)) {
+		LG("Database", "SQL drop TR_D_Character_Friends failed!\n");
 	}
-	strncpy_s(sql, sizeof(sql), "drop trigger [TR_I_Character]", _TRUNCATE);
+	strncpy_s(sql, sizeof(sql),
+		"IF OBJECT_ID('TR_I_Character','TR') IS NOT NULL DROP TRIGGER [TR_I_Character]",
+		_TRUNCATE);
 	l_ret = Exec_sql_direct(sql, this);
-	if (!DBOK(l_ret)) {
-		LG("Database", "SQL:%s execute failed !\n", sql);
+	if (!DBOK(l_ret) && !DBNODATA(l_ret)) {
+		LG("Database", "SQL drop TR_I_Character failed!\n");
 	}
 	strncpy_s(sql, sizeof(sql), "CREATE TRIGGER TR_D_Character_Friends ON character \n\
 				FOR DELETE \n\
@@ -57,7 +63,7 @@ bool TBLAccounts::IsReady() {
 		", _TRUNCATE);
 	l_ret = Exec_sql_direct(sql, this);
 	if (!DBOK(l_ret)) {
-		LG("Database", "SQL:%s execute failed !\n", sql);
+		LG("Database", "CREATE TRIGGER TR_D_Character_Friends failed!\n");
 		return false;
 	}
 	strncpy_s(sql, sizeof(sql), "CREATE TRIGGER TR_I_Character ON character\n\
@@ -71,9 +77,10 @@ bool TBLAccounts::IsReady() {
 		", _TRUNCATE);
 	l_ret = Exec_sql_direct(sql, this);
 	if (!DBOK(l_ret)) {
-		LG("Database", "SQL:%s execute failed !\n", sql);
+		LG("Database", "CREATE TRIGGER TR_I_Character failed!\n");
 		return false;
 	}
+	Exec_sql_direct("SET LOCK_TIMEOUT -1", this);
 	return true;
 }
 
@@ -825,13 +832,18 @@ bool TBLGuilds::InitAllGuilds(char disband_days) {
 	return l_ret;
 }
 bool TBLGuilds::SendGuildInfo(Player* ply) {
+	Guild* l_guild = ply->GetGuild();
+	if (!l_guild) {
+		LG("Guild", "SendGuildInfo: GetGuild() is null for chaid=%lu\n", ply->m_chaid[ply->m_currcha]);
+		return false;
+	}
 	WPacket l_togmSelf = g_gpsvr->GetWPacket();
 	l_togmSelf.WriteCmd(CMD_PM_GUILDINFO);
 	l_togmSelf.WriteLong(ply->m_chaid[ply->m_currcha]); // 角色DBID
 	l_togmSelf.WriteLong(ply->m_guild[ply->m_currcha]); // 公会ID
-	l_togmSelf.WriteLong(ply->GetGuild()->m_leaderID);	// 会长ID
-	l_togmSelf.WriteString(ply->GetGuild()->m_name);	// 公会name
-	l_togmSelf.WriteString(ply->GetGuild()->m_motto);	// 公会座佑名
+	l_togmSelf.WriteLong(l_guild->m_leaderID);	// 会长ID
+	l_togmSelf.WriteString(l_guild->m_name);	// 公会name
+	l_togmSelf.WriteString(l_guild->m_motto);	// 公会座佑名
 	ply->m_gate->GetDataSock()->SendData(l_togmSelf);
 	return true;
 }
@@ -918,9 +930,14 @@ bool TBLGuilds::InitGuildMember(Player* ply, uLong chaid, uLong gldid, int mode)
 				}
 				if (ply && !l_hrd) {
 					l_hrd = true;
+					Guild* l_guildptr = ply->GetGuild();
+					if (!l_guildptr) {
+						LG("Guild", "InitGuildMember: GetGuild() is null for chaid=%lu gldid=%lu\n", chaid, gldid);
+						throw 3;
+					}
 					l_toSelf.WriteLong(ply->m_guild[ply->m_currcha]); // 公会ID
-					l_toSelf.WriteString(ply->GetGuild()->m_name);	  // 公会name
-					l_toSelf.WriteLong(ply->GetGuild()->m_leaderID);  // 会长ID
+					l_toSelf.WriteString(l_guildptr->m_name);	  // 公会name
+					l_toSelf.WriteLong(l_guildptr->m_leaderID);  // 会长ID
 				}
 				unsigned long long l_memaddr = strtoull((cChar*)_buf[0], nullptr, 10);
 				if (l_memaddr) {
@@ -963,9 +980,14 @@ bool TBLGuilds::InitGuildMember(Player* ply, uLong chaid, uLong gldid, int mode)
 			}
 			if (ply && !l_hrd) {
 				l_hrd = true;
+				Guild* l_guildptr = ply->GetGuild();
+				if (!l_guildptr) {
+					LG("Guild", "InitGuildMember: GetGuild() is null (post-loop) for chaid=%lu gldid=%lu\n", chaid, gldid);
+					throw 3;
+				}
 				l_toSelf.WriteLong(ply->m_guild[ply->m_currcha]); // 公会ID
-				l_toSelf.WriteString(ply->GetGuild()->m_name);	  // 公会name
-				l_toSelf.WriteLong(ply->GetGuild()->m_leaderID);  // 会长ID
+				l_toSelf.WriteString(l_guildptr->m_name);		  // 公会name
+				l_toSelf.WriteLong(l_guildptr->m_leaderID);		  // 会长ID
 			}
 			if (ply) {
 				l_toSelf.WriteLong(lPacketNum);

@@ -2087,7 +2087,9 @@ bool CItemCommand::IsAllowUse() {
 		if (!_pSkill->GetIsUse())
 			return false;
 
-		CCharacter* pCha = g_stUIBoat.GetHuman();
+		CCharacter* pCha = CGameScene::GetMainCha();
+		if (!pCha)
+			pCha = g_stUIBoat.GetHuman();
 		if (!pCha)
 			return false;
 

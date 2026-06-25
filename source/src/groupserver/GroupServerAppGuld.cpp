@@ -14,6 +14,9 @@ void GroupServerApp::PC_GULD_INIT(Player* ply) {
 			}
 		} else {
 			LG("Guild", "player [%s] can't get guild struct ,guild ID:%d\n", ply->m_chaname[ply->m_currcha].c_str(), ply->m_guild[ply->m_currcha]);
+			// Guild struct not loaded — clear ID so InitGuildMember sends "no guild"
+			// instead of dereferencing a null Guild pointer.
+			ply->m_guild[ply->m_currcha] = 0;
 		}
 	}
 	{
@@ -84,7 +87,7 @@ void GroupServerApp::MP_GUILD_KICK(Player* ply, DataSocket* datasock, RPacket& p
 
 	if (l_ply && l_ply->m_currcha >= 0) {
 		l_ply->m_guild[l_ply->m_currcha] = 0;
-		ply->m_guildPermission[ply->m_currcha] = 0;
+		l_ply->m_guildPermission[l_ply->m_currcha] = 0;
 		l_ply->LeaveGuild();
 
 		WPacket l_wpk = GetWPacket();
@@ -158,8 +161,10 @@ void GroupServerApp::MP_GUILD_DISBAND(Player* ply, DataSocket* datasock, RPacket
 	l_wpk.WriteChar(MSG_GUILD_STOP);
 	RunChainGetArmor<GuildMember> l(*l_guild);
 	while (ply = static_cast<Player*>(l_guild->GetFirstItem())) {
-		ply->m_guildPermission[ply->m_currcha] = 0;
-		ply->m_guild[ply->m_currcha] = 0;
+		if (ply->m_currcha >= 0) {
+			ply->m_guildPermission[ply->m_currcha] = 0;
+			ply->m_guild[ply->m_currcha] = 0;
+		}
 		ply->LeaveGuild();
 
 		l_plylst[l_plynum] = ply;

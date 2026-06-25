@@ -450,12 +450,26 @@ std::string GetMacString() {
 	if (GetAdaptersInfo(&CheckBuf, &outLen) != ERROR_SUCCESS) {
 		PIP_ADAPTER_INFO pAdpterInfo = (IP_ADAPTER_INFO*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, outLen);
 		if (GetAdaptersInfo(pAdpterInfo, &outLen) == ERROR_SUCCESS) {
+			PIP_ADAPTER_INFO pCur = pAdpterInfo;
+			while (pCur != nullptr) {
+				bool bNonZero = false;
+				for (int i = 0; i < 6; i++) {
+					if (pCur->Address[i] != 0) { bNonZero = true; break; }
+				}
+				bool bPhysical = (pCur->Type == MIB_IF_TYPE_ETHERNET ||
+				                  pCur->Type == IF_TYPE_IEEE80211);
+				if (bNonZero && bPhysical) {
+					break;
+				}
+				pCur = pCur->Next;
+			}
+			if (pCur == nullptr) pCur = pAdpterInfo;
+
 			char lpBuf[8];
-			for (int i = 0; i < MAX_ADAPTER_ADDRESS_LENGTH; i++) {
-				sprintf(lpBuf, "%.2X", pAdpterInfo->Address[i]);
-				// itoa(pAdpterInfo->Address[i],lpBuf,16);
+			for (int i = 0; i < 6; i++) {
+				sprintf(lpBuf, "%.2X", pCur->Address[i]);
 				strRet += lpBuf;
-				if (i + 1 < MAX_ADAPTER_ADDRESS_LENGTH) {
+				if (i + 1 < 6) {
 					strRet += "-";
 				}
 			}

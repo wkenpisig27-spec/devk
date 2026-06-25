@@ -27,6 +27,8 @@
 #include <unordered_map>
 #include <mutex>
 #include <shared_mutex>
+#include <atomic>
+#include <chrono>
 
 _DBC_USING
 
@@ -328,6 +330,19 @@ public:
 
 private:
 	bool InitMasterRelation();
+
+	// Registration flood protection
+	struct RegRateInfo {
+		int attempts = 0;
+		std::chrono::steady_clock::time_point windowStart;
+		std::chrono::steady_clock::time_point blockedUntil;
+	};
+	std::mutex                                   m_regRateMutex;
+	std::unordered_map<std::string, RegRateInfo> m_regRateMap;
+	bool CheckRegisterRateLimit(const char* ip);
+	std::atomic<int> m_activeRegistrations{0};
+	static constexpr int REG_MAX_CONCURRENT = 3;
+
 	int GetMasterCount(uLong cha_id);
 	int GetPrenticeCount(uLong cha_id);
 	int HasMaster(uLong cha_id1, uLong cha_id2);

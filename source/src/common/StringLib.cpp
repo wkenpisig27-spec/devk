@@ -175,7 +175,7 @@ int StringNewLineEng(char* pOutBuf, unsigned int nWidth, const char* pInBuf, uns
 
 	unsigned int nOutPos = 0;
 	unsigned int nInPos = 0;
-	unsigned int nSpacePos = -1;
+	unsigned int nSpacePos = (unsigned int)-1;  // sentinel: no space found on current line
 	unsigned int nLinePos = 0;
 
 	for (;;) {
@@ -188,18 +188,16 @@ int StringNewLineEng(char* pOutBuf, unsigned int nWidth, const char* pInBuf, uns
 		}
 
 		if (nLinePos >= nWidth) {
-			// if(pInBuf[nInPos + 1] == ' ')
-			//{
-			//	++nLinePos;
-			//	nSpacePos = nLinePos;
-			// }
-
-			nOutPos -= nLinePos - nSpacePos;
-			nInPos -= nLinePos - nSpacePos;
+			if (nSpacePos != (unsigned int)-1) {
+				nOutPos -= nLinePos - nSpacePos;
+				nInPos  -= nLinePos - nSpacePos;
+			} else {
+				--nInPos;  // hard break: keep current char for next line
+			}
 
 			pOutBuf[nOutPos] = '\n';
-
 			nLinePos = 0;
+			nSpacePos = (unsigned int)-1;
 		} else {
 			pOutBuf[nOutPos] = pInBuf[nInPos];
 		}

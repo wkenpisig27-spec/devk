@@ -33,7 +33,7 @@ Player* Guild::FindGuildMemByChaID(uLong id) {
 	Player* l_ply = 0;
 	RunChainGetArmor<GuildMember> l(*this);
 	while (l_ply = static_cast<Player*>(GetNextItem())) {
-		if (l_ply->m_chaid[l_ply->m_currcha] == id)
+		if (l_ply->m_currcha >= 0 && l_ply->m_chaid[l_ply->m_currcha] == id)
 			break;
 	}
 	l.unlock();
@@ -77,7 +77,8 @@ void ChkGuild::Process() {
 					Player* l_ply;
 					RunChainGetArmor<GuildMember> l_lock(*l_gld);
 					while (l_ply = static_cast<Player*>(l_gld->GetNextItem())) {
-						l_ply->m_guild[l_ply->m_currcha] = 0;
+						if (l_ply->m_currcha >= 0)
+							l_ply->m_guild[l_ply->m_currcha] = 0;
 						l_ply->LeaveGuild();
 
 						l_plylst[l_plynum] = l_ply;

@@ -233,10 +233,11 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    -- Return the pending gold before deleting
+    -- Return pending gold before deleting (no is_active filter — fully-sold stalls
+    -- may have is_active=0 from older server versions but still owe pending gold)
     SELECT [pending_gold], [stall_id]
     FROM [dbo].[offline_stalls]
-    WHERE [cha_id] = @cha_id AND [is_active] = 1
+    WHERE [cha_id] = @cha_id
     
     -- Delete the stall
     DELETE FROM [dbo].[offline_stalls]
@@ -322,13 +323,9 @@ BEGIN
         [pending_gold] = [pending_gold] + @gold_earned
     WHERE [stall_id] = @stall_id AND [is_active] = 1
     
-    -- If no more items, mark as inactive
-    IF @item_count = 0
-    BEGIN
-        UPDATE [dbo].[offline_stalls]
-        SET [is_active] = 0
-        WHERE [stall_id] = @stall_id
-    END
+    -- Do NOT mark inactive when item_count = 0. The record must stay active so
+    -- OfflineStall_LoadAll picks up soldItems tracking data on server restart.
+    -- The stall is deleted (not deactivated) when the owner logs back in.
     
     RETURN @@ROWCOUNT
 END

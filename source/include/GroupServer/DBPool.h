@@ -5,6 +5,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <string>
+#include <chrono>
 
 // Forward declarations - full headers included in DBPool.cpp and via GroupServerApp.h
 class cfl_db;
@@ -29,6 +30,7 @@ struct DBConnection {
 	TBLParam*       tblparam      = nullptr;
 	friend_tbl*     tblX1         = nullptr;
 	bool            in_use        = false;
+	std::chrono::steady_clock::time_point last_used = std::chrono::steady_clock::now();
 
 	~DBConnection();
 };
@@ -110,6 +112,7 @@ public:
 	                const char* login, const char* passwd);
 
 	/// Get a connection from the pool. Blocks if all connections are in use.
+	/// Automatically pings idle connections and reconnects if stale.
 	/// Returns an RAII guard that auto-releases on scope exit.
 	/// @param timeoutMs Maximum time to wait in ms (0 = wait forever)
 	/// @return Valid guard on success, invalid guard (bool==false) on timeout
@@ -130,11 +133,21 @@ public:
 private:
 	void ReleaseConnection(int index);
 
+	/// Ping a connection and reconnect if dead. Must hold m_poolMutex.
+	bool PingAndReconnect(DBConnection& conn, int index);
+
 	std::vector<DBConnection> m_connections;
 	std::mutex                m_poolMutex;
 	std::condition_variable   m_poolCV;
 	int                       m_poolSize;
 	bool                      m_initialized;
+
+	std::string m_ip;
+	std::string m_db;
+	std::string m_login;
+	std::string m_passwd;
+
+	static constexpr int KEEPALIVE_IDLE_SECONDS = 300;
 };
 
 #endif // DBPOOL_H

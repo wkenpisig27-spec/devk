@@ -5228,11 +5228,12 @@ bool CGameDB::LoadOfflineStalls(const char* szMapName, COfflineStallMgr* pMgr) {
 			LG("offline_stall", "Decoded %zu bytes from hex string (expected per item: %zu)\n", 
 			   decodedSize, sizeof(SOfflineStallItem));
 			
-			// Basic sanity check - need at least some data (but allow less than sizeof(SOfflineStallItem)
-			// because ODBC strips trailing zeros from varbinary when converting to SQL_C_CHAR hex).
-			if (decodedSize < 10) {
-				LG("offline_stall", "WARNING: Item data too small! Decoded %zu bytes. Skipping stall %u.\n",
-				   decodedSize, pInfo->dwStallID);
+			// Sanity check against corrupted data. Fully-sold stalls (byItemCount==0)
+			// only store soldItems tracking (1 + 3*N bytes), which can be 4-7 bytes.
+			size_t minDataSize = (pInfo->byItemCount > 0) ? (size_t)10 : (size_t)1;
+			if (decodedSize < minDataSize) {
+				LG("offline_stall", "WARNING: Item data too small! Decoded %zu bytes (byItemCount=%d, min=%zu). Skipping stall %u.\n",
+				   decodedSize, pInfo->byItemCount, minDataSize, pInfo->dwStallID);
 				delete pInfo;
 				continue;
 			}

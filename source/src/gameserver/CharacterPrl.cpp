@@ -2928,6 +2928,10 @@ void CCharacter::BeginAction(RPACKET pk) {
 			break;  // Don't broadcast invalid data
 		}
 		
+		// Block temp appearance on blind chaos maps — would reveal real gear identity
+		if (g_Config.m_bBlindChaos && IsPlayerCha() && IsPKSilver())
+			break;
+		
 		m_STempChaPart.sItemID = tempItemID;
 		m_STempChaPart.sPartID = tempPartID;
 

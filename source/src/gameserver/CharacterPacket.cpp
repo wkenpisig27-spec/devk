@@ -72,7 +72,8 @@ void CCharacter::WriteBaseInfo(WPACKET& pkret, Char chLookType) {
 		WRITE_LONG(pkret, 0);
 		WRITE_STRING(pkret, "");
 		WRITE_STRING(pkret, "");
-		WRITE_STRING(pkret, "");
+		WRITE_LONG(pkret, 0);       // guildPermission = 0
+		WRITE_STRING(pkret, "");    // stallName = "" (anonymous)
 	} else {
 		WRITE_LONG(pkret, GetHandle());
 		WRITE_CHAR(pkret, (Char)m_CChaAttr.GetAttr(ATTR_CHATYPE));
@@ -382,9 +383,8 @@ void CCharacter::WriteLookData(WPACKET& WtPk, Char chLookType, Char chSynType) {
 				}
 
 				Short eqID = GetChaosEquip(i, nJob);
-				// WRITE_LONG(WtPk, pItem->dwDBID);
-				WRITE_SHORT(WtPk, eqID); // pItem->sID
-				WRITE_LONG(WtPk, pItem->dwDBID);
+				WRITE_SHORT(WtPk, eqID);
+				WRITE_LONG(WtPk, 0); // hide real DB ID in blind chaos mode
 				WRITE_SHORT(WtPk, pItem->sNeedLv);
 				if (eqID == 0)
 					continue;

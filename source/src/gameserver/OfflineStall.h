@@ -103,6 +103,7 @@ struct SOfflineStallInfo {
     CCharacter* pVirtualNPC;    // Virtual NPC representing this stall
     DWORD dwWorldID;            // World ID assigned to virtual NPC
     bool  bActive;              // Is stall currently active in world
+    bool  bMapNotFound;         // Map not hosted on this server (multi-GS setup)
 };
 
 // Virtual NPC for offline stall

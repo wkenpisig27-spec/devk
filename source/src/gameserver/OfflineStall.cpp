@@ -614,6 +614,7 @@ bool COfflineStallMgr::CreateOfflineStall(CPlayer* pPlayer, CCharacter* pStaller
     pInfo->tCreated = time(nullptr);
     pInfo->tExpire = pInfo->tCreated + (g_Config.m_dwStallTime * 3600);  // Hours to seconds
     pInfo->bActive = true;
+    pInfo->bMapNotFound = false;
     pInfo->pVirtualNPC = nullptr;
     pInfo->dwWorldID = 0;
     pInfo->bySoldCount = 0;  // No items sold yet
@@ -793,7 +794,7 @@ void COfflineStallMgr::Update(DWORD dwCurTime) {
     std::vector<SOfflineStallInfo*> stallsToActivate;
     for (auto& pair : m_mapStalls) {
         SOfflineStallInfo* pInfo = pair.second;
-        if (!pInfo || pInfo->bActive) continue;  // Skip active stalls
+        if (!pInfo || pInfo->bActive || pInfo->bMapNotFound) continue;
         
         // Never re-spawn an expired stall. CleanupExpiredStalls() sets bActive=false but keeps
         // the record alive (for pending gold), which would cause this loop to re-spawn it every
@@ -812,11 +813,10 @@ void COfflineStallMgr::Update(DWORD dwCurTime) {
     
     // Spawn NPCs for stalls whose owners have disconnected
     for (SOfflineStallInfo* pInfo : stallsToActivate) {
-        LG("offline_stall", "Player %s disconnected, spawning offline stall NPC now...\n", pInfo->szChaName);
         if (CreateVirtualNPC(pInfo)) {
-            LG("offline_stall", "Successfully spawned offline stall NPC for %s at %s (%d, %d)\n",
+            LG("offline_stall", "Spawned offline stall NPC for %s at %s (%d, %d)\n",
                pInfo->szChaName, pInfo->szMapName, pInfo->nPosX, pInfo->nPosY);
-        } else {
+        } else if (!pInfo->bMapNotFound) {
             LG("offline_stall", "ERROR: Failed to spawn offline stall NPC for %s\n", pInfo->szChaName);
         }
     }
@@ -927,7 +927,8 @@ bool COfflineStallMgr::CreateVirtualNPC(SOfflineStallInfo* pInfo) {
     // Find the map by name
     CMapRes* pMapRes = g_pGameApp->FindMapByName(pInfo->szMapName);
     if (!pMapRes) {
-        LG("offline_stall", "Map %s not found for offline stall\n", pInfo->szMapName);
+        // Map not on this server — expected in multi-server setups
+        pInfo->bMapNotFound = true;
         return false;
     }
     
@@ -1225,6 +1226,14 @@ bool COfflineStallMgr::CleanupForReturningPlayer(CCharacter* pMainCha, DWORD dwC
         LG("offline_stall", "  Stall closed, no pending gold (items removed: %d)\n", nItemsRemoved);
     }
     
+    // Persist kitbag/gold immediately — a crash before periodic save would reload
+    // the seller's original kitbag and re-introduce sold items (duplication).
+    extern CGameDB game_db;
+    if (!game_db.SaveChaAssets(pMainCha)) {
+        LG("offline_stall", "WARNING: Failed to save character assets for %s after stall cleanup!\n",
+           pMainCha->GetName());
+    }
+    
     return true;
 }
 
@@ -1239,10 +1248,17 @@ bool COfflineStallMgr::AddLoadedStall(SOfflineStallInfo* pInfo) {
     
     m_mapStalls[pInfo->dwStallID] = pInfo;
     m_mapOwnerToStall[pInfo->dwChaID] = pInfo->dwStallID;
+    pInfo->bMapNotFound = false;
     
-    // Create virtual NPC
-    LG("offline_stall", "Calling CreateVirtualNPC for stall ID %u\n", pInfo->dwStallID);
-    CreateVirtualNPC(pInfo);
+    // Fully-sold stalls still need in-memory registration for owner cleanup,
+    // but must not spawn an NPC with zero items.
+    if (pInfo->byItemCount > 0) {
+        LG("offline_stall", "Calling CreateVirtualNPC for stall ID %u\n", pInfo->dwStallID);
+        CreateVirtualNPC(pInfo);
+    } else {
+        LG("offline_stall", "Stall ID %u has 0 items (fully sold) — skipping NPC, awaiting owner login\n",
+           pInfo->dwStallID);
+    }
     
     LG("offline_stall", "AddLoadedStall complete: WorldID=%u\n", pInfo->dwWorldID);
     return true;

@@ -849,7 +849,7 @@ void ToClient::CM_LOGIN(DataSocket* datasock, RPacket& recvbuf) {
 			SendData(datasock, l_wpk);		  // 发给客户端
 			LG("GateServer", "client: %s\tlogin error: GroupServer is disresponse!\n", datasock->GetPeerIP());
 			Disconnect(datasock, 100, -31);
-		} else if (l_errno = l_rpk.ReadShort()) {
+		} else if ((l_errno = l_rpk.ReadShort()) != 0) {
 			l_wpk = l_rpk;
 			l_wpk.WriteCmd(CMD_MC_LOGIN);
 			SendData(datasock, l_wpk);
@@ -913,9 +913,8 @@ WPacket ToClient::CM_LOGOUT(DataSocket* datasock, RPacket& recvbuf) {
 
 		try {
 			if (l_ply->m_status == 0) {
-				WPacket l_wpk = datasock->GetWPacket();
+				l_retpk = datasock->GetWPacket();
 				l_retpk.WriteShort(ERR_MC_NOTLOGIN);
-				// Should probably free() our player...
 				l_ply->Free();
 				return l_retpk;
 			}
@@ -998,7 +997,7 @@ void ToClient::CM_BGNPLAY(DataSocket* datasock, RPacket& recvbuf) {
 					l_wpk.WriteCmd(CMD_MC_BGNPLAY);
 					l_wpk.WriteShort(ERR_MC_NETEXCP);
 					SendData(datasock, l_wpk);
-				} else if (l_errno = l_rpk.ReadShort()) // 所玩角色不合法
+				} else if ((l_errno = l_rpk.ReadShort()) != 0) // 所玩角色不合法
 				{
 					l_wpk = l_rpk;
 					l_wpk.WriteCmd(CMD_MC_BGNPLAY);

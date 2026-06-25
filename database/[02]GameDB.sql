@@ -5724,12 +5724,33 @@ GO
 -- ============================================
 -- Get Player Login IP and MAC from AccountServer
 -- ============================================
+-- Requires GameDB TRUSTWORTHY ON and EXECUTE AS OWNER for cross-DB access.
+USE [master]
+GO
+
+ALTER AUTHORIZATION ON DATABASE::[GameDB] TO [sa];
+PRINT 'Reset GameDB owner to sa (fixes Msg 33009 SID mismatch after restore)'
+GO
+
+IF (SELECT is_trustworthy_on FROM sys.databases WHERE name = 'GameDB') = 0
+BEGIN
+    ALTER DATABASE [GameDB] SET TRUSTWORTHY ON;
+    PRINT 'Set GameDB TRUSTWORTHY ON'
+END
+ELSE
+    PRINT 'GameDB already TRUSTWORTHY ON'
+GO
+
+USE [GameDB]
+GO
+
 IF OBJECT_ID('dbo.GetPlayerLoginInfo', 'P') IS NOT NULL
     DROP PROCEDURE dbo.GetPlayerLoginInfo
 GO
 
 CREATE PROCEDURE [dbo].[GetPlayerLoginInfo]
     @act_name VARCHAR(50)
+WITH EXECUTE AS OWNER
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -5739,6 +5760,9 @@ BEGIN
     FROM [AccountServer].[dbo].[account_login] al
     WHERE al.[name] = @act_name;
 END
+GO
+
+GRANT EXECUTE ON [dbo].[GetPlayerLoginInfo] TO [pko_game];
 GO
 
 PRINT 'Created stored procedure: GetPlayerLoginInfo'
