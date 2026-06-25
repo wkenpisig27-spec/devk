@@ -34,6 +34,7 @@
 #include "WorldScene.h"
 #include "UICozeForm.h"
 #include "autoattack.h"
+#include "UIAutoAttackSettingsForm.h"
 #include <algorithm>
 #include <string>
 
@@ -321,6 +322,14 @@ bool CEquipMgr::Init() {
 	_chkAutoAttack = dynamic_cast<CCheckBox*>(frmFast2->Find("chkAutoAttack"));
 	if (_chkAutoAttack)
 		_chkAutoAttack->evtCheckChange = _evtAutoAttackChange;
+
+	_chkAutoTarget = dynamic_cast<CCheckBox*>(frmFast2->Find("chkAutoTarget"));
+	if (_chkAutoTarget)
+		_chkAutoTarget->evtCheckChange = _evtAutoTargetChange;
+
+	CTextButton* btnAASettings = dynamic_cast<CTextButton*>(frmFast2->Find("btnAASettings"));
+	if (btnAASettings)
+		btnAASettings->evtMouseClick = _evtButtonClickEvent;
 
 	//_pActiveFastLabel = dynamic_cast<CLabel*>(frmMain800->Find( "labFast" ) );
 	_ActiveFast(0);
@@ -956,6 +965,8 @@ void CEquipMgr::SwitchMap() {
 	HideChestPreview();
 	if (_chkAutoAttack)
 		_chkAutoAttack->SetIsChecked(false);
+	if (_chkAutoTarget)
+		_chkAutoTarget->SetIsChecked(false);
 }
 
 void CEquipMgr::RenderModel(int x, int y, CCharacter* original, CCharacter* model, int rotation, bool refresh) {
@@ -1232,6 +1243,20 @@ void CEquipMgr::_evtAutoAttackChange(CGuiData* pSender) {
 	g_pGameApp->SysInfo(pChk->GetIsChecked() ? "Auto-Attack: ON" : "Auto-Attack: OFF");
 }
 
+void CEquipMgr::_evtAutoTargetChange(CGuiData* pSender) {
+	CCheckBox* pChk = dynamic_cast<CCheckBox*>(pSender);
+	if (!pChk)
+		return;
+
+	CWorldScene* pScene = dynamic_cast<CWorldScene*>(g_pGameApp->GetCurScene());
+	if (!pScene)
+		return;
+
+	CAutoAttack* pAA = pScene->GetMouseDown().GetAutoAttack();
+	pAA->SetAutoTarget(pChk->GetIsChecked());
+	g_pGameApp->SysInfo(pChk->GetIsChecked() ? "Auto-Target: ON" : "Auto-Target: OFF");
+}
+
 void CEquipMgr::_evtButtonClickEvent(CGuiData* pSender, int x, int y, DWORD key) {
 	string name = pSender->GetName();
 	if (name == "btnFastUp") {
@@ -1239,6 +1264,9 @@ void CEquipMgr::_evtButtonClickEvent(CGuiData* pSender, int x, int y, DWORD key)
 		return;
 	} else if (name == "btnFastDown") {
 		g_stUIEquip._ActiveFast(g_stUIEquip._nFastCur + 1);
+		return;
+	} else if (name == "btnAASettings") {
+		g_stUIAutoAttackSettings.Show();
 		return;
 	}
 }

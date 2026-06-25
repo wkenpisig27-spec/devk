@@ -10,6 +10,9 @@
 #include "scene.h"
 #include "uifastcommand.h"
 #include "uiskillcommand.h"
+#include "uibankform.h"
+#include "UITradeForm.h"
+#include "UINpcTradeForm.h"
 
 #include "stmove.h"
 #include "stattack.h"
@@ -34,6 +37,9 @@ void CAutoAttack::Reset() {
 	_IsStart = false;
 
 	_bToggleEnabled = false;
+	_bAutoTarget = false;
+	_bMeleeEnabled = true;
+	_szTargetFilter[0] = '\0';
 	memset(_slotNextCheck, 0, sizeof(_slotNextCheck));
 	_dwMeleeNextCheck = 0;
 }
@@ -235,6 +241,36 @@ void CAutoAttack::ToggleAutoAttack() {
 	g_pGameApp->SysInfo(_bToggleEnabled ? "Auto-Attack: ON" : "Auto-Attack: OFF");
 }
 
+// Scan the scene for the closest valid, living monster that is not hidden.
+// Used by FrameMoveToggle() when _bAutoTarget is enabled and no target is selected.
+CCharacter* CAutoAttack::_FindNearestEnemy(CCharacter* pMain) {
+	CGameScene* pScene = CGameApp::GetCurScene();
+	if (!pScene)
+		return nullptr;
+
+	CCharacter* pNearest = nullptr;
+	int nMinDist = INT_MAX;
+	const int nCnt = (int)pScene->GetChaCnt();
+	for (int i = 0; i < nCnt; ++i) {
+		CCharacter* pCha = &pScene->_pChaArray[i];
+		if (!pCha->IsValid() || !pCha->IsEnabled() || pCha->IsHide())
+			continue;
+		if (!pCha->IsMonster())
+			continue; // Only target monsters, not players or NPCs
+		if (pCha == pMain)
+			continue;
+		// Respect the name filter — skip monsters that don't match
+		if (_szTargetFilter[0] != '\0' && _stricmp(pCha->getName(), _szTargetFilter) != 0)
+			continue;
+		const int dist = pMain->DistanceFrom(pCha);
+		if (dist < nMinDist) {
+			nMinDist = dist;
+			pNearest = pCha;
+		}
+	}
+	return pNearest;
+}
+
 void CAutoAttack::FrameMoveToggle() {
 	if (!_bToggleEnabled)
 		return;
@@ -243,76 +279,117 @@ void CAutoAttack::FrameMoveToggle() {
 	if (!pMain || !pMain->IsValid() || !pMain->IsEnabled())
 		return;
 
+	// --- Dead target detection ---
+	// GetTarget() returns nullptr for dead/invalid targets (checked by ID), but
+	// the character may still exist as a corpse with IsEnabled()==false.  Clear it
+	// so the auto-target logic below gets a chance to pick a new enemy.
 	CCharacter* pTarget = g_stUIStart.GetTarget();
-	if (!pTarget || !pTarget->IsValid() || !pTarget->IsEnabled() || pTarget->IsHide())
+	if (pTarget && !pTarget->IsEnabled()) {
+		g_stUIStart.RemoveTarget();
+		pTarget = nullptr;
+	}
+
+	// --- Auto-target nearest monster ---
+	// When _bAutoTarget is on and we have no valid target, scan the scene for the
+	// nearest living monster and select it so combat continues uninterrupted.
+	if (!pTarget && _bAutoTarget) {
+		pTarget = _FindNearestEnemy(pMain);
+		if (pTarget)
+			g_stUIStart.SetTargetInfo(pTarget);
+	}
+
+	if (!pTarget || pTarget->IsHide())
 		return;
 
 	DWORD dwNow = CGameApp::GetCurTick();
 
-	// Try topBar skill slots in priority order (nTag 24..35 = slots 0..11)
-	int totalSlots = CFastCommand::GetFastCommandCount();
-	for (int tag = (int)(MAX_FAST_COL * 2); tag < (int)(MAX_FAST_COL * 3); ++tag) {
-		int slotIndex = tag - (int)(MAX_FAST_COL * 2); // 0..11
+	// --- SP management ---
+	// If current SP is below 20 % of max, skip skill casting and fall through to
+	// melee only.  This prevents draining SP to zero and silently failing skills.
+	const long nSP = pMain->getGameAttr()->get(ATTR_SP);
+	const long nMaxSP = pMain->getGameAttr()->get(ATTR_MXSP);
+	const bool bSkillsAllowed = (nMaxSP <= 0) || (nSP * 100 / nMaxSP >= 20);
 
-		// Skip until per-slot predicted cooldown expires
-		if (dwNow < _slotNextCheck[slotIndex])
-			continue;
+	if (bSkillsAllowed) {
+		// Try topBar skill slots in priority order (nTag 24..35 = slots 0..11)
+		int totalSlots = CFastCommand::GetFastCommandCount();
+		for (int tag = (int)(MAX_FAST_COL * 2); tag < (int)(MAX_FAST_COL * 3); ++tag) {
+			int slotIndex = tag - (int)(MAX_FAST_COL * 2); // 0..11
 
-		// Locate the topBar slot with this semantic nTag
-		CFastCommand* pFast = nullptr;
-		for (int vi = 0; vi < totalSlots; ++vi) {
-			CFastCommand* p = CFastCommand::GetFastCommand(vi);
-			if (p && p->topBar && p->nTag == tag) {
-				pFast = p;
-				break;
+			// Skip until per-slot predicted cooldown expires
+			if (dwNow < _slotNextCheck[slotIndex])
+				continue;
+
+			// Locate the topBar slot with this semantic nTag
+			CFastCommand* pFast = nullptr;
+			for (int vi = 0; vi < totalSlots; ++vi) {
+				CFastCommand* p = CFastCommand::GetFastCommand(vi);
+				if (p && p->topBar && p->nTag == tag) {
+					pFast = p;
+					break;
+				}
 			}
+			if (!pFast)
+				continue;
+
+			CCommandObj* pCmd = pFast->GetCommand();
+			if (!pCmd)
+				continue;
+
+			CSkillCommand* pSkillCmd = dynamic_cast<CSkillCommand*>(pCmd);
+			if (!pSkillCmd)
+				continue;
+
+			CSkillRecord* pSkill = pSkillCmd->GetSkillRecord();
+			if (!pSkill)
+				continue;
+
+			if (!pSkill->IsAttackTime(dwNow))
+				continue;
+
+			// Validate skill usability (SP, state, level) without target-type check.
+			// IsUse() would reject self-buff skills (e.g. Berserk/Stealth) when pTarget is enemy.
+			if (!g_SkillUse.IsValid(pSkill, pMain))
+				continue;
+
+			// Replicate CSkillCommand::IsAtOnce() using public CSkillRecord fields.
+			// IsAtOnce() is protected so we can't call it from here directly.
+			bool isAtOnce = pSkill->GetIsActive() || pSkill->GetDistance() <= 0 ||
+			                pSkill->chApplyTarget == enumSKILL_TYPE_SELF;
+
+			if (isAtOnce) {
+				// Self-targeting or zero-distance skill: directly invoke UseCommand()
+				// → CAttackState targeting self → SetCommand(this) → StartCommand() → AniClock
+				pSkillCmd->UseCommand();
+			} else {
+				// Enemy-targeted skill: prime _pCommand so ActAttackCha's CAttackState
+				// picks it up via GetReadyCommand() → StartCommand() → AniClock
+				CCommandObj::SetReadyCommand(pSkillCmd);
+				_pMouseDown->ActAttackCha(pMain, pSkill, pTarget, false, false, false);
+			}
+
+			// Record when this slot's cooldown is predicted to expire so we don't poll it
+			int fireSpeed = pSkill->GetFireSpeed();
+			_slotNextCheck[slotIndex] = dwNow + (fireSpeed > 0 ? (DWORD)fireSpeed : 500);
+			return;
 		}
-		if (!pFast)
-			continue;
-
-		CCommandObj* pCmd = pFast->GetCommand();
-		if (!pCmd)
-			continue;
-
-		CSkillCommand* pSkillCmd = dynamic_cast<CSkillCommand*>(pCmd);
-		if (!pSkillCmd)
-			continue;
-
-		CSkillRecord* pSkill = pSkillCmd->GetSkillRecord();
-		if (!pSkill)
-			continue;
-
-		if (!pSkill->IsAttackTime(dwNow))
-			continue;
-
-		// Validate skill usability (SP, state, level) without target-type check.
-		// IsUse() would reject self-buff skills (e.g. Berserk/Stealth) when pTarget is enemy.
-		if (!g_SkillUse.IsValid(pSkill, pMain))
-			continue;
-
-		// Replicate CSkillCommand::IsAtOnce() using public CSkillRecord fields.
-		// IsAtOnce() is protected so we can't call it from here directly.
-		bool isAtOnce = pSkill->GetIsActive() || pSkill->GetDistance() <= 0 ||
-		                pSkill->chApplyTarget == enumSKILL_TYPE_SELF;
-
-		if (isAtOnce) {
-			// Self-targeting or zero-distance skill: directly invoke UseCommand()
-			// → CAttackState targeting self → SetCommand(this) → StartCommand() → AniClock
-			pSkillCmd->UseCommand();
-		} else {
-			// Enemy-targeted skill: prime _pCommand so ActAttackCha's CAttackState
-			// picks it up via GetReadyCommand() → StartCommand() → AniClock
-			CCommandObj::SetReadyCommand(pSkillCmd);
-			_pMouseDown->ActAttackCha(pMain, pSkill, pTarget, false, false, false);
-		}
-
-		// Record when this slot's cooldown is predicted to expire so we don't poll it
-		int fireSpeed = pSkill->GetFireSpeed();
-		_slotNextCheck[slotIndex] = dwNow + (fireSpeed > 0 ? (DWORD)fireSpeed : 500);
-		return;
 	}
 
-	// Fallback: inborn (normal melee) attack
+	// --- Melee fallback ---
+	// Pause if bank or trade windows are open — interacting with them should take
+	// priority over auto-attacking.  Skills are already blocked via IsAllowUse()
+	// inside UseCommand(); the melee path needs its own explicit check.
+	if (g_stUIBank.GetBankGoodsGrid()->GetForm()->GetIsShow())
+		return;
+	if (g_stUITrade.IsTrading())
+		return;
+	if (g_stUINpcTrade.GetIsShow())
+		return;
+
+	// Respect the per-player melee opt-out flag (casters, ranged builds, etc.)
+	if (!_bMeleeEnabled)
+		return;
+
 	if (dwNow < _dwMeleeNextCheck)
 		return;
 

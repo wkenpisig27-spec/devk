@@ -425,10 +425,20 @@ fscMainF221  = UI_CreateCompent( frmFast2, FAST_COMMANG_TYPE, "fscMainF221",  32
 fscMainF222 = UI_CreateCompent( frmFast2, FAST_COMMANG_TYPE, "fscMainF222", 32, 32, 345, 5 )
 fscMainF223 = UI_CreateCompent( frmFast2, FAST_COMMANG_TYPE, "fscMainF223", 32, 32, 379, 5 )
 
+chkAutoTarget = UI_CreateCompent( frmFast2, CHECK_TYPE, "chkAutoTarget", 12, 12, 416, 2 )
+UI_LoadImage( chkAutoTarget, "texture/ui/QQ2.tga", UNCHECKED, 10, 10, 40, 231 )
+UI_LoadImage( chkAutoTarget, "texture/ui/QQ2.tga", CHECKED, 10, 10, 52, 231 )
+UI_SetHint( chkAutoTarget, "Auto-Target" )
+
 chkAutoAttack = UI_CreateCompent( frmFast2, CHECK_TYPE, "chkAutoAttack", 12, 12, 416, 16 )
 UI_LoadImage( chkAutoAttack, "texture/ui/QQ2.tga", UNCHECKED, 10, 10, 40, 231 )
 UI_LoadImage( chkAutoAttack, "texture/ui/QQ2.tga", CHECKED, 10, 10, 52, 231 )
 UI_SetHint( chkAutoAttack, "Auto-Attack" )
+
+-- Small gear-like button to open the Auto-Attack Settings panel
+btnAASettings = UI_CreateCompent( frmFast2, BUTTON_TYPE, "btnAASettings", 14, 14, 415, 28 )
+UI_LoadButtonImage( btnAASettings, "texture/ui/PublicC.tga", 14, 14, 116, 175, TRUE )
+UI_SetHint( btnAASettings, "Auto-Attack Settings" )
 
 ---------------
 -- Quickslot --

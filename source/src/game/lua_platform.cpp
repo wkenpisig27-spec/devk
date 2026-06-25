@@ -82,6 +82,10 @@ void InitLuaPlatform() {
 	// Toggle auto-attack mode
 	REGFN(ToggleAutoAttack);
 	REGFN(GetAutoAttackEnabled);
+	REGFN(SetAutoTarget);
+	REGFN(GetAutoTarget);
+	REGFN(SetMeleeEnabled);
+	REGFN(GetMeleeEnabled);
 
 	// scene??????
 	g_luaFNList.push_back("[scene]");

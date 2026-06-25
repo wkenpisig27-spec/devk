@@ -53,6 +53,7 @@
 #include "UINumAnswer.h"
 #include "UIChurchChallenge.h"
 #include "UIKnowledgeBase.h"
+#include "UIAutoAttackSettingsForm.h"
 
 using namespace std;
 
@@ -130,6 +131,8 @@ CCookingMgr g_stUICooking;
 CMailMgr g_stUIMail;
 CNumAnswerMgr g_stUINumAnswer;
 CChurchChallengeMgr g_stChurchChallenge;
+
+CAutoAttackSettingsMgr g_stUIAutoAttackSettings;
 
 CCozeForm g_stUICozeForm;
 CChannelSwitchForm g_stUIChannelSwitch;

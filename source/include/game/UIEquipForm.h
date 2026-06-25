@@ -171,8 +171,10 @@ private:
 
 	CCheckBox* chkLinkEqForm;
 	CCheckBox* _chkAutoAttack{};
+	CCheckBox* _chkAutoTarget{};
 
 	static void _evtAutoAttackChange(CGuiData* pSender);
+	static void _evtAutoTargetChange(CGuiData* pSender);
 
 	CForm* frmItemSpy;						 // 道具表单
 	CGoodsGrid* grdItem;					 // 道具栏

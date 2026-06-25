@@ -130,3 +130,45 @@ inline int lua_GetAutoAttackEnabled(lua_State* L) {
 	lua_pushboolean(L, enabled ? 1 : 0);
 	return 1;
 }
+
+// Enable/disable auto-target (auto-select nearest monster when target dies)
+// Lua: SetAutoTarget(bool)
+inline int lua_SetAutoTarget(lua_State* L) {
+	if (lua_gettop(L) < 1) return 0;
+	bool v = lua_toboolean(L, 1) != 0;
+	CWorldScene* pScene = dynamic_cast<CWorldScene*>(g_pGameApp->GetCurScene());
+	if (!pScene) { SCENE_NULL_ERROR return 0; }
+	pScene->GetMouseDown().GetAutoAttack()->SetAutoTarget(v);
+	return 0;
+}
+
+// Query auto-target state
+// Lua: local enabled = GetAutoTarget()
+inline int lua_GetAutoTarget(lua_State* L) {
+	CWorldScene* pScene = dynamic_cast<CWorldScene*>(g_pGameApp->GetCurScene());
+	if (!pScene) { lua_pushboolean(L, 0); return 1; }
+	bool v = pScene->GetMouseDown().GetAutoAttack()->IsAutoTarget();
+	lua_pushboolean(L, v ? 1 : 0);
+	return 1;
+}
+
+// Enable/disable melee fallback in auto-attack
+// Lua: SetMeleeEnabled(bool)
+inline int lua_SetMeleeEnabled(lua_State* L) {
+	if (lua_gettop(L) < 1) return 0;
+	bool v = lua_toboolean(L, 1) != 0;
+	CWorldScene* pScene = dynamic_cast<CWorldScene*>(g_pGameApp->GetCurScene());
+	if (!pScene) { SCENE_NULL_ERROR return 0; }
+	pScene->GetMouseDown().GetAutoAttack()->SetMeleeEnabled(v);
+	return 0;
+}
+
+// Query melee fallback state
+// Lua: local enabled = GetMeleeEnabled()
+inline int lua_GetMeleeEnabled(lua_State* L) {
+	CWorldScene* pScene = dynamic_cast<CWorldScene*>(g_pGameApp->GetCurScene());
+	if (!pScene) { lua_pushboolean(L, 1); return 1; }
+	bool v = pScene->GetMouseDown().GetAutoAttack()->IsMeleeEnabled();
+	lua_pushboolean(L, v ? 1 : 0);
+	return 1;
+}

@@ -305,6 +305,7 @@
     <ClCompile Include="..\..\src\game\UIEditor.cpp" />
     <ClCompile Include="..\..\src\game\UIEditStrategy.cpp" />
     <ClCompile Include="..\..\src\game\UIEquipForm.cpp" />
+    <ClCompile Include="..\..\src\game\UIAutoAttackSettingsForm.cpp" />
     <ClCompile Include="..\..\src\game\UIFastCommand.cpp" />
     <ClCompile Include="..\..\src\game\UIFindTeamForm.cpp" />
     <ClCompile Include="..\..\src\game\UIBossTimerForm.cpp" />
@@ -529,6 +530,7 @@
     <ClInclude Include="..\..\src\game\UIEditor.h" />
     <ClInclude Include="..\..\src\game\UIEditStrategy.h" />
     <ClInclude Include="..\..\src\game\UIEquipForm.h" />
+    <ClInclude Include="..\..\src\game\UIAutoAttackSettingsForm.h" />
     <ClInclude Include="..\..\src\game\UIFastCommand.h" />
     <ClInclude Include="..\..\src\game\UIFindTeamForm.h" />
     <ClInclude Include="..\..\src\game\UIBossTimerForm.h" />

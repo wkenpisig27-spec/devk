@@ -1,6 +1,6 @@
 # Auto-Attack System
 
-> **Status:** Implemented (Phase 1 complete)  
+> **Status:** Implemented (Phase 2 complete)  
 > **Files:** `source/src/game/AutoAttack.cpp`, `source/include/game/AutoAttack.h`, `source/include/game/UICommand.h`
 
 ---
@@ -123,6 +123,11 @@ The fix: let the attack state machine call `StartCommand()` exactly once per cas
 - [x] Self-buff skills (Berserk, Stealth) correctly cast on self
 - [x] Enemy-targeted skills (Illusion Slash, Shadow Slash, Poison Dart) correctly cast on target
 - [x] Toggle-type active skills correctly cancelled when active
+- [x] Dead target detection — corpse is deselected immediately so attacks don't spam the air
+- [x] Auto-target nearest enemy — `chkAutoTarget` checkbox activates automatic monster selection when the current target dies or has no target; `SetAutoTarget()` / `GetAutoTarget()` Lua API also available
+- [x] SP management — skill casting pauses when SP drops below 20% of max; melee fallback still fires; recovers automatically once SP regenerates
+- [x] Pause on UI open — melee fallback skips when bank window, player trade, or NPC shop is open
+- [x] Melee enable/disable — `SetMeleeEnabled(false)` suppresses the melee fallback for ranged/caster builds; controlled via Lua (`SetMeleeEnabled`, `GetMeleeEnabled`)
 
 ---
 
@@ -138,19 +143,18 @@ The fix: let the attack state machine call `StartCommand()` exactly once per cas
 
 ### High Priority
 
-#### 1. Auto-Target Nearest Enemy
-When the current target dies or becomes invalid, automatically select the nearest valid enemy.
-- Hook into `FrameMoveToggle()`: if `pTarget == nullptr` or `!pTarget->IsValid()`, call `g_stUIStart.GetNearestEnemy(pMain)` or equivalent
-- Could be a separate sub-toggle: "Auto-Target" checkbox alongside Auto-Attack
+#### 1. Auto-Target Nearest Enemy ✅ DONE
+~~When the current target dies or becomes invalid, automatically select the nearest valid enemy.~~
+Implemented: `_bAutoTarget` / `SetAutoTarget()` / `chkAutoTarget` UI checkbox. Scans `_pChaArray` for nearest `IsMonster()` character and calls `SetTargetInfo()`.
 
 #### 2. Skill Condition Awareness
 Some skills have prerequisites (e.g. Stealth requires not being in combat, some skills require a buff to be active). Currently we rely on the server to reject them and the client wastes a cooldown slot.
 - Add optional per-slot condition callbacks or check `GetIsActive()` for prerequisite buffs before attempting
 - At minimum: detect if the server never confirmed the cast (no `_dwAttackTime` update) and reduce retry penalty
 
-#### 3. Dead Target Detection & Stop
-When the target dies, auto-attack should stop or wait for a new target rather than spamming attacks at a corpse.
-- Check `pTarget->IsDead()` or `!pTarget->IsEnabled()` in `FrameMoveToggle()` and either stop or trigger auto-target
+#### 3. Dead Target Detection & Stop ✅ DONE
+~~When the target dies, auto-attack should stop or wait for a new target rather than spamming attacks at a corpse.~~
+Implemented: after `GetTarget()`, if `pTarget && !pTarget->IsEnabled()` → `RemoveTarget()` + set `pTarget = nullptr` so auto-target picks up.
 
 ### Medium Priority
 
@@ -159,10 +163,9 @@ The current system uses topBar slot position as priority. An explicit priority U
 - Would require a new `CAutoAttackMgr` UI form with a priority list widget
 - Persist priority order in user settings
 
-#### 5. SP Management — Stop Casting if Low SP
-If the player's SP drops below a threshold, pause skill casting and fall back to melee only.
-- Read `pMain->GetSP()` / `pMain->GetMaxSP()` and set a configurable threshold (e.g. 20%)
-- Resume skill casting once SP regenerates above threshold
+#### 5. SP Management — Stop Casting if Low SP ✅ DONE
+~~If the player's SP drops below a threshold, pause skill casting and fall back to melee only.~~
+Implemented: `bSkillsAllowed = (nSP * 100 / nMaxSP >= 20)` guards the entire skill loop. Melee fallback continues until SP recovers.
 
 #### 6. Pet/Fairy Skill Integration
 Trigger pet/fairy skills in a similar priority loop.
@@ -179,13 +182,13 @@ Instead of "cast the first available skill in priority order", support a **rotat
 Show a small indicator on screen when auto-attack is active — e.g. a glowing border on the topBar, or a persistent status icon near the character.
 - Avoids confusion about whether auto-attack is on or off
 
-#### 9. Pause on UI Open
-Automatically pause auto-attack when trade windows, banks, or crafting UIs are open (already partially handled by `IsAllowUse()` checking for bank window, but melee fallback still fires).
+#### 9. Pause on UI Open ✅ DONE
+~~Automatically pause auto-attack when trade windows, banks, or crafting UIs are open.~~
+Implemented: `FrameMoveToggle()` checks `g_stUIBank`, `g_stUITrade.IsTrading()`, and `g_stUINpcTrade.GetIsShow()` before melee fallback and returns early if any are open.
 
-#### 10. Configurable Melee Enable/Disable
-Let the player opt out of melee fallback (useful for ranged/caster builds that don't want to run into melee range).
-- Add a "Melee Fallback" checkbox to the auto-attack UI
-- Store preference in user settings
+#### 10. Configurable Melee Enable/Disable ✅ DONE
+~~Let the player opt out of melee fallback (useful for ranged/caster builds that don't want to run into melee range).~~
+Implemented: `_bMeleeEnabled` flag, `SetMeleeEnabled()` / `IsMeleeEnabled()` accessors, and Lua API `SetMeleeEnabled(bool)` / `GetMeleeEnabled()`. Melee fallback is skipped when disabled.
 
 ---
 
