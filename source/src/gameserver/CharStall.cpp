@@ -7,6 +7,7 @@
 #include "SubMap.h"
 #include "lua_gamectrl.h"
 #include "GameDB.h"
+#include "ItemAudit.h"
 #include "OfflineStall.h"
 #include "PacketSanitizer.h"
 #include <fstream>
@@ -590,6 +591,9 @@ void CStallSystem::BuyGoods(CCharacter& character, RPACKET& packet) {
 						return;
 					} else {
 						Short sPushPos = defKITBAG_DEFPUSH_POS;
+						CKitbag buyerBagBackup = character.m_CKitbag;
+						CKitbag sellerBagBackup = pStaller->m_CKitbag;
+						BYTE byStallGoodsCountBackup = pData->m_Goods[byIndex].byCount;
 						// give seller item
 						SItemGrid Grid;
 						Grid.sNum = quantity;
@@ -614,22 +618,30 @@ void CStallSystem::BuyGoods(CCharacter& character, RPACKET& packet) {
 						Short sPushRet2 = character.KbPushItem(true, false, &Grid2, sPushPos);
 						pData->m_Goods[byIndex].byCount -= 1;
 
-						character.SynAttr(enumATTRSYN_TRADE);
-						character.SyncBoatAttr(enumATTRSYN_TRADE);
-						character.SynKitbagNew(enumSYN_KITBAG_TRADE);
-						pStaller->SynAttr(enumATTRSYN_TRADE);
-						pStaller->SyncBoatAttr(enumATTRSYN_TRADE);
-						pStaller->SynKitbagNew(enumSYN_KITBAG_TRADE);
-						DelGoods(*pStaller, pData->m_Goods[byIndex].byGrid, 1);
-						pStaller->RefreshNeedItem(Grid2.sID);
-						character.RefreshNeedItem(Grid2.sID);
-
-						// SECURITY FIX: Immediate save after stall barter to prevent crash recovery item loss
 						game_db.BeginTran();
 						if (character.SaveAssets() && pStaller->SaveAssets()) {
 							game_db.CommitTran();
+
+							character.SynAttr(enumATTRSYN_TRADE);
+							character.SyncBoatAttr(enumATTRSYN_TRADE);
+							character.SynKitbagNew(enumSYN_KITBAG_TRADE);
+							pStaller->SynAttr(enumATTRSYN_TRADE);
+							pStaller->SyncBoatAttr(enumATTRSYN_TRADE);
+							pStaller->SynKitbagNew(enumSYN_KITBAG_TRADE);
+							DelGoods(*pStaller, pData->m_Goods[byIndex].byGrid, 1);
+							ItemAuditLog(&character, "STALL_BUY", &Grid2, 1, pStaller, 0);
+							ItemAuditLog(pStaller, "STALL_BUY", &Grid2, -1, &character, 0);
+							ItemAuditLog(&character, "STALL_BUY", &Grid, quantity, pStaller, 0);
+							ItemAuditLog(pStaller, "STALL_BUY", &Grid, -(int)quantity, &character, 0);
+							pStaller->RefreshNeedItem(Grid2.sID);
+							character.RefreshNeedItem(Grid2.sID);
 						} else {
 							game_db.RollBack();
+							character.m_CKitbag = buyerBagBackup;
+							pStaller->m_CKitbag = sellerBagBackup;
+							pData->m_Goods[byIndex].byCount = byStallGoodsCountBackup;
+							character.SystemNotice("Barter failed: could not save your data. Items were restored.");
+							pStaller->SystemNotice("Barter could not be saved. The transaction was reversed.");
 							LG("stall_error", "Failed to save assets after stall barter trade: buyer=%s seller=%s",
 							   character.GetName(), pStaller->GetName());
 						}
@@ -656,7 +668,7 @@ void CStallSystem::BuyGoods(CCharacter& character, RPACKET& packet) {
 			return;
 		}
 
-		if (pData->m_Goods[byIndex].llMoney * byCount > character.getAttr(ATTR_GD)) {
+		if (n64Temp > character.getAttr(ATTR_GD)) {
 			// character.SystemNotice( "你的金钱不足以购买该物品！" );
 			character.SystemNotice(RES_STRING(GM_CHARSTALL_CPP_00037));
 			return;
@@ -714,6 +726,12 @@ void CStallSystem::BuyGoods(CCharacter& character, RPACKET& packet) {
 			return;
 		}
 		Grid.sNum = byCount;
+
+		CKitbag buyerBagBackup = character.m_CKitbag;
+		CKitbag sellerBagBackup = pStaller->m_CKitbag;
+		__int64 llBuyerGoldBackup = character.getAttr(ATTR_GD);
+		__int64 llSellerGoldBackup = pStaller->getAttr(ATTR_GD);
+		BYTE byStallGoodsCountBackup = pData->m_Goods[byIndex].byCount;
 
 		pStaller->m_CChaAttr.ResetChangeFlag();
 		pStaller->SetBoatAttrChangeFlag(false);
@@ -794,8 +812,6 @@ void CStallSystem::BuyGoods(CCharacter& character, RPACKET& packet) {
 		Bag.Lock();
 
 		character.setAttr(ATTR_GD, character.getAttr(ATTR_GD) - pData->m_Goods[byIndex].llMoney * byCount);
-		character.SynAttr(enumATTRSYN_TRADE);
-		character.SyncBoatAttr(enumATTRSYN_TRADE);
 		// Seller receives gold with cap check
                 __int64 stallerGold = pStaller->getAttr(ATTR_GD);
                 __int64 maxGold = 100000000000LL;  // 100 billion cap
@@ -803,12 +819,10 @@ void CStallSystem::BuyGoods(CCharacter& character, RPACKET& packet) {
                 __int64 actualGain = saleAmount;
                 
                 if (stallerGold >= maxGold) {
-                        pStaller->SystemNotice("Sale complete but your gold is at the maximum limit (100 billion)!");
                         actualGain = 0;
                 } else if (stallerGold + saleAmount > maxGold) {
                         actualGain = maxGold - stallerGold;
                         stallerGold = maxGold;
-                        pStaller->SystemNotice("Sale complete! Received %lld gold (capped at max 100 billion).", actualGain);
                 } else {
                         stallerGold += saleAmount;
                 }
@@ -824,10 +838,20 @@ void CStallSystem::BuyGoods(CCharacter& character, RPACKET& packet) {
 
                 RES_FORMAT_STRING(GM_CHARSTALL_CPP_00052, param, szNotice);
 
+		game_db.BeginTran();
+		if (character.SaveAssets() && pStaller->SaveAssets()) {
+			game_db.CommitTran();
+
                 if (actualGain == saleAmount) {
                         pStaller->SystemNotice(szNotice);
+                } else if (actualGain == 0 && saleAmount > 0) {
+                        pStaller->SystemNotice("Sale complete but your gold is at the maximum limit (100 billion)!");
+                } else if (actualGain > 0 && actualGain < saleAmount) {
+                        pStaller->SystemNotice("Sale complete! Received %lld gold (capped at max 100 billion).", actualGain);
                 }
 
+		character.SynAttr(enumATTRSYN_TRADE);
+		character.SyncBoatAttr(enumATTRSYN_TRADE);
 		pStaller->SynAttr(enumATTRSYN_TRADE);
 		pStaller->SyncBoatAttr(enumATTRSYN_TRADE);
 		pStaller->SynKitbagNew(enumSYN_KITBAG_TRADE);
@@ -839,16 +863,12 @@ void CStallSystem::BuyGoods(CCharacter& character, RPACKET& packet) {
 
 		if (pItem->sType == enumItemTypeBoat) {
 			if (!character.BoatAdd((DWORD)Grid.GetDBParam(enumITEMDBP_INST_ID))) {
-				/*pStaller->SystemNotice( "摆摊：添加给角色“%s”购买的船只失败！ID[0xX]", character.GetName(), (DWORD)Grid.GetDBParam( enumITEMDBP_INST_ID ) );
-				character.SystemNotice( "摆摊：添加给角色“%s”购买的船只失败！ID[0xX]", character.GetName(), (DWORD)Grid.GetDBParam( enumITEMDBP_INST_ID ) );
-				LG( "stall_error", "摆摊：添加给角色“%s”购买的船只失败！ID[0xX]", character.GetName(), (DWORD)Grid.GetDBParam( enumITEMDBP_INST_ID ) );*/
 				pStaller->SystemNotice(RES_STRING(GM_CHARSTALL_CPP_00053), character.GetName(), (DWORD)Grid.GetDBParam(enumITEMDBP_INST_ID));
 				character.SystemNotice(RES_STRING(GM_CHARSTALL_CPP_00053), character.GetName(), (DWORD)Grid.GetDBParam(enumITEMDBP_INST_ID));
 				LG("stall_error", "stall：add boat failed that charcter“%s”bought！ID[0xX]", character.GetName(), (DWORD)Grid.GetDBParam(enumITEMDBP_INST_ID));
 			}
 		}
 
-		// The two parameters are different
 		param.setString(0, pStaller->GetName());
 		param.setLong(5, (int)character.getAttr(ATTR_GD));
 		RES_FORMAT_STRING(GM_CHARSTALL_CPP_00054, param, szNotice);
@@ -861,13 +881,17 @@ void CStallSystem::BuyGoods(CCharacter& character, RPACKET& packet) {
 				szLog, pData->m_Goods[byIndex].llMoney, byCount, pData->m_Goods[byIndex].llMoney * byCount,
 				pStaller->getAttr(ATTR_GD), character.getAttr(ATTR_GD));
 		TL(CHA_VENDOR, pStaller->GetName(), character.GetName(), szTemp);
-
-		// SECURITY FIX: Immediate save after stall purchase to prevent crash recovery item loss
-		game_db.BeginTran();
-		if (character.SaveAssets() && pStaller->SaveAssets()) {
-			game_db.CommitTran();
+			ItemAuditLog(&character, "STALL_BUY", &Grid, byCount, pStaller, -saleAmount);
+			ItemAuditLog(pStaller, "STALL_BUY", &Grid, -(int)byCount, &character, actualGain);
 		} else {
 			game_db.RollBack();
+			character.m_CKitbag = buyerBagBackup;
+			pStaller->m_CKitbag = sellerBagBackup;
+			character.setAttr(ATTR_GD, llBuyerGoldBackup);
+			pStaller->setAttr(ATTR_GD, llSellerGoldBackup);
+			pData->m_Goods[byIndex].byCount = byStallGoodsCountBackup;
+			character.SystemNotice("Purchase failed: could not save your data. Items and gold were restored.");
+			pStaller->SystemNotice("Sale could not be saved. The transaction was reversed.");
 			LG("stall_error", "Failed to save assets after stall purchase: buyer=%s seller=%s",
 			   character.GetName(), pStaller->GetName());
 		}

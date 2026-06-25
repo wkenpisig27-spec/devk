@@ -81,7 +81,7 @@ function Combine_Success_Rate(GemLv, GemType, BonusFruit)
         Rate[7] = .3
         Rate[8] = .2
         if Rate[GemLv] ~= nil then
-            a = Rate[GemLv] + StateLv
+            a = math.min(1.0, Rate[GemLv] + StateLv)
             b = Percentage_Random(a)
         else
             b = 0
@@ -99,7 +99,7 @@ function Combine_Success_Rate(GemLv, GemType, BonusFruit)
         Rate[7] = .75
         Rate[8] = .7
         if Rate[GemLv] ~= nil then
-            a = Rate[GemLv] + StateLv
+            a = math.min(1.0, Rate[GemLv] + StateLv)
             b = Percentage_Random(a)
         else
             b = 0
@@ -281,7 +281,7 @@ function Forging_Success_Rate(GemLv, BonusFruit)
     Rate[8] = .05
     Rate[9] = .02
     if Rate[GemLv] ~= nil then
-        a = Rate[GemLv] + StateLv
+        a = math.min(1.0, Rate[GemLv] + StateLv)
         b = Percentage_Random(a)
     else
         b = 0

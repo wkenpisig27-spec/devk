@@ -11,6 +11,8 @@
 
 using namespace std;
 
+bool g_bDBDegraded = false;
+
 char szDBLog[256] = "DBData";
 //-------------------
 // Check if character name exists
@@ -1956,11 +1958,13 @@ bool CTableResource::ReadKitbagData(CCharacter* pCha) {
 			return false;
 		}
 		if (!pCha->String2KitbagData(g_buf[nIndex++])) {
-			// LG("enter_map", "???????????????.\n");
-			LG("enter_map", "kitbag data check sum error.\n");
-			// LG("???????", "?????%s???i????????resource_id %u?????????.\n", pCha->GetLogName(), pCha->GetKitbagRecDBID());
-			LG("check sum error", "character(%s) kitbag data(resource_id %u) check sum error.\n", pCha->GetLogName(), pCha->GetKitbagRecDBID());
-			return false;
+			LG("Security", "KITBAG_CHECKSUM_FAIL cha=%s resource_id=%u - loading empty bag\n",
+			   pCha->GetLogName(), pCha->GetKitbagRecDBID());
+			short sCap = pCha->m_CKitbag.GetCapacity();
+			if (sCap <= 0)
+				sCap = defDEF_KBITEM_NUM_PER_TYPE;
+			pCha->m_CKitbag.Init(sCap);
+			pCha->SetKitbagNeedsReview(true);
 		}
 	} else {
 		// LG("enter_map", "?????????????_get_row()???????%d.\n", r);
@@ -2734,7 +2738,7 @@ BOOL CTableBoat::GetBoat(CCharacter& Boat) {
 		Boat.SetAngle(Str2Int(g_buf[nIndex++]));
 		// ???
 		Boat.setAttr(ATTR_LV, Str2Int(g_buf[nIndex++]), 1);
-		Boat.setAttr(ATTR_CEXP, Str2Int(g_buf[nIndex++]), 1);
+		Boat.setAttr(ATTR_CEXP, _atoi64(g_buf[nIndex++].c_str()), 1);
 
 	} else
 		return FALSE;
@@ -2836,7 +2840,10 @@ BOOL CTableBoat::SaveBoat(CCharacter& Boat, char chSaveType) {
 		int mapY = Boat.GetPos().y;
 		int angle = Boat.GetAngle();
 		int degree = (int)Boat.getAttr(ATTR_LV);
-		int boatExp = (int)Boat.getAttr(ATTR_CEXP);
+		LONG64 boatExp64 = Boat.getAttr(ATTR_CEXP);
+		if (boatExp64 > 2000000000LL)
+			boatExp64 = 2000000000LL;
+		int boatExp = (int)boatExp64;
 		int boatID = dwBoatID;
 		char mapName[64];
 		strncpy_s(mapName, sizeof(mapName), Boat.GetBirthMap(), _TRUNCATE);
@@ -2854,7 +2861,10 @@ BOOL CTableBoat::SaveBoat(CCharacter& Boat, char chSaveType) {
 		int curSupply = (int)Boat.getAttr(ATTR_SP);
 		int mxSupply = (int)Boat.getAttr(ATTR_BMXSP);
 		int degree = (int)Boat.getAttr(ATTR_LV);
-		int boatExp = (int)Boat.getAttr(ATTR_CEXP);
+		LONG64 boatExp64 = Boat.getAttr(ATTR_CEXP);
+		if (boatExp64 > 2000000000LL)
+			boatExp64 = 2000000000LL;
+		int boatExp = (int)boatExp64;
 		int boatID = dwBoatID;
 		
 		sExec = stored_procedure("{CALL dbo.SaveBoatEx(?,?,?,?,?,?,?,?,?,?,?)}",

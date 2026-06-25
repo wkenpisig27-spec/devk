@@ -1335,6 +1335,7 @@ function Ship_Sp(ship_role)
     return ship_sp
 end
 function Percentage_Random(A)
+    A = math.min(1.0, math.max(0.0, A))
     local B = A * 1000000000
     local C = math.random(0, 1000000000)
     local D = 0

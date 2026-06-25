@@ -170,6 +170,7 @@ protected:
 
 	int GenSid(char const* szName);
 	void ResetAccount();
+	void ResetStaleLoginStatus();
 	void KickAccount(std::string& strGroup, int nId);
 
 private:

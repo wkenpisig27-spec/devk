@@ -212,7 +212,7 @@ protected:
 	static CChaRecordSet* _Instance; // �൱�ڵ���, ���Լ���ס
 
 	virtual CRawDataInfo* _CreateRawDataArray(int nCnt) {
-		return new CChaRecord[nCnt];
+		return new CChaRecord[nCnt]();
 	}
 
 	virtual void _DeleteRawDataArray() {

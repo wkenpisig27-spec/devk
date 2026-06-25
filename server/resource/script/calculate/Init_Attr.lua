@@ -50,3 +50,7 @@ SetChaAttrMax(ATTR_BOAT_CANNON, 100000)
 SetChaAttrMax(ATTR_BOAT_PART, 100000)
 SetChaAttrMax(ATTR_BOAT_BERTH, 100000)
 SetChaAttrMax(ATTR_BOAT_DBID, 2000000000)
+
+if g_ServerSeed ~= nil then
+    math.randomseed(g_ServerSeed)
+end

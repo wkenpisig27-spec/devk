@@ -169,6 +169,11 @@ Sender& Sender::operator<<(WPacket& wpk) {
 				}
 
 				if (l_timelock != WAIT_OBJECT_0) {
+					static unsigned long s_sendQueueDropCount = 0;
+					if (++s_sendQueueDropCount == 1 || s_sendQueueDropCount % 100 == 0) {
+						LG("Security", "Send queue saturated for %s (drops=%lu)",
+						   m_datasock->GetPeerIP(), s_sendQueueDropCount);
+					}
 					wpk = 0;
 				} else {
 					// Add by lark.li 20090309 begin

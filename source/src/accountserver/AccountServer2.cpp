@@ -1098,6 +1098,35 @@ int AuthThread::GenSid(char const* szName) {
 	int* ptr = (int*)md;
 	return ptr[0];
 }
+void AuthThread::ResetStaleLoginStatus() {
+	if (m_nIndex != 0)
+		return;
+
+	static DWORD s_dwLastCheck = 0;
+	const DWORD dwNow = GetTickCount();
+	if (s_dwLastCheck != 0 && dwNow - s_dwLastCheck < 5 * 60 * 1000)
+		return;
+	s_dwLastCheck = dwNow;
+
+	const int staleMinutes = 30;
+	char sql[512];
+	_snprintf_s(sql, sizeof(sql), _TRUNCATE,
+		"UPDATE account_login SET login_status=%d, sid=%d, login_group='', enable_login_time=getdate() "
+		"WHERE login_status IN (%d,%d) AND enable_login_time < dateadd(minute, -%d, getdate())",
+		ACCOUNT_OFFLINE, INVALID_SID, ACCOUNT_ONLINE, ACCOUNT_SAVING, staleMinutes);
+
+	try {
+		SQLRETURN ret = db_connection.exec_sql_direct(sql);
+		if (DBOK(ret)) {
+			LG("Security", "Stale login_status watchdog executed\n");
+		}
+	} catch (CSQLException* pEx) {
+		LG("AuthDBExcp", "ResetStaleLoginStatus failed: %s\n", pEx->m_strError.c_str());
+	} catch (...) {
+		LG("AuthDBExcp", "ResetStaleLoginStatus unknown exception\n");
+	}
+}
+
 void AuthThread::ResetAccount() {
 	/*
 	2005-4-17 added by Arcol:
@@ -1154,6 +1183,7 @@ void AuthThread::KickAccount(std::string& strGroup, int nId) {
 int AuthThread::Run() {
 	Init();
 	while (!GetExitFlag()) {
+		ResetStaleLoginStatus();
 		g_Auth.PeekPacket(1000); // ����1���ʱ�����ɼ������е������
 	}
 	Exit();

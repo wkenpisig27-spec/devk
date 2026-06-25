@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "log.h"
 #include "util2.h"
+#include <time.h>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -83,11 +85,33 @@ bool CLog::Open(const char* pszName, const char* pszExt) {
 	str += '/';
 	str += pszName;
 	strcpy(m_szName, pszName);
+
+	time_t now = time(nullptr);
+	struct tm tmNow {};
+#ifdef _WIN32
+	localtime_s(&tmNow, &now);
+#else
+	localtime_r(&now, &tmNow);
+#endif
+	char szDate[32];
+	_snprintf_s(szDate, sizeof(szDate), _TRUNCATE, "%04d-%02d-%02d",
+		tmNow.tm_year + 1900, tmNow.tm_mon + 1, tmNow.tm_mday);
+	str += "_";
+	str += szDate;
 	if (strlen(pszExt) > 0) {
 		str += ".";
 		str += pszExt;
 	}
-	_fp = fopen(str.c_str(), "wt");
+
+	const long kMaxLogBytes = 50L * 1024L * 1024L;
+	struct stat st {};
+	if (stat(str.c_str(), &st) == 0 && st.st_size >= kMaxLogBytes) {
+		string oldName = str + ".old";
+		remove(oldName.c_str());
+		rename(str.c_str(), oldName.c_str());
+	}
+
+	_fp = fopen(str.c_str(), "a");
 	if (_fp == nullptr) {
 		return false;
 	}

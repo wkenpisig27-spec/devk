@@ -31,6 +31,12 @@ BOOL InitLuaScript() {
 
 	luaL_openlibs(g_pLuaState);
 
+	{
+		unsigned long long seed = (unsigned long long)GetTickCount64() ^ (uintptr_t)g_pLuaState;
+		lua_pushnumber(g_pLuaState, (lua_Number)seed);
+		lua_setglobal(g_pLuaState, "g_ServerSeed");
+	}
+
 	if (lConsole == nullptr)
 		lConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 

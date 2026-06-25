@@ -156,6 +156,7 @@ function Check_Baoliao(ATKER, DEFER, ...)
                 mf = math.min(1, 100 / arg[i]) * plyRate
                 local retExpState = GetExpState(ATKER)
                 mf = mf * GetExpState(ATKER) / 100
+                mf = math.min(1.0, mf)
                 a = Percentage_Random(mf)
                 if a == 1 then
                     Count = Count + 1

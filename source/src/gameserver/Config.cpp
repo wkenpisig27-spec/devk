@@ -57,6 +57,7 @@ void CGameConfig::SetDefault() {
 	m_bLogMission = FALSE; // 是否打开Mission的log
 
 	m_bSuperCmd = FALSE;
+	m_bEnforceSpeedHack = TRUE;
 
 	// Add by lark.li 20080731 begin
 	m_vGMCmd.clear();
@@ -224,6 +225,8 @@ bool CGameConfig::Load(char* pszFileName) {
 		// End
 		else if (strKey == "supercmd") {
 			m_bSuperCmd = Str2Int(strValue);
+		} else if (strKey == "enforce_speed_hack") {
+			m_bEnforceSpeedHack = Str2Int(strValue);
 		} else if (strKey == "item_show_time") {
 			m_lItemShowTime = Str2Int(strValue);
 		} else if (strKey == "item_prot_time") {
@@ -273,6 +276,10 @@ bool CGameConfig::Load(char* pszFileName) {
 		}
 	}
 	in.close();
+
+	if (m_bSuperCmd) {
+		LG("Security", "WARNING: SuperCmd enabled — disable in production");
+	}
 
 	// Add by lark.li 20080324 begin
 	if (strlen(g_Config.m_szTradeLogDBIP) > 0 && strlen(g_Config.m_szTradeLogDBName) > 0 && strlen(g_Config.m_szTradeLogDBUsr) > 0 && strlen(g_Config.m_szTradeLogDBPass) > 0)

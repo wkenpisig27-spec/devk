@@ -646,6 +646,9 @@ public:
 	bool String2KitbagTmpData(std::string& strData);
 
 	void SetKitbagRecDBID(int lDBID) { m_lKbRecDBID = lDBID; }
+	void SetKitbagNeedsReview(bool bReview) { m_bKitbagNeedsReview = bReview; }
+	bool GetKitbagNeedsReview() const { return m_bKitbagNeedsReview; }
+
 	int GetKitbagRecDBID(void) { return m_lKbRecDBID; }
 
 	// ???????ID
@@ -784,6 +787,10 @@ public:
 	DWORD m_dwLastNpcInteractTime;   // Rate limiter for NPC talk/trade/event (Lua execution)
 	DWORD m_dwLastStallSearchTime;   // Rate limiter for stall search (CPU-heavy)
 	DWORD m_dwLastChestPreviewTime;  // Rate limiter for chest preview requests
+	DWORD m_dwLastMovePacketTime;    // Rate limiter for movement packets
+	DWORD m_dwLastSkillPacketTime;   // Rate limiter for skill packets
+	DWORD m_dwLastTradePacketTime;   // Rate limiter for trade packets
+	bool m_bKitbagNeedsReview;       // Set when kitbag checksum fails at login (GM review)
 	// cooldown for ranking
 	DWORD ShowRankColD;
 	int m_nPetNum;

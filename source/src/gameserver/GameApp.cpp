@@ -159,9 +159,9 @@ DWORD WINAPI g_GameLogicProcess(LPVOID lpParameter) {
 		}*/
 
 		// 状态遍历
-		dwLastTick = GetTickCount();
+		dwLastTick = (DWORD)GetTickCount64();
 		g_pGameApp->Run(dwLastTick);
-		dwCurTick = GetTickCount();
+		dwCurTick = (DWORD)GetTickCount64();
 		dwRunTick = dwCurTick - dwLastTick;
 
 		// 服务器间消息处理

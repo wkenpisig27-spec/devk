@@ -2,6 +2,8 @@
 #include "GameAppNet.h"
 #include "Player.h"
 
+extern bool g_bDBDegraded;
+
 // Forward declarations for offline stall system
 class COfflineStallMgr;
 struct SOfflineStallInfo;
@@ -439,23 +441,44 @@ public:
 	}
 	bool SaveChaAssets(CCharacter* pCCha) {
 		// 因为此操作可能包含数据库回滚操作，所以期间不能throw异常
+		static int s_nConsecutiveSaveFailures = 0;
 		try {
 			// LG("enter_map", "开始保存角色资产.\n");
 			LG("enter_map", "Start save character assets.\n");
-			if (!pCCha || !pCCha->GetPlayer())
+			if (!pCCha || !pCCha->GetPlayer()) {
+				if (++s_nConsecutiveSaveFailures >= 3)
+					g_bDBDegraded = true;
 				return false;
+			}
 
 			DWORD dwStartTick = GetTickCount();
-			if (!_tab_cha->SaveMoney(pCCha->GetPlayer()))
+			if (!_tab_cha->SaveMoney(pCCha->GetPlayer())) {
+				if (++s_nConsecutiveSaveFailures >= 3) {
+					g_bDBDegraded = true;
+					LG("Security", "DB degraded mode enabled after %d consecutive save failures\n", s_nConsecutiveSaveFailures);
+				}
 				return false;
+			}
 
 			if (!pCCha->IsBoat()) {
-				if (!_tab_res->SaveKitbagData(pCCha))
+				if (!_tab_res->SaveKitbagData(pCCha)) {
+					if (++s_nConsecutiveSaveFailures >= 3) {
+						g_bDBDegraded = true;
+						LG("Security", "DB degraded mode enabled after %d consecutive save failures\n", s_nConsecutiveSaveFailures);
+					}
 					return false;
+				}
 			} else {
-				if (!_tab_boat->SaveCabin(*pCCha, enumSAVE_TYPE_TRADE))
+				if (!_tab_boat->SaveCabin(*pCCha, enumSAVE_TYPE_TRADE)) {
+					if (++s_nConsecutiveSaveFailures >= 3) {
+						g_bDBDegraded = true;
+						LG("Security", "DB degraded mode enabled after %d consecutive save failures\n", s_nConsecutiveSaveFailures);
+					}
 					return false;
+				}
 			}
+
+			s_nConsecutiveSaveFailures = 0;
 
 			// LG("enter_map", "保存角色 %s(%s) 资产成功.\n", pCCha->GetLogName(), pCCha->GetPlyMainCha()->GetLogName());
 			LG("enter_map", "Save character %s(%s)assets succeed.\n", pCCha->GetLogName(), pCCha->GetPlyMainCha()->GetLogName());
@@ -464,10 +487,22 @@ public:
 		} catch (...) {
 			// LG("enter_map", "保存角色资产时，发生异常!\n");
 			LG("enter_map", "When save character assets occured abnormity\n");
+			if (++s_nConsecutiveSaveFailures >= 3) {
+				g_bDBDegraded = true;
+				LG("Security", "DB degraded mode enabled after %d consecutive save failures\n", s_nConsecutiveSaveFailures);
+			}
 			return false;
 		}
 
 		return true;
+	}
+
+	bool ExecAuditSql(const char* pszSQL) {
+		try {
+			return _tab_cha && DBOK(_tab_cha->exec_sql_direct(pszSQL, 30));
+		} catch (...) {
+			return false;
+		}
 	}
 
 	// Add by lark.li 20080527 begin

@@ -386,6 +386,11 @@ BOOL CChaRecordSet::_ReadRawDataInfo(CRawDataInfo* pRawDataInfo, vector<string>&
 		pInfo->scaling[i] = Str2Float(strList[i]);
 	}
 
+	if (pInfo->lID <= 0) {
+		LG2("table", "Invalid character record row: id=%d name=%s - skipping\n", pInfo->lID, pInfo->szName);
+		return FALSE;
+	}
+
 	return TRUE;
 	T_E
 }

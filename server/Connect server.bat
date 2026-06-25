@@ -12,7 +12,7 @@ echo Starting Group Server...
 START "GroupServer" GroupServer.exe GroupServer.cfg
 
 echo Starting Game Servers...
-START "GameServer00" GameServer.exe GameServer.cfg
+START "GameServer" GameServer.exe GameServer.cfg
 
 echo.
 echo All server components started successfully!

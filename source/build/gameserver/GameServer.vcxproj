@@ -309,6 +309,7 @@
     <ClCompile Include="..\..\src\gameserver\gmsvr.cpp" />
     <ClCompile Include="..\..\src\gameserver\Guild.cpp" />
     <ClCompile Include="..\..\src\gameserver\HarmRec.cpp" />
+    <ClCompile Include="..\..\src\gameserver\ItemAudit.cpp" />
     <ClCompile Include="..\..\src\gameserver\Item.cpp" />
     <ClCompile Include="..\..\src\gameserver\lua_bridge.cpp" />
     <ClCompile Include="..\..\src\gameserver\lua_gamectrl.cpp" />

@@ -106,6 +106,7 @@ public:
 	BOOL m_bLogMission; // 是否打开Mission的log
 
 	BOOL m_bSuperCmd;
+	BOOL m_bEnforceSpeedHack;
 
 	// Add by lark.li 20080731 begin
 	std::vector<int> m_vGMCmd;

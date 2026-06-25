@@ -2,6 +2,7 @@
 //---------------------------------------------------------
 #include "stdafx.h"
 #include "CharTrade.h"
+#include "ItemAudit.h"
 #include "GameApp.h"
 #include "GameAppNet.h"
 #include "SubMap.h"
@@ -1227,16 +1228,14 @@ BOOL CTradeSystem::ValidateTrade(BYTE byType, CCharacter& character, DWORD dwCha
 			return FALSE;
 		}
 
-		if (dwAcpIMP + pTradeData->ReqTradeData.dwIMP > 2000000) {
-			pAccept->SystemNotice("Character (%s] IMP would exceed 2b, trading cannot be continued!", pAccept->GetName());
-			pRequest->SystemNotice("Character (%s] IMP would exceed 2b, trading cannot be continued!", pAccept->GetName());
+		if (dwAcpIMP + (int)pTradeData->ReqTradeData.dwIMP > 2000000000) {
+			pAccept->SystemNotice("Character (%s] IMP would exceed max, trading cannot be continued!", pAccept->GetName());
+			pRequest->SystemNotice("Character (%s] IMP would exceed max, trading cannot be continued!", pAccept->GetName());
 			pTradeData->UnlockExecution();
 			return FALSE;
 		}
 
-		if (dwReqIMP + pTradeData->AcpTradeData.dwIMP > 2000000) {
-			pAccept->SystemNotice("Character (%s] IMP would exceed 2b, trading cannot be continued!", pRequest->GetName());
-			pRequest->SystemNotice("Character (%s] IMP would exceed 2b, trading cannot be continued!", pRequest->GetName());
+		if (dwReqIMP + (int)pTradeData->AcpTradeData.dwIMP > 2000000000) {
 			pTradeData->UnlockExecution();
 			return FALSE;
 		}
@@ -1854,6 +1853,33 @@ BOOL CTradeSystem::ValidateTrade(BYTE byType, CCharacter& character, DWORD dwCha
 		} else {
 			// ä¸¤æ¬¡æ•°æ®å­˜å‚¨æˆåŠŸ
 			game_db.CommitTran();
+
+			for (int i = 0; i < ROLE_MAXNUM_TRADEDATA; i++) {
+				if (pTradeData->AcpTradeData.ItemArray[i].sItemID != 0) {
+					BYTE byQty = pTradeData->AcpTradeData.ItemArray[i].byCount - AcpGrid[i].sNum;
+					if (byQty > 0) {
+						ItemAuditLog(pRequest, "TRADE", &AcpGrid[i], byQty, pAccept, 0);
+						ItemAuditLog(pAccept, "TRADE", &AcpGrid[i], -(int)byQty, pRequest, 0);
+					}
+				}
+				if (pTradeData->ReqTradeData.ItemArray[i].sItemID != 0) {
+					BYTE byQty = pTradeData->ReqTradeData.ItemArray[i].byCount - ReqGrid[i].sNum;
+					if (byQty > 0) {
+						ItemAuditLog(pAccept, "TRADE", &ReqGrid[i], byQty, pRequest, 0);
+						ItemAuditLog(pRequest, "TRADE", &ReqGrid[i], -(int)byQty, pAccept, 0);
+					}
+				}
+			}
+			if (pTradeData->ReqTradeData.llMoney > 0) {
+				SItemGrid goldGrid = {};
+				ItemAuditLog(pAccept, "TRADE", &goldGrid, 0, pRequest, pTradeData->ReqTradeData.llMoney);
+				ItemAuditLog(pRequest, "TRADE", &goldGrid, 0, pAccept, -pTradeData->ReqTradeData.llMoney);
+			}
+			if (pTradeData->AcpTradeData.llMoney > 0) {
+				SItemGrid goldGrid = {};
+				ItemAuditLog(pRequest, "TRADE", &goldGrid, 0, pAccept, pTradeData->AcpTradeData.llMoney);
+				ItemAuditLog(pAccept, "TRADE", &goldGrid, 0, pRequest, -pTradeData->AcpTradeData.llMoney);
+			}
 
 			if (pRequest->IsBoat()) {
 				char szBoat1[64] = "";

@@ -14,6 +14,7 @@
 #include "CharForge.h"
 #include "Birthplace.h"
 #include "GameDB.h"
+#include "ItemAudit.h"
 #include "lua_gamectrl.h"
 #include "MapEntry.h"
 
@@ -1943,6 +1944,12 @@ Short CCharacter::Cmd_BankOper(Char chSrcType, Short sSrcGridID, Short sSrcNum, 
 	pCSrcBag->SetChangeFlag(false);
 	pCTarBag->SetChangeFlag(false);
 
+	CKitbag srcBagBackup, tarBagBackup;
+	bool bCrossBagTransfer = false;
+	SItemGrid auditGrid = {};
+	Short auditQty = 0;
+	bool bAuditBank = false;
+
 	if (pCSrcBag == pCTarBag) // ����λ��
 	{
 		if (pCSrcBag == &pCMainCha->m_CKitbag) {
@@ -1958,6 +1965,11 @@ Short CCharacter::Cmd_BankOper(Char chSrcType, Short sSrcGridID, Short sSrcNum, 
 		CItemRecord* pItem = GetItemRecordInfo(sSrcItemID);
 		if (pItem == nullptr)
 			return enumITEMOPT_ERROR_NONE;
+
+		bCrossBagTransfer = true;
+		srcBagBackup = *pCSrcBag;
+		tarBagBackup = *pCTarBag;
+
 		if (chSrcType == 0 && chTarType == 1) // �ӵ�����������
 		{
 			// if(pItem->sType == enumItemTypeBoat || pItem->sType == enumItemTypeTrade || pItem->sType == enumItemTypeBravery) // d?3h?hj??3ȰA?hj?Ȯ??????h
@@ -2011,30 +2023,40 @@ Short CCharacter::Cmd_BankOper(Char chSrcType, Short sSrcGridID, Short sSrcNum, 
 		// sprintf(szMsg, "���в���[%s-->%s]������ %s[%u]������ %u.", chSrcType == 0 ? "������" : "����", chTarType == 0 ? "������" : "����", pItem->szName, sSrcItemID, sLeftNum);
 		sprintf(szMsg, RES_STRING(GM_CHARACTERCMD_CPP_00012), chSrcType == 0 ? RES_STRING(GM_CHARACTERCMD_CPP_00013) : RES_STRING(GM_CHARACTERCMD_CPP_00014), chTarType == 0 ? RES_STRING(GM_CHARACTERCMD_CPP_00013) : RES_STRING(GM_CHARACTERCMD_CPP_00014), pItem->szName, sSrcItemID, sLeftNum);
 		TL(CHA_BANK, szPlyName, "", szMsg);
+		auditGrid = SPopItem;
+		auditQty = sLeftNum;
+		bAuditBank = true;
 	}
 
-	if (chSrcType == 0)
-		SynKitbagNew(enumSYN_KITBAG_BANK);
-	else {
-		GetPlayer()->SynBank(0, enumSYN_KITBAG_BANK);
-		GetPlayer()->SetBankSaveFlag(0);
-	}
-	if (chSrcType != chTarType) {
-		if (chTarType == 0)
+	game_db.BeginTran();
+	if (GetPlyMainCha()->SaveAssets()) {
+		game_db.CommitTran();
+
+		if (chSrcType == 0)
 			SynKitbagNew(enumSYN_KITBAG_BANK);
 		else {
 			GetPlayer()->SynBank(0, enumSYN_KITBAG_BANK);
 			GetPlayer()->SetBankSaveFlag(0);
 		}
-	}
-
-	// SECURITY FIX: Immediate save after bank operation to prevent crash recovery item loss
-	game_db.BeginTran();
-	if (GetPlyMainCha()->SaveAssets()) {
-		game_db.CommitTran();
+		if (chSrcType != chTarType) {
+			if (chTarType == 0)
+				SynKitbagNew(enumSYN_KITBAG_BANK);
+			else {
+				GetPlayer()->SynBank(0, enumSYN_KITBAG_BANK);
+				GetPlayer()->SetBankSaveFlag(0);
+			}
+		}
+		if (bAuditBank)
+			ItemAuditLog(GetPlyMainCha(), "BANK", &auditGrid, auditQty, nullptr, 0);
 	} else {
 		game_db.RollBack();
+		if (bCrossBagTransfer) {
+			*pCSrcBag = srcBagBackup;
+			*pCTarBag = tarBagBackup;
+		}
+		GetPlyMainCha()->SystemNotice("Bank operation failed: could not save your data.");
 		LG("bank_error", "Failed to save assets after bank operation: player=%s", GetPlyMainCha()->GetName());
+		return enumITEMOPT_ERROR_NONE;
 	}
 
 	return enumITEMOPT_SUCCESS;

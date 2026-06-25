@@ -755,10 +755,19 @@ Char CMoveAble::AttemptMove(double dPreMoveDist, bool bNotiInflexion) {
 	m_CLog.Log("move stat\tcurrently time %u，move distance %u，cost time %u，\taccumulative distance %u，taccumulative cost time %u。\n",
 			   GetTickCount(), lMoveDist, m_SMoveProc.ulElapse, g_ulDist, g_ulElapse);
 
-	// Speed hack detection logging (Option A - logging only, no rejection)
-	// Compare actual distance moved vs expected distance based on time and speed
+	// Speed hack detection and optional rejection
 	if (dPreMoveDist > 0 && lMoveDist > 0) {
-		LogSpeedViolation((double)lMoveDist, dPreMoveDist, m_SMoveProc.ulElapse);
+		if (LogSpeedViolation((double)lMoveDist, dPreMoveDist, m_SMoveProc.ulElapse) && g_Config.m_bEnforceSpeedHack) {
+			m_SMoveProc.sState |= enumMSTATE_CANCEL;
+			CCharacter* pCha = IsCharacter();
+			if (pCha) {
+				pCha->SystemNotice("Movement rejected due to speed violation.");
+				LG("Security", "[SpeedHack] Rejected move for %s (violations=%d)\n",
+				   pCha->GetLogName(), m_speedTracker.sViolationCount);
+			}
+			EndMove();
+			return -1;
+		}
 	}
 
 	return chRet;
@@ -1065,12 +1074,14 @@ Point CMoveAble::NearlyPointFromPointToLine(const Point* pSPort1, const Point* p
 // Speed hack detection logging (Option A - Logging only, no rejection)
 // Logs detailed information about suspicious movement for manual review
 //=============================================================================
-void CMoveAble::LogSpeedViolation(double actualDist, double expectedDist, uLong elapsedTime) {
+bool CMoveAble::LogSpeedViolation(double actualDist, double expectedDist, uLong elapsedTime) {
 	T_B
-	if (expectedDist <= 0) return;
+	if (expectedDist <= 0)
+		return false;
 	
 	float ratio = (float)(actualDist / expectedDist);
 	uLong currentTick = GetTickCount();
+	bool shouldReject = false;
 	
 	// Decay violations after period of good behavior
 	if (currentTick - m_speedTracker.ulLastViolationTick > SPEED_HACK_VIOLATION_DECAY) {
@@ -1120,6 +1131,11 @@ void CMoveAble::LogSpeedViolation(double actualDist, double expectedDist, uLong 
 				"This is extremely suspicious and likely a teleport/speed hack.\n",
 				chaName, ratio);
 		}
+
+		if (ratio > SPEED_HACK_REJECT_RATIO &&
+			m_speedTracker.sViolationCount >= SPEED_HACK_REJECT_THRESHOLD) {
+			shouldReject = true;
+		}
 	} else {
 		// Good movement - decay violation count slowly
 		if (m_speedTracker.sViolationCount > 0 && 
@@ -1129,5 +1145,6 @@ void CMoveAble::LogSpeedViolation(double actualDist, double expectedDist, uLong 
 	}
 	
 	m_speedTracker.ulLastValidationTick = currentTick;
+	return shouldReject;
 	T_E
 }

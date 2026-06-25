@@ -366,6 +366,20 @@ void CFightAble::SkillTarEffect(SFireUnit* pSFireSrc) {
 	m_SFightProc.bCrt = false;
 	m_SFightProc.bMiss = false;
 
+	// Re-validate skill range before applying damage/effects
+	if (pSFireSrc->pCSkillRecord && pSrcCha) {
+		CCharacter* pTargetCha = this->IsCharacter();
+		if (pTargetCha) {
+			dbc::uLong ulDist = pSrcCha->GetSkillDist(pTargetCha, pSFireSrc->pCSkillRecord);
+			// Allow small tolerance for movement during cast time
+			if (!pSrcCha->IsRangePoint(pTargetCha->GetPos(), ulDist + 200)) {
+				LG("Security", "[SkillRange] %s skill %d out of range vs %s (dist limit %u)\n",
+				   pSrcCha->GetLogName(), pSFireSrc->pCSkillRecord->sID, pTargetCha->GetLogName(), ulDist);
+				return;
+			}
+		}
+	}
+
 	Long lOldHP = (int)m_CChaAttr.GetAttr(ATTR_HP);
 	Long lNowHP;
 	Long lSrcOldHP = (int)pSrcCha->m_CChaAttr.GetAttr(ATTR_HP);
@@ -1758,7 +1772,7 @@ void CFightAble::CountLevel() {
 void CFightAble::CountSailLevel() {
 	T_B if (!IsLiveing()) return;
 	Long lOldLevel, lCurLevel;
-	Long lCurExp = (int)m_CChaAttr.GetAttr(ATTR_CSAILEXP);
+	LONG64 lCurExp = m_CChaAttr.GetAttr(ATTR_CSAILEXP);
 
 	lOldLevel = lCurLevel = (int)m_CChaAttr.GetAttr(ATTR_SAILLV);
 	CSailLvRecord *pCLvRec = 0, *pNLvRec = 0;
@@ -1769,7 +1783,7 @@ void CFightAble::CountSailLevel() {
 			m_CLog.Log("******not find navigate grade %d note\n");
 			break;
 		}
-		if ((uLong)lCurExp >= pCLvRec->ulExp) {
+		if (lCurExp >= (LONG64)pCLvRec->ulExp) {
 			lCurLevel++;
 			setAttr(ATTR_SAILLV, lCurLevel);
 			setAttr(ATTR_CLV_SAILEXP, pCLvRec->ulExp);
@@ -1818,17 +1832,17 @@ void CFightAble::CountLifeLevel() {
 	T_E
 }
 
-Long CalculateLevelByExp(Long lretLv, uLong t) /* by value */
+Long CalculateLevelByExp(Long lretLv, LONG64 t) /* by value */
 {
 	CLevelRecord* pCLvRec = 0;
 	while (true) {
 		pCLvRec = GetLevelRecordInfo((int)lretLv + 1);
 		if (!pCLvRec)
 			break;
-		if (t < pCLvRec->ulExp)
+		if (t < (LONG64)pCLvRec->ulExp)
 			break;
 		lretLv++;
-		t -= pCLvRec->ulExp;
+		t -= (LONG64)pCLvRec->ulExp;
 	}
 	return lretLv;
 }
@@ -1838,8 +1852,8 @@ void CFightAble::AddExp(LONG64 ulAddExp) {
 	if (!this || !GetPlayer())
 		return;
 
-	uLong lCurExp = (uLong)m_CChaAttr.GetAttr(ATTR_CEXP);
-	Long lCurLevel = m_CChaAttr.GetAttr(ATTR_LV);
+	LONG64 lCurExp = m_CChaAttr.GetAttr(ATTR_CEXP);
+	Long lCurLevel = (Long)m_CChaAttr.GetAttr(ATTR_LV);
 
 	CLevelRecord* pCLvRec = GetLevelRecordInfo((int)lCurLevel + 1);
 	if (!pCLvRec)
@@ -1847,17 +1861,17 @@ void CFightAble::AddExp(LONG64 ulAddExp) {
 
 	if (!GetPlayer()->GetCtrlCha()->IsBoat()) {
 		if (lCurLevel < 80) {
-			uLong lTotalExp = lCurExp + ulAddExp;
+			LONG64 lTotalExp = lCurExp + ulAddExp;
 			Long lTotalLevel = CalculateLevelByExp(lCurLevel, lTotalExp);
 			if (lTotalLevel >= 80) {
-				uLong ulNeed = GetLevelRecordInfo(80)->ulExp - lCurExp;
-				ulAddExp = /* needed for 80 */ ulNeed + /* remaining / 50 */ ((ulAddExp - ulNeed) / 50);
+				LONG64 ulNeed = (LONG64)GetLevelRecordInfo(80)->ulExp - lCurExp;
+				ulAddExp = ulNeed + ((ulAddExp - ulNeed) / 50);
 			}
 		} else {
-			ulAddExp = floor(ulAddExp / 50);
+			ulAddExp = (LONG64)floor((double)ulAddExp / 50.0);
 		}
 	}
-	lCurExp = floor(lCurExp + ulAddExp);
+	lCurExp = (LONG64)floor((double)(lCurExp + ulAddExp));
 	setAttr(ATTR_CEXP, lCurExp);
 	// m_CChaAttr.SetAttr(ATTR_CEXP, lCurExp);
 }

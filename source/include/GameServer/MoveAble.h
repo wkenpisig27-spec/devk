@@ -16,6 +16,8 @@
 // Speed hack detection thresholds
 #define SPEED_HACK_TOLERANCE 2.0f        // Allow 2x expected distance (very generous for lag)
 #define SPEED_HACK_LOG_THRESHOLD 1.5f    // Log if exceeds 1.5x (suspicious)
+#define SPEED_HACK_REJECT_RATIO 2.5f     // Reject if exceeds 2.5x expected distance
+#define SPEED_HACK_REJECT_THRESHOLD 5    // Consecutive violations before move rejection
 #define SPEED_HACK_VIOLATION_DECAY 30000 // Reset violations after 30 seconds of good behavior
 
 class CMoveAble : public CFightAble {
@@ -127,8 +129,8 @@ private:
 	Point NearlyPointFromPointToLine(const Point* pPort1, const Point* pPort2, const Point* pCenter);
 	bool SegmentEnterCircle(Point* pSPort1, Point* pSPort2, Circle* pSCircle, Point* pResult);
 	
-	// Speed hack detection logging
-	void LogSpeedViolation(double actualDist, double expectedDist, dbc::uLong elapsedTime);
+	// Speed hack detection; returns true if movement should be rejected
+	bool LogSpeedViolation(double actualDist, double expectedDist, dbc::uLong elapsedTime);
 
 	dbc::uShort m_usHeartbeatFreq; // 移动执行的心跳（频率），单位（毫秒）
 	dbc::uLong m_ulHeartbeatTick;  // 单位（毫秒）
@@ -136,7 +138,7 @@ private:
 
 	CTimer m_timeRun;
 	
-	// Speed hack tracking (for logging only - does not reject)
+	// Speed hack tracking
 	SSpeedHackTracker m_speedTracker;
 };
 

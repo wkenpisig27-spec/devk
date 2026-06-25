@@ -130,6 +130,10 @@ void CCharacter::Initially() {
 	m_dwLastNpcInteractTime = 0; // Initialize NPC interaction rate limiter
 	m_dwLastStallSearchTime = 0; // Initialize stall search rate limiter
 	m_dwLastChestPreviewTime = 0; // Initialize chest preview request rate limiter
+	m_dwLastMovePacketTime = 0;
+	m_dwLastSkillPacketTime = 0;
+	m_dwLastTradePacketTime = 0;
+	m_bKitbagNeedsReview = false;
 
 	m_timerAI.Begin(500);
 	m_timerAreaCheck.Begin(2000);
@@ -1723,6 +1727,11 @@ void CCharacter::MoveCity(cChar* szCityName, Long lMapCopyNO, Char chSwitchType)
 		pSBirthP = GetRandBirthPoint(GetLogName(), GetBirthCity());
 	else
 		pSBirthP = GetRandBirthPoint(GetLogName(), szCityName);
+	if (!pSBirthP) {
+		LG("birth_error", "MoveCity: no birth point for cha=%s city=%s, aborting teleport\n",
+		   GetLogName(), szCityName ? szCityName : "");
+		return;
+	}
 	SwitchMap(GetSubMap(), pSBirthP->szMapName, (pSBirthP->x + 2 - rand() % 4) * 100, (pSBirthP->y + 2 - rand() % 4) * 100, true, chSwitchType, lMapCopyNO);
 
 	// temp...

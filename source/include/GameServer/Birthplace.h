@@ -58,6 +58,8 @@ inline SBirthPoint* CBirthMgr::GetRandBirthPoint(const char* pszLocation) {
 	std::map<std::string, SBirthplace*>::iterator it = _LocIdx.find(pszLocation);
 	if (it != _LocIdx.end()) {
 		SBirthplace* p = (*it).second;
+		if (!p || p->nCount <= 0)
+			return nullptr;
 		int nSel = rand() % (p->nCount);
 		SBirthPoint* pPoint = &(p->PointList[nSel]);
 		// LG("birth", "选中了随机出生点[%s] %d %d\n", pPoint->szMapName, pPoint->x, pPoint->y);

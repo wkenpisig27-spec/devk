@@ -19,6 +19,13 @@
 
 #include "Auction.h"
 #include <cctype>
+
+static bool IsEconomyBlockedByDB(CCharacter& cha) {
+	if (!g_bDBDegraded)
+		return false;
+	cha.SystemNotice("Server database is temporarily unavailable. Economy actions are disabled.");
+	return true;
+}
 #include <cerrno>
 #include <climits>
 #include <conformity.h>
@@ -312,7 +319,7 @@ void CCharacter::ProcessPacket(unsigned short usCmd, RPACKET pk) {
 		// NOTE: must NOT break here - ack must always be sent or GroupServer queue gets permanently stuck
 		bool bRateLimited = false;
 		{
-			DWORD dwNow = GetTickCount();
+			DWORD dwNow = (DWORD)GetTickCount64();
 			if (dwNow - m_dwLastGuildBankTime < 1000) {
 				bRateLimited = true;
 			} else {
@@ -323,6 +330,8 @@ void CCharacter::ProcessPacket(unsigned short usCmd, RPACKET pk) {
 		// Check if player is in a safezone (enumAREA_TYPE_NOT_FIGHT = 0x0002)
 		if (bRateLimited) {
 			// silently skip processing but still fall through to send ack
+		} else if (IsEconomyBlockedByDB(*this)) {
+			// notice already shown
 		} else if (!IsLiveing()) {
 			SystemNotice("Dead pirates are unable to trade.");
 		} else if (!IsInArea(enumAREA_TYPE_NOT_FIGHT)) {
@@ -753,11 +762,27 @@ void CCharacter::ProcessPacket(unsigned short usCmd, RPACKET pk) {
 		g_ForgeSystem.ForgeItem(*this, byIndex);
 	} break;
 	case CMD_CM_CHARTRADE_REQUEST: {
+		if (IsEconomyBlockedByDB(*this))
+			break;
+		{
+			DWORD dwNow = (DWORD)GetTickCount64();
+			if (dwNow - m_dwLastTradePacketTime < 200)
+				break;
+			m_dwLastTradePacketTime = dwNow;
+		}
 		BYTE byType = READ_CHAR(pk);
 		DWORD dwCharID = READ_LONG(pk);
 		g_TradeSystem.Request(byType, *this, dwCharID);
 	} break;
 	case CMD_CM_CHARTRADE_ACCEPT: {
+		if (IsEconomyBlockedByDB(*this))
+			break;
+		{
+			DWORD dwNow = (DWORD)GetTickCount64();
+			if (dwNow - m_dwLastTradePacketTime < 200)
+				break;
+			m_dwLastTradePacketTime = dwNow;
+		}
 		BYTE byType = READ_CHAR(pk);
 		DWORD dwCharID = READ_LONG(pk);
 		g_TradeSystem.Accept(byType, *this, dwCharID);
@@ -765,11 +790,27 @@ void CCharacter::ProcessPacket(unsigned short usCmd, RPACKET pk) {
 	case CMD_CM_CHARTRADE_REJECT: {
 	} break;
 	case CMD_CM_CHARTRADE_CANCEL: {
+		if (IsEconomyBlockedByDB(*this))
+			break;
+		{
+			DWORD dwNow = (DWORD)GetTickCount64();
+			if (dwNow - m_dwLastTradePacketTime < 200)
+				break;
+			m_dwLastTradePacketTime = dwNow;
+		}
 		BYTE byType = READ_CHAR(pk);
 		DWORD dwCharID = READ_LONG(pk);
 		g_TradeSystem.Cancel(byType, *this, dwCharID);
 	} break;
 	case CMD_CM_CHARTRADE_ITEM: {
+		if (IsEconomyBlockedByDB(*this))
+			break;
+		{
+			DWORD dwNow = (DWORD)GetTickCount64();
+			if (dwNow - m_dwLastTradePacketTime < 200)
+				break;
+			m_dwLastTradePacketTime = dwNow;
+		}
 		BYTE byType = READ_CHAR(pk);
 		DWORD dwCharID = READ_LONG(pk);
 		BYTE byOpType = READ_CHAR(pk);
@@ -794,6 +835,14 @@ void CCharacter::ProcessPacket(unsigned short usCmd, RPACKET pk) {
 		g_TradeSystem.AddItem(byType, *this, dwCharID, byOpType, byIndex, byItemIndex, byCount);
 	} break;
 	case CMD_CM_CHARTRADE_MONEY: {
+		if (IsEconomyBlockedByDB(*this))
+			break;
+		{
+			DWORD dwNow = (DWORD)GetTickCount64();
+			if (dwNow - m_dwLastTradePacketTime < 200)
+				break;
+			m_dwLastTradePacketTime = dwNow;
+		}
 		BYTE byType = READ_CHAR(pk);
 		DWORD dwCharID = READ_LONG(pk);
 		BYTE byOpType = READ_CHAR(pk);
@@ -832,11 +881,27 @@ void CCharacter::ProcessPacket(unsigned short usCmd, RPACKET pk) {
 		}
 	} break;
 	case CMD_CM_CHARTRADE_VALIDATEDATA: {
+		if (IsEconomyBlockedByDB(*this))
+			break;
+		{
+			DWORD dwNow = (DWORD)GetTickCount64();
+			if (dwNow - m_dwLastTradePacketTime < 200)
+				break;
+			m_dwLastTradePacketTime = dwNow;
+		}
 		BYTE byType = READ_CHAR(pk);
 		DWORD dwCharID = READ_LONG(pk);
 		g_TradeSystem.ValidateItemData(byType, *this, dwCharID);
 	} break;
 	case CMD_CM_CHARTRADE_VALIDATE: {
+		if (IsEconomyBlockedByDB(*this))
+			break;
+		{
+			DWORD dwNow = (DWORD)GetTickCount64();
+			if (dwNow - m_dwLastTradePacketTime < 200)
+				break;
+			m_dwLastTradePacketTime = dwNow;
+		}
 		BYTE byType = READ_CHAR(pk);
 		DWORD dwCharID = READ_LONG(pk);
 		g_TradeSystem.ValidateTrade(byType, *this, dwCharID);
@@ -918,6 +983,8 @@ void CCharacter::ProcessPacket(unsigned short usCmd, RPACKET pk) {
 		g_StallSystem.OpenStall(*this, pk);
 	} break;
 	case CMD_CM_STALL_BUY: {
+		if (IsEconomyBlockedByDB(*this))
+			break;
 		g_StallSystem.BuyGoods(*this, pk);
 	} break;
 	case CMD_CM_STALL_CLOSE: {
@@ -2331,6 +2398,12 @@ void CCharacter::BeginAction(RPACKET pk) {
 	m_ulPacketID = ulPacketId;
 	switch (chActionType) {
 	case enumACTION_MOVE: {
+		{
+			DWORD dwNow = (DWORD)GetTickCount64();
+			if (dwNow - m_dwLastMovePacketTime < 50)
+				break;
+			m_dwLastMovePacketTime = dwNow;
+		}
 
 		if (!GetSubMap()) {
 
@@ -2389,6 +2462,13 @@ void CCharacter::BeginAction(RPACKET pk) {
 		Cmd_BeginMove((Short)m_dwPing, Path, chPointNum);
 	} break;
 	case enumACTION_SKILL: {
+		{
+			DWORD dwNow = (DWORD)GetTickCount64();
+			if (dwNow - m_dwLastSkillPacketTime < 100)
+				break;
+			m_dwLastSkillPacketTime = dwNow;
+		}
+
 		if (GetPlyMainCha()->m_CKitbag.IsLock()) {
 			// SystemNotice("????????,??????!\n");
 			SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00038));
@@ -2743,6 +2823,8 @@ void CCharacter::BeginAction(RPACKET pk) {
 	case enumACTION_BANK:
 
 	{
+		if (IsEconomyBlockedByDB(*this))
+			break;
 		Char chSrcType = READ_CHAR(pk);
 		Short sSrcGrid = READ_SHORT(pk);
 		Short sSrcNum = READ_SHORT(pk);
