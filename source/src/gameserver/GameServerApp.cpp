@@ -565,8 +565,59 @@ bool GameServerApp::ValidatePlayerPointer(GatePlayer* ply, uintptr_t expectedGat
 		   ply, (unsigned long long)expectedGateAddr, (unsigned long long)ply->GetGateAddr());
 		return false;
 	}
+
+	if (!ValidatePlayerSession(ply)) {
+		return false;
+	}
 	
 	return true;
+}
+
+bool GameServerApp::ValidatePlayerSession(GatePlayer* ply) const {
+	if (!ply || !ply->GetSessionHandle().IsValid()) {
+		return true;
+	}
+
+	GateServer* gt = ply->GetGate();
+	if (!gt || !gt->IsValid()) {
+		LG("SessionManager", "GameServer INVALID: Player %p has session but gate is invalid\n", ply);
+		return false;
+	}
+
+	GatePlayer* resolved = gt->ResolveSession(ply->GetSessionHandle());
+	if (resolved != ply) {
+		LG("SessionManager", "GameServer INVALID: Player %p session slot=%u gen=%u mismatch\n",
+		   ply, ply->GetSessionHandle().slot, ply->GetSessionHandle().generation);
+		return false;
+	}
+
+	return true;
+}
+
+void GateServer::BindPlayerSession(SessionHandle handle, GatePlayer* ply) {
+	if (!handle.IsValid() || !ply) {
+		return;
+	}
+
+	m_sessionManager.Bind(handle, ply);
+	ply->SetSessionHandle(handle);
+	LG("SessionManager", "GameServer bound session slot=%u gen=%u to player %p dbid=%u\n",
+	   handle.slot, handle.generation, ply, ply->GetDBChaId());
+}
+
+void GateServer::ReleasePlayerSession(GatePlayer* ply) {
+	if (!ply || !ply->GetSessionHandle().IsValid()) {
+		return;
+	}
+
+	LG("SessionManager", "GameServer released session slot=%u gen=%u for player %p\n",
+	   ply->GetSessionHandle().slot, ply->GetSessionHandle().generation, ply);
+	m_sessionManager.Release(ply->GetSessionHandle());
+	ply->SetSessionHandle(SessionHandle{});
+}
+
+GatePlayer* GateServer::ResolveSession(SessionHandle handle) const {
+	return static_cast<GatePlayer*>(m_sessionManager.Resolve(handle));
 }
 
 bool GameServerApp::IsPlayerRegistered(GatePlayer* ply) const {
@@ -613,10 +664,14 @@ bool GameServerApp::AddPlayer(GatePlayer* gtplayer, GateServer* gt, uintptr_t gt
 bool GameServerApp::DelPlayer(GatePlayer* gtplayer) {
 	T_B if (gtplayer == nullptr) return false;
 
+	GateServer* gt = gtplayer->GetGate();
+	if (gt != nullptr && gt->IsValid()) {
+		gt->ReleasePlayerSession(gtplayer);
+	}
+
 	// Unregister from player registry before removal
 	UnregisterPlayer(gtplayer);
 
-	GateServer* gt = gtplayer->GetGate();
 	if (gt == nullptr || !gt->IsValid())
 		return false;
 

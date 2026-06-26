@@ -7,6 +7,9 @@
 #include <atomic>
 #include <shared_mutex>
 #include <unordered_map>
+
+#include "common/SessionHandle.h"
+#include "common/SessionManager.h"
 #include "DBCCommon.h"
 #include "PreAlloc.h"
 #include "ThreadPool.h"
@@ -73,6 +76,11 @@ public:
 	void AddPlayerCount() { ++m_playercount; }
 	void DecPlayerCount() { --m_playercount; }
 	int GetPlayerCount() const { return m_playercount; }
+
+	SessionManager m_sessionManager;
+	void BindPlayerSession(SessionHandle handle, GatePlayer* ply);
+	void ReleasePlayerSession(GatePlayer* ply);
+	GatePlayer* ResolveSession(SessionHandle handle) const;
 
 protected:
 	std::string m_strIp;
@@ -267,6 +275,7 @@ public:
 	void RegisterPlayer(GatePlayer* ply);
 	void UnregisterPlayer(GatePlayer* ply);
 	bool ValidatePlayerPointer(GatePlayer* ply, uintptr_t expectedGateAddr = 0);
+	bool ValidatePlayerSession(GatePlayer* ply) const;
 	bool IsPlayerRegistered(GatePlayer* ply) const;
 
 public:

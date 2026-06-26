@@ -474,9 +474,10 @@ void ToGameServer::MC_ENTERMAP(dbc::DataSocket* datasock, dbc::RPacket& recvbuf)
 		l_game->m_plynum = l_rpk.ReverseReadLong();
 		char l_isSwitch = l_rpk.ReverseReadChar();
 
-		LG("GateServer", "Client: %s:%d receive Gate from [%s] success EnterMap command, Game address:%llX, Gate address:%llX\n",
+		LG("GateServer", "Client: %s:%d receive Gate from [%s] success EnterMap command, Game address:%llX, Gate address:%llX session slot=%u gen=%u\n",
 			l_ply->m_datasock->GetPeerIP(), l_ply->m_datasock->GetPeerPort(),
-			datasock->GetPeerIP(), l_ply->gm_addr, MakeULong(l_ply));
+			datasock->GetPeerIP(), l_ply->gm_addr, MakeULong(l_ply),
+			l_ply->m_sessionHandle.slot, l_ply->m_sessionHandle.generation);
 
 		// Discard gate-only trailer before forwarding to client:
 		// Per player: dbid (uLong=4) + gateaddr (LLong=8) = 12 bytes each
@@ -552,6 +553,8 @@ void GameServer::Finally() {
 }
 
 void GameServer::EnterMap(Player* ply, uLong actid, uLong dbid, uLong worldid, cChar* map, Long lMapCpyNO, uLong x, uLong y, char entertype, short swiner) {
+	g_gtsvr->EnsurePlayerSession(ply);
+
 	WPacket l_wpk = m_datasock->GetWPacket();
 	l_wpk.WriteCmd(CMD_TM_ENTERMAP);
 	l_wpk.WriteLong(actid);
@@ -565,6 +568,12 @@ void GameServer::EnterMap(Player* ply, uLong actid, uLong dbid, uLong worldid, c
 	l_wpk.WriteChar(entertype);
 	l_wpk.WriteLongLong(MakeULong(ply)); // Gate address (reverse-read by GameServer)
 	l_wpk.WriteShort(swiner);
+	if (ply->m_sessionHandle.IsValid()) {
+		l_wpk.WriteLong(ply->m_sessionHandle.slot);
+		l_wpk.WriteLong(ply->m_sessionHandle.generation);
+		LG("SessionManager", "EnterMap TM_ENTERMAP session slot=%u gen=%u player %p dbid=%u\n",
+		   ply->m_sessionHandle.slot, ply->m_sessionHandle.generation, ply, dbid);
+	}
 	g_gtsvr->gm_conn->SendData(m_datasock, l_wpk);
 	ply->SetMapName(map); // Chaos Blind
 }

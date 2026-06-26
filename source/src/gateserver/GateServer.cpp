@@ -417,6 +417,8 @@ void GateServer::RegisterPlayer(Player* ply) {
 
 void GateServer::UnregisterPlayer(Player* ply) {
 	if (!ply) return;
+
+	ReleasePlayerSession(ply);
 	
 	std::unique_lock<std::shared_mutex> lock(m_playerRegistryMutex);
 	uintptr_t addr = reinterpret_cast<uintptr_t>(ply);
@@ -459,8 +461,40 @@ bool GateServer::ValidatePlayerPointer(Player* ply, long long expectedGpAddr) {
 		   ply, expectedGpAddr, (long long)ply->gp_addr);
 		return false;
 	}
+
+	if (ply->m_sessionHandle.IsValid() && !m_sessionManager.Validate(ply->m_sessionHandle, ply)) {
+		LG("SessionManager", "INVALID: Player %p session slot=%u gen=%u mismatch\n",
+		   ply, ply->m_sessionHandle.slot, ply->m_sessionHandle.generation);
+		return false;
+	}
 	
 	return true;
+}
+
+void GateServer::EnsurePlayerSession(Player* ply) {
+	if (!ply || ply->m_sessionHandle.IsValid()) {
+		return;
+	}
+
+	ply->m_sessionHandle = m_sessionManager.Allocate(ply);
+	if (!ply->m_sessionHandle.IsValid()) {
+		LG("SessionManager", "Gate failed to allocate session for player %p dbid=%u\n", ply, ply->m_dbid);
+		return;
+	}
+
+	LG("SessionManager", "Gate allocated session slot=%u gen=%u for player %p dbid=%u\n",
+	   ply->m_sessionHandle.slot, ply->m_sessionHandle.generation, ply, ply->m_dbid);
+}
+
+void GateServer::ReleasePlayerSession(Player* ply) {
+	if (!ply || !ply->m_sessionHandle.IsValid()) {
+		return;
+	}
+
+	LG("SessionManager", "Gate released session slot=%u gen=%u for player %p\n",
+	   ply->m_sessionHandle.slot, ply->m_sessionHandle.generation, ply);
+	m_sessionManager.Release(ply->m_sessionHandle);
+	ply->m_sessionHandle = SessionHandle{};
 }
 
 bool GateServer::IsPlayerRegistered(Player* ply) const {

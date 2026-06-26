@@ -23,6 +23,8 @@
 #include "pi_Alloc.h"
 #include "NetRetCode.h"
 #include "common/NetLimits.h"
+#include "common/SessionHandle.h"
+#include "common/SessionManager.h"
 
 #include <iostream>
 #include <map>
@@ -288,9 +290,11 @@ struct Player : public PreAllocStru, public RunBiDirectItem<Player> {
 	// Generation counter for pointer validation
 	static std::atomic<uint32_t> s_globalGeneration;
 	uint32_t m_generation{0};
+	SessionHandle m_sessionHandle{};
 
 public:
 	uint32_t GetGeneration() const { return m_generation; }
+	const SessionHandle& GetSessionHandle() const { return m_sessionHandle; }
 	bool InitReference(DataSocket* datasock);
 	void Free();
 
@@ -412,6 +416,10 @@ public:
 	void UnregisterPlayer(Player* ply);
 	bool ValidatePlayerPointer(Player* ply, long long expectedGpAddr = 0);
 	bool IsPlayerRegistered(Player* ply) const;
+	void EnsurePlayerSession(Player* ply);
+	void ReleasePlayerSession(Player* ply);
+
+	SessionManager m_sessionManager;
 
 	IMPLEMENT_CDELETE(GateServer)
 };

@@ -57,7 +57,7 @@ Track progress for autonomous refactoring. Update after each completed task.
 
 | Track | Task | Status | Notes |
 |-------|------|--------|-------|
-| A | M3 Session handles (slot + generation) | pending | Replace pointer identity on game path |
+| A | M3 Session handles (slot + generation) | **in_progress** | Phase 1 prototype: SessionManager, gate alloc at EnterMap, TM_ENTERMAP extension, dual validation |
 | B | M2 Bulk migration — Gate lifecycle (B1) | mostly done | SyncCall on comm thread covers login/BGNPLAY |
 | B | M2 Bulk migration — GameAppNet (B5) | **done** | batch 3: 35 handlers total (2026-06-27) |
 | B | M2 Bulk migration — CharacterPrl (B6) | **done** | 2026-06-27 — 112 handlers; legacy switch empty |
@@ -143,6 +143,29 @@ Blockers: none for batch 4. ~70 switch cases remain.
 **Manual verification (2026-06-27):** T0-login, T0-enter, chat, and in-game checks for batch 1–3 handlers including BEGINACTION — **PASS** (user confirmed).
 
 **Recommended batch 4 (~10):** BOAT_LUANCH, BOAT_SELECT, BOAT_BAGSEL, ENTITY_EVENT, STALL_BUY, SKILLUPGRADE, TEAM_FIGHT_ASK/ASR, ITEM_REPAIR_ASK/ASR (boat/stall/combat-adjacent, self-contained bodies).
+
+### Track A — M3 session handles (phase 1, 2026-06-27)
+
+**Design:** Option A dual validation — CM forward trailer unchanged (`gate_ptr + gm_addr`); session `{slot, gen}` allocated on Gate at `EnterMap`, appended to `CMD_TM_ENTERMAP` trailer (+8 bytes, backward-compatible via `RemainData()` fork). Game binds mirror handle on `GatePlayer` at enter-map; `ValidatePlayerPointer` requires pointer registry **and** session registry match when handle is set.
+
+**New files:**
+- `source/include/common/SessionHandle.h`
+- `source/include/common/SessionManager.h`
+- `source/src/common/SessionManager.cpp` (in `Common.lib`)
+
+**Wired:**
+- Gate `Player::m_sessionHandle`, `GateServer::m_sessionManager`, `EnsurePlayerSession` / `ReleasePlayerSession`
+- `GameServer::EnterMap` — allocate + append slot/gen to TM_ENTERMAP
+- `ToClient::ReRouteToGameServer` — log session (pointer trailer unchanged)
+- Game `GatePlayer::m_sessionHandle`, per-gate `SessionManager`, `BindPlayerSession` / `ResolveSession`
+- `OpcodeHandle_TmEntermap` — read extended trailer, bind session after `ADDPLAYER`
+- Dual validation in `ValidatePlayerPointer` + gate `ValidatePlayerPointer`
+
+**Build (2026-06-27):** `Common.lib` **PASS**; GateServer + GameServer **compile PASS**; link blocked (`GateServer.exe` / `GameServer.exe` in use).
+
+**Manual test:** T0-login → T0-enter → move/chat; grep logs for `SessionManager` (`Gate allocated`, `TM_ENTERMAP`, `ReRoute`, `GameServer bound`).
+
+**Phase 2 remains:** repurpose 8-byte CM trailer to `{slot, gen}`; remove pointer registry path; GroupServer session sync.
 
 ### Track B6 — CharacterPrl registry (batch 4, 2026-06-27)
 
@@ -423,4 +446,4 @@ See last-smoke-result.txt for automated output.
 
 ## Resume prompt for next session
 
-> Continue Option B Phase 3. **Track B6 done** (112 CharacterPrl registry entries). **Track B5 done** (35 GameAppNet handlers). Next: Track A (session handles) or Track C (zero-copy gate forwarding). Read `docs/NETWORK_AUDIT.md` and this file. Wire format unchanged.
+> Continue Option B Phase 3. **Track B6 done** (112 CharacterPrl registry entries). **Track B5 done** (35 GameAppNet handlers). **Track A phase 1 in progress** (session handles prototype). Next: Track A phase 2 (trailer swap) or Track C (zero-copy gate forwarding). Read `docs/NETWORK_AUDIT.md` and this file. CM forward wire unchanged.

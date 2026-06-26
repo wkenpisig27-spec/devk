@@ -15,6 +15,8 @@
 
 #include <cstdint>  // For uintptr_t
 
+#include "common/SessionHandle.h"
+
 class GateServer;
 // Unique Player structure
 struct uplayer {
@@ -39,7 +41,7 @@ struct uplayer {
 
 struct GatePlayer {
 protected:
-	GatePlayer() : ply(), Next(nullptr), Prev(nullptr), m_tmplist(nullptr), m_generation(0) {}
+	GatePlayer() : ply(), Next(nullptr), Prev(nullptr), m_tmplist(nullptr), m_generation(0), m_sessionHandle() {}
 	~GatePlayer() {
 		Next = nullptr;
 		Prev = nullptr;
@@ -64,12 +66,16 @@ public:
 	uint32_t GetGeneration() const { return m_generation; }
 	void SetGeneration(uint32_t gen) { m_generation = gen; }
 
+	const SessionHandle& GetSessionHandle() const { return m_sessionHandle; }
+	void SetSessionHandle(SessionHandle handle) { m_sessionHandle = handle; }
+
 	GatePlayer* Next;
 	GatePlayer* Prev;
 
 private:
 	uplayer ply;
 	uint32_t m_generation;  // Session generation for pointer validation
+	SessionHandle m_sessionHandle;
 
 	GatePlayer* m_tmplist; // 特定发包接口之用，名称以后可能会调整
 };

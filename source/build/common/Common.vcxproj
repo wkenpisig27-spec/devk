@@ -200,6 +200,7 @@
     <ClCompile Include="..\..\src\common\LicenseValidator.cpp" />
     <ClCompile Include="..\..\src\common\OpcodeMeta.cpp" />
     <ClCompile Include="..\..\src\common\OpcodeHandlerRegistry.cpp" />
+    <ClCompile Include="..\..\src\common\SessionManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\AreaRecord.h" />

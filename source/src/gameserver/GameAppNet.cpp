@@ -679,8 +679,27 @@ bool CGameApp::OpcodeHandle_TmEntermap(void* ctx, DataSocket* /*sock*/, RPacket&
 	uLong l_x = READ_LONG(recv);
 	uLong l_y = READ_LONG(recv);
 	char chLogin = READ_CHAR(recv);
-	short swiner = READ_SHORT_R(recv);
-	unsigned long long l_gtaddr = recv.ReverseReadLongLong();
+	SessionHandle gateSession;
+	short swiner = 0;
+	unsigned long long l_gtaddr = 0;
+	const uLong trailerRemain = recv.RemainData();
+	if (trailerRemain >= 18) {
+		l_gtaddr = recv.ReadLongLong();
+		swiner = static_cast<short>(recv.ReadShort());
+		gateSession.slot = static_cast<uint32_t>(recv.ReadLong());
+		gateSession.generation = static_cast<uint32_t>(recv.ReadLong());
+	} else if (trailerRemain >= 10) {
+		swiner = READ_SHORT_R(recv);
+		l_gtaddr = recv.ReverseReadLongLong();
+	} else {
+		LG("enter_map", "TM_ENTERMAP trailer too short (%u bytes) dbid=%u\n", trailerRemain, l_dbid);
+		return true;
+	}
+
+	if (gateSession.IsValid()) {
+		LG("SessionManager", "TM_ENTERMAP gate session slot=%u gen=%u gtaddr=%llX dbid=%u\n",
+		   gateSession.slot, gateSession.generation, l_gtaddr, l_dbid);
+	}
 
 	LG("enter_map", "start entry map cha_id = %d enter--------------------------\n", l_dbid);
 
@@ -705,6 +724,9 @@ bool CGameApp::OpcodeHandle_TmEntermap(void* ctx, DataSocket* /*sock*/, RPacket&
 		l_player->MisLogin();
 
 	ADDPLAYER(l_player, pGate, l_gtaddr);
+	if (gateSession.IsValid()) {
+		pGate->BindPlayerSession(gateSession, l_player);
+	}
 	l_player->OnLogin();
 
 	if (g_Config.m_bOfflineStall) {
