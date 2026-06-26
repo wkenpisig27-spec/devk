@@ -63,7 +63,7 @@ Track progress for autonomous refactoring. Update after each completed task.
 | B | M2 Bulk migration — CharacterPrl (B6) | **done** | 2026-06-27 — 112 handlers; legacy switch empty |
 | C | M6 Zero-copy gate forwarding | pending | Drop `Duplicate()` in `ReRouteToGameServer` |
 | D | M4 Backplane PSK auth | **done** | 2026-06-27 — `BackplaneAuth` HMAC-SHA256; OS/SO opcodes 6510/7010 |
-| E | M5 PacketReader everywhere | pending | After each B-batch migration |
+| E | M5 PacketReader everywhere | **in_progress** | Track E batch 4: chartrade item/money + Group session mins (2026-06-27) |
 
 **Phase 3 exit gate:** Legacy switches empty or assert-only; session handles primary; backplane auth in default configs; 30-min soak clean.
 
@@ -452,6 +452,198 @@ Build: Release\|x64 **PASS** (`GameServer.vcxproj`, CharacterPrl.cpp compiled an
 
 Blockers: none. **Track B6 complete.**
 
+### Track E — OpcodeIngress + PacketReader pilot (batch 1, 2026-06-27)
+
+**Design:** Central ingress validation module driven by `OpcodeMeta` (band + known opcode) with per-handler `minPayloadBytes` on `OpcodeHandlerEntry`. Fail-closed at call sites — Gate disconnects (`-32`), Game drops packet. Bulk-routed CM/CP gap opcodes (registered but not in meta table) still allowed at Gate.
+
+**New files:**
+- `source/include/common/OpcodeIngress.h`
+- `source/src/common/OpcodeIngress.cpp` (in `Common.lib`)
+
+**API:**
+- `ValidateKnownOpcode` — meta lookup, reject `isBase`
+- `ValidateOpcodeBand` — band must match
+- `ValidateMinPayload` — `RemainData() >= minBytes` after cmd consumed
+- `ValidateClientToGateOpcode` — CM/CP band + known (or registered) + handler min
+- `ValidateGameCharacterOpcode` — CM band + known + handler min
+- `ValidateGameAppOpcode` — only when handler registered; TM/PM/MM band + known + handler min
+
+**Registry changes:**
+- `OpcodeHandlerEntry.minPayloadBytes` (default 0)
+- `LookupOpcodeHandler` exported
+- `DispatchOpcodeHandler` enforces min payload before handler invoke
+
+**Gate pilot minPayload (~10 handlers):**
+
+| Opcode | min | Notes |
+|--------|-----|-------|
+| CMD_CP_PING | 0 | empty body OK |
+| CMD_CM_SAY | 0 | variable string |
+| CMD_CM_KITBAG_UNLOCK | 0 | encrypted sequence |
+| CMD_CM_ITEM_UNLOCK_ASK | 0 | encrypted + slot |
+| CMD_CM_ENDACTION | 0 | route-only |
+| CMD_CM_OFFLINE_MODE | 0 | route-only |
+| CMD_CM_BEGINACTION | 4 | world ID |
+| CMD_CM_CHECK_PING | 0 | empty body OK |
+| CMD_CM_SYNATTR | 0 | variable attrs |
+| CMD_CM_REFRESH_DATA | 8 | two longs |
+
+**Wired:**
+- Gate `ToClient::OnProcessData` — `ValidateClientToGateOpcode` before registry dispatch
+- Game `CCharacter::ProcessPacket` — `ValidateGameCharacterOpcode` before dispatch
+- Game `CGameApp::ProcessPacket` / `ProcessInterGameMsg` — `ValidateGameAppOpcode` only for registered opcodes (default router trailer path unchanged)
+
+**PacketReader pilot:**
+- Gate: `OpcodeHandle_CmItemUnlockAsk` (slot read); `CmSay` already migrated
+- Game Character: `OpcodeHandle_CmBeginAction` (world ID), `OpcodeHandle_CmDieReturn` (relive char)
+
+**Log line:** `OpcodeIngress [reject] cmd=N name=… reason=… peer=…`
+
+**Build (2026-06-27):** `Common.lib` + `GateServer.exe` + `GameServer.exe` Release\|x64 **PASS** (VS 18 MSBuild).
+
+**Manual test checklist:** T0-login → T0-enter → move (`CMD_CM_BEGINACTION`) → chat (`CMD_CM_SAY`) → ping → kitbag unlock → logout. Grep logs for spurious `OpcodeIngress [reject]`.
+
+**Recommended batch 2:** Extend minPayload to more Gate explicit handlers + GameApp TM/PM/MM handlers with known fixed headers; migrate Gate `CmKitbagUnlock` sequence read; CharacterPrl READ_* → PacketReader for stall/boat group (~10 handlers); optional `OpcodeMeta.minPayload` column in generator (only if table-driven mins outweigh per-handler entries).
+
+### Track E — OpcodeIngress + PacketReader (batch 2, 2026-06-27)
+
+**minPayload expansion — GameApp (`RegisterAllGameAppOpcodeHandlers`):**
+
+| Opcode | min | Notes |
+|--------|-----|-------|
+| CMD_PM_TEAM | 1 | team msg type char |
+| CMD_PM_GUILDINFO | 4 | cha DBID long |
+| CMD_PM_GUILD_CHALLMONEY | 12 | long + longlong before strings |
+| CMD_PM_GUILD_CHALL_PRIZEMONEY | 12 | long + longlong before strings |
+| CMD_TM_GOOUTMAP | 17 | 1 char body + 16-byte session trailer |
+| CMD_PM_EXPSCALE | 8 | two longs |
+| CMD_MM_UPDATEGUILDBANK | 4 | guild ID long |
+| CMD_MM_UPDATEGUILDBANKGOLD | 4 | guild ID long |
+| CMD_MM_GUILD_APPROVE | 4 | guild ID long before strings |
+| CMD_MM_ADDCREDIT | 8 | cha DBID + credit long |
+| CMD_MM_ADDMONEY | 8 | cha DBID + money long |
+
+**minPayload expansion — Character (`RegisterCharacterOpcodeHandlers`):**
+
+| Opcode | min | Notes |
+|--------|-----|-------|
+| CMD_CM_PING | 28 | long + longlong + long + long + longlong |
+| CMD_CM_STALLSEARCH | 4 | item ID long |
+| CMD_CM_MISLOGINFO | 2 | mission ID short |
+| CMD_CM_MISLOG_CLEAR | 2 | mission ID short |
+| CMD_CM_KITBAG_AUTOLOCK | 1 | autolock char |
+| CMD_CM_KITBAG_CHECK | 0 | empty body |
+| CMD_CM_KITBAG_LOCK | 0 | empty body |
+| CMD_CM_KITBAG_UNLOCK | 0 | password string |
+| CMD_CM_BOAT_GETINFO | 0 | empty body |
+| CMD_CM_STALL_ALLDATA | 0 | variable stall payload |
+| CMD_CM_SYNATTR | 0 | variable attr list |
+
+**PacketReader migration (~10 handlers):**
+- Gate: `OpcodeHandle_CmKitbagUnlock` — `PacketWriter` rebuild after encrypted sequence decrypt
+- Character: `CmPing`, `CmStallSearch`, `CmRefreshData`, `CmMisLogInfo`, `CmMisLogClear`, `CmKitbagUnlock`, `CmKitbagAutolock` (+ batch 1 `CmBeginAction`, `CmDieReturn`)
+
+**GroupServer ingress:**
+- `ValidateGroupIngressOpcode(cmd, pk, peer, GroupIngressPath)` in `OpcodeIngress.h/cpp`
+- `ServeCall`: fail-closed on band not TP/PA/OS + unknown opcode
+- `ProcessData`: strict known-opcode check for CP/MP only; TP/AP server messages pass through unchanged
+- Wired in `GroupServerAppServ.cpp` `OnServeCall` (after `CMD_OS_BACKPLANE_HELLO`) and `OnProcessData` (after `BackplaneAuth::AllowProcessData`)
+
+**Reject rate summary:** static counter in `LogReject`; logs `[summary] rejects=N in last 60s` when count > 0.
+
+**Build (2026-06-27):** `Common.lib` compile **PASS**; `GateServer.exe` / `GameServer.exe` / `GroupServer.exe` compile **PASS**, link **BLOCKED** (`LNK1104` — exes locked by running server processes). Stop servers and relink to refresh binaries.
+
+**Manual test checklist:** login (`TP_LOGIN`/`TP_USER_LOGIN`) → enter map → move → chat → CP ping/party/friend if available → kitbag unlock → logout; grep for spurious `OpcodeIngress [reject]` on Gate/Game/Group.
+
+**Recommended batch 3:** Gate explicit handler minPayload for login RSA path handlers; Character trade/forge group PacketReader; GameApp MM string handlers with conservative mins; GroupServer per-handler registry + minPayload for CP/MP player switch; AccountServer ingress pilot.
+
+### Track E — OpcodeIngress + PacketReader (batch 3, 2026-06-27)
+
+**AccountServer ingress pilot:**
+- `ValidateAccountIngressOpcode(cmd, pk, peer)` — PA band + known opcode via OpcodeMeta; skips `CMD_OS_BACKPLANE_HELLO`
+- Wired in `AccountServer2.cpp` `OnProcessData` + `OnServeCall` (after BackplaneAuth, before switch)
+- Fail-closed: drop packet + `[AccountServer] Invalid CMD` Security log (replaces hardcoded 3000–3050 range)
+
+**GroupServer CP hot-opcode min map (ProcessData path only):**
+
+| Opcode | min | Notes |
+|--------|-----|-------|
+| CMD_CP_PING | 4 | ping value long |
+| CMD_CP_TEAM_ACCEPT | 4 | inviter cha ID long |
+| CMD_CP_TEAM_REFUSE | 4 | inviter cha ID long |
+| CMD_CP_FRND_ACCEPT | 4 | inviter cha ID long |
+| CMD_CP_TEAM_INVITE | 0 | string leads |
+| CMD_CP_FRND_INVITE | 0 | string leads |
+| CMD_CP_TEAM_LEAVE | 0 | empty body |
+
+**Gate sync/login path:**
+- `ValidateGateSyncClientOpcode` — CM/CP band + known opcode for RSA/login/TransmitCall set; min=0 (variable encrypted payloads)
+- Wired in `ToClient::OnProcessData` before `CM_RSA_HANDSHAKE1` / `DispatchSyncClientOpcode`
+- Payload comments in `CM_RSA_HANDSHAKE1` + `CM_LOGIN`
+
+**Character trade/forge PacketReader (~8 handlers):**
+- `CmForge`, `CmItemForgeAsk`, `CmItemForgeAsr`
+- `CmChartradeRequest`, `Accept`, `Reject`, `Cancel`
+- `CmRequestTalkOrTrade` (NPC ID long + remainder forwarded via `reader.Raw()`)
+
+**GameApp minPayload additions:**
+
+| Opcode | min | Notes |
+|--------|-----|-------|
+| CMD_PM_SAY2ALL | 4 | cha DBID long before string |
+| CMD_PM_SAY2TRADE | 4 | cha DBID long before string |
+| CMD_MM_GUILD_CHALL_PRIZEMONEY | 12 | long + longlong |
+| CMD_MM_STORE_BUY | 12 | three longs |
+| CMD_MM_AUCTION | 4 | cha DBID long |
+
+**Character registry minPayload additions:**
+
+| Opcode | min | Notes |
+|--------|-----|-------|
+| CMD_CM_FORGE | 1 | forge index char |
+| CMD_CM_ITEM_FORGE_ASK | 1 | cancel/confirm char |
+| CMD_CM_ITEM_FORGE_ASR | 1 | answer char |
+| CMD_CM_REQUESTTALK | 4 | NPC/world ID long |
+| CMD_CM_REQUESTTRADE | 4 | NPC ID long |
+| CMD_CM_CHARTRADE_REQUEST | 5 | type char + cha ID long |
+| CMD_CM_CHARTRADE_ACCEPT | 5 | type char + cha ID long |
+| CMD_CM_CHARTRADE_REJECT | 0 | empty body |
+| CMD_CM_CHARTRADE_CANCEL | 5 | type char + cha ID long |
+
+**Build (2026-06-27):** `Common.lib` compile **PASS**; `GateServer.exe` / `GameServer.exe` / `GroupServer.exe` / `AccountServer.exe` compile **PASS** (`CharacterPrl.cpp`, `GameAppNet.cpp`, `ToClient.cpp`, `AccountServer2.cpp`, `OpcodeIngress.cpp`), link **BLOCKED** (`LNK1104` — exes locked by running server processes). Stop servers and relink to refresh binaries.
+
+**Manual test checklist:** login (RSA + CM_LOGIN) → enter → move → chat → player trade (request/accept/cancel) → NPC trade (`CMD_CM_REQUESTTRADE`) → forge ask/asr → party invite/accept (CP) → friend invite → grep for spurious `OpcodeIngress [reject]` on Gate/Game/Group/Account.
+
+**Recommended batch 4:** Character chartrade item/money/validate PacketReader; GroupServer CP say/session opcodes min map; Gate BGNPLAY/NEWCHA fixed-header mins; AccountServer PA string-handler PacketReader; optional `OpcodeDispatchDomain::Group` registry for MP hot path; Track C zero-copy gate forwarding pilot.
+
+### Track E — OpcodeIngress + PacketReader (batch 4, 2026-06-27)
+
+**Character chartrade PacketReader (4 handlers):**
+- `CmChartradeItem`, `CmChartradeMoney`, `CmChartradeValidatedata`, `CmChartradeValidate`
+- Registry minPayload: ITEM=9, MONEY=7 (fixed header before currency-specific tail), VALIDATEDATA/VALIDATE=5
+
+**GroupServer CP session min map (ProcessData path):**
+
+| Opcode | min | Notes |
+|--------|-----|-------|
+| CMD_CP_SESS_CREATE | 1 | player count char |
+| CMD_CP_SESS_SAY | 4 | session ID long before string |
+| CMD_CP_SESS_ADD | 4 | session ID long before string |
+| CMD_CP_SESS_LEAVE | 4 | session ID long |
+| CMD_CP_SAY2* | 0 | string-led (unchanged) |
+
+**Gate sync/login non-empty body check:**
+- `LookupGateSyncMinPayload`: `CMD_CM_BGNPLAY`, `CMD_CM_NEWCHA`, `CMD_CM_DELCHA` → min=1 (reject empty body; strings remain variable)
+
+**AccountServer PA PacketReader:**
+- `CMD_PA_CHANGEPASS`, `CMD_PA_REGISTER`, `CMD_PA_GMBANACCOUNT`, `CMD_PA_GMUNBANACCOUNT` — typed string reads via `net::PacketReader`
+
+**Build (2026-06-27):** stop running server exes before link.
+
+**Manual test checklist:** login → char select (BGNPLAY) → new/del char if used → player trade full cycle (item + money + validate) → CP session chat → grep `OpcodeIngress [reject]` during normal play.
+
+**Recommended batch 5:** Gate BGNPLAY/NEWCHA PacketReader pre-check (non-consuming duplicate path); Group MP hot-opcode min map; Character remaining READ_* handlers; optional `OpcodeDispatchDomain::Group` registry pilot; Phase 3 exit soak + commit Track E batches 1–4.
+
 ### Track B5 — GameAppNet registry (batch 1, 2026-06-27)
 
 `CGameApp::ProcessPacket` now tries `DispatchOpcodeHandler` first (via `GameAppPacketContext { app, gate }`); unmigrated opcodes fall through to legacy switch + default router.
@@ -566,4 +758,4 @@ See last-smoke-result.txt for automated output.
 
 ## Resume prompt for next session
 
-> Continue Option B Phase 3. **Track B6 done** (112 CharacterPrl registry entries). **Track B5 done** (35 GameAppNet handlers). **Track A phase 2b in tree** (Gate↔Group session trailer + Group SessionManager). Next: manual T0-enter/move/chat/group verify, or Track A phase 3 (PM/TM game paths, pointer registry cleanup), or Track C (zero-copy gate forwarding). Read `docs/NETWORK_AUDIT.md` and this file. Deploy gate + game + group together after rebuild.
+> Continue Option B Phase 3. **Track B6 done** (112 CharacterPrl registry entries). **Track B5 done** (35 GameAppNet handlers). **Track E batch 4 in tree** (chartrade item/money/validate, Group session mins, Gate sync non-empty check, Account PA PacketReader). **Track A phase 2b/3 in tree**. Next: manual T0 verify post Track E batch 4, commit Track E batches 1–4, or Track E batch 5. Read `docs/NETWORK_AUDIT.md` and this file. Deploy gate + game + group + account together after rebuild.

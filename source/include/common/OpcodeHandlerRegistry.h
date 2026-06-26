@@ -27,8 +27,10 @@ struct OpcodeHandlerEntry {
 	uint16_t opcode;
 	OpcodeHandlerFn handler;
 	const char* name;
+	uint16_t minPayloadBytes = 0;
 };
 
+const OpcodeHandlerEntry* LookupOpcodeHandler(OpcodeDispatchDomain domain, uint16_t opcode);
 bool RegisterOpcodeHandlers(OpcodeDispatchDomain domain, const OpcodeHandlerEntry* entries, std::size_t count);
 bool DispatchOpcodeHandler(OpcodeDispatchDomain domain, uint16_t opcode, void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
 void ClearOpcodeHandlers(OpcodeDispatchDomain domain);

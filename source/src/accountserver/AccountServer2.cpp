@@ -20,6 +20,8 @@
 #include "PacketSanitizer.h"
 #include "common/NetLimits.h"
 #include "BackplaneAuth.h"
+#include "common/OpcodeIngress.h"
+#include "common/PacketReader.h"
 
 using namespace std;
 
@@ -131,8 +133,7 @@ void AccountServer2::OnProcessData(DataSocket* datasock, RPacket& rpkt) {
 	if (!BackplaneAuth::AllowProcessData(datasock, usCmd, this))
 		return;
 
-	// Validate CMD range - AccountServer only accepts CMD_PA (3000-3050)
-	if (usCmd < 3000 || usCmd > 3050) {
+	if (!ValidateAccountIngressOpcode(usCmd, rpkt, datasock->GetPeerIP())) {
 		LG("Security", "[AccountServer] Invalid CMD %u from peer, dropping packet\n", usCmd);
 		return;
 	}
@@ -140,9 +141,10 @@ void AccountServer2::OnProcessData(DataSocket* datasock, RPacket& rpkt) {
 	switch (usCmd) {
 		// GroupServerЭ��
 	case CMD_PA_CHANGEPASS: {
-		cChar* pName = rpkt.ReadString();
-		cChar* pPass = rpkt.ReadString();
-		if (!pName || !pPass) {
+		net::PacketReader reader(rpkt);
+		cChar* pName = nullptr;
+		cChar* pPass = nullptr;
+		if (!reader.String(pName) || !reader.String(pPass) || !pName || !pPass) {
 			LG("Security", "[AccountServer] CMD_PA_CHANGEPASS: truncated packet\n");
 			break;
 		}
@@ -160,10 +162,12 @@ void AccountServer2::OnProcessData(DataSocket* datasock, RPacket& rpkt) {
 		break;
 	}
 	case CMD_PA_REGISTER: {
-		cChar* pName = rpkt.ReadString();
-		cChar* pPass = rpkt.ReadString();
-		cChar* pEmail = rpkt.ReadString();
-		if (!pName || !pPass || !pEmail) {
+		net::PacketReader reader(rpkt);
+		cChar* pName = nullptr;
+		cChar* pPass = nullptr;
+		cChar* pEmail = nullptr;
+		if (!reader.String(pName) || !reader.String(pPass) || !reader.String(pEmail) ||
+			!pName || !pPass || !pEmail) {
 			LG("Security", "[AccountServer] CMD_PA_REGISTER: truncated packet\n");
 			break;
 		}
@@ -197,8 +201,9 @@ void AccountServer2::OnProcessData(DataSocket* datasock, RPacket& rpkt) {
 	}
 
 	case CMD_PA_GMBANACCOUNT: {
-		cChar* pAct = rpkt.ReadString();
-		if (!pAct) {
+		net::PacketReader reader(rpkt);
+		cChar* pAct = nullptr;
+		if (!reader.String(pAct) || !pAct) {
 			LG("Security", "[AccountServer] CMD_PA_GMBANACCOUNT: truncated packet\n");
 			break;
 		}
@@ -211,8 +216,9 @@ void AccountServer2::OnProcessData(DataSocket* datasock, RPacket& rpkt) {
 		break;
 	}
 	case CMD_PA_GMUNBANACCOUNT: {
-		cChar* pAct = rpkt.ReadString();
-		if (!pAct) {
+		net::PacketReader reader(rpkt);
+		cChar* pAct = nullptr;
+		if (!reader.String(pAct) || !pAct) {
 			LG("Security", "[AccountServer] CMD_PA_GMUNBANACCOUNT: truncated packet\n");
 			break;
 		}
@@ -236,8 +242,7 @@ WPacket AccountServer2::OnServeCall(DataSocket* datasock, RPacket& rpkt) {
 		return BackplaneAuth::ServeHello(this, datasock, rpkt);
 	}
 
-	// Validate CMD range - AccountServer only accepts CMD_PA (3000-3050)
-	if (usCmd < 3000 || usCmd > 3050) {
+	if (!ValidateAccountIngressOpcode(usCmd, rpkt, datasock->GetPeerIP())) {
 		LG("Security", "[AccountServer] Invalid CMD %u in ServeCall, rejecting\n", usCmd);
 		return ProcessUnknownCmd(rpkt);
 	}

@@ -38,7 +38,9 @@ static bool IsEconomyBlockedByDB(CCharacter& cha) {
 #include "PacketSanitizer.h"  // Packet validation utilities
 #include "BossTimer.h"        // Boss respawn timer system
 #include "common/OpcodeHandlerRegistry.h"
+#include "common/OpcodeIngress.h"
 #include "common/OpcodeMeta.h"
+#include "common/PacketReader.h"
 #include <stdexcept>
 
 _DBC_USING
@@ -546,39 +548,39 @@ void RegisterAllCharacterOpcodeHandlers() {
 	std::vector<OpcodeHandlerEntry> entries;
 	entries.reserve(112);
 
-	auto add = [&](uint16_t op, OpcodeHandlerFn fn, const char* name) {
-		entries.push_back({op, fn, name});
+	auto add = [&](uint16_t op, OpcodeHandlerFn fn, const char* name, uint16_t minPayload = 0) {
+		entries.push_back({op, fn, name, minPayload});
 	};
 
 	add(CMD_CM_BOSSTIMER_REQUEST, &CCharacter::OpcodeHandle_CmBossTimerRequest, OpcodeName(CMD_CM_BOSSTIMER_REQUEST));
 	add(CMD_CM_RANK, &CCharacter::OpcodeHandle_CmRank, OpcodeName(CMD_CM_RANK));
 	add(CMD_CM_CANCELEXIT, &CCharacter::OpcodeHandle_CmCancelExit, OpcodeName(CMD_CM_CANCELEXIT));
-	add(CMD_CM_CHECK_PING, &CCharacter::OpcodeHandle_CmCheckPing, OpcodeName(CMD_CM_CHECK_PING));
-	add(CMD_CM_ENDACTION, &CCharacter::OpcodeHandle_CmEndAction, OpcodeName(CMD_CM_ENDACTION));
-	add(CMD_CM_DIE_RETURN, &CCharacter::OpcodeHandle_CmDieReturn, OpcodeName(CMD_CM_DIE_RETURN));
+	add(CMD_CM_CHECK_PING, &CCharacter::OpcodeHandle_CmCheckPing, OpcodeName(CMD_CM_CHECK_PING), 0);
+	add(CMD_CM_ENDACTION, &CCharacter::OpcodeHandle_CmEndAction, OpcodeName(CMD_CM_ENDACTION), 0);
+	add(CMD_CM_DIE_RETURN, &CCharacter::OpcodeHandle_CmDieReturn, OpcodeName(CMD_CM_DIE_RETURN), 1);
 	add(CMD_CM_MISLOG, &CCharacter::OpcodeHandle_CmMisLog, OpcodeName(CMD_CM_MISLOG));
-	add(CMD_CM_MISLOGINFO, &CCharacter::OpcodeHandle_CmMisLogInfo, OpcodeName(CMD_CM_MISLOGINFO));
-	add(CMD_CM_MISLOG_CLEAR, &CCharacter::OpcodeHandle_CmMisLogClear, OpcodeName(CMD_CM_MISLOG_CLEAR));
+	add(CMD_CM_MISLOGINFO, &CCharacter::OpcodeHandle_CmMisLogInfo, OpcodeName(CMD_CM_MISLOGINFO), 2);
+	add(CMD_CM_MISLOG_CLEAR, &CCharacter::OpcodeHandle_CmMisLogClear, OpcodeName(CMD_CM_MISLOG_CLEAR), 2);
 	add(CMD_CM_MAP_MASK, &CCharacter::OpcodeHandle_CmMapMask, OpcodeName(CMD_CM_MAP_MASK));
 	add(CMD_CM_SAY, &CCharacter::OpcodeHandle_CmSay, OpcodeName(CMD_CM_SAY));
-	add(CMD_CM_STALLSEARCH, &CCharacter::OpcodeHandle_CmStallSearch, OpcodeName(CMD_CM_STALLSEARCH));
-	add(CMD_CM_SYNATTR, &CCharacter::OpcodeHandle_CmSynAttr, OpcodeName(CMD_CM_SYNATTR));
-	add(CMD_CM_REFRESH_DATA, &CCharacter::OpcodeHandle_CmRefreshData, OpcodeName(CMD_CM_REFRESH_DATA));
+	add(CMD_CM_STALLSEARCH, &CCharacter::OpcodeHandle_CmStallSearch, OpcodeName(CMD_CM_STALLSEARCH), 4);
+	add(CMD_CM_SYNATTR, &CCharacter::OpcodeHandle_CmSynAttr, OpcodeName(CMD_CM_SYNATTR), 0);
+	add(CMD_CM_REFRESH_DATA, &CCharacter::OpcodeHandle_CmRefreshData, OpcodeName(CMD_CM_REFRESH_DATA), 8);
 	add(CMD_CM_READBOOK_START, &CCharacter::OpcodeHandle_CmReadbookStart, OpcodeName(CMD_CM_READBOOK_START));
 	add(CMD_CM_READBOOK_CLOSE, &CCharacter::OpcodeHandle_CmReadbookClose, OpcodeName(CMD_CM_READBOOK_CLOSE));
-	add(CMD_CM_KITBAG_CHECK, &CCharacter::OpcodeHandle_CmKitbagCheck, OpcodeName(CMD_CM_KITBAG_CHECK));
-	add(CMD_CM_KITBAG_UNLOCK, &CCharacter::OpcodeHandle_CmKitbagUnlock, OpcodeName(CMD_CM_KITBAG_UNLOCK));
-	add(CMD_CM_BOAT_GETINFO, &CCharacter::OpcodeHandle_CmBoatGetinfo, OpcodeName(CMD_CM_BOAT_GETINFO));
-	add(CMD_CM_STALL_ALLDATA, &CCharacter::OpcodeHandle_CmStallAlldata, OpcodeName(CMD_CM_STALL_ALLDATA));
-	add(CMD_CM_BEGINACTION, &CCharacter::OpcodeHandle_CmBeginAction, OpcodeName(CMD_CM_BEGINACTION));
-	add(CMD_CM_FORGE, &CCharacter::OpcodeHandle_CmForge, OpcodeName(CMD_CM_FORGE));
+	add(CMD_CM_KITBAG_CHECK, &CCharacter::OpcodeHandle_CmKitbagCheck, OpcodeName(CMD_CM_KITBAG_CHECK), 0);
+	add(CMD_CM_KITBAG_UNLOCK, &CCharacter::OpcodeHandle_CmKitbagUnlock, OpcodeName(CMD_CM_KITBAG_UNLOCK), 0);
+	add(CMD_CM_BOAT_GETINFO, &CCharacter::OpcodeHandle_CmBoatGetinfo, OpcodeName(CMD_CM_BOAT_GETINFO), 0);
+	add(CMD_CM_STALL_ALLDATA, &CCharacter::OpcodeHandle_CmStallAlldata, OpcodeName(CMD_CM_STALL_ALLDATA), 0);
+	add(CMD_CM_BEGINACTION, &CCharacter::OpcodeHandle_CmBeginAction, OpcodeName(CMD_CM_BEGINACTION), 4);
+	add(CMD_CM_FORGE, &CCharacter::OpcodeHandle_CmForge, OpcodeName(CMD_CM_FORGE), 1);
 	add(CMD_CM_BOAT_CANCEL, &CCharacter::OpcodeHandle_CmBoatCancel, OpcodeName(CMD_CM_BOAT_CANCEL));
 	add(CMD_CM_CREATE_BOAT, &CCharacter::OpcodeHandle_CmCreateBoat, OpcodeName(CMD_CM_CREATE_BOAT));
 	add(CMD_CM_UPDATEBOAT_PART, &CCharacter::OpcodeHandle_CmUpdateboatPart, OpcodeName(CMD_CM_UPDATEBOAT_PART));
 	add(CMD_CM_STALL_OPEN, &CCharacter::OpcodeHandle_CmStallOpen, OpcodeName(CMD_CM_STALL_OPEN));
 	add(CMD_CM_STALL_CLOSE, &CCharacter::OpcodeHandle_CmStallClose, OpcodeName(CMD_CM_STALL_CLOSE));
-	add(CMD_CM_KITBAG_AUTOLOCK, &CCharacter::OpcodeHandle_CmKitbagAutolock, OpcodeName(CMD_CM_KITBAG_AUTOLOCK));
-	add(CMD_CM_KITBAG_LOCK, &CCharacter::OpcodeHandle_CmKitbagLock, OpcodeName(CMD_CM_KITBAG_LOCK));
+	add(CMD_CM_KITBAG_AUTOLOCK, &CCharacter::OpcodeHandle_CmKitbagAutolock, OpcodeName(CMD_CM_KITBAG_AUTOLOCK), 1);
+	add(CMD_CM_KITBAG_LOCK, &CCharacter::OpcodeHandle_CmKitbagLock, OpcodeName(CMD_CM_KITBAG_LOCK), 0);
 	add(CMD_CM_UPDATEHAIR, &CCharacter::OpcodeHandle_CmUpdatehair, OpcodeName(CMD_CM_UPDATEHAIR));
 	add(CMD_CM_SKILLUPGRADE, &CCharacter::OpcodeHandle_CmSkillupgrade, OpcodeName(CMD_CM_SKILLUPGRADE));
 	add(CMD_CM_TEAM_FIGHT_ASK, &CCharacter::OpcodeHandle_CmTeamFightAsk, OpcodeName(CMD_CM_TEAM_FIGHT_ASK));
@@ -592,13 +594,13 @@ void RegisterAllCharacterOpcodeHandlers() {
 	add(CMD_CM_ENTITY_EVENT, &CCharacter::OpcodeHandle_CmEntityEvent, OpcodeName(CMD_CM_ENTITY_EVENT));
 	add(CMD_CM_ITEM_FORGE_CANACTION, &CCharacter::OpcodeHandle_CmItemForgeCanaction, OpcodeName(CMD_CM_ITEM_FORGE_CANACTION));
 	add(CMD_CM_VALIDATE_SLOT_ITEM, &CCharacter::OpcodeHandle_CmValidateSlotItem, OpcodeName(CMD_CM_VALIDATE_SLOT_ITEM));
-	add(CMD_CM_ITEM_FORGE_ASK, &CCharacter::OpcodeHandle_CmItemForgeAsk, OpcodeName(CMD_CM_ITEM_FORGE_ASK));
-	add(CMD_CM_ITEM_FORGE_ASR, &CCharacter::OpcodeHandle_CmItemForgeAsr, OpcodeName(CMD_CM_ITEM_FORGE_ASR));
+	add(CMD_CM_ITEM_FORGE_ASK, &CCharacter::OpcodeHandle_CmItemForgeAsk, OpcodeName(CMD_CM_ITEM_FORGE_ASK), 1);
+	add(CMD_CM_ITEM_FORGE_ASR, &CCharacter::OpcodeHandle_CmItemForgeAsr, OpcodeName(CMD_CM_ITEM_FORGE_ASR), 1);
 	add(CMD_CM_ITEM_LOTTERY_ASK, &CCharacter::OpcodeHandle_CmItemLotteryAsk, OpcodeName(CMD_CM_ITEM_LOTTERY_ASK));
 	add(CMD_CM_LIFESKILL_ASK, &CCharacter::OpcodeHandle_CmLifeskillAsk, OpcodeName(CMD_CM_LIFESKILL_ASK));
 	add(CMD_CM_LIFESKILL_ASR, &CCharacter::OpcodeHandle_CmLifeskillAsr, OpcodeName(CMD_CM_LIFESKILL_ASR));
 	add(CMD_CM_KITBAG_EXPAND, &CCharacter::OpcodeHandle_CmKitbagExpand, OpcodeName(CMD_CM_KITBAG_EXPAND));
-	add(CMD_CM_PING, &CCharacter::OpcodeHandle_CmPing, OpcodeName(CMD_CM_PING));
+	add(CMD_CM_PING, &CCharacter::OpcodeHandle_CmPing, OpcodeName(CMD_CM_PING), 28);
 	add(CMD_CM_TIGER_START, &CCharacter::OpcodeHandle_CmTigerStart, OpcodeName(CMD_CM_TIGER_START));
 	add(CMD_CM_TIGER_STOP, &CCharacter::OpcodeHandle_CmTigerStop, OpcodeName(CMD_CM_TIGER_STOP));
 	add(CMD_CM_KITBAGTEMP_SYNC, &CCharacter::OpcodeHandle_CmKitbagtempSync, OpcodeName(CMD_CM_KITBAGTEMP_SYNC));
@@ -609,19 +611,19 @@ void RegisterAllCharacterOpcodeHandlers() {
 	add(CMD_CM_STORE_QUERY, &CCharacter::OpcodeHandle_CmStoreQuery, OpcodeName(CMD_CM_STORE_QUERY));
 	add(CMD_CM_STORE_VIP, &CCharacter::OpcodeHandle_CmStoreVip, OpcodeName(CMD_CM_STORE_VIP));
 	add(CMD_CM_STORE_CLOSE, &CCharacter::OpcodeHandle_CmStoreClose, OpcodeName(CMD_CM_STORE_CLOSE));
-	add(CMD_CM_REQUESTTALK, &CCharacter::OpcodeHandle_CmRequestTalkOrTrade, OpcodeName(CMD_CM_REQUESTTALK));
-	add(CMD_CM_REQUESTTRADE, &CCharacter::OpcodeHandle_CmRequestTalkOrTrade, OpcodeName(CMD_CM_REQUESTTRADE));
+	add(CMD_CM_REQUESTTALK, &CCharacter::OpcodeHandle_CmRequestTalkOrTrade, OpcodeName(CMD_CM_REQUESTTALK), 4);
+	add(CMD_CM_REQUESTTRADE, &CCharacter::OpcodeHandle_CmRequestTalkOrTrade, OpcodeName(CMD_CM_REQUESTTRADE), 4);
 	add(CMD_CM_ITEM_LOCK_ASK, &CCharacter::OpcodeHandle_CmItemLockAsk, OpcodeName(CMD_CM_ITEM_LOCK_ASK));
 	add(CMD_CM_ITEM_UNLOCK_ASK, &CCharacter::OpcodeHandle_CmItemUnlockAsk, OpcodeName(CMD_CM_ITEM_UNLOCK_ASK));
 	add(CMD_CM_GAME_REQUEST_PIN, &CCharacter::OpcodeHandle_CmGameRequestPin, OpcodeName(CMD_CM_GAME_REQUEST_PIN));
-	add(CMD_CM_CHARTRADE_REQUEST, &CCharacter::OpcodeHandle_CmChartradeRequest, OpcodeName(CMD_CM_CHARTRADE_REQUEST));
-	add(CMD_CM_CHARTRADE_ACCEPT, &CCharacter::OpcodeHandle_CmChartradeAccept, OpcodeName(CMD_CM_CHARTRADE_ACCEPT));
-	add(CMD_CM_CHARTRADE_REJECT, &CCharacter::OpcodeHandle_CmChartradeReject, OpcodeName(CMD_CM_CHARTRADE_REJECT));
-	add(CMD_CM_CHARTRADE_CANCEL, &CCharacter::OpcodeHandle_CmChartradeCancel, OpcodeName(CMD_CM_CHARTRADE_CANCEL));
-	add(CMD_CM_CHARTRADE_ITEM, &CCharacter::OpcodeHandle_CmChartradeItem, OpcodeName(CMD_CM_CHARTRADE_ITEM));
-	add(CMD_CM_CHARTRADE_MONEY, &CCharacter::OpcodeHandle_CmChartradeMoney, OpcodeName(CMD_CM_CHARTRADE_MONEY));
-	add(CMD_CM_CHARTRADE_VALIDATEDATA, &CCharacter::OpcodeHandle_CmChartradeValidatedata, OpcodeName(CMD_CM_CHARTRADE_VALIDATEDATA));
-	add(CMD_CM_CHARTRADE_VALIDATE, &CCharacter::OpcodeHandle_CmChartradeValidate, OpcodeName(CMD_CM_CHARTRADE_VALIDATE));
+	add(CMD_CM_CHARTRADE_REQUEST, &CCharacter::OpcodeHandle_CmChartradeRequest, OpcodeName(CMD_CM_CHARTRADE_REQUEST), 5);
+	add(CMD_CM_CHARTRADE_ACCEPT, &CCharacter::OpcodeHandle_CmChartradeAccept, OpcodeName(CMD_CM_CHARTRADE_ACCEPT), 5);
+	add(CMD_CM_CHARTRADE_REJECT, &CCharacter::OpcodeHandle_CmChartradeReject, OpcodeName(CMD_CM_CHARTRADE_REJECT), 0);
+	add(CMD_CM_CHARTRADE_CANCEL, &CCharacter::OpcodeHandle_CmChartradeCancel, OpcodeName(CMD_CM_CHARTRADE_CANCEL), 5);
+	add(CMD_CM_CHARTRADE_ITEM, &CCharacter::OpcodeHandle_CmChartradeItem, OpcodeName(CMD_CM_CHARTRADE_ITEM), 9);
+	add(CMD_CM_CHARTRADE_MONEY, &CCharacter::OpcodeHandle_CmChartradeMoney, OpcodeName(CMD_CM_CHARTRADE_MONEY), 7);
+	add(CMD_CM_CHARTRADE_VALIDATEDATA, &CCharacter::OpcodeHandle_CmChartradeValidatedata, OpcodeName(CMD_CM_CHARTRADE_VALIDATEDATA), 5);
+	add(CMD_CM_CHARTRADE_VALIDATE, &CCharacter::OpcodeHandle_CmChartradeValidate, OpcodeName(CMD_CM_CHARTRADE_VALIDATE), 5);
 	add(CMD_CM_VOLUNTER_OPEN, &CCharacter::OpcodeHandle_CmVolunterOpen, OpcodeName(CMD_CM_VOLUNTER_OPEN));
 	add(CMD_CM_VOLUNTER_LIST, &CCharacter::OpcodeHandle_CmVolunterList, OpcodeName(CMD_CM_VOLUNTER_LIST));
 	add(CMD_CM_VOLUNTER_ADD, &CCharacter::OpcodeHandle_CmVolunterAdd, OpcodeName(CMD_CM_VOLUNTER_ADD));
@@ -718,7 +720,12 @@ bool CCharacter::OpcodeHandle_CmEndAction(void* ctx, DataSocket* /*sock*/, RPack
 
 bool CCharacter::OpcodeHandle_CmDieReturn(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	cha->m_chSelRelive = READ_CHAR(pk);
+	net::PacketReader reader(pk);
+	uChar relive = 0;
+	if (!reader.Char(relive)) {
+		return true;
+	}
+	cha->m_chSelRelive = relive;
 	cha->GetPlyMainCha()->ResetChaRelive();
 	if (cha->m_chSelRelive == enumEPLAYER_RELIVE_NORIGIN) {
 		cha->SetRelive(enumEPLAYER_RELIVE_ORIGIN, 0);
@@ -732,13 +739,21 @@ bool CCharacter::OpcodeHandle_CmMisLog(void* ctx, DataSocket* /*sock*/, RPacket&
 }
 
 bool CCharacter::OpcodeHandle_CmMisLogInfo(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
-	const WORD wMisID = READ_SHORT(pk);
+	net::PacketReader reader(pk);
+	uShort wMisID = 0;
+	if (!reader.Short(wMisID)) {
+		return true;
+	}
 	static_cast<CCharacter*>(ctx)->MisLogInfo(wMisID);
 	return true;
 }
 
 bool CCharacter::OpcodeHandle_CmMisLogClear(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
-	const WORD wMisID = READ_SHORT(pk);
+	net::PacketReader reader(pk);
+	uShort wMisID = 0;
+	if (!reader.Short(wMisID)) {
+		return true;
+	}
 	static_cast<CCharacter*>(ctx)->MisLogClear(wMisID);
 	return true;
 }
@@ -821,7 +836,11 @@ bool CCharacter::OpcodeHandle_CmStallSearch(void* ctx, DataSocket* /*sock*/, RPa
 	}
 	cha->m_dwLastStallSearchTime = dwNow;
 
-	Long itemID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uLong itemID = 0;
+	if (!reader.Long(itemID)) {
+		return true;
+	}
 	g_StallSystem.SearchItem(*cha, itemID);
 	return true;
 }
@@ -834,8 +853,12 @@ bool CCharacter::OpcodeHandle_CmSynAttr(void* ctx, DataSocket* /*sock*/, RPacket
 
 bool CCharacter::OpcodeHandle_CmRefreshData(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	Long lWorldID = READ_LONG(pk);
-	Long lHandle = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uLong lWorldID = 0;
+	uLong lHandle = 0;
+	if (!reader.Long(lWorldID) || !reader.Long(lHandle)) {
+		return true;
+	}
 	Entity* pCEnt = g_pGameApp->IsLiveingEntity(lWorldID, lHandle);
 	if (pCEnt) {
 		CCharacter* pCCha = pCEnt->IsCharacter();
@@ -879,9 +902,11 @@ bool CCharacter::OpcodeHandle_CmKitbagCheck(void* ctx, DataSocket* /*sock*/, RPa
 
 bool CCharacter::OpcodeHandle_CmKitbagUnlock(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	const char* szPwd = READ_STRING(pk);
-	if (szPwd == nullptr)
+	net::PacketReader reader(pk);
+	cChar* szPwd = nullptr;
+	if (!reader.String(szPwd)) {
 		return true;
+	}
 
 	cha->GetPlyMainCha()->Cmd_UnlockKitbag(szPwd);
 	return true;
@@ -904,7 +929,11 @@ bool CCharacter::OpcodeHandle_CmStallAlldata(void* ctx, DataSocket* /*sock*/, RP
 
 bool CCharacter::OpcodeHandle_CmBeginAction(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	uLong ulWorldID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uLong ulWorldID = 0;
+	if (!reader.Long(ulWorldID)) {
+		return true;
+	}
 
 	if (cha->GetPlayer()) {
 		if (cha->GetPlayer()->GetCtrlCha() && ulWorldID == cha->GetPlayer()->GetCtrlCha()->GetID())
@@ -917,7 +946,11 @@ bool CCharacter::OpcodeHandle_CmBeginAction(void* ctx, DataSocket* /*sock*/, RPa
 
 bool CCharacter::OpcodeHandle_CmForge(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	BYTE byIndex = READ_CHAR(pk);
+	net::PacketReader reader(pk);
+	uChar byIndex = 0;
+	if (!reader.Char(byIndex)) {
+		return true;
+	}
 	g_ForgeSystem.ForgeItem(*cha, byIndex);
 	return true;
 }
@@ -949,7 +982,11 @@ bool CCharacter::OpcodeHandle_CmStallClose(void* ctx, DataSocket* /*sock*/, RPac
 
 bool CCharacter::OpcodeHandle_CmKitbagAutolock(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	char cAutoLock = READ_CHAR(pk);
+	net::PacketReader reader(pk);
+	uChar cAutoLock = 0;
+	if (!reader.Char(cAutoLock)) {
+		return true;
+	}
 	cha->GetPlyMainCha()->Cmd_SetKitbagAutoLock(cAutoLock);
 	return true;
 }
@@ -1153,11 +1190,20 @@ bool CCharacter::OpcodeHandle_CmValidateSlotItem(void* ctx, DataSocket* /*sock*/
 
 bool CCharacter::OpcodeHandle_CmItemForgeAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	if (READ_CHAR(pk) == 0) {
+	net::PacketReader reader(pk);
+	uChar first = 0;
+	if (!reader.Char(first)) {
+		return true;
+	}
+	if (first == 0) {
 		cha->ForgeAction(false);
 		return true;
 	}
-	Char chType = READ_CHAR(pk);
+	uChar chType = 0;
+	if (!reader.Char(chType)) {
+		cha->ForgeAction(false);
+		return true;
+	}
 
 	if (!PS::ValidateRange(static_cast<int>(chType), 0, 10)) {
 		LG("Security", "[Forge] Invalid forge type %d from character %s\n", chType, cha->GetName());
@@ -1168,15 +1214,26 @@ bool CCharacter::OpcodeHandle_CmItemForgeAsk(void* ctx, DataSocket* /*sock*/, RP
 	SForgeItem SFgeItem;
 	bool validForge = true;
 	for (int i = 0; i < defMAX_ITEM_FORGE_GROUP && validForge; i++) {
-		SFgeItem.SGroup[i].sGridNum = READ_SHORT(pk);
+		uShort sGridNum = 0;
+		if (!reader.Short(sGridNum)) {
+			cha->ForgeAction(false);
+			return true;
+		}
+		SFgeItem.SGroup[i].sGridNum = static_cast<short>(sGridNum);
 		if (SFgeItem.SGroup[i].sGridNum < 0 || SFgeItem.SGroup[i].sGridNum > defMAX_KBITEM_NUM_PER_TYPE) {
 			cha->ForgeAction(false);
 			validForge = false;
 			break;
 		}
 		for (short j = 0; j < SFgeItem.SGroup[i].sGridNum; j++) {
-			SFgeItem.SGroup[i].SGrid[j].sGridID = READ_SHORT(pk);
-			SFgeItem.SGroup[i].SGrid[j].sItemNum = READ_SHORT(pk);
+			uShort sGridID = 0;
+			uShort sItemNum = 0;
+			if (!reader.Short(sGridID) || !reader.Short(sItemNum)) {
+				cha->ForgeAction(false);
+				return true;
+			}
+			SFgeItem.SGroup[i].SGrid[j].sGridID = static_cast<short>(sGridID);
+			SFgeItem.SGroup[i].SGrid[j].sItemNum = static_cast<short>(sItemNum);
 
 			if (!PS::ValidateKitbagSlot(static_cast<int>(SFgeItem.SGroup[i].SGrid[j].sGridID))) {
 				LG("Security", "[Forge] Invalid grid ID %d from character %s\n", SFgeItem.SGroup[i].SGrid[j].sGridID, cha->GetName());
@@ -1194,7 +1251,7 @@ bool CCharacter::OpcodeHandle_CmItemForgeAsk(void* ctx, DataSocket* /*sock*/, RP
 		cha->ForgeAction(false);
 		return true;
 	}
-	cha->Cmd_ItemForgeAsk(chType, &SFgeItem);
+	cha->Cmd_ItemForgeAsk(static_cast<Char>(chType), &SFgeItem);
 	return true;
 }
 
@@ -1239,7 +1296,12 @@ bool CCharacter::OpcodeHandle_CmItemLotteryAsk(void* ctx, DataSocket* /*sock*/, 
 
 bool CCharacter::OpcodeHandle_CmItemForgeAsr(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	cha->Cmd_ItemForgeAnswer(READ_CHAR(pk) != 0 ? true : false);
+	net::PacketReader reader(pk);
+	uChar answer = 0;
+	if (!reader.Char(answer)) {
+		return true;
+	}
+	cha->Cmd_ItemForgeAnswer(answer != 0 ? true : false);
 	return true;
 }
 
@@ -1372,11 +1434,17 @@ bool CCharacter::OpcodeHandle_CmKitbagExpand(void* ctx, DataSocket* /*sock*/, RP
 
 bool CCharacter::OpcodeHandle_CmPing(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	uLong ulPing = GetTickCount() - READ_LONG(pk);
-	unsigned long long lGateSvr = READ_LONGLONG(pk);
-	Long lSrcID = READ_LONG(pk);
-	Long lGatePlayerID = READ_LONG(pk);
-	unsigned long long lGatePlayerAddr = READ_LONGLONG(pk);
+	net::PacketReader reader(pk);
+	uLong ulPing = 0;
+	unsigned long long lGateSvr = 0;
+	uLong lSrcID = 0;
+	uLong lGatePlayerID = 0;
+	unsigned long long lGatePlayerAddr = 0;
+	if (!reader.Long(ulPing) || !reader.LongLong(lGateSvr) || !reader.Long(lSrcID)
+		|| !reader.Long(lGatePlayerID) || !reader.LongLong(lGatePlayerAddr)) {
+		return true;
+	}
+	ulPing = GetTickCount() - ulPing;
 
 	BEGINGETGATE();
 	GateServer* pNoGate;
@@ -1535,9 +1603,13 @@ bool CCharacter::OpcodeHandle_CmRequestTalkOrTrade(void* ctx, DataSocket* /*sock
 		cha->m_dwLastNpcInteractTime = dwNow;
 	}
 
-	uLong ulID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uLong ulID = 0;
+	if (!reader.Long(ulID)) {
+		return true;
+	}
 	if (ulID == mission::g_WorldEudemon.GetID()) {
-		mission::g_WorldEudemon.MsgProc(*cha, pk);
+		mission::g_WorldEudemon.MsgProc(*cha, reader.Raw());
 		return true;
 	}
 
@@ -1548,7 +1620,7 @@ bool CCharacter::OpcodeHandle_CmRequestTalkOrTrade(void* ctx, DataSocket* /*sock
 
 	mission::CNpc* pNpc = pCha->IsNpc();
 	if (pNpc) {
-		pNpc->MsgProc(*cha, pk);
+		pNpc->MsgProc(*cha, reader.Raw());
 	}
 	return true;
 }
@@ -1656,8 +1728,12 @@ bool CCharacter::OpcodeHandle_CmChartradeRequest(void* ctx, DataSocket* /*sock*/
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	if (!CharTradeRateLimitOk(*cha))
 		return true;
-	BYTE byType = READ_CHAR(pk);
-	DWORD dwCharID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uChar byType = 0;
+	uLong dwCharID = 0;
+	if (!reader.Char(byType) || !reader.Long(dwCharID)) {
+		return true;
+	}
 	g_TradeSystem.Request(byType, *cha, dwCharID);
 	return true;
 }
@@ -1666,8 +1742,12 @@ bool CCharacter::OpcodeHandle_CmChartradeAccept(void* ctx, DataSocket* /*sock*/,
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	if (!CharTradeRateLimitOk(*cha))
 		return true;
-	BYTE byType = READ_CHAR(pk);
-	DWORD dwCharID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uChar byType = 0;
+	uLong dwCharID = 0;
+	if (!reader.Char(byType) || !reader.Long(dwCharID)) {
+		return true;
+	}
 	g_TradeSystem.Accept(byType, *cha, dwCharID);
 	return true;
 }
@@ -1681,8 +1761,12 @@ bool CCharacter::OpcodeHandle_CmChartradeCancel(void* ctx, DataSocket* /*sock*/,
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	if (!CharTradeRateLimitOk(*cha))
 		return true;
-	BYTE byType = READ_CHAR(pk);
-	DWORD dwCharID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uChar byType = 0;
+	uLong dwCharID = 0;
+	if (!reader.Char(byType) || !reader.Long(dwCharID)) {
+		return true;
+	}
 	g_TradeSystem.Cancel(byType, *cha, dwCharID);
 	return true;
 }
@@ -1691,12 +1775,17 @@ bool CCharacter::OpcodeHandle_CmChartradeItem(void* ctx, DataSocket* /*sock*/, R
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	if (!CharTradeRateLimitOk(*cha))
 		return true;
-	BYTE byType = READ_CHAR(pk);
-	DWORD dwCharID = READ_LONG(pk);
-	BYTE byOpType = READ_CHAR(pk);
-	BYTE byIndex = READ_CHAR(pk);
-	BYTE byItemIndex = READ_CHAR(pk);
-	BYTE byCount = READ_CHAR(pk);
+	net::PacketReader reader(pk);
+	uChar byType = 0;
+	uLong dwCharID = 0;
+	uChar byOpType = 0;
+	uChar byIndex = 0;
+	uChar byItemIndex = 0;
+	uChar byCount = 0;
+	if (!reader.Char(byType) || !reader.Long(dwCharID) || !reader.Char(byOpType) ||
+		!reader.Char(byIndex) || !reader.Char(byItemIndex) || !reader.Char(byCount)) {
+		return true;
+	}
 
 	if (!PS::ValidateTradeSlot(byIndex)) {
 		LG("Security", "[Trade] Invalid trade slot %d from character %s\n", byIndex, cha->GetName());
@@ -1719,15 +1808,27 @@ bool CCharacter::OpcodeHandle_CmChartradeMoney(void* ctx, DataSocket* /*sock*/, 
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	if (!CharTradeRateLimitOk(*cha))
 		return true;
-	BYTE byType = READ_CHAR(pk);
-	DWORD dwCharID = READ_LONG(pk);
-	BYTE byOpType = READ_CHAR(pk);
-	BYTE currency = READ_CHAR(pk);
+	net::PacketReader reader(pk);
+	uChar byType = 0;
+	uLong dwCharID = 0;
+	uChar byOpType = 0;
+	uChar currency = 0;
+	if (!reader.Char(byType) || !reader.Long(dwCharID) || !reader.Char(byOpType) || !reader.Char(currency)) {
+		return true;
+	}
 	long long llMoney = 0;
 	if (currency == 0) {
-		llMoney = READ_LONGLONG(pk);
-	} else {
-		llMoney = (long long)READ_LONG(pk);
+		unsigned long long money = 0;
+		if (!reader.LongLong(money)) {
+			return true;
+		}
+		llMoney = static_cast<long long>(money);
+	} else if (currency == 1) {
+		uLong money = 0;
+		if (!reader.Long(money)) {
+			return true;
+		}
+		llMoney = static_cast<long long>(money);
 	}
 
 	if (currency != 0 && currency != 1) {
@@ -1759,8 +1860,12 @@ bool CCharacter::OpcodeHandle_CmChartradeValidatedata(void* ctx, DataSocket* /*s
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	if (!CharTradeRateLimitOk(*cha))
 		return true;
-	BYTE byType = READ_CHAR(pk);
-	DWORD dwCharID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uChar byType = 0;
+	uLong dwCharID = 0;
+	if (!reader.Char(byType) || !reader.Long(dwCharID)) {
+		return true;
+	}
 	g_TradeSystem.ValidateItemData(byType, *cha, dwCharID);
 	return true;
 }
@@ -1769,8 +1874,12 @@ bool CCharacter::OpcodeHandle_CmChartradeValidate(void* ctx, DataSocket* /*sock*
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	if (!CharTradeRateLimitOk(*cha))
 		return true;
-	BYTE byType = READ_CHAR(pk);
-	DWORD dwCharID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uChar byType = 0;
+	uLong dwCharID = 0;
+	if (!reader.Char(byType) || !reader.Long(dwCharID)) {
+		return true;
+	}
 	g_TradeSystem.ValidateTrade(byType, *cha, dwCharID);
 	return true;
 }
@@ -2598,6 +2707,9 @@ bool CCharacter::OpcodeHandle_CmRequestChestPreview(void* ctx, DataSocket* /*soc
 //                    ?????????
 //----------------------------------------------------------
 void CCharacter::ProcessPacket(unsigned short usCmd, RPACKET pk) {
+	if (!ValidateGameCharacterOpcode(usCmd, pk, GetName())) {
+		return;
+	}
 	if (DispatchOpcodeHandler(OpcodeDispatchDomain::GameCharacter, usCmd, this, nullptr, pk)) {
 		return;
 	}

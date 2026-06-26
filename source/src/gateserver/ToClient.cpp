@@ -2,6 +2,7 @@
 #include "log.h"
 #include "common/NetLimits.h"
 #include "common/OpcodeHandlerRegistry.h"
+#include "common/OpcodeIngress.h"
 #include "common/OpcodeMeta.h"
 #include "common/PacketReader.h"
 #include "common/PacketWriter.h"
@@ -55,6 +56,10 @@ bool IsExplicitCmOpcode(uint16_t cmd) {
 		cmd == CMD_CM_KITBAG_UNLOCK ||
 		cmd == CMD_CM_ITEM_UNLOCK_ASK ||
 		cmd == CMD_CM_ENDACTION ||
+		cmd == CMD_CM_BEGINACTION ||
+		cmd == CMD_CM_CHECK_PING ||
+		cmd == CMD_CM_SYNATTR ||
+		cmd == CMD_CM_REFRESH_DATA ||
 		cmd == CMD_CM_OFFLINE_MODE;
 }
 
@@ -106,16 +111,20 @@ void RegisterAllToClientOpcodeHandlers() {
 	std::vector<OpcodeHandlerEntry> entries;
 	entries.reserve(600);
 
-	auto add = [&](uint16_t op, OpcodeHandlerFn fn, const char* name) {
-		entries.push_back({op, fn, name});
+	auto add = [&](uint16_t op, OpcodeHandlerFn fn, const char* name, uint16_t minPayload = 0) {
+		entries.push_back({op, fn, name, minPayload});
 	};
 
-	add(CMD_CP_PING, &ToClient::OpcodeHandle_CpPing, "CMD_CP_PING");
-	add(CMD_CM_SAY, &ToClient::OpcodeHandle_CmSay, "CMD_CM_SAY");
-	add(CMD_CM_KITBAG_UNLOCK, &ToClient::OpcodeHandle_CmKitbagUnlock, "CMD_CM_KITBAG_UNLOCK");
-	add(CMD_CM_ITEM_UNLOCK_ASK, &ToClient::OpcodeHandle_CmItemUnlockAsk, "CMD_CM_ITEM_UNLOCK_ASK");
-	add(CMD_CM_ENDACTION, &ToClient::OpcodeHandle_CmEndAction, "CMD_CM_ENDACTION");
-	add(CMD_CM_OFFLINE_MODE, &ToClient::OpcodeHandle_CmOfflineMode, "CMD_CM_OFFLINE_MODE");
+	add(CMD_CP_PING, &ToClient::OpcodeHandle_CpPing, "CMD_CP_PING", 0);
+	add(CMD_CM_SAY, &ToClient::OpcodeHandle_CmSay, "CMD_CM_SAY", 0);
+	add(CMD_CM_KITBAG_UNLOCK, &ToClient::OpcodeHandle_CmKitbagUnlock, "CMD_CM_KITBAG_UNLOCK", 0);
+	add(CMD_CM_ITEM_UNLOCK_ASK, &ToClient::OpcodeHandle_CmItemUnlockAsk, "CMD_CM_ITEM_UNLOCK_ASK", 0);
+	add(CMD_CM_ENDACTION, &ToClient::OpcodeHandle_CmEndAction, "CMD_CM_ENDACTION", 0);
+	add(CMD_CM_OFFLINE_MODE, &ToClient::OpcodeHandle_CmOfflineMode, "CMD_CM_OFFLINE_MODE", 0);
+	add(CMD_CM_BEGINACTION, &ToClient::OpcodeHandle_RouteCmToGame, OpcodeName(CMD_CM_BEGINACTION), 4);
+	add(CMD_CM_CHECK_PING, &ToClient::OpcodeHandle_RouteCmToGame, OpcodeName(CMD_CM_CHECK_PING), 0);
+	add(CMD_CM_SYNATTR, &ToClient::OpcodeHandle_RouteCmToGame, OpcodeName(CMD_CM_SYNATTR), 0);
+	add(CMD_CM_REFRESH_DATA, &ToClient::OpcodeHandle_RouteCmToGame, OpcodeName(CMD_CM_REFRESH_DATA), 8);
 
 	// Account / RSA opcodes use OpcodeHandle_TransmitCall fast-path in OnProcessData
 	// (not registered here — avoids async buffer races via duplicated packet in Init).
@@ -760,10 +769,11 @@ bool ToClient::OpcodeHandle_CmKitbagUnlock(void* ctx, DataSocket* datasock, RPac
 		return true;
 	}
 
-	auto seq = ReadPacketSequenceEncrypted(recvbuf, ply->m_AESKey);
-	recvbuf.DiscardLast(recvbuf.HasData());
-	WPacket wpk(recvbuf);
-	wpk.WriteSequence((cChar*)seq.data(), seq.size());
+	const auto seq = ReadPacketSequenceEncrypted(recvbuf, ply->m_AESKey);
+	WPacket wpk = self->GetWPacket();
+	net::PacketWriter writer(wpk);
+	writer.Cmd(CMD_CM_KITBAG_UNLOCK);
+	writer.Sequence(reinterpret_cast<cChar*>(seq.data()), static_cast<uShort>(seq.size()));
 	recvbuf = wpk;
 	self->ReRouteToGameServer(datasock, recvbuf);
 	return true;
@@ -781,7 +791,12 @@ bool ToClient::OpcodeHandle_CmItemUnlockAsk(void* ctx, DataSocket* datasock, RPa
 	net::PacketWriter wpk(l_wpk);
 	wpk.Cmd(CMD_CM_ITEM_UNLOCK_ASK);
 	wpk.Sequence((cChar*)seq.data(), static_cast<uShort>(seq.size()));
-	wpk.Char(recvbuf.ReadChar());
+	net::PacketReader reader(recvbuf);
+	uChar slot = 0;
+	if (!reader.Char(slot)) {
+		return true;
+	}
+	wpk.Char(slot);
 	recvbuf = l_wpk;
 	self->ReRouteToGameServer(datasock, recvbuf);
 	return true;
@@ -991,12 +1006,21 @@ void ToClient::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 		}
 
 		if (l_cmd == CMD_CM_RSA_HANDSHAKE_1) {
-			// Process RSA on the comm thread — async TransmitCall queue wait was
-			// tripping the packet-age timeout and disconnecting with -25 (~140 ms).
+			// Payload: length-prefixed PEM client public key (variable; validated in handler).
+			if (!ValidateGateSyncClientOpcode(l_cmd, recvbuf, datasock->GetPeerIP())) {
+				Disconnect(datasock, 50, -32);
+				return;
+			}
 			CM_RSA_HANDSHAKE1(datasock, recvbuf);
 		} else if (IsTransmitCallOpcode(l_cmd) || l_cmd == CMD_CM_LOGIN) {
-			// Login, begin-play, and other GroupServer SyncCalls must not be queued.
+			if (!ValidateGateSyncClientOpcode(l_cmd, recvbuf, datasock->GetPeerIP())) {
+				Disconnect(datasock, 50, -32);
+				return;
+			}
 			DispatchSyncClientOpcode(this, datasock, recvbuf, l_cmd);
+		} else if (!ValidateClientToGateOpcode(l_cmd, recvbuf, datasock->GetPeerIP())) {
+			Disconnect(datasock, 50, -32);
+			return;
 		} else if (!DispatchOpcodeHandler(OpcodeDispatchDomain::Gate, l_cmd, this, datasock, recvbuf)) {
 			LG("Security", "[OpcodeRegistry] Unhandled CMD %u from %s\n",
 				static_cast<unsigned int>(l_cmd), datasock->GetPeerIP());
@@ -1091,6 +1115,7 @@ int TransmitCall::Process() {
 }
 
 void ToClient::CM_LOGIN(DataSocket* datasock, RPacket& recvbuf) {
+	// Payload: client version (reverse short) + encrypted login sequence (variable).
 	// Reduced timeout from 30s to 10s to prevent thread exhaustion
 	uLong l_ulMilliseconds = 10 * 1000;
 	uLong l_tick = GetTickCount() - recvbuf.GetTickCount();

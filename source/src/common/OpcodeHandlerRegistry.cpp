@@ -1,5 +1,7 @@
 #include "OpcodeHandlerRegistry.h"
 
+#include "serversdk/Packet.h"
+
 #include <algorithm>
 #include <array>
 #include <vector>
@@ -49,6 +51,13 @@ bool mergeHandlers(HandlerTable& handlers, const OpcodeHandlerEntry* entries, st
 
 } // namespace
 
+const OpcodeHandlerEntry* LookupOpcodeHandler(OpcodeDispatchDomain domain, uint16_t opcode) {
+	if (domain >= OpcodeDispatchDomain::Count) {
+		return nullptr;
+	}
+	return findHandler(table(domain), opcode);
+}
+
 bool RegisterOpcodeHandlers(OpcodeDispatchDomain domain, const OpcodeHandlerEntry* entries, std::size_t count) {
 	if (domain >= OpcodeDispatchDomain::Count) {
 		return false;
@@ -62,6 +71,9 @@ bool DispatchOpcodeHandler(OpcodeDispatchDomain domain, uint16_t opcode, void* c
 	}
 	const OpcodeHandlerEntry* entry = findHandler(table(domain), opcode);
 	if (!entry || !entry->handler) {
+		return false;
+	}
+	if (entry->minPayloadBytes > 0 && recv.RemainData() < entry->minPayloadBytes) {
 		return false;
 	}
 	return entry->handler(ctx, sock, recv);

@@ -8,6 +8,7 @@
 #include "Config.h"
 #include "OfflineStall.h"
 #include "common/OpcodeHandlerRegistry.h"
+#include "common/OpcodeIngress.h"
 #include "common/OpcodeMeta.h"
 #include "common/SessionHandle.h"
 #include <stdexcept>
@@ -400,8 +401,13 @@ void CGameApp::ProcessPacket(GateServer* pGate, RPACKET pkt) {
 	}
 
 	GameAppPacketContext ctx{this, pGate, 0, 0, 0};
-	if (DispatchOpcodeHandler(OpcodeDispatchDomain::GameApp, cmd, &ctx, nullptr, pkt)) {
-		return;
+	if (LookupOpcodeHandler(OpcodeDispatchDomain::GameApp, cmd)) {
+		if (!ValidateGameAppOpcode(cmd, pkt, pGate->GetName().c_str())) {
+			return;
+		}
+		if (DispatchOpcodeHandler(OpcodeDispatchDomain::GameApp, cmd, &ctx, nullptr, pkt)) {
+			return;
+		}
 	}
 
 	switch (cmd) {
@@ -477,32 +483,32 @@ void RegisterAllGameAppOpcodeHandlers() {
 	std::vector<OpcodeHandlerEntry> entries;
 	entries.reserve(35);
 
-	auto add = [&](uint16_t op, OpcodeHandlerFn fn, const char* name) {
-		entries.push_back({op, fn, name});
+	auto add = [&](uint16_t op, OpcodeHandlerFn fn, const char* name, uint16_t minPayload = 0) {
+		entries.push_back({op, fn, name, minPayload});
 	};
 
 	add(CMD_TM_LOGIN_ACK, &CGameApp::OpcodeHandle_TmLoginAck, OpcodeName(CMD_TM_LOGIN_ACK));
 	add(CMD_TM_MAPENTRY_NOMAP, &CGameApp::OpcodeHandle_TmMapentryNomap, OpcodeName(CMD_TM_MAPENTRY_NOMAP));
-	add(CMD_PM_TEAM, &CGameApp::OpcodeHandle_PmTeam, OpcodeName(CMD_PM_TEAM));
-	add(CMD_PM_GUILDINFO, &CGameApp::OpcodeHandle_PmGuildinfo, OpcodeName(CMD_PM_GUILDINFO));
-	add(CMD_PM_GUILD_CHALLMONEY, &CGameApp::OpcodeHandle_PmGuildChallmoney, OpcodeName(CMD_PM_GUILD_CHALLMONEY));
+	add(CMD_PM_TEAM, &CGameApp::OpcodeHandle_PmTeam, OpcodeName(CMD_PM_TEAM), 1);
+	add(CMD_PM_GUILDINFO, &CGameApp::OpcodeHandle_PmGuildinfo, OpcodeName(CMD_PM_GUILDINFO), 4);
+	add(CMD_PM_GUILD_CHALLMONEY, &CGameApp::OpcodeHandle_PmGuildChallmoney, OpcodeName(CMD_PM_GUILD_CHALLMONEY), 12);
 	add(CMD_TM_MAPENTRY, &CGameApp::OpcodeHandle_TmMapentry, OpcodeName(CMD_TM_MAPENTRY));
 	add(CMD_PM_GARNER2_UPDATE, &CGameApp::OpcodeHandle_PmGarner2Update, OpcodeName(CMD_PM_GARNER2_UPDATE));
-	add(CMD_PM_SAY2ALL, &CGameApp::OpcodeHandle_PmSay2all, OpcodeName(CMD_PM_SAY2ALL));
-	add(CMD_PM_SAY2TRADE, &CGameApp::OpcodeHandle_PmSay2trade, OpcodeName(CMD_PM_SAY2TRADE));
-	add(CMD_PM_GUILD_CHALL_PRIZEMONEY, &CGameApp::OpcodeHandle_PmGuildChallPrizemoney, OpcodeName(CMD_PM_GUILD_CHALL_PRIZEMONEY));
+	add(CMD_PM_SAY2ALL, &CGameApp::OpcodeHandle_PmSay2all, OpcodeName(CMD_PM_SAY2ALL), 4);
+	add(CMD_PM_SAY2TRADE, &CGameApp::OpcodeHandle_PmSay2trade, OpcodeName(CMD_PM_SAY2TRADE), 4);
+	add(CMD_PM_GUILD_CHALL_PRIZEMONEY, &CGameApp::OpcodeHandle_PmGuildChallPrizemoney, OpcodeName(CMD_PM_GUILD_CHALL_PRIZEMONEY), 12);
 	add(CMD_TM_ENTERMAP, &CGameApp::OpcodeHandle_TmEntermap, OpcodeName(CMD_TM_ENTERMAP));
-	add(CMD_TM_GOOUTMAP, &CGameApp::OpcodeHandle_TmGooutmap, OpcodeName(CMD_TM_GOOUTMAP));
-	add(CMD_PM_EXPSCALE, &CGameApp::OpcodeHandle_PmExpscale, OpcodeName(CMD_PM_EXPSCALE));
-	add(CMD_MM_UPDATEGUILDBANK, &CGameApp::OpcodeHandle_MmUpdateguildbank, OpcodeName(CMD_MM_UPDATEGUILDBANK));
-	add(CMD_MM_UPDATEGUILDBANKGOLD, &CGameApp::OpcodeHandle_MmUpdateguildbankgold, OpcodeName(CMD_MM_UPDATEGUILDBANKGOLD));
+	add(CMD_TM_GOOUTMAP, &CGameApp::OpcodeHandle_TmGooutmap, OpcodeName(CMD_TM_GOOUTMAP), 17);
+	add(CMD_PM_EXPSCALE, &CGameApp::OpcodeHandle_PmExpscale, OpcodeName(CMD_PM_EXPSCALE), 8);
+	add(CMD_MM_UPDATEGUILDBANK, &CGameApp::OpcodeHandle_MmUpdateguildbank, OpcodeName(CMD_MM_UPDATEGUILDBANK), 4);
+	add(CMD_MM_UPDATEGUILDBANKGOLD, &CGameApp::OpcodeHandle_MmUpdateguildbankgold, OpcodeName(CMD_MM_UPDATEGUILDBANKGOLD), 4);
 	add(CMD_MM_GUILD_MOTTO, &CGameApp::OpcodeHandle_MmGuildMotto, OpcodeName(CMD_MM_GUILD_MOTTO));
 	add(CMD_MM_GUILD_DISBAND, &CGameApp::OpcodeHandle_MmGuildDisband, OpcodeName(CMD_MM_GUILD_DISBAND));
 	add(CMD_MM_GUILD_KICK, &CGameApp::OpcodeHandle_MmGuildKick, OpcodeName(CMD_MM_GUILD_KICK));
-	add(CMD_MM_GUILD_APPROVE, &CGameApp::OpcodeHandle_MmGuildApprove, OpcodeName(CMD_MM_GUILD_APPROVE));
+	add(CMD_MM_GUILD_APPROVE, &CGameApp::OpcodeHandle_MmGuildApprove, OpcodeName(CMD_MM_GUILD_APPROVE), 4);
 	add(CMD_MM_GUILD_REJECT, &CGameApp::OpcodeHandle_MmGuildReject, OpcodeName(CMD_MM_GUILD_REJECT));
-	add(CMD_MM_ADDCREDIT, &CGameApp::OpcodeHandle_MmAddcredit, OpcodeName(CMD_MM_ADDCREDIT));
-	add(CMD_MM_ADDMONEY, &CGameApp::OpcodeHandle_MmAddmoney, OpcodeName(CMD_MM_ADDMONEY));
+	add(CMD_MM_ADDCREDIT, &CGameApp::OpcodeHandle_MmAddcredit, OpcodeName(CMD_MM_ADDCREDIT), 8);
+	add(CMD_MM_ADDMONEY, &CGameApp::OpcodeHandle_MmAddmoney, OpcodeName(CMD_MM_ADDMONEY), 8);
 	add(CMD_MM_NOTICE, &CGameApp::OpcodeHandle_MmNotice, OpcodeName(CMD_MM_NOTICE));
 	add(CMD_MM_QUERY_CHAPING, &CGameApp::OpcodeHandle_MmQuerychaping, OpcodeName(CMD_MM_QUERY_CHAPING));
 	add(CMD_MM_QUERY_CHA, &CGameApp::OpcodeHandle_MmQuerycha, OpcodeName(CMD_MM_QUERY_CHA));
@@ -513,9 +519,9 @@ void RegisterAllGameAppOpcodeHandlers() {
 	add(CMD_MM_CHA_NOTICE, &CGameApp::OpcodeHandle_MmChaNotice, OpcodeName(CMD_MM_CHA_NOTICE));
 	add(CMD_MM_DO_STRING, &CGameApp::OpcodeHandle_MmDoString, OpcodeName(CMD_MM_DO_STRING));
 	add(CMD_MM_LOGIN, &CGameApp::OpcodeHandle_MmLogin, OpcodeName(CMD_MM_LOGIN));
-	add(CMD_MM_GUILD_CHALL_PRIZEMONEY, &CGameApp::OpcodeHandle_MmGuildChallPrizemoney, OpcodeName(CMD_MM_GUILD_CHALL_PRIZEMONEY));
-	add(CMD_MM_STORE_BUY, &CGameApp::OpcodeHandle_MmStoreBuy, OpcodeName(CMD_MM_STORE_BUY));
-	add(CMD_MM_AUCTION, &CGameApp::OpcodeHandle_MmAuction, OpcodeName(CMD_MM_AUCTION));
+	add(CMD_MM_GUILD_CHALL_PRIZEMONEY, &CGameApp::OpcodeHandle_MmGuildChallPrizemoney, OpcodeName(CMD_MM_GUILD_CHALL_PRIZEMONEY), 12);
+	add(CMD_MM_STORE_BUY, &CGameApp::OpcodeHandle_MmStoreBuy, OpcodeName(CMD_MM_STORE_BUY), 12);
+	add(CMD_MM_AUCTION, &CGameApp::OpcodeHandle_MmAuction, OpcodeName(CMD_MM_AUCTION), 4);
 
 	if (!RegisterOpcodeHandlers(OpcodeDispatchDomain::GameApp, entries.data(), entries.size())) {
 		throw std::runtime_error("RegisterAllGameAppOpcodeHandlers failed");
@@ -1687,8 +1693,13 @@ void CGameApp::ProcessInterGameMsg(unsigned short usCmd, GateServer* pGate, RPAC
 	int lGatePlayerID = READ_LONG_R(pkt);
 
 	GameAppPacketContext ctx{this, pGate, lSrcID, lGatePlayerID, lGatePlayerAddr};
-	if (DispatchOpcodeHandler(OpcodeDispatchDomain::GameApp, usCmd, &ctx, nullptr, pkt)) {
-		return;
+	if (LookupOpcodeHandler(OpcodeDispatchDomain::GameApp, usCmd)) {
+		if (!ValidateGameAppOpcode(usCmd, pkt, pGate->GetName().c_str())) {
+			return;
+		}
+		if (DispatchOpcodeHandler(OpcodeDispatchDomain::GameApp, usCmd, &ctx, nullptr, pkt)) {
+			return;
+		}
 	}
 
 	switch (usCmd) {

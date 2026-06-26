@@ -12,6 +12,7 @@
 #include "conformity.h"
 #include "PacketSanitizer.h"
 #include "BackplaneAuth.h"
+#include "common/OpcodeIngress.h"
 
 using namespace std;
 
@@ -351,15 +352,7 @@ WPacket GroupServerApp::OnServeCall(DataSocket* datasock, RPacket& pk) {
 		return BackplaneAuth::ServeHello(this, datasock, pk);
 	}
 
-	// Validate CMD is within a valid range for GroupServer SyncCalls
-	// Valid ranges: CMD_TP (2000-2050), CMD_OS (6500-6550)
-	bool validCmd =
-		(l_cmd >= CMD_TP_BASE && l_cmd <= CMD_TP_BASE + 50) ||
-		(l_cmd >= CMD_OS_BASE && l_cmd <= CMD_OS_BASE + 50);
-
-	if (!validCmd) {
-		LG("Security", "[PacketValidation] Invalid CMD %u from %s:%d in OnServeCall - rejected\n",
-		   static_cast<unsigned int>(l_cmd), datasock->GetPeerIP(), datasock->GetPeerPort());
+	if (!ValidateGroupIngressOpcode(l_cmd, pk, datasock->GetPeerIP(), GroupIngressPath::ServeCall)) {
 		WPacket l_retpk = GetWPacket();
 		l_retpk.WriteShort(ERR_PT_LOGFAIL);
 		return l_retpk;
@@ -584,17 +577,7 @@ void GroupServerApp::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 		if (!BackplaneAuth::AllowProcessData(datasock, l_cmd, this))
 			return;
 
-		// Validate CMD is within a valid range for GroupServer
-		// Valid ranges: CMD_TP (2000-2050), CMD_AP (3500-3550), CMD_MP (5500-5550), CMD_CP (6000-6500)
-		bool validCmd =
-			(l_cmd >= CMD_TP_BASE && l_cmd <= CMD_TP_BASE + 50) ||
-			(l_cmd >= CMD_AP_BASE && l_cmd <= CMD_AP_BASE + 50) ||
-			(l_cmd >= CMD_MP_BASE && l_cmd <= CMD_MP_BASE + 50) ||
-			(l_cmd >= CMD_CP_BASE && l_cmd <= CMD_CP_BASE + 500);
-
-		if (!validCmd) {
-			LG("Security", "[PacketValidation] Invalid CMD %u from %s:%d in OnProcessData - rejected\n",
-			   static_cast<unsigned int>(l_cmd), datasock->GetPeerIP(), datasock->GetPeerPort());
+		if (!ValidateGroupIngressOpcode(l_cmd, recvbuf, datasock->GetPeerIP(), GroupIngressPath::ProcessData)) {
 			return;
 		}
 
