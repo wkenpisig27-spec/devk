@@ -23,6 +23,7 @@ python helper\network-tests\test_opcode_meta.py
 |------|---------|
 | `BASELINE.md` | Frozen build/config/protocol inventory |
 | `STATUS.md` | Task checklist — update after each work session |
+| [`docs/NETWORK_AUDIT.md`](../../docs/NETWORK_AUDIT.md) | Full Phases 1–6 audit & roadmap |
 | `net-smoke.py` | Automated T0-connect / T0-ping |
 | `data/opcodes.csv` | Machine-readable opcode list |
 | `scripts/generate_opcode_table.py` | Regenerate opcodes.csv |
@@ -30,10 +31,12 @@ python helper\network-tests\test_opcode_meta.py
 | `test_opcode_meta.py` | Verify OpcodeMetaTable.inc vs CSV (M1) |
 | `last-smoke-result.txt` | Written by net-smoke.py |
 
-## Manual tests (Phase 0)
+## Manual tests
 
 1. **T0-login:** Start full stack, launch client, log in with a test account.
 2. **T0-enter:** Select character, enter world.
 3. **T0-inter-server:** Confirm `server/LOG/GameServer/*/GameLogin.log` shows gate connected.
 
-Mark these in `STATUS.md` when done.
+**Status (2026-06-27):** T0-login, T0-enter, in-world chat, and Track B6 batch 1+2 handler checks verified.
+
+Mark updates in `STATUS.md` when re-running.

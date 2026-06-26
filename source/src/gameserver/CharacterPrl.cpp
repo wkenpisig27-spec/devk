@@ -37,6 +37,9 @@ static bool IsEconomyBlockedByDB(CCharacter& cha) {
 #include <vector>
 #include "PacketSanitizer.h"  // Packet validation utilities
 #include "BossTimer.h"        // Boss respawn timer system
+#include "common/OpcodeHandlerRegistry.h"
+#include "common/OpcodeMeta.h"
+#include <stdexcept>
 
 _DBC_USING
 
@@ -278,2094 +281,2328 @@ void SendChestPreviewPacket(CCharacter* pCha, int chestItemID) {
 
 } // namespace
 
+namespace {
+
+bool CharTradeRateLimitOk(CCharacter& cha) {
+	if (IsEconomyBlockedByDB(cha))
+		return false;
+	DWORD dwNow = (DWORD)GetTickCount64();
+	if (dwNow - cha.m_dwLastTradePacketTime < 200)
+		return false;
+	cha.m_dwLastTradePacketTime = dwNow;
+	return true;
+}
+
+void HandleStoreOperate(CCharacter* cha, RPacket& pk, uint16_t usCmd) {
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	if (!pMainCha->IsStoreEnable()) {
+		return;
+	}
+	lua_getglobal(g_pLuaState, "operateIGS");
+	if (!lua_isfunction(g_pLuaState, -1)) {
+		lua_pop(g_pLuaState, 1);
+		return;
+	}
+
+	lua_pushlightuserdata(g_pLuaState, (void*)cha);
+	lua_pushlightuserdata(g_pLuaState, (void*)&pk);
+	int nStatus = lua_pcall(g_pLuaState, 2, 0, 0);
+	lua_settop(g_pLuaState, 0);
+
+	if (usCmd == CMD_CM_STORE_CLOSE) {
+		pMainCha->SetStoreEnable(false);
+		pMainCha->ForgeAction(false);
+	}
+}
+
+void HandlePmGuildBank(CCharacter* cha, RPacket& pk) {
+	Char bankType = READ_CHAR(pk);
+
+	// Rate limit guild bank DB operations (1s cooldown)
+	// NOTE: must NOT break here - ack must always be sent or GroupServer queue gets permanently stuck
+	bool bRateLimited = false;
+	{
+		DWORD dwNow = (DWORD)GetTickCount64();
+		if (dwNow - cha->m_dwLastGuildBankTime < 1000) {
+			bRateLimited = true;
+		} else {
+			cha->m_dwLastGuildBankTime = dwNow;
+		}
+	}
+
+	// Check if player is in a safezone (enumAREA_TYPE_NOT_FIGHT = 0x0002)
+	if (bRateLimited) {
+		// silently skip processing but still fall through to send ack
+	} else if (IsEconomyBlockedByDB(*cha)) {
+		// notice already shown
+	} else if (!cha->IsLiveing()) {
+		cha->SystemNotice("Dead pirates are unable to trade.");
+	} else if (!cha->IsInArea(enumAREA_TYPE_NOT_FIGHT)) {
+		cha->SystemNotice("Must be in a safe zone to use the guild bank.");
+	} else if (!cha->IsGuildBankOpen()) {
+		cha->SystemNotice("You must open the guild bank interface first.");
+	} else {
+		switch (bankType) {
+
+		case 0: { // bankoper
+			Char chSrcType = READ_CHAR(pk);
+			Short sSrcGrid = READ_SHORT(pk);
+			Short sSrcNum = READ_SHORT(pk);
+			Char chTarType = READ_CHAR(pk);
+			Short sTarGrid = READ_SHORT(pk);
+			Short sRet;
+			int guildID = cha->GetGuildID();
+			std::vector<CTableGuild::BankLog> logs = game_db.GetGuildLog(guildID);
+
+			if (chTarType != chSrcType) {
+
+				CTableGuild::BankLog l;
+				CKitbag bag;
+
+				l.time = time(0);
+				l.quantity = sSrcNum;
+				l.userID = cha->GetPlyMainCha()->m_ID;
+
+				if (chTarType == 0) {
+					game_db.GetGuildBank(guildID, &bag);
+					l.type = 2;
+				} else if (chTarType == 1) {
+					bag = cha->GetPlyMainCha()->m_CKitbag;
+					l.type = 3;
+				}
+				l.parameter = bag.GetID(sSrcGrid);
+				logs.push_back(l);
+			}
+			sRet = cha->Cmd_GuildBankOper(chSrcType, sSrcGrid, sSrcNum, chTarType, sTarGrid);
+			if (sRet != enumITEMOPT_SUCCESS || !game_db.SetGuildLog(logs, guildID)) {
+				cha->ItemOprateFailed(sRet);
+			}
+
+			break;
+		}
+
+		case 1: { // withdraw/deposit gold
+			Char action = READ_CHAR(pk);
+
+			int guildID = cha->GetGuildID();
+			long long gold = READ_LONGLONG(pk);
+
+			// SANITIZE: Validate gold amount before processing
+			if (gold < 0) {
+				LG("Security", "[GuildBank] Negative gold %lld from character %s (ID:%d) - exploit attempt blocked\n",
+					gold, cha->GetName(), cha->m_ID);
+				break;
+			}
+			if (!PS::ValidateGold(gold)) {
+				LG("Security", "[GuildBank] Invalid gold amount %lld from character %s (ID:%d)\n",
+					gold, cha->GetName(), cha->m_ID);
+				break;
+			}
+			// SANITIZE: Validate action type
+			if (action != 0 && action != 1) {
+				LG("Security", "[GuildBank] Invalid action %d from character %s\n", action, cha->GetName());
+				break;
+			}
+
+			long long originalGold = gold;  // Store original request for messages
+			__int64 currentgold = cha->getAttr(ATTR_GD);
+			unsigned long long guildGold = game_db.GetGuildBankGold(guildID);
+
+			unsigned long long maxGuildGold = 100000000000LL;  // 100 billion cap
+			__int64 maxCharGold = 100000000000LL;
+			std::vector<CTableGuild::BankLog> logs = game_db.GetGuildLog(guildID);
+
+			int canTake = (emGldPermTakeBank & cha->guildPermission);
+			int canGive = (emGldPermDepoBank & cha->guildPermission);
+
+			CTableGuild::BankLog l;
+
+			if (action == 0 && canTake == emGldPermTakeBank) { // withdraw
+				l.type = 0;									   // Withdraw
+
+				// Check if character is already at max gold
+				if (currentgold >= maxCharGold) {
+					cha->SystemNotice("Unable to withdraw: Your inventory gold is at the maximum limit (100 billion).");
+					break;
+				}
+				// make sure we dont cause gold overflow.
+				if (gold + currentgold > maxCharGold) {
+					gold = maxCharGold - currentgold;
+					char msg[256];
+					_snprintf_s(msg, sizeof(msg), _TRUNCATE,
+						"Withdrawal capped: You can only receive %lld gold (inventory would exceed 100 billion limit).", gold);
+					cha->SystemNotice(msg);
+				}
+				// make sure we cant withdraw more than is in bank.
+				if (gold > (__int64)guildGold) {
+					gold = guildGold;
+					if (gold < originalGold) {
+						char msg[256];
+						_snprintf_s(msg, sizeof(msg), _TRUNCATE,
+							"Withdrawal adjusted: Guild vault only has %lld gold available.", gold);
+						cha->SystemNotice(msg);
+					}
+				}
+				// we dont want to do redundant transactions.
+				if (gold < 1) {
+					cha->SystemNotice("Unable to withdraw: No gold available to withdraw.");
+					break;
+				}
+			} else if (action == 1 && canGive == emGldPermDepoBank) { // deposit
+				l.type = 1;											  // deposit
+
+				// Check if guild vault is already at max
+				if (guildGold >= maxGuildGold) {
+					cha->SystemNotice("Unable to deposit: Guild vault is at the maximum limit (100 billion).");
+					break;
+				}
+				// check player has that much gold
+				// if not, then set gold to whatever they have.
+				if (gold > currentgold) {
+					gold = currentgold;
+					if (gold < originalGold && gold > 0) {
+						char msg[256];
+						_snprintf_s(msg, sizeof(msg), _TRUNCATE,
+							"Deposit adjusted: You only have %lld gold available.", gold);
+						cha->SystemNotice(msg);
+					}
+				}
+				// check to see if guild is at max gold already.
+				// make sure we dont cause gold overflow.
+				if (gold + (__int64)guildGold > (__int64)maxGuildGold) {
+					gold = maxGuildGold - guildGold;
+					char msg[256];
+					_snprintf_s(msg, sizeof(msg), _TRUNCATE,
+						"Deposit capped: Guild vault can only accept %lld more gold (would exceed 100 billion limit).", gold);
+					cha->SystemNotice(msg);
+				}
+
+				// we dont want to do redundant transactions.
+				if (gold < 1) {
+					cha->SystemNotice("Unable to deposit: No gold to deposit or vault is full.");
+					break;
+				}
+				gold = 0 - gold;
+			} else {
+				break;
+			}
+
+			// TRANSACTION: Wrap gold transfer in transaction for atomicity
+			game_db.BeginTran();
+
+			if (game_db.UpdateGuildBankGold(guildID, -gold)) {
+				l.time = time(0);
+				l.parameter = gold > 0 ? gold : -gold;
+				l.quantity = 0;
+				l.userID = cha->GetPlyMainCha()->m_ID;
+
+				logs.push_back(l);
+				if (game_db.SetGuildLog(logs, guildID)) {
+					cha->setAttr(ATTR_GD, currentgold + gold);
+
+					// Save player gold immediately to ensure atomicity
+					if (cha->GetPlyMainCha()->SaveAssets()) {
+						game_db.CommitTran();
+
+						cha->SynAttr(enumATTRSYN_TRADE);
+						cha->SyncBoatAttr(enumATTRSYN_TRADE);
+
+						// send update packet to let other members of guild see the update.
+						WPACKET WtPk = GETWPACKET();
+						WRITE_CMD(WtPk, CMD_MM_UPDATEGUILDBANKGOLD);
+						WRITE_LONG(WtPk, cha->GetPlyMainCha()->m_ID);
+						WRITE_LONG(WtPk, cha->GetPlyMainCha()->GetGuildID());
+						cha->ReflectINFof(cha, WtPk);
+					} else {
+						// Rollback and restore player gold
+						game_db.RollBack();
+						cha->setAttr(ATTR_GD, currentgold);
+						LG("bank_error", "Failed to save player assets during gold transfer: player=%s guild=%d gold=%lld\n",
+						   cha->GetPlyMainCha()->GetName(), guildID, gold);
+					}
+				} else {
+					game_db.RollBack();
+					LG("bank_error", "Failed to set guild log during gold transfer: player=%s guild=%d\n",
+					   cha->GetPlyMainCha()->GetName(), guildID);
+				}
+			} else {
+				game_db.RollBack();
+				LG("bank_error", "Failed to update guild bank gold: player=%s guild=%d gold=%lld\n",
+				   cha->GetPlyMainCha()->GetName(), guildID, gold);
+			}
+			break;
+		}
+		}
+	}
+
+	// let group know we have finished, so the next guild bank packet can be processed.
+	WPACKET WtPk = GETWPACKET();
+	WRITE_CMD(WtPk, CMD_MP_GUILDBANK);
+	WRITE_LONG(WtPk, cha->GetGuildID());
+	cha->ReflectINFof(cha, WtPk);
+}
+
+void RegisterAllCharacterOpcodeHandlers() {
+	std::vector<OpcodeHandlerEntry> entries;
+	entries.reserve(112);
+
+	auto add = [&](uint16_t op, OpcodeHandlerFn fn, const char* name) {
+		entries.push_back({op, fn, name});
+	};
+
+	add(CMD_CM_BOSSTIMER_REQUEST, &CCharacter::OpcodeHandle_CmBossTimerRequest, OpcodeName(CMD_CM_BOSSTIMER_REQUEST));
+	add(CMD_CM_RANK, &CCharacter::OpcodeHandle_CmRank, OpcodeName(CMD_CM_RANK));
+	add(CMD_CM_CANCELEXIT, &CCharacter::OpcodeHandle_CmCancelExit, OpcodeName(CMD_CM_CANCELEXIT));
+	add(CMD_CM_CHECK_PING, &CCharacter::OpcodeHandle_CmCheckPing, OpcodeName(CMD_CM_CHECK_PING));
+	add(CMD_CM_ENDACTION, &CCharacter::OpcodeHandle_CmEndAction, OpcodeName(CMD_CM_ENDACTION));
+	add(CMD_CM_DIE_RETURN, &CCharacter::OpcodeHandle_CmDieReturn, OpcodeName(CMD_CM_DIE_RETURN));
+	add(CMD_CM_MISLOG, &CCharacter::OpcodeHandle_CmMisLog, OpcodeName(CMD_CM_MISLOG));
+	add(CMD_CM_MISLOGINFO, &CCharacter::OpcodeHandle_CmMisLogInfo, OpcodeName(CMD_CM_MISLOGINFO));
+	add(CMD_CM_MISLOG_CLEAR, &CCharacter::OpcodeHandle_CmMisLogClear, OpcodeName(CMD_CM_MISLOG_CLEAR));
+	add(CMD_CM_MAP_MASK, &CCharacter::OpcodeHandle_CmMapMask, OpcodeName(CMD_CM_MAP_MASK));
+	add(CMD_CM_SAY, &CCharacter::OpcodeHandle_CmSay, OpcodeName(CMD_CM_SAY));
+	add(CMD_CM_STALLSEARCH, &CCharacter::OpcodeHandle_CmStallSearch, OpcodeName(CMD_CM_STALLSEARCH));
+	add(CMD_CM_SYNATTR, &CCharacter::OpcodeHandle_CmSynAttr, OpcodeName(CMD_CM_SYNATTR));
+	add(CMD_CM_REFRESH_DATA, &CCharacter::OpcodeHandle_CmRefreshData, OpcodeName(CMD_CM_REFRESH_DATA));
+	add(CMD_CM_READBOOK_START, &CCharacter::OpcodeHandle_CmReadbookStart, OpcodeName(CMD_CM_READBOOK_START));
+	add(CMD_CM_READBOOK_CLOSE, &CCharacter::OpcodeHandle_CmReadbookClose, OpcodeName(CMD_CM_READBOOK_CLOSE));
+	add(CMD_CM_KITBAG_CHECK, &CCharacter::OpcodeHandle_CmKitbagCheck, OpcodeName(CMD_CM_KITBAG_CHECK));
+	add(CMD_CM_KITBAG_UNLOCK, &CCharacter::OpcodeHandle_CmKitbagUnlock, OpcodeName(CMD_CM_KITBAG_UNLOCK));
+	add(CMD_CM_BOAT_GETINFO, &CCharacter::OpcodeHandle_CmBoatGetinfo, OpcodeName(CMD_CM_BOAT_GETINFO));
+	add(CMD_CM_STALL_ALLDATA, &CCharacter::OpcodeHandle_CmStallAlldata, OpcodeName(CMD_CM_STALL_ALLDATA));
+	add(CMD_CM_BEGINACTION, &CCharacter::OpcodeHandle_CmBeginAction, OpcodeName(CMD_CM_BEGINACTION));
+	add(CMD_CM_FORGE, &CCharacter::OpcodeHandle_CmForge, OpcodeName(CMD_CM_FORGE));
+	add(CMD_CM_BOAT_CANCEL, &CCharacter::OpcodeHandle_CmBoatCancel, OpcodeName(CMD_CM_BOAT_CANCEL));
+	add(CMD_CM_CREATE_BOAT, &CCharacter::OpcodeHandle_CmCreateBoat, OpcodeName(CMD_CM_CREATE_BOAT));
+	add(CMD_CM_UPDATEBOAT_PART, &CCharacter::OpcodeHandle_CmUpdateboatPart, OpcodeName(CMD_CM_UPDATEBOAT_PART));
+	add(CMD_CM_STALL_OPEN, &CCharacter::OpcodeHandle_CmStallOpen, OpcodeName(CMD_CM_STALL_OPEN));
+	add(CMD_CM_STALL_CLOSE, &CCharacter::OpcodeHandle_CmStallClose, OpcodeName(CMD_CM_STALL_CLOSE));
+	add(CMD_CM_KITBAG_AUTOLOCK, &CCharacter::OpcodeHandle_CmKitbagAutolock, OpcodeName(CMD_CM_KITBAG_AUTOLOCK));
+	add(CMD_CM_KITBAG_LOCK, &CCharacter::OpcodeHandle_CmKitbagLock, OpcodeName(CMD_CM_KITBAG_LOCK));
+	add(CMD_CM_UPDATEHAIR, &CCharacter::OpcodeHandle_CmUpdatehair, OpcodeName(CMD_CM_UPDATEHAIR));
+	add(CMD_CM_SKILLUPGRADE, &CCharacter::OpcodeHandle_CmSkillupgrade, OpcodeName(CMD_CM_SKILLUPGRADE));
+	add(CMD_CM_TEAM_FIGHT_ASK, &CCharacter::OpcodeHandle_CmTeamFightAsk, OpcodeName(CMD_CM_TEAM_FIGHT_ASK));
+	add(CMD_CM_TEAM_FIGHT_ASR, &CCharacter::OpcodeHandle_CmTeamFightAsr, OpcodeName(CMD_CM_TEAM_FIGHT_ASR));
+	add(CMD_CM_ITEM_REPAIR_ASK, &CCharacter::OpcodeHandle_CmItemRepairAsk, OpcodeName(CMD_CM_ITEM_REPAIR_ASK));
+	add(CMD_CM_ITEM_REPAIR_ASR, &CCharacter::OpcodeHandle_CmItemRepairAsr, OpcodeName(CMD_CM_ITEM_REPAIR_ASR));
+	add(CMD_CM_STALL_BUY, &CCharacter::OpcodeHandle_CmStallBuy, OpcodeName(CMD_CM_STALL_BUY));
+	add(CMD_CM_BOAT_LUANCH, &CCharacter::OpcodeHandle_CmBoatLuanch, OpcodeName(CMD_CM_BOAT_LUANCH));
+	add(CMD_CM_BOAT_BAGSEL, &CCharacter::OpcodeHandle_CmBoatBagsel, OpcodeName(CMD_CM_BOAT_BAGSEL));
+	add(CMD_CM_BOAT_SELECT, &CCharacter::OpcodeHandle_CmBoatSelect, OpcodeName(CMD_CM_BOAT_SELECT));
+	add(CMD_CM_ENTITY_EVENT, &CCharacter::OpcodeHandle_CmEntityEvent, OpcodeName(CMD_CM_ENTITY_EVENT));
+	add(CMD_CM_ITEM_FORGE_CANACTION, &CCharacter::OpcodeHandle_CmItemForgeCanaction, OpcodeName(CMD_CM_ITEM_FORGE_CANACTION));
+	add(CMD_CM_VALIDATE_SLOT_ITEM, &CCharacter::OpcodeHandle_CmValidateSlotItem, OpcodeName(CMD_CM_VALIDATE_SLOT_ITEM));
+	add(CMD_CM_ITEM_FORGE_ASK, &CCharacter::OpcodeHandle_CmItemForgeAsk, OpcodeName(CMD_CM_ITEM_FORGE_ASK));
+	add(CMD_CM_ITEM_FORGE_ASR, &CCharacter::OpcodeHandle_CmItemForgeAsr, OpcodeName(CMD_CM_ITEM_FORGE_ASR));
+	add(CMD_CM_ITEM_LOTTERY_ASK, &CCharacter::OpcodeHandle_CmItemLotteryAsk, OpcodeName(CMD_CM_ITEM_LOTTERY_ASK));
+	add(CMD_CM_LIFESKILL_ASK, &CCharacter::OpcodeHandle_CmLifeskillAsk, OpcodeName(CMD_CM_LIFESKILL_ASK));
+	add(CMD_CM_LIFESKILL_ASR, &CCharacter::OpcodeHandle_CmLifeskillAsr, OpcodeName(CMD_CM_LIFESKILL_ASR));
+	add(CMD_CM_KITBAG_EXPAND, &CCharacter::OpcodeHandle_CmKitbagExpand, OpcodeName(CMD_CM_KITBAG_EXPAND));
+	add(CMD_CM_PING, &CCharacter::OpcodeHandle_CmPing, OpcodeName(CMD_CM_PING));
+	add(CMD_CM_TIGER_START, &CCharacter::OpcodeHandle_CmTigerStart, OpcodeName(CMD_CM_TIGER_START));
+	add(CMD_CM_TIGER_STOP, &CCharacter::OpcodeHandle_CmTigerStop, OpcodeName(CMD_CM_TIGER_STOP));
+	add(CMD_CM_KITBAGTEMP_SYNC, &CCharacter::OpcodeHandle_CmKitbagtempSync, OpcodeName(CMD_CM_KITBAGTEMP_SYNC));
+	add(CMD_CM_STORE_OPEN_ASK, &CCharacter::OpcodeHandle_CmStoreOpenAsk, OpcodeName(CMD_CM_STORE_OPEN_ASK));
+	add(CMD_CM_STORE_LIST_ASK, &CCharacter::OpcodeHandle_CmStoreListAsk, OpcodeName(CMD_CM_STORE_LIST_ASK));
+	add(CMD_CM_STORE_BUY_ASK, &CCharacter::OpcodeHandle_CmStoreBuyAsk, OpcodeName(CMD_CM_STORE_BUY_ASK));
+	add(CMD_CM_STORE_CHANGE_ASK, &CCharacter::OpcodeHandle_CmStoreChangeAsk, OpcodeName(CMD_CM_STORE_CHANGE_ASK));
+	add(CMD_CM_STORE_QUERY, &CCharacter::OpcodeHandle_CmStoreQuery, OpcodeName(CMD_CM_STORE_QUERY));
+	add(CMD_CM_STORE_VIP, &CCharacter::OpcodeHandle_CmStoreVip, OpcodeName(CMD_CM_STORE_VIP));
+	add(CMD_CM_STORE_CLOSE, &CCharacter::OpcodeHandle_CmStoreClose, OpcodeName(CMD_CM_STORE_CLOSE));
+	add(CMD_CM_REQUESTTALK, &CCharacter::OpcodeHandle_CmRequestTalkOrTrade, OpcodeName(CMD_CM_REQUESTTALK));
+	add(CMD_CM_REQUESTTRADE, &CCharacter::OpcodeHandle_CmRequestTalkOrTrade, OpcodeName(CMD_CM_REQUESTTRADE));
+	add(CMD_CM_ITEM_LOCK_ASK, &CCharacter::OpcodeHandle_CmItemLockAsk, OpcodeName(CMD_CM_ITEM_LOCK_ASK));
+	add(CMD_CM_ITEM_UNLOCK_ASK, &CCharacter::OpcodeHandle_CmItemUnlockAsk, OpcodeName(CMD_CM_ITEM_UNLOCK_ASK));
+	add(CMD_CM_GAME_REQUEST_PIN, &CCharacter::OpcodeHandle_CmGameRequestPin, OpcodeName(CMD_CM_GAME_REQUEST_PIN));
+	add(CMD_CM_CHARTRADE_REQUEST, &CCharacter::OpcodeHandle_CmChartradeRequest, OpcodeName(CMD_CM_CHARTRADE_REQUEST));
+	add(CMD_CM_CHARTRADE_ACCEPT, &CCharacter::OpcodeHandle_CmChartradeAccept, OpcodeName(CMD_CM_CHARTRADE_ACCEPT));
+	add(CMD_CM_CHARTRADE_REJECT, &CCharacter::OpcodeHandle_CmChartradeReject, OpcodeName(CMD_CM_CHARTRADE_REJECT));
+	add(CMD_CM_CHARTRADE_CANCEL, &CCharacter::OpcodeHandle_CmChartradeCancel, OpcodeName(CMD_CM_CHARTRADE_CANCEL));
+	add(CMD_CM_CHARTRADE_ITEM, &CCharacter::OpcodeHandle_CmChartradeItem, OpcodeName(CMD_CM_CHARTRADE_ITEM));
+	add(CMD_CM_CHARTRADE_MONEY, &CCharacter::OpcodeHandle_CmChartradeMoney, OpcodeName(CMD_CM_CHARTRADE_MONEY));
+	add(CMD_CM_CHARTRADE_VALIDATEDATA, &CCharacter::OpcodeHandle_CmChartradeValidatedata, OpcodeName(CMD_CM_CHARTRADE_VALIDATEDATA));
+	add(CMD_CM_CHARTRADE_VALIDATE, &CCharacter::OpcodeHandle_CmChartradeValidate, OpcodeName(CMD_CM_CHARTRADE_VALIDATE));
+	add(CMD_CM_VOLUNTER_OPEN, &CCharacter::OpcodeHandle_CmVolunterOpen, OpcodeName(CMD_CM_VOLUNTER_OPEN));
+	add(CMD_CM_VOLUNTER_LIST, &CCharacter::OpcodeHandle_CmVolunterList, OpcodeName(CMD_CM_VOLUNTER_LIST));
+	add(CMD_CM_VOLUNTER_ADD, &CCharacter::OpcodeHandle_CmVolunterAdd, OpcodeName(CMD_CM_VOLUNTER_ADD));
+	add(CMD_CM_VOLUNTER_DEL, &CCharacter::OpcodeHandle_CmVolunterDel, OpcodeName(CMD_CM_VOLUNTER_DEL));
+	add(CMD_CM_VOLUNTER_SEL, &CCharacter::OpcodeHandle_CmVolunterSel, OpcodeName(CMD_CM_VOLUNTER_SEL));
+	add(CMD_CM_VOLUNTER_ASR, &CCharacter::OpcodeHandle_CmVolunterAsr, OpcodeName(CMD_CM_VOLUNTER_ASR));
+	add(CMD_CM_MASTER_INVITE, &CCharacter::OpcodeHandle_CmMasterInvite, OpcodeName(CMD_CM_MASTER_INVITE));
+	add(CMD_CM_MASTER_ASR, &CCharacter::OpcodeHandle_CmMasterAsr, OpcodeName(CMD_CM_MASTER_ASR));
+	add(CMD_CM_MASTER_DEL, &CCharacter::OpcodeHandle_CmMasterDel, OpcodeName(CMD_CM_MASTER_DEL));
+	add(CMD_CM_PRENTICE_DEL, &CCharacter::OpcodeHandle_CmPrenticeDel, OpcodeName(CMD_CM_PRENTICE_DEL));
+	add(CMD_CM_PRENTICE_INVITE, &CCharacter::OpcodeHandle_CmPrenticeInvite, OpcodeName(CMD_CM_PRENTICE_INVITE));
+	add(CMD_CM_PRENTICE_ASR, &CCharacter::OpcodeHandle_CmPrenticeAsr, OpcodeName(CMD_CM_PRENTICE_ASR));
+	add(CMD_PM_GUILDBANK, &CCharacter::OpcodeHandle_PmGuildbank, OpcodeName(CMD_PM_GUILDBANK));
+	add(CMD_PM_PUSHTOGUILDBANK, &CCharacter::OpcodeHandle_PmPushToGuildbank, OpcodeName(CMD_PM_PUSHTOGUILDBANK));
+	add(CMD_TM_CHANGE_PERSONINFO, &CCharacter::OpcodeHandle_TmChangePersoninfo, OpcodeName(CMD_TM_CHANGE_PERSONINFO));
+	add(CMD_CM_GUILD_PERM, &CCharacter::OpcodeHandle_CmGuildPerm, OpcodeName(CMD_CM_GUILD_PERM));
+	add(CMD_CM_GUILD_PUTNAME, &CCharacter::OpcodeHandle_CmGuildPutname, OpcodeName(CMD_CM_GUILD_PUTNAME));
+	add(CMD_CM_GUILD_TRYFOR, &CCharacter::OpcodeHandle_CmGuildTryfor, OpcodeName(CMD_CM_GUILD_TRYFOR));
+	add(CMD_CM_GUILD_TRYFORCFM, &CCharacter::OpcodeHandle_CmGuildTryforcfm, OpcodeName(CMD_CM_GUILD_TRYFORCFM));
+	add(CMD_CM_GUILD_LISTTRYPLAYER, &CCharacter::OpcodeHandle_CmGuildListtryplayer, OpcodeName(CMD_CM_GUILD_LISTTRYPLAYER));
+	add(CMD_CM_GUILD_APPROVE, &CCharacter::OpcodeHandle_CmGuildApprove, OpcodeName(CMD_CM_GUILD_APPROVE));
+	add(CMD_CM_GUILD_REJECT, &CCharacter::OpcodeHandle_CmGuildReject, OpcodeName(CMD_CM_GUILD_REJECT));
+	add(CMD_CM_GUILD_KICK, &CCharacter::OpcodeHandle_CmGuildKick, OpcodeName(CMD_CM_GUILD_KICK));
+	add(CMD_CM_GUILD_LEAVE, &CCharacter::OpcodeHandle_CmGuildLeave, OpcodeName(CMD_CM_GUILD_LEAVE));
+	add(CMD_CM_GUILD_DISBAND, &CCharacter::OpcodeHandle_CmGuildDisband, OpcodeName(CMD_CM_GUILD_DISBAND));
+	add(CMD_CM_GUILD_MOTTO, &CCharacter::OpcodeHandle_CmGuildMotto, OpcodeName(CMD_CM_GUILD_MOTTO));
+	add(CMD_PM_GUILD_DISBAND, &CCharacter::OpcodeHandle_PmGuildDisband, OpcodeName(CMD_PM_GUILD_DISBAND));
+	add(CMD_CM_GUILD_CHALLENGE, &CCharacter::OpcodeHandle_CmGuildChallenge, OpcodeName(CMD_CM_GUILD_CHALLENGE));
+	add(CMD_CM_GUILD_LEIZHU, &CCharacter::OpcodeHandle_CmGuildLeizhu, OpcodeName(CMD_CM_GUILD_LEIZHU));
+	add(CMD_CM_SAY2CAMP, &CCharacter::OpcodeHandle_CmSay2camp, OpcodeName(CMD_CM_SAY2CAMP));
+	add(CMD_CM_GM_SEND, &CCharacter::OpcodeHandle_CmGmSend, OpcodeName(CMD_CM_GM_SEND));
+	add(CMD_CM_GM_RECV, &CCharacter::OpcodeHandle_CmGmRecv, OpcodeName(CMD_CM_GM_RECV));
+	add(CMD_CM_PK_CTRL, &CCharacter::OpcodeHandle_CmPkCtrl, OpcodeName(CMD_CM_PK_CTRL));
+	add(CMD_CM_CHEAT_CHECK, &CCharacter::OpcodeHandle_CmCheatCheck, OpcodeName(CMD_CM_CHEAT_CHECK));
+	add(CMD_CM_BIDUP, &CCharacter::OpcodeHandle_CmBidup, OpcodeName(CMD_CM_BIDUP));
+	add(CMD_CM_ANTIINDULGENCE, &CCharacter::OpcodeHandle_CmAntiindulgence, OpcodeName(CMD_CM_ANTIINDULGENCE));
+	add(CMD_CM_REQUEST_DROP_RATE, &CCharacter::OpcodeHandle_CmRequestDropRate, OpcodeName(CMD_CM_REQUEST_DROP_RATE));
+	add(CMD_CM_REQUEST_EXP_RATE, &CCharacter::OpcodeHandle_CmRequestExpRate, OpcodeName(CMD_CM_REQUEST_EXP_RATE));
+	add(CMD_CM_GET_PLAYER_BATTLE_POINT, &CCharacter::OpcodeHandle_CmGetPlayerBattlePoint, OpcodeName(CMD_CM_GET_PLAYER_BATTLE_POINT));
+	add(CMD_CM_REQUEST_CHEST_PREVIEW, &CCharacter::OpcodeHandle_CmRequestChestPreview, OpcodeName(CMD_CM_REQUEST_CHEST_PREVIEW));
+
+	if (!RegisterOpcodeHandlers(entries.data(), entries.size())) {
+		throw std::runtime_error("RegisterAllCharacterOpcodeHandlers failed");
+	}
+
+	printf("Character opcode registry: %zu handlers (total %zu)\n", entries.size(), OpcodeHandlerCount());
+}
+
+} // namespace
+
+void RegisterCharacterOpcodeHandlers() {
+	static bool registered = false;
+	if (registered) {
+		return;
+	}
+	RegisterAllCharacterOpcodeHandlers();
+	registered = true;
+}
+
+bool CCharacter::OpcodeHandle_CmBossTimerRequest(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	BossTimer::SendToPlayer(cha);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmRank(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	const DWORD cooldown = GetTickCount();
+	if (cha->ShowRankColD > cooldown) {
+		cha->BickerNotice("Please Calm Down Don't Spam! ");
+		return true;
+	}
+	game_db.ShowExpRank(cha->GetPlyMainCha(), 50);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmCancelExit(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	static_cast<CCharacter*>(ctx)->CancelExit();
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmCheckPing(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	const DWORD dwPing = GetTickCount() - cha->m_dwPingSendTick;
+	cha->m_dwPing = dwPing;
+	cha->SendPreMoveTime();
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmEndAction(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	static_cast<CCharacter*>(ctx)->EndAction(pk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmDieReturn(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	cha->m_chSelRelive = READ_CHAR(pk);
+	cha->GetPlyMainCha()->ResetChaRelive();
+	if (cha->m_chSelRelive == enumEPLAYER_RELIVE_NORIGIN) {
+		cha->SetRelive(enumEPLAYER_RELIVE_ORIGIN, 0);
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmMisLog(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	static_cast<CCharacter*>(ctx)->MisLog();
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmMisLogInfo(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	const WORD wMisID = READ_SHORT(pk);
+	static_cast<CCharacter*>(ctx)->MisLogInfo(wMisID);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmMisLogClear(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	const WORD wMisID = READ_SHORT(pk);
+	static_cast<CCharacter*>(ctx)->MisLogClear(wMisID);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmMapMask(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	if (!cha->GetSubMap()) {
+		return true;
+	}
+
+	int lDataLen;
+	BYTE* pData = cha->GetPlayer()->GetMapMask(lDataLen);
+	WPACKET wpk = GETWPACKET();
+	WRITE_CMD(wpk, CMD_MC_MAP_MASK);
+	WRITE_LONG(wpk, cha->m_ID);
+	if (!pData) {
+		WRITE_CHAR(wpk, 0);
+	} else {
+		WRITE_CHAR(wpk, 1);
+		WRITE_SEQ(wpk, (cChar*)pData, (uShort)lDataLen);
+	}
+	cha->ReflectINFof(cha, wpk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmSay(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	DWORD dwNowTick = GetTickCount();
+	if (dwNowTick - cha->_dwLastSayTick < (DWORD)g_Config.m_lSayInterval) {
+		cha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00001));
+		return true;
+	}
+	cha->_dwLastSayTick = dwNowTick;
+
+	if (!cha->GetSubMap()) {
+		LG("dialog error", "when character%s is dialog,the map is null!\n", cha->m_CLog.GetLogName());
+		return true;
+	}
+	uShort l_retlen;
+	cChar* l_content = READ_SEQ(pk, l_retlen);
+	if (!l_content)
+		return true;
+
+	if (l_retlen == 0 || l_retlen > PS::MAX_CHAT_LENGTH) {
+		LG("Security", "[Chat] Invalid message length %d from character %s\n", l_retlen, cha->GetName());
+		return true;
+	} else if (*l_content == '&') {
+		Char chGMLv = cha->GetPlayer()->GetGMLev();
+		if (chGMLv == 0 || chGMLv > 150)
+			cha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00002));
+		else
+			cha->DoCommand(l_content + 1, l_retlen - 1);
+	} else if (*l_content == '$' && *(l_content + 1) == '$') {
+		cha->DoCommand_CheckStatus(l_content + 3, l_retlen - 2);
+	} else {
+		g_CParser.DoString("HandleChat", enumSCRIPT_RETURN_NUMBER, 1, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, cha, enumSCRIPT_PARAM_STRING, 1, l_content, DOSTRING_PARAM_END);
+		if (!g_CParser.GetReturnNumber(0))
+			return true;
+		if (g_Config.m_bBlindChaos && cha->IsPlayerCha() && cha->IsPKSilver()) {
+			cha->SystemNotice("Unable to chat in this map!");
+			return true;
+		}
+
+		WPACKET wpk = GETWPACKET();
+		WRITE_CMD(wpk, CMD_MC_SAY);
+		WRITE_LONG(wpk, cha->m_ID);
+		WRITE_SEQ(wpk, l_content, l_retlen);
+		WRITE_LONG(wpk, cha->chatColour);
+		cha->NotiChgToEyeshot(wpk);
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmStallSearch(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	DWORD dwNow = GetTickCount();
+	if (dwNow - cha->m_dwLastStallSearchTime < 2000) {
+		cha->SystemNotice("Please wait before searching again.");
+		return true;
+	}
+	cha->m_dwLastStallSearchTime = dwNow;
+
+	Long itemID = READ_LONG(pk);
+	g_StallSystem.SearchItem(*cha, itemID);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmSynAttr(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	cha->GetPlayer()->GetMainCha()->Cmd_ReassignAttr(pk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmRefreshData(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	Long lWorldID = READ_LONG(pk);
+	Long lHandle = READ_LONG(pk);
+	Entity* pCEnt = g_pGameApp->IsLiveingEntity(lWorldID, lHandle);
+	if (pCEnt) {
+		CCharacter* pCCha = pCEnt->IsCharacter();
+		if (pCCha && pCCha->GetPlayer() == cha->GetPlayer()) {
+			pCCha->SynAttr(enumATTRSYN_ITEM_EQUIP);
+		}
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmReadbookStart(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	if (!cha->IsBoat()) {
+		pMainCha->SetReadBookState(true);
+		pMainCha->ForgeAction(true);
+		pMainCha->m_CKitbag.Lock();
+	} else {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00004));
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmReadbookClose(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	if (!cha->IsBoat()) {
+		pMainCha->SetReadBookState(false);
+		pMainCha->ForgeAction(false);
+		pMainCha->m_CKitbag.UnLock();
+	} else {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00005));
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmKitbagCheck(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	static_cast<CCharacter*>(ctx)->GetPlyMainCha()->Cmd_CheckKitbagState();
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmKitbagUnlock(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	const char* szPwd = READ_STRING(pk);
+	if (szPwd == nullptr)
+		return true;
+
+	cha->GetPlyMainCha()->Cmd_UnlockKitbag(szPwd);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmBoatGetinfo(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	if (cha->GetPlayer()->IsLuanchOut()) {
+		g_CharBoat.GetBoatInfo(*cha, cha->GetPlayer()->GetLuanchID());
+	} else {
+		cha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00003));
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmStallAlldata(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	g_StallSystem.StartStall(*static_cast<CCharacter*>(ctx), pk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmBeginAction(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	uLong ulWorldID = READ_LONG(pk);
+
+	if (cha->GetPlayer()) {
+		if (cha->GetPlayer()->GetCtrlCha() && ulWorldID == cha->GetPlayer()->GetCtrlCha()->GetID())
+			cha->GetPlayer()->GetCtrlCha()->BeginAction(pk);
+		else if (cha->GetPlayer()->GetMainCha() && ulWorldID == cha->GetPlayer()->GetMainCha()->GetID())
+			cha->GetPlayer()->GetMainCha()->BeginAction(pk);
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmForge(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	BYTE byIndex = READ_CHAR(pk);
+	g_ForgeSystem.ForgeItem(*cha, byIndex);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmBoatCancel(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	g_CharBoat.Cancel(*static_cast<CCharacter*>(ctx));
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmCreateBoat(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	g_CharBoat.MakeBoat(*static_cast<CCharacter*>(ctx), pk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmUpdateboatPart(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	g_CharBoat.Update(*static_cast<CCharacter*>(ctx), pk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmStallOpen(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	g_StallSystem.OpenStall(*static_cast<CCharacter*>(ctx), pk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmStallClose(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	g_StallSystem.CloseStall(*static_cast<CCharacter*>(ctx));
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmKitbagAutolock(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	char cAutoLock = READ_CHAR(pk);
+	cha->GetPlyMainCha()->Cmd_SetKitbagAutoLock(cAutoLock);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmKitbagLock(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	static_cast<CCharacter*>(ctx)->GetPlyMainCha()->Cmd_LockKitbag();
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmUpdatehair(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	if (!cha->GetSubMap())
+		return true;
+	cha->Cmd_ChangeHair(pk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmSkillupgrade(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	Short sSkillID = READ_SHORT(pk);
+	Char chAddGrade = READ_CHAR(pk);
+
+	if (!PS::ValidateRange(static_cast<int>(sSkillID), 1, PS::MAX_SKILL_ID)) {
+		LG("Security", "[Skill] Invalid skill ID %d from character %s\n", sSkillID, cha->GetName());
+		return true;
+	}
+
+	chAddGrade = 1;
+
+	char chSkillLv = 0;
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	SSkillGrid* pSkill = pMainCha->m_CSkillBag.GetSkillContByID(sSkillID);
+	if (pSkill)
+		chSkillLv = pSkill->chLv;
+
+	if (chSkillLv <= 0) {
+		cha->SystemNotice("Unable to upgrade skill without learning!");
+		return true;
+	}
+
+	auto validation = [&]() -> bool {
+		auto pCSkill = GetSkillRecordInfo(sSkillID);
+		if (!pCSkill->IsShow())
+			return false;
+		if (sSkillID >= 25 && sSkillID <= 38)
+			return false;
+		if (sSkillID >= 329 && sSkillID <= 444)
+			return false;
+		if (sSkillID >= 321 && sSkillID <= 324)
+			return false;
+		if (453 <= sSkillID && sSkillID <= 459)
+			return false;
+		if (0467 == sSkillID || 280 == sSkillID || 311 == sSkillID)
+			return false;
+		return true;
+	}();
+
+	if (!validation) {
+		cha->SystemNotice("You have been caught exploiting! This will lead to account suspension or deletion.");
+		LG("Upgrade Exploit", "Player %s tried to force upgrade on SkillID: %d\n", pMainCha->GetName(), sSkillID);
+		return true;
+	}
+	cha->GetPlayer()->GetMainCha()->LearnSkill(sSkillID, chAddGrade, false);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmTeamFightAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	Char chType = READ_CHAR(pk);
+	Long lID = READ_LONG(pk);
+	Long lHandle = READ_LONG(pk);
+	cha->Cmd_FightAsk(chType, lID, lHandle);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmTeamFightAsr(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	Char chAnswer = READ_CHAR(pk);
+	cha->Cmd_FightAnswer(chAnswer != 0 ? true : false);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmItemRepairAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	READ_LONG(pk);
+	READ_LONG(pk);
+	Char chPosType = READ_CHAR(pk);
+	Char chPosID = READ_CHAR(pk);
+	cha->Cmd_ItemRepairAsk(chPosType, chPosID);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmItemRepairAsr(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	cha->Cmd_ItemRepairAnswer(READ_CHAR(pk) != 0 ? true : false);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmStallBuy(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	if (IsEconomyBlockedByDB(*cha))
+		return true;
+	g_StallSystem.BuyGoods(*cha, pk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmBoatLuanch(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	DWORD dwNpcID = READ_LONG(pk);
+	CCharacter* pCha = cha->m_submap->FindCharacter(dwNpcID, cha->GetShape().centre);
+	if (pCha == nullptr) {
+		return true;
+	} else if (cha->GetPlayer()->GetBankNpc()) {
+		return true;
+	} else if (g_CParser.DoString("IsSailNpc", enumSCRIPT_RETURN_NUMBER, 1, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, cha, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, pCha, DOSTRING_PARAM_END)) {
+		if (!g_CParser.GetReturnNumber(0)) {
+			return true;
+		}
+	}
+
+	BYTE byIndex = READ_CHAR(pk);
+	cha->BoatSelLuanch(byIndex);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmBoatSelect(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	DWORD dwNpcID = READ_LONG(pk);
+	CCharacter* pCha = cha->m_submap->FindCharacter(dwNpcID, cha->GetShape().centre);
+	if (pCha == nullptr) {
+		return true;
+	}
+	if (g_CParser.DoString("IsSailBoatNpc", enumSCRIPT_RETURN_NUMBER, 1, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, cha, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, pCha, DOSTRING_PARAM_END)) {
+		if (!g_CParser.GetReturnNumber(0)) {
+			return true;
+		}
+	}
+	BYTE byType = READ_CHAR(pk);
+	BYTE byIndex = READ_CHAR(pk);
+	cha->BoatSelected(byType, byIndex);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmBoatBagsel(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	DWORD dwNpcID = READ_LONG(pk);
+	if (dwNpcID) {
+		CCharacter* pCha = cha->m_submap->FindCharacter(dwNpcID, cha->GetShape().centre);
+		if (pCha == nullptr)
+			return true;
+	}
+
+	BYTE byIndex = READ_CHAR(pk);
+	cha->BoatPackBag(byIndex);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmEntityEvent(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	DWORD dwEntityID = READ_LONG(pk);
+	CCharacter* pCha = cha->m_submap->FindCharacter(dwEntityID, cha->GetShape().centre);
+	if (pCha == nullptr)
+		return true;
+	mission::CEventEntity* pEntity = pCha->IsEvent();
+	if (pEntity) {
+		pEntity->MsgProc(*cha, pk);
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmItemForgeCanaction(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	short canaction = READ_CHAR(pk);
+	bool bCan = (canaction == 0) ? false : true;
+	cha->ForgeAction(bCan);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmValidateSlotItem(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	Char chFormType = READ_CHAR(pk);
+	Char chSlotIndex = READ_CHAR(pk);
+	Short sGridID = READ_SHORT(pk);
+
+	if (!PS::ValidateRange(static_cast<int>(chFormType), 1, 6)) {
+		LG("Security", "[SlotItem] Invalid form type %d from character %s\n", chFormType, cha->GetName());
+		return true;
+	}
+	if (!PS::ValidateRange(static_cast<int>(chSlotIndex), 0, 9)) {
+		LG("Security", "[SlotItem] Invalid slot index %d from character %s\n", chSlotIndex, cha->GetName());
+		return true;
+	}
+	if (!PS::ValidateKitbagSlot(static_cast<int>(sGridID)) && sGridID != -1) {
+		LG("Security", "[SlotItem] Invalid grid ID %d from character %s\n", sGridID, cha->GetName());
+		return true;
+	}
+
+	cha->Cmd_ValidateSlotItem(chFormType, chSlotIndex, sGridID);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmItemForgeAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	if (READ_CHAR(pk) == 0) {
+		cha->ForgeAction(false);
+		return true;
+	}
+	Char chType = READ_CHAR(pk);
+
+	if (!PS::ValidateRange(static_cast<int>(chType), 0, 10)) {
+		LG("Security", "[Forge] Invalid forge type %d from character %s\n", chType, cha->GetName());
+		cha->ForgeAction(false);
+		return true;
+	}
+
+	SForgeItem SFgeItem;
+	bool validForge = true;
+	for (int i = 0; i < defMAX_ITEM_FORGE_GROUP && validForge; i++) {
+		SFgeItem.SGroup[i].sGridNum = READ_SHORT(pk);
+		if (SFgeItem.SGroup[i].sGridNum < 0 || SFgeItem.SGroup[i].sGridNum > defMAX_KBITEM_NUM_PER_TYPE) {
+			cha->ForgeAction(false);
+			validForge = false;
+			break;
+		}
+		for (short j = 0; j < SFgeItem.SGroup[i].sGridNum; j++) {
+			SFgeItem.SGroup[i].SGrid[j].sGridID = READ_SHORT(pk);
+			SFgeItem.SGroup[i].SGrid[j].sItemNum = READ_SHORT(pk);
+
+			if (!PS::ValidateKitbagSlot(static_cast<int>(SFgeItem.SGroup[i].SGrid[j].sGridID))) {
+				LG("Security", "[Forge] Invalid grid ID %d from character %s\n", SFgeItem.SGroup[i].SGrid[j].sGridID, cha->GetName());
+				validForge = false;
+				break;
+			}
+			if (SFgeItem.SGroup[i].SGrid[j].sItemNum < 0 || SFgeItem.SGroup[i].SGrid[j].sItemNum > PS::MAX_STACK_COUNT) {
+				LG("Security", "[Forge] Invalid item count %d from character %s\n", SFgeItem.SGroup[i].SGrid[j].sItemNum, cha->GetName());
+				validForge = false;
+				break;
+			}
+		}
+	}
+	if (!validForge) {
+		cha->ForgeAction(false);
+		return true;
+	}
+	cha->Cmd_ItemForgeAsk(chType, &SFgeItem);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmItemLotteryAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	if (READ_CHAR(pk) == 0) {
+		cha->ForgeAction(false);
+		return true;
+	}
+
+	SLotteryItem SLtrItem;
+	bool validLottery = true;
+	for (int i = 0; i < defMAX_ITEM_LOTTERY_GROUP && validLottery; i++) {
+		SLtrItem.SGroup[i].sGridNum = READ_SHORT(pk);
+		if (SLtrItem.SGroup[i].sGridNum < 0 || SLtrItem.SGroup[i].sGridNum > defMAX_KBITEM_NUM_PER_TYPE) {
+			validLottery = false;
+			break;
+		}
+		for (short j = 0; j < SLtrItem.SGroup[i].sGridNum; j++) {
+			SLtrItem.SGroup[i].SGrid[j].sGridID = READ_SHORT(pk);
+			SLtrItem.SGroup[i].SGrid[j].sItemNum = READ_SHORT(pk);
+
+			if (!PS::ValidateKitbagSlot(static_cast<int>(SLtrItem.SGroup[i].SGrid[j].sGridID))) {
+				LG("Security", "[Lottery] Invalid grid ID %d from character %s\n", SLtrItem.SGroup[i].SGrid[j].sGridID, cha->GetName());
+				validLottery = false;
+				break;
+			}
+			if (SLtrItem.SGroup[i].SGrid[j].sItemNum < 0 || SLtrItem.SGroup[i].SGrid[j].sItemNum > PS::MAX_STACK_COUNT) {
+				LG("Security", "[Lottery] Invalid item count %d from character %s\n", SLtrItem.SGroup[i].SGrid[j].sItemNum, cha->GetName());
+				validLottery = false;
+				break;
+			}
+		}
+	}
+	if (!validLottery) {
+		cha->ForgeAction(false);
+		return true;
+	}
+	cha->Cmd_ItemLotteryAsk(&SLtrItem);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmItemForgeAsr(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	cha->Cmd_ItemForgeAnswer(READ_CHAR(pk) != 0 ? true : false);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmLifeskillAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	int type = READ_LONG(pk);
+	if (type >= 0 && type < 4) {
+		int dwNpcID = READ_LONG(pk);
+
+		SLifeSkillItem LifeSkillItem;
+		LifeSkillItem.sbagCount = g_sLiveSkillNeedItemNum[type];
+		for (int i = 0; i < LifeSkillItem.sbagCount; i++) {
+			LifeSkillItem.sGridID[i] = READ_SHORT(pk);
+		}
+		switch (type) {
+		case 0: {
+			LifeSkillItem.sReturn = atoi(cha->GetPlayer()->GetLifeSkillinfo().c_str());
+			break;
+		}
+		case 1: {
+			string strVer[2];
+			Util_ResolveTextLine(cha->GetPlayer()->GetLifeSkillinfo().c_str(), strVer, 2, ',');
+			if (atoi(strVer[0].c_str()) > atoi(strVer[1].c_str()))
+				LifeSkillItem.sReturn = 1;
+			else
+				LifeSkillItem.sReturn = 0;
+			break;
+		}
+		case 2: {
+			short sret = READ_SHORT(pk);
+			string strVer[3];
+			Util_ResolveTextLine(cha->GetPlayer()->GetLifeSkillinfo().c_str(), strVer, 3, ',');
+			int count = atoi(strVer[0].c_str()) + atoi(strVer[1].c_str()) + atoi(strVer[2].c_str());
+			count -= 9;
+			if (count > 0)
+				count = 1;
+			else
+				count = 0;
+			if (count == sret)
+				LifeSkillItem.sReturn = 1;
+			else
+				LifeSkillItem.sReturn = 0;
+			break;
+		}
+		case 3: {
+			LifeSkillItem.sReturn = READ_SHORT(pk);
+			break;
+		}
+		}
+		cha->Cmd_LifeSkillItemAsk(type, &LifeSkillItem);
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmLifeskillAsr(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	int type = READ_LONG(pk);
+
+	if (type >= 0 && type < 4) {
+		int dwNpcID = READ_LONG(pk);
+		SLifeSkillItem LifeSkillItem;
+		LifeSkillItem.sbagCount = g_sLiveSkillNeedItemNum[type];
+		for (int i = 0; i < LifeSkillItem.sbagCount; i++) {
+			LifeSkillItem.sGridID[i] = READ_SHORT(pk);
+		}
+
+		switch (type) {
+		case 0: {
+			const char* pchar = READ_STRING(pk);
+			LifeSkillItem.sReturn = 1;
+		}
+		case 1: {
+			LifeSkillItem.sReturn = 0;
+		}
+		case 2: {
+			LifeSkillItem.sReturn = READ_SHORT(pk);
+
+			break;
+		}
+		case 3: {
+			LifeSkillItem.sReturn = READ_SHORT(pk);
+			break;
+		}
+		}
+
+		cha->Cmd_LifeSkillItemAsR(type, &LifeSkillItem);
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmKitbagExpand(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	if (!pMainCha)
+		return true;
+
+	const int EXPAND_COST = 100;
+	const short EXPAND_AMOUNT = 6;
+
+	short currentCap = pMainCha->m_CKitbag.GetCapacity();
+	if (currentCap >= defMAX_KBITEM_NUM_PER_TYPE) {
+		pMainCha->SystemNotice("Your inventory is already at maximum capacity.");
+		return true;
+	}
+
+	short actualExpand = EXPAND_AMOUNT;
+	if (currentCap + actualExpand > defMAX_KBITEM_NUM_PER_TYPE)
+		actualExpand = defMAX_KBITEM_NUM_PER_TYPE - currentCap;
+
+	int currentIMP = pMainCha->GetIMP();
+	if (currentIMP < EXPAND_COST) {
+		pMainCha->SystemNotice("Not enough IMP. You need 100 IMP to expand your inventory.");
+		return true;
+	}
+
+	pMainCha->SetIMP(currentIMP - EXPAND_COST, true);
+
+	if (!pMainCha->AddKitbagCapacity(actualExpand)) {
+		pMainCha->SetIMP(currentIMP, true);
+		pMainCha->SystemNotice("Failed to expand inventory.");
+		return true;
+	}
+
+	char szMsg[128];
+	sprintf(szMsg, "Inventory expanded by %d slots! New capacity: %d.",
+		actualExpand, pMainCha->m_CKitbag.GetCapacity());
+	pMainCha->SystemNotice(szMsg);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmPing(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	uLong ulPing = GetTickCount() - READ_LONG(pk);
+	unsigned long long lGateSvr = READ_LONGLONG(pk);
+	Long lSrcID = READ_LONG(pk);
+	Long lGatePlayerID = READ_LONG(pk);
+	unsigned long long lGatePlayerAddr = READ_LONGLONG(pk);
+
+	BEGINGETGATE();
+	GateServer* pNoGate;
+	GateServer* pGate = 0;
+	while (pNoGate = GETNEXTGATE()) {
+		if (MakeULong(pNoGate) == lGateSvr) {
+			pGate = pNoGate;
+			break;
+		}
+	}
+	if (!pGate)
+		return true;
+
+	WPACKET WtPk = GETWPACKET();
+	WRITE_CMD(WtPk, CMD_MC_QUERY_CHAPING);
+	WRITE_LONG(WtPk, lSrcID);
+	WRITE_STRING(WtPk, cha->GetName());
+	WRITE_STRING(WtPk, cha->GetSubMap()->GetName());
+	WRITE_LONG(WtPk, ulPing);
+	WRITE_LONG(WtPk, lGatePlayerID);
+	WRITE_LONGLONG(WtPk, lGatePlayerAddr);
+	WRITE_SHORT(WtPk, 1);
+	pGate->SendData(WtPk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmTigerStart(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	DWORD dwNpcID = READ_LONG(pk);
+
+	for (int i = 0; i < 3; i++) {
+		short sTigerSel = READ_SHORT(pk);
+		cha->m_sTigerSel[i] = (sTigerSel > 0) ? 1 : 0;
+	}
+
+	CCharacter* pCha = cha->m_submap->FindCharacter(dwNpcID, cha->GetShape().centre);
+	if (pCha == nullptr)
+		return true;
+
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	pMainCha->DoTigerScript("TigerStart");
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmTigerStop(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	DWORD dwNpcID = READ_LONG(pk);
+	CCharacter* pCha = cha->m_submap->FindCharacter(dwNpcID, cha->GetShape().centre);
+	if (pCha == nullptr)
+		return true;
+
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	short sNum = READ_SHORT(pk);
+
+	if (sNum < 1 || sNum > 3) {
+		pMainCha->ForgeAction(false);
+		memset(cha->m_sTigerItemID, 0, sizeof(cha->m_sTigerItemID));
+		memset(cha->m_sTigerSel, 0, sizeof(cha->m_sTigerSel));
+		return true;
+	}
+
+	short sIndex = 3 * (sNum - 1);
+	bool bSucc = true;
+	WPACKET wpk = GETWPACKET();
+	WRITE_CMD(wpk, CMD_MC_TIGER_ITEM_ID);
+	WRITE_SHORT(wpk, sNum);
+	for (int i = 0; i < 3; i++) {
+		if (pMainCha->m_sTigerItemID[sIndex] <= 0) {
+			bSucc = false;
+		}
+		WRITE_SHORT(wpk, pMainCha->m_sTigerItemID[sIndex++]);
+	}
+	cha->ReflectINFof(cha, wpk);
+
+	if (bSucc) {
+		if (sNum == 3) {
+			pMainCha->DoTigerScript("TigerStop");
+			memset(cha->m_sTigerItemID, 0, sizeof(cha->m_sTigerItemID));
+			memset(cha->m_sTigerSel, 0, sizeof(cha->m_sTigerSel));
+		}
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmStoreOpenAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	const char* szPwd = READ_STRING(pk);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	if (pMainCha->IsReadBook()) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00008));
+		return true;
+	}
+
+	if (pMainCha->IsStoreEnable()) {
+		return true;
+	}
+
+	if (!pMainCha->CheckStoreTime(1000)) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00009));
+		return true;
+	}
+	pMainCha->ResetStoreTime();
+
+	CPlayer* pCply = pMainCha->GetPlayer();
+	cChar* szPwd2 = pCply->GetPassword();
+
+	if ((szPwd2[0] == 0) || (!strcmp(szPwd, szPwd2)) || g_Config.m_bInstantIGS) {
+		pMainCha->SetStoreEnable(true);
+		HandleStoreOperate(cha, pk, CMD_CM_STORE_OPEN_ASK);
+	} else {
+		pMainCha->PopupNotice(RES_STRING(GM_CHARACTERPRL_CPP_00010));
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmStoreListAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	HandleStoreOperate(static_cast<CCharacter*>(ctx), pk, CMD_CM_STORE_LIST_ASK);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmStoreBuyAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	HandleStoreOperate(static_cast<CCharacter*>(ctx), pk, CMD_CM_STORE_BUY_ASK);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmStoreChangeAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	HandleStoreOperate(static_cast<CCharacter*>(ctx), pk, CMD_CM_STORE_CHANGE_ASK);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmStoreQuery(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	HandleStoreOperate(static_cast<CCharacter*>(ctx), pk, CMD_CM_STORE_QUERY);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmStoreVip(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	HandleStoreOperate(static_cast<CCharacter*>(ctx), pk, CMD_CM_STORE_VIP);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmStoreClose(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	HandleStoreOperate(static_cast<CCharacter*>(ctx), pk, CMD_CM_STORE_CLOSE);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmRequestTalkOrTrade(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	if (cha->GetTradeData() || cha->GetBoat() || cha->GetStallData() || !cha->GetActControl(enumACTCONTROL_TALKTO_NPC) || cha->m_CKitbag.IsLock() || !cha->GetActControl(enumACTCONTROL_ITEM_OPT)) {
+		return true;
+	}
+
+	{
+		DWORD dwNow = GetTickCount();
+		if (dwNow - cha->m_dwLastNpcInteractTime < 300)
+			return true;
+		cha->m_dwLastNpcInteractTime = dwNow;
+	}
+
+	uLong ulID = READ_LONG(pk);
+	if (ulID == mission::g_WorldEudemon.GetID()) {
+		mission::g_WorldEudemon.MsgProc(*cha, pk);
+		return true;
+	}
+
+	CCharacter* pCha = cha->m_submap->FindCharacter(ulID, cha->GetShape().centre);
+	if (pCha == nullptr) {
+		return true;
+	}
+
+	mission::CNpc* pNpc = pCha->IsNpc();
+	if (pNpc) {
+		pNpc->MsgProc(*cha, pk);
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmKitbagtempSync(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+
+	if (!pMainCha->m_pCKitbagTmp) {
+		return true;
+	}
+
+	WPACKET pkret = GETWPACKET();
+	WRITE_CMD(pkret, CMD_MC_KITBAGTEMP_SYNC);
+	pMainCha->WriteKitbag(*(pMainCha->m_pCKitbagTmp), pkret, enumSYN_KITBAG_INIT);
+	pMainCha->ReflectINFof(pMainCha, pkret);
+
+	int lStoreItemID = pMainCha->GetStoreItemID();
+	if (lStoreItemID > 0) {
+		if (g_StoreSystem.Accept(pMainCha, lStoreItemID)) {
+			pMainCha->SetStoreItemID(0);
+		}
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmItemLockAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	WPACKET rpk = GETWPACKET();
+	WRITE_CMD(rpk, CMD_CM_ITEM_LOCK_ASR);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	CPlayer* pCPly = cha->GetPlayer();
+
+	if (pMainCha) {
+
+		if (pMainCha->m_CKitbag.IsLock() || pMainCha->m_CKitbag.IsPwdLocked() || pCPly->GetStallData() || pCPly->GetMainCha()->GetTradeData()) {
+			cha->SystemNotice("Bag is currently locked.");
+			return true;
+		}
+
+		dbc::Char chPosType = READ_CHAR(pk);
+
+		if (!PS::ValidateKitbagSlot(chPosType)) {
+			LG("Security", "[ItemLock] Invalid slot %d from character %s\n", chPosType, cha->GetName());
+			return true;
+		}
+
+		SItemGrid* item = pMainCha->m_CKitbag.GetGridContByID(chPosType);
+		if (item) {
+			CItemRecord* pCItemRec = GetItemRecordInfo(item->sID);
+			if (pCItemRec) {
+				CPlayer* pPlayer = pMainCha->GetPlayer();
+				if (pPlayer) {
+					WRITE_CHAR(rpk, 1);
+					item->dwDBID = 1;
+					cha->m_CKitbag.SetChangeFlag();
+					cha->SynKitbagNew(enumSYN_KITBAG_SWITCH);
+					cha->ReflectINFof(pMainCha, rpk);
+					return true;
+				};
+			};
+		};
+	};
+	WRITE_CHAR(rpk, 0);
+	pMainCha->ReflectINFof(pMainCha, rpk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmItemUnlockAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	static_cast<CCharacter*>(ctx)->ItemUnlockRequest(pk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGameRequestPin(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	if (!pMainCha)
+		return true;
+
+	if (cha->requestType == 0)
+		return true;
+
+	if (!cha->IsReqPosEqualRealPos()) {
+		cha->requestType = 0;
+		return true;
+	}
+
+	const char* szPwd = READ_STRING(pk);
+	if (szPwd == nullptr)
+		return true;
+
+	CPlayer* pCply = pMainCha->GetPlayer();
+	cChar* szPwd2 = pCply->GetPassword();
+	if ((szPwd2[0] == 0) || (!strcmp(szPwd, szPwd2))) {
+		g_CParser.DoString("HandlePinRequest", enumSCRIPT_RETURN_NUMBER, 1, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, cha, enumSCRIPT_PARAM_NUMBER, 1, cha->requestType, DOSTRING_PARAM_END);
+		if (!g_CParser.GetReturnNumber(0))
+			return true;
+	} else {
+		pMainCha->PopupNotice(RES_STRING(GM_CHARACTERPRL_CPP_00010));
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmChartradeRequest(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	if (!CharTradeRateLimitOk(*cha))
+		return true;
+	BYTE byType = READ_CHAR(pk);
+	DWORD dwCharID = READ_LONG(pk);
+	g_TradeSystem.Request(byType, *cha, dwCharID);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmChartradeAccept(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	if (!CharTradeRateLimitOk(*cha))
+		return true;
+	BYTE byType = READ_CHAR(pk);
+	DWORD dwCharID = READ_LONG(pk);
+	g_TradeSystem.Accept(byType, *cha, dwCharID);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmChartradeReject(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	(void)ctx;
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmChartradeCancel(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	if (!CharTradeRateLimitOk(*cha))
+		return true;
+	BYTE byType = READ_CHAR(pk);
+	DWORD dwCharID = READ_LONG(pk);
+	g_TradeSystem.Cancel(byType, *cha, dwCharID);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmChartradeItem(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	if (!CharTradeRateLimitOk(*cha))
+		return true;
+	BYTE byType = READ_CHAR(pk);
+	DWORD dwCharID = READ_LONG(pk);
+	BYTE byOpType = READ_CHAR(pk);
+	BYTE byIndex = READ_CHAR(pk);
+	BYTE byItemIndex = READ_CHAR(pk);
+	BYTE byCount = READ_CHAR(pk);
+
+	if (!PS::ValidateTradeSlot(byIndex)) {
+		LG("Security", "[Trade] Invalid trade slot %d from character %s\n", byIndex, cha->GetName());
+		return true;
+	}
+	if (!PS::ValidateKitbagSlot(byItemIndex)) {
+		LG("Security", "[Trade] Invalid kitbag slot %d from character %s\n", byItemIndex, cha->GetName());
+		return true;
+	}
+	if (!PS::ValidateStackCount(byCount) && byCount != 0) {
+		LG("Security", "[Trade] Invalid stack count %d from character %s\n", byCount, cha->GetName());
+		return true;
+	}
+
+	g_TradeSystem.AddItem(byType, *cha, dwCharID, byOpType, byIndex, byItemIndex, byCount);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmChartradeMoney(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	if (!CharTradeRateLimitOk(*cha))
+		return true;
+	BYTE byType = READ_CHAR(pk);
+	DWORD dwCharID = READ_LONG(pk);
+	BYTE byOpType = READ_CHAR(pk);
+	BYTE currency = READ_CHAR(pk);
+	long long llMoney = 0;
+	if (currency == 0) {
+		llMoney = READ_LONGLONG(pk);
+	} else {
+		llMoney = (long long)READ_LONG(pk);
+	}
+
+	if (currency != 0 && currency != 1) {
+		LG("Security", "[Trade] Invalid currency type %d from character %s\n", currency, cha->GetName());
+		return true;
+	}
+	if (llMoney < 0) {
+		LG("Security", "[Trade] Negative money %lld from character %s - possible exploit attempt\n", llMoney, cha->GetName());
+		return true;
+	}
+	if (currency == 0 && !PS::ValidateGold(llMoney)) {
+		LG("Security", "[Trade] Gold amount %lld exceeds maximum from character %s\n", llMoney, cha->GetName());
+		return true;
+	}
+	if (currency == 1 && !PS::ValidateIMPs((int)llMoney)) {
+		LG("Security", "[Trade] IMP amount %lld exceeds maximum from character %s\n", llMoney, cha->GetName());
+		return true;
+	}
+
+	if (currency == 0) {
+		g_TradeSystem.AddMoney(byType, *cha, dwCharID, byOpType, llMoney);
+	} else if (currency == 1) {
+		g_TradeSystem.AddIMP(byType, *cha, dwCharID, byOpType, (DWORD)llMoney);
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmChartradeValidatedata(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	if (!CharTradeRateLimitOk(*cha))
+		return true;
+	BYTE byType = READ_CHAR(pk);
+	DWORD dwCharID = READ_LONG(pk);
+	g_TradeSystem.ValidateItemData(byType, *cha, dwCharID);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmChartradeValidate(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	if (!CharTradeRateLimitOk(*cha))
+		return true;
+	BYTE byType = READ_CHAR(pk);
+	DWORD dwCharID = READ_LONG(pk);
+	g_TradeSystem.ValidateTrade(byType, *cha, dwCharID);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmVolunterOpen(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	short sNum = READ_SHORT(pk);
+
+	int nVolNum = g_pGameApp->GetVolNum();
+	int nStart = 0;
+	short sRetNum = (nVolNum - nStart < sNum) ? (nVolNum - nStart) : sNum;
+	if (sRetNum < 0)
+		sRetNum = 0;
+	short sPageNum = (nVolNum % sNum == 0) ? (nVolNum / sNum) : (nVolNum / sNum + 1);
+
+	char chState = (pMainCha->IsVolunteer() ? 1 : 0);
+	WPACKET packet = GETWPACKET();
+	WRITE_CMD(packet, CMD_MC_VOLUNTER_OPEN);
+	WRITE_CHAR(packet, chState);
+	WRITE_SHORT(packet, sPageNum);
+	WRITE_SHORT(packet, sRetNum);
+	for (int i = 0; i < sRetNum; i++) {
+		SVolunteer* pVolunteer = g_pGameApp->GetVolInfo(nStart + i);
+		WRITE_STRING(packet, pVolunteer->szName);
+		WRITE_LONG(packet, pVolunteer->lLevel);
+		WRITE_LONG(packet, pVolunteer->lJob);
+		WRITE_STRING(packet, pVolunteer->szMapName);
+	}
+	cha->ReflectINFof(cha, packet);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmVolunterList(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	short sPage = READ_SHORT(pk);
+	short sNum = READ_SHORT(pk);
+
+	int nVolNum = g_pGameApp->GetVolNum();
+	int nStart = (sPage - 1) * sNum;
+	short sRetNum = (nVolNum - nStart < sNum) ? (nVolNum - nStart) : sNum;
+	if (sRetNum < 0)
+		sRetNum = 0;
+	short sPageNum = (nVolNum % sNum == 0) ? (nVolNum / sNum) : (nVolNum / sNum + 1);
+
+	WPACKET packet = GETWPACKET();
+	WRITE_CMD(packet, CMD_MC_VOLUNTER_LIST);
+	WRITE_SHORT(packet, sPageNum);
+	WRITE_SHORT(packet, sPage);
+	WRITE_SHORT(packet, sRetNum);
+	for (int i = 0; i < sRetNum; i++) {
+		SVolunteer* pVolunteer = g_pGameApp->GetVolInfo(nStart + i);
+		WRITE_STRING(packet, pVolunteer->szName);
+		WRITE_LONG(packet, pVolunteer->lLevel);
+		WRITE_LONG(packet, pVolunteer->lJob);
+		WRITE_STRING(packet, pVolunteer->szMapName);
+	}
+	cha->ReflectINFof(cha, packet);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmVolunterAdd(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	pMainCha->Cmd_AddVolunteer();
+	pMainCha->SynVolunteerState(pMainCha->IsVolunteer());
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmVolunterDel(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	pMainCha->Cmd_DelVolunteer();
+	pMainCha->SynVolunteerState(pMainCha->IsVolunteer());
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmVolunterSel(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	if (pMainCha->GetLevel() < 8) {
+		pMainCha->PopupNotice("Only players lv8 and above can request party!");
+		return true;
+	}
+
+	cChar* szName = READ_STRING(pk);
+	CCharacter* pTarCha = cha->FindVolunteer(szName);
+	if (!pTarCha) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00012), szName);
+		return true;
+	}
+
+	if (pTarCha == pMainCha) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00013));
+		return true;
+	}
+
+	if (strcmp(pTarCha->GetPlyCtrlCha()->GetSubMap()->GetName(), cha->GetPlyCtrlCha()->GetSubMap()->GetName())) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00014));
+		return true;
+	}
+
+	if (!(cha->GetPlyCtrlCha()->GetSubMap()->GetMapRes()->CanTeam())) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00015));
+		return true;
+	}
+
+	pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00016));
+
+	WPACKET packet = GETWPACKET();
+	WRITE_CMD(packet, CMD_MC_VOLUNTER_ASK);
+	WRITE_STRING(packet, pMainCha->GetName());
+	pTarCha->ReflectINFof(pTarCha, packet);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmVolunterAsr(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	short sRet = READ_SHORT(pk);
+	cChar* szName = READ_STRING(pk);
+	CCharacter* pSrcCha = g_pGameApp->FindChaByName(szName);
+	if (!pSrcCha) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00012), szName);
+		return true;
+	}
+
+	if (sRet == 0) {
+		pSrcCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00018), pMainCha->GetName());
+		return true;
+	}
+
+	WPacket l_wpk = GETWPACKET();
+	WRITE_CMD(l_wpk, CMD_MP_TEAM_CREATE);
+	WRITE_STRING(l_wpk, pSrcCha->GetName());
+	WRITE_STRING(l_wpk, pMainCha->GetName());
+	pMainCha->ReflectINFof(pMainCha, l_wpk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmMasterInvite(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	cChar* szName = READ_STRING(pk);
+	DWORD dwCharID = READ_LONG(pk);
+
+	if (!szName || strlen(szName) == 0 || strlen(szName) > PS::MAX_CHARACTER_NAME_LENGTH) {
+		LG("Security", "[Master] Invalid name from character %s\n", cha->GetName());
+		return true;
+	}
+
+	if (cha->IsBoat()) {
+		cha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00019));
+		return true;
+	}
+
+	CCharacter* pTarCha = pMainCha->GetSubMap()->FindCharacter(dwCharID, pMainCha->GetShape().centre);
+	if (!pTarCha) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00012), szName);
+		return true;
+	}
+
+	if (pTarCha->IsOfflineStallNPC()) {
+		pMainCha->SystemNotice("You cannot send a disciple request to an offline stall.");
+		return true;
+	}
+
+	if (pTarCha->GetLevel() < 41) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00017));
+		return true;
+	}
+
+	if (pMainCha->GetLevel() > 40) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00020));
+		return true;
+	}
+
+	if (pMainCha->GetMasterDBID() != 0) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00021));
+		return true;
+	}
+
+	if (pTarCha->IsInvited()) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00022));
+		return true;
+	}
+	if (!pTarCha->GetPlayer() || !pTarCha->GetPlayer()->CanReceiveRequests()) {
+		pMainCha->SystemNotice("%s is currently offline. Unable to send request!", pMainCha->GetName());
+		return true;
+	}
+
+	pTarCha->SetInvited(true);
+
+	WPACKET packet = GETWPACKET();
+	WRITE_CMD(packet, CMD_MC_MASTER_ASK);
+	WRITE_STRING(packet, pMainCha->GetName());
+	WRITE_LONG(packet, pMainCha->GetID());
+	pTarCha->ReflectINFof(pTarCha, packet);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmMasterAsr(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	short sRet = READ_SHORT(pk);
+	cChar* szName = READ_STRING(pk);
+	DWORD dwCharID = READ_LONG(pk);
+
+	pMainCha->SetInvited(false);
+
+	if (cha->IsBoat()) {
+		cha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00023));
+		return true;
+	}
+
+	CCharacter* pSrcCha = pMainCha->GetSubMap()->FindCharacter(dwCharID, pMainCha->GetShape().centre);
+	if (!pSrcCha) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00012), szName);
+		return true;
+	}
+
+	if (pMainCha->GetLevel() < 41) {
+		pSrcCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00017));
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00024));
+		return true;
+	}
+
+	if (pSrcCha->GetLevel() > 40) {
+		pSrcCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00020));
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00025));
+		return true;
+	}
+
+	if (sRet == 0) {
+		pSrcCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00026), pMainCha->GetName());
+		return true;
+	}
+
+	WPacket l_wpk = GETWPACKET();
+	WRITE_CMD(l_wpk, CMD_MP_MASTER_CREATE);
+	WRITE_STRING(l_wpk, pSrcCha->GetName());
+	WRITE_LONG(l_wpk, pSrcCha->GetPlayer()->GetDBChaId());
+	WRITE_STRING(l_wpk, pMainCha->GetName());
+	WRITE_LONG(l_wpk, pMainCha->GetPlayer()->GetDBChaId());
+	pMainCha->ReflectINFof(pMainCha, l_wpk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmMasterDel(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	cChar* szName = READ_STRING(pk);
+	uLong ulChaID = READ_LONG(pk);
+
+	if (pMainCha->GetLevel() > 40) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00027));
+		return true;
+	}
+
+	int lDelMoney = 0;
+	if (!pMainCha->HasMoney(lDelMoney)) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00028));
+		return true;
+	}
+	pMainCha->SystemNotice("Your Mentor Deleted Successfully ");
+
+	WPacket l_wpk = GETWPACKET();
+	WRITE_CMD(l_wpk, CMD_MP_MASTER_DEL);
+	WRITE_STRING(l_wpk, pMainCha->GetName());
+	WRITE_LONG(l_wpk, pMainCha->GetPlayer()->GetDBChaId());
+	WRITE_STRING(l_wpk, szName);
+	WRITE_LONG(l_wpk, ulChaID);
+	pMainCha->ReflectINFof(pMainCha, l_wpk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmPrenticeDel(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	cChar* szName = READ_STRING(pk);
+	uLong ulChaID = READ_LONG(pk);
+
+	int lCredit = (int)pMainCha->GetCredit();
+	if (lCredit < 0) {
+		lCredit = 0;
+	}
+	pMainCha->SetCredit(lCredit);
+	pMainCha->SynAttr(enumATTRSYN_TASK);
+	pMainCha->SystemNotice("Your Disciple Deleted Successfully ");
+
+	WPacket l_wpk = GETWPACKET();
+	WRITE_CMD(l_wpk, CMD_MP_MASTER_DEL);
+	WRITE_STRING(l_wpk, szName);
+	WRITE_LONG(l_wpk, ulChaID);
+	WRITE_STRING(l_wpk, pMainCha->GetName());
+	WRITE_LONG(l_wpk, pMainCha->GetPlayer()->GetDBChaId());
+	pMainCha->ReflectINFof(pMainCha, l_wpk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmPrenticeInvite(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	cChar* szName = READ_STRING(pk);
+	DWORD dwCharID = READ_LONG(pk);
+
+	if (cha->IsBoat()) {
+		cha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00023));
+		return true;
+	}
+
+	CCharacter* pTarCha = pMainCha->GetSubMap()->FindCharacter(dwCharID, pMainCha->GetShape().centre);
+	if (!pTarCha) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00012), szName);
+		return true;
+	}
+
+	if (pTarCha->IsOfflineStallNPC()) {
+		pMainCha->SystemNotice("You cannot send a disciple request to an offline stall.");
+		return true;
+	}
+
+	if (pMainCha->GetLevel() < 41) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00024));
+		return true;
+	}
+
+	if (pTarCha->GetLevel() > 40) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00025));
+		return true;
+	}
+
+	if (pTarCha->IsInvited()) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00022));
+		return true;
+	}
+	if (!pTarCha->GetPlayer() || !pTarCha->GetPlayer()->CanReceiveRequests()) {
+		pMainCha->SystemNotice("%s is currently offline. Unable to send request!", pMainCha->GetName());
+		return true;
+	}
+	pTarCha->SetInvited(true);
+
+	WPACKET packet = GETWPACKET();
+	WRITE_CMD(packet, CMD_MC_PRENTICE_ASK);
+	WRITE_STRING(packet, pMainCha->GetName());
+	WRITE_LONG(packet, pMainCha->GetID());
+	pTarCha->ReflectINFof(pTarCha, packet);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmPrenticeAsr(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	short sRet = READ_SHORT(pk);
+	cChar* szName = READ_STRING(pk);
+	DWORD dwCharID = READ_LONG(pk);
+
+	pMainCha->SetInvited(false);
+
+	if (cha->IsBoat()) {
+		cha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00019));
+		return true;
+	}
+
+	CCharacter* pSrcCha = pMainCha->GetSubMap()->FindCharacter(dwCharID, pMainCha->GetShape().centre);
+	if (!pSrcCha) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00012), szName);
+		return true;
+	}
+
+	if (pSrcCha->GetLevel() < 41) {
+		pSrcCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00024));
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00017));
+		return true;
+	}
+
+	if (pMainCha->GetLevel() > 40) {
+		pSrcCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00025));
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00020));
+		return true;
+	}
+
+	if (sRet == 0) {
+		pSrcCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00030), pMainCha->GetName());
+		return true;
+	}
+
+	WPacket l_wpk = GETWPACKET();
+	WRITE_CMD(l_wpk, CMD_MP_MASTER_CREATE);
+	WRITE_STRING(l_wpk, pMainCha->GetName());
+	WRITE_LONG(l_wpk, pMainCha->GetPlayer()->GetDBChaId());
+	WRITE_STRING(l_wpk, pSrcCha->GetName());
+	WRITE_LONG(l_wpk, pSrcCha->GetPlayer()->GetDBChaId());
+	pMainCha->ReflectINFof(pMainCha, l_wpk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_PmGuildbank(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	HandlePmGuildBank(static_cast<CCharacter*>(ctx), pk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_PmPushToGuildbank(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	int guildID = cha->GetGuildID();
+	if (guildID == 0) {
+		return true;
+	}
+	CKitbag pCSrcBag;
+	game_db.GetGuildBank(guildID, &pCSrcBag);
+	pCSrcBag.SetChangeFlag(false);
+
+	SItemGrid SPopItem;
+	const char* strItem = READ_STRING(pk);
+	String2Item(strItem, &SPopItem);
+
+	short sSrcGridID = defKITBAG_DEFPUSH_POS;
+	if (pCSrcBag.Push(&SPopItem, sSrcGridID) == enumKBACT_ERROR_FULL) {
+		// drop item next to player?
+	} else {
+		cha->GetPlayer()->SynGuildBank(&pCSrcBag, enumSYN_KITBAG_BANK);
+		cha->GetPlayer()->SetBankSaveFlag(0);
+		game_db.UpdateGuildBank(guildID, &pCSrcBag);
+	}
+	// let group know we have finished, so the next guild bank packet can be processed.
+	WPACKET WtPk = GETWPACKET();
+	WRITE_CMD(WtPk, CMD_MP_GUILDBANK);
+	WRITE_LONG(WtPk, guildID);
+	cha->ReflectINFof(cha, WtPk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_TmChangePersoninfo(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	cChar* motto = READ_STRING(pk);
+	if (motto) {
+		cha->SetMotto(motto);
+	}
+	Short sIconID = READ_SHORT(pk);
+
+	// SANITIZE: Validate icon ID range (valid icons are 1-100, 0 = no icon)
+	if (sIconID < 0 || sIconID > 100) {
+		LG("Security", "[PersonInfo] Invalid icon ID %d from character %s\n", sIconID, cha->GetName());
+		sIconID = 1;  // Reset to default icon
+	}
+	cha->SetIcon(sIconID);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGuildPerm(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	int targetID = READ_LONG(pk);
+	unsigned int permission = READ_LONG(pk);
+
+	// SANITIZE: Validate permission value (must be valid bitmask)
+	const unsigned int VALID_PERM_MASK = 0xFF;  // All valid permission bits
+	if (permission & ~VALID_PERM_MASK) {
+		LG("Security", "[Guild] Invalid permission mask 0x%08X from character %s\n", permission, cha->GetName());
+		return true;
+	}
+
+	int guild_id = cha->GetPlyMainCha()->GetGuildID();
+	if (guild_id == 0 || !emGldPermMgr & cha->GetPlyMainCha()->guildPermission || game_db.GetGuildLeaderID(guild_id) == targetID) {
+		cha->GetPlyMainCha()->SystemNotice("You do not have permission to do this.");
+		return true;
+	}
+
+	// update in DB
+	if (!game_db.SetGuildPermission(targetID, permission, guild_id)) {
+		cha->GetPlyMainCha()->SystemNotice("Player not found");
+		return true;
+	}
+
+	// update in game
+	CPlayer* targetPly = g_pGameApp->GetPlayerByDBID(targetID);
+	if (targetPly) {
+		targetPly->GetMainCha()->guildPermission = permission;
+	}
+
+	// update for group (sends to players)
+	WPACKET wpk = GETWPACKET();
+	WRITE_CMD(wpk, CMD_MP_GUILD_PERM);
+	WRITE_LONG(wpk, targetID);
+	WRITE_LONG(wpk, permission);
+	cha->ReflectINFof(cha, wpk);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGuildPutname(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	bool l_confirm = READ_CHAR(pk) ? true : false;
+	cChar* l_guildname = READ_STRING(pk);
+	cChar* l_passwd = READ_STRING(pk);
+
+	// SANITIZE: Validate guild name and password
+	if (!l_guildname || !l_passwd) {
+		cha->GetPlyMainCha()->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00006));
+		return true;
+	}
+	size_t guildNameLen = strlen(l_guildname);
+	size_t passwdLen = strlen(l_passwd);
+	if (guildNameLen == 0 || guildNameLen > 16 || passwdLen == 0 || passwdLen > 32) {
+		LG("Security", "[Guild] Invalid guild name/password length from character %s\n", cha->GetName());
+		cha->GetPlyMainCha()->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00006));
+		return true;
+	}
+	if (!PS::IsSafeString(l_guildname) || !PS::IsSafeString(l_passwd)) {
+		LG("Security", "[Guild] Dangerous characters in guild name/password from character %s\n", cha->GetName());
+		cha->GetPlyMainCha()->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00006));
+		return true;
+	}
+
+	if (Guild::IsValidGuildName(l_guildname, uShort(strlen(l_guildname)))) {
+		Guild::cmd_CreateGuild(cha->GetPlyMainCha(), l_confirm, l_guildname, l_passwd);
+	} else {
+		cha->GetPlyMainCha()->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00006));
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGuildTryfor(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	Guild::cmd_GuildTryFor(static_cast<CCharacter*>(ctx)->GetPlyMainCha(), READ_LONG(pk));
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGuildTryforcfm(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	Guild::cmd_GuildTryForComfirm(static_cast<CCharacter*>(ctx)->GetPlyMainCha(), READ_CHAR(pk));
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGuildListtryplayer(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	Guild::cmd_GuildListTryPlayer(static_cast<CCharacter*>(ctx)->GetPlyMainCha());
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGuildApprove(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	Guild::cmd_GuildApprove(static_cast<CCharacter*>(ctx)->GetPlyMainCha(), READ_LONG(pk));
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGuildReject(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	Guild::cmd_GuildReject(static_cast<CCharacter*>(ctx)->GetPlyMainCha(), READ_LONG(pk));
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGuildKick(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	Guild::cmd_GuildKick(static_cast<CCharacter*>(ctx)->GetPlyMainCha(), READ_LONG(pk));
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGuildLeave(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	if (!(cha->GetPlyCtrlCha()->GetSubMap()->GetMapRes()->CanGuild())) {
+		cha->GetPlyMainCha()->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00007));
+		return true;
+	}
+
+	Guild::cmd_GuildLeave(cha->GetPlyMainCha());
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGuildDisband(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	cChar* l_passwd = READ_STRING(pk);
+	int canDisband = (cha->GetPlyMainCha()->guildPermission & emGldPermDisband);
+	if (canDisband == emGldPermDisband) {
+		if (l_passwd && !strchr(l_passwd, '\'')) {
+			Guild::cmd_GuildDisband(cha->GetPlyMainCha(), l_passwd);
+		}
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGuildMotto(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	uShort len;
+	cChar* l_motto = pk.ReadString(&len);
+	if (!l_motto)
+		return true;
+
+	if (len > 0 && !common::conformity::guild::motto::is_valid(l_motto, len))
+		return true;
+
+	// Allow empty motto for removal or valid non-empty motto
+	if (l_motto && (len == 0 || (strlen(l_motto) < 50 && !strchr(l_motto, '\'')))) {
+		int canMotto = (cha->GetPlyMainCha()->guildPermission & emGldPermMotto);
+		if (canMotto == emGldPermMotto) {
+			Guild::cmd_GuildMotto(cha->GetPlyMainCha(), l_motto);
+		}
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_PmGuildDisband(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	Guild::cmd_PMDisband(static_cast<CCharacter*>(ctx)->GetPlyMainCha());
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGuildChallenge(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	BYTE byLevel = READ_CHAR(pk);
+	DWORD dwMoney = READ_LONG(pk);
+	Guild::cmd_GuildChallenge(cha->GetPlyMainCha(), byLevel, dwMoney);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGuildLeizhu(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	BYTE byLevel = READ_CHAR(pk);
+	DWORD dwMoney = READ_LONG(pk);
+	Guild::cmd_GuildLeizhu(cha->GetPlyMainCha(), byLevel, dwMoney);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmSay2camp(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	cChar* szContent = READ_STRING(pk);
+	CCharacter* pCha = nullptr;
+	SubMap* pSubMap = cha->GetPlyCtrlCha()->GetSubMap();
+
+	// Rate limit: reuse the same say interval as normal chat
+	DWORD dwNowTick = GetTickCount();
+	if (dwNowTick - cha->_dwLastSayTick < (DWORD)g_Config.m_lSayInterval) {
+		cha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00001));
+		return true;
+	}
+	cha->_dwLastSayTick = dwNowTick;
+
+	// Validate chat content
+	if (!szContent || !PS::ValidateChatMessage(szContent)) {
+		LG("Security", "[CampChat] Invalid message from character %s\n", pMainCha->GetName());
+		return true;
+	}
+
+	short mapType = pSubMap->GetMapRes()->GetType();
+	bool bIsCTF = (mapType == 17);  // CTF map type
+	bool bIsGuildWar = pSubMap->GetMapRes()->CanGuildWar();
+
+	if (bIsCTF) {
+		// CTF maps: send to all players on the same side (SideID)
+		Long lSideID = pMainCha->GetSideID();
+		if (lSideID == 0) {
+			cha->SystemNotice("You are not assigned to a team.");
+			return true;
+		}
+
+		pSubMap->BeginGetPlyCha();
+		while (pCha = pSubMap->GetNextPlyCha()) {
+			if (pCha->GetSideID() == lSideID) {
+				WPacket l_wpk = GETWPACKET();
+				WRITE_CMD(l_wpk, CMD_MC_SAY2CAMP);
+				WRITE_STRING(l_wpk, pMainCha->GetName());
+				WRITE_STRING(l_wpk, szContent);
+				WRITE_LONG(l_wpk, cha->chatColour);
+				pCha->ReflectINFof(pCha, l_wpk);
+			}
+		}
+	} else if (bIsGuildWar) {
+		// Guild war maps: send to all players with the same guild type
+		BOOL bHasGuild = pMainCha->HasGuild();
+		if (!bHasGuild) {
+			cha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00031));
+			return true;
+		}
+
+		DWORD dwGuildID = pMainCha->GetGuildID();
+
+		pSubMap->BeginGetPlyCha();
+		while (pCha = pSubMap->GetNextPlyCha()) {
+			if (pCha->HasGuild() && pCha->GetGuildID() == dwGuildID) {
+				WPacket l_wpk = GETWPACKET();
+				WRITE_CMD(l_wpk, CMD_MC_SAY2CAMP);
+				WRITE_STRING(l_wpk, pMainCha->GetName());
+				WRITE_STRING(l_wpk, szContent);
+				WRITE_LONG(l_wpk, cha->chatColour);
+				pCha->ReflectINFof(pCha, l_wpk);
+			}
+		}
+	} else {
+		cha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00032));
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGmSend(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+
+	DWORD dwNpcID = READ_LONG(pk);
+	CCharacter* pCha = cha->m_submap->FindCharacter(dwNpcID, cha->GetShape().centre);
+	if (pCha == nullptr)
+		return true;
+
+	cChar* szTitle = READ_STRING(pk);
+	cChar* szContent = READ_STRING(pk);
+	// SANITIZE: null check before strlen to prevent crash on malformed packet
+	if (!szTitle || !szContent) {
+		LG("Security", "[GMSend] Null title or content from character %s\n", cha->GetName());
+		return true;
+	}
+	if (strlen(szTitle) > 32 || strlen(szContent) > 512) {
+		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00033));
+		return true;
+	}
+	g_StoreSystem.RequestGMSend(pMainCha, szTitle, szContent);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGmRecv(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+
+	DWORD dwNpcID = READ_LONG(pk);
+	CCharacter* pCha = cha->m_submap->FindCharacter(dwNpcID, cha->GetShape().centre);
+	if (pCha == nullptr)
+		return true;
+
+	g_StoreSystem.RequestGMRecv(pMainCha);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmPkCtrl(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+
+	if (READ_CHAR(pk))
+		cha->Cmd_SetInPK();
+	else
+		cha->Cmd_SetInPK(false);
+	cha->SynPKCtrl();
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmCheatCheck(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+
+	cChar* answer = READ_STRING(pk);
+	pMainCha->CheatCheck(answer);
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmBidup(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	if (g_CParser.DoString("YORN", enumSCRIPT_RETURN_NUMBER, 1, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, pMainCha, DOSTRING_PARAM_END)) {
+		if (g_CParser.GetReturnNumber(0)) {
+			DWORD dwNpcID = READ_LONG(pk);
+			CCharacter* pNpc = cha->m_submap->FindCharacter(dwNpcID, cha->GetShape().centre);
+			if (pNpc == nullptr) {
+				cha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00034), dwNpcID);
+				return true;
+			}
+			short sItemID = READ_SHORT(pk);
+			int price = READ_LONG(pk);
+			g_AuctionSystem.BidUp(pMainCha, sItemID, (uInt)price);
+			g_AuctionSystem.NotifyAuction(cha, pNpc);
+		}
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmAntiindulgence(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	static_cast<CCharacter*>(ctx)->GetPlyMainCha()->SetScaleFlag();
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmRequestDropRate(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pCha = cha->GetPlyCtrlCha();
+	if (pCha) {
+		WPACKET pk = GETWPACKET();
+		WRITE_CMD(pk, CMD_MC_REQUEST_DROP_RATE);
+		pk.WriteFloat(pCha->GetDropRate());
+		pCha->ReflectINFof(pCha, pk);
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmRequestExpRate(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pCha = cha->GetPlyMainCha();
+	if (pCha) {
+		WPACKET pk = GETWPACKET();
+		WRITE_CMD(pk, CMD_MC_REQUEST_EXP_RATE);
+		pk.WriteFloat(pCha->GetExpRate());
+		pCha->ReflectINFof(pCha, pk);
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmGetPlayerBattlePoint(void* ctx, DataSocket* /*sock*/, RPacket& /*pk*/) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pCha = cha->GetPlyMainCha();
+	if (pCha) {
+		WPACKET pk = GETWPACKET();
+		WRITE_CMD(pk, CMD_MC_GET_PLAYER_BATTLE_POINT);
+		pk.WriteLong(pCha->GetBattlePower());
+		pCha->ReflectINFof(pCha, pk);
+	}
+	return true;
+}
+
+bool CCharacter::OpcodeHandle_CmRequestChestPreview(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	CCharacter* pCha = cha->GetPlyMainCha();
+	if (pCha) {
+		DWORD dwNow = GetTickCount();
+		if (dwNow - cha->m_dwLastChestPreviewTime < kChestPreviewRequestCooldownMs) {
+			return true;
+		}
+		cha->m_dwLastChestPreviewTime = dwNow;
+
+		int chestItemID = READ_LONG(pk);
+		if (chestItemID <= 0) {
+			return true;
+		}
+
+		SendChestPreviewPacket(pCha, chestItemID);
+	}
+	return true;
+}
+
 //----------------------------------------------------------
 //                    ?????????
 //----------------------------------------------------------
 void CCharacter::ProcessPacket(unsigned short usCmd, RPACKET pk) {
+	if (DispatchOpcodeHandler(usCmd, this, nullptr, pk)) {
+		return;
+	}
+
 	T_B switch (usCmd) {
-	case CMD_CM_BOSSTIMER_REQUEST: {
-		// Client requests boss timer data - send current state
-		BossTimer::SendToPlayer(this);
-		break;
-	}
-	case CMD_CM_RANK: {
-		DWORD COOLDOWN = GetTickCount();
-		if (ShowRankColD > COOLDOWN) {
-			BickerNotice("Please Calm Down Don't Spam! ");
-			return;
-		}
-		game_db.ShowExpRank(GetPlyMainCha(), 50);
-		break;
-	}
-	case CMD_CM_STALLSEARCH: {
-		// Rate limit stall search (2s cooldown) — O(n*m) CPU-heavy operation
-		{
-			DWORD dwNow = GetTickCount();
-			if (dwNow - m_dwLastStallSearchTime < 2000) {
-				SystemNotice("Please wait before searching again.");
-				break;
-			}
-			m_dwLastStallSearchTime = dwNow;
-		}
-
-		Long itemID = READ_LONG(pk);
-		g_StallSystem.SearchItem(*this, itemID);
-		break;
-	}
-	case CMD_PM_GUILDBANK: {
-		Char bankType = READ_CHAR(pk);
-
-		// Rate limit guild bank DB operations (1s cooldown)
-		// NOTE: must NOT break here - ack must always be sent or GroupServer queue gets permanently stuck
-		bool bRateLimited = false;
-		{
-			DWORD dwNow = (DWORD)GetTickCount64();
-			if (dwNow - m_dwLastGuildBankTime < 1000) {
-				bRateLimited = true;
-			} else {
-				m_dwLastGuildBankTime = dwNow;
-			}
-		}
-
-		// Check if player is in a safezone (enumAREA_TYPE_NOT_FIGHT = 0x0002)
-		if (bRateLimited) {
-			// silently skip processing but still fall through to send ack
-		} else if (IsEconomyBlockedByDB(*this)) {
-			// notice already shown
-		} else if (!IsLiveing()) {
-			SystemNotice("Dead pirates are unable to trade.");
-		} else if (!IsInArea(enumAREA_TYPE_NOT_FIGHT)) {
-			SystemNotice("Must be in a safe zone to use the guild bank.");
-		} else if (!IsGuildBankOpen()) {
-			SystemNotice("You must open the guild bank interface first.");
-		} else {
-			switch (bankType) {
-
-			case 0: { // bankoper
-				Char chSrcType = READ_CHAR(pk);
-				Short sSrcGrid = READ_SHORT(pk);
-				Short sSrcNum = READ_SHORT(pk);
-				Char chTarType = READ_CHAR(pk);
-				Short sTarGrid = READ_SHORT(pk);
-				Short sRet;
-				int guildID = GetGuildID();
-				std::vector<CTableGuild::BankLog> logs = game_db.GetGuildLog(guildID);
-
-				if (chTarType != chSrcType) {
-
-					CTableGuild::BankLog l;
-					CKitbag bag;
-
-					l.time = time(0);
-					l.quantity = sSrcNum;
-					l.userID = GetPlyMainCha()->m_ID;
-
-					if (chTarType == 0) {
-						game_db.GetGuildBank(guildID, &bag);
-						l.type = 2;
-					} else if (chTarType == 1) {
-						bag = GetPlyMainCha()->m_CKitbag;
-						l.type = 3;
-					}
-					l.parameter = bag.GetID(sSrcGrid);
-					logs.push_back(l);
-				}
-				sRet = Cmd_GuildBankOper(chSrcType, sSrcGrid, sSrcNum, chTarType, sTarGrid);
-				if (sRet != enumITEMOPT_SUCCESS || !game_db.SetGuildLog(logs, guildID)) {
-					ItemOprateFailed(sRet);
-				}
-
-				break;
-			}
-
-			case 1: { // withdraw/deposit gold
-				Char action = READ_CHAR(pk);
-
-				int guildID = GetGuildID();
-				long long gold = READ_LONGLONG(pk);
-				
-				// SANITIZE: Validate gold amount before processing
-				if (gold < 0) {
-					LG("Security", "[GuildBank] Negative gold %lld from character %s (ID:%d) - exploit attempt blocked\n", 
-						gold, GetName(), m_ID);
-					break;
-				}
-				if (!PS::ValidateGold(gold)) {
-					LG("Security", "[GuildBank] Invalid gold amount %lld from character %s (ID:%d)\n", 
-						gold, GetName(), m_ID);
-					break;
-				}
-				// SANITIZE: Validate action type
-				if (action != 0 && action != 1) {
-					LG("Security", "[GuildBank] Invalid action %d from character %s\n", action, GetName());
-					break;
-				}
-				
-				long long originalGold = gold;  // Store original request for messages
-				__int64 currentgold = getAttr(ATTR_GD);
-				unsigned long long guildGold = game_db.GetGuildBankGold(guildID);
-
-				unsigned long long maxGuildGold = 100000000000LL;  // 100 billion cap
-				__int64 maxCharGold = 100000000000LL;
-				std::vector<CTableGuild::BankLog> logs = game_db.GetGuildLog(guildID);
-
-				int canTake = (emGldPermTakeBank & guildPermission);
-				int canGive = (emGldPermDepoBank & guildPermission);
-
-				CTableGuild::BankLog l;
-
-				if (action == 0 && canTake == emGldPermTakeBank) { // withdraw
-					l.type = 0;									   // Withdraw
-
-					// Check if character is already at max gold
-					if (currentgold >= maxCharGold) {
-						SystemNotice("Unable to withdraw: Your inventory gold is at the maximum limit (100 billion).");
-						break;
-					}
-					// make sure we dont cause gold overflow.
-					if (gold + currentgold > maxCharGold) {
-						gold = maxCharGold - currentgold;
-						char msg[256];
-						_snprintf_s(msg, sizeof(msg), _TRUNCATE, 
-							"Withdrawal capped: You can only receive %lld gold (inventory would exceed 100 billion limit).", gold);
-						SystemNotice(msg);
-					}
-					// make sure we cant withdraw more than is in bank.
-					if (gold > (__int64)guildGold) {
-						gold = guildGold;
-						if (gold < originalGold) {
-							char msg[256];
-							_snprintf_s(msg, sizeof(msg), _TRUNCATE, 
-								"Withdrawal adjusted: Guild vault only has %lld gold available.", gold);
-							SystemNotice(msg);
-						}
-					}
-					// we dont want to do redundant transactions.
-					if (gold < 1) {
-						SystemNotice("Unable to withdraw: No gold available to withdraw.");
-						break;
-					}
-				} else if (action == 1 && canGive == emGldPermDepoBank) { // deposit
-					l.type = 1;											  // deposit
-					
-					// Check if guild vault is already at max
-					if (guildGold >= maxGuildGold) {
-						SystemNotice("Unable to deposit: Guild vault is at the maximum limit (100 billion).");
-						break;
-					}
-					// check player has that much gold
-					// if not, then set gold to whatever they have.
-					if (gold > currentgold) {
-						gold = currentgold;
-						if (gold < originalGold && gold > 0) {
-							char msg[256];
-							_snprintf_s(msg, sizeof(msg), _TRUNCATE, 
-								"Deposit adjusted: You only have %lld gold available.", gold);
-							SystemNotice(msg);
-						}
-					}
-					// check to see if guild is at max gold already.
-					// make sure we dont cause gold overflow.
-					if (gold + (__int64)guildGold > (__int64)maxGuildGold) {
-						gold = maxGuildGold - guildGold;
-						char msg[256];
-						_snprintf_s(msg, sizeof(msg), _TRUNCATE, 
-							"Deposit capped: Guild vault can only accept %lld more gold (would exceed 100 billion limit).", gold);
-						SystemNotice(msg);
-					}
-
-					// we dont want to do redundant transactions.
-					if (gold < 1) {
-						SystemNotice("Unable to deposit: No gold to deposit or vault is full.");
-						break;
-					}
-					gold = 0 - gold;
-				} else {
-					break;
-				}
-
-				// TRANSACTION: Wrap gold transfer in transaction for atomicity
-				game_db.BeginTran();
-				
-				if (game_db.UpdateGuildBankGold(guildID, -gold)) {
-					l.time = time(0);
-					l.parameter = gold > 0 ? gold : -gold;
-					l.quantity = 0;
-					l.userID = GetPlyMainCha()->m_ID;
-
-					logs.push_back(l);
-					if (game_db.SetGuildLog(logs, guildID)) {
-						setAttr(ATTR_GD, currentgold + gold);
-						
-						// Save player gold immediately to ensure atomicity
-						if (GetPlyMainCha()->SaveAssets()) {
-							game_db.CommitTran();
-							
-							SynAttr(enumATTRSYN_TRADE);
-							SyncBoatAttr(enumATTRSYN_TRADE);
-
-							// send update packet to let other members of guild see the update.
-							WPACKET WtPk = GETWPACKET();
-							WRITE_CMD(WtPk, CMD_MM_UPDATEGUILDBANKGOLD);
-							WRITE_LONG(WtPk, GetPlyMainCha()->m_ID);
-							WRITE_LONG(WtPk, GetPlyMainCha()->GetGuildID());
-							ReflectINFof(this, WtPk);
-						} else {
-							// Rollback and restore player gold
-							game_db.RollBack();
-							setAttr(ATTR_GD, currentgold);
-							LG("bank_error", "Failed to save player assets during gold transfer: player=%s guild=%d gold=%lld\n",
-							   GetPlyMainCha()->GetName(), guildID, gold);
-						}
-					} else {
-						game_db.RollBack();
-						LG("bank_error", "Failed to set guild log during gold transfer: player=%s guild=%d\n",
-						   GetPlyMainCha()->GetName(), guildID);
-					}
-				} else {
-					game_db.RollBack();
-					LG("bank_error", "Failed to update guild bank gold: player=%s guild=%d gold=%lld\n",
-					   GetPlyMainCha()->GetName(), guildID, gold);
-				}
-				break;
-			}
-			}
-		}
-
-		// let group know we have finished, so the next guild bank packet can be processed.
-		WPACKET WtPk = GETWPACKET();
-		WRITE_CMD(WtPk, CMD_MP_GUILDBANK);
-		WRITE_LONG(WtPk, GetGuildID());
-		ReflectINFof(this, WtPk);
-		break;
-	}
-
-	case CMD_PM_PUSHTOGUILDBANK: {
-		int guildID = GetGuildID();
-		if (guildID == 0) {
-			return;
-		}
-		CKitbag pCSrcBag;
-		game_db.GetGuildBank(guildID, &pCSrcBag);
-		pCSrcBag.SetChangeFlag(false);
-
-		SItemGrid SPopItem;
-		const char* strItem = READ_STRING(pk);
-		String2Item(strItem, &SPopItem);
-
-		short sSrcGridID = defKITBAG_DEFPUSH_POS;
-		if (pCSrcBag.Push(&SPopItem, sSrcGridID) == enumKBACT_ERROR_FULL) {
-			// drop item next to player?
-		} else {
-			GetPlayer()->SynGuildBank(&pCSrcBag, enumSYN_KITBAG_BANK);
-			GetPlayer()->SetBankSaveFlag(0);
-			game_db.UpdateGuildBank(guildID, &pCSrcBag);
-		}
-		// let group know we have finished, so the next guild bank packet can be processed.
-		WPACKET WtPk = GETWPACKET();
-		WRITE_CMD(WtPk, CMD_MP_GUILDBANK);
-		WRITE_LONG(WtPk, guildID);
-		ReflectINFof(this, WtPk);
-		break;
-	}
-
-	case CMD_CM_PING: {
-		uLong ulPing = GetTickCount() - READ_LONG(pk);
-		unsigned long long lGateSvr = READ_LONGLONG(pk);
-		Long lSrcID = READ_LONG(pk);
-		Long lGatePlayerID = READ_LONG(pk);
-		unsigned long long lGatePlayerAddr = READ_LONGLONG(pk);
-
-		// ???????????
-		BEGINGETGATE();
-		GateServer* pNoGate;
-		GateServer* pGate = 0;
-		while (pNoGate = GETNEXTGATE()) {
-			if (MakeULong(pNoGate) == lGateSvr) {
-				pGate = pNoGate;
-				break;
-			}
-		}
-		if (!pGate)
-			break;
-		//
-
-		WPACKET WtPk = GETWPACKET();
-		WRITE_CMD(WtPk, CMD_MC_QUERY_CHAPING);
-		WRITE_LONG(WtPk, lSrcID);
-		WRITE_STRING(WtPk, GetName());
-		WRITE_STRING(WtPk, GetSubMap()->GetName());
-		WRITE_LONG(WtPk, ulPing);
-		WRITE_LONG(WtPk, lGatePlayerID);
-		WRITE_LONGLONG(WtPk, lGatePlayerAddr);
-		WRITE_SHORT(WtPk, 1);
-		pGate->SendData(WtPk);
-
-		break;
-	}
-	case CMD_CM_CHECK_PING: {
-		DWORD dwPing = GetTickCount() - m_dwPingSendTick;
-		/*if (m_dwPingRec[0] == 0)
-		{
-			for (int i = 0; i < defPING_RECORD_NUM; i++)
-				m_dwPingRec[i] = dwPing;
-			m_dwPing = dwPing;
-		}
-		else
-		{
-			DWORD	dwAddPing = 0;
-			for (int i = 1; i < defPING_RECORD_NUM; i++)
-			{
-				m_dwPingRec[i - 1] = m_dwPingRec[i];
-				dwAddPing += m_dwPingRec[i];
-			}
-			m_dwPingRec[defPING_RECORD_NUM - 1] = dwPing;
-			dwAddPing += dwPing;
-			m_dwPing = dwAddPing / defPING_RECORD_NUM;
-		}*/
-		m_dwPing = dwPing;
-		// printf("ping = %d [%s]\n", m_dwPing, GetName());
-		SendPreMoveTime();
-		break;
-	}
-	case CMD_CM_CANCELEXIT: {
-		CancelExit();
-	} break;
-	case CMD_CM_BEGINACTION: {
-		uLong ulWorldID = READ_LONG(pk);
-
-		if (GetPlayer()) {
-
-			if (GetPlayer()->GetCtrlCha() && ulWorldID == GetPlayer()->GetCtrlCha()->GetID())
-				GetPlayer()->GetCtrlCha()->BeginAction(pk);
-			else if (GetPlayer()->GetMainCha() && ulWorldID == GetPlayer()->GetMainCha()->GetID())
-				GetPlayer()->GetMainCha()->BeginAction(pk);
-		}
-		break;
-	}
-	case CMD_CM_ENDACTION: {
-		EndAction(pk);
-
-		break;
-	}
-	case CMD_CM_DIE_RETURN: {
-		m_chSelRelive = READ_CHAR(pk);
-		GetPlyMainCha()->ResetChaRelive(); // ??????
-		if (m_chSelRelive == enumEPLAYER_RELIVE_NORIGIN)
-			SetRelive(enumEPLAYER_RELIVE_ORIGIN, 0);
-		break;
-	}
-	case CMD_CM_SAY: {
-		DWORD dwNowTick = GetTickCount();
-		if (dwNowTick - _dwLastSayTick < (DWORD)g_Config.m_lSayInterval) {
-			// SystemNotice("??????!");
-			SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00001));
-			break;
-		}
-		_dwLastSayTick = dwNowTick;
-
-		if (!GetSubMap()) {
-			// LG("????", "??%s ????,?????!\n", m_CLog.GetLogName());
-			LG("dialog error", "when character%s is dialog,the map is null!\n", m_CLog.GetLogName());
-			break;
-		}
-		uShort l_retlen;
-		cChar* l_content = READ_SEQ(pk, l_retlen);
-		if (!l_content)
-			break;
-			
-		// SANITIZE: Validate chat message length
-		if (l_retlen == 0 || l_retlen > PS::MAX_CHAT_LENGTH) {
-			LG("Security", "[Chat] Invalid message length %d from character %s\n", l_retlen, GetName());
-			break;
-		}
-		else if (*l_content == '&') // ????
-		{
-			Char chGMLv = GetPlayer()->GetGMLev();
-			if (chGMLv == 0 || chGMLv > 150)
-				// SystemNotice("??????\n");
-				SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00002));
-			else
-				DoCommand(l_content + 1, l_retlen - 1);
-		} else if (*l_content == '$' && *(l_content + 1) == '$') // ????
-		{
-			DoCommand_CheckStatus(l_content + 3, l_retlen - 2);
-		}
-
-		/*else if (*l_content == '/' && *(l_content+1)=='?') // ????????
-		{
-			HandleHelp(l_content + 2, l_retlen - 2);
-		}*/
-		else {
-
-			// kong@pkodev.net 09.22.2017
-			g_CParser.DoString("HandleChat", enumSCRIPT_RETURN_NUMBER, 1, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, this, enumSCRIPT_PARAM_STRING, 1, l_content, DOSTRING_PARAM_END);
-			if (!g_CParser.GetReturnNumber(0))
-				break;
-			if (g_Config.m_bBlindChaos && IsPlayerCha() && IsPKSilver()) {
-				SystemNotice("Unable to chat in this map!");
-				break;
-			}
-
-			WPACKET wpk = GETWPACKET();
-			WRITE_CMD(wpk, CMD_MC_SAY);
-			WRITE_LONG(wpk, m_ID);
-			WRITE_SEQ(wpk, l_content, l_retlen);
-			WRITE_LONG(wpk, chatColour);
-			NotiChgToEyeshot(wpk);
-		}
-		break;
-	}
-	case CMD_CM_REQUESTTALK:
-	case CMD_CM_REQUESTTRADE: {
-		if (GetTradeData() || GetBoat() || GetStallData() || !GetActControl(enumACTCONTROL_TALKTO_NPC) || m_CKitbag.IsLock() || !GetActControl(enumACTCONTROL_ITEM_OPT)) {
-			return;
-		}
-
-		// Rate limit NPC interactions to prevent Lua VM saturation
-		{
-			DWORD dwNow = GetTickCount();
-			if (dwNow - m_dwLastNpcInteractTime < 300) break;
-			m_dwLastNpcInteractTime = dwNow;
-		}
-
-		uLong ulID = READ_LONG(pk);
-		if (ulID == mission::g_WorldEudemon.GetID()) {
-			mission::g_WorldEudemon.MsgProc(*this, pk);
-			break;
-		}
-
-		CCharacter* pCha = m_submap->FindCharacter(ulID, GetShape().centre);
-		if (pCha == nullptr) {
-			break;
-		}
-
-		mission::CNpc* pNpc = pCha->IsNpc();
-		if (pNpc) {
-			pNpc->MsgProc(*this, pk);
-			break;
-		}
-	} break;
-	case CMD_CM_MISLOG: {
-		MisLog();
-	} break;
-	case CMD_CM_MISLOGINFO: {
-		WORD wMisID = READ_SHORT(pk);
-		MisLogInfo(wMisID);
-	} break;
-	case CMD_CM_MISLOG_CLEAR: {
-		WORD wMisID = READ_SHORT(pk);
-		MisLogClear(wMisID);
-	} break;
-	case CMD_CM_FORGE: {
-		BYTE byIndex = READ_CHAR(pk);
-		g_ForgeSystem.ForgeItem(*this, byIndex);
-	} break;
-	case CMD_CM_CHARTRADE_REQUEST: {
-		if (IsEconomyBlockedByDB(*this))
-			break;
-		{
-			DWORD dwNow = (DWORD)GetTickCount64();
-			if (dwNow - m_dwLastTradePacketTime < 200)
-				break;
-			m_dwLastTradePacketTime = dwNow;
-		}
-		BYTE byType = READ_CHAR(pk);
-		DWORD dwCharID = READ_LONG(pk);
-		g_TradeSystem.Request(byType, *this, dwCharID);
-	} break;
-	case CMD_CM_CHARTRADE_ACCEPT: {
-		if (IsEconomyBlockedByDB(*this))
-			break;
-		{
-			DWORD dwNow = (DWORD)GetTickCount64();
-			if (dwNow - m_dwLastTradePacketTime < 200)
-				break;
-			m_dwLastTradePacketTime = dwNow;
-		}
-		BYTE byType = READ_CHAR(pk);
-		DWORD dwCharID = READ_LONG(pk);
-		g_TradeSystem.Accept(byType, *this, dwCharID);
-	} break;
-	case CMD_CM_CHARTRADE_REJECT: {
-	} break;
-	case CMD_CM_CHARTRADE_CANCEL: {
-		if (IsEconomyBlockedByDB(*this))
-			break;
-		{
-			DWORD dwNow = (DWORD)GetTickCount64();
-			if (dwNow - m_dwLastTradePacketTime < 200)
-				break;
-			m_dwLastTradePacketTime = dwNow;
-		}
-		BYTE byType = READ_CHAR(pk);
-		DWORD dwCharID = READ_LONG(pk);
-		g_TradeSystem.Cancel(byType, *this, dwCharID);
-	} break;
-	case CMD_CM_CHARTRADE_ITEM: {
-		if (IsEconomyBlockedByDB(*this))
-			break;
-		{
-			DWORD dwNow = (DWORD)GetTickCount64();
-			if (dwNow - m_dwLastTradePacketTime < 200)
-				break;
-			m_dwLastTradePacketTime = dwNow;
-		}
-		BYTE byType = READ_CHAR(pk);
-		DWORD dwCharID = READ_LONG(pk);
-		BYTE byOpType = READ_CHAR(pk);
-		BYTE byIndex = READ_CHAR(pk);
-		BYTE byItemIndex = READ_CHAR(pk);
-		BYTE byCount = READ_CHAR(pk);
-		
-		// SANITIZE: Validate trade slot and inventory indices
-		if (!PS::ValidateTradeSlot(byIndex)) {
-			LG("Security", "[Trade] Invalid trade slot %d from character %s\n", byIndex, GetName());
-			break;
-		}
-		if (!PS::ValidateKitbagSlot(byItemIndex)) {
-			LG("Security", "[Trade] Invalid kitbag slot %d from character %s\n", byItemIndex, GetName());
-			break;
-		}
-		if (!PS::ValidateStackCount(byCount) && byCount != 0) {
-			LG("Security", "[Trade] Invalid stack count %d from character %s\n", byCount, GetName());
-			break;
-		}
-		
-		g_TradeSystem.AddItem(byType, *this, dwCharID, byOpType, byIndex, byItemIndex, byCount);
-	} break;
-	case CMD_CM_CHARTRADE_MONEY: {
-		if (IsEconomyBlockedByDB(*this))
-			break;
-		{
-			DWORD dwNow = (DWORD)GetTickCount64();
-			if (dwNow - m_dwLastTradePacketTime < 200)
-				break;
-			m_dwLastTradePacketTime = dwNow;
-		}
-		BYTE byType = READ_CHAR(pk);
-		DWORD dwCharID = READ_LONG(pk);
-		BYTE byOpType = READ_CHAR(pk);
-		BYTE currency = READ_CHAR(pk);
-		long long llMoney = 0;
-		if (currency == 0) {
-			llMoney = READ_LONGLONG(pk);
-		} else {
-			llMoney = (long long)READ_LONG(pk);
-		}
-
-		// SANITIZE: Validate currency type and money amount
-		if (currency != 0 && currency != 1) {
-			LG("Security", "[Trade] Invalid currency type %d from character %s\n", currency, GetName());
-			break;
-		}
-		if (llMoney < 0) {
-			LG("Security", "[Trade] Negative money %lld from character %s - possible exploit attempt\n", llMoney, GetName());
-			break;
-		}
-		if (currency == 0 && !PS::ValidateGold(llMoney)) {
-			LG("Security", "[Trade] Gold amount %lld exceeds maximum from character %s\n", llMoney, GetName());
-			break;
-		}
-		if (currency == 1 && !PS::ValidateIMPs((int)llMoney)) {
-			LG("Security", "[Trade] IMP amount %lld exceeds maximum from character %s\n", llMoney, GetName());
-			break;
-		}
-
-		if (currency == 0) {
-			// gold
-			g_TradeSystem.AddMoney(byType, *this, dwCharID, byOpType, llMoney);
-		} else if (currency == 1) {
-			// IMPS
-			g_TradeSystem.AddIMP(byType, *this, dwCharID, byOpType, (DWORD)llMoney);
-		}
-	} break;
-	case CMD_CM_CHARTRADE_VALIDATEDATA: {
-		if (IsEconomyBlockedByDB(*this))
-			break;
-		{
-			DWORD dwNow = (DWORD)GetTickCount64();
-			if (dwNow - m_dwLastTradePacketTime < 200)
-				break;
-			m_dwLastTradePacketTime = dwNow;
-		}
-		BYTE byType = READ_CHAR(pk);
-		DWORD dwCharID = READ_LONG(pk);
-		g_TradeSystem.ValidateItemData(byType, *this, dwCharID);
-	} break;
-	case CMD_CM_CHARTRADE_VALIDATE: {
-		if (IsEconomyBlockedByDB(*this))
-			break;
-		{
-			DWORD dwNow = (DWORD)GetTickCount64();
-			if (dwNow - m_dwLastTradePacketTime < 200)
-				break;
-			m_dwLastTradePacketTime = dwNow;
-		}
-		BYTE byType = READ_CHAR(pk);
-		DWORD dwCharID = READ_LONG(pk);
-		g_TradeSystem.ValidateTrade(byType, *this, dwCharID);
-	} break;
-	case CMD_CM_CREATE_BOAT: {
-		g_CharBoat.MakeBoat(*this, pk);
-	} break;
-	case CMD_CM_UPDATEBOAT_PART: {
-		g_CharBoat.Update(*this, pk);
-	} break;
-	case CMD_CM_BOAT_GETINFO: {
-		if (GetPlayer()->IsLuanchOut()) {
-			g_CharBoat.GetBoatInfo(*this, GetPlayer()->GetLuanchID());
-		} else {
-			// SystemNotice( "????????!" );
-			SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00003));
-		}
-	} break;
-	case CMD_CM_BOAT_CANCEL: {
-		g_CharBoat.Cancel(*this);
-	} break;
-	case CMD_CM_BOAT_LUANCH: {
-		DWORD dwNpcID = READ_LONG(pk);
-		CCharacter* pCha = m_submap->FindCharacter(dwNpcID, GetShape().centre);
-		if (pCha == nullptr) {
-			break;
-		} else if (GetPlayer()->GetBankNpc()) {
-			break;
-		} else if (g_CParser.DoString("IsSailNpc", enumSCRIPT_RETURN_NUMBER, 1, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, this, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, pCha, DOSTRING_PARAM_END)) {
-			if (!g_CParser.GetReturnNumber(0)) {
-				break;
-			}
-		}
-
-		BYTE byIndex = READ_CHAR(pk);
-		BoatSelLuanch(byIndex);
-	} break;
-	case CMD_CM_BOAT_SELECT: {
-		DWORD dwNpcID = READ_LONG(pk);
-		CCharacter* pCha = m_submap->FindCharacter(dwNpcID, GetShape().centre);
-		if (pCha == nullptr) {
-			break;
-		}
-		if (g_CParser.DoString("IsSailBoatNpc", enumSCRIPT_RETURN_NUMBER, 1, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, this, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, pCha, DOSTRING_PARAM_END)) {
-			if (!g_CParser.GetReturnNumber(0)) {
-				break;
-			}
-		}
-		BYTE byType = READ_CHAR(pk);
-		BYTE byIndex = READ_CHAR(pk);
-		BoatSelected(byType, byIndex);
-	} break;
-	case CMD_CM_BOAT_BAGSEL: {
-		DWORD dwNpcID = READ_LONG(pk);
-		if (dwNpcID) {
-			CCharacter* pCha = m_submap->FindCharacter(dwNpcID, GetShape().centre);
-			if (pCha == nullptr)
-				break;
-		}
-
-		BYTE byIndex = READ_CHAR(pk);
-		BoatPackBag(byIndex);
-	} break;
-	case CMD_CM_ENTITY_EVENT: {
-		DWORD dwEntityID = READ_LONG(pk);
-		CCharacter* pCha = m_submap->FindCharacter(dwEntityID, GetShape().centre);
-		if (pCha == nullptr)
-			break;
-		mission::CEventEntity* pEntity = pCha->IsEvent();
-		if (pEntity) {
-			pEntity->MsgProc(*this, pk);
-			break;
-		}
-	} break;
-	case CMD_CM_STALL_ALLDATA: {
-		g_StallSystem.StartStall(*this, pk);
-	} break;
-	case CMD_CM_STALL_OPEN: {
-		g_StallSystem.OpenStall(*this, pk);
-	} break;
-	case CMD_CM_STALL_BUY: {
-		if (IsEconomyBlockedByDB(*this))
-			break;
-		g_StallSystem.BuyGoods(*this, pk);
-	} break;
-	case CMD_CM_STALL_CLOSE: {
-		g_StallSystem.CloseStall(*this);
-	} break;
-	case CMD_CM_READBOOK_START: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		if (!IsBoat()) {
-			pMainCha->SetReadBookState(true);
-			pMainCha->ForgeAction(true);
-			pMainCha->m_CKitbag.Lock();
-		} else
-			// pMainCha->SystemNotice("??????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00004));
-	} break;
-	case CMD_CM_READBOOK_CLOSE: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		if (!IsBoat()) {
-			pMainCha->SetReadBookState(false);
-			pMainCha->ForgeAction(false);
-			pMainCha->m_CKitbag.UnLock();
-		} else
-			// pMainCha->SystemNotice("????????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00005));
-	} break;
-	case CMD_CM_SYNATTR: // ????????(???????????????,?????????,???????,?????)
-	{
-		GetPlayer()->GetMainCha()->Cmd_ReassignAttr(pk);
-	} break;
-	case CMD_CM_SKILLUPGRADE: {
-		Short sSkillID = READ_SHORT(pk);
-		Char chAddGrade = READ_CHAR(pk);
-		
-		// SANITIZE: Validate skill ID range (max skill ID is ~500 in SkillInfo.txt)
-		if (!PS::ValidateRange(static_cast<int>(sSkillID), 1, PS::MAX_SKILL_ID)) {
-			LG("Security", "[Skill] Invalid skill ID %d from character %s\n", sSkillID, GetName());
-			break;
-		}
-
-		// kong@pkodev.net 09.22.2017
-		chAddGrade = 1;
-
-		char chSkillLv = 0;
-		CCharacter* pMainCha = GetPlyMainCha();
-		SSkillGrid* pSkill = pMainCha->m_CSkillBag.GetSkillContByID(sSkillID);
-		if (pSkill)
-			chSkillLv = pSkill->chLv;
-
-		if (chSkillLv <= 0) {
-			SystemNotice("Unable to upgrade skill without learning!");
-			break;
-		}
-
-		// fixed force upgrade on restricted skills by @mothannakh
-		auto validation = [&]() -> bool {
-			auto pCSkill = GetSkillRecordInfo(sSkillID);
-			if (!pCSkill->IsShow()) // make sure our skill has an active icon skill so can upgrade it
-				return false;
-			if (sSkillID >= 25 && sSkillID <= 38) // disable base skill from upgrade
-				return false;
-			if (sSkillID >= 329 && sSkillID <= 444) // make sure its not manu skill like flash skills etc
-				return false;
-			if (sSkillID >= 321 && sSkillID <= 324) // cooking skills and such
-				return false;
-			if (453 <= sSkillID && sSkillID <= 459) // make sure its not rebirth skills too
-				return false;
-			if (0467 == sSkillID || 280 == sSkillID || 311 == sSkillID) // loveline, fairy body (poss), self destruct
-				return false;
-			return true; // otherwise all fine return true;
-		}();
-
-		if (!validation) { // check final result of validation
-			SystemNotice("You have been caught exploiting! This will lead to account suspension or deletion.");
-			LG("Upgrade Exploit", "Player %s tried to force upgrade on SkillID: %d\n", pMainCha->GetName(), sSkillID);
-			break;
-		}
-		GetPlayer()->GetMainCha()->LearnSkill(sSkillID, chAddGrade, false);
-	} break;
-	case CMD_CM_REFRESH_DATA: {
-		Long lWorldID = READ_LONG(pk);
-		Long lHandle = READ_LONG(pk);
-		Entity* pCEnt = g_pGameApp->IsLiveingEntity(lWorldID, lHandle);
-		if (pCEnt) {
-			CCharacter* pCCha = pCEnt->IsCharacter();
-			if (pCCha && pCCha->GetPlayer() == GetPlayer()) // ???????
-			{
-				pCCha->SynAttr(enumATTRSYN_ITEM_EQUIP);
-			}
-		}
-	} break;
-	case CMD_TM_CHANGE_PERSONINFO: {
-		cChar* motto = READ_STRING(pk);
-		if (motto) {
-			SetMotto(motto);
-		}
-		Short sIconID = READ_SHORT(pk);
-		
-		// SANITIZE: Validate icon ID range (valid icons are 1-100, 0 = no icon)
-		if (sIconID < 0 || sIconID > 100) {
-			LG("Security", "[PersonInfo] Invalid icon ID %d from character %s\n", sIconID, GetName());
-			sIconID = 1;  // Reset to default icon
-		}
-		SetIcon(sIconID);
-	} break;
-	case CMD_CM_GUILD_PERM: {
-		int targetID = READ_LONG(pk);
-		unsigned int permission = READ_LONG(pk);
-		
-		// SANITIZE: Validate permission value (must be valid bitmask)
-		const unsigned int VALID_PERM_MASK = 0xFF;  // All valid permission bits
-		if (permission & ~VALID_PERM_MASK) {
-			LG("Security", "[Guild] Invalid permission mask 0x%08X from character %s\n", permission, GetName());
-			break;
-		}
-		
-		int guild_id = GetPlyMainCha()->GetGuildID();
-		if (guild_id == 0 || !emGldPermMgr & GetPlyMainCha()->guildPermission || game_db.GetGuildLeaderID(guild_id) == targetID) {
-			GetPlyMainCha()->SystemNotice("You do not have permission to do this.");
-			return;
-		}
-
-		// update in DB
-		if (!game_db.SetGuildPermission(targetID, permission, guild_id)) {
-			GetPlyMainCha()->SystemNotice("Player not found");
-			return;
-		}
-
-		// update in game
-		CPlayer* targetPly = g_pGameApp->GetPlayerByDBID(targetID);
-		if (targetPly) {
-			targetPly->GetMainCha()->guildPermission = permission;
-		}
-
-		// update for group (sends to players)
-		WPACKET wpk = GETWPACKET();
-		WRITE_CMD(wpk, CMD_MP_GUILD_PERM);
-		WRITE_LONG(wpk, targetID);
-		WRITE_LONG(wpk, permission);
-		ReflectINFof(this, wpk);
-		break;
-	}
-	case CMD_CM_GUILD_PUTNAME: {
-		bool l_confirm = READ_CHAR(pk) ? true : false;
-		cChar* l_guildname = READ_STRING(pk);
-		cChar* l_passwd = READ_STRING(pk);
-		
-		// SANITIZE: Validate guild name and password
-		if (!l_guildname || !l_passwd) {
-			GetPlyMainCha()->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00006));
-			break;
-		}
-		size_t guildNameLen = strlen(l_guildname);
-		size_t passwdLen = strlen(l_passwd);
-		if (guildNameLen == 0 || guildNameLen > 16 || passwdLen == 0 || passwdLen > 32) {
-			LG("Security", "[Guild] Invalid guild name/password length from character %s\n", GetName());
-			GetPlyMainCha()->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00006));
-			break;
-		}
-		if (!PS::IsSafeString(l_guildname) || !PS::IsSafeString(l_passwd)) {
-			LG("Security", "[Guild] Dangerous characters in guild name/password from character %s\n", GetName());
-			GetPlyMainCha()->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00006));
-			break;
-		}
-		
-		if (Guild::IsValidGuildName(l_guildname, uShort(strlen(l_guildname)))) {
-			Guild::cmd_CreateGuild(GetPlyMainCha(), l_confirm, l_guildname, l_passwd);
-		} else {
-			// GetPlyMainCha()->SystemNotice("?????????!");
-			GetPlyMainCha()->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00006));
-		}
-	} break;
-	case CMD_CM_GUILD_TRYFOR: {
-		Guild::cmd_GuildTryFor(GetPlyMainCha(), READ_LONG(pk));
-	} break;
-	case CMD_CM_GUILD_TRYFORCFM: {
-		Guild::cmd_GuildTryForComfirm(GetPlyMainCha(), READ_CHAR(pk));
-	} break;
-	case CMD_CM_GUILD_LISTTRYPLAYER: {
-		Guild::cmd_GuildListTryPlayer(GetPlyMainCha());
-	} break;
-	case CMD_CM_GUILD_APPROVE: {
-		Guild::cmd_GuildApprove(GetPlyMainCha(), READ_LONG(pk));
-	} break;
-	case CMD_CM_GUILD_REJECT: {
-		Guild::cmd_GuildReject(GetPlyMainCha(), READ_LONG(pk));
-	} break;
-	case CMD_CM_GUILD_KICK: {
-		Guild::cmd_GuildKick(GetPlyMainCha(), READ_LONG(pk));
-	} break;
-	case CMD_CM_GUILD_LEAVE: {
-		if (!(GetPlyCtrlCha()->GetSubMap()->GetMapRes()->CanGuild())) {
-			// GetPlyMainCha()->SystemNotice("???????!");
-			GetPlyMainCha()->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00007));
-			break;
-		}
-
-		Guild::cmd_GuildLeave(GetPlyMainCha());
-	} break;
-	case CMD_CM_GUILD_DISBAND: {
-		cChar* l_passwd = READ_STRING(pk);
-		int canDisband = (GetPlyMainCha()->guildPermission & emGldPermDisband);
-		if (canDisband == emGldPermDisband) {
-			if (l_passwd && !strchr(l_passwd, '\'')) {
-				Guild::cmd_GuildDisband(GetPlyMainCha(), l_passwd);
-			}
-		}
-		break;
-	}
-	case CMD_CM_GUILD_MOTTO: {
-		uShort len;
-		cChar* l_motto = pk.ReadString(&len);
-		if (!l_motto)
-			break;
-
-		if (len > 0 && !common::conformity::guild::motto::is_valid(l_motto, len))
-			break;
-
-		// Allow empty motto for removal or valid non-empty motto
-		if (l_motto && (len == 0 || (strlen(l_motto) < 50 && !strchr(l_motto, '\'')))) {
-			int canMotto = (GetPlyMainCha()->guildPermission & emGldPermMotto);
-			if (canMotto == emGldPermMotto) {
-				Guild::cmd_GuildMotto(GetPlyMainCha(), l_motto);
-			}
-		}
-	} break;
-	case CMD_PM_GUILD_DISBAND: {
-		Guild::cmd_PMDisband(GetPlyMainCha());
-	} break;
-	case CMD_CM_GUILD_CHALLENGE: {
-		BYTE byLevel = READ_CHAR(pk);
-		DWORD dwMoney = READ_LONG(pk);
-		Guild::cmd_GuildChallenge(GetPlyMainCha(), byLevel, dwMoney);
-	} break;
-	case CMD_CM_GUILD_LEIZHU: {
-		BYTE byLevel = READ_CHAR(pk);
-		DWORD dwMoney = READ_LONG(pk);
-		Guild::cmd_GuildLeizhu(GetPlyMainCha(), byLevel, dwMoney);
-	} break;
-	case CMD_CM_MAP_MASK: {
-		if (!GetSubMap())
-			break;
-		// const char	*szMapName = READ_STRING(pk);
-		const char* szMapName = GetSubMap()->GetName();
-
-		int lDataLen;
-		BYTE* pData = GetPlayer()->GetMapMask(lDataLen);
-		WPACKET wpk = GETWPACKET();
-		WRITE_CMD(wpk, CMD_MC_MAP_MASK);
-		WRITE_LONG(wpk, m_ID);
-		if (!pData) {
-			WRITE_CHAR(wpk, 0);
-		} else {
-			WRITE_CHAR(wpk, 1);
-			WRITE_SEQ(wpk, (cChar*)pData, (uShort)lDataLen);
-		}
-		ReflectINFof(this, wpk);
-	} break;
-
-	case CMD_CM_UPDATEHAIR: // ????
-	{
-		if (!GetSubMap())
-			break;
-		Cmd_ChangeHair(pk);
-	} break;
-	case CMD_CM_TEAM_FIGHT_ASK: // ??????
-	{
-		Char chType = READ_CHAR(pk);
-		Long lID = READ_LONG(pk);
-		Long lHandle = READ_LONG(pk);
-		Cmd_FightAsk(chType, lID, lHandle);
-	} break;
-	case CMD_CM_TEAM_FIGHT_ASR: // ??????
-	{
-		Char chAnswer = READ_CHAR(pk);
-		Cmd_FightAnswer(chAnswer != 0 ? true : false);
-	} break;
-	case CMD_CM_ITEM_REPAIR_ASK: {
-		Long lTarID = READ_LONG(pk);
-		Long lTarHandle = READ_LONG(pk);
-		Char chPosType = READ_CHAR(pk);
-		Char chPosID = READ_CHAR(pk);
-
-		Cmd_ItemRepairAsk(chPosType, chPosID);
-	} break;
-	case CMD_CM_ITEM_REPAIR_ASR: {
-		Cmd_ItemRepairAnswer(READ_CHAR(pk) != 0 ? true : false);
-	} break;
-	case CMD_CM_ITEM_FORGE_CANACTION: {
-		short canaction = READ_CHAR(pk);
-		bool bCan = (canaction == 0) ? false : true;
-		ForgeAction(bCan);
-		break;
-	}
-	case CMD_CM_VALIDATE_SLOT_ITEM: {
-		// Client requests validation for placing item in a forge/crafting slot
-		Char chFormType = READ_CHAR(pk);   // Form type (1=forge, 2=combine, 3=milling, 4=fusion, 5=upgrade, 6=elf)
-		Char chSlotIndex = READ_CHAR(pk);  // Target slot index
-		Short sGridID = READ_SHORT(pk);    // Item grid ID in kitbag
-		
-		// SANITIZE: Validate form type and slot index
-		if (!PS::ValidateRange(static_cast<int>(chFormType), 1, 6)) {
-			LG("Security", "[SlotItem] Invalid form type %d from character %s\n", chFormType, GetName());
-			break;
-		}
-		if (!PS::ValidateRange(static_cast<int>(chSlotIndex), 0, 9)) {  // Max 10 slots per form
-			LG("Security", "[SlotItem] Invalid slot index %d from character %s\n", chSlotIndex, GetName());
-			break;
-		}
-		if (!PS::ValidateKitbagSlot(static_cast<int>(sGridID)) && sGridID != -1) {
-			LG("Security", "[SlotItem] Invalid grid ID %d from character %s\n", sGridID, GetName());
-			break;
-		}
-		
-		Cmd_ValidateSlotItem(chFormType, chSlotIndex, sGridID);
-		break;
-	}
-	case CMD_CM_ITEM_FORGE_ASK: {
-		if (READ_CHAR(pk) == 0) {
-			ForgeAction(false);
-			break;
-		}
-		Char chType = READ_CHAR(pk);
-		
-		// SANITIZE: Validate forge type
-		if (!PS::ValidateRange(static_cast<int>(chType), 0, 10)) {
-			LG("Security", "[Forge] Invalid forge type %d from character %s\n", chType, GetName());
-			ForgeAction(false);
-			break;
-		}
-		
-		SForgeItem SFgeItem;
-		bool validForge = true;
-		for (int i = 0; i < defMAX_ITEM_FORGE_GROUP && validForge; i++) {
-			SFgeItem.SGroup[i].sGridNum = READ_SHORT(pk);
-			if (SFgeItem.SGroup[i].sGridNum < 0 || SFgeItem.SGroup[i].sGridNum > defMAX_KBITEM_NUM_PER_TYPE) {
-				ForgeAction(false);
-				validForge = false;
-				break;
-			}
-			for (short j = 0; j < SFgeItem.SGroup[i].sGridNum; j++) {
-				SFgeItem.SGroup[i].SGrid[j].sGridID = READ_SHORT(pk);
-				SFgeItem.SGroup[i].SGrid[j].sItemNum = READ_SHORT(pk);
-				
-				// SANITIZE: Validate grid ID and item count
-				if (!PS::ValidateKitbagSlot(static_cast<int>(SFgeItem.SGroup[i].SGrid[j].sGridID))) {
-					LG("Security", "[Forge] Invalid grid ID %d from character %s\n", SFgeItem.SGroup[i].SGrid[j].sGridID, GetName());
-					validForge = false;
-					break;
-				}
-				if (SFgeItem.SGroup[i].SGrid[j].sItemNum < 0 || SFgeItem.SGroup[i].SGrid[j].sItemNum > PS::MAX_STACK_COUNT) {
-					LG("Security", "[Forge] Invalid item count %d from character %s\n", SFgeItem.SGroup[i].SGrid[j].sItemNum, GetName());
-					validForge = false;
-					break;
-				}
-			}
-		}
-		if (!validForge) {
-			ForgeAction(false);
-			break;
-		}
-		Cmd_ItemForgeAsk(chType, &SFgeItem);
-	} break;
-		// Add by lark.li 20080515 begin
-	case CMD_CM_ITEM_LOTTERY_ASK: {
-		if (READ_CHAR(pk) == 0) {
-			ForgeAction(false);
-			break;
-		}
-
-		SLotteryItem SLtrItem;
-		bool validLottery = true;
-		for (int i = 0; i < defMAX_ITEM_LOTTERY_GROUP && validLottery; i++) {
-			SLtrItem.SGroup[i].sGridNum = READ_SHORT(pk);
-			if (SLtrItem.SGroup[i].sGridNum < 0 || SLtrItem.SGroup[i].sGridNum > defMAX_KBITEM_NUM_PER_TYPE) {
-				validLottery = false;
-				break;
-			}
-			for (short j = 0; j < SLtrItem.SGroup[i].sGridNum; j++) {
-				SLtrItem.SGroup[i].SGrid[j].sGridID = READ_SHORT(pk);
-				SLtrItem.SGroup[i].SGrid[j].sItemNum = READ_SHORT(pk);
-				
-				// SANITIZE: Validate grid ID and item count
-				if (!PS::ValidateKitbagSlot(static_cast<int>(SLtrItem.SGroup[i].SGrid[j].sGridID))) {
-					LG("Security", "[Lottery] Invalid grid ID %d from character %s\n", SLtrItem.SGroup[i].SGrid[j].sGridID, GetName());
-					validLottery = false;
-					break;
-				}
-				if (SLtrItem.SGroup[i].SGrid[j].sItemNum < 0 || SLtrItem.SGroup[i].SGrid[j].sItemNum > PS::MAX_STACK_COUNT) {
-					LG("Security", "[Lottery] Invalid item count %d from character %s\n", SLtrItem.SGroup[i].SGrid[j].sItemNum, GetName());
-					validLottery = false;
-					break;
-				}
-			}
-		}
-		if (!validLottery) {
-			ForgeAction(false);
-			break;
-		}
-		Cmd_ItemLotteryAsk(&SLtrItem);
-	} break;
-		// End
-	case CMD_CM_ITEM_FORGE_ASR: {
-		Cmd_ItemForgeAnswer(READ_CHAR(pk) != 0 ? true : false);
-	} break;
-	case CMD_CM_KITBAG_LOCK: {
-		GetPlyMainCha()->Cmd_LockKitbag();
-	} break;
-	case CMD_CM_LIFESKILL_ASK: {
-		// Modify by lark.li 20080801 begin
-		int type = READ_LONG(pk);
-		if (type >= 0 && type < 4) {
-			int dwNpcID = READ_LONG(pk);
-
-			SLifeSkillItem LifeSkillItem;
-			LifeSkillItem.sbagCount = g_sLiveSkillNeedItemNum[type];
-			for (int i = 0; i < LifeSkillItem.sbagCount; i++) {
-				LifeSkillItem.sGridID[i] = READ_SHORT(pk);
-			}
-			switch (type) {
-			case 0: {
-				LifeSkillItem.sReturn = atoi(GetPlayer()->GetLifeSkillinfo().c_str());
-				break;
-			}
-			case 1: {
-				string strVer[2];
-				Util_ResolveTextLine(GetPlayer()->GetLifeSkillinfo().c_str(), strVer, 2, ',');
-				if (atoi(strVer[0].c_str()) > atoi(strVer[1].c_str()))
-					LifeSkillItem.sReturn = 1;
-				else
-					LifeSkillItem.sReturn = 0;
-				break;
-			}
-			case 2: {
-				short sret = READ_SHORT(pk);
-				string strVer[3];
-				Util_ResolveTextLine(GetPlayer()->GetLifeSkillinfo().c_str(), strVer, 3, ',');
-				int count = atoi(strVer[0].c_str()) + atoi(strVer[1].c_str()) + atoi(strVer[2].c_str());
-				count -= 9;
-				if (count > 0)
-					count = 1;
-				else
-					count = 0;
-				if (count == sret)
-					LifeSkillItem.sReturn = 1;
-				else
-					LifeSkillItem.sReturn = 0;
-				break;
-			}
-			case 3: {
-				LifeSkillItem.sReturn = READ_SHORT(pk);
-				break;
-			}
-			}
-			Cmd_LifeSkillItemAsk(type, &LifeSkillItem);
-		}
-		break;
-	}
-	case CMD_CM_LIFESKILL_ASR: {
-		// Modify by lark.li 20080801 begin
-		int type = READ_LONG(pk);
-
-		if (type >= 0 && type < 4) {
-			int dwNpcID = READ_LONG(pk);
-			SLifeSkillItem LifeSkillItem;
-			LifeSkillItem.sbagCount = g_sLiveSkillNeedItemNum[type];
-			for (int i = 0; i < LifeSkillItem.sbagCount; i++) {
-				LifeSkillItem.sGridID[i] = READ_SHORT(pk);
-			}
-
-			switch (type) {
-			case 0: {
-				const char* pchar = READ_STRING(pk);
-				LifeSkillItem.sReturn = 1;
-			}
-			case 1: {
-				LifeSkillItem.sReturn = 0;
-			}
-			case 2: {
-				LifeSkillItem.sReturn = READ_SHORT(pk);
-
-				break;
-			}
-			case 3: {
-				LifeSkillItem.sReturn = READ_SHORT(pk);
-				break;
-			}
-			}
-
-			Cmd_LifeSkillItemAsR(type, &LifeSkillItem);
-		}
-
-		// int type = READ_LONG(pk);
-		// int dwNpcID = READ_LONG( pk );
-		// SLifeSkillItem LifeSkillItem;
-		// LifeSkillItem.sbagCount = g_sLiveSkillNeedItemNum[type];
-		// for(int i = 0; i < LifeSkillItem.sbagCount; i++)
-		//{
-		//	LifeSkillItem.sGridID[i] = READ_SHORT(pk);
-		// }
-
-		// switch(type)
-		//{
-		// case 0:
-		//	{
-		//		const char * pchar =READ_STRING(pk);
-		//		LifeSkillItem.sReturn = 1;
-		//	}
-		// case 1:
-		//	{
-		//		LifeSkillItem.sReturn = 0;
-		//	}
-		// case 2:
-		//	{
-		//		LifeSkillItem.sReturn  = READ_SHORT(pk);
-
-		//		break;
-		//	}
-		// case 3:
-		//	{
-		//		LifeSkillItem.sReturn = READ_SHORT(pk);
-		//		break;
-		//	}
-		//}
-
-		// Cmd_LifeSkillItemAsR(type,&LifeSkillItem);
-		//  End
-	} break;
-	case CMD_CM_KITBAG_UNLOCK: {
-		const char* szPwd = READ_STRING(pk);
-
-		if (szPwd == nullptr)
-			break;
-
-		GetPlyMainCha()->Cmd_UnlockKitbag(szPwd);
-	} break;
-	case CMD_CM_KITBAG_CHECK: {
-		GetPlyMainCha()->Cmd_CheckKitbagState();
-	} break;
-	case CMD_CM_KITBAG_AUTOLOCK: {
-		char cAutoLock = READ_CHAR(pk);
-		GetPlyMainCha()->Cmd_SetKitbagAutoLock(cAutoLock);
-	} break;
-	case CMD_CM_KITBAG_EXPAND: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		if (!pMainCha)
-			break;
-
-		const int EXPAND_COST = 100;
-		const short EXPAND_AMOUNT = 6;
-
-		short currentCap = pMainCha->m_CKitbag.GetCapacity();
-		if (currentCap >= defMAX_KBITEM_NUM_PER_TYPE) {
-			pMainCha->SystemNotice("Your inventory is already at maximum capacity.");
-			break;
-		}
-
-		short actualExpand = EXPAND_AMOUNT;
-		if (currentCap + actualExpand > defMAX_KBITEM_NUM_PER_TYPE)
-			actualExpand = defMAX_KBITEM_NUM_PER_TYPE - currentCap;
-
-		int currentIMP = pMainCha->GetIMP();
-		if (currentIMP < EXPAND_COST) {
-			pMainCha->SystemNotice("Not enough IMP. You need 100 IMP to expand your inventory.");
-			break;
-		}
-
-		pMainCha->SetIMP(currentIMP - EXPAND_COST, true);
-
-		if (!pMainCha->AddKitbagCapacity(actualExpand)) {
-			pMainCha->SetIMP(currentIMP, true);
-			pMainCha->SystemNotice("Failed to expand inventory.");
-			break;
-		}
-
-		char szMsg[128];
-		sprintf(szMsg, "Inventory expanded by %d slots! New capacity: %d.",
-			actualExpand, pMainCha->m_CKitbag.GetCapacity());
-		pMainCha->SystemNotice(szMsg);
-	} break;
-	case CMD_CM_STORE_OPEN_ASK: {
-		const char* szPwd = READ_STRING(pk);
-		CCharacter* pMainCha = GetPlyMainCha();
-		if (pMainCha->IsReadBook()) {
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00008));
-			break;
-		}
-
-		if (pMainCha->IsStoreEnable()) {
-			break;
-		}
-
-		if (!pMainCha->CheckStoreTime(1000)) {
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00009));
-			break;
-		} else {
-			pMainCha->ResetStoreTime();
-		}
-
-		CPlayer* pCply = pMainCha->GetPlayer();
-		cChar* szPwd2 = pCply->GetPassword();
-
-		if ((szPwd2[0] == 0) || (!strcmp(szPwd, szPwd2)) || g_Config.m_bInstantIGS) {
-			// g_StoreSystem.RequestRoleInfo(pMainCha);
-			pMainCha->SetStoreEnable(true);
-		} else {
-			pMainCha->PopupNotice(RES_STRING(GM_CHARACTERPRL_CPP_00010));
-			break;
-		}
-	}
-	case CMD_CM_STORE_LIST_ASK:
-	case CMD_CM_STORE_BUY_ASK:
-	case CMD_CM_STORE_CHANGE_ASK:
-	case CMD_CM_STORE_QUERY:
-	case CMD_CM_STORE_CLOSE:
-	case CMD_CM_STORE_VIP: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		if (!pMainCha->IsStoreEnable()) {
-			break;
-		}
-		lua_getglobal(g_pLuaState, "operateIGS");
-		if (!lua_isfunction(g_pLuaState, -1)) {
-			lua_pop(g_pLuaState, 1);
-			break;
-		}
-
-		lua_pushlightuserdata(g_pLuaState, (void*)this);
-		lua_pushlightuserdata(g_pLuaState, (void*)&pk);
-		int nStatus = lua_pcall(g_pLuaState, 2, 0, 0);
-		lua_settop(g_pLuaState, 0);
-
-		if (usCmd == CMD_CM_STORE_CLOSE) {
-			CCharacter* pMainCha = GetPlyMainCha();
-			pMainCha->SetStoreEnable(false);
-			pMainCha->ForgeAction(false);
-		}
-
-		break;
-	}
-
-	case CMD_CM_TIGER_START: {
-		DWORD dwNpcID = READ_LONG(pk);
-
-		for (int i = 0; i < 3; i++) {
-			short sTigerSel = READ_SHORT(pk);
-			m_sTigerSel[i] = (sTigerSel > 0) ? 1 : 0;
-		}
-
-		CCharacter* pCha = m_submap->FindCharacter(dwNpcID, GetShape().centre);
-		if (pCha == nullptr)
-			break;
-
-		CCharacter* pMainCha = GetPlyMainCha();
-		pMainCha->DoTigerScript("TigerStart");
-	} break;
-	case CMD_CM_TIGER_STOP: {
-		DWORD dwNpcID = READ_LONG(pk);
-		CCharacter* pCha = m_submap->FindCharacter(dwNpcID, GetShape().centre);
-		if (pCha == nullptr)
-			break;
-
-		CCharacter* pMainCha = GetPlyMainCha();
-		short sNum = READ_SHORT(pk);
-
-		if (sNum < 1 || sNum > 3) {
-			pMainCha->ForgeAction(false);
-			memset(m_sTigerItemID, 0, sizeof(m_sTigerItemID));
-			memset(m_sTigerSel, 0, sizeof(m_sTigerSel));
-			break;
-		}
-
-		short sIndex = 3 * (sNum - 1);
-		bool bSucc = true;
-		WPACKET wpk = GETWPACKET();
-		WRITE_CMD(wpk, CMD_MC_TIGER_ITEM_ID);
-		WRITE_SHORT(wpk, sNum);
-		for (int i = 0; i < 3; i++) {
-			if (pMainCha->m_sTigerItemID[sIndex] <= 0) {
-				bSucc = false;
-			}
-			WRITE_SHORT(wpk, pMainCha->m_sTigerItemID[sIndex++]);
-		}
-		ReflectINFof(this, wpk);
-
-		if (bSucc) {
-			if (sNum == 3) {
-				pMainCha->DoTigerScript("TigerStop");
-				memset(m_sTigerItemID, 0, sizeof(m_sTigerItemID));
-				memset(m_sTigerSel, 0, sizeof(m_sTigerSel));
-			}
-		}
-	} break;
-	case CMD_CM_VOLUNTER_OPEN: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		short sNum = READ_SHORT(pk);
-
-		int nVolNum = g_pGameApp->GetVolNum();
-		int nStart = 0;
-		short sRetNum = (nVolNum - nStart < sNum) ? (nVolNum - nStart) : sNum;
-		if (sRetNum < 0)
-			sRetNum = 0;
-		short sPageNum = (nVolNum % sNum == 0) ? (nVolNum / sNum) : (nVolNum / sNum + 1);
-
-		char chState = (pMainCha->IsVolunteer() ? 1 : 0);
-		WPACKET packet = GETWPACKET();
-		WRITE_CMD(packet, CMD_MC_VOLUNTER_OPEN);
-		WRITE_CHAR(packet, chState);
-		WRITE_SHORT(packet, sPageNum);
-		WRITE_SHORT(packet, sRetNum);
-		for (int i = 0; i < sRetNum; i++) {
-			SVolunteer* pVolunteer = g_pGameApp->GetVolInfo(nStart + i);
-			WRITE_STRING(packet, pVolunteer->szName);
-			WRITE_LONG(packet, pVolunteer->lLevel);
-			WRITE_LONG(packet, pVolunteer->lJob);
-			WRITE_STRING(packet, pVolunteer->szMapName);
-		}
-		ReflectINFof(this, packet);
-	} break;
-	case CMD_CM_VOLUNTER_LIST: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		short sPage = READ_SHORT(pk);
-		short sNum = READ_SHORT(pk);
-
-		int nVolNum = g_pGameApp->GetVolNum();
-		int nStart = (sPage - 1) * sNum;
-		short sRetNum = (nVolNum - nStart < sNum) ? (nVolNum - nStart) : sNum;
-		if (sRetNum < 0)
-			sRetNum = 0;
-		short sPageNum = (nVolNum % sNum == 0) ? (nVolNum / sNum) : (nVolNum / sNum + 1);
-
-		WPACKET packet = GETWPACKET();
-		WRITE_CMD(packet, CMD_MC_VOLUNTER_LIST);
-		WRITE_SHORT(packet, sPageNum);
-		WRITE_SHORT(packet, sPage);
-		WRITE_SHORT(packet, sRetNum);
-		for (int i = 0; i < sRetNum; i++) {
-			SVolunteer* pVolunteer = g_pGameApp->GetVolInfo(nStart + i);
-			WRITE_STRING(packet, pVolunteer->szName);
-			WRITE_LONG(packet, pVolunteer->lLevel);
-			WRITE_LONG(packet, pVolunteer->lJob);
-			WRITE_STRING(packet, pVolunteer->szMapName);
-		}
-		ReflectINFof(this, packet);
-	} break;
-	case CMD_CM_VOLUNTER_ADD: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		pMainCha->Cmd_AddVolunteer();
-		pMainCha->SynVolunteerState(pMainCha->IsVolunteer());
-	} break;
-	case CMD_CM_VOLUNTER_DEL: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		pMainCha->Cmd_DelVolunteer();
-		pMainCha->SynVolunteerState(pMainCha->IsVolunteer());
-	} break;
-	case CMD_CM_VOLUNTER_SEL: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		if (pMainCha->GetLevel() < 8) {
-			pMainCha->PopupNotice("Only players lv8 and above can request party!");
-			break;
-		}
-
-		cChar* szName = READ_STRING(pk);
-		CCharacter* pTarCha = FindVolunteer(szName);
-		if (!pTarCha) {
-			// pMainCha->SystemNotice("%s ?????!", szName);
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00012), szName);
-			break;
-		}
-
-		if (pTarCha == pMainCha) {
-			// pMainCha->SystemNotice("????????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00013));
-			break;
-		}
-
-		if (strcmp(pTarCha->GetPlyCtrlCha()->GetSubMap()->GetName(), GetPlyCtrlCha()->GetSubMap()->GetName())) {
-			// pMainCha->SystemNotice("????, ?????????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00014));
-			break;
-		}
-
-		if (!(GetPlyCtrlCha()->GetSubMap()->GetMapRes()->CanTeam())) {
-			// pMainCha->SystemNotice("???????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00015));
-			break;
-		}
-
-		// pMainCha->SystemNotice("???????,???????!");
-		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00016));
-
-		WPACKET packet = GETWPACKET();
-		WRITE_CMD(packet, CMD_MC_VOLUNTER_ASK);
-		WRITE_STRING(packet, pMainCha->GetName());
-		pTarCha->ReflectINFof(pTarCha, packet);
-	} break;
-	case CMD_CM_VOLUNTER_ASR: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		short sRet = READ_SHORT(pk);
-		cChar* szName = READ_STRING(pk);
-		CCharacter* pSrcCha = g_pGameApp->FindChaByName(szName);
-		if (!pSrcCha) {
-			// pMainCha->SystemNotice("%s ?????!", szName);
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00012), szName);
-			break;
-		}
-
-		if (sRet == 0) {
-			// pSrcCha->SystemNotice("%s ???????!", pMainCha->GetName());
-			pSrcCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00018), pMainCha->GetName());
-			break;
-		}
-
-		WPacket l_wpk = GETWPACKET();
-		WRITE_CMD(l_wpk, CMD_MP_TEAM_CREATE);
-		WRITE_STRING(l_wpk, pSrcCha->GetName());
-		WRITE_STRING(l_wpk, pMainCha->GetName());
-		pMainCha->ReflectINFof(pMainCha, l_wpk);
-	} break;
-	case CMD_CM_KITBAGTEMP_SYNC: {
-		CCharacter* pMainCha = GetPlyMainCha();
-
-		if (!pMainCha->m_pCKitbagTmp) {
-			break;
-		}
-
-		WPACKET pkret = GETWPACKET();
-		WRITE_CMD(pkret, CMD_MC_KITBAGTEMP_SYNC);
-		pMainCha->WriteKitbag(*(pMainCha->m_pCKitbagTmp), pkret, enumSYN_KITBAG_INIT);
-		pMainCha->ReflectINFof(pMainCha, pkret);
-
-		int lStoreItemID = pMainCha->GetStoreItemID();
-		if (lStoreItemID > 0) {
-			if (g_StoreSystem.Accept(pMainCha, lStoreItemID)) {
-				pMainCha->SetStoreItemID(0);
-			}
-		}
-	} break;
-	case CMD_CM_ITEM_LOCK_ASK: {
-		WPACKET rpk = GETWPACKET();
-		WRITE_CMD(rpk, CMD_CM_ITEM_LOCK_ASR);
-		CCharacter* pMainCha = GetPlyMainCha();
-		CPlayer* pCPly = GetPlayer();
-
-		if (pMainCha) {
-
-			if (pMainCha->m_CKitbag.IsLock() || pMainCha->m_CKitbag.IsPwdLocked() || pCPly->GetStallData() || pCPly->GetMainCha()->GetTradeData()) {
-				SystemNotice("Bag is currently locked.");
-				return;
-			}
-
-			dbc::Char chPosType = READ_CHAR(pk);
-			
-			// SANITIZE: Validate kitbag slot
-			if (!PS::ValidateKitbagSlot(chPosType)) {
-				LG("Security", "[ItemLock] Invalid slot %d from character %s\n", chPosType, GetName());
-				return;
-			}
-			
-			SItemGrid* item = pMainCha->m_CKitbag.GetGridContByID(chPosType);
-			if (item) {
-				CItemRecord* pCItemRec = GetItemRecordInfo(item->sID);
-				if (pCItemRec) {
-					CPlayer* pPlayer = pMainCha->GetPlayer();
-					if (pPlayer) {
-						// if(	game_db.LockItem(	item,	pPlayer->GetDBChaId()	)	){
-						WRITE_CHAR(rpk, 1);
-						item->dwDBID = 1;
-						//}else{
-						//	WRITE_CHAR(	rpk,	0	);
-						//};
-						this->m_CKitbag.SetChangeFlag();
-						this->SynKitbagNew(enumSYN_KITBAG_SWITCH);
-						this->ReflectINFof(pMainCha, rpk);
-						break;
-					};
-				};
-			};
-		};
-		WRITE_CHAR(rpk, 0);
-		pMainCha->ReflectINFof(pMainCha, rpk);
-	} break;
-	case CMD_CM_GAME_REQUEST_PIN: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		if (!pMainCha)
-			return;
-
-		if (requestType == 0)
-			break;
-
-		if (!IsReqPosEqualRealPos()) {
-			requestType = 0;
-			break;
-		}
-
-		const char* szPwd = READ_STRING(pk);
-		if (szPwd == nullptr)
-			break;
-
-		CPlayer* pCply = pMainCha->GetPlayer();
-		cChar* szPwd2 = pCply->GetPassword();
-		if ((szPwd2[0] == 0) || (!strcmp(szPwd, szPwd2))) {
-			g_CParser.DoString("HandlePinRequest", enumSCRIPT_RETURN_NUMBER, 1, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, this, enumSCRIPT_PARAM_NUMBER, 1, requestType, DOSTRING_PARAM_END);
-			if (!g_CParser.GetReturnNumber(0))
-				break;
-		} else {
-			pMainCha->PopupNotice(RES_STRING(GM_CHARACTERPRL_CPP_00010));
-		}
-		break;
-	}
-	case CMD_CM_ITEM_UNLOCK_ASK: {
-		ItemUnlockRequest(pk);
-	} break;
-	case CMD_CM_MASTER_INVITE: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		cChar* szName = READ_STRING(pk);
-		DWORD dwCharID = READ_LONG(pk);
-		
-		// SANITIZE: Validate name
-		if (!szName || strlen(szName) == 0 || strlen(szName) > PS::MAX_CHARACTER_NAME_LENGTH) {
-			LG("Security", "[Master] Invalid name from character %s\n", GetName());
-			break;
-		}
-
-		if (IsBoat()) {
-			// SystemNotice("??????!");
-			SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00019));
-			break;
-		}
-
-		CCharacter* pTarCha = pMainCha->GetSubMap()->FindCharacter(dwCharID, pMainCha->GetShape().centre);
-		if (!pTarCha) {
-			// pMainCha->SystemNotice("%s ?????!", szName);
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00012), szName);
-			break;
-		}
-
-		// Offline stall NPCs have no player - reject master invite
-		if (pTarCha->IsOfflineStallNPC()) {
-			pMainCha->SystemNotice("You cannot send a disciple request to an offline stall.");
-			break;
-		}
-
-		if (pTarCha->GetLevel() < 41) {
-			// pMainCha->SystemNotice("??????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00017));
-			break;
-		}
-
-		if (pMainCha->GetLevel() > 40) {
-			// pMainCha->SystemNotice("???????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00020));
-			break;
-		}
-
-		if (pMainCha->GetMasterDBID() != 0) {
-			// pMainCha->SystemNotice("???????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00021));
-			break;
-		}
-
-		if (pTarCha->IsInvited()) {
-			// pMainCha->SystemNotice("???????????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00022));
-			break;
-		}
-		if (!pTarCha->GetPlayer() || !pTarCha->GetPlayer()->CanReceiveRequests()) {
-
-			pMainCha->SystemNotice("%s is currently offline. Unable to send request!", pMainCha->GetName());
-			break;
-		}
-
-		pTarCha->SetInvited(true);
-
-		WPACKET packet = GETWPACKET();
-		WRITE_CMD(packet, CMD_MC_MASTER_ASK);
-		WRITE_STRING(packet, pMainCha->GetName());
-		WRITE_LONG(packet, pMainCha->GetID());
-		pTarCha->ReflectINFof(pTarCha, packet);
-	} break;
-	case CMD_CM_MASTER_ASR: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		short sRet = READ_SHORT(pk);
-		cChar* szName = READ_STRING(pk);
-		DWORD dwCharID = READ_LONG(pk);
-
-		pMainCha->SetInvited(false);
-
-		if (IsBoat()) {
-			// SystemNotice("??????!");
-			SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00023));
-			break;
-		}
-
-		CCharacter* pSrcCha = pMainCha->GetSubMap()->FindCharacter(dwCharID, pMainCha->GetShape().centre);
-		if (!pSrcCha) {
-			// pMainCha->SystemNotice("%s ?????!", szName);
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00012), szName);
-			break;
-		}
-
-		if (pMainCha->GetLevel() < 41) {
-			// pSrcCha->SystemNotice("???????!");
-			pSrcCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00017));
-			// pMainCha->SystemNotice("??????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00024));
-			break;
-		}
-
-		if (pSrcCha->GetLevel() > 40) {
-			// pSrcCha->SystemNotice("???????!");
-			pSrcCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00020));
-			// pMainCha->SystemNotice("????????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00025));
-			break;
-		}
-
-		if (sRet == 0) {
-			// pSrcCha->SystemNotice("%s ???????!", pMainCha->GetName());
-			pSrcCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00026), pMainCha->GetName());
-			break;
-		}
-
-		WPacket l_wpk = GETWPACKET();
-		WRITE_CMD(l_wpk, CMD_MP_MASTER_CREATE);
-		WRITE_STRING(l_wpk, pSrcCha->GetName());
-		WRITE_LONG(l_wpk, pSrcCha->GetPlayer()->GetDBChaId());
-		WRITE_STRING(l_wpk, pMainCha->GetName());
-		WRITE_LONG(l_wpk, pMainCha->GetPlayer()->GetDBChaId());
-		pMainCha->ReflectINFof(pMainCha, l_wpk);
-	} break;
-	case CMD_CM_MASTER_DEL: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		cChar* szName = READ_STRING(pk);
-		uLong ulChaID = READ_LONG(pk);
-
-		if (pMainCha->GetLevel() > 40) {
-			// pMainCha->SystemNotice("??????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00027));
-			break;
-		}
-
-		int lDelMoney = 0; //* pMainCha->GetLevel();
-		if (!pMainCha->HasMoney(lDelMoney)) {
-			// pMainCha->SystemNotice("??????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00028));
-			break;
-		}
-		// pMainCha->TakeMoney("??", lDelMoney);
-		// pMainCha->TakeMoney(RES_STRING(GM_CHARSCRIPT_CPP_00001), lDelMoney);
-		pMainCha->SystemNotice("Your Mentor Deleted Successfully ");
-
-		WPacket l_wpk = GETWPACKET();
-		WRITE_CMD(l_wpk, CMD_MP_MASTER_DEL);
-		WRITE_STRING(l_wpk, pMainCha->GetName());
-		WRITE_LONG(l_wpk, pMainCha->GetPlayer()->GetDBChaId());
-		WRITE_STRING(l_wpk, szName);
-		WRITE_LONG(l_wpk, ulChaID);
-		pMainCha->ReflectINFof(pMainCha, l_wpk);
-	} break;
-	case CMD_CM_PRENTICE_DEL: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		cChar* szName = READ_STRING(pk);
-		uLong ulChaID = READ_LONG(pk);
-
-		// int lDelMoney = 10000 * pMainCha->GetLevel();
-		// if(!pMainCha->HasMoney(lDelMoney))
-		//{
-		//	pMainCha->SystemNotice("??????!");
-		//	break;
-		// }
-		// pMainCha->TakeMoney("??", lDelMoney);
-		int lCredit = (int)pMainCha->GetCredit(); //- 5 * pMainCha->GetLevel();
-		// printf(lCredit);
-		if (lCredit < 0) {
-			lCredit = 0;
-		}
-		pMainCha->SetCredit(lCredit);
-		pMainCha->SynAttr(enumATTRSYN_TASK);
-		// pMainCha->SystemNotice("???????!");
-		pMainCha->SystemNotice("Your Disciple Deleted Successfully ");
-
-		WPacket l_wpk = GETWPACKET();
-		WRITE_CMD(l_wpk, CMD_MP_MASTER_DEL);
-		WRITE_STRING(l_wpk, szName);
-		WRITE_LONG(l_wpk, ulChaID);
-		WRITE_STRING(l_wpk, pMainCha->GetName());
-		WRITE_LONG(l_wpk, pMainCha->GetPlayer()->GetDBChaId());
-		pMainCha->ReflectINFof(pMainCha, l_wpk);
-	} break;
-	case CMD_CM_PRENTICE_INVITE: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		cChar* szName = READ_STRING(pk);
-		DWORD dwCharID = READ_LONG(pk);
-
-		if (IsBoat()) {
-			// SystemNotice("??????!");
-			SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00023));
-			break;
-		}
-
-		CCharacter* pTarCha = pMainCha->GetSubMap()->FindCharacter(dwCharID, pMainCha->GetShape().centre);
-		if (!pTarCha) {
-			// pMainCha->SystemNotice("%s ?????!", szName);
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00012), szName);
-			break;
-		}
-
-		// Offline stall NPCs have no player - reject prentice invite
-		if (pTarCha->IsOfflineStallNPC()) {
-			pMainCha->SystemNotice("You cannot send a disciple request to an offline stall.");
-			break;
-		}
-
-		if (pMainCha->GetLevel() < 41) {
-			// pMainCha->SystemNotice("??????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00024));
-			break;
-		}
-
-		if (pTarCha->GetLevel() > 40) {
-			// pMainCha->SystemNotice("????????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00025));
-			break;
-		}
-
-		if (pTarCha->IsInvited()) {
-			// pMainCha->SystemNotice("???????????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00022));
-			break;
-		}
-		if (!pTarCha->GetPlayer() || !pTarCha->GetPlayer()->CanReceiveRequests()) {
-
-			pMainCha->SystemNotice("%s is currently offline. Unable to send request!", pMainCha->GetName());
-			break;
-		}
-		pTarCha->SetInvited(true);
-
-		WPACKET packet = GETWPACKET();
-		WRITE_CMD(packet, CMD_MC_PRENTICE_ASK);
-		WRITE_STRING(packet, pMainCha->GetName());
-		WRITE_LONG(packet, pMainCha->GetID());
-		pTarCha->ReflectINFof(pTarCha, packet);
-	} break;
-	case CMD_CM_PRENTICE_ASR: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		short sRet = READ_SHORT(pk);
-		cChar* szName = READ_STRING(pk);
-		DWORD dwCharID = READ_LONG(pk);
-
-		pMainCha->SetInvited(false);
-
-		if (IsBoat()) {
-			// SystemNotice("??????!");
-			SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00019));
-			break;
-		}
-
-		CCharacter* pSrcCha = pMainCha->GetSubMap()->FindCharacter(dwCharID, pMainCha->GetShape().centre);
-		if (!pSrcCha) {
-			// pMainCha->SystemNotice("%s ?????!", szName);
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00012), szName);
-			break;
-		}
-
-		if (pSrcCha->GetLevel() < 41) {
-			// pSrcCha->SystemNotice("??????!");
-			pSrcCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00024));
-			// pMainCha->SystemNotice("???????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00017));
-			break;
-		}
-
-		if (pMainCha->GetLevel() > 40) {
-			// pSrcCha->SystemNotice("????????!");
-			pSrcCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00025));
-			// pMainCha->SystemNotice("???????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00020));
-			break;
-		}
-
-		if (sRet == 0) {
-			// pSrcCha->SystemNotice("%s ???????!", pMainCha->GetName());
-			pSrcCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00030), pMainCha->GetName());
-			break;
-		}
-
-		WPacket l_wpk = GETWPACKET();
-		WRITE_CMD(l_wpk, CMD_MP_MASTER_CREATE);
-		WRITE_STRING(l_wpk, pMainCha->GetName());
-		WRITE_LONG(l_wpk, pMainCha->GetPlayer()->GetDBChaId());
-		WRITE_STRING(l_wpk, pSrcCha->GetName());
-		WRITE_LONG(l_wpk, pSrcCha->GetPlayer()->GetDBChaId());
-		pMainCha->ReflectINFof(pMainCha, l_wpk);
-	} break;
-	case CMD_CM_SAY2CAMP: {
-		CCharacter* pMainCha = GetPlyMainCha();
-		cChar* szContent = READ_STRING(pk);
-		CCharacter* pCha = nullptr;
-		SubMap* pSubMap = GetPlyCtrlCha()->GetSubMap();
-
-		// Rate limit: reuse the same say interval as normal chat
-		DWORD dwNowTick = GetTickCount();
-		if (dwNowTick - _dwLastSayTick < (DWORD)g_Config.m_lSayInterval) {
-			SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00001));
-			break;
-		}
-		_dwLastSayTick = dwNowTick;
-
-		// Validate chat content
-		if (!szContent || !PS::ValidateChatMessage(szContent)) {
-			LG("Security", "[CampChat] Invalid message from character %s\n", pMainCha->GetName());
-			break;
-		}
-
-		short mapType = pSubMap->GetMapRes()->GetType();
-		bool bIsCTF = (mapType == 17);  // CTF map type
-		bool bIsGuildWar = pSubMap->GetMapRes()->CanGuildWar();
-
-		if (bIsCTF) {
-			// CTF maps: send to all players on the same side (SideID)
-			Long lSideID = pMainCha->GetSideID();
-			if (lSideID == 0) {
-				SystemNotice("You are not assigned to a team.");
-				break;
-			}
-
-			pSubMap->BeginGetPlyCha();
-			while (pCha = pSubMap->GetNextPlyCha()) {
-				if (pCha->GetSideID() == lSideID) {
-					WPacket l_wpk = GETWPACKET();
-					WRITE_CMD(l_wpk, CMD_MC_SAY2CAMP);
-					WRITE_STRING(l_wpk, pMainCha->GetName());
-					WRITE_STRING(l_wpk, szContent);
-					WRITE_LONG(l_wpk, chatColour);
-					pCha->ReflectINFof(pCha, l_wpk);
-				}
-			}
-		} else if (bIsGuildWar) {
-			// Guild war maps: send to all players with the same guild type
-			BOOL bHasGuild = pMainCha->HasGuild();
-			if (!bHasGuild) {
-				SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00031));
-				break;
-			}
-
-			DWORD dwGuildID = pMainCha->GetGuildID();
-
-			pSubMap->BeginGetPlyCha();
-			while (pCha = pSubMap->GetNextPlyCha()) {
-				if (pCha->HasGuild() && pCha->GetGuildID() == dwGuildID) {
-					WPacket l_wpk = GETWPACKET();
-					WRITE_CMD(l_wpk, CMD_MC_SAY2CAMP);
-					WRITE_STRING(l_wpk, pMainCha->GetName());
-					WRITE_STRING(l_wpk, szContent);
-					WRITE_LONG(l_wpk, chatColour);
-					pCha->ReflectINFof(pCha, l_wpk);
-				}
-			}
-		} else {
-			SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00032));
-		}
-	} break;
-	case CMD_CM_GM_SEND: {
-		CCharacter* pMainCha = GetPlyMainCha();
-
-		DWORD dwNpcID = READ_LONG(pk);
-		CCharacter* pCha = m_submap->FindCharacter(dwNpcID, GetShape().centre);
-		if (pCha == nullptr)
-			break;
-
-		cChar* szTitle = READ_STRING(pk);
-		cChar* szContent = READ_STRING(pk);
-		// SANITIZE: null check before strlen to prevent crash on malformed packet
-		if (!szTitle || !szContent) {
-			LG("Security", "[GMSend] Null title or content from character %s\n", GetName());
-			break;
-		}
-		if (strlen(szTitle) > 32 || strlen(szContent) > 512) {
-			// pMainCha->SystemNotice("??????!");
-			pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00033));
-			break;
-		}
-		g_StoreSystem.RequestGMSend(pMainCha, szTitle, szContent);
-	} break;
-	case CMD_CM_GM_RECV: {
-		CCharacter* pMainCha = GetPlyMainCha();
-
-		DWORD dwNpcID = READ_LONG(pk);
-		CCharacter* pCha = m_submap->FindCharacter(dwNpcID, GetShape().centre);
-		if (pCha == nullptr)
-			break;
-
-		g_StoreSystem.RequestGMRecv(pMainCha);
-	} break;
-	case CMD_CM_PK_CTRL: {
-		CCharacter* pMainCha = GetPlyMainCha();
-
-		if (READ_CHAR(pk))
-			Cmd_SetInPK();
-		else
-			Cmd_SetInPK(false);
-		SynPKCtrl();
-	} break;
-	case CMD_CM_CHEAT_CHECK: {
-		CCharacter *pMainCha = GetPlyMainCha();
-
-		cChar *answer = READ_STRING(pk);
-		pMainCha->CheatCheck(answer);
-	} break;
-	case CMD_CM_BIDUP:
-		// add by ALLEN 2007-10-19
-		{
-			// ????????
-			CCharacter* pMainCha = GetPlyMainCha();
-			if (g_CParser.DoString("YORN", enumSCRIPT_RETURN_NUMBER, 1, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, pMainCha, DOSTRING_PARAM_END)) {
-				if (g_CParser.GetReturnNumber(0)) {
-					DWORD dwNpcID = READ_LONG(pk);
-					CCharacter* pNpc = m_submap->FindCharacter(dwNpcID, GetShape().centre);
-					if (pNpc == nullptr) {
-						// SystemNotice( "??NPCID%d??!", dwNpcID );
-						SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00034), dwNpcID);
-						break;
-					}
-					short sItemID = READ_SHORT(pk);
-					int price = READ_LONG(pk);
-					g_AuctionSystem.BidUp(pMainCha, sItemID, (uInt)price);
-					g_AuctionSystem.NotifyAuction(this, pNpc);
-				}
-			}
-		}
-		break;
-	case CMD_CM_ANTIINDULGENCE: {
-		GetPlyMainCha()->SetScaleFlag();
-	} break;
-	case CMD_CM_REQUEST_DROP_RATE: {
-		CCharacter* pCha = GetPlyCtrlCha();
-		if (pCha) {
-			WPACKET pk = GETWPACKET();
-			WRITE_CMD(pk, CMD_MC_REQUEST_DROP_RATE);
-			pk.WriteFloat(pCha->GetDropRate());
-			pCha->ReflectINFof(pCha, pk);
-		}
-		break;
-	}
-	case CMD_CM_REQUEST_EXP_RATE: {
-		CCharacter* pCha = GetPlyMainCha();
-		if (pCha) {
-			WPACKET pk = GETWPACKET();
-			WRITE_CMD(pk, CMD_MC_REQUEST_EXP_RATE);
-			pk.WriteFloat(pCha->GetExpRate());
-			pCha->ReflectINFof(pCha, pk);
-		}
-		break;
-	}
-	case CMD_CM_GET_PLAYER_BATTLE_POINT: {
-		CCharacter* pCha = GetPlyMainCha();
-		if (pCha) {
-			WPACKET pk = GETWPACKET();
-			WRITE_CMD(pk, CMD_MC_GET_PLAYER_BATTLE_POINT);
-			pk.WriteLong(pCha->GetBattlePower());
-			pCha->ReflectINFof(pCha, pk);
-		}
-		break;
-	}
-	case CMD_CM_REQUEST_CHEST_PREVIEW: {
-		CCharacter* pCha = GetPlyMainCha();
-		if (pCha) {
-			DWORD dwNow = GetTickCount();
-			if (dwNow - m_dwLastChestPreviewTime < kChestPreviewRequestCooldownMs) {
-				break;
-			}
-			m_dwLastChestPreviewTime = dwNow;
-
-			int chestItemID = READ_LONG(pk);
-			if (chestItemID <= 0) {
-				break;
-			}
-
-			SendChestPreviewPacket(pCha, chestItemID);
-		}
-		break;
-	}
 	default:
 		break;
 	}

@@ -2,8 +2,8 @@
 
 Frozen snapshot for Option B / Phase-6 refactoring. Update only when protocol or build layout changes intentionally.
 
-**Generated:** 2026-06-26  
-**Source header:** `source/include/common/NetCommand.h`  
+**Generated:** 2026-06-26 (limits updated 2026-06-27)  
+**Audit report:** [`docs/NETWORK_AUDIT.md`](../../docs/NETWORK_AUDIT.md)  
 **Opcode CSV:** `helper/network-tests/data/opcodes.csv` (regenerate via `scripts/generate_opcode_table.py`)
 
 ---
@@ -69,8 +69,8 @@ msbuild source\source.sln /p:Configuration=Release /p:Platform=x64 /m
 
 | Component | File | SetPKParse (max frame / recv cap) |
 |-----------|------|-----------------------------------|
-| Client NetIF | `game/NetIF.cpp:598` | 16 KB / 16 KB (`NetLimits::kClientGameMaxPacket`) |
-| Gate ToClient | `gateserver/ToClient.cpp:62` | 8 KB / 8 KB |
+| Client NetIF | `game/NetIF.cpp:598` | 32 KB / 32 KB (`NetLimits::kClientGameMaxPacket`) |
+| Gate ToClient | `gateserver/ToClient.cpp:171` | 32 KB / 32 KB (`NetLimits::kClientMaxPacket`) |
 | Gate ToGameServer | `gateserver/ToGameServer.cpp:23` | 32 KB / 32 KB |
 | Gate ToGroupServer | `gateserver/ToGroupServer.cpp:130` | 32 KB / 32 KB |
 | GameServerApp | `gameserver/GameServerApp.cpp:191` | 32 KB / 32 KB |
@@ -79,6 +79,10 @@ msbuild source\source.sln /p:Configuration=Release /p:Platform=x64 /m
 | OuterServer (GM) | `gameserver/OuterServer.cpp:21` | 4 KB / 4 KB |
 
 **Framing:** 2-byte big-endian length at offset 0; 2-byte big-endian cmd at start of payload; +4 byte SESS when `RPCMGR` enabled.
+
+### Gate SyncCall dispatch (2026-06-27)
+
+GroupServer **SyncCall** opcodes (`CM_LOGIN`, `CM_BGNPLAY`, `CM_ENDPLAY`, new/del char, etc.) must run on the **communicator thread** via `DispatchSyncClientOpcode()` in `ToClient.cpp`. Queuing to the processor pool lets `recvbuf` age past the 10s SyncCall deadline → client disconnect `-5` / `ERR_MC_NETEXCP`.
 
 ---
 
@@ -108,7 +112,7 @@ Enable audit logging in a server project: add preprocessor `NET_AUDIT_DIAG=1` to
 | T0-connect | `net-smoke.py` | Yes | TCP + `CMD_MC_RSA_HANDSHAKE_1` (943) |
 | T0-ping | `net-smoke.py` | Yes | Send `CMD_CP_PING` (6022), stay connected |
 | T0-login | Manual / client | No | RSA+AES login via `ProCirculateCS::Login` |
-| T0-enter | Manual / client | No | Char select → `CMD_CM_BGNPLAY` |
+| T0-enter | Manual / client | No | Char select → `CMD_CM_BGNPLAY` → enter map |
 | T0-inter-server | Log check | Partial | `server/LOG/GameServer/*/GameLogin.log` gate entry |
 
 **Run automated tests** (GateServer must be running):
