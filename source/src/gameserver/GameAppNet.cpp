@@ -9,6 +9,7 @@
 #include "OfflineStall.h"
 #include "common/OpcodeHandlerRegistry.h"
 #include "common/OpcodeMeta.h"
+#include "common/SessionHandle.h"
 #include <stdexcept>
 #include <vector>
 
@@ -408,21 +409,35 @@ void CGameApp::ProcessPacket(GateServer* pGate, RPACKET pkt) {
 		if (cmd / 500 == CMD_MM_BASE / 500) {
 			ProcessInterGameMsg(cmd, pGate, pkt);
 		} else {
-			l_player = (CPlayer*)MakePointer(pkt.ReverseReadLongLong());
-			if (cmd / 500 == CMD_PM_BASE / 500 && !l_player) {
-				ProcessGroupBroadcast(cmd, pGate, pkt);
+			if (cmd / 500 == CMD_CM_BASE / 500) {
+				const unsigned long long l_gmaddr = pkt.ReverseReadLongLong();
+				const SessionHandle gateSession = SessionHandle::FromWire(
+					static_cast<uint32_t>(pkt.ReverseReadLong()),
+					static_cast<uint32_t>(pkt.ReverseReadLong()));
+				l_player = static_cast<CPlayer*>(pGate->ResolveSession(gateSession));
+				if (!l_player || !g_gmsvr->ValidatePlayerSession(l_player)) {
+					LG("SessionManager", "CM REJECT cmd=%u session slot=%u gen=%u gmaddr=%llX\n",
+					   cmd, gateSession.slot, gateSession.generation, l_gmaddr);
+					break;
+				}
+				LG("SessionManager", "CM session cmd=%u slot=%u gen=%u player=%p\n",
+				   cmd, gateSession.slot, gateSession.generation, l_player);
 			} else {
-				unsigned long long l_gateaddr = READ_LONGLONG_R(pkt);
-				
-				// Use registry validation instead of just address check
+				l_player = (CPlayer*)MakePointer(pkt.ReverseReadLongLong());
+				if (cmd / 500 == CMD_PM_BASE / 500 && !l_player) {
+					ProcessGroupBroadcast(cmd, pGate, pkt);
+					break;
+				}
+				const unsigned long long l_gateaddr = READ_LONGLONG_R(pkt);
 				if (!g_gmsvr->ValidatePlayerPointer(l_player, l_gateaddr)) {
 					if (l_player) {
 						LG("session", "Action cmd=%d: Invalid player %p or stale session ignored\n", cmd, l_player);
 					}
 					break;
 				}
-				if (!l_player->IsValid())
-					break;
+			}
+			if (!l_player->IsValid())
+				break;
 				if (l_player->GetMainCha()->GetPlayer() != l_player) {
 					// LG("error", "????player????????????%s??Gate???[????%p, ????%p]????cmd=%u\n", l_player->GetMainCha()->GetLogName(), l_player->GetMainCha()->GetPlayer(), l_player, cmd);
 					LG("error", "two player not matching??character name??%s??Gate address [local %p, guest %p]????cmd=%u\n", l_player->GetMainCha()->GetLogName(), l_player->GetMainCha()->GetPlayer(), l_player, cmd);
@@ -448,7 +463,6 @@ void CGameApp::ProcessPacket(GateServer* pGate, RPACKET pkt) {
 					LG("error", "when receive CMD_CM_BASE message[%d], find character pCCha is null\n", cmd);
 				}
 				break;
-			}
 		}
 	}
 	T_E

@@ -57,7 +57,7 @@ Track progress for autonomous refactoring. Update after each completed task.
 
 | Track | Task | Status | Notes |
 |-------|------|--------|-------|
-| A | M3 Session handles (slot + generation) | **in_progress** | Phase 1 prototype: SessionManager, gate alloc at EnterMap, TM_ENTERMAP extension, dual validation |
+| A | M3 Session handles (slot + generation) | **in_progress** | Phase 2: CM trailer `{slot,gen}+gm_addr`; session-only CM resolve on game |
 | B | M2 Bulk migration — Gate lifecycle (B1) | mostly done | SyncCall on comm thread covers login/BGNPLAY |
 | B | M2 Bulk migration — GameAppNet (B5) | **done** | batch 3: 35 handlers total (2026-06-27) |
 | B | M2 Bulk migration — CharacterPrl (B6) | **done** | 2026-06-27 — 112 handlers; legacy switch empty |
@@ -156,7 +156,7 @@ Blockers: none for batch 4. ~70 switch cases remain.
 **Wired:**
 - Gate `Player::m_sessionHandle`, `GateServer::m_sessionManager`, `EnsurePlayerSession` / `ReleasePlayerSession`
 - `GameServer::EnterMap` — allocate + append slot/gen to TM_ENTERMAP
-- `ToClient::ReRouteToGameServer` — log session (pointer trailer unchanged)
+- `ToClient::ReRouteToGameServer` — phase 1 logged session; phase 2 writes session trailer
 - Game `GatePlayer::m_sessionHandle`, per-gate `SessionManager`, `BindPlayerSession` / `ResolveSession`
 - `OpcodeHandle_TmEntermap` — read extended trailer, bind session after `ADDPLAYER`
 - Dual validation in `ValidatePlayerPointer` + gate `ValidatePlayerPointer`
@@ -165,7 +165,27 @@ Blockers: none for batch 4. ~70 switch cases remain.
 
 **Manual test:** T0-login → T0-enter → move/chat; grep logs for `SessionManager` (`Gate allocated`, `TM_ENTERMAP`, `ReRoute`, `GameServer bound`).
 
-**Phase 2 remains:** repurpose 8-byte CM trailer to `{slot, gen}`; remove pointer registry path; GroupServer session sync.
+### Track A — M3 session handles (phase 2, 2026-06-27)
+
+**Trailer swap (gate→game CM forward):** first identity field repurposed from `WriteLongLong(gate_ptr)` to `WriteLong(slot) + WriteLong(generation)`; second field unchanged `WriteLongLong(gm_addr)`. Total trailer still 16 bytes.
+
+**Gate `ReRouteToGameServer`:** fail-closed if `!m_sessionHandle.IsValid()` in-game; writes session + gm_addr.
+
+**Game default router (`GameAppNet.cpp`):** CM band reads reverse trailer `gm_addr`, `generation`, `slot` → `ResolveSession` → `ValidatePlayerSession` (no pointer registry on CM hot path). PM/TM bands keep pointer trailer (GroupServer path unchanged).
+
+**Validation demotion:** `ValidatePlayerPointer` on game + gate skips pointer registry when player has bound session; `ValidatePlayerSession` is fail-closed (requires valid handle). Legacy pointer registry retained for TM/PM paths without session.
+
+**Log lines (session-only CM path):**
+- Gate: `SessionManager ReRoute cmd=… session slot=… gen=…`
+- Gate reject: `SessionManager ReRoute REJECT cmd=…: no valid session`
+- Game accept: `SessionManager CM session cmd=… slot=… gen=… player=…`
+- Game reject: `SessionManager CM REJECT cmd=… session slot=… gen=…`
+
+**Manual test checklist:** T0-login → T0-enter → move (`CM session cmd=6`) → chat (`CM session cmd=1`). Deploy gate + game together.
+
+**GroupServer scope:** **deferred (phase 2b)** — `ToGroupServer.cpp` / `ReRouteToGroupServer` still use `WriteLongLong(MakeULong(l_ply))`; GroupServer `ValidatePlayerPointer` unchanged.
+
+**Build (2026-06-27):** `Common.lib` **PASS**; GateServer **compile PASS**, link blocked (`GateServer.exe` in use); GameServer link blocked (`GameServer.pdb` locked — exe running). Stop servers and rebuild both binaries before deploy.
 
 ### Track B6 — CharacterPrl registry (batch 4, 2026-06-27)
 
@@ -446,4 +466,4 @@ See last-smoke-result.txt for automated output.
 
 ## Resume prompt for next session
 
-> Continue Option B Phase 3. **Track B6 done** (112 CharacterPrl registry entries). **Track B5 done** (35 GameAppNet handlers). **Track A phase 1 in progress** (session handles prototype). Next: Track A phase 2 (trailer swap) or Track C (zero-copy gate forwarding). Read `docs/NETWORK_AUDIT.md` and this file. CM forward wire unchanged.
+> Continue Option B Phase 3. **Track B6 done** (112 CharacterPrl registry entries). **Track B5 done** (35 GameAppNet handlers). **Track A phase 2 in tree** (CM trailer session swap). Next: manual T0-enter/move/chat verify, or Track A phase 2b (GroupServer), or Track C (zero-copy gate forwarding). Read `docs/NETWORK_AUDIT.md` and this file. Deploy gate + game together after rebuild.

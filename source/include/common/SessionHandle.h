@@ -16,4 +16,12 @@ struct SessionHandle {
 	}
 
 	bool operator!=(const SessionHandle& other) const { return !(*this == other); }
+
+	// Wire layout (8 bytes, slot then generation — matches WriteLong + WriteLong).
+	static SessionHandle FromWire(uint32_t slot, uint32_t generation) {
+		return SessionHandle{slot, generation};
+	}
+
+	uint32_t WireSlot() const { return slot; }
+	uint32_t WireGeneration() const { return generation; }
 };

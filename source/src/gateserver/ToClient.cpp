@@ -650,13 +650,17 @@ void ToClient::ReRouteToGameServer(dbc::DataSocket* datasock, dbc::RPacket& recv
 		GameServer* l_game = l_ply->game;
 
 		if (l_gpaddr && l_gmaddr && l_game) {
-			if (l_ply->m_sessionHandle.IsValid()) {
-				LG("SessionManager", "ReRoute cmd=%u session slot=%u gen=%u player %p dbid=%u\n",
-				   m_lastRecvCmd, l_ply->m_sessionHandle.slot, l_ply->m_sessionHandle.generation,
-				   l_ply, l_ply->m_dbid);
+			if (!l_ply->m_sessionHandle.IsValid()) {
+				LG("SessionManager", "ReRoute REJECT cmd=%u: no valid session player=%p dbid=%u\n",
+				   m_lastRecvCmd, l_ply, l_ply->m_dbid);
+				return;
 			}
+			LG("SessionManager", "ReRoute cmd=%u session slot=%u gen=%u player=%p dbid=%u\n",
+			   m_lastRecvCmd, l_ply->m_sessionHandle.slot, l_ply->m_sessionHandle.generation,
+			   l_ply, l_ply->m_dbid);
 			WPacket l_wpk = WPacket(recvbuf).Duplicate();
-			l_wpk.WriteLongLong(MakeULong(l_ply));
+			l_wpk.WriteLong(l_ply->m_sessionHandle.slot);
+			l_wpk.WriteLong(l_ply->m_sessionHandle.generation);
 			l_wpk.WriteLongLong(l_gmaddr);
 			g_gtsvr->gm_conn->SendData(l_ply->game->m_datasock, l_wpk);
 		}

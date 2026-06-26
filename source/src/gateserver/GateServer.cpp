@@ -433,11 +433,24 @@ bool GateServer::ValidatePlayerPointer(Player* ply, long long expectedGpAddr) {
 	if (!ply) {
 		return false;
 	}
-	
+
+	if (ply->m_sessionHandle.IsValid()) {
+		if (expectedGpAddr != 0 && ply->gp_addr != expectedGpAddr) {
+			LG("SessionManager", "INVALID: Player %p gp_addr mismatch (expected %lld, got %lld)\n",
+			   ply, expectedGpAddr, (long long)ply->gp_addr);
+			return false;
+		}
+		if (!m_sessionManager.Validate(ply->m_sessionHandle, ply)) {
+			LG("SessionManager", "INVALID: Player %p session slot=%u gen=%u mismatch\n",
+			   ply, ply->m_sessionHandle.slot, ply->m_sessionHandle.generation);
+			return false;
+		}
+		return true;
+	}
+
 	uintptr_t addr = reinterpret_cast<uintptr_t>(ply);
 	uint32_t expectedGeneration = 0;
-	
-	// Check registry
+
 	{
 		std::shared_lock<std::shared_mutex> lock(m_playerRegistryMutex);
 		auto it = m_playerRegistry.find(addr);
@@ -447,27 +460,19 @@ bool GateServer::ValidatePlayerPointer(Player* ply, long long expectedGpAddr) {
 		}
 		expectedGeneration = it->second;
 	}
-	
-	// Validate generation matches
+
 	if (ply->m_generation != expectedGeneration) {
-		LG("PlayerRegistry", "INVALID: Player %p generation mismatch (expected %u, got %u)\n", 
+		LG("PlayerRegistry", "INVALID: Player %p generation mismatch (expected %u, got %u)\n",
 		   ply, expectedGeneration, ply->m_generation);
 		return false;
 	}
-	
-	// Validate gp_addr if provided (for packets from GroupServer)
+
 	if (expectedGpAddr != 0 && ply->gp_addr != expectedGpAddr) {
 		LG("PlayerRegistry", "INVALID: Player %p gp_addr mismatch (expected %lld, got %lld)\n",
 		   ply, expectedGpAddr, (long long)ply->gp_addr);
 		return false;
 	}
 
-	if (ply->m_sessionHandle.IsValid() && !m_sessionManager.Validate(ply->m_sessionHandle, ply)) {
-		LG("SessionManager", "INVALID: Player %p session slot=%u gen=%u mismatch\n",
-		   ply, ply->m_sessionHandle.slot, ply->m_sessionHandle.generation);
-		return false;
-	}
-	
 	return true;
 }
 

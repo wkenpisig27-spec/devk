@@ -537,11 +537,20 @@ bool GameServerApp::ValidatePlayerPointer(GatePlayer* ply, uintptr_t expectedGat
 	if (!ply) {
 		return false;
 	}
-	
+
+	// Phase 2: session handle is authoritative when bound (CM path + enter-map players).
+	if (ply->GetSessionHandle().IsValid()) {
+		if (expectedGateAddr != 0 && ply->GetGateAddr() != expectedGateAddr) {
+			LG("SessionManager", "GameServer INVALID: Player %p gateAddr mismatch (expected %llu, got %llu)\n",
+			   ply, (unsigned long long)expectedGateAddr, (unsigned long long)ply->GetGateAddr());
+			return false;
+		}
+		return ValidatePlayerSession(ply);
+	}
+
 	uintptr_t addr = reinterpret_cast<uintptr_t>(ply);
 	uint32_t expectedGeneration = 0;
-	
-	// Check registry
+
 	{
 		std::shared_lock<std::shared_mutex> lock(m_playerRegistryMutex);
 		auto it = m_playerRegistry.find(addr);
@@ -551,31 +560,25 @@ bool GameServerApp::ValidatePlayerPointer(GatePlayer* ply, uintptr_t expectedGat
 		}
 		expectedGeneration = it->second;
 	}
-	
-	// Validate generation matches
+
 	if (ply->GetGeneration() != expectedGeneration) {
-		LG("PlayerRegistry", "GameServer INVALID: Player %p generation mismatch (expected %u, got %u)\n", 
+		LG("PlayerRegistry", "GameServer INVALID: Player %p generation mismatch (expected %u, got %u)\n",
 		   ply, expectedGeneration, ply->GetGeneration());
 		return false;
 	}
-	
-	// Validate GateAddr if provided
+
 	if (expectedGateAddr != 0 && ply->GetGateAddr() != expectedGateAddr) {
 		LG("PlayerRegistry", "GameServer INVALID: Player %p gateAddr mismatch (expected %llu, got %llu)\n",
 		   ply, (unsigned long long)expectedGateAddr, (unsigned long long)ply->GetGateAddr());
 		return false;
 	}
 
-	if (!ValidatePlayerSession(ply)) {
-		return false;
-	}
-	
 	return true;
 }
 
 bool GameServerApp::ValidatePlayerSession(GatePlayer* ply) const {
 	if (!ply || !ply->GetSessionHandle().IsValid()) {
-		return true;
+		return false;
 	}
 
 	GateServer* gt = ply->GetGate();
