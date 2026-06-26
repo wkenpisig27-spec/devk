@@ -397,14 +397,21 @@ bool GroupServerApp::CheckRegisterRateLimit(const char* ip) {
 WPacket GroupServerApp::TP_REGISTER(DataSocket* datasock, RPacket& pk) {
 	cChar* userName = pk.ReadString();
 	cChar* password = pk.ReadString();
-
 	cChar* email = pk.ReadString();
+
+	WPacket ret_pk = g_gpsvr->GetWPacket();
+	ret_pk.WriteCmd(CMD_PT_REGISTER);
+
+	if (!userName || !password || !email) {
+		LG("Security", "[Register] Truncated registration packet from %s\n", datasock->GetPeerIP());
+		ret_pk.WriteChar(0);
+		ret_pk.WriteString("Invalid request.");
+		return ret_pk;
+	}
 
 	int len = strlen(userName);
 	int passlen = strlen(password);
 	int emaillen = strlen(email);
-	WPacket ret_pk = g_gpsvr->GetWPacket();
-	ret_pk.WriteCmd(CMD_PT_REGISTER);
 
 	if (!CheckRegisterRateLimit(datasock->GetPeerIP())) {
 		ret_pk.WriteChar(0);

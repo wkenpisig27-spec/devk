@@ -502,25 +502,35 @@ unsigned long long RPacket::ReadLongLong() {
 //--------------------------------------------------------------------
 cChar* RPacket::ReadSequence(uShort& retlen) {
 	cChar* l_retseq = 0;
-	retlen = ReadShort();
-	if (RemainData() >= retlen) {
+	retlen = 0;
+	uShort l_len = ReadShort();
+	if (l_len > 0 && RemainData() >= l_len) {
 		l_retseq = GetDataAddr() + em_cmdsize + m_rpos;
-		m_rpos += retlen;
+		m_rpos += l_len;
+		retlen = l_len;
 	}
 	return l_retseq;
 }
 cChar* RPacket::ReadString(uShort* len) {
-	uShort l_retlen;
+	uShort l_retlen = 0;
 	cChar* l_ret = ReadSequence(l_retlen);
-	if (l_ret && l_retlen > 0) {
-		const_cast<char*>(l_ret)[l_retlen - 1] = 0;
+	if (!l_ret || l_retlen == 0) {
 		if (len) {
-			*len = l_retlen - 1;
+			*len = 0;
 		}
-		return l_ret;
-	} else {
-		return "";
+		return nullptr;
 	}
+	// WriteString() appends a trailing NUL inside the sequence.
+	if (l_ret[l_retlen - 1] != '\0') {
+		if (len) {
+			*len = 0;
+		}
+		return nullptr;
+	}
+	if (len) {
+		*len = l_retlen - 1;
+	}
+	return l_ret;
 }
 float RPacket::ReadFloat() {
 	float l_retval = 0;

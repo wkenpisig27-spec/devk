@@ -133,7 +133,7 @@ void TcpCommApp::WSACleanup() {
 }
 //================================================================================
 TcpCommApp::TcpCommApp(RPCMGR* rpc, ThreadPool* processor, ThreadPool* communicator, bool mode)
-	: __maxsndque(10), m_keepalive(10 * 1000), __delay(0), __len_offset(0), __len_size(2), __pkt_maxlen(4 * 1024), __rpc(rpc), m_selexit(0), __mode(mode), __communicator1(communicator), __communicator(communicator ? communicator : ThreadPool::CreatePool(3, 3, 128, THREAD_PRIORITY_ABOVE_NORMAL)), __processor1(processor), __processor(processor), __atnotconn(0), __conntotal(0), __deltotal(0) {
+	: __maxsndque(10), m_keepalive(10 * 1000), __delay(0), __len_offset(0), __len_size(2), __pkt_maxlen(4 * 1024), __recvbuf_cap(4 * 1024), __rpc(rpc), m_selexit(0), __mode(mode), __communicator1(communicator), __communicator(communicator ? communicator : ThreadPool::CreatePool(3, 3, 128, THREAD_PRIORITY_ABOVE_NORMAL)), __processor1(processor), __processor(processor), __atnotconn(0), __conntotal(0), __deltotal(0), m_steadyOrigin(std::chrono::steady_clock::now()) {
 	m_band.m_sendbytes = m_band.m_sendpkts = m_band.m_recvbytes = m_band.m_recvpkts = 0;
 };
 TcpCommApp::~TcpCommApp() {
@@ -176,18 +176,24 @@ void TcpCommApp::ShutDown(uLong ulMilliseconds) {
 	}
 }
 //--------------------------------------------------------------------
-void TcpCommApp::SetPKParse(uLong len_offset, uChar len_size, uLong pkt_maxlen, int maxsndque) {
+void TcpCommApp::SetPKParse(uLong len_offset, uChar len_size, uLong pkt_maxlen, int maxsndque, uLong recvbuf_cap) {
 	*const_cast<Long*>(&__maxsndque) = static_cast<Long>(max(maxsndque, (int)10));
 	*const_cast<uLong*>(&__len_offset) = len_offset;
 	*const_cast<uChar*>(&__len_size) = len_size;
 	*const_cast<uLong*>(&__pkt_maxlen) = pkt_maxlen;
+	if (recvbuf_cap == 0 || recvbuf_cap > pkt_maxlen) {
+		recvbuf_cap = pkt_maxlen;
+	}
+	*const_cast<uLong*>(&__recvbuf_cap) = recvbuf_cap;
 	if (((__len_size != 2) && (__len_size != 4) && (__len_size != 1))) {
 		std::runtime_error("packet size is wrong!");
 	}
 }
 bool TcpCommApp::AddSocket(DataSocket* datasock) {
 	if (datasock) {
-		datasock->m_sendtime = datasock->m_recvtime = m_TickCount;
+		const uLong steadyNow = GetSteadyMs();
+		datasock->m_sendtime.store(steadyNow, std::memory_order_relaxed);
+		datasock->m_recvtime.store(steadyNow, std::memory_order_relaxed);
 		return datasock->_BeginRun(&__socklist) ? true : false;
 	} else {
 		return false;
@@ -214,12 +220,18 @@ WPacket TcpCommApp::GetWPacket() const {
 void TcpCommApp::BeginWork(uLong keepalive_seconds, uLong delay) {
 	m_keepalive = ((keepalive_seconds && (keepalive_seconds < 10)) ? 10 : keepalive_seconds) * 1000;
 	*const_cast<uLong*>(&__delay) = delay;
+	m_steadyOrigin = std::chrono::steady_clock::now();
 	m_TickCount = GetTickCount();
 	if (++__bufinit == 1) {
 		__bufheap.Init(NetBuffer);
 	}
 	Task* task = new DispatchThread(this);
 	__communicator->AddTask(task);
+}
+
+uLong TcpCommApp::GetSteadyMs() const {
+	using namespace std::chrono;
+	return static_cast<uLong>(duration_cast<milliseconds>(steady_clock::now() - m_steadyOrigin).count());
 }
 
 void TcpCommApp::DisconnectAll() {
@@ -234,9 +246,9 @@ void TcpCommApp::DisconnectAll() {
 //--------------------------------------------------------------------
 void TcpCommApp::Disconnect(DataSocket* datasock, uLong remain, int reason) {
 	if (datasock) {
-		datasock->m_delreason = reason;
-		datasock->m_delremain = remain;
-		datasock->m_deltime = datasock->__tca->m_TickCount;
+		datasock->m_delreason.store(reason, std::memory_order_relaxed);
+		datasock->m_delremain.store(static_cast<LONG>(remain), std::memory_order_relaxed);
+		datasock->m_deltime.store(static_cast<LONG>(datasock->__tca->GetSteadyMs()), std::memory_order_relaxed);
 	}
 };
 //--------------------------------------------------------------------
@@ -248,7 +260,7 @@ int TcpCommApp::SendData(DataSocket* datasock, WPacket sendbuf) {
 	}
 }
 int TcpCommApp::_SendData(DataSocket* datasock, WPacket& sendbuf) {
-	if (!datasock || datasock->m_delflag || !bool(sendbuf)) {
+	if (!datasock || datasock->m_delflag.load(std::memory_order_relaxed) || !bool(sendbuf)) {
 		return -1;
 	}
 	datasock->m_sender << sendbuf;
@@ -281,6 +293,7 @@ void TcpCommApp::BeforeSel(selparm& p) {
 	}
 	uLong l_sendbytes, l_recvbytes, l_sendpkts, l_recvpkts;
 	uLong l_intertime;
+	const uLong steadyNow = GetSteadyMs();
 	bool l_flag = ((l_tick - p.m_tick) >= 1000);
 	RunChainGetArmor<DataSocket> l(__socklist);
 	if (l_flag) {
@@ -295,56 +308,56 @@ void TcpCommApp::BeforeSel(selparm& p) {
 			uLong l_ulong = l_datasock->m_sbts.SetZero();
 			if (l_ulong) {
 				l_sendbytes += l_ulong;
-				l_datasock->m_sendbytes += l_ulong;
+				l_datasock->m_sendbytes.fetch_add(l_ulong, std::memory_order_relaxed);
 				if (l_ulong < (0xFFFFFFFF / 1000)) {
-					l_datasock->m_sendbyteps = l_ulong * 1000 / l_intertime;
+					l_datasock->m_sendbyteps.store(l_ulong * 1000 / l_intertime, std::memory_order_relaxed);
 				} else {
-					l_datasock->m_sendbyteps = (l_ulong / l_intertime) * 1000;
+					l_datasock->m_sendbyteps.store((l_ulong / l_intertime) * 1000, std::memory_order_relaxed);
 				}
 			} else {
-				l_datasock->m_sendbyteps = 0;
+				l_datasock->m_sendbyteps.store(0, std::memory_order_relaxed);
 			}
 			l_ulong = l_datasock->m_spks.SetZero();
 			if (l_ulong) {
 				l_sendpkts += l_ulong;
-				l_datasock->m_sendpkts += l_ulong;
+				l_datasock->m_sendpkts.fetch_add(l_ulong, std::memory_order_relaxed);
 				if (l_ulong < (0xFFFFFFFF / 1000)) {
-					l_datasock->m_sendpktps = l_ulong * 1000 / l_intertime;
+					l_datasock->m_sendpktps.store(l_ulong * 1000 / l_intertime, std::memory_order_relaxed);
 				} else {
-					l_datasock->m_sendpktps = (l_ulong / l_intertime) * 1000;
+					l_datasock->m_sendpktps.store((l_ulong / l_intertime) * 1000, std::memory_order_relaxed);
 				}
 			} else {
-				l_datasock->m_sendpktps = 0;
+				l_datasock->m_sendpktps.store(0, std::memory_order_relaxed);
 			}
 			l_ulong = l_datasock->m_rbts.SetZero();
 			if (l_ulong) {
 				l_recvbytes += l_ulong;
-				l_datasock->m_recvbytes += l_ulong;
+				l_datasock->m_recvbytes.fetch_add(l_ulong, std::memory_order_relaxed);
 				if (l_ulong < (0xFFFFFFFF / 1000)) {
-					l_datasock->m_recvbyteps = l_ulong * 1000 / l_intertime;
+					l_datasock->m_recvbyteps.store(l_ulong * 1000 / l_intertime, std::memory_order_relaxed);
 				} else {
-					l_datasock->m_recvbyteps = (l_ulong / l_intertime) * 1000;
+					l_datasock->m_recvbyteps.store((l_ulong / l_intertime) * 1000, std::memory_order_relaxed);
 				}
 			} else {
-				l_datasock->m_recvbyteps = 0;
+				l_datasock->m_recvbyteps.store(0, std::memory_order_relaxed);
 			}
 			l_ulong = l_datasock->m_rpks.SetZero();
 			if (l_ulong) {
 				l_recvpkts += l_ulong;
-				l_datasock->m_recvpkts += l_ulong;
+				l_datasock->m_recvpkts.fetch_add(l_ulong, std::memory_order_relaxed);
 				if (l_ulong < (0xFFFFFFFF / 1000)) {
-					l_datasock->m_recvpktps = l_ulong * 1000 / l_intertime;
+					l_datasock->m_recvpktps.store(l_ulong * 1000 / l_intertime, std::memory_order_relaxed);
 				} else {
-					l_datasock->m_recvpktps = (l_ulong / l_intertime) * 1000;
+					l_datasock->m_recvpktps.store((l_ulong / l_intertime) * 1000, std::memory_order_relaxed);
 				}
 			} else {
-				l_datasock->m_recvpktps = 0;
+				l_datasock->m_recvpktps.store(0, std::memory_order_relaxed);
 			}
 		}
 		if (m_keepalive) {
-			if (l_tick - uLong(l_datasock->m_recvtime) > m_keepalive) {
+			if (steadyNow - uLong(l_datasock->m_recvtime.load(std::memory_order_relaxed)) > m_keepalive) {
 				Disconnect(l_datasock, 0, -9);
-			} else if (l_tick - 2000 > uLong(l_datasock->m_sendtime)) {
+			} else if (steadyNow - uLong(l_datasock->m_sendtime.load(std::memory_order_relaxed)) > 2000) {
 				WPacket l_wpk = GetWPacket();
 
 				// Add by lark.li 20090309 begin
@@ -355,33 +368,33 @@ void TcpCommApp::BeforeSel(selparm& p) {
 
 				l_wpk.m_wpos = __len_offset + __len_size - l_wpk.GetPktLen();
 				_SendData(l_datasock, l_wpk);
-				l_datasock->m_sendtime = l_tick;
+				l_datasock->m_sendtime.store(static_cast<LONG>(steadyNow), std::memory_order_relaxed);
 			}
 		}
-		if (l_datasock->m_deltime) {
-			if (l_datasock->m_isProcess)
-				l_datasock->m_isProcess = 0;
-			if ((l_tick - l_datasock->m_deltime) >= uLong(l_datasock->m_delremain)) {
-				if (!l_datasock->m_delflag)
-					l_datasock->m_delflag = 1;
-				if (l_datasock->m_recvflag++ == 0) {
-					if (l_datasock->m_procflag <= 0) {
-						if (l_datasock->m_sendflag++ == 0) {
+		if (l_datasock->m_deltime.load(std::memory_order_relaxed)) {
+			if (l_datasock->m_isProcess.load(std::memory_order_relaxed))
+				l_datasock->m_isProcess.store(0, std::memory_order_relaxed);
+			if ((steadyNow - uLong(l_datasock->m_deltime.load(std::memory_order_relaxed))) >= uLong(l_datasock->m_delremain.load(std::memory_order_relaxed))) {
+				if (!l_datasock->m_delflag.load(std::memory_order_relaxed))
+					l_datasock->m_delflag.store(1, std::memory_order_relaxed);
+				if (l_datasock->m_recvflag.fetch_add(1, std::memory_order_relaxed) == 0) {
+					if (l_datasock->m_procflag.load(std::memory_order_relaxed) <= 0) {
+						if (l_datasock->m_sendflag.fetch_add(1, std::memory_order_relaxed) == 0) {
 							DelSocket(l_datasock);
 
 							++__deltotal;
 							DelConnect* l_del = DelConnect::m_delHeap.Get();
-							l_del->Init(l_datasock, l_datasock->m_delreason);
+							l_del->Init(l_datasock, l_datasock->GetDisconnectReason());
 							(__processor ? __processor : __communicator)->AddTask(l_del);
 						} else {
-							l_datasock->m_sendflag--;
-							l_datasock->m_recvflag--;
+							l_datasock->m_sendflag.fetch_sub(1, std::memory_order_relaxed);
+							l_datasock->m_recvflag.fetch_sub(1, std::memory_order_relaxed);
 						}
 					} else {
-						l_datasock->m_recvflag--;
+						l_datasock->m_recvflag.fetch_sub(1, std::memory_order_relaxed);
 					}
 				} else {
-					l_datasock->m_recvflag--;
+					l_datasock->m_recvflag.fetch_sub(1, std::memory_order_relaxed);
 				}
 				continue;
 			}
@@ -396,12 +409,12 @@ void TcpCommApp::BeforeSel(selparm& p) {
 		p.m_fdtrack.track(l_datasock->m_socket);
 		p.m_errflag = true;
 
-		if (!l_datasock->m_recvflag) {
+		if (!l_datasock->m_recvflag.load(std::memory_order_relaxed)) {
 			FD_SET(l_datasock->m_socket, &(p.m_readfds));
 			p.m_fdtrack.track(l_datasock->m_socket);
 			p.m_readflag = true;
 		}
-		if (!l_datasock->m_sendflag && l_datasock->m_sender.HasData()) {
+		if (!l_datasock->m_sendflag.load(std::memory_order_relaxed) && l_datasock->m_sender.HasData()) {
 			FD_SET(l_datasock->m_socket, &(p.m_writefds));
 			p.m_fdtrack.track(l_datasock->m_socket);
 			p.m_writeflag = true;
@@ -447,25 +460,25 @@ void TcpCommApp::AfterSel(selparm& p) {
 	RunChainGetArmor<DataSocket> l(__socklist);
 	DataSocket* l_datasock;
 	while ((l_datasock = __socklist.GetNextItem()) && p.m_selretval) {
-		if (l_datasock->m_delflag)
+		if (l_datasock->m_delflag.load(std::memory_order_relaxed))
 			continue;
 		if (FD_ISSET(l_datasock->m_socket, &(p.m_errfds))) {
 			Disconnect(l_datasock, 0, -1);
 			p.m_selretval--;
 		} else {
-			if (!l_datasock->m_recvflag && FD_ISSET(l_datasock->m_socket, &(p.m_readfds))) {
-				if (l_datasock->m_recvflag++ == 0) {
+			if (!l_datasock->m_recvflag.load(std::memory_order_relaxed) && FD_ISSET(l_datasock->m_socket, &(p.m_readfds))) {
+				if (l_datasock->m_recvflag.fetch_add(1, std::memory_order_relaxed) == 0) {
 					__communicator->AddTask(&(l_datasock->m_receiver));
 				} else {
-					l_datasock->m_recvflag--;
+					l_datasock->m_recvflag.fetch_sub(1, std::memory_order_relaxed);
 				}
 				p.m_selretval--;
 			}
-			if (!l_datasock->m_sendflag && l_datasock->m_sender.HasData() && FD_ISSET(l_datasock->m_socket, &(p.m_writefds))) {
-				if (l_datasock->m_sendflag++ == 0) {
+			if (!l_datasock->m_sendflag.load(std::memory_order_relaxed) && l_datasock->m_sender.HasData() && FD_ISSET(l_datasock->m_socket, &(p.m_writefds))) {
+				if (l_datasock->m_sendflag.fetch_add(1, std::memory_order_relaxed) == 0) {
 					__communicator->AddTask(&(l_datasock->m_sender));
 				} else {
-					l_datasock->m_sendflag--;
+					l_datasock->m_sendflag.fetch_sub(1, std::memory_order_relaxed);
 				}
 				p.m_selretval--;
 			}
@@ -730,7 +743,13 @@ dstring TcpCommApp::GetDisconnectErrText(int reason) {
 	case -7:
 		return "Socket�ϵ���������̫���ء�";
 	case -9:
-		return "KeepAliveʧ�ܡ�";
+		return "KeepAlive失败。";
+	case DS_DECRYPT_FAIL:
+		return "Packet decrypt failed.";
+	case DS_HANDLER_EXCP:
+		return "Packet handler exception.";
+	case DS_PACKET_PIPELINE:
+		return "Packet pipeline exception.";
 	case DS_DISCONN:
 		return "������õ�Ĭ�Ϸ����ӡ�";
 	case DS_SHUTDOWN:

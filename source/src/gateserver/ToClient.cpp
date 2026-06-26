@@ -1,7 +1,9 @@
 #include "gateserver.h"
 #include "log.h"
+#include "common/NetLimits.h"
 #include <stdexcept>
 #include <condition_variable>
+#include <chrono>
 using namespace dbc;
 using namespace std;
 #include <sstream>
@@ -9,6 +11,20 @@ using namespace std;
 
 // External function to log security events to terminal and log file
 extern void LogSecurityEvent(const char* ip, const char* action, const char* reason);
+
+namespace {
+unsigned ReadAntiDDoSUInt(const IniSection& ddos, const char* key, unsigned defaultVal) {
+	const std::string value = ddos[key];
+	if (value.empty()) {
+		return defaultVal;
+	}
+	try {
+		return static_cast<unsigned>(std::stoul(value));
+	} catch (...) {
+		return defaultVal;
+	}
+}
+} // namespace
 
 ToClient::ToClient(char const* fname, ThreadPool* proc, ThreadPool* comm)
 	: TcpServerApp(this, proc, comm, false), RPCMGR(this), m_maxcon(500), m_atexit(0), m_calltotal(0) {
@@ -52,6 +68,22 @@ ToClient::ToClient(char const* fname, ThreadPool* proc, ThreadPool* comm)
 		}
 		printf("Whitelist: %zu IPs loaded\n", m_whitelist.size());
 	}
+
+	{
+		const std::string connRateStr = ddos["ConnectionRateLimit"];
+		m_connRateEnabled = connRateStr.empty() || std::stoi(connRateStr) != 0;
+		m_connMinIntervalMs = ReadAntiDDoSUInt(ddos, "ConnectionMinInterval", NetLimits::kGateConnMinIntervalMs);
+		m_maxConnPerSecondPerIp = ReadAntiDDoSUInt(ddos, "MaxConnectionsPerSecond", NetLimits::kGateMaxConnPerSecondPerIp);
+		m_maxRecvBytesPerSec = ReadAntiDDoSUInt(ddos, "MaxRecvBytesPerSecond", NetLimits::kGateMaxRecvBytesPerSec);
+		m_maxRecvPktsPerSec = ReadAntiDDoSUInt(ddos, "MaxPacketsPerSecond", NetLimits::kGateMaxRecvPktsPerSec);
+		m_connBlockMinutes = ReadAntiDDoSUInt(ddos, "BanDurationMinutes", NetLimits::kGateConnBlockMinutes);
+		m_maxTrackedConnIps = ReadAntiDDoSUInt(ddos, "MaxTrackedIPs", static_cast<unsigned>(NetLimits::kGateMaxTrackedConnIps));
+		if (m_maxConnPerSecondPerIp < 1) {
+			m_maxConnPerSecondPerIp = 1;
+		}
+		printf("Connection rate limit: %s (min interval %u ms, max %u/s per IP)\n",
+			m_connRateEnabled ? "ON" : "OFF", m_connMinIntervalMs, m_maxConnPerSecondPerIp);
+	}
 	
 	if (m_proxyProtocolEnabled) {
 		printf("Proxy Protocol v1: ENABLED (SmartProxy integration)\n");
@@ -59,7 +91,7 @@ ToClient::ToClient(char const* fname, ThreadPool* proc, ThreadPool* comm)
 	}
 	
 	printf("Current client version is %d\n", m_version);
-	SetPKParse(0, 2, 16 * 1024, 100);
+	SetPKParse(0, 2, NetLimits::kClientMaxPacket, 100, NetLimits::kClientMaxPacket);
 	BeginWork(std::stoi(is["EnablePing"]), 1);
 	if (OpenListenSocket(port, ip.c_str()) != 0)
 		throw std::runtime_error("ToClient listen failed\n");
@@ -205,6 +237,94 @@ bool ToClient::DoCommand(DataSocket* datasock, cChar* cmdline) {
 	return false;
 }
 
+bool ToClient::IsWhitelisted(cChar* peerIp) const {
+	if (!m_whitelistEnabled || !peerIp || !peerIp[0]) {
+		return false;
+	}
+	for (const auto& entry : m_whitelist) {
+		if (entry == peerIp) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool ToClient::AllowConnectionRate(cChar* peerIp) {
+	if (!m_connRateEnabled || !peerIp || !peerIp[0]) {
+		return true;
+	}
+	if (IsWhitelisted(peerIp)) {
+		return true;
+	}
+
+	using clock = std::chrono::steady_clock;
+	using namespace std::chrono;
+	const auto now = clock::now();
+	const auto oneSecond = seconds(1);
+	const auto minInterval = milliseconds(m_connMinIntervalMs);
+	const auto blockDuration = minutes(m_connBlockMinutes);
+
+	auto isBlockExpired = [&](const ConnRateEntry& entry) {
+		if (entry.blockedUntil.time_since_epoch().count() == 0) {
+			return true;
+		}
+		return duration_cast<nanoseconds>(now - entry.blockedUntil).count() >= 0;
+	};
+	auto isStillBlocked = [&](const ConnRateEntry& entry) {
+		if (entry.blockedUntil.time_since_epoch().count() == 0) {
+			return false;
+		}
+		return duration_cast<nanoseconds>(entry.blockedUntil - now).count() > 0;
+	};
+
+	std::lock_guard<std::mutex> lock(m_connRateMutex);
+
+	for (auto it = m_connRateMap.begin(); it != m_connRateMap.end(); ) {
+		if (now - it->second.lastConnect > blockDuration + oneSecond && isBlockExpired(it->second)) {
+			it = m_connRateMap.erase(it);
+		} else {
+			++it;
+		}
+	}
+
+	if (m_connRateMap.size() >= m_maxTrackedConnIps && m_connRateMap.find(peerIp) == m_connRateMap.end()) {
+		LG("Security", "[ConnRate] tracked IP cap %zu, rejecting %s\n", m_maxTrackedConnIps, peerIp);
+		LogSecurityEvent(peerIp, "CONN_FLOOD", "Tracked IP table full");
+		return false;
+	}
+
+	auto& info = m_connRateMap[peerIp];
+
+	if (isStillBlocked(info)) {
+		LG("Security", "[ConnRate] IP %s blocked\n", peerIp);
+		return false;
+	}
+
+	if (info.lastConnect.time_since_epoch().count() != 0 && now - info.lastConnect < minInterval) {
+		info.blockedUntil = now + blockDuration;
+		LG("Security", "[ConnRate] IP %s reconnect too fast (< %u ms)\n", peerIp, m_connMinIntervalMs);
+		LogSecurityEvent(peerIp, "CONN_RATE", "Min connection interval");
+		return false;
+	}
+
+	if (info.countInWindow == 0 || now - info.windowStart >= oneSecond) {
+		info.windowStart = now;
+		info.countInWindow = 0;
+	}
+
+	info.countInWindow++;
+	info.lastConnect = now;
+
+	if (info.countInWindow > static_cast<int>(m_maxConnPerSecondPerIp)) {
+		info.blockedUntil = now + blockDuration;
+		LG("Security", "[ConnRate] IP %s exceeded %u connections/s\n", peerIp, m_maxConnPerSecondPerIp);
+		LogSecurityEvent(peerIp, "CONN_FLOOD", "Per-second connection limit");
+		return false;
+	}
+
+	return true;
+}
+
 void ToClient::TaskDispatcher(Task* task) {
 	extern std::mutex global_gate_ready_mutex;
 	extern std::condition_variable global_gate_ready_cv;
@@ -236,6 +356,11 @@ bool ToClient::OnConnect(DataSocket* datasock) {
 	// Check max connections
 	if (GetSockTotal() >= m_maxcon) {
 		LG("GateServer", "client: %s\tcome, greater than %u player, force disconnect...\n", datasock->GetPeerIP(), m_maxcon);
+		return false;
+	}
+
+	if (!AllowConnectionRate(datasock->GetPeerIP())) {
+		LG("GateServer", "client: %s connection rate limited, rejecting\n", datasock->GetPeerIP());
 		return false;
 	}
 	
@@ -728,9 +853,18 @@ void ToClient::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 			}
 			break;
 		}
-		if (datasock->m_recvbyteps > 1024 * 12) {
-			LG("AttackMonitor", "[%s] flooding (>12K/s)\n", datasock->GetPeerIP());
-			std::cout << "[" << datasock->GetPeerIP() << "] flooding (>12K/s)\n";
+		if (m_connRateEnabled && !IsWhitelisted(datasock->GetPeerIP()) &&
+			(datasock->m_recvbyteps.load(std::memory_order_relaxed) > m_maxRecvBytesPerSec ||
+				datasock->m_recvpktps.load(std::memory_order_relaxed) > m_maxRecvPktsPerSec)) {
+			const char* ip = datasock->GetPeerIP();
+			LG("Security", "[TrafficRate] IP %s flood recv %u B/s, %u pkt/s (limits %u/%u)\n",
+				ip ? ip : "Unknown",
+				static_cast<unsigned>(datasock->m_recvbyteps.load(std::memory_order_relaxed)),
+				static_cast<unsigned>(datasock->m_recvpktps.load(std::memory_order_relaxed)),
+				m_maxRecvBytesPerSec, m_maxRecvPktsPerSec);
+			LogSecurityEvent(ip ? ip : "Unknown", "TRAFFIC_FLOOD", "Recv rate exceeded");
+			Disconnect(datasock, 50, -33);
+			return;
 		}
 	} catch (...) {
 		LG("ToClientError", "l_cmd = %d\n", l_cmd);
@@ -1009,12 +1143,21 @@ void ToClient::CM_BGNPLAY(DataSocket* datasock, RPacket& recvbuf) {
 				{
 					// Modify by lark.li 20080317
 					memset(l_ply->m_password, 0, sizeof(l_ply->m_password));
-					strncpy(l_ply->m_password, l_rpk.ReadString(), ROLE_MAXSIZE_PASSWORD2); // 角色二次密码
-					// End
+					cChar* l_pw2 = l_rpk.ReadString();
+					if (l_pw2) {
+						strncpy(l_ply->m_password, l_pw2, ROLE_MAXSIZE_PASSWORD2 - 1);
+						l_ply->m_password[ROLE_MAXSIZE_PASSWORD2 - 1] = '\0';
+					}
 
 					l_ply->m_dbid = l_rpk.ReadLong();	 // 角色ID;
 					l_ply->m_worldid = l_rpk.ReadLong(); // GroupServer分配的唯一ID
 					cChar* l_map = l_rpk.ReadString();
+					if (!l_map) {
+						l_wpk = datasock->GetWPacket();
+						l_wpk.WriteCmd(CMD_MC_BGNPLAY);
+						l_wpk.WriteShort(ERR_MC_NOTARRIVE);
+						SendData(datasock, l_wpk);
+					} else {
 					l_ply->m_sGarnerWiner = l_rpk.ReadShort();
 					GameServer* l_game = g_gtsvr->gm_conn->find(l_map);
 					if (!l_game) // 目标地图不可达
@@ -1074,6 +1217,7 @@ void ToClient::CM_BGNPLAY(DataSocket* datasock, RPacket& recvbuf) {
 								l_game->m_datasock->GetPeerIP(), l_ply->m_dbid, MakeULong(l_ply));
 							l_game->EnterMap(l_ply, l_ply->m_loginID, l_ply->m_dbid, l_ply->m_worldid, l_map, -1, 0, 0, 0, l_ply->m_sGarnerWiner); // 根据地图查找GameServer，然后请求GameServer以进入这个地图。
 						}
+					}
 					}
 				}
 			}
@@ -1445,52 +1589,75 @@ void ToClient::TC_DISCONNECT(dbc::DataSocket* datasock, int reason, int remain) 
 	g_gtsvr->cli_conn->SendData(datasock, wpk);
 }
 
+uLong ToClient::GetWireTagOverhead(DataSocket* datasock) const {
+	(void)datasock;
+	return (_comm_enc >= WIRE_CRYPTO_GCM) ? WIRE_GCM_TAG_SIZE : 0;
+}
+
 void ToClient::OnEncrypt(DataSocket* datasock, char* ciphertext, const char* text, uLong& len) {
 	TcpCommApp::OnEncrypt(datasock, ciphertext, text, len);
 
-	if (_comm_enc > 0) {
-		auto ply = static_cast<Player*>(datasock->GetPointer());
-
-		if (ply && ply->enc && ply->m_enc_cipher) {
-			try {
-				memcpy(ciphertext, text, len);
-				MutexArmor lock(ply->m_mtx_enc);
-				ply->m_enc_cipher->process((uint8_t*)ciphertext, len);
-			} catch (const Botan::Exception& e) {
-				// Wipe the plaintext that was copied before process() failed,
-				// then drop the connection — cipher state is now undefined.
-				memset(ciphertext, 0, len);
-				LG("ErrServer", "[%s] OnEncrypt Botan Error: %s — disconnecting\n", datasock->GetPeerIP(), e.what());
-				Disconnect(datasock, 0, -32);
-			} catch (...) {
-				memset(ciphertext, 0, len);
-				LG("ErrServer", "[%s] OnEncrypt Unknown Error — disconnecting\n", datasock->GetPeerIP());
-				Disconnect(datasock, 0, -32);
-			}
-		}
+	if (_comm_enc <= 0) {
+		return;
 	}
 
-	return;
+	auto ply = static_cast<Player*>(datasock->GetPointer());
+	if (!ply || !ply->enc) {
+		return;
+	}
+
+	try {
+		if (_comm_enc >= WIRE_CRYPTO_GCM) {
+			memcpy(ciphertext, text, len);
+			const uLong capacity = datasock->GetSendBuf();
+			WireGcmEncryptInPlace(ply->m_AESKey, ply->m_IV, ply->m_gcmSeqToClient++, (uint8_t*)ciphertext, len, capacity);
+			return;
+		}
+
+		if (ply->m_enc_cipher) {
+			memcpy(ciphertext, text, len);
+			MutexArmor lock(ply->m_mtx_enc);
+			ply->m_enc_cipher->process((uint8_t*)ciphertext, len);
+		}
+	} catch (const Botan::Exception& e) {
+		memset(ciphertext, 0, len);
+		LG("ErrServer", "[%s] OnEncrypt Botan Error: %s — disconnecting\n", datasock->GetPeerIP(), e.what());
+		Disconnect(datasock, 0, -32);
+	} catch (...) {
+		memset(ciphertext, 0, len);
+		LG("ErrServer", "[%s] OnEncrypt Unknown Error — disconnecting\n", datasock->GetPeerIP());
+		Disconnect(datasock, 0, -32);
+	}
 }
 
 void ToClient::OnDecrypt(DataSocket* datasock, char* ciphertext, uLong& len) {
 	TcpCommApp::OnDecrypt(datasock, ciphertext, len);
 
-	if (_comm_enc > 0) {
-		auto ply = static_cast<Player*>(datasock->GetPointer());
-		if (ply && ply->enc && ply->m_dec_cipher) {
-			try {
-				ply->m_dec_cipher->process((uint8_t*)ciphertext, len);
-			} catch (const Botan::Exception& e) {
-				LG("ErrServer", "[%s] OnDecrypt Botan Error: %s\n", datasock->GetPeerIP(), e.what());
-				Disconnect(datasock, 0, -32);
-			} catch (...) {
-				LG("ErrServer", "[%s] OnDecrypt Unknown Error!\n", datasock->GetPeerIP());
-				Disconnect(datasock, 0, -32);
-			}
-		}
+	if (_comm_enc <= 0) {
+		return;
 	}
-	return;
+
+	auto ply = static_cast<Player*>(datasock->GetPointer());
+	if (!ply || !ply->enc) {
+		return;
+	}
+
+	try {
+		if (_comm_enc >= WIRE_CRYPTO_GCM) {
+			WireGcmDecryptInPlace(ply->m_AESKey, ply->m_cs_iv, ply->m_gcmSeqFromClient++, (uint8_t*)ciphertext, len);
+			return;
+		}
+
+		if (ply->m_dec_cipher) {
+			ply->m_dec_cipher->process((uint8_t*)ciphertext, len);
+		}
+	} catch (const Botan::Exception& e) {
+		LG("ErrServer", "[%s] OnDecrypt Botan Error: %s\n", datasock->GetPeerIP(), e.what());
+		Disconnect(datasock, 0, -32);
+	} catch (...) {
+		LG("ErrServer", "[%s] OnDecrypt Unknown Error!\n", datasock->GetPeerIP());
+		Disconnect(datasock, 0, -32);
+	}
 }
 
 void ToClient::post_mapcrash_msg(Player* ply) {

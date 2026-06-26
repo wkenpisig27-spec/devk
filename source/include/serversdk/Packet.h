@@ -19,6 +19,12 @@ class TcpCommApp;
 class RPacket;
 
 enum { em_cmdsize = sizeof(uShort) };
+
+// RPacket read contract (I4):
+// - ReadSequence: returns nullptr and retlen=0 on underflow.
+// - ReadString: returns nullptr on underflow or malformed string (missing trailing NUL).
+//   Does not modify the receive buffer. Callers must null-check before use.
+// - ReadChar/Short/Long/etc.: return zero on underflow (legacy).
 //==============================================================================================
 class WPacket : private rptr<rbuf> {
 	friend class RPacket;

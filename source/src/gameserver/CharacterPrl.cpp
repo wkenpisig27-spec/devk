@@ -1076,7 +1076,10 @@ void CCharacter::ProcessPacket(unsigned short usCmd, RPACKET pk) {
 		}
 	} break;
 	case CMD_TM_CHANGE_PERSONINFO: {
-		SetMotto(READ_STRING(pk));
+		cChar* motto = READ_STRING(pk);
+		if (motto) {
+			SetMotto(motto);
+		}
 		Short sIconID = READ_SHORT(pk);
 		
 		// SANITIZE: Validate icon ID range (valid icons are 1-100, 0 = no icon)

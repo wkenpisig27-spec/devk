@@ -11,11 +11,16 @@
 
 #include "platform_compat.h"
 
+#include <chrono>
+
 #include "DataSocket.h"
 #include "Packet.h"
 
 #define DS_SHUTDOWN (0xFFFF)
 #define DS_DISCONN (0xFFFE)
+#define DS_DECRYPT_FAIL (-11)
+#define DS_HANDLER_EXCP (-12)
+#define DS_PACKET_PIPELINE (-13)
 
 _DBC_BEGIN
 #pragma pack(push)
@@ -103,24 +108,29 @@ public:
 	uLong GetPktHead() const;
 	WPacket GetWPacket() const;
 	uLong GetCurrentTick() const { return m_TickCount; }
+	uLong GetSteadyMs() const;
 	uLong GetRecvTime(DataSocket* datasock) const {
 		if (datasock) {
-			return datasock->m_recvtime;
+			return datasock->m_recvtime.load(std::memory_order_relaxed);
 		} else {
 			return uLong(int(-1));
 		}
 	}
+	virtual uLong GetWireTagOverhead(DataSocket* datasock) const { (void)datasock; return 0; }
 	static dstring GetDisconnectErrText(int reason);
 
-	// const��Ա
+	// const members
 	cLong __maxsndque;
-	cuLong __len_offset, __pkt_maxlen;
+	cuLong __len_offset, __pkt_maxlen, __recvbuf_cap;
 	cuChar __len_size;
 	bool const __mode;
 	RPCMGR* const __rpc;
 
+	uLong GetPktMaxLen() const { return __pkt_maxlen; }
+	uLong GetRecvBufCap() const { return __recvbuf_cap; }
+
 protected:
-	void SetPKParse(uLong len_offset, uChar len_size, uLong pkt_maxlen, int maxsndque);
+	void SetPKParse(uLong len_offset, uChar len_size, uLong pkt_maxlen, int maxsndque, uLong recvbuf_cap = 0);
 	void BeginWork(uLong keepalive_seconds = 10, uLong delay = 0);
 
 	virtual void ShutDown(uLong ulMilliseconds);
@@ -141,6 +151,7 @@ private:
 
 	ThreadPool *const __communicator, *const __communicator1, *const __processor, *const __processor1;
 	InterLockedLong m_TickCount;
+	std::chrono::steady_clock::time_point m_steadyOrigin;
 	uLong const __delay;
 	uLong m_keepalive;
 

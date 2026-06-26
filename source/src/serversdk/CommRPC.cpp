@@ -9,6 +9,7 @@
 #include "RPCInfo.h"
 #include "DataSocket.h"
 #include "CommRPC.h"
+#include "PacketPipeline.h"
 #include <string>
 
 _DBC_USING
@@ -32,13 +33,17 @@ int OnServeCall::Process() {
 		try {
 			l_retbuf = __rpc->OnServeCall(m_datasock, m_rpk);
 		} catch (...) {
+			PacketPipelineFailDisconnect(__tca, m_datasock, m_rpk, DS_HANDLER_EXCP, "OnServeCall");
+			m_sessid = 0;
+			m_rpk = 0;
+			return 0;
 		}
 
 		if (!l_retbuf.HasData() || l_retbuf.Size() < l_retbuf.GetPktLen()) {
 			l_retbuf = __tca->GetWPacket();
 		}
 
-		m_sessid += SESSFLAG; // ���Ϸ��ر�־
+		m_sessid += SESSFLAG; // 加上返回标志
 		l_retbuf.WriteSESS(m_sessid);
 
 		try {
@@ -47,8 +52,11 @@ int OnServeCall::Process() {
 				__tca->_SendData(m_datasock, l_retbuf);
 			}
 		} catch (...) {
+			LG("Security", "[PacketPipeline] OnServeCall send failed peer=%s:%u\n",
+			   m_datasock->GetPeerIP(), m_datasock->GetPeerPort());
 		}
 	} catch (...) {
+		PacketPipelineFailDisconnect(__tca, m_datasock, m_rpk, DS_PACKET_PIPELINE, "OnServeCall_outer");
 	}
 	m_sessid = 0;
 	m_rpk = 0;

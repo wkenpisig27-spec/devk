@@ -13,6 +13,7 @@
 #include "PacketCmd.h"
 #include "NetChat.h"
 #include "NetGuild.h"
+#include "common/NetLimits.h"
 #include "uiequipform.h"
 #include "uiglobalvar.h"
 #include <fstream>
@@ -595,7 +596,7 @@ NetIF::NetIF(ThreadPool* comm) : TcpClientApp(this, 0, comm), RPCMGR(this), PKQu
 	memset(m_ulDelayTime, 0, sizeof(dbc::uLong) * 4);
 	m_mutmov.Create(false);
 	m_mutProCir.Create(false);
-	SetPKParse(0, 2, 64 * 1024, 100);
+	SetPKParse(0, 2, NetLimits::kClientGameMaxPacket, 100, NetLimits::kClientGameMaxPacket);
 	BeginWork(g_Config.m_nSendHeartbeat);
 
 	m_pCProCir = new CProCirculateCC(this);
@@ -759,24 +760,49 @@ void NetIF::ProcessData(dbc::DataSocket* datasock, dbc::RPacket& recvbuf) {
 extern bool encrypt_Noise(int nNoise, char* src, unsigned int src_len);
 extern bool decrypt_Noise(int nNoise, char* src, unsigned int src_len);
 
+uLong NetIF::GetWireTagOverhead(dbc::DataSocket* datasock) const {
+	(void)datasock;
+	return (_comm_enc >= WIRE_CRYPTO_GCM) ? WIRE_GCM_TAG_SIZE : 0;
+}
+
 void NetIF::OnEncrypt(dbc::DataSocket* datasock, char* ciphertext, const char* text, dbc::uLong& len) {
 	TcpCommApp::OnEncrypt(datasock, ciphertext, text, len);
-	if (_comm_enc > 0 && _enc && m_enc_cipher) {
-		try {
+	if (_comm_enc <= 0 || !_enc) {
+		return;
+	}
+
+	try {
+		if (_comm_enc >= WIRE_CRYPTO_GCM) {
+			memcpy(ciphertext, text, len);
+			const uLong capacity = datasock->GetSendBuf();
+			WireGcmEncryptInPlace(m_AESKey, m_cs_iv, m_gcmSeqToServer++, (uint8_t*)ciphertext, len, capacity);
+			return;
+		}
+
+		if (m_enc_cipher) {
 			memcpy(ciphertext, text, len);
 			m_enc_cipher->process((uint8_t*)ciphertext, len);
-		} catch (const Botan::Exception& e) {
-			LG("enc", "OnEncrypt Botan Error: %s\n", e.what());
-		} catch (...) {
-			LG("enc", "OnEncrypt Unknown Error\n");
 		}
+	} catch (const Botan::Exception& e) {
+		LG("enc", "OnEncrypt Botan Error: %s\n", e.what());
+	} catch (...) {
+		LG("enc", "OnEncrypt Unknown Error\n");
 	}
 }
 
 void NetIF::OnDecrypt(dbc::DataSocket* datasock, char* ciphertext, dbc::uLong& len) {
 	TcpCommApp::OnDecrypt(datasock, ciphertext, len);
+	if (_comm_enc <= 0 || !_enc) {
+		return;
+	}
+
 	try {
-		if (_comm_enc > 0 && _enc && m_dec_cipher) {
+		if (_comm_enc >= WIRE_CRYPTO_GCM) {
+			WireGcmDecryptInPlace(m_AESKey, m_IV, m_gcmSeqFromServer++, (uint8_t*)ciphertext, len);
+			return;
+		}
+
+		if (m_dec_cipher) {
 			m_dec_cipher->process((uint8_t*)ciphertext, len);
 		}
 	} catch (const Botan::Exception& e) {

@@ -1,6 +1,7 @@
 
 #include "gateserver.h"
 #include "log.h"
+#include "common/NetLimits.h"
 #include <condition_variable>
 
 using namespace dbc;
@@ -127,7 +128,7 @@ ToGroupServer::ToGroupServer(char const* fname, ThreadPool* proc, ThreadPool* co
 
 	// Æô¶¯ PING Ïß³Ì
 
-	SetPKParse(0, 2, 64 * 1024, 400);
+	SetPKParse(0, 2, NetLimits::kInterServerMaxPacket, 400, NetLimits::kInterServerMaxPacket);
 	BeginWork(std::stoi(is["EnablePing"]));
 
 	//++m_calltotal;

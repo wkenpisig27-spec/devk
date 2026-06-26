@@ -1,5 +1,6 @@
 #include "DataSocket.h"
 #include "PacketQueue.h"
+#include "PacketPipeline.h"
 #include "../../include/util/log.h"
 
 _DBC_USING
@@ -176,11 +177,19 @@ void PKQueue::PeekPacket(uLong sleep, bool isServer) {
 				try {
 					ProcessData(l_item->m_datasock, l_item->m_inpk);
 				} catch (...) {
+					if (l_item->m_datasock) {
+						TcpCommApp* tca = l_item->m_datasock->GetTcpApp();
+						PacketPipelineFailDisconnect(tca, l_item->m_datasock, l_item->m_inpk, DS_HANDLER_EXCP, "PKQueue::ProcessData");
+					}
 					l_item->Free();
-					throw;
+					break;
 				}
 			} else {
-				ProcessData(l_item->m_datasock, l_item->m_inpk);
+				try {
+					ProcessData(l_item->m_datasock, l_item->m_inpk);
+				} catch (...) {
+					LG("Security", "[PacketPipeline] client ProcessData exception\n");
+				}
 			}
 			l_item->Free();
 			break;

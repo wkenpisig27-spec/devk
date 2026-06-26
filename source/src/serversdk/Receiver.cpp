@@ -11,6 +11,8 @@
 #include "Packet.h"
 #include "CommRPC.h"
 
+#include "common/NetAuditDiag.h"
+#include "PacketPipeline.h"
 #include "iostream"
 #include "../../include/util/log.h"
 
@@ -18,6 +20,18 @@ _DBC_USING
 
 extern PreAllocHeap<rbuf> __bufheap;
 PreAllocHeapPtr<OnProcessData> Receiver::m_HeapProcData(0, 30);
+
+static uLong CalcRecvAllocSize(const TcpCommApp* tca) {
+	if (!tca) {
+		return 4096;
+	}
+	uLong cap = tca->GetRecvBufCap();
+	uLong frameMax = tca->GetPktMaxLen();
+	if (cap > 0 && cap < frameMax) {
+		frameMax = cap;
+	}
+	return frameMax > 0 ? frameMax : 4096;
+}
 
 //================================================================================
 inline void OnProcessData::Init(DataSocket* datasock, RPacket& rpk) {
@@ -28,17 +42,11 @@ inline void OnProcessData::Init(DataSocket* datasock, RPacket& rpk) {
 //--------------------------------------------------
 int OnProcessData::Process() {
 	try {
-		// Add by larl.li 20090309 begin
-#if 0
-       LG("DebugIn", "Recv %s(%d) <== %s(%d), cmd=%d\n",
-          m_datasock->GetLocalIP(), m_datasock->GetLocalPort(),
-          m_datasock->GetPeerIP(), m_datasock->GetPeerPort(), m_rpk.ReadCmd());
-#endif
-		// End
 		__tca->OnProcessData(m_datasock, m_rpk);
 	} catch (...) {
+		PacketPipelineFailDisconnect(__tca, m_datasock, m_rpk, DS_HANDLER_EXCP, "OnProcessData");
 	}
-	m_datasock->m_procflag--;
+	m_datasock->m_procflag.fetch_sub(1, std::memory_order_relaxed);
 	m_rpk = 0;
 	return 0;
 }
@@ -66,9 +74,9 @@ int Receiver::Process() {
 	int l_reallen = 0;
 	int l_retval = 0;
 
-	while (!m_datasock->m_delflag && !GetExitFlag()) {
+	while (!m_datasock->m_delflag.load(std::memory_order_relaxed) && !GetExitFlag()) {
 		if (!HasSpace()) {
-			m_rpk = __bufheap.Get(max(m_datasock->GetRecvBuf(), __tca->__pkt_maxlen));
+			m_rpk = __bufheap.Get(CalcRecvAllocSize(__tca));
 			m_p = 0;
 		}
 
@@ -76,17 +84,16 @@ int Receiver::Process() {
 
 		if (l_reallen > 0) {
 			m_rpk.m_tickcount = ::GetTickCount();
-			m_datasock->m_recvtime = __tca->GetCurrentTick();
+			m_datasock->m_recvtime.store(static_cast<LONG>(__tca->GetSteadyMs()), std::memory_order_relaxed);
 			m_p += l_reallen;
-			while (!m_datasock->m_delflag) {
+			while (!m_datasock->m_delflag.load(std::memory_order_relaxed)) {
 				if (!m_rpk.GetPktLen() && (m_p >= _len_inc)) {
 					m_rpk.ReadPktLen();
 
-					if (m_rpk.GetPktLen() > __tca->__pkt_maxlen || m_rpk.GetPktLen() < _len_inc) {
-						LG("DebugIn", "Recv %s(%d) <== %s(%d), cmd=%d, len=%u, MaxLen=%u\n",
-						   m_datasock->GetLocalIP(), m_datasock->GetLocalPort(),
+					if (m_rpk.GetPktLen() > __tca->GetPktMaxLen() || m_rpk.GetPktLen() < _len_inc) {
+						LG("Security", "[PacketValidation] Oversize/truncated frame peer=%s:%u cmd=%u len=%u max=%u\n",
 						   m_datasock->GetPeerIP(), m_datasock->GetPeerPort(),
-						   m_rpk.ReadCmd(), m_rpk.GetPktLen(), __tca->__pkt_maxlen);
+						   m_rpk.ReadCmd(), m_rpk.GetPktLen(), __tca->GetPktMaxLen());
 
 						l_retval = -5;
 						break;
@@ -99,14 +106,28 @@ int Receiver::Process() {
 					m_datasock->m_rpks++;
 					m_datasock->m_rbts += m_rpk.GetPktLen();
 
-					if (m_rpk.GetPktLen() > _len_inc && m_datasock->m_isProcess) {
+					if (m_rpk.GetPktLen() > _len_inc && m_datasock->m_isProcess.load(std::memory_order_relaxed)) {
 						RPacket l_rpk = m_rpk;
 
 						if (l_rpk.IsOK()) {
+#if NET_AUDIT_DIAG
+							NET_AUDIT_LOG(
+								"NetAudit",
+								"recv peer=%s:%u local=%s:%u cmd=%u len=%u\n",
+								m_datasock->GetPeerIP(),
+								m_datasock->GetPeerPort(),
+								m_datasock->GetLocalIP(),
+								m_datasock->GetLocalPort(),
+								l_rpk.ReadCmd(),
+								l_rpk.GetPktLen());
+#endif
 							uLong l_len = l_rpk.GetDataLen();
 							try {
 								__tca->OnDecrypt(m_datasock, const_cast<char*>(l_rpk.GetDataAddr()), l_len);
 							} catch (...) {
+								PacketPipelineFailDisconnect(__tca, m_datasock, l_rpk, DS_DECRYPT_FAIL, "OnDecrypt");
+								l_retval = 0;
+								break;
 							}
 							l_rpk.DiscardLast(l_rpk.GetDataLen() - l_len);
 							try {
@@ -114,19 +135,28 @@ int Receiver::Process() {
 									OnProcessData* l_processdata = m_HeapProcData.Get();
 									l_processdata->Init(m_datasock, l_rpk);
 									if (__tca->__mode && __tca->GetProcessor()) {
-										m_datasock->m_procflag++;
+										m_datasock->m_procflag.fetch_add(1, std::memory_order_relaxed);
 										try {
 											__tca->GetProcessor()->AddTask(l_processdata);
 										} catch (...) {
-											m_datasock->m_procflag--;
+											m_datasock->m_procflag.fetch_sub(1, std::memory_order_relaxed);
+											LG("Security", "[PacketPipeline] AddTask failed peer=%s:%u\n",
+											   m_datasock->GetPeerIP(), m_datasock->GetPeerPort());
 										}
 									} else {
-										m_datasock->m_procflag++;
+										m_datasock->m_procflag.fetch_add(1, std::memory_order_relaxed);
 										try {
 											l_processdata->Process();
 										} catch (...) {
+											PacketPipelineFailDisconnect(__tca, m_datasock, l_rpk, DS_HANDLER_EXCP, "inline_handler");
+											m_datasock->m_procflag.fetch_sub(1, std::memory_order_relaxed);
+											try {
+												l_processdata->Lastly();
+											} catch (...) {
+											}
+											break;
 										}
-										m_datasock->m_procflag--;
+										m_datasock->m_procflag.fetch_sub(1, std::memory_order_relaxed);
 										try {
 											l_processdata->Lastly();
 										} catch (...) {
@@ -134,6 +164,9 @@ int Receiver::Process() {
 									}
 								}
 							} catch (...) {
+								PacketPipelineFailDisconnect(__tca, m_datasock, l_rpk, DS_PACKET_PIPELINE, "recv_dispatch");
+								l_retval = 0;
+								break;
 							}
 						}
 					} // if(m_rpk.GetPktLen() >_len_inc && m_datasock->m_isProcess)
@@ -146,8 +179,8 @@ int Receiver::Process() {
 					break;
 				}
 			} // while(!m_datasock->m_delflag)
-			if (!l_retval && !HasSpace() && !m_datasock->m_delflag) {
-				rbuf* l_rbuf = __bufheap.Get(max(m_datasock->GetRecvBuf(), __tca->__pkt_maxlen));
+			if (!l_retval && !HasSpace() && !m_datasock->m_delflag.load(std::memory_order_relaxed)) {
+				rbuf* l_rbuf = __bufheap.Get(CalcRecvAllocSize(__tca));
 				if (m_p) {
 					MemCpy(l_rbuf->getbuf(), m_rpk.GetPktAddr(), m_p);
 				}
@@ -167,12 +200,12 @@ int Receiver::Process() {
 		}
 		break;
 	} // while(!m_datasock->m_delflag && !GetExitFlag())
-	if (m_datasock->m_delflag) {
-		m_datasock->m_recvflag--;
+	if (m_datasock->m_delflag.load(std::memory_order_relaxed)) {
+		m_datasock->m_recvflag.fetch_sub(1, std::memory_order_relaxed);
 		return 0;
 	} else if (l_retval && (l_retval != WSAEWOULDBLOCK)) {
 		__tca->Disconnect(m_datasock, 0, l_retval);
 	}
-	m_datasock->m_recvflag--;
+	m_datasock->m_recvflag.fetch_sub(1, std::memory_order_relaxed);
 	return l_retval;
 };

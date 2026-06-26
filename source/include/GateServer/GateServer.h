@@ -22,6 +22,7 @@
 #include "pi_Memory.h"
 #include "pi_Alloc.h"
 #include "NetRetCode.h"
+#include "common/NetLimits.h"
 
 #include <iostream>
 #include <map>
@@ -29,6 +30,8 @@
 #include <atomic>
 #include <shared_mutex>
 #include <fstream>
+#include <chrono>
+#include <mutex>
 
 using namespace std;
 using namespace dbc;
@@ -64,6 +67,8 @@ public:
 	void TC_DISCONNECT(DataSocket* datasock, int reason = DS_DISCONN, int remain = 4000);
 
 	uShort GetVersion() { return m_version; }
+	int GetCommEncryptMode() const { return _comm_enc; }
+	uLong GetWireTagOverhead(DataSocket* datasock) const override;
 	int GetCallTotal() { return m_calltotal; }
 	uShort GetHandshakeTimeout() const { return m_handshakeTimeout; }
 
@@ -85,6 +90,26 @@ private:
 
 	void ReRouteToGameServer(DataSocket* datasock, RPacket& recvbuf);
 	void ReRouteToGroupServer(DataSocket* datasock, RPacket& recvbuf);
+
+	bool AllowConnectionRate(cChar* peerIp);
+	bool IsWhitelisted(cChar* peerIp) const;
+
+	struct ConnRateEntry {
+		std::chrono::steady_clock::time_point windowStart{};
+		std::chrono::steady_clock::time_point lastConnect{};
+		std::chrono::steady_clock::time_point blockedUntil{};
+		int countInWindow{0};
+	};
+
+	bool m_connRateEnabled{true};
+	unsigned m_connMinIntervalMs{NetLimits::kGateConnMinIntervalMs};
+	unsigned m_maxConnPerSecondPerIp{NetLimits::kGateMaxConnPerSecondPerIp};
+	unsigned m_maxRecvBytesPerSec{NetLimits::kGateMaxRecvBytesPerSec};
+	unsigned m_maxRecvPktsPerSec{NetLimits::kGateMaxRecvPktsPerSec};
+	unsigned m_connBlockMinutes{NetLimits::kGateConnBlockMinutes};
+	size_t m_maxTrackedConnIps{NetLimits::kGateMaxTrackedConnIps};
+	std::mutex m_connRateMutex;
+	std::unordered_map<std::string, ConnRateEntry> m_connRateMap;
 
 	InterLockedLong m_atexit, m_calltotal;
 	volatile uShort m_maxcon;
@@ -269,6 +294,9 @@ public:
 	char m_nonce[12];
 	AES_KEY m_AESKey;
 	AES_IV m_IV;
+	AES_IV m_cs_iv;
+	uint64_t m_gcmSeqToClient{0};
+	uint64_t m_gcmSeqFromClient{0};
 
 	// Stateful AES-128/CTR cipher objects — one per traffic direction.
 	// Initialized once in Initially() so keystream advances continuously

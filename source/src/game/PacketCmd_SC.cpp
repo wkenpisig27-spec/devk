@@ -122,6 +122,9 @@ BOOL SC_RSAHandshake1(LPRPACKET pk) {
 	CGameApp::Waiting(true, "Securing connection...");
 	uShort len;
 	const char* pemKey = pk.ReadString(&len);
+	if (!pemKey || len == 0) {
+		return FALSE;
+	}
 	std::vector<uint8_t> input(pemKey, pemKey + sizeof(uint8_t) * len);
 	g_NetIF->m_srvPublicKey = Botan::X509::load_key(input);
 
@@ -140,6 +143,9 @@ BOOL SC_RSAHandshake2(LPRPACKET pk) {
 	const char* encrypted_aes_key = pk.ReadSequence(len_aes);
 	uShort len_iv;
 	const char* encrypted_iv = pk.ReadSequence(len_iv);
+	if (!encrypted_aes_key || !encrypted_iv || len_aes == 0 || len_iv == 0) {
+		return FALSE;
+	}
 	Botan::AutoSeeded_RNG rng;
 	Botan::PK_Decryptor_EME dec(*g_NetIF->m_clientPrivateKey, rng, "OAEP(SHA-256)");
 	Botan::secure_vector<uint8_t> decrypted_aes = dec.decrypt((uint8_t*)encrypted_aes_key, len_aes);
@@ -193,21 +199,24 @@ BOOL SC_Login(LPRPACKET pk) {
 
 		DWORD dwFlag = pk.ReadLong(); // 0x3214
 
-		// Initialize stateful AES-CTR ciphers once per session.
-		// Directions use different IVs so C→S and S→C keystreams are never identical.
-		//   Client enc (C→S) / Server dec: IV with first byte flipped (^= 0x01)
-		//   Client dec (S→C) / Server enc: base IV as-is
-		AES_IV cs_iv;
-		memcpy(cs_iv, g_NetIF->m_IV, AES_IV_LENGTH);
-		cs_iv[0] ^= 0x01;
+		memcpy(g_NetIF->m_cs_iv, g_NetIF->m_IV, AES_IV_LENGTH);
+		g_NetIF->m_cs_iv[0] ^= 0x01;
+		g_NetIF->m_gcmSeqToServer = 0;
+		g_NetIF->m_gcmSeqFromServer = 0;
 
-		g_NetIF->m_enc_cipher = Botan::Cipher_Mode::create("AES-128/CTR", Botan::ENCRYPTION);
-		g_NetIF->m_enc_cipher->set_key(g_NetIF->m_AESKey, AES_KEY_LENGTH);
-		g_NetIF->m_enc_cipher->start(cs_iv, AES_IV_LENGTH);  // C→S: modified IV
+		if (g_NetIF->_comm_enc >= WIRE_CRYPTO_GCM) {
+			g_NetIF->m_enc_cipher.reset();
+			g_NetIF->m_dec_cipher.reset();
+		} else if (g_NetIF->_comm_enc > 0) {
+			// Initialize stateful AES-CTR ciphers once per session.
+			g_NetIF->m_enc_cipher = Botan::Cipher_Mode::create("AES-128/CTR", Botan::ENCRYPTION);
+			g_NetIF->m_enc_cipher->set_key(g_NetIF->m_AESKey, AES_KEY_LENGTH);
+			g_NetIF->m_enc_cipher->start(g_NetIF->m_cs_iv, AES_IV_LENGTH);  // C→S: modified IV
 
-		g_NetIF->m_dec_cipher = Botan::Cipher_Mode::create("AES-128/CTR", Botan::DECRYPTION);
-		g_NetIF->m_dec_cipher->set_key(g_NetIF->m_AESKey, AES_KEY_LENGTH);
-		g_NetIF->m_dec_cipher->start(g_NetIF->m_IV, AES_IV_LENGTH);  // S→C: base IV
+			g_NetIF->m_dec_cipher = Botan::Cipher_Mode::create("AES-128/CTR", Botan::DECRYPTION);
+			g_NetIF->m_dec_cipher->set_key(g_NetIF->m_AESKey, AES_KEY_LENGTH);
+			g_NetIF->m_dec_cipher->start(g_NetIF->m_IV, AES_IV_LENGTH);  // S→C: base IV
+		}
 
 		g_NetIF->_enc = true;
 

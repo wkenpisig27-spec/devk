@@ -60,6 +60,7 @@ public:
 	bool IsConnected() { return m_connect.IsConnected(); }
 	int GetConnStat() { return m_connect.GetConnStat(); }
 	virtual void ProcessData(dbc::DataSocket* datasock, dbc::RPacket& recvbuf);
+	uLong GetWireTagOverhead(dbc::DataSocket* datasock) const override;
 
 	unsigned long GetAveragePing();
 	CProCirculate* GetProCir(void) { return m_pCProCir; }
@@ -92,6 +93,9 @@ public:
 	Botan::Public_Key* m_srvPublicKey;
 	AES_KEY m_AESKey;
 	AES_IV m_IV;
+	AES_IV m_cs_iv;
+	uint64_t m_gcmSeqToServer{0};
+	uint64_t m_gcmSeqFromServer{0};
 
 	std::unique_ptr<Botan::Cipher_Mode> m_enc_cipher;
 	std::unique_ptr<Botan::Cipher_Mode> m_dec_cipher;

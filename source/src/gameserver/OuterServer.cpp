@@ -11,6 +11,7 @@
 #include "TryUtil.h"
 #include "Config.h"
 #include "GameApp.h"
+#include "common/NetLimits.h"
 
 _DBC_USING
 // OuterServer * g_gmout	=0;
@@ -18,7 +19,7 @@ _DBC_USING
 OuterServer::OuterServer(ThreadPool* proc, ThreadPool* comm)
 	: TcpServerApp(this, proc, comm), RPCMGR(this), m_count(0) {
 	T_B
-		SetPKParse(0, 2, 4 * 1024, 400);
+		SetPKParse(0, 2, NetLimits::kAccountServerMaxPacket, 400, NetLimits::kAccountServerMaxPacket);
 	BeginWork(g_Config.m_lSocketAlive);
 	m_mutdisc.Create(false);
 	T_E

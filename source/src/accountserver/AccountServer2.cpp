@@ -18,6 +18,7 @@
 // New auth system integration
 #include "Auth.h"
 #include "PacketSanitizer.h"
+#include "common/NetLimits.h"
 
 using namespace std;
 
@@ -87,7 +88,7 @@ AccountServer2::AccountServer2(ThreadPool* proc, ThreadPool* comm)
 	// the field of "packet length" is 2 bytes
 	// the max length of packet is 4K bytes
 	// the max length of send queue is 100
-	SetPKParse(0, 2, 4 * 1024, 100);
+	SetPKParse(0, 2, NetLimits::kAccountServerMaxPacket, 100, NetLimits::kAccountServerMaxPacket);
 
 #ifdef _DEBUG
 	BeginWork(200);
@@ -134,8 +135,14 @@ void AccountServer2::OnProcessData(DataSocket* datasock, RPacket& rpkt) {
 	switch (usCmd) {
 		// GroupServerЭ��
 	case CMD_PA_CHANGEPASS: {
-		string name = rpkt.ReadString();
-		string pass = rpkt.ReadString();
+		cChar* pName = rpkt.ReadString();
+		cChar* pPass = rpkt.ReadString();
+		if (!pName || !pPass) {
+			LG("Security", "[AccountServer] CMD_PA_CHANGEPASS: truncated packet\n");
+			break;
+		}
+		string name = pName;
+		string pass = pPass;
 		if (!PS::ValidateUsername(name.c_str())) {
 			LG("Security", "[AccountServer] CMD_PA_CHANGEPASS: invalid username '%s'\n", name.c_str());
 			break;
@@ -148,9 +155,16 @@ void AccountServer2::OnProcessData(DataSocket* datasock, RPacket& rpkt) {
 		break;
 	}
 	case CMD_PA_REGISTER: {
-		string name = rpkt.ReadString();
-		string pass = rpkt.ReadString();
-		string email = rpkt.ReadString();
+		cChar* pName = rpkt.ReadString();
+		cChar* pPass = rpkt.ReadString();
+		cChar* pEmail = rpkt.ReadString();
+		if (!pName || !pPass || !pEmail) {
+			LG("Security", "[AccountServer] CMD_PA_REGISTER: truncated packet\n");
+			break;
+		}
+		string name = pName;
+		string pass = pPass;
+		string email = pEmail;
 		if (!PS::ValidateUsername(name.c_str())) {
 			LG("Security", "[AccountServer] CMD_PA_REGISTER: invalid username '%s'\n", name.c_str());
 			break;
@@ -178,7 +192,12 @@ void AccountServer2::OnProcessData(DataSocket* datasock, RPacket& rpkt) {
 	}
 
 	case CMD_PA_GMBANACCOUNT: {
-		string actName = rpkt.ReadString();
+		cChar* pAct = rpkt.ReadString();
+		if (!pAct) {
+			LG("Security", "[AccountServer] CMD_PA_GMBANACCOUNT: truncated packet\n");
+			break;
+		}
+		string actName = pAct;
 		if (actName.empty() || actName.size() > PS::MAX_USERNAME_LENGTH) {
 			LG("Security", "[AccountServer] CMD_PA_GMBANACCOUNT: invalid account name length\n");
 			break;
@@ -187,7 +206,12 @@ void AccountServer2::OnProcessData(DataSocket* datasock, RPacket& rpkt) {
 		break;
 	}
 	case CMD_PA_GMUNBANACCOUNT: {
-		string actName = rpkt.ReadString();
+		cChar* pAct = rpkt.ReadString();
+		if (!pAct) {
+			LG("Security", "[AccountServer] CMD_PA_GMUNBANACCOUNT: truncated packet\n");
+			break;
+		}
+		string actName = pAct;
 		if (actName.empty() || actName.size() > PS::MAX_USERNAME_LENGTH) {
 			LG("Security", "[AccountServer] CMD_PA_GMUNBANACCOUNT: invalid account name length\n");
 			break;

@@ -394,17 +394,14 @@ void CGameApp::ProcessPacket(GateServer* pGate, RPACKET pkt) {
 			   g_pGameApp->m_strMapNameList.c_str());
 			DISCONNECT(pGate->GetDataSock());
 		} else {
-			pGate->GetName() = READ_STRING(pkt);
-			if (!strcmp(pGate->GetName().c_str(), "")) {
-				/*LG("GameLogin", "??� GateServer: [%s:%d]??? ??�???�???????????????????????\n",
-					pGate->GetName().c_str(), pGate->GetIP().c_str(), pGate->GetPort(),
-					g_pGameApp->m_strMapNameList.c_str());*/
+			cChar* gateName = READ_STRING(pkt);
+			if (!gateName || !strcmp(gateName, "")) {
 				LG("GameLogin", "entry GateServer: [%s:%d]success but do not get his name??so disconnection and entry again\n",
-				   pGate->GetName().c_str(), pGate->GetIP().c_str(), pGate->GetPort(),
+				   pGate->GetIP().c_str(), pGate->GetPort(),
 				   g_pGameApp->m_strMapNameList.c_str());
-
 				DISCONNECT(pGate->GetDataSock());
 			} else {
+				pGate->GetName() = gateName;
 				/*LG("GameLogin", "??� GateServer: %s [%s:%d]??? [MapName:%s]\n",
 					pGate->GetName().c_str(), pGate->GetIP().c_str(), pGate->GetPort(),
 					g_pGameApp->m_strMapNameList.c_str());*/

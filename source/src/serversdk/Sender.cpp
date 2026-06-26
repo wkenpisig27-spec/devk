@@ -93,7 +93,7 @@ inline SNDPacket& SNDPacket::operator<<(WPacket& wpk) {
 	//====
 	uLong l_len = wpk.GetPktLen() - wpk.m_cpos;
 	if (wpk.m_wpos < SIGN32 - em_cmdsize) {
-		l_len += (l_len + 9) / 10;
+		l_len += (l_len + 9) / 10 + m_datasock->GetTcpApp()->GetWireTagOverhead(m_datasock);
 	}
 	if (HasSpace() < l_len) {
 		m_haspace = false;
@@ -128,7 +128,7 @@ Sender& Sender::operator<<(WPacket& wpk) {
 
 	MutexArmor l_lockSend(m_mtxsend);
 	MutexArmor l_lockComb(m_mtxcomb);
-	while (bool(wpk) && m_datasock->m_delflag == 0) {
+	while (bool(wpk) && m_datasock->m_delflag.load(std::memory_order_relaxed) == 0) {
 		if (m_tail && m_tail->HasSpace()) {
 			// Add by lark.li 20090309 begin
 #if 0
@@ -143,11 +143,11 @@ Sender& Sender::operator<<(WPacket& wpk) {
 			// End
 
 			*m_tail << wpk;
-			if (m_head->m_cpos > uLong(0.618 * m_head->SendSize()) && !m_send && !m_datasock->m_sendflag && !m_datasock->m_delflag) {
-				if (m_datasock->m_sendflag++ == 0) {
+			if (m_head->m_cpos > uLong(0.618 * m_head->SendSize()) && !m_send && !m_datasock->m_sendflag.load(std::memory_order_relaxed) && !m_datasock->m_delflag.load(std::memory_order_relaxed)) {
+				if (m_datasock->m_sendflag.fetch_add(1, std::memory_order_relaxed) == 0) {
 					m_datasock->GetTcpApp()->GetCommunicator()->AddTask(this);
 				} else {
-					m_datasock->m_sendflag--;
+					m_datasock->m_sendflag.fetch_sub(1, std::memory_order_relaxed);
 				}
 			}
 		} else {
@@ -161,7 +161,7 @@ Sender& Sender::operator<<(WPacket& wpk) {
 							l_flag = m_datasock->GetTcpApp()->OnSendBlock(m_datasock);
 						} catch (...) {
 						}
-					} while (!m_datasock->m_delflag && !GetExitFlag() && l_flag && (l_timelock = m_semSndC.timelock(100)) != WAIT_OBJECT_0);
+					} while (!m_datasock->m_delflag.load(std::memory_order_relaxed) && !GetExitFlag() && l_flag && (l_timelock = m_semSndC.timelock(100)) != WAIT_OBJECT_0);
 				}
 
 				if (!l_flag) {
@@ -199,11 +199,11 @@ Sender& Sender::operator<<(WPacket& wpk) {
 						m_tail = l_snd;
 					} else {
 						m_head = m_tail = l_snd;
-						if (m_head->m_cpos > uLong(0.618 * m_head->SendSize()) && !m_send && !m_datasock->m_sendflag && !m_datasock->m_delflag) {
-							if (m_datasock->m_sendflag++ == 0) {
+						if (m_head->m_cpos > uLong(0.618 * m_head->SendSize()) && !m_send && !m_datasock->m_sendflag.load(std::memory_order_relaxed) && !m_datasock->m_delflag.load(std::memory_order_relaxed)) {
+							if (m_datasock->m_sendflag.fetch_add(1, std::memory_order_relaxed) == 0) {
 								m_datasock->GetTcpApp()->GetCommunicator()->AddTask(this);
 							} else {
-								m_datasock->m_sendflag--;
+								m_datasock->m_sendflag.fetch_sub(1, std::memory_order_relaxed);
 							}
 						}
 					}
@@ -250,7 +250,7 @@ int Sender::Process() {
 	try {
 		int l_retval;
 		int l_sendlen = 0;
-		while (!m_datasock->m_delflag && !GetExitFlag() && HasData()) {
+		while (!m_datasock->m_delflag.load(std::memory_order_relaxed) && !GetExitFlag() && HasData()) {
 			if (!m_send) {
 				if (!PopSNDPacket(0)) {
 					break;
@@ -258,7 +258,7 @@ int Sender::Process() {
 			}
 			l_sendlen = send(m_datasock->m_socket, m_send->GetBufAddr() + m_p, m_send->m_cpos - m_p, 0);
 			if (l_sendlen >= 0) {
-				m_datasock->m_sendtime = __tca->GetCurrentTick();
+				m_datasock->m_sendtime.store(static_cast<LONG>(__tca->GetSteadyMs()), std::memory_order_relaxed);
 				m_p += l_sendlen;
 				l_retval = 0;
 			} else if (l_sendlen == SOCKET_ERROR) {
@@ -302,9 +302,9 @@ int Sender::Process() {
 		} // while(!m_datasock->m_delflag && !GetExitFlag() && HasData())
 	} catch (...) {
 		LG("comm", "Sender::Process() exception, PeerIP:%s this=0x%p m_datasock=0x%p m_send=0x%p m_head=0x%p m_tail=0x%p m_p=%u m_sendflag=%d\n",
-		   m_datasock->GetPeerIP(), this, m_datasock, m_send, m_head, m_tail, m_p, m_datasock->m_sendflag);
+		   m_datasock->GetPeerIP(), this, m_datasock, m_send, m_head, m_tail, m_p, static_cast<int>(m_datasock->m_sendflag.load(std::memory_order_relaxed)));
 	}
 
-	m_datasock->m_sendflag--;
+	m_datasock->m_sendflag.fetch_sub(1, std::memory_order_relaxed);
 	return 0;
 }

@@ -314,23 +314,28 @@ void Player::Initially() {
 	Botan::InitializationVector iv(rng, aes_key.length());
 	memcpy(m_AESKey, aes_key.bits_of().data(), aes_key.bits_of().size());
 	memcpy(m_IV, iv.bits_of().data(), iv.bits_of().size());
+	memcpy(m_cs_iv, m_IV, AES_IV_LENGTH);
+	m_cs_iv[0] ^= 0x01;
+	m_gcmSeqToClient = 0;
+	m_gcmSeqFromClient = 0;
 
-	// Initialize stateful ciphers. Two separate IVs ensure S→C and C→S
-	// keystreams are never identical (same IV both ways allows cross-stream XOR attacks).
-	//   Server enc (S→C) / Client dec: base IV as-is
-	//   Server dec (C→S) / Client enc: IV with first byte flipped (^= 0x01)
-	AES_IV cs_iv;
-	memcpy(cs_iv, m_IV, AES_IV_LENGTH);
-	cs_iv[0] ^= 0x01;
+	const int wireMode = (g_gtsvr && g_gtsvr->cli_conn) ? g_gtsvr->cli_conn->GetCommEncryptMode() : WIRE_CRYPTO_CTR;
+	if (wireMode == WIRE_CRYPTO_CTR) {
+		// Initialize stateful ciphers. Two separate IVs ensure S→C and C→S
+		// keystreams are never identical (same IV both ways allows cross-stream XOR attacks).
+		//   Server enc (S→C) / Client dec: base IV as-is
+		//   Server dec (C→S) / Client enc: IV with first byte flipped (^= 0x01)
+		m_enc_cipher = Botan::Cipher_Mode::create("AES-128/CTR", Botan::ENCRYPTION);
+		m_enc_cipher->set_key(m_AESKey, AES_KEY_LENGTH);
+		m_enc_cipher->start(m_IV, AES_IV_LENGTH);   // S→C: base IV
+		m_mtx_enc.Create(false);
 
-	m_enc_cipher = Botan::Cipher_Mode::create("AES-128/CTR", Botan::ENCRYPTION);
-	m_enc_cipher->set_key(m_AESKey, AES_KEY_LENGTH);
-	m_enc_cipher->start(m_IV, AES_IV_LENGTH);   // S→C: base IV
-	m_mtx_enc.Create(false);
-
-	m_dec_cipher = Botan::Cipher_Mode::create("AES-128/CTR", Botan::DECRYPTION);
-	m_dec_cipher->set_key(m_AESKey, AES_KEY_LENGTH);
-	m_dec_cipher->start(cs_iv, AES_IV_LENGTH);  // C→S: modified IV
+		m_dec_cipher = Botan::Cipher_Mode::create("AES-128/CTR", Botan::DECRYPTION);
+		m_dec_cipher->set_key(m_AESKey, AES_KEY_LENGTH);
+		m_dec_cipher->start(m_cs_iv, AES_IV_LENGTH);  // C→S: modified IV
+	} else {
+		m_mtx_enc.Create(false);
+	}
 
 	// Register in player registry with new generation
 	if (g_gtsvr) {

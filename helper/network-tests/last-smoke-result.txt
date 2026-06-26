@@ -1,0 +1,6 @@
+2026-06-26 15:48:13
+target=127.0.0.1:1973
+T0-connect	PASS	OK cmd=943 pkt_len=636
+T0-ping	PASS	OK ping sent, connection still open
+T0-login	SKIP	SKIP: run manual login via game client (LoginScene -> CS_Login)
+T0-enter	SKIP	SKIP: run manual char select -> CMD_CM_BGNPLAY after login

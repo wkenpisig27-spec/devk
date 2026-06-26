@@ -1,6 +1,7 @@
 
 #include "gateserver.h"
 #include "log.h"
+#include "common/NetLimits.h"
 #include <stdexcept>
 #include <condition_variable>
 using namespace std;
@@ -20,7 +21,7 @@ ToGameServer::ToGameServer(char const* fname, ThreadPool* proc, ThreadPool* comm
 
 	// Æô¶¯ PING Ïß³Ì
 
-	SetPKParse(0, 2, 64 * 1024, 400);
+	SetPKParse(0, 2, NetLimits::kInterServerMaxPacket, 400, NetLimits::kInterServerMaxPacket);
 	BeginWork(std::stoi(is["EnablePing"]));
 	if (OpenListenSocket(port, ip.c_str()) != 0) {
 		throw std::runtime_error("ToGameServer listen failed");
@@ -288,6 +289,11 @@ void ToGameServer::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 void ToGameServer::MT_LOGIN(DataSocket* datasock, RPacket& rpk) {
 	cChar* gms_name = rpk.ReadString();
 	cChar* map_list = rpk.ReadString();
+	if (!gms_name || !map_list) {
+		LG("Security", "[ToGameServer] MT_LOGIN: truncated packet from GameServer\n");
+		Disconnect(datasock);
+		return;
+	}
 	GameServer* gms = _game_heap.Get();
 	WPacket retpk = GetWPacket();
 	bool valid = true;

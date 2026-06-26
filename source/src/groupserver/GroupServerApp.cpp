@@ -13,6 +13,7 @@
 #include "Team.h"
 #include "Script.h"
 #include "Parser.h"
+#include "common/NetLimits.h"
 
 using namespace std;
 
@@ -186,7 +187,7 @@ GroupServerApp::GroupServerApp(ThreadPool* proc, ThreadPool* comm)
 		LG_SetDirWithTimestamp(logDir.c_str());
 	}
 
-	SetPKParse(0, 2, 16 * 1024, 100);
+	SetPKParse(0, 2, NetLimits::kGroupServerMaxPacket, 100, NetLimits::kGroupServerMaxPacket);
 	uLong l_alive = 10;
 	try {
 		l_alive = std::stoi(m_cfg["Main"]["KeepAlive"]);

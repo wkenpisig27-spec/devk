@@ -10,6 +10,7 @@
 #include "GameApp.h"
 #include "TryUtil.h"
 #include "OfflineStall.h"
+#include "common/NetLimits.h"
 
 _DBC_USING
 // 不要修改下面的行,谢谢合作!
@@ -188,7 +189,7 @@ GameServerApp::GameServerApp(ThreadPool* proc, ThreadPool* comm)
 	m_mutdisconn.Create(false);
 
 	// 网络设置
-	SetPKParse(0, 2, 32 * 1024, 400);
+	SetPKParse(0, 2, NetLimits::kGameServerMaxPacket, 400, NetLimits::kGameServerMaxPacket);
 	BeginWork(g_Config.m_lSocketAlive);
 
 	// LG("init", "ServerApp构造结束\n");
