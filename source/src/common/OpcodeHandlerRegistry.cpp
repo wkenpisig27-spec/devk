@@ -1,32 +1,37 @@
 #include "OpcodeHandlerRegistry.h"
 
 #include <algorithm>
+#include <array>
 #include <vector>
 
 namespace {
 
-std::vector<OpcodeHandlerEntry> g_handlers;
+using HandlerTable = std::vector<OpcodeHandlerEntry>;
 
-const OpcodeHandlerEntry* findHandler(uint16_t opcode) {
+std::array<HandlerTable, static_cast<std::size_t>(OpcodeDispatchDomain::Count)> g_handlers;
+
+HandlerTable& table(OpcodeDispatchDomain domain) {
+	return g_handlers[static_cast<std::size_t>(domain)];
+}
+
+const OpcodeHandlerEntry* findHandler(const HandlerTable& handlers, uint16_t opcode) {
 	auto it = std::lower_bound(
-		g_handlers.begin(),
-		g_handlers.end(),
+		handlers.begin(),
+		handlers.end(),
 		opcode,
 		[](const OpcodeHandlerEntry& entry, uint16_t value) { return entry.opcode < value; });
-	if (it != g_handlers.end() && it->opcode == opcode) {
+	if (it != handlers.end() && it->opcode == opcode) {
 		return &(*it);
 	}
 	return nullptr;
 }
 
-} // namespace
-
-bool RegisterOpcodeHandlers(const OpcodeHandlerEntry* entries, std::size_t count) {
+bool mergeHandlers(HandlerTable& handlers, const OpcodeHandlerEntry* entries, std::size_t count) {
 	if (!entries || count == 0) {
 		return false;
 	}
 
-	std::vector<OpcodeHandlerEntry> merged = g_handlers;
+	HandlerTable merged = handlers;
 	merged.insert(merged.end(), entries, entries + count);
 	std::sort(merged.begin(), merged.end(), [](const OpcodeHandlerEntry& a, const OpcodeHandlerEntry& b) {
 		return a.opcode < b.opcode;
@@ -38,22 +43,40 @@ bool RegisterOpcodeHandlers(const OpcodeHandlerEntry* entries, std::size_t count
 		}
 	}
 
-	g_handlers.swap(merged);
+	handlers.swap(merged);
 	return true;
 }
 
-bool DispatchOpcodeHandler(uint16_t opcode, void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv) {
-	const OpcodeHandlerEntry* entry = findHandler(opcode);
+} // namespace
+
+bool RegisterOpcodeHandlers(OpcodeDispatchDomain domain, const OpcodeHandlerEntry* entries, std::size_t count) {
+	if (domain >= OpcodeDispatchDomain::Count) {
+		return false;
+	}
+	return mergeHandlers(table(domain), entries, count);
+}
+
+bool DispatchOpcodeHandler(OpcodeDispatchDomain domain, uint16_t opcode, void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv) {
+	if (domain >= OpcodeDispatchDomain::Count) {
+		return false;
+	}
+	const OpcodeHandlerEntry* entry = findHandler(table(domain), opcode);
 	if (!entry || !entry->handler) {
 		return false;
 	}
 	return entry->handler(ctx, sock, recv);
 }
 
-void ClearOpcodeHandlers() {
-	g_handlers.clear();
+void ClearOpcodeHandlers(OpcodeDispatchDomain domain) {
+	if (domain >= OpcodeDispatchDomain::Count) {
+		return;
+	}
+	table(domain).clear();
 }
 
-std::size_t OpcodeHandlerCount() {
-	return g_handlers.size();
+std::size_t OpcodeHandlerCount(OpcodeDispatchDomain domain) {
+	if (domain >= OpcodeDispatchDomain::Count) {
+		return 0;
+	}
+	return table(domain).size();
 }

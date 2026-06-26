@@ -132,11 +132,11 @@ void RegisterAllToClientOpcodeHandlers() {
 		}
 	}
 
-	if (!RegisterOpcodeHandlers(entries.data(), entries.size())) {
+	if (!RegisterOpcodeHandlers(OpcodeDispatchDomain::Gate, entries.data(), entries.size())) {
 		throw std::runtime_error("RegisterAllToClientOpcodeHandlers failed\n");
 	}
 
-	printf("ToClient opcode registry: %zu handlers\n", OpcodeHandlerCount());
+	printf("ToClient opcode registry: %zu handlers\n", OpcodeHandlerCount(OpcodeDispatchDomain::Gate));
 }
 } // namespace
 
@@ -983,7 +983,7 @@ void ToClient::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 		} else if (IsTransmitCallOpcode(l_cmd) || l_cmd == CMD_CM_LOGIN) {
 			// Login, begin-play, and other GroupServer SyncCalls must not be queued.
 			DispatchSyncClientOpcode(this, datasock, recvbuf, l_cmd);
-		} else if (!DispatchOpcodeHandler(l_cmd, this, datasock, recvbuf)) {
+		} else if (!DispatchOpcodeHandler(OpcodeDispatchDomain::Gate, l_cmd, this, datasock, recvbuf)) {
 			LG("Security", "[OpcodeRegistry] Unhandled CMD %u from %s\n",
 				static_cast<unsigned int>(l_cmd), datasock->GetPeerIP());
 		}

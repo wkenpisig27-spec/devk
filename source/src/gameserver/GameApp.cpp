@@ -555,6 +555,7 @@ BOOL CGameApp::Init() {
 	m_CTimerItem.Begin(3 * 1000);
 
 	RegisterCharacterOpcodeHandlers();
+	RegisterGameAppOpcodeHandlers();
 
 	return TRUE;
 	T_E

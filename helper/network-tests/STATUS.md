@@ -59,7 +59,7 @@ Track progress for autonomous refactoring. Update after each completed task.
 |-------|------|--------|-------|
 | A | M3 Session handles (slot + generation) | pending | Replace pointer identity on game path |
 | B | M2 Bulk migration — Gate lifecycle (B1) | mostly done | SyncCall on comm thread covers login/BGNPLAY |
-| B | M2 Bulk migration — GameAppNet (B5) | pending | ~14 top-level cases |
+| B | M2 Bulk migration — GameAppNet (B5) | **done** | batch 3: 35 handlers total (2026-06-27) |
 | B | M2 Bulk migration — CharacterPrl (B6) | **done** | 2026-06-27 — 112 handlers; legacy switch empty |
 | C | M6 Zero-copy gate forwarding | pending | Drop `Duplicate()` in `ReRouteToGameServer` |
 | D | M4 Backplane PSK auth | pending | Gate↔Game/Group/Account |
@@ -309,6 +309,100 @@ Build: Release\|x64 **PASS** (`GameServer.vcxproj`, CharacterPrl.cpp compiled an
 
 Blockers: none. **Track B6 complete.**
 
+### Track B5 — GameAppNet registry (batch 1, 2026-06-27)
+
+`CGameApp::ProcessPacket` now tries `DispatchOpcodeHandler` first (via `GameAppPacketContext { app, gate }`); unmigrated opcodes fall through to legacy switch + default router.
+
+Registered handlers (10):
+
+| Opcode | # | Handler |
+|--------|---|---------|
+| CMD_TM_LOGIN_ACK | 1005 | Gate login ack / name bind |
+| CMD_TM_MAPENTRY_NOMAP | 1008 | No-op (no map entry) |
+| CMD_PM_TEAM | 4501 | ProcessTeamMsg |
+| CMD_PM_GUILDINFO | 4504 | ProcessGuildMsg |
+| CMD_PM_GUILD_CHALLMONEY | 4505 | ProcessGuildChallMoney |
+| CMD_TM_MAPENTRY | 1007 | ProcessDynMapEntry |
+| CMD_PM_GARNER2_UPDATE | 4507 | ProcessGarner2Update |
+| CMD_PM_SAY2ALL | 4509 | World chat relay |
+| CMD_PM_SAY2TRADE | 4510 | Trade chat relay |
+| CMD_PM_GUILD_CHALL_PRIZEMONEY | 4506 | Forward to MM guild chall prize |
+
+**Context pattern:** `GameAppPacketContext { CGameApp* app; GateServer* gate; }` passed as `void* ctx` to `OpcodeHandlerFn` (Gate ToClient uses `ToClient*` directly; GameApp needs both app and gate).
+
+Files: `GameAppNet.cpp`, `GameApp.h`, `GameApp.cpp` (`RegisterGameAppOpcodeHandlers` after `RegisterCharacterOpcodeHandlers`).
+
+Build: Release\|x64 **PASS** (`GameServer.vcxproj`, GameAppNet.cpp compiled and linked).
+
+**Legacy switch:** 3 explicit cases remain (`CMD_TM_ENTERMAP`, `CMD_TM_GOOUTMAP`, `CMD_PM_EXPSCALE`) + `default` router (MM band → `ProcessInterGameMsg`, CM/TM player → `CCharacter::ProcessPacket`).
+
+Blockers: none for batch 2.
+
+**Recommended batch 2 (~3 top-level + pilot):** `CMD_TM_ENTERMAP`, `CMD_TM_GOOUTMAP` (critical enter/leave path — test T0-enter carefully), `CMD_PM_EXPSCALE` (nested switch). Then begin `ProcessInterGameMsg` MM cases (guild bank sync, GM query/kick, ADDCREDIT/ADDMONEY — lower coupling than enter/leave).
+
+### Track B5 — GameAppNet registry (batch 2, 2026-06-27)
+
+Added 13 handlers (23 total on registry):
+
+| Opcode | # | Handler |
+|--------|---|---------|
+| CMD_TM_ENTERMAP | 1003 | Enter map / create player (T0-enter path) |
+| CMD_TM_GOOUTMAP | 1004 | Leave map / logout / offline stall |
+| CMD_PM_EXPSCALE | 4511 | Anti-indulgence exp scale (nested ulTime switch) |
+| CMD_MM_UPDATEGUILDBANK | 4023 | Sync guild bank kitbag to members |
+| CMD_MM_UPDATEGUILDBANKGOLD | 4024 | Broadcast guild bank gold |
+| CMD_MM_GUILD_MOTTO | 4014 | Guild motto sync (lSrcID = guild ID) |
+| CMD_MM_GUILD_DISBAND | 4011 | Guild disband broadcast |
+| CMD_MM_GUILD_KICK | 4010 | Guild kick single player |
+| CMD_MM_GUILD_APPROVE | 4009 | Guild approve applicant |
+| CMD_MM_GUILD_REJECT | 4008 | Guild reject applicant |
+| CMD_MM_ADDCREDIT | 4019 | Add player credit |
+| CMD_MM_ADDMONEY | 4021 | Add player gold |
+| CMD_MM_NOTICE | 4013 | LocalNotice broadcast |
+
+**ProcessInterGameMsg dispatch:** Option B — same `RegisterGameAppOpcodeHandlers()` registry. After reading MM header (`lSrcID`, `sNum`, `lGatePlayerAddr`, `lGatePlayerID`), `ProcessInterGameMsg` builds extended `GameAppPacketContext { app, gate, lSrcID, lGatePlayerID, lGatePlayerAddr }` and calls `DispatchOpcodeHandler` before legacy switch. Guild handlers that used `lSrcID` read it from context; `ProcessPacket` passes zeros for inter-game fields.
+
+**ProcessPacket legacy switch:** No explicit cases remain — only `default` router (MM band → `ProcessInterGameMsg`, CM/TM player → `CCharacter::ProcessPacket`).
+
+Files: `GameAppNet.cpp`, `GameApp.h` (same init path as batch 1).
+
+Build: Release\|x64 **PASS** (`GameAppNet.cpp` compiled and linked → `source/bin/Release/gameserver/GameServer.exe`).
+
+Blockers: none for batch 3. **Manual T0-enter / logout test recommended** for ENTERMAP/GOOUTMAP.
+
+**Hotfix (2026-06-27):** B5 broke movement/chat — `OpcodeHandlerRegistry` was a single global table; `GameApp::ProcessPacket` dispatched CM/PM packets through Character handlers with wrong `ctx`. Fixed by `OpcodeDispatchDomain` (Gate / GameCharacter / GameApp) isolated registries.
+
+**Recommended batch 3 (~10):** `ProcessInterGameMsg` GM/query group — `CMD_MM_QUERY_CHAPING`, `CMD_MM_QUERY_CHA`, `CMD_MM_QUERY_CHAITEM`, `CMD_MM_CALL_CHA`, `CMD_MM_GOTO_CHA`, `CMD_MM_KICK_CHA`, `CMD_MM_CHA_NOTICE`, `CMD_MM_DO_STRING`, `CMD_MM_LOGIN`, `CMD_MM_GUILD_CHALL_PRIZEMONEY` (uses lSrcID/lGatePlayerAddr from context).
+
+### Track B5 — GameAppNet registry (batch 3, 2026-06-27)
+
+Added 12 handlers (35 total on registry) — **final ProcessInterGameMsg switch cleanup**:
+
+| Opcode | # | Handler |
+|--------|---|---------|
+| CMD_MM_QUERY_CHAPING | 4012 | GM ping query |
+| CMD_MM_QUERY_CHA | 4003 | GM character location query |
+| CMD_MM_QUERY_CHAITEM | 4004 | GM kitbag query |
+| CMD_MM_CALL_CHA | 4005 | GM summon character |
+| CMD_MM_GOTO_CHA | 4006 | GM goto character (2-phase) |
+| CMD_MM_KICK_CHA | 4007 | GM kick character |
+| CMD_MM_CHA_NOTICE | 4016 | GM notice (local or targeted) |
+| CMD_MM_DO_STRING | 4015 | GM Lua dostring |
+| CMD_MM_LOGIN | 4017 | After-player-login hook |
+| CMD_MM_GUILD_CHALL_PRIZEMONEY | 4018 | Guild challenge prize payout |
+| CMD_MM_STORE_BUY | 4020 | IGS store buy accept |
+| CMD_MM_AUCTION | 4022 | Auction end script |
+
+**ProcessInterGameMsg legacy switch:** Only `default: break;` remains — all MM opcodes dispatched via registry after MM header read + `GameAppPacketContext`.
+
+**ProcessPacket legacy switch:** No explicit cases — only `default` router (MM band → `ProcessInterGameMsg`, CM/TM player → `CCharacter::ProcessPacket`).
+
+Files: `GameAppNet.cpp`, `GameApp.h` (same init path as batch 1–2).
+
+Build: Release\|x64 compile **PASS** (`GameAppNet.cpp`); link blocked (GameServer.exe in use).
+
+Blockers: none. **Track B5 complete** — both ProcessPacket and ProcessInterGameMsg legacy switches empty (`default` only).
+
 ---
 
 ## Known regressions
@@ -329,4 +423,4 @@ See last-smoke-result.txt for automated output.
 
 ## Resume prompt for next session
 
-> Continue Option B Phase 3. **Track B6 done** (112 CharacterPrl registry entries; legacy switch empty). Next: Track B5 (GameAppNet ~14 cases) or Track A (M3 session handles). Read `docs/NETWORK_AUDIT.md` and this file. Wire format unchanged.
+> Continue Option B Phase 3. **Track B6 done** (112 CharacterPrl registry entries). **Track B5 done** (35 GameAppNet handlers). Next: Track A (session handles) or Track C (zero-copy gate forwarding). Read `docs/NETWORK_AUDIT.md` and this file. Wire format unchanged.

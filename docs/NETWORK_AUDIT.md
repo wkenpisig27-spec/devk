@@ -231,7 +231,8 @@ Full detail with code paths was documented 2026-06-26. Summary by category:
 | Track | Goal | Priority | Key files |
 |-------|------|----------|-----------|
 | **A — M3** | Slot+generation session handles | High | `GateServer.cpp`, `GameAppNet.cpp`, `ToClient.cpp` |
-| **B — M2** | Migrate GameServer `CharacterPrl.cpp` to registry | High | **Done** — 112 handlers, switch empty |
+| **B — M2** | Migrate GameServer `CharacterPrl.cpp` to registry | High | **Done** — 112 handlers |
+| **B — M2** | Migrate GameServer `GameAppNet.cpp` to registry | High | **Done** — 35 handlers |
 | **C — M6** | Zero-copy gate forward (drop `Duplicate()`) | Med | `ToClient.cpp` `ReRouteToGameServer` |
 | **D — M4** | Backplane PSK / mutual auth | High | `Comm.cpp`, `ToGameServer.cpp`, `ToGroupServer.cpp` |
 | **E — M5** | PacketReader rollout + opcode-table-driven validation | Med | All CM/CP handlers |

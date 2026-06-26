@@ -134,6 +134,44 @@ public:
 	void ProcessInterGameMsg(unsigned short usCmd, GateServer* pGate, RPACKET pkt);
 	void ProcessGroupBroadcast(unsigned short usCmd, GateServer* pGate, RPACKET pkt);
 	void ProcessGarner2Update(RPACKET pkt); // 乱斗白银城
+
+	// M2: GameAppNet opcode registry handlers (Track B5)
+	static bool OpcodeHandle_TmLoginAck(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_TmMapentryNomap(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_PmTeam(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_PmGuildinfo(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_PmGuildChallmoney(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_TmMapentry(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_PmGarner2Update(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_PmSay2all(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_PmSay2trade(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_PmGuildChallPrizemoney(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_TmEntermap(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_TmGooutmap(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_PmExpscale(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmUpdateguildbank(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmUpdateguildbankgold(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmGuildMotto(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmGuildDisband(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmGuildKick(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmGuildApprove(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmGuildReject(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmAddcredit(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmAddmoney(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmNotice(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmQuerychaping(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmQuerycha(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmQuerychaitem(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmCallcha(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmGotocha(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmKickcha(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmChaNotice(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmDoString(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmLogin(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmGuildChallPrizemoney(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmStoreBuy(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+	static bool OpcodeHandle_MmAuction(void* ctx, dbc::DataSocket* sock, dbc::RPacket& recv);
+
 	// 处理InfoServer消息
 	void ProcessInfoMsg(pNetMessage msg, short sType, InfoServer* pInfo);
 	void ProcessMsg(pNetMessage msg, InfoServer* pInfo);
@@ -750,5 +788,7 @@ extern HANDLE hConsole;
 
 #define defINVALID_CHA_ID 0
 #define defINVALID_CHA_HANDLE -1
+
+void RegisterGameAppOpcodeHandlers();
 
 #endif // GAMEAPP_H

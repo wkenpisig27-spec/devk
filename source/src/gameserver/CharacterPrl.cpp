@@ -663,11 +663,11 @@ void RegisterAllCharacterOpcodeHandlers() {
 	add(CMD_CM_GET_PLAYER_BATTLE_POINT, &CCharacter::OpcodeHandle_CmGetPlayerBattlePoint, OpcodeName(CMD_CM_GET_PLAYER_BATTLE_POINT));
 	add(CMD_CM_REQUEST_CHEST_PREVIEW, &CCharacter::OpcodeHandle_CmRequestChestPreview, OpcodeName(CMD_CM_REQUEST_CHEST_PREVIEW));
 
-	if (!RegisterOpcodeHandlers(entries.data(), entries.size())) {
+	if (!RegisterOpcodeHandlers(OpcodeDispatchDomain::GameCharacter, entries.data(), entries.size())) {
 		throw std::runtime_error("RegisterAllCharacterOpcodeHandlers failed");
 	}
 
-	printf("Character opcode registry: %zu handlers (total %zu)\n", entries.size(), OpcodeHandlerCount());
+	printf("Character opcode registry: %zu handlers\n", OpcodeHandlerCount(OpcodeDispatchDomain::GameCharacter));
 }
 
 } // namespace
@@ -2598,7 +2598,7 @@ bool CCharacter::OpcodeHandle_CmRequestChestPreview(void* ctx, DataSocket* /*soc
 //                    ?????????
 //----------------------------------------------------------
 void CCharacter::ProcessPacket(unsigned short usCmd, RPACKET pk) {
-	if (DispatchOpcodeHandler(usCmd, this, nullptr, pk)) {
+	if (DispatchOpcodeHandler(OpcodeDispatchDomain::GameCharacter, usCmd, this, nullptr, pk)) {
 		return;
 	}
 
