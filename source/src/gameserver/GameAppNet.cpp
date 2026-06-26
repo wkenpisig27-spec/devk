@@ -409,19 +409,18 @@ void CGameApp::ProcessPacket(GateServer* pGate, RPACKET pkt) {
 		if (cmd / 500 == CMD_MM_BASE / 500) {
 			ProcessInterGameMsg(cmd, pGate, pkt);
 		} else {
-			if (cmd / 500 == CMD_CM_BASE / 500) {
-				const unsigned long long l_gmaddr = pkt.ReverseReadLongLong();
-				const SessionHandle gateSession = SessionHandle::FromWire(
-					static_cast<uint32_t>(pkt.ReverseReadLong()),
-					static_cast<uint32_t>(pkt.ReverseReadLong()));
-				l_player = static_cast<CPlayer*>(pGate->ResolveSession(gateSession));
-				if (!l_player || !g_gmsvr->ValidatePlayerSession(l_player)) {
-					LG("SessionManager", "CM REJECT cmd=%u session slot=%u gen=%u gmaddr=%llX\n",
-					   cmd, gateSession.slot, gateSession.generation, l_gmaddr);
+			const bool isSessionBand =
+				cmd / 500 == CMD_CM_BASE / 500 ||
+				cmd / 500 == CMD_TM_BASE / 500 ||
+				cmd / 500 == CMD_PM_BASE / 500;
+			if (isSessionBand) {
+				l_player = static_cast<CPlayer*>(g_gmsvr->ResolvePlayerFromGateTrailer(pGate, pkt, cmd));
+				if (!l_player) {
+					if (cmd / 500 == CMD_PM_BASE / 500) {
+						ProcessGroupBroadcast(cmd, pGate, pkt);
+					}
 					break;
 				}
-				LG("SessionManager", "CM session cmd=%u slot=%u gen=%u player=%p\n",
-				   cmd, gateSession.slot, gateSession.generation, l_player);
 			} else {
 				l_player = (CPlayer*)MakePointer(pkt.ReverseReadLongLong());
 				if (cmd / 500 == CMD_PM_BASE / 500 && !l_player) {
@@ -769,13 +768,8 @@ bool CGameApp::OpcodeHandle_TmGooutmap(void* ctx, DataSocket* /*sock*/, RPacket&
 	GameAppPacketContext* pc = GameAppCtx(ctx);
 	CGameApp* app = pc->app;
 
-	CPlayer* l_player = (CPlayer*)MakePointer(recv.ReverseReadLongLong());
-	unsigned long long l_gateaddr = recv.ReverseReadLongLong();
-
-	if (!g_gmsvr->ValidatePlayerPointer(l_player, l_gateaddr)) {
-		if (l_player) {
-			LG("session", "GOOUTMAP: Invalid player %p or address mismatch (stale session ignored)\n", l_player);
-		}
+	CPlayer* l_player = static_cast<CPlayer*>(g_gmsvr->ResolvePlayerFromGateTrailer(pc->gate, recv, CMD_TM_GOOUTMAP));
+	if (!l_player) {
 		return true;
 	}
 	if (!l_player->IsValid()) {

@@ -276,6 +276,7 @@ public:
 	void UnregisterPlayer(GatePlayer* ply);
 	bool ValidatePlayerPointer(GatePlayer* ply, uintptr_t expectedGateAddr = 0);
 	bool ValidatePlayerSession(GatePlayer* ply) const;
+	GatePlayer* ResolvePlayerFromGateTrailer(GateServer* pGate, dbc::RPacket& recvbuf, uShort cmd) const;
 	bool IsPlayerRegistered(GatePlayer* ply) const;
 
 public:

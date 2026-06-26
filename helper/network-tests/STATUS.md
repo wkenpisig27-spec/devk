@@ -171,7 +171,7 @@ Blockers: none for batch 4. ~70 switch cases remain.
 
 **Gate `ReRouteToGameServer`:** fail-closed if `!m_sessionHandle.IsValid()` in-game; writes session + gm_addr.
 
-**Game default router (`GameAppNet.cpp`):** CM band reads reverse trailer `gm_addr`, `generation`, `slot` → `ResolveSession` → `ValidatePlayerSession` (no pointer registry on CM hot path). PM/TM bands keep pointer trailer (GroupServer path unchanged).
+**Game default router (`GameAppNet.cpp`):** CM/TM/PM bands read reverse trailer `gm_addr`, `generation`, `slot` → `ResolvePlayerFromGateTrailer` → `ValidatePlayerSession`. Legacy pointer path retained for non-session bands only.
 
 **Validation demotion:** `ValidatePlayerPointer` on game + gate skips pointer registry when player has bound session; `ValidatePlayerSession` is fail-closed (requires valid handle). Legacy pointer registry retained for TM/PM paths without session.
 
@@ -219,9 +219,53 @@ Reverse read on Group: gp_addr, generation, slot
 
 **Manual test checklist:** T0-login → T0-enter → move → chat → friend invite or party invite (group path) → logout. Deploy gate + game + group together.
 
-**Out of scope (phase 3):** PM/TM game paths still pointer trailer; GroupServer internal MakePointer friend lookups; pointer registry cleanup.
+**Out of scope (phase 2b):** PM/TM game paths still pointer trailer; GroupServer internal MakePointer friend lookups; pointer registry cleanup.
 
 **Build (2026-06-27):** `Common.lib` **PASS**; GateServer + GameServer + GroupServer Release\|x64 **PASS** (`GateServer.exe`, `GameServer.exe`, `GroupServer.exe` linked).
+
+### Track A — M3 session handles (phase 3, 2026-06-27)
+
+**Trailer swap (gate→game in-game TM/PM forward):** same 16-byte layout as phase 2 CM — `WriteLong(slot) + WriteLong(generation) + WriteLongLong(gm_addr)`. Reverse read on Game: `gm_addr`, `generation`, `slot`.
+
+**Gate paths updated:**
+- `AppendInGameGameTrailer` — fail-closed without valid session; writes `{slot, gen, gm_addr}`
+- `ReRouteToGameServer` — uses `AppendInGameGameTrailer` (CM + in-game forwards)
+- `CMD_TM_GOOUTMAP` — CM_LOGOUT, CM_ENDPLAY, offline-mode success path
+- `CMD_TM_OFFLINE_MODE` — SyncCall trailer migrated to session format
+
+**Game paths updated:**
+- `GameServerApp::ResolvePlayerFromGateTrailer` — session resolve + gm_addr dual check (mirror GroupServer)
+- `ProcessPacket` default router — TM band (1000–1499) and PM band (4500+) use session trailer via shared helper; PM broadcast null-player path preserved
+- `OpcodeHandle_TmGooutmap` — session resolve instead of MakePointer
+- `TM_OFFLINE_MODE` SyncCall handler — session resolve instead of gate pointer trailer
+
+**Wire format (gate→game in-game, 16-byte trailer):**
+```
+WriteLong(slot) + WriteLong(generation) + WriteLongLong(gm_addr)
+Reverse read on Game: gm_addr, generation, slot
+```
+
+**Log lines (game TM/PM path):**
+- Gate: `SessionManager ReRoute Game cmd=… session slot=… gen=…`
+- Gate reject: `SessionManager ReRoute Game REJECT cmd=…: no valid session`
+- Game accept: `SessionManager Game session cmd=… slot=… gen=… player=…`
+- Game reject: `SessionManager Game REJECT cmd=… session slot=… gen=…`
+
+**Session release (unchanged, verified):** Gate `UnregisterPlayer` → `ReleasePlayerSession`; Game `DelPlayer` → `ReleasePlayerSession`.
+
+**Intentionally kept on pointers:**
+- `TM_ENTERMAP` gate ptr + session extension (bind event)
+- `CMD_MP_ENTERMAP` group fallback when session not yet allocated
+- TP/SyncCall login/char-select paths (gate→group)
+- Game→Gate `WRITE_LONGLONG(MakeULong(pc->gate))` routing (gate connection identity)
+- `CharacterCmd.cpp` enter-map response gm_addr write
+- `OnGateDisconnect` player list walk
+- Group internal friend MakePointer lookups
+- Game→Group PM responses (Group→Game direction)
+
+**Manual test checklist:** T0-login → T0-enter → move → chat → logout → char switch (EndPlay) → offline stall (if enabled) → party/guild PM. Deploy gate + game together.
+
+**Build (2026-06-27, phase 3):** GateServer + GameServer Release\|x64 — **compile PASS**, link **FAIL (LNK1104)** — `GateServer.exe` / `GameServer.exe` locked (servers running). Stop processes and rebuild to produce binaries.
 
 ### Track B6 — CharacterPrl registry (batch 4, 2026-06-27)
 

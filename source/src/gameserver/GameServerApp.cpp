@@ -338,21 +338,18 @@ WPacket GameServerApp::TM_KICKCHA(DataSocket* datasock, RPacket& pkt) {
 
 dbc::WPacket GameServerApp::TM_OFFLINE_MODE(dbc::DataSocket* datasock, RPacket& rpk) {
 	LG("offline_stall", "TM_OFFLINE_MODE handler called\n");
-	
-	// GateServer writes: [GatePlayerAddr][GameServerPlayerAddr]
-	// ReverseRead reads from END of packet, so we read in reverse order:
-	auto player = (CPlayer*)MakePointer(rpk.ReverseReadLongLong());  // gm_addr - GameServer's player
-	auto gatePlayerAddr = rpk.ReverseReadLongLong();                  // GateServer's player address
+
+	auto* pGate = static_cast<GateServer*>(datasock->GetPointer());
+	auto* player = static_cast<CPlayer*>(ResolvePlayerFromGateTrailer(pGate, rpk, CMD_TM_OFFLINE_MODE));
 	CCharacter* pCCha{};
 
-	LG("offline_stall", "TM_OFFLINE_MODE: player=%p, gateAddr=%llu\n", player, gatePlayerAddr);
+	LG("offline_stall", "TM_OFFLINE_MODE: player=%p\n", player);
 
 	auto wpk = GETWPACKET();
-	
+
 	const auto return_code = [&] {
-		// Use registry validation instead of just address check
-		if (!ValidatePlayerPointer(player, gatePlayerAddr)) {
-			LG("offline_stall", "TM_OFFLINE_MODE: Invalid player %p or gateAddr mismatch\n", player);
+		if (!player) {
+			LG("offline_stall", "TM_OFFLINE_MODE: session resolve failed\n");
 			return ReturnCode::OfflineMode::Unknown;
 		}
 
@@ -595,6 +592,39 @@ bool GameServerApp::ValidatePlayerSession(GatePlayer* ply) const {
 	}
 
 	return true;
+}
+
+GatePlayer* GameServerApp::ResolvePlayerFromGateTrailer(GateServer* pGate, RPacket& recvbuf, uShort cmd) const {
+	if (!pGate) {
+		return nullptr;
+	}
+
+	const unsigned long long gmAddr = recvbuf.ReverseReadLongLong();
+	const SessionHandle gateSession = SessionHandle::FromWire(
+		static_cast<uint32_t>(recvbuf.ReverseReadLong()),
+		static_cast<uint32_t>(recvbuf.ReverseReadLong()));
+
+	if (!gateSession.IsValid()) {
+		LG("SessionManager", "Game REJECT cmd=%u: invalid session trailer gmAddr=%llX\n",
+		   cmd, gmAddr);
+		return nullptr;
+	}
+
+	GatePlayer* ply = pGate->ResolveSession(gateSession);
+	if (ply && ValidatePlayerSession(ply)) {
+		if (gmAddr != 0 && reinterpret_cast<uintptr_t>(ply) != gmAddr) {
+			LG("SessionManager", "Game REJECT cmd=%u session slot=%u gen=%u gmAddr mismatch\n",
+			   cmd, gateSession.slot, gateSession.generation);
+			return nullptr;
+		}
+		LG("SessionManager", "Game session cmd=%u slot=%u gen=%u player=%p\n",
+		   cmd, gateSession.slot, gateSession.generation, ply);
+		return ply;
+	}
+
+	LG("SessionManager", "Game REJECT cmd=%u session slot=%u gen=%u gmAddr=%llX\n",
+	   cmd, gateSession.slot, gateSession.generation, gmAddr);
+	return nullptr;
 }
 
 void GateServer::BindPlayerSession(SessionHandle handle, GatePlayer* ply) {

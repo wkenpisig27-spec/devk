@@ -655,13 +655,10 @@ void ToClient::ReRouteToGameServer(dbc::DataSocket* datasock, dbc::RPacket& recv
 				   m_lastRecvCmd, l_ply, l_ply->m_dbid);
 				return;
 			}
-			LG("SessionManager", "ReRoute cmd=%u session slot=%u gen=%u player=%p dbid=%u\n",
-			   m_lastRecvCmd, l_ply->m_sessionHandle.slot, l_ply->m_sessionHandle.generation,
-			   l_ply, l_ply->m_dbid);
 			WPacket l_wpk = WPacket(recvbuf).Duplicate();
-			l_wpk.WriteLong(l_ply->m_sessionHandle.slot);
-			l_wpk.WriteLong(l_ply->m_sessionHandle.generation);
-			l_wpk.WriteLongLong(l_gmaddr);
+			if (!g_gtsvr->AppendInGameGameTrailer(l_wpk, l_ply, m_lastRecvCmd)) {
+				return;
+			}
 			g_gtsvr->gm_conn->SendData(l_ply->game->m_datasock, l_wpk);
 		}
 	}
@@ -851,8 +848,9 @@ bool ToClient::OpcodeHandle_CmOfflineMode(void* ctx, DataSocket* datasock, RPack
 
 	auto wpk = self->GetWPacket();
 	wpk.WriteCmd(CMD_TM_OFFLINE_MODE);
-	wpk.WriteLongLong(MakeULong(player));
-	wpk.WriteLongLong(player->gm_addr);
+	if (!g_gtsvr->AppendInGameGameTrailer(wpk, player, CMD_TM_OFFLINE_MODE)) {
+		return true;
+	}
 
 	auto rpk = self->SyncCall(player->game->m_datasock, wpk, 10 * 1000);
 	if (!rpk.HasData()) {
@@ -876,9 +874,9 @@ bool ToClient::OpcodeHandle_CmOfflineMode(void* ctx, DataSocket* datasock, RPack
 				WPacket l_wpk = l_game->m_datasock->GetWPacket();
 				l_wpk.WriteCmd(CMD_TM_GOOUTMAP);
 				l_wpk.WriteChar(1);
-				l_wpk.WriteLongLong(MakeULong(player));
-				l_wpk.WriteLongLong(player->gm_addr);
-				self->SendData(l_game->m_datasock, l_wpk);
+				if (g_gtsvr->AppendInGameGameTrailer(l_wpk, player, CMD_TM_GOOUTMAP)) {
+					self->SendData(l_game->m_datasock, l_wpk);
+				}
 				player->game = nullptr;
 				player->gm_addr = 0;
 			}
@@ -1244,9 +1242,9 @@ WPacket ToClient::CM_LOGOUT(DataSocket* datasock, RPacket& recvbuf) {
 					WPacket l_wpk = l_game->m_datasock->GetWPacket();
 					l_wpk.WriteCmd(CMD_TM_GOOUTMAP);
 					l_wpk.WriteChar(0);
-					l_wpk.WriteLongLong(MakeULong(l_ply));
-					l_wpk.WriteLongLong(l_ply->gm_addr); // ��������GameServer�ϵĵ�ַ
-					SendData(l_game->m_datasock, l_wpk);
+					if (g_gtsvr->AppendInGameGameTrailer(l_wpk, l_ply, CMD_TM_GOOUTMAP)) {
+						SendData(l_game->m_datasock, l_wpk);
+					}
 				}
 
 				l_ply->game = 0;	// ��ֹ����ĵ�GameServer������
@@ -1441,13 +1439,12 @@ void ToClient::CM_ENDPLAY(DataSocket* datasock, RPacket& recvbuf) {
 
 				l_wpk.WriteChar(0);
 
-				l_wpk.WriteLongLong(MakeULong(l_ply));
-				l_wpk.WriteLongLong(l_ply->gm_addr); // ����GameServer�ϵĵ�ַ
+				if (g_gtsvr->AppendInGameGameTrailer(l_wpk, l_ply, CMD_TM_GOOUTMAP)) {
+					g_gtsvr->gm_conn->SendData(l_game->m_datasock, l_wpk);
+				}
 
-				l_ply->game = 0;	// ��ֹ����ĵ�GameServer������
-				l_ply->gm_addr = 0; // ��ֹ����ĵ�GameServer������
-
-				g_gtsvr->gm_conn->SendData(l_game->m_datasock, l_wpk);
+				l_ply->game = 0;
+				l_ply->gm_addr = 0;
 				// g_gtsvr->gm_conn->SyncCall(l_game->m_datasock,l_wpk);
 				// ֪ͨGroupServer��������Ϸ
 
