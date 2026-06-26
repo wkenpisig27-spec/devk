@@ -62,6 +62,7 @@ void Player::Initially() {
 	m_lTradeChatMoney = 1000;
 	m_bNew = false;
 	bCanReceiveRequests = true;
+	m_sessionHandle = SessionHandle{};
 
 	std::fill(std::begin(m_guildPermission), std::end(m_guildPermission), 0);
 

@@ -10,6 +10,8 @@
 
 #include "GateServer.h"
 #include "Player.h"
+#include "common/SessionHandle.h"
+#include "common/SessionManager.h"
 #include "Guild.h"
 #include "Team.h"
 #include "SessionChat.h"
@@ -209,9 +211,16 @@ public:
 	//   expectedGtAddr - The expected GateServer address for validation
 	//   generation - The generation counter from when player was registered (optional, 0 to skip)
 	Player* ValidatePlayerPointer(uintptr_t ptr, uint64_t expectedGtAddr, uint32_t generation = 0);
+	Player* ResolvePlayerFromGateTrailer(RPacket& recvbuf, uShort cmd);
+	bool ValidatePlayerSession(Player* ply) const;
 	
 	// Check if a player pointer is currently registered (thread-safe)
 	bool IsPlayerRegistered(Player* ply);
+
+	SessionManager m_sessionManager;
+	void BindPlayerSession(SessionHandle handle, Player* ply);
+	void ReleasePlayerSession(Player* ply);
+	Player* ResolveSession(SessionHandle handle) const;
 
 	static constexpr auto GATE_MAX{10};
 	std::array<GateServer, GATE_MAX> m_gate;

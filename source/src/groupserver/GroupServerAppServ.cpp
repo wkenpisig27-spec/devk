@@ -97,6 +97,8 @@ void GroupServerApp::RegisterPlayer(Player* ply) {
 
 void GroupServerApp::UnregisterPlayer(Player* ply) {
 	if (!ply) return;
+
+	ReleasePlayerSession(ply);
 	
 	std::unique_lock<std::shared_mutex> lock(m_playerRegistryMutex);
 	uintptr_t ptr = reinterpret_cast<uintptr_t>(ply);
@@ -137,8 +139,20 @@ Player* GroupServerApp::ValidatePlayerPointer(uintptr_t ptr, uint64_t expectedGt
 	Player* ply = reinterpret_cast<Player*>(ptr);
 	
 	try {
+		if (ply->GetSessionHandle().IsValid()) {
+			if (expectedGtAddr != 0 && ply->m_gtAddr != expectedGtAddr) {
+				LG("SessionManager", "Group INVALID: Player %p gtAddr mismatch (expected=%llu, got=%llu)\n",
+				   ply, expectedGtAddr, ply->m_gtAddr);
+				return nullptr;
+			}
+			if (!ValidatePlayerSession(ply)) {
+				return nullptr;
+			}
+			return ply;
+		}
+
 		// Verify the GateServer address matches
-		if (ply->m_gtAddr != expectedGtAddr) {
+		if (expectedGtAddr != 0 && ply->m_gtAddr != expectedGtAddr) {
 			LG("Security", "ValidatePlayerPointer: REJECTED gtAddr mismatch ptr=0x%llX expected=%llu actual=%llu\n",
 			   static_cast<unsigned long long>(ptr), expectedGtAddr, ply->m_gtAddr);
 			return nullptr;
@@ -157,6 +171,86 @@ Player* GroupServerApp::ValidatePlayerPointer(uintptr_t ptr, uint64_t expectedGt
 		   static_cast<unsigned long long>(ptr));
 		return nullptr;
 	}
+}
+
+void GroupServerApp::BindPlayerSession(SessionHandle handle, Player* ply) {
+	if (!handle.IsValid() || !ply) {
+		return;
+	}
+
+	m_sessionManager.Bind(handle, ply);
+	ply->SetSessionHandle(handle);
+	LG("SessionManager", "Group bound session slot=%u gen=%u to player %p acct=%s\n",
+	   handle.slot, handle.generation, ply, ply->m_acctname.c_str());
+}
+
+void GroupServerApp::ReleasePlayerSession(Player* ply) {
+	if (!ply || !ply->GetSessionHandle().IsValid()) {
+		return;
+	}
+
+	LG("SessionManager", "Group released session slot=%u gen=%u for player %p\n",
+	   ply->GetSessionHandle().slot, ply->GetSessionHandle().generation, ply);
+	m_sessionManager.Release(ply->GetSessionHandle());
+	ply->SetSessionHandle(SessionHandle{});
+}
+
+Player* GroupServerApp::ResolveSession(SessionHandle handle) const {
+	return static_cast<Player*>(m_sessionManager.Resolve(handle));
+}
+
+bool GroupServerApp::ValidatePlayerSession(Player* ply) const {
+	if (!ply || !ply->GetSessionHandle().IsValid()) {
+		return false;
+	}
+
+	Player* resolved = ResolveSession(ply->GetSessionHandle());
+	if (resolved != ply) {
+		LG("SessionManager", "Group INVALID: Player %p session slot=%u gen=%u mismatch\n",
+		   ply, ply->GetSessionHandle().slot, ply->GetSessionHandle().generation);
+		return false;
+	}
+
+	return true;
+}
+
+Player* GroupServerApp::ResolvePlayerFromGateTrailer(RPacket& recvbuf, uShort cmd) {
+	const unsigned long long gpAddr = recvbuf.ReverseReadLongLong();
+	const SessionHandle gateSession = SessionHandle::FromWire(
+		static_cast<uint32_t>(recvbuf.ReverseReadLong()),
+		static_cast<uint32_t>(recvbuf.ReverseReadLong()));
+
+	if (!gateSession.IsValid()) {
+		LG("SessionManager", "Group REJECT cmd=%u: invalid session trailer gpAddr=%llX\n",
+		   cmd, gpAddr);
+		return nullptr;
+	}
+
+	Player* ply = ResolveSession(gateSession);
+	if (ply && ValidatePlayerSession(ply)) {
+		if (gpAddr != 0 && static_cast<unsigned long long>(MakeULong(ply)) != gpAddr) {
+			LG("SessionManager", "Group REJECT cmd=%u session slot=%u gen=%u gpAddr mismatch\n",
+			   cmd, gateSession.slot, gateSession.generation);
+			return nullptr;
+		}
+		LG("SessionManager", "Group session cmd=%u slot=%u gen=%u player=%p\n",
+		   cmd, gateSession.slot, gateSession.generation, ply);
+		return ply;
+	}
+
+	if (cmd == CMD_MP_ENTERMAP && gpAddr != 0) {
+		ply = ValidatePlayerPointer(static_cast<uintptr_t>(gpAddr), 0);
+		if (ply) {
+			BindPlayerSession(gateSession, ply);
+			LG("SessionManager", "Group MP_ENTERMAP bound session slot=%u gen=%u player=%p\n",
+			   gateSession.slot, gateSession.generation, ply);
+			return ply;
+		}
+	}
+
+	LG("SessionManager", "Group REJECT cmd=%u session slot=%u gen=%u gpAddr=%llX\n",
+	   cmd, gateSession.slot, gateSession.generation, gpAddr);
+	return nullptr;
 }
 
 bool GroupServerApp::IsPlayerRegistered(Player* ply) {
@@ -537,29 +631,23 @@ void GroupServerApp::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 			break; // Fall through to player-specific command handling below
 		}
 
-		// Read player pointer and gate address from packet
-		uintptr_t l_plyptr = static_cast<uintptr_t>(recvbuf.ReverseReadLongLong());
-		unsigned long long l_gtaddr = recvbuf.ReverseReadLongLong();
-		
-		// Use safe validation system to get player pointer
-		// This checks: 1) pointer is registered, 2) generation matches, 3) gtAddr matches, 4) has valid gate
-		Player* l_ply = ValidatePlayerPointer(l_plyptr, l_gtaddr);
+		// Read session trailer from packet (slot + gen + gp_addr)
+		Player* l_ply = ResolvePlayerFromGateTrailer(recvbuf, l_cmd);
 		
 		if (!l_ply) {
-			// Player pointer is invalid (stale, unregistered, or mismatched)
 			// For CMD_MP_ENTERMAP, this could be a race condition - log but don't kick aggressively
 			if (l_cmd == CMD_MP_ENTERMAP) {
-				LG("Security", "CMD_MP_ENTERMAP: Invalid player pointer 0x%llX from %s (possible race condition)\n",
-				   static_cast<unsigned long long>(l_plyptr), datasock->GetPeerIP());
+				LG("Security", "CMD_MP_ENTERMAP: Invalid session trailer from %s (possible race condition)\n",
+				   datasock->GetPeerIP());
 			} else {
-				KickUser(datasock, l_plyptr, l_gtaddr);
+				KickUser(datasock, 0, 0);
 			}
 			return;
 		}
 		
 		// Additional check for non-ENTERMAP commands: player must have selected a character
 		if (l_cmd != CMD_MP_ENTERMAP && l_ply->m_currcha < 0) {
-			KickUser(datasock, l_plyptr, l_gtaddr);
+			KickUser(datasock, MakeULong(l_ply), l_ply->m_gtAddr);
 			return;
 		}
 		

@@ -418,6 +418,7 @@ public:
 	bool IsPlayerRegistered(Player* ply) const;
 	void EnsurePlayerSession(Player* ply);
 	void ReleasePlayerSession(Player* ply);
+	bool AppendInGameGroupTrailer(WPacket& wpk, Player* ply, uShort cmdForLog);
 
 	SessionManager m_sessionManager;
 

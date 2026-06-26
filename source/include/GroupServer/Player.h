@@ -12,6 +12,7 @@
 #include "Friend.h"
 #include "Master.h"
 #include "SessionChat.h"
+#include "common/SessionHandle.h"
 class Team;
 
 _DBC_USING
@@ -104,6 +105,10 @@ public:
 	int m_lTradeChatMoney{1000};
 	bool m_bNew{false};
 	bool bCanReceiveRequests{true};
+
+	SessionHandle m_sessionHandle{};
+	const SessionHandle& GetSessionHandle() const { return m_sessionHandle; }
+	void SetSessionHandle(SessionHandle handle) { m_sessionHandle = handle; }
 
 private:
 	~Player() = default;

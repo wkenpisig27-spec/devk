@@ -489,8 +489,16 @@ void ToGameServer::MC_ENTERMAP(dbc::DataSocket* datasock, dbc::RPacket& recvbuf)
 			WPacket l_wpk = GetWPacket();
 			l_wpk.WriteCmd(CMD_MP_ENTERMAP);
 			l_wpk.WriteChar(l_isSwitch);
-			l_wpk.WriteLongLong(MakeULong(l_ply));
-			l_wpk.WriteLongLong(l_ply->gp_addr);
+			if (l_ply->m_sessionHandle.IsValid()) {
+				l_wpk.WriteLong(l_ply->m_sessionHandle.slot);
+				l_wpk.WriteLong(l_ply->m_sessionHandle.generation);
+				l_wpk.WriteLongLong(l_ply->gp_addr);
+				LG("SessionManager", "EnterMap MP_ENTERMAP session slot=%u gen=%u player %p dbid=%u\n",
+				   l_ply->m_sessionHandle.slot, l_ply->m_sessionHandle.generation, l_ply, l_ply->m_dbid);
+			} else {
+				l_wpk.WriteLongLong(MakeULong(l_ply));
+				l_wpk.WriteLongLong(l_ply->gp_addr);
+			}
 
 			g_gtsvr->gp_conn->SendData(g_gtsvr->gp_conn->get_datasock(), l_wpk);
 		}

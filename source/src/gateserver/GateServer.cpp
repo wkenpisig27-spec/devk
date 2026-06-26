@@ -502,6 +502,21 @@ void GateServer::ReleasePlayerSession(Player* ply) {
 	ply->m_sessionHandle = SessionHandle{};
 }
 
+bool GateServer::AppendInGameGroupTrailer(WPacket& wpk, Player* ply, uShort cmdForLog) {
+	if (!ply || !ply->m_sessionHandle.IsValid()) {
+		LG("SessionManager", "ReRoute Group REJECT cmd=%u: no valid session player=%p dbid=%u\n",
+		   cmdForLog, ply, ply ? ply->m_dbid : 0u);
+		return false;
+	}
+
+	LG("SessionManager", "ReRoute Group cmd=%u session slot=%u gen=%u player=%p dbid=%u\n",
+	   cmdForLog, ply->m_sessionHandle.slot, ply->m_sessionHandle.generation, ply, ply->m_dbid);
+	wpk.WriteLong(ply->m_sessionHandle.slot);
+	wpk.WriteLong(ply->m_sessionHandle.generation);
+	wpk.WriteLongLong(ply->gp_addr);
+	return true;
+}
+
 bool GateServer::IsPlayerRegistered(Player* ply) const {
 	if (!ply) return false;
 	

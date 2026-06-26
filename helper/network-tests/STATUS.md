@@ -57,7 +57,7 @@ Track progress for autonomous refactoring. Update after each completed task.
 
 | Track | Task | Status | Notes |
 |-------|------|--------|-------|
-| A | M3 Session handles (slot + generation) | **in_progress** | Phase 2: CM trailer `{slot,gen}+gm_addr`; session-only CM resolve on game |
+| A | M3 Session handles (slot + generation) | **in_progress** | Phase 2b: Gate↔Group session trailer; Group SessionManager + MP_ENTERMAP bind |
 | B | M2 Bulk migration — Gate lifecycle (B1) | mostly done | SyncCall on comm thread covers login/BGNPLAY |
 | B | M2 Bulk migration — GameAppNet (B5) | **done** | batch 3: 35 handlers total (2026-06-27) |
 | B | M2 Bulk migration — CharacterPrl (B6) | **done** | 2026-06-27 — 112 handlers; legacy switch empty |
@@ -183,9 +183,45 @@ Blockers: none for batch 4. ~70 switch cases remain.
 
 **Manual test checklist:** T0-login → T0-enter → move (`CM session cmd=6`) → chat (`CM session cmd=1`). Deploy gate + game together.
 
-**GroupServer scope:** **deferred (phase 2b)** — `ToGroupServer.cpp` / `ReRouteToGroupServer` still use `WriteLongLong(MakeULong(l_ply))`; GroupServer `ValidatePlayerPointer` unchanged.
+**GroupServer scope:** **done (phase 2b)** — see section below; TP SyncCall login path still uses pointer trailer.
 
-**Build (2026-06-27):** `Common.lib` **PASS**; GateServer **compile PASS**, link blocked (`GateServer.exe` in use); GameServer link blocked (`GameServer.pdb` locked — exe running). Stop servers and rebuild both binaries before deploy.
+**Build (2026-06-27, phase 2b):** GateServer + GameServer + GroupServer Release|x64 **PASS**. Deploy all three together; manual T0 verify pending.
+
+### Track A — M3 session handles (phase 2b, 2026-06-27)
+
+**Trailer swap (gate→group in-game forward):** first identity field repurposed from `WriteLongLong(gate_ptr)` to `WriteLong(slot) + WriteLong(generation)`; second field unchanged `WriteLongLong(gp_addr)`. Total trailer still 16 bytes (mirrors phase 2 CM path).
+
+**Gate paths updated:**
+- `ReRouteToGroupServer` — fail-closed if `!m_sessionHandle.IsValid()` when `gp_addr && gm_addr`; writes session + gp_addr via `AppendInGameGroupTrailer`
+- `OpcodeHandle_CpPing` — same session trailer when in-world
+- `CMD_MP_ENTERMAP` (ToGameServer.cpp) — session trailer sync to GroupServer at enter-map (bind event)
+
+**GroupServer session support:**
+- `GroupServerApp::m_sessionManager`, `Player::m_sessionHandle`
+- `BindPlayerSession` / `ReleasePlayerSession` / `ResolveSession` / `ValidatePlayerSession`
+- `ResolvePlayerFromGateTrailer` — session resolve + dual gp_addr check; `CMD_MP_ENTERMAP` binds mirror handle on first packet
+- `OnProcessData` CP/MP ingress uses session trailer (fail-closed in-world)
+- `OnServeCall` TP SyncCall path unchanged (pointer trailer for login/char select)
+- `ValidatePlayerPointer` — session-authoritative when handle bound (dual validation pattern)
+
+**Wire format (gate→group in-game, 16-byte trailer):**
+```
+WriteLong(slot) + WriteLong(generation) + WriteLongLong(gp_addr)
+Reverse read on Group: gp_addr, generation, slot
+```
+
+**Log lines (group path):**
+- Gate: `SessionManager ReRoute Group cmd=… session slot=… gen=…`
+- Gate: `SessionManager EnterMap MP_ENTERMAP session slot=… gen=…`
+- Group bind: `SessionManager Group MP_ENTERMAP bound session slot=… gen=…`
+- Group accept: `SessionManager Group session cmd=… slot=… gen=… player=…`
+- Group reject: `SessionManager Group REJECT cmd=… session slot=… gen=…`
+
+**Manual test checklist:** T0-login → T0-enter → move → chat → friend invite or party invite (group path) → logout. Deploy gate + game + group together.
+
+**Out of scope (phase 3):** PM/TM game paths still pointer trailer; GroupServer internal MakePointer friend lookups; pointer registry cleanup.
+
+**Build (2026-06-27):** `Common.lib` **PASS**; GateServer + GameServer + GroupServer Release\|x64 **PASS** (`GateServer.exe`, `GameServer.exe`, `GroupServer.exe` linked).
 
 ### Track B6 — CharacterPrl registry (batch 4, 2026-06-27)
 
@@ -466,4 +502,4 @@ See last-smoke-result.txt for automated output.
 
 ## Resume prompt for next session
 
-> Continue Option B Phase 3. **Track B6 done** (112 CharacterPrl registry entries). **Track B5 done** (35 GameAppNet handlers). **Track A phase 2 in tree** (CM trailer session swap). Next: manual T0-enter/move/chat verify, or Track A phase 2b (GroupServer), or Track C (zero-copy gate forwarding). Read `docs/NETWORK_AUDIT.md` and this file. Deploy gate + game together after rebuild.
+> Continue Option B Phase 3. **Track B6 done** (112 CharacterPrl registry entries). **Track B5 done** (35 GameAppNet handlers). **Track A phase 2b in tree** (Gate↔Group session trailer + Group SessionManager). Next: manual T0-enter/move/chat/group verify, or Track A phase 3 (PM/TM game paths, pointer registry cleanup), or Track C (zero-copy gate forwarding). Read `docs/NETWORK_AUDIT.md` and this file. Deploy gate + game + group together after rebuild.

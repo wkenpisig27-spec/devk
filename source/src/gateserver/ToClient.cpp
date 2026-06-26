@@ -688,9 +688,15 @@ void ToClient::ReRouteToGroupServer(dbc::DataSocket* datasock, dbc::RPacket& rec
 	const long long l_gpaddr = l_ply->gp_addr;
 	const long long l_gmaddr = l_ply->gm_addr;
 	if (l_gpaddr && l_gmaddr) {
+		if (!l_ply->m_sessionHandle.IsValid()) {
+			LG("SessionManager", "ReRoute Group REJECT cmd=%u: no valid session player=%p dbid=%u\n",
+			   m_lastRecvCmd, l_ply, l_ply->m_dbid);
+			return;
+		}
 		WPacket l_wpk = WPacket(recvbuf).Duplicate();
-		l_wpk.WriteLongLong(MakeULong(l_ply));
-		l_wpk.WriteLongLong(l_gpaddr);
+		if (!g_gtsvr->AppendInGameGroupTrailer(l_wpk, l_ply, m_lastRecvCmd)) {
+			return;
+		}
 		g_gtsvr->gp_conn->SendData(g_gtsvr->gp_conn->get_datasock(), l_wpk);
 	}
 }
@@ -704,8 +710,9 @@ bool ToClient::OpcodeHandle_CpPing(void* ctx, DataSocket* datasock, RPacket& rec
 		wpk.Cmd(CMD_CP_PING);
 		wpk.Long(GetTickCount() - l_ply->m_pingtime);
 		l_ply->m_pingtime = 0;
-		wpk.LongLong(MakeULong(l_ply));
-		wpk.LongLong(l_ply->gp_addr);
+		if (!g_gtsvr->AppendInGameGroupTrailer(l_wpk, l_ply, CMD_CP_PING)) {
+			return true;
+		}
 		g_gtsvr->gp_conn->SendData(g_gtsvr->gp_conn->get_datasock(), l_wpk);
 	}
 	return true;
