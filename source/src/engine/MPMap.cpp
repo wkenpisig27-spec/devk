@@ -27,6 +27,41 @@ using namespace std;
 
 #define FVF_SKYDOOM          D3DFVF_XYZ|D3DFVF_TEX1 
 
+namespace {
+DWORD CalcEnhancedSeaColor(const VECTOR3& pos, DWORD baseColor, float shoreAlphaScale)
+{
+	BYTE ba = (BYTE)((baseColor >> 24) & 0xff);
+	BYTE br = (BYTE)((baseColor >> 16) & 0xff);
+	BYTE bg = (BYTE)((baseColor >> 8) & 0xff);
+	BYTE bb = (BYTE)(baseColor & 0xff);
+
+	D3DXMATRIX view = g_Render.GetWorldViewMatrix();
+	D3DXMATRIX invView;
+	D3DXMatrixInverse(&invView, NULL, &view);
+	D3DXVECTOR3 eye(invView._41, invView._42, invView._43);
+	D3DXVECTOR3 vpos(pos.x, pos.y, pos.z);
+	D3DXVECTOR3 toCam = eye - vpos;
+	if (D3DXVec3LengthSq(&toCam) > 0.0001f)
+		D3DXVec3Normalize(&toCam, &toCam);
+
+	// Water surface normal points up; fresnel brightens grazing views.
+	const D3DXVECTOR3 up(0.0f, 0.0f, 1.0f);
+	float ndv = fabsf(D3DXVec3Dot(&up, &toCam));
+	float fresnel = 1.0f - ndv;
+	fresnel = fresnel * fresnel;
+
+	float dist = D3DXVec3Length(&(eye - vpos));
+	float fogBlend = 1.0f - expf(-dist * 0.0015f);
+
+	br = (BYTE)min(255.0f, br + fresnel * 70.0f + fogBlend * 20.0f);
+	bg = (BYTE)min(255.0f, bg + fresnel * 85.0f + fogBlend * 30.0f);
+	bb = (BYTE)min(255.0f, bb + fresnel * 40.0f);
+	ba = (BYTE)min(255.0f, ba * shoreAlphaScale + fresnel * 25.0f);
+
+	return D3DCOLOR_ARGB(ba, br, bg, bb);
+}
+} // namespace
+
  
 MPMap::MPMap()
 :_bEdit(FALSE),
@@ -705,10 +740,17 @@ void MPMap::RenderSea()
 					SVertex[i].p = VECTOR3( (float)nCurX, (float)nCurY, SEA_LEVEL);
 				
 					MPTile *pTile = GetTile(nCurX, nCurY);
+					float shoreAlpha = 1.0f;
 					if((SEA_LEVEL - pTile->fHeight) < 0.5f)
 					{
-						SVertex[i].dwColor = 0x00ffffff; 
+						SVertex[i].dwColor = 0x00ffffff;
+						continue;
 					}
+					else if((SEA_LEVEL - pTile->fHeight) < 1.5f)
+					{
+						shoreAlpha = (SEA_LEVEL - pTile->fHeight - 0.5f);
+					}
+					SVertex[i].dwColor = CalcEnhancedSeaColor(SVertex[i].p, _dwSeaDefaultColor, shoreAlpha);
 				}   
 				// 1 2 3 
 				memcpy(pCurVertex, &SVertex, 3 * sizeof(MPSeaTileVertex));
@@ -754,10 +796,17 @@ void MPMap::RenderSea()
 					SVertex[i].p = VECTOR3( (float)nCurX, (float)nCurY, SEA_LEVEL);
 				
 					MPTile *pTile = GetTile(nCurX, nCurY);
+					float shoreAlpha = 1.0f;
 					if((SEA_LEVEL - pTile->fHeight) < 0.5f)
 					{
 						SVertex[i].dwColor = 0x00ffffff;
+						continue;
 					}
+					else if((SEA_LEVEL - pTile->fHeight) < 1.5f)
+					{
+						shoreAlpha = (SEA_LEVEL - pTile->fHeight - 0.5f);
+					}
+					SVertex[i].dwColor = CalcEnhancedSeaColor(SVertex[i].p, _dwSeaDefaultColor, shoreAlpha);
 				}
 
                 // begin by lsh
@@ -1555,8 +1604,8 @@ void MPMap::CreateSkyDoom(D3DXVECTOR3 center, float radius, char* txPath, bool h
 			{
 				if(FAILED(dev->CreateVertexShader((DWORD*)pCode->GetBufferPointer(),(IDirect3DVertexShaderX**)&m_SkyDoomVertexShaderHandle)))
 				{
-					m_SkyDoomVertexShaderHandle = 0;			
-					MessageBox( 0,"Failed To Create Vertex Shader","D3DXAssembleShaderFromFile For Vertex Shader Failed",0);
+					m_SkyDoomVertexShaderHandle = 0;
+					LG("error", "Failed to create sky dome vertex shader\n");
 				}
 			}
 			else
@@ -1565,11 +1614,11 @@ void MPMap::CreateSkyDoom(D3DXVECTOR3 center, float radius, char* txPath, bool h
 				if(pError != NULL)
 				{
 					const char* str = (const char*)pError->GetBufferPointer();
-					MessageBox( 0,str,"D3DXAssembleShaderFromFile For Vertex Shader Failed", 0 );
+					LG("error", "Sky dome VS assemble failed: %s\n", str);
 				}
 				else
 				{
-					MessageBox( 0, "File Of Vertex Shader Not Exist","D3DXAssembleShaderFromFile For Vertex Shader Failed",0);			
+					LG("error", "Sky dome VS file missing: %s\n", Path);
 				}
 			}
 			if( pError )
@@ -1591,8 +1640,8 @@ void MPMap::CreateSkyDoom(D3DXVECTOR3 center, float radius, char* txPath, bool h
 			{
 				if(FAILED(dev->CreatePixelShader((DWORD*)pCode->GetBufferPointer(),(IDirect3DPixelShaderX**)&m_SkyDoomPixelShaderHandle)))
 				{
-					m_SkyDoomPixelShaderHandle = 0;			
-					MessageBox( 0,"Failed To Create Pixel Shader","D3DXAssembleShaderFromFile For Pixel Shader Failed",0);
+					m_SkyDoomPixelShaderHandle = 0;
+					LG("error", "Failed to create sky dome pixel shader\n");
 				}
 			}
 			else
@@ -1601,11 +1650,11 @@ void MPMap::CreateSkyDoom(D3DXVECTOR3 center, float radius, char* txPath, bool h
 				if(pError != NULL)
 				{
 					const char* str = (const char*)pError->GetBufferPointer();
-					MessageBox( 0, str,"D3DXAssembleShaderFromFile For Pixel Shader Failed",0);
+					LG("error", "Sky dome PS assemble failed: %s\n", str);
 				}
 				else
 				{
-					MessageBox( 0, "File Of Pixel Shader Not Exist","D3DXAssembleShaderFromFile For Pixel Shader Failed",0);
+					LG("error", "Sky dome PS file missing: %s\n", Path);
 				}
 			}
 			if( pError )

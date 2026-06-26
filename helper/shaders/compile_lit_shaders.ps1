@@ -8,7 +8,28 @@
 
 $ErrorActionPreference = 'Stop'
 
-$Fxc       = 'C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x86\fxc.exe'
+function Find-FxcPath {
+    $candidates = @(
+        'C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x86\fxc.exe',
+        'C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x86\fxc.exe',
+        'C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x86\fxc.exe',
+        'C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Utilities\bin\x86\fxc.exe'
+    )
+    foreach ($p in $candidates) {
+        if (Test-Path -LiteralPath $p) { return $p }
+    }
+    $kits = 'C:\Program Files (x86)\Windows Kits\10\bin'
+    if (Test-Path $kits) {
+        $found = Get-ChildItem -Path $kits -Recurse -Filter 'fxc.exe' -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match '\\x86\\fxc\.exe$' } |
+            Sort-Object FullName -Descending |
+            Select-Object -First 1
+        if ($found) { return $found.FullName }
+    }
+    return $null
+}
+
+$Fxc       = Find-FxcPath
 $HlslDir   = Join-Path $PSScriptRoot 'hlsl'
 $OutDir    = Join-Path $PSScriptRoot 'shaders'
 $ClientDir = Resolve-Path (Join-Path $PSScriptRoot '..\..\client\shader')
@@ -16,7 +37,7 @@ $Key       = 'X7#m9$KpL2@v5*ZnQ8!w4&YhF3%r6^Dq'
 $Target    = '/Tvs_2_a'
 $Profile   = '/Dvs_2_a'
 
-if (-not (Test-Path $Fxc))    { throw "fxc.exe not found at $Fxc" }
+if (-not $Fxc)    { throw "fxc.exe not found. Install Windows 10 SDK (Desktop C++ workload)." }
 if (-not (Test-Path $OutDir)) { New-Item -ItemType Directory $OutDir | Out-Null }
 
 # Only the shaders whose pixel value comes through CalcLighting() in common.hlsli.

@@ -1,6 +1,7 @@
 //
 #include "stdafx.h"
 #include "RenderStateMgr.h"
+#include "GameConfig.h"
 
 RenderStateMgr::RenderStateMgr()
     : _dev_obj(0), _rsa_scene(0), _rsa_cha(0), _rsa_sceneobj(0), _rsa_sceneitem(0), _rsa_terrain(0), _rsa_transpobj(0) {
@@ -150,6 +151,10 @@ HRESULT RenderStateMgr::Init(MPIDeviceObject* dev_obj) {
 HRESULT RenderStateMgr::BeginScene() {
 	if (_rsa_scene) {
 		_rsa_scene->BeginRenderState(_dev_obj, 0, 10);
+	}
+	extern CGameConfig g_Config;
+	if (g_Config.m_bSRGBWrite) {
+		_dev_obj->SetRenderState(D3DRS_SRGBWRITEENABLE, TRUE);
 	}
 	return 0L;
 }

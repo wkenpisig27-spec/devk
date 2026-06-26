@@ -12,7 +12,7 @@ VS_OUTPUT main(VS_INPUT_PNT input)
     float3 normal = normalize(input.Normal);
 
     output.Position = OutlineClipPos(input.Position, normal);
-    output.Color    = OUTLINE_COLOR;
+    output.Color    = GetOutlineColor();
     output.TexCoord = input.TexCoord;
 
     return output;

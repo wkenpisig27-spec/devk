@@ -27,7 +27,7 @@ VS_OUTPUT main(VS_INPUT_SKIN3 input)
     float3 skinnedNormal = normalize(nrm0 * weight0 + nrm1 * weight1 + nrm2 * weight2);
 
     output.Position = OutlineClipPos(skinnedPos.xyz, skinnedNormal);
-    output.Color    = OUTLINE_COLOR;
+    output.Color    = GetOutlineColor();
     output.TexCoord = input.TexCoord;
 
     return output;

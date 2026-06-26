@@ -25,6 +25,7 @@
 #include "scene.h"
 #include "UICozeForm.h"
 #include "MPRender.h"
+#include "ShaderLoad.h"
 
 #ifndef USE_DSOUND
 #include "AudioThread.h"
@@ -33,8 +34,7 @@ extern CAudioThread g_AudioThread;
 using namespace std;
 using namespace GUI;
 
-// Engine-side outline toggle (defined in MindPower3D.dll / lwPhysique.cpp).
-extern "C" __declspec(dllimport) void lwSetOutlineEnabled(int enabled);
+// Engine-side animation exports (MindPower3D.dll).
 extern "C" __declspec(dllimport) void lwSet60FpsMode(int enabled);
 extern "C" __declspec(dllimport) void lwSetAnimVelocity(float velocity);
 
@@ -431,6 +431,7 @@ void CSystemMgr::LoadCustomProp() {
 
 	// Apply outline rendering toggle
 	lwSetOutlineEnabled(m_sysProp.m_gameOption.bOutline ? 1 : 0);
+	g_Config.ApplyVisualSettingsToEngine();
 
 	// Apply 60 FPS animation scaling toggle (engine-side default-pose / TexUV velocity).
 	lwSetAnimVelocity(1.0f / CSteadyFrame::GetAnimMultiplier());

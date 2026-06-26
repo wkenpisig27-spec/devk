@@ -14,20 +14,11 @@
 #include "lwItem.h"
 #include "ShaderLoad.h"
 #include "lwPredefinition.h"
+#include "lwxRenderCtrlVS.h"
 
 using namespace std;
 
-// Internal flag for inverted-hull outline pass (characters + items).
-// Toggled from game-side via lwSetOutlineEnabled() exported below.
-// External linkage so lwItem.cpp can extern-reference it.
-bool g_lwOutlineEnabled = true;
-
-// Exported setter so game.exe (which links against MindPower3D import lib)
-// can toggle the outline pass without needing a shared global.
-extern "C" __declspec(dllexport) void lwSetOutlineEnabled(int enabled)
-{
-    g_lwOutlineEnabled = (enabled != 0);
-}
+extern bool g_lwOutlineEnabled;
 
 // Internal flag for ambient/default-pose animation speed scaling.
 // Original engine ran the game loop at 30 FPS so default-pose velocity = 1.0f
@@ -916,8 +907,8 @@ LW_RESULT lwPhysique::Render()
                 lwIPrimitive* p;
                 if ((p = _obj_seq[i]) == 0)
                     continue;
-                if (_scene_mgr && p->GetState(STATE_TRANSPARENT))
-                    continue;
+
+                const bool isTransparent = _scene_mgr && p->GetState(STATE_TRANSPARENT);
 
                 // Map normal VS → outline VS variant
                 DWORD cur_vs = p->GetRenderCtrlAgent()->GetVertexShader();
@@ -935,18 +926,19 @@ LW_RESULT lwPhysique::Render()
 
                 p->GetRenderCtrlAgent()->SetVertexShader(outline_vs);
                 p->GetRenderCtrlAgent()->BeginSet();
+                lwApplyOutlineVSConstants(dev_obj);
 
                 // Re-assert after BeginSet: mesh RSA may have overridden CULLMODE
-                // (e.g. D3DCULL_NONE for double-sided meshes). Use Forced to sync
-                // both the cache mirror and the actual D3D device.
-                // The VS outputs black diffuse; existing FF MODULATE stage gives
-                // (texture * 0) = 0 for any bound texture, so we don't touch TSS
-                // or texture bindings (changing those would leave the device in a
-                // state the next mesh render doesn't expect, breaking textures).
                 dev_obj->SetRenderStateForced(D3DRS_CULLMODE,         D3DCULL_CW);
                 dev_obj->SetRenderStateForced(D3DRS_ZWRITEENABLE,     FALSE);
-                dev_obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE,  FALSE);
                 dev_obj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, FALSE);
+                if (isTransparent) {
+                    dev_obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE, TRUE);
+                    dev_obj->SetRenderStateForced(D3DRS_ALPHAREF, 0x00000080);
+                    dev_obj->SetRenderStateForced(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
+                } else {
+                    dev_obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE, FALSE);
+                }
 
                 DWORD snum = 0;
                 p->GetSubsetNum(&snum);

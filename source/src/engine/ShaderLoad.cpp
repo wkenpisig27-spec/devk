@@ -3,9 +3,41 @@
 
 #include "ShaderLoad.h"
 #include "lwgraphicsutil.h"
+#include "lwxRenderCtrlVS.h"
 
 
 #define USER_SHADER_NUM             8
+
+// --- Outline pass globals ---------------------------------------------------
+bool g_lwOutlineEnabled = true;
+static float g_lwOutlineWidth = 0.0025f;
+static float g_lwOutlineColorR = 0.10f;
+static float g_lwOutlineColorG = 0.06f;
+static float g_lwOutlineColorB = 0.08f;
+
+extern "C" MINDPOWER_API void lwSetOutlineEnabled(int enabled)
+{
+    g_lwOutlineEnabled = (enabled != 0);
+}
+
+extern "C" MINDPOWER_API void lwSetOutlineParams(float ndcWidth, float r, float g, float b)
+{
+    if (ndcWidth > 0.0f)
+        g_lwOutlineWidth = ndcWidth;
+    g_lwOutlineColorR = r;
+    g_lwOutlineColorG = g;
+    g_lwOutlineColorB = b;
+}
+
+void lwApplyOutlineVSConstants(lwIDeviceObject* dev_obj)
+{
+    if (!dev_obj)
+        return;
+    lwVector4 base(1.0f, g_lwOutlineWidth, 0.0f, 765.01f);
+    lwVector4 outlineColor(g_lwOutlineColorR, g_lwOutlineColorG, g_lwOutlineColorB, 1.0f);
+    dev_obj->SetVertexShaderConstantF(VS_CONST_REG_BASE, (float*)&base, 1);
+    dev_obj->SetVertexShaderConstantF(VS_CONST_REG_LIGHT_DIF, (float*)&outlineColor, 1);
+}
 
 LW_RESULT LoadShader0(lwISysGraphics* sys_graphics)
 {

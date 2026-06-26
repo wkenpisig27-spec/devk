@@ -13,6 +13,8 @@ public:
 	CGameConfig();
 
 	void Load(const char* pszFileName); // 读配置文件
+	void LoadVisualSettings(const char* pszIniFileName); // user/system.ini [visual]
+	void ApplyVisualSettingsToEngine(); // push outline/sRGB to engine
 	void SetDefault();					// 默认配置
 	void SetMoveClient(bool v);			// 是否与客户端同步
 
@@ -33,6 +35,14 @@ public:
 	int m_iFogG;
 	int m_iFogB;
 	float m_fExp2;
+	BOOL m_bFogEnabled;
+	float m_fOutlineWidth;
+	float m_fOutlineColorR;
+	float m_fOutlineColorG;
+	float m_fOutlineColorB;
+	BOOL m_bStaticCelEnabled;
+	BOOL m_bWaterEnhance;
+	BOOL m_bSRGBWrite;
 
 	int m_nMaxChaType;
 	int m_nMaxSceneObjType;

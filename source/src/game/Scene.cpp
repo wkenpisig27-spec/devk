@@ -44,6 +44,7 @@
 #include "uiboxform.h"
 #include "LitLoad.h"
 #include "LootFilter.h"
+#include "MPShadowMap.h"
 
 using namespace std;
 
@@ -1742,9 +1743,32 @@ CSceneItem* CGameScene::SearchItemByID(unsigned long id) {
 }
 
 bool CGameScene::RecreateShadowMapFromQuality(int nQuality, bool bEnableShadow) {
-	// Blob shadow system is used — no CMPShadowMap allocation needed.
-	CCharacter::SetIsShowShadow(bEnableShadow);
-	return true;
+	ShadowMapConfig shadowCfg;
+	switch (nQuality) {
+	case 2:  shadowCfg.resolution = SHADOW_QUALITY_LOW;    break;
+	case 1:  shadowCfg.resolution = SHADOW_QUALITY_MEDIUM; break;
+	default: shadowCfg.resolution = SHADOW_QUALITY_HIGH;   break;
+	}
+
+	if (_pShadowMap) {
+		delete _pShadowMap;
+		_pShadowMap = nullptr;
+	}
+
+	if (bEnableShadow && g_Config.m_bEnableShadowMap) {
+		_pShadowMap = new CMPShadowMap();
+		if (!_pShadowMap->Create(g_Render.GetDevice(), shadowCfg)) {
+			LG("shadow", "Failed to initialize shadow map\n");
+			delete _pShadowMap;
+			_pShadowMap = nullptr;
+		} else {
+			_pShadowMap->SetEnabled(true);
+		}
+	}
+
+	// Blob shadows only when directional shadow map is unavailable.
+	CCharacter::SetIsShowShadow(bEnableShadow && !_pShadowMap);
+	return _pShadowMap != nullptr || bEnableShadow;
 }
 
 void CGameScene::SetMainCha(int nChaID) {

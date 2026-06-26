@@ -3,7 +3,8 @@
 //==============================================================================
 
 // Constant Registers (set by engine in lwxRenderCtrVS.cpp)
-// c0      = Base {1.0, 0.0, 0.0, 765.01}  - w is bone index multiplier
+// c0      = Base {1.0, outline_ndc, 0.0, 765.01}  - w is bone index multiplier
+//           Base.y is runtime outline width when > 0 (set during outline pass)
 // c1-c4   = ViewProjection matrix (transposed)
 // c5      = Light direction (in object space)
 // c6      = Ambient color
@@ -159,13 +160,22 @@ float3 TransformNormalByBone(float3 nrm, int boneBase)
 #define OUTLINE_NDC 0.0025
 #endif
 
-// Outline color. Pure black reads as "early-2000s toon"; dark-tinted reads as
-// "modern stylized" (Genshin / Hi-Fi Rush). The FF MODULATE stage downstream
-// multiplies this against the bound texture, so dark non-zero values yield a
-// near-black outline with a subtle hue shift from the underlying material.
 #ifndef OUTLINE_COLOR
 #define OUTLINE_COLOR float4(0.10, 0.06, 0.08, 1.0)
 #endif
+
+float GetOutlineNDC()
+{
+    return (Base.y > 0.0) ? Base.y : OUTLINE_NDC;
+}
+
+float4 GetOutlineColor()
+{
+    // Engine pushes runtime tint to Diffuse (c7) with a=1 during outline pass.
+    if (Diffuse.a >= 0.99)
+        return float4(Diffuse.rgb, 1.0);
+    return OUTLINE_COLOR;
+}
 
 // Distance-scaled outline extrusion: extrude in clip-space along the
 // screen-projected normal, scaled by w so the perspective divide leaves a
@@ -181,7 +191,7 @@ float4 OutlineClipPos(float3 posOS, float3 nrmOS)
     // Direction in screen space (clip-space xy projected to NDC).
     float2 dir = normalize(clipNrm.xy);
 
-    clipPos.xy += dir * OUTLINE_NDC * clipPos.w;
+    clipPos.xy += dir * GetOutlineNDC() * clipPos.w;
     return clipPos;
 }
 
@@ -288,4 +298,32 @@ float4 CalcLighting(float3 normal)
 {
     float NdotL = max(0, dot(normal, LightDir.xyz));
     return _ApplyDiffuseBand(NdotL);
+}
+
+// Softer 2-band cel for static environment geometry (trees, props).
+// Enable via ENV_CEL_ENABLE in the including shader.
+#ifndef ENV_CEL_ENABLE
+#define ENV_CEL_ENABLE 0
+#endif
+#define ENV_CEL_BAND0    0.35
+#define ENV_CEL_BAND1    0.70
+#define ENV_CEL_LEVEL0   0.50
+#define ENV_CEL_LEVEL1   0.80
+#define ENV_CEL_LEVEL2   1.00
+
+float4 CalcLightingEnv(float3 normal)
+{
+#if ENV_CEL_ENABLE
+    float NdotL = max(0, dot(normal, LightDir.xyz));
+    float band = ENV_CEL_LEVEL0
+               + step(ENV_CEL_BAND0, NdotL) * (ENV_CEL_LEVEL1 - ENV_CEL_LEVEL0)
+               + step(ENV_CEL_BAND1, NdotL) * (ENV_CEL_LEVEL2 - ENV_CEL_LEVEL1);
+    float3 lit = Ambient.rgb + Diffuse.rgb * band;
+#if TINT_ENABLE
+    lit *= lerp(SHADOW_TINT, LIGHT_TINT, band);
+#endif
+    return float4(lit, Ambient.a);
+#else
+    return CalcLighting(normal);
+#endif
 }

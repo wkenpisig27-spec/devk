@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GameConfig.h"
 #include "GameApp.h"
+#include "ShaderLoad.h"
 
 using namespace std;
 
@@ -10,6 +11,7 @@ CGameConfig::CGameConfig() {
 	g_bBinaryTable = TRUE; // �˱��������˱���ʹ���Ƿ������
 	SetDefault();
 	Load("scripts/kop.cfg"); // �������ļ�
+	LoadVisualSettings("user/system.ini");
 }
 
 void CGameConfig::SetDefault() // Ĭ������
@@ -95,6 +97,53 @@ void CGameConfig::SetDefault() // Ĭ������
 	// Shadow mapping defaults
 	m_bEnableShadowMap = TRUE;
 	m_nShadowMapQuality = 1;  // 1 = Medium (1024)
+
+	// Visual defaults (fog, outline, water, gamma)
+	m_iFogR = 180;
+	m_iFogG = 200;
+	m_iFogB = 220;
+	m_fExp2 = 0.0008f;
+	m_bFogEnabled = FALSE;
+	m_fOutlineWidth = 0.0025f;
+	m_fOutlineColorR = 0.10f;
+	m_fOutlineColorG = 0.06f;
+	m_fOutlineColorB = 0.08f;
+	m_bStaticCelEnabled = TRUE;
+	m_bWaterEnhance = TRUE;
+	m_bSRGBWrite = FALSE;
+}
+
+void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
+	if (!pszIniFileName || !pszIniFileName[0])
+		return;
+	if (GetFileAttributesA(pszIniFileName) == INVALID_FILE_ATTRIBUTES)
+		return;
+
+	m_bFogEnabled = GetPrivateProfileInt("visual", "fogEnabled", m_bFogEnabled ? 1 : 0, pszIniFileName) != 0;
+	m_iFogR = GetPrivateProfileInt("visual", "fogR", m_iFogR, pszIniFileName);
+	m_iFogG = GetPrivateProfileInt("visual", "fogG", m_iFogG, pszIniFileName);
+	m_iFogB = GetPrivateProfileInt("visual", "fogB", m_iFogB, pszIniFileName);
+
+	char buf[64];
+	GetPrivateProfileStringA("visual", "fogDensity", "0.0008", buf, sizeof(buf), pszIniFileName);
+	m_fExp2 = (float)atof(buf);
+
+	GetPrivateProfileStringA("visual", "outlineWidth", "0.0025", buf, sizeof(buf), pszIniFileName);
+	m_fOutlineWidth = (float)atof(buf);
+	GetPrivateProfileStringA("visual", "outlineColorR", "0.10", buf, sizeof(buf), pszIniFileName);
+	m_fOutlineColorR = (float)atof(buf);
+	GetPrivateProfileStringA("visual", "outlineColorG", "0.06", buf, sizeof(buf), pszIniFileName);
+	m_fOutlineColorG = (float)atof(buf);
+	GetPrivateProfileStringA("visual", "outlineColorB", "0.08", buf, sizeof(buf), pszIniFileName);
+	m_fOutlineColorB = (float)atof(buf);
+
+	m_bStaticCelEnabled = GetPrivateProfileInt("visual", "staticCel", m_bStaticCelEnabled ? 1 : 0, pszIniFileName) != 0;
+	m_bWaterEnhance = GetPrivateProfileInt("visual", "waterEnhance", m_bWaterEnhance ? 1 : 0, pszIniFileName) != 0;
+	m_bSRGBWrite = GetPrivateProfileInt("visual", "srgbWrite", m_bSRGBWrite ? 1 : 0, pszIniFileName) != 0;
+}
+
+void CGameConfig::ApplyVisualSettingsToEngine() {
+	lwSetOutlineParams(m_fOutlineWidth, m_fOutlineColorR, m_fOutlineColorG, m_fOutlineColorB);
 }
 
 void CGameConfig::Load(const char* pszFileName) //  ��kop.cfg
@@ -181,6 +230,23 @@ void CGameConfig::Load(const char* pszFileName) //  ��kop.cfg
 		} else if (strKey == "fogexp2") // ���ܶ�
 		{
 			m_fExp2 = Str2Float(strValue);
+		} else if (strKey == "fog_enabled") {
+			m_bFogEnabled = Str2Int(strValue);
+		} else if (strKey == "outline_width") {
+			m_fOutlineWidth = Str2Float(strValue);
+		} else if (strKey == "outline_color") {
+			string strColor[3];
+			if (Util_ResolveTextLine(strValue.c_str(), strColor, 3, ',') == 3) {
+				m_fOutlineColorR = Str2Float(strColor[0]);
+				m_fOutlineColorG = Str2Float(strColor[1]);
+				m_fOutlineColorB = Str2Float(strColor[2]);
+			}
+		} else if (strKey == "static_cel") {
+			m_bStaticCelEnabled = Str2Int(strValue);
+		} else if (strKey == "water_enhance") {
+			m_bWaterEnhance = Str2Int(strValue);
+		} else if (strKey == "srgb_write") {
+			m_bSRGBWrite = Str2Int(strValue);
 		} else if (strKey == "noobj") {
 			m_bNoObj = Str2Int(strValue);
 		} else if (strKey == "eyeX") {

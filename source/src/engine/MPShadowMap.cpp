@@ -385,7 +385,8 @@ void CMPShadowMap::UpdateLightMatrices() {
         // close under the character at normal walking speeds.
         // Z (height) uses a gentler rate (0.12/frame) to absorb the
         // abrupt step when crossing a terrain-height boundary.
-        const float kXY = 0.25f;
+        // Slower XY tracking reduces texel swimming (sharp/soft flicker) while walking.
+        const float kXY = 0.15f;
         const float kZ  = 0.12f;
         _vFocusPointSmoothed.x += (_vFocusPoint.x - _vFocusPointSmoothed.x) * kXY;
         _vFocusPointSmoothed.y += (_vFocusPoint.y - _vFocusPointSmoothed.y) * kXY;
@@ -719,8 +720,8 @@ void CMPShadowMap::RenderGroundOverlay(const D3DXMATRIX& matViewProj) {
     _pShadowEffect->SetFloat("g_fShadowIntensity", _config.shadowIntensity);
     _pShadowEffect->SetFloat("g_fDepthBias", _config.depthBias);
     _pShadowEffect->SetFloat("g_fTexelSize", 1.0f / (float)_config.resolution);
-    _pShadowEffect->SetFloat("g_fBorderFade", 0.10f);  // 10% fade zone at each projection edge
-    _pShadowEffect->SetFloat("g_fPCFRadius",  5.0f);   // Poisson kernel spread in texels
+    _pShadowEffect->SetFloat("g_fBorderFade", 0.12f);  // 12% fade zone at each projection edge
+    _pShadowEffect->SetFloat("g_fPCFRadius",  _config.pcfRadius);
     _pShadowEffect->SetTexture("g_texShadowMap", _pShadowTexture);
 
     // Disable Z-test so the overlay renders on top of already-drawn terrain

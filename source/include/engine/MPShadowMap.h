@@ -21,6 +21,7 @@ struct ShadowMapConfig {
     float slopeScaleBias;     // Slope-scale depth bias
     float shadowIntensity;    // Shadow darkness (0=invisible, 1=fully dark)
     float lightHeight;        // Height of the light source above the focus point
+    float pcfRadius;          // Poisson PCF kernel radius in texels (higher = softer edges)
     bool  enabled;            // Master toggle
 
     ShadowMapConfig()
@@ -32,6 +33,7 @@ struct ShadowMapConfig {
         , slopeScaleBias(1.0f)
         , shadowIntensity(0.55f)
         , lightHeight(100.0f)
+        , pcfRadius(9.0f)
         , enabled(true)
     {}
 };

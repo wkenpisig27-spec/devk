@@ -13,7 +13,7 @@
 #include "lwShaderMgr.h"
 #include "ShaderLoad.h"
 
-// Defined in lwPhysique.cpp.  Engine-internal flag for outline pass.
+// Engine-internal flag for outline pass.
 extern bool g_lwOutlineEnabled;
 
 LW_BEGIN
@@ -325,6 +325,7 @@ LW_RESULT lwItem::Render()
             dev_obj->SetVertexDeclarationForced(decl);
             dev_obj->SetVertexShader(outline_shader);
             dev_obj->SetVertexShaderConstantF(1, (float*)&mvp, 4);
+            lwApplyOutlineVSConstants(dev_obj);
 
             // Force critical states AFTER BeginSet so mesh RSA can't override.
             // The VS outputs black diffuse; existing FF MODULATE stage gives

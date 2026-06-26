@@ -52,5 +52,12 @@ enum UserShaderType
     VSTU_STATIC_OUTLINE,    // static mesh (PNT / PNDT)
 };
 
+#include "MindPowerAPI.h"
+
 LW_RESULT MINDPOWER_API LoadShader0(lwISysGraphics* sys_graphics);
 LW_RESULT MINDPOWER_API LoadShader1(lwISysGraphics* sys_graphics);
+
+// Outline pass runtime tuning (set from game via lwSetOutlineParams)
+extern "C" MINDPOWER_API void lwSetOutlineEnabled(int enabled);
+extern "C" MINDPOWER_API void lwSetOutlineParams(float ndcWidth, float r, float g, float b);
+MINDPOWER_API void lwApplyOutlineVSConstants(lwIDeviceObject* dev_obj);

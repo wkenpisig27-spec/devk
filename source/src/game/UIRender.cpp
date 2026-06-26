@@ -86,6 +86,8 @@ void CUIPanel::Draw(IDirect3DTextureX* pSrcTexture, CONST RECT* pSrcRect, CONST 
 	m_pDev->SetRenderState(D3DRS_VERTEXBLEND, FALSE);
 	m_pDev->SetRenderState(D3DRS_INDEXEDVERTEXBLENDENABLE, FALSE);
 	m_pDev->SetRenderState(D3DRS_FOGENABLE, FALSE);
+	m_pDev->SetRenderState(D3DRS_SRGBWRITEENABLE, FALSE);
+	m_pDev->SetRenderState(D3DRS_SRGBWRITEENABLE, FALSE);
 
 	// m_pDev->SetTextureStageState( 0, D3DTSS_MINFILTER, D3DTEXF_LINEAR );
 	// m_pDev->SetTextureStageState( 0, D3DTSS_MAGFILTER, D3DTEXF_POINT );

@@ -12,9 +12,8 @@ VS_OUTPUT main(VS_INPUT_PNDT input)
     float4 worldPos = float4(input.Position, 1.0);
     output.Position = mul(worldPos, ViewProj);
     
-    // Use vertex color directly; no specular for unlit geometry
+    // Use vertex color directly
     output.Color    = input.Color;
-    output.Specular = float4(0.0, 0.0, 0.0, 0.0);
     
     // Pass through texture coordinates
     output.TexCoord = input.TexCoord;

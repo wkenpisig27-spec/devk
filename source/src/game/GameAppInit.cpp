@@ -432,6 +432,7 @@ BOOL CGameApp::_Init() {
 
 	// ��������Զ������Ϸ����(Modify by Michael Chen 2006-01-17)
 	g_stUISystem.m_sysProp.ApplyGameOption();
+	g_Config.ApplyVisualSettingsToEngine();
 
 #ifdef TESTDEMO
 	InitTestDemo();

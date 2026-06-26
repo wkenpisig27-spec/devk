@@ -21,7 +21,37 @@
 #include "cameractrl.h"
 #include "findpath.h"
 #include "event.h"
+#include "MPShadowMap.h"
 #include "ui3dcompent.h"
+
+namespace {
+bool ContainsNoCase(const char* text, const char* needle) {
+	if (!text || !needle || !*needle)
+		return false;
+	const size_t nlen = strlen(needle);
+	for (; *text; ++text) {
+		if (_strnicmp(text, needle, nlen) == 0)
+			return true;
+	}
+	return false;
+}
+
+bool ShouldCastSceneObjectShadow(CSceneObj* pObj) {
+	if (!pObj)
+		return false;
+
+	CSceneObjInfo* pInfo = GetSceneObjInfo(pObj->getTypeID());
+	if (!pInfo || pInfo->nType != 0)
+		return false;
+
+	if (pInfo->nStyle == 8)
+		return true;
+
+	return ContainsNoCase(pInfo->szName, "butterfly") ||
+		ContainsNoCase(pInfo->szName, "floating leaf") ||
+		ContainsNoCase(pInfo->szName, "fallen leaf");
+}
+}
 
 using namespace std;
 
@@ -132,12 +162,6 @@ void CGameScene::_Render() {
 
 	// g_Render.SetDirectLightDir(1, 1, -1.0f);
 
-//////
-// MPIDeviceObject* dev_obj = g_Render.GetInterfaceMgr()->dev_obj;
-#ifdef TESTDEMO
-	SetupVertexFog(dev_obj, 50, 60, D3DCOLOR_XRGB(g_Config.m_iFogR, g_Config.m_iFogG, g_Config.m_iFogB), D3DFOG_EXP2, 1, g_Config.m_fExp2);
-#endif
-
 	// g_Render.SetBackgroundColor(D3DCOLOR_XRGB(64, 64, 64));
 	list<int>::iterator it;
 	for (it = _SceneObjIdx[SCENEOBJ_TYPE_POINTLIGHT].begin();
@@ -146,6 +170,62 @@ void CGameScene::_Render() {
 		CSceneObj* pObj = &_pSceneObjArray[nArrayID];
 		if (pObj->IsValid() && pObj->IsHide() == FALSE) {
 			pObj->UpdateLight();
+		}
+	}
+
+	// Shadow map depth pass — render casters from the light's point of view.
+	if (_pShadowMap && _pShadowMap->IsEnabled()) {
+		CCharacter* pMainCha = GetMainCha();
+		if (pMainCha && _pTerrain) {
+			D3DXVECTOR3 mainPos = pMainCha->GetPos();
+			_pShadowMap->SetFocusPoint(mainPos);
+
+			MPTile* pTile = _pTerrain->GetTile((int)mainPos.x, (int)mainPos.y);
+			if (pTile) {
+				CAreaInfo* pArea = GetAreaInfo(pTile->getIsland());
+				if (pArea) {
+					_pShadowMap->SetLightDirection(
+						pArea->fLightDir[0],
+						pArea->fLightDir[1],
+						pArea->fLightDir[2]);
+				}
+			}
+
+			if (_pShadowMap->BeginShadowPass()) {
+				_pShadowMap->SetAlphaCutoutCasterMode(false);
+				extern bool g_IsShowModel;
+				if (g_IsShowModel) {
+					for (int si = 0; si < _nChaCnt; si++) {
+						CCharacter* pShadowCha = &_pChaArray[si];
+						if (!pShadowCha->IsValid() || pShadowCha->GetIsForUI() || pShadowCha->IsHide())
+							continue;
+						pShadowCha->Render();
+					}
+				}
+
+				if (_bShowSceneObj) {
+					_pShadowMap->SetAlphaCutoutCasterMode(true);
+					float shadowRange = _pShadowMap->GetOrthoSize();
+					for (std::list<int>::iterator sit = _SceneObjIdx[0].begin(); sit != _SceneObjIdx[0].end(); ++sit) {
+						CSceneObj* pObj = &_pSceneObjArray[*sit];
+						if (!pObj->IsValid() || pObj->IsHide())
+							continue;
+						if (!ShouldCastSceneObjectShadow(pObj))
+							continue;
+						D3DXVECTOR3 objPos = pObj->getPos();
+						float dx = objPos.x - mainPos.x;
+						float dy = objPos.y - mainPos.y;
+						if (dx * dx + dy * dy > shadowRange * shadowRange)
+							continue;
+						lwIModel* pModel = pObj->GetObject();
+						if (pModel)
+							pModel->Render();
+					}
+					_pShadowMap->SetAlphaCutoutCasterMode(false);
+				}
+
+				_pShadowMap->EndShadowPass();
+			}
 		}
 	}
 
@@ -161,6 +241,12 @@ void CGameScene::_Render() {
 			_pTerrain->EnableNormalLight(0); // 0 = terrtain lighting : 1 = disable
 			_pTerrain->Render();
 		}
+	}
+
+	if (_pShadowMap && _pShadowMap->IsEnabled()) {
+		MPIDeviceObject* pDevObj = g_Render.GetInterfaceMgr()->dev_obj;
+		D3DXMATRIX matVP = *(D3DXMATRIX*)pDevObj->GetMatViewProj();
+		_pShadowMap->RenderGroundOverlay(matVP);
 	}
 
 	for (it = _SceneObjIdx[SCENEOBJ_TYPE_POINTLIGHT].begin();
