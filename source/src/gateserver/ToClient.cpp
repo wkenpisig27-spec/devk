@@ -48,6 +48,22 @@ bool IsTransmitCallOpcode(uint16_t cmd) {
 	}
 }
 
+bool ProbeSyncClientStrings(RPacket& recvbuf, int stringCount) {
+	if (stringCount <= 0) {
+		return true;
+	}
+	WPacket copy = WPacket(recvbuf).Duplicate();
+	RPacket probe(copy);
+	net::PacketReader reader(probe);
+	for (int i = 0; i < stringCount; ++i) {
+		cChar* value = nullptr;
+		if (!reader.String(value) || !value) {
+			return false;
+		}
+	}
+	return true;
+}
+
 bool IsExplicitCmOpcode(uint16_t cmd) {
 	return IsTransmitCallOpcode(cmd) ||
 		cmd == CMD_CM_LOGIN ||
@@ -1313,6 +1329,14 @@ void ToClient::CM_BGNPLAY(DataSocket* datasock, RPacket& recvbuf) {
 				l_wpk.WriteShort(ERR_MC_NOTSELCHA);
 				SendData(datasock, l_wpk);
 			} else {
+				if (!ProbeSyncClientStrings(recvbuf, 1)) {
+					WPacket errPk = datasock->GetWPacket();
+					errPk.WriteCmd(CMD_MC_BGNPLAY);
+					errPk.WriteShort(ERR_MC_NETEXCP);
+					SendData(datasock, errPk);
+					l_lockStat.unlock();
+					return;
+				}
 				// 验证所玩角色合法性
 				WPacket l_wpk = WPacket(recvbuf).Duplicate();
 				l_wpk.WriteCmd(CMD_TP_BGNPLAY);
@@ -1588,6 +1612,14 @@ void ToClient::CM_NEWCHA(DataSocket* datasock, RPacket& recvbuf) {
 				l_wpk.WriteShort(ERR_MC_NOTSELCHA);
 				SendData(datasock, l_wpk);
 			} else {
+				if (!ProbeSyncClientStrings(recvbuf, 2)) {
+					WPacket errPk = datasock->GetWPacket();
+					errPk.WriteCmd(CMD_MC_NEWCHA);
+					errPk.WriteShort(ERR_MC_NETEXCP);
+					SendData(datasock, errPk);
+					l_lockStat.unlock();
+					return;
+				}
 				// 调用GroupServer
 				WPacket l_wpk = WPacket(recvbuf).Duplicate();
 				l_wpk.WriteCmd(CMD_TP_NEWCHA);

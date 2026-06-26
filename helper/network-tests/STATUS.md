@@ -63,7 +63,7 @@ Track progress for autonomous refactoring. Update after each completed task.
 | B | M2 Bulk migration — CharacterPrl (B6) | **done** | 2026-06-27 — 112 handlers; legacy switch empty |
 | C | M6 Zero-copy gate forwarding | pending | Drop `Duplicate()` in `ReRouteToGameServer` |
 | D | M4 Backplane PSK auth | **done** | 2026-06-27 — `BackplaneAuth` HMAC-SHA256; OS/SO opcodes 6510/7010 |
-| E | M5 PacketReader everywhere | **in_progress** | Track E batch 4: chartrade item/money + Group session mins (2026-06-27) |
+| E | M5 PacketReader everywhere | **in_progress** | Track E batch 5: MP min map + boat/guild PacketReader (2026-06-27) |
 
 **Phase 3 exit gate:** Legacy switches empty or assert-only; session handles primary; backplane auth in default configs; 30-min soak clean.
 
@@ -644,6 +644,34 @@ Blockers: none. **Track B6 complete.**
 
 **Recommended batch 5:** Gate BGNPLAY/NEWCHA PacketReader pre-check (non-consuming duplicate path); Group MP hot-opcode min map; Character remaining READ_* handlers; optional `OpcodeDispatchDomain::Group` registry pilot; Phase 3 exit soak + commit Track E batches 1–4.
 
+### Track E — OpcodeIngress + PacketReader (batch 5, 2026-06-27)
+
+**Gate sync path pre-check (non-consuming):**
+- `ProbeSyncClientStrings` on duplicate buffer before GroupServer SyncCall
+- `CM_BGNPLAY`: require readable char name string
+- `CM_NEWCHA`: require readable name + birth strings
+- Fail-closed: `CMD_MC_*` + `ERR_MC_NETEXCP` without consuming forward buffer
+
+**GroupServer MP hot-opcode min map (ProcessData path):**
+
+| Opcode | min | Notes |
+|--------|-----|-------|
+| CMD_MP_ENTERMAP | 1 | switch char |
+| CMD_MP_MASTER_FINISH | 4 | prentice cha ID long |
+| CMD_MP_GUILD_APPROVE / KICK / CREATE | 4 | leading long |
+| CMD_MP_GUILD_CHALLMONEY / CHALL_PRIZEMONEY | 12 | long + longlong before strings |
+| CMD_MP_CANRECEIVEREQUESTS | 6 | cha ID long + short |
+| CMD_MP_TEAM_CREATE / MASTER_* | 0 | string-led |
+
+**Character PacketReader (~17 handlers):**
+- Boat/repair/fight: `CmBoatLuanch`, `CmBoatSelect`, `CmBoatBagsel`, `CmTeamFightAsk/Asr`, `CmItemRepairAsk/Asr`, `CmSkillupgrade`
+- Crafting: `CmItemForgeCanaction`, `CmValidateSlotItem`, `CmEntityEvent` (forwards remainder via `reader.Raw()`)
+- Guild: `CmGuildTryfor`, `CmGuildTryforcfm`, `CmGuildApprove`, `CmGuildReject`, `CmGuildKick`
+
+**Manual test checklist:** login → BGNPLAY/NEWCHA → boat NPC if available → item repair → guild approve/kick → MP enter map (char switch) → grep `OpcodeIngress [reject]`.
+
+**Recommended batch 6:** Character store/volunteer/lifeskill PacketReader tail; Group CP team-kick/friend-refuse mins; Gate DELCHA probe; 30-min Phase 3 exit soak.
+
 ### Track B5 — GameAppNet registry (batch 1, 2026-06-27)
 
 `CGameApp::ProcessPacket` now tries `DispatchOpcodeHandler` first (via `GameAppPacketContext { app, gate }`); unmigrated opcodes fall through to legacy switch + default router.
@@ -758,4 +786,4 @@ See last-smoke-result.txt for automated output.
 
 ## Resume prompt for next session
 
-> Continue Option B Phase 3. **Track B6 done** (112 CharacterPrl registry entries). **Track B5 done** (35 GameAppNet handlers). **Track E batch 4 in tree** (chartrade item/money/validate, Group session mins, Gate sync non-empty check, Account PA PacketReader). **Track A phase 2b/3 in tree**. Next: manual T0 verify post Track E batch 4, commit Track E batches 1–4, or Track E batch 5. Read `docs/NETWORK_AUDIT.md` and this file. Deploy gate + game + group + account together after rebuild.
+> Continue Option B Phase 3. **Track E batch 1–4 committed** (`5b4d7f2e`). **Track E batch 5 in tree** (Gate BGNPLAY/NEWCHA probe, Group MP mins, boat/guild PacketReader). Next: manual T0 verify, commit batch 5, 30-min Phase 3 exit soak. Read `docs/NETWORK_AUDIT.md` and this file.

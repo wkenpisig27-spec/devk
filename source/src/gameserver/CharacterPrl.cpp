@@ -582,18 +582,18 @@ void RegisterAllCharacterOpcodeHandlers() {
 	add(CMD_CM_KITBAG_AUTOLOCK, &CCharacter::OpcodeHandle_CmKitbagAutolock, OpcodeName(CMD_CM_KITBAG_AUTOLOCK), 1);
 	add(CMD_CM_KITBAG_LOCK, &CCharacter::OpcodeHandle_CmKitbagLock, OpcodeName(CMD_CM_KITBAG_LOCK), 0);
 	add(CMD_CM_UPDATEHAIR, &CCharacter::OpcodeHandle_CmUpdatehair, OpcodeName(CMD_CM_UPDATEHAIR));
-	add(CMD_CM_SKILLUPGRADE, &CCharacter::OpcodeHandle_CmSkillupgrade, OpcodeName(CMD_CM_SKILLUPGRADE));
-	add(CMD_CM_TEAM_FIGHT_ASK, &CCharacter::OpcodeHandle_CmTeamFightAsk, OpcodeName(CMD_CM_TEAM_FIGHT_ASK));
-	add(CMD_CM_TEAM_FIGHT_ASR, &CCharacter::OpcodeHandle_CmTeamFightAsr, OpcodeName(CMD_CM_TEAM_FIGHT_ASR));
-	add(CMD_CM_ITEM_REPAIR_ASK, &CCharacter::OpcodeHandle_CmItemRepairAsk, OpcodeName(CMD_CM_ITEM_REPAIR_ASK));
-	add(CMD_CM_ITEM_REPAIR_ASR, &CCharacter::OpcodeHandle_CmItemRepairAsr, OpcodeName(CMD_CM_ITEM_REPAIR_ASR));
+	add(CMD_CM_SKILLUPGRADE, &CCharacter::OpcodeHandle_CmSkillupgrade, OpcodeName(CMD_CM_SKILLUPGRADE), 3);
+	add(CMD_CM_TEAM_FIGHT_ASK, &CCharacter::OpcodeHandle_CmTeamFightAsk, OpcodeName(CMD_CM_TEAM_FIGHT_ASK), 9);
+	add(CMD_CM_TEAM_FIGHT_ASR, &CCharacter::OpcodeHandle_CmTeamFightAsr, OpcodeName(CMD_CM_TEAM_FIGHT_ASR), 1);
+	add(CMD_CM_ITEM_REPAIR_ASK, &CCharacter::OpcodeHandle_CmItemRepairAsk, OpcodeName(CMD_CM_ITEM_REPAIR_ASK), 10);
+	add(CMD_CM_ITEM_REPAIR_ASR, &CCharacter::OpcodeHandle_CmItemRepairAsr, OpcodeName(CMD_CM_ITEM_REPAIR_ASR), 1);
 	add(CMD_CM_STALL_BUY, &CCharacter::OpcodeHandle_CmStallBuy, OpcodeName(CMD_CM_STALL_BUY));
-	add(CMD_CM_BOAT_LUANCH, &CCharacter::OpcodeHandle_CmBoatLuanch, OpcodeName(CMD_CM_BOAT_LUANCH));
-	add(CMD_CM_BOAT_BAGSEL, &CCharacter::OpcodeHandle_CmBoatBagsel, OpcodeName(CMD_CM_BOAT_BAGSEL));
-	add(CMD_CM_BOAT_SELECT, &CCharacter::OpcodeHandle_CmBoatSelect, OpcodeName(CMD_CM_BOAT_SELECT));
-	add(CMD_CM_ENTITY_EVENT, &CCharacter::OpcodeHandle_CmEntityEvent, OpcodeName(CMD_CM_ENTITY_EVENT));
-	add(CMD_CM_ITEM_FORGE_CANACTION, &CCharacter::OpcodeHandle_CmItemForgeCanaction, OpcodeName(CMD_CM_ITEM_FORGE_CANACTION));
-	add(CMD_CM_VALIDATE_SLOT_ITEM, &CCharacter::OpcodeHandle_CmValidateSlotItem, OpcodeName(CMD_CM_VALIDATE_SLOT_ITEM));
+	add(CMD_CM_BOAT_LUANCH, &CCharacter::OpcodeHandle_CmBoatLuanch, OpcodeName(CMD_CM_BOAT_LUANCH), 5);
+	add(CMD_CM_BOAT_BAGSEL, &CCharacter::OpcodeHandle_CmBoatBagsel, OpcodeName(CMD_CM_BOAT_BAGSEL), 5);
+	add(CMD_CM_BOAT_SELECT, &CCharacter::OpcodeHandle_CmBoatSelect, OpcodeName(CMD_CM_BOAT_SELECT), 6);
+	add(CMD_CM_ENTITY_EVENT, &CCharacter::OpcodeHandle_CmEntityEvent, OpcodeName(CMD_CM_ENTITY_EVENT), 4);
+	add(CMD_CM_ITEM_FORGE_CANACTION, &CCharacter::OpcodeHandle_CmItemForgeCanaction, OpcodeName(CMD_CM_ITEM_FORGE_CANACTION), 1);
+	add(CMD_CM_VALIDATE_SLOT_ITEM, &CCharacter::OpcodeHandle_CmValidateSlotItem, OpcodeName(CMD_CM_VALIDATE_SLOT_ITEM), 4);
 	add(CMD_CM_ITEM_FORGE_ASK, &CCharacter::OpcodeHandle_CmItemForgeAsk, OpcodeName(CMD_CM_ITEM_FORGE_ASK), 1);
 	add(CMD_CM_ITEM_FORGE_ASR, &CCharacter::OpcodeHandle_CmItemForgeAsr, OpcodeName(CMD_CM_ITEM_FORGE_ASR), 1);
 	add(CMD_CM_ITEM_LOTTERY_ASK, &CCharacter::OpcodeHandle_CmItemLotteryAsk, OpcodeName(CMD_CM_ITEM_LOTTERY_ASK));
@@ -641,12 +641,12 @@ void RegisterAllCharacterOpcodeHandlers() {
 	add(CMD_TM_CHANGE_PERSONINFO, &CCharacter::OpcodeHandle_TmChangePersoninfo, OpcodeName(CMD_TM_CHANGE_PERSONINFO));
 	add(CMD_CM_GUILD_PERM, &CCharacter::OpcodeHandle_CmGuildPerm, OpcodeName(CMD_CM_GUILD_PERM));
 	add(CMD_CM_GUILD_PUTNAME, &CCharacter::OpcodeHandle_CmGuildPutname, OpcodeName(CMD_CM_GUILD_PUTNAME));
-	add(CMD_CM_GUILD_TRYFOR, &CCharacter::OpcodeHandle_CmGuildTryfor, OpcodeName(CMD_CM_GUILD_TRYFOR));
-	add(CMD_CM_GUILD_TRYFORCFM, &CCharacter::OpcodeHandle_CmGuildTryforcfm, OpcodeName(CMD_CM_GUILD_TRYFORCFM));
+	add(CMD_CM_GUILD_TRYFOR, &CCharacter::OpcodeHandle_CmGuildTryfor, OpcodeName(CMD_CM_GUILD_TRYFOR), 4);
+	add(CMD_CM_GUILD_TRYFORCFM, &CCharacter::OpcodeHandle_CmGuildTryforcfm, OpcodeName(CMD_CM_GUILD_TRYFORCFM), 1);
 	add(CMD_CM_GUILD_LISTTRYPLAYER, &CCharacter::OpcodeHandle_CmGuildListtryplayer, OpcodeName(CMD_CM_GUILD_LISTTRYPLAYER));
-	add(CMD_CM_GUILD_APPROVE, &CCharacter::OpcodeHandle_CmGuildApprove, OpcodeName(CMD_CM_GUILD_APPROVE));
-	add(CMD_CM_GUILD_REJECT, &CCharacter::OpcodeHandle_CmGuildReject, OpcodeName(CMD_CM_GUILD_REJECT));
-	add(CMD_CM_GUILD_KICK, &CCharacter::OpcodeHandle_CmGuildKick, OpcodeName(CMD_CM_GUILD_KICK));
+	add(CMD_CM_GUILD_APPROVE, &CCharacter::OpcodeHandle_CmGuildApprove, OpcodeName(CMD_CM_GUILD_APPROVE), 4);
+	add(CMD_CM_GUILD_REJECT, &CCharacter::OpcodeHandle_CmGuildReject, OpcodeName(CMD_CM_GUILD_REJECT), 4);
+	add(CMD_CM_GUILD_KICK, &CCharacter::OpcodeHandle_CmGuildKick, OpcodeName(CMD_CM_GUILD_KICK), 4);
 	add(CMD_CM_GUILD_LEAVE, &CCharacter::OpcodeHandle_CmGuildLeave, OpcodeName(CMD_CM_GUILD_LEAVE));
 	add(CMD_CM_GUILD_DISBAND, &CCharacter::OpcodeHandle_CmGuildDisband, OpcodeName(CMD_CM_GUILD_DISBAND));
 	add(CMD_CM_GUILD_MOTTO, &CCharacter::OpcodeHandle_CmGuildMotto, OpcodeName(CMD_CM_GUILD_MOTTO));
@@ -1006,8 +1006,12 @@ bool CCharacter::OpcodeHandle_CmUpdatehair(void* ctx, DataSocket* /*sock*/, RPac
 
 bool CCharacter::OpcodeHandle_CmSkillupgrade(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	Short sSkillID = READ_SHORT(pk);
-	Char chAddGrade = READ_CHAR(pk);
+	net::PacketReader reader(pk);
+	uShort sSkillID = 0;
+	uChar chAddGrade = 0;
+	if (!reader.Short(sSkillID) || !reader.Char(chAddGrade)) {
+		return true;
+	}
 
 	if (!PS::ValidateRange(static_cast<int>(sSkillID), 1, PS::MAX_SKILL_ID)) {
 		LG("Security", "[Skill] Invalid skill ID %d from character %s\n", sSkillID, cha->GetName());
@@ -1055,33 +1059,52 @@ bool CCharacter::OpcodeHandle_CmSkillupgrade(void* ctx, DataSocket* /*sock*/, RP
 
 bool CCharacter::OpcodeHandle_CmTeamFightAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	Char chType = READ_CHAR(pk);
-	Long lID = READ_LONG(pk);
-	Long lHandle = READ_LONG(pk);
-	cha->Cmd_FightAsk(chType, lID, lHandle);
+	net::PacketReader reader(pk);
+	uChar chType = 0;
+	uLong lID = 0;
+	uLong lHandle = 0;
+	if (!reader.Char(chType) || !reader.Long(lID) || !reader.Long(lHandle)) {
+		return true;
+	}
+	cha->Cmd_FightAsk(static_cast<Char>(chType), static_cast<Long>(lID), static_cast<Long>(lHandle));
 	return true;
 }
 
 bool CCharacter::OpcodeHandle_CmTeamFightAsr(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	Char chAnswer = READ_CHAR(pk);
-	cha->Cmd_FightAnswer(chAnswer != 0 ? true : false);
+	net::PacketReader reader(pk);
+	uChar chAnswer = 0;
+	if (!reader.Char(chAnswer)) {
+		return true;
+	}
+	cha->Cmd_FightAnswer(chAnswer != 0);
 	return true;
 }
 
 bool CCharacter::OpcodeHandle_CmItemRepairAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	READ_LONG(pk);
-	READ_LONG(pk);
-	Char chPosType = READ_CHAR(pk);
-	Char chPosID = READ_CHAR(pk);
-	cha->Cmd_ItemRepairAsk(chPosType, chPosID);
+	net::PacketReader reader(pk);
+	uLong npcId1 = 0;
+	uLong npcId2 = 0;
+	uChar chPosType = 0;
+	uChar chPosID = 0;
+	if (!reader.Long(npcId1) || !reader.Long(npcId2) || !reader.Char(chPosType) || !reader.Char(chPosID)) {
+		return true;
+	}
+	(void)npcId1;
+	(void)npcId2;
+	cha->Cmd_ItemRepairAsk(static_cast<Char>(chPosType), static_cast<Char>(chPosID));
 	return true;
 }
 
 bool CCharacter::OpcodeHandle_CmItemRepairAsr(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	cha->Cmd_ItemRepairAnswer(READ_CHAR(pk) != 0 ? true : false);
+	net::PacketReader reader(pk);
+	uChar answer = 0;
+	if (!reader.Char(answer)) {
+		return true;
+	}
+	cha->Cmd_ItemRepairAnswer(answer != 0);
 	return true;
 }
 
@@ -1095,7 +1118,11 @@ bool CCharacter::OpcodeHandle_CmStallBuy(void* ctx, DataSocket* /*sock*/, RPacke
 
 bool CCharacter::OpcodeHandle_CmBoatLuanch(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	DWORD dwNpcID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uLong dwNpcID = 0;
+	if (!reader.Long(dwNpcID)) {
+		return true;
+	}
 	CCharacter* pCha = cha->m_submap->FindCharacter(dwNpcID, cha->GetShape().centre);
 	if (pCha == nullptr) {
 		return true;
@@ -1107,14 +1134,21 @@ bool CCharacter::OpcodeHandle_CmBoatLuanch(void* ctx, DataSocket* /*sock*/, RPac
 		}
 	}
 
-	BYTE byIndex = READ_CHAR(pk);
-	cha->BoatSelLuanch(byIndex);
+	uChar byIndex = 0;
+	if (!reader.Char(byIndex)) {
+		return true;
+	}
+	cha->BoatSelLuanch(static_cast<BYTE>(byIndex));
 	return true;
 }
 
 bool CCharacter::OpcodeHandle_CmBoatSelect(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	DWORD dwNpcID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uLong dwNpcID = 0;
+	if (!reader.Long(dwNpcID)) {
+		return true;
+	}
 	CCharacter* pCha = cha->m_submap->FindCharacter(dwNpcID, cha->GetShape().centre);
 	if (pCha == nullptr) {
 		return true;
@@ -1124,52 +1158,73 @@ bool CCharacter::OpcodeHandle_CmBoatSelect(void* ctx, DataSocket* /*sock*/, RPac
 			return true;
 		}
 	}
-	BYTE byType = READ_CHAR(pk);
-	BYTE byIndex = READ_CHAR(pk);
-	cha->BoatSelected(byType, byIndex);
+	uChar byType = 0;
+	uChar byIndex = 0;
+	if (!reader.Char(byType) || !reader.Char(byIndex)) {
+		return true;
+	}
+	cha->BoatSelected(static_cast<BYTE>(byType), static_cast<BYTE>(byIndex));
 	return true;
 }
 
 bool CCharacter::OpcodeHandle_CmBoatBagsel(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	DWORD dwNpcID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uLong dwNpcID = 0;
+	if (!reader.Long(dwNpcID)) {
+		return true;
+	}
 	if (dwNpcID) {
 		CCharacter* pCha = cha->m_submap->FindCharacter(dwNpcID, cha->GetShape().centre);
 		if (pCha == nullptr)
 			return true;
 	}
 
-	BYTE byIndex = READ_CHAR(pk);
-	cha->BoatPackBag(byIndex);
+	uChar byIndex = 0;
+	if (!reader.Char(byIndex)) {
+		return true;
+	}
+	cha->BoatPackBag(static_cast<BYTE>(byIndex));
 	return true;
 }
 
 bool CCharacter::OpcodeHandle_CmEntityEvent(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	DWORD dwEntityID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uLong dwEntityID = 0;
+	if (!reader.Long(dwEntityID)) {
+		return true;
+	}
 	CCharacter* pCha = cha->m_submap->FindCharacter(dwEntityID, cha->GetShape().centre);
 	if (pCha == nullptr)
 		return true;
 	mission::CEventEntity* pEntity = pCha->IsEvent();
 	if (pEntity) {
-		pEntity->MsgProc(*cha, pk);
+		pEntity->MsgProc(*cha, reader.Raw());
 	}
 	return true;
 }
 
 bool CCharacter::OpcodeHandle_CmItemForgeCanaction(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	short canaction = READ_CHAR(pk);
-	bool bCan = (canaction == 0) ? false : true;
-	cha->ForgeAction(bCan);
+	net::PacketReader reader(pk);
+	uChar canaction = 0;
+	if (!reader.Char(canaction)) {
+		return true;
+	}
+	cha->ForgeAction(canaction != 0);
 	return true;
 }
 
 bool CCharacter::OpcodeHandle_CmValidateSlotItem(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	Char chFormType = READ_CHAR(pk);
-	Char chSlotIndex = READ_CHAR(pk);
-	Short sGridID = READ_SHORT(pk);
+	net::PacketReader reader(pk);
+	uChar chFormType = 0;
+	uChar chSlotIndex = 0;
+	uShort sGridID = 0;
+	if (!reader.Char(chFormType) || !reader.Char(chSlotIndex) || !reader.Short(sGridID)) {
+		return true;
+	}
 
 	if (!PS::ValidateRange(static_cast<int>(chFormType), 1, 6)) {
 		LG("Security", "[SlotItem] Invalid form type %d from character %s\n", chFormType, cha->GetName());
@@ -2401,12 +2456,22 @@ bool CCharacter::OpcodeHandle_CmGuildPutname(void* ctx, DataSocket* /*sock*/, RP
 }
 
 bool CCharacter::OpcodeHandle_CmGuildTryfor(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
-	Guild::cmd_GuildTryFor(static_cast<CCharacter*>(ctx)->GetPlyMainCha(), READ_LONG(pk));
+	net::PacketReader reader(pk);
+	uLong guildId = 0;
+	if (!reader.Long(guildId)) {
+		return true;
+	}
+	Guild::cmd_GuildTryFor(static_cast<CCharacter*>(ctx)->GetPlyMainCha(), guildId);
 	return true;
 }
 
 bool CCharacter::OpcodeHandle_CmGuildTryforcfm(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
-	Guild::cmd_GuildTryForComfirm(static_cast<CCharacter*>(ctx)->GetPlyMainCha(), READ_CHAR(pk));
+	net::PacketReader reader(pk);
+	uChar confirm = 0;
+	if (!reader.Char(confirm)) {
+		return true;
+	}
+	Guild::cmd_GuildTryForComfirm(static_cast<CCharacter*>(ctx)->GetPlyMainCha(), static_cast<Char>(confirm));
 	return true;
 }
 
@@ -2416,17 +2481,32 @@ bool CCharacter::OpcodeHandle_CmGuildListtryplayer(void* ctx, DataSocket* /*sock
 }
 
 bool CCharacter::OpcodeHandle_CmGuildApprove(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
-	Guild::cmd_GuildApprove(static_cast<CCharacter*>(ctx)->GetPlyMainCha(), READ_LONG(pk));
+	net::PacketReader reader(pk);
+	uLong chaId = 0;
+	if (!reader.Long(chaId)) {
+		return true;
+	}
+	Guild::cmd_GuildApprove(static_cast<CCharacter*>(ctx)->GetPlyMainCha(), chaId);
 	return true;
 }
 
 bool CCharacter::OpcodeHandle_CmGuildReject(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
-	Guild::cmd_GuildReject(static_cast<CCharacter*>(ctx)->GetPlyMainCha(), READ_LONG(pk));
+	net::PacketReader reader(pk);
+	uLong chaId = 0;
+	if (!reader.Long(chaId)) {
+		return true;
+	}
+	Guild::cmd_GuildReject(static_cast<CCharacter*>(ctx)->GetPlyMainCha(), chaId);
 	return true;
 }
 
 bool CCharacter::OpcodeHandle_CmGuildKick(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
-	Guild::cmd_GuildKick(static_cast<CCharacter*>(ctx)->GetPlyMainCha(), READ_LONG(pk));
+	net::PacketReader reader(pk);
+	uLong chaId = 0;
+	if (!reader.Long(chaId)) {
+		return true;
+	}
+	Guild::cmd_GuildKick(static_cast<CCharacter*>(ctx)->GetPlyMainCha(), chaId);
 	return true;
 }
 

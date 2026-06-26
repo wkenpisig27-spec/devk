@@ -82,6 +82,17 @@ uint16_t LookupGroupProcessDataMinPayload(uint16_t cmd) {
 		return 4;
 	case CMD_CP_SESS_CREATE:
 		return 1;
+	case CMD_MP_ENTERMAP:
+	case CMD_MP_MASTER_FINISH:
+	case CMD_MP_GUILD_APPROVE:
+	case CMD_MP_GUILD_KICK:
+	case CMD_MP_GUILD_CREATE:
+		return 4;
+	case CMD_MP_GUILD_CHALLMONEY:
+	case CMD_MP_GUILD_CHALL_PRIZEMONEY:
+		return 12;
+	case CMD_MP_CANRECEIVEREQUESTS:
+		return 6;
 	default:
 		return 0;
 	}
