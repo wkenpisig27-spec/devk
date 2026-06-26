@@ -2,7 +2,7 @@
 
 Track progress for autonomous refactoring. Update after each completed task.
 
-**Current phase:** Phase 1 — Immediate fixes (Sprint 1)  
+**Current phase:** Phase 2 — Foundation (M1–M2-prep)  
 **Last updated:** 2026-06-26
 
 ---
@@ -39,14 +39,14 @@ Track progress for autonomous refactoring. Update after each completed task.
 
 ---
 
-## Phase 2 — Foundation (not started)
+## Phase 2 — Foundation (in progress)
 
 | Task | Status | Date | Notes |
 |------|--------|------|-------|
-| M1 Opcode table (OpcodeMeta) | pending | | |
-| M5-prep PacketReader/Writer | pending | | |
-| M2-prep Handler registry + 5 pilots | pending | | |
-| **Phase 2 exit gate** | pending | | |
+| M1 Opcode table (OpcodeMeta) | done | 2026-06-26 | `OpcodeMeta.h/cpp`, generated `OpcodeMetaTable.inc`, `test_opcode_meta.py` |
+| M5-prep PacketReader/Writer | done | 2026-06-26 | `PacketReader.h`, `PacketWriter.h` (I4-aware reads) |
+| M2-prep Handler registry + 5 pilots | done | 2026-06-26 | `OpcodeHandlerRegistry`; Gate `ToClient` pilots: PING, SAY, KITBAG_UNLOCK, ITEM_UNLOCK_ASK, ENDACTION |
+| **Phase 2 exit gate** | pending | | Full build + smoke after user verify |
 
 ---
 
@@ -73,4 +73,4 @@ See last-smoke-result.txt for full output.
 
 ## Resume prompt for next session
 
-> Phase 1 complete. Start **Phase 2** (M1 opcode table) or run full-stack test with `CommEncrypt=2`. Read `helper/network-tests/STATUS.md`.
+> Phase 2 foundation complete (M1, M5-prep, M2-prep). User: Release\|x64 build + `net-smoke.py`. Then Phase 2 exit gate or Phase 3. Read `helper/network-tests/STATUS.md`.

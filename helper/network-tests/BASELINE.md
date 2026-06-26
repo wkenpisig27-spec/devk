@@ -87,6 +87,9 @@ msbuild source\source.sln /p:Configuration=Release /p:Platform=x64 /m
 | Flag | Location | Default | Purpose |
 |------|----------|---------|---------|
 | `NET_AUDIT_DIAG` | `source/include/common/NetAuditDiag.h` | **0** | Per-packet recv log in `Receiver.cpp` |
+| `OpcodeMeta` | `source/include/common/OpcodeMeta.h` | — | 546-entry sorted lookup from `NetCommand.h` (M1) |
+| `OpcodeHandlerRegistry` | `source/include/common/OpcodeHandlerRegistry.h` | — | Sorted opcode→handler dispatch (M2-prep) |
+| `PacketReader` / `PacketWriter` | `source/include/common/PacketReader.h` | — | Typed R/W facades over I4 contract (M5-prep) |
 | `DS_DECRYPT_FAIL` / `DS_HANDLER_EXCP` / `DS_PACKET_PIPELINE` | `source/include/serversdk/Comm.h` | — | Disconnect reasons -11/-12/-13 (I5) |
 | `PacketPipelineFailDisconnect` | `source/include/serversdk/PacketPipeline.h` | — | Log + disconnect on handler/decrypt faults |
 | `GetSteadyMs()` | `source/include/serversdk/Comm.h` | — | Keepalive/disconnect timers (I3, ms since `BeginWork`) |

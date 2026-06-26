@@ -91,6 +91,12 @@ private:
 	void ReRouteToGameServer(DataSocket* datasock, RPacket& recvbuf);
 	void ReRouteToGroupServer(DataSocket* datasock, RPacket& recvbuf);
 
+	static bool OpcodeHandle_CpPing(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_CmSay(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_CmKitbagUnlock(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_CmItemUnlockAsk(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_CmEndAction(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+
 	bool AllowConnectionRate(cChar* peerIp);
 	bool IsWhitelisted(cChar* peerIp) const;
 

@@ -198,6 +198,8 @@
     <ClCompile Include="..\..\src\common\SwitchMapRecord.cpp" />
     <ClCompile Include="..\..\src\common\TerrainAttrib.cpp" />
     <ClCompile Include="..\..\src\common\LicenseValidator.cpp" />
+    <ClCompile Include="..\..\src\common\OpcodeMeta.cpp" />
+    <ClCompile Include="..\..\src\common\OpcodeHandlerRegistry.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\AreaRecord.h" />

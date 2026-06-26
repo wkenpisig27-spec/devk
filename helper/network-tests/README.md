@@ -14,6 +14,7 @@ powershell -File helper\network-tests\scripts\build-release.ps1
 REM 3. Start GateServer (and dependent servers), then:
 python helper\network-tests\net-smoke.py
 python helper\network-tests\test_packet_read_contract.py
+python helper\network-tests\test_opcode_meta.py
 ```
 
 ## Files
@@ -26,6 +27,7 @@ python helper\network-tests\test_packet_read_contract.py
 | `data/opcodes.csv` | Machine-readable opcode list |
 | `scripts/generate_opcode_table.py` | Regenerate opcodes.csv |
 | `scripts/build-release.ps1` | MSBuild Release\|x64 verification |
+| `test_opcode_meta.py` | Verify OpcodeMetaTable.inc vs CSV (M1) |
 | `last-smoke-result.txt` | Written by net-smoke.py |
 
 ## Manual tests (Phase 0)

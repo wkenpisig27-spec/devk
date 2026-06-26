@@ -1,6 +1,9 @@
 #include "gateserver.h"
 #include "log.h"
 #include "common/NetLimits.h"
+#include "common/OpcodeHandlerRegistry.h"
+#include "common/PacketReader.h"
+#include "common/PacketWriter.h"
 #include <stdexcept>
 #include <condition_variable>
 #include <chrono>
@@ -100,6 +103,17 @@ ToClient::ToClient(char const* fname, ThreadPool* proc, ThreadPool* comm)
 	Botan::AutoSeeded_RNG rng;
 	m_serverPrivateKey = new Botan::RSA_PrivateKey(rng, 3072);
 	printf("Key generated!\n");
+
+	{
+		static const OpcodeHandlerEntry kGatePilotHandlers[] = {
+			{CMD_CP_PING, &ToClient::OpcodeHandle_CpPing, "CMD_CP_PING"},
+			{CMD_CM_SAY, &ToClient::OpcodeHandle_CmSay, "CMD_CM_SAY"},
+			{CMD_CM_KITBAG_UNLOCK, &ToClient::OpcodeHandle_CmKitbagUnlock, "CMD_CM_KITBAG_UNLOCK"},
+			{CMD_CM_ITEM_UNLOCK_ASK, &ToClient::OpcodeHandle_CmItemUnlockAsk, "CMD_CM_ITEM_UNLOCK_ASK"},
+			{CMD_CM_ENDACTION, &ToClient::OpcodeHandle_CmEndAction, "CMD_CM_ENDACTION"},
+		};
+		RegisterOpcodeHandlers(kGatePilotHandlers, sizeof(kGatePilotHandlers) / sizeof(kGatePilotHandlers[0]));
+	}
 }
 
 ToClient::~ToClient() {
@@ -562,6 +576,98 @@ void ToClient::ReRouteToGroupServer(dbc::DataSocket* datasock, dbc::RPacket& rec
 	}
 }
 
+bool ToClient::OpcodeHandle_CpPing(void* ctx, DataSocket* datasock, RPacket& recvbuf) {
+	ToClient* self = static_cast<ToClient*>(ctx);
+	Player* l_ply = (Player*)datasock->GetPointer();
+	if (l_ply && l_ply->gp_addr && l_ply->gm_addr && g_gtsvr->gp_conn->IsReady()) {
+		net::PacketWriter wpk(self->GetWPacket());
+		wpk.Cmd(CMD_CP_PING);
+		wpk.Long(GetTickCount() - l_ply->m_pingtime);
+		l_ply->m_pingtime = 0;
+		wpk.LongLong(MakeULong(l_ply));
+		wpk.LongLong(l_ply->gp_addr);
+		g_gtsvr->gp_conn->SendData(g_gtsvr->gp_conn->get_datasock(), wpk.Raw());
+	}
+	return true;
+}
+
+bool ToClient::OpcodeHandle_CmSay(void* ctx, DataSocket* datasock, RPacket& recvbuf) {
+	ToClient* self = static_cast<ToClient*>(ctx);
+	Player* l_ply = (Player*)datasock->GetPointer();
+	if (!l_ply) {
+		LG("ErrServer", "CMD_CM_SAY: invalid player.\n");
+		return true;
+	}
+
+	net::PacketReader reader(recvbuf);
+	cChar* l_str = nullptr;
+	if (!reader.String(l_str)) {
+		return true;
+	}
+	if (*l_str == '&' && self->DoCommand(datasock, l_str + 1)) {
+		return true;
+	}
+	if (strstr(l_str, "#21")) {
+		return true;
+	}
+
+	if (l_ply->m_estop) {
+		if (GetTickCount() - l_ply->m_lestoptick >= 1000 * 60 * 2) {
+			WPacket l_wpk = self->GetWPacket();
+			l_wpk.WriteCmd(CMD_TP_ESTOPUSER_CHECK);
+			l_wpk.WriteLong(l_ply->m_actid);
+			g_gtsvr->gp_conn->SendData(g_gtsvr->gp_conn->get_datasock(), l_wpk);
+		}
+		WPacket l_wpk = self->GetWPacket();
+		l_wpk.WriteCmd(CMD_MC_SYSINFO);
+		l_wpk.WriteString(RES_STRING(GS_TOCLIENT_CPP_00018));
+		g_gtsvr->gp_conn->SendData(l_ply->m_datasock, l_wpk);
+		return true;
+	}
+
+	self->ReRouteToGameServer(datasock, recvbuf);
+	return true;
+}
+
+bool ToClient::OpcodeHandle_CmKitbagUnlock(void* ctx, DataSocket* datasock, RPacket& recvbuf) {
+	ToClient* self = static_cast<ToClient*>(ctx);
+	auto ply = (Player*)datasock->GetPointer();
+	if (!ply) {
+		return true;
+	}
+
+	auto seq = ReadPacketSequenceEncrypted(recvbuf, ply->m_AESKey);
+	recvbuf.DiscardLast(recvbuf.HasData());
+	WPacket wpk(recvbuf);
+	wpk.WriteSequence((cChar*)seq.data(), seq.size());
+	recvbuf = wpk;
+	self->ReRouteToGameServer(datasock, recvbuf);
+	return true;
+}
+
+bool ToClient::OpcodeHandle_CmItemUnlockAsk(void* ctx, DataSocket* datasock, RPacket& recvbuf) {
+	ToClient* self = static_cast<ToClient*>(ctx);
+	auto ply = (Player*)datasock->GetPointer();
+	if (!ply) {
+		return true;
+	}
+
+	const auto seq = ReadPacketSequenceEncrypted(recvbuf, ply->m_AESKey);
+	net::PacketWriter wpk(self->GetWPacket());
+	wpk.Cmd(CMD_CM_ITEM_UNLOCK_ASK);
+	wpk.Sequence((cChar*)seq.data(), seq.size());
+	wpk.Char(recvbuf.ReadChar());
+	recvbuf = wpk.Raw();
+	self->ReRouteToGameServer(datasock, recvbuf);
+	return true;
+}
+
+bool ToClient::OpcodeHandle_CmEndAction(void* ctx, DataSocket* datasock, RPacket& recvbuf) {
+	ToClient* self = static_cast<ToClient*>(ctx);
+	self->ReRouteToGameServer(datasock, recvbuf);
+	return true;
+}
+
 void ToClient::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 	uShort l_cmd = recvbuf.ReadCmd();
 	try {
@@ -592,7 +698,9 @@ void ToClient::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 
 		Player* l_ply = (Player*)datasock->GetPointer();
 
-		switch (l_cmd) {
+		if (DispatchOpcodeHandler(l_cmd, this, datasock, recvbuf)) {
+			// Handled by OpcodeHandlerRegistry (M2-prep pilots).
+		} else switch (l_cmd) {
 		case CMD_CM_LOGIN:	 // �����û���/����Խ�����֤,�����û����µ����з��������ϵ���Ч��ɫ�б�.
 		case CMD_CM_LOGOUT:	 // ͬ������
 		case CMD_CM_BGNPLAY: // ����ѡ��Ľ�ɫ������GroupServer��֤��Ȼ��֪ͨGameServerʹ��ɫ������ͼ�ռ�.
@@ -636,96 +744,6 @@ void ToClient::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 			TransmitCall* l_tc = g_gtsvr->m_tch.Get();
 			l_tc->Init(datasock, recvbuf);
 			GetProcessor()->AddTask(l_tc);
-		} break;
-		case CMD_CP_PING: {
-			// Client keepalive ping — always accept to reset m_recvtime.
-			// Only forward to GroupServer if the player is fully in-game.
-			// Never disconnect on ping — a keepalive should not kill the connection.
-			Player* l_ply = (Player*)datasock->GetPointer();
-			if (l_ply && l_ply->gp_addr && l_ply->gm_addr && g_gtsvr->gp_conn->IsReady()) {
-				WPacket l_wpk = GetWPacket();
-				l_wpk.WriteCmd(CMD_CP_PING);
-				l_wpk.WriteLong(GetTickCount() - l_ply->m_pingtime);
-				l_ply->m_pingtime = 0;
-
-				l_wpk.WriteLongLong(MakeULong(l_ply));
-				l_wpk.WriteLongLong(l_ply->gp_addr);
-				g_gtsvr->gp_conn->SendData(g_gtsvr->gp_conn->get_datasock(), l_wpk);
-			}
-			// If not in-game or GroupServer is down, silently ignore.
-			// The packet arrival already reset m_recvtime (keepalive purpose served).
-		} break;
-		case CMD_CM_SAY: {
-			Player* l_ply = (Player*)datasock->GetPointer();
-			if (!l_ply) {
-				// The packet can't be coming from an actual player,
-				// lets not process it further
-				LG("ErrServer", "CMD_CM_SAY: invalid player.\n");
-				break;
-			}
-
-			cChar* l_str = recvbuf.ReadString();
-			if (!l_str) {
-				break;
-			}
-			if (*l_str == '&' && DoCommand(datasock, l_str + 1)) {
-				break;
-			}
-			if (strstr(l_str, "#21")) {
-				break;
-			}
-
-			if (l_ply->m_estop) {
-				if (GetTickCount() - l_ply->m_lestoptick >= 1000 * 60 * 2) {
-					WPacket l_wpk = GetWPacket();
-					l_wpk.WriteCmd(CMD_TP_ESTOPUSER_CHECK);
-					l_wpk.WriteLong(l_ply->m_actid);
-
-					g_gtsvr->gp_conn->SendData(g_gtsvr->gp_conn->get_datasock(), l_wpk);
-				}
-				WPacket l_wpk = GetWPacket();
-				l_wpk.WriteCmd(CMD_MC_SYSINFO);
-				// l_wpk.WriteString("���Ѿ���ϵͳ���ԣ�");
-				l_wpk.WriteString(RES_STRING(GS_TOCLIENT_CPP_00018));
-				g_gtsvr->gp_conn->SendData(l_ply->m_datasock, l_wpk);
-				break;
-			}
-
-			ReRouteToGameServer(datasock, recvbuf);
-		} break;
-		case CMD_CM_KITBAG_UNLOCK: {
-			auto ply = (Player*)datasock->GetPointer();
-			if (!ply)
-				break;
-
-			auto seq = ReadPacketSequenceEncrypted(recvbuf, ply->m_AESKey);
-
-			// Reset the buffer (in size only, capacity remains the same)
-			recvbuf.DiscardLast(recvbuf.HasData());
-			WPacket wpk(recvbuf);
-
-			// and overwrite with decrypted sequence
-			wpk.WriteSequence((cChar*)seq.data(), seq.size());
-
-			// Update recvbuf with metadata from wpk
-			recvbuf = wpk;
-
-			ReRouteToGameServer(datasock, recvbuf);
-		} break;
-		case CMD_CM_ITEM_UNLOCK_ASK: {
-			auto ply = (Player*)datasock->GetPointer();
-			if (!ply)
-				break;
-
-			const auto seq = ReadPacketSequenceEncrypted(recvbuf, ply->m_AESKey);
-
-			WPacket wpk = GetWPacket();
-			wpk.WriteCmd(CMD_CM_ITEM_UNLOCK_ASK);
-			wpk.WriteSequence((cChar*)seq.data(), seq.size());
-			wpk.WriteChar(recvbuf.ReadChar()); // slot position
-
-			recvbuf = wpk;
-			ReRouteToGameServer(datasock, recvbuf);
 		} break;
 		case CMD_CM_OFFLINE_MODE: {
 			MutexArmor lock(g_gtsvr->_mtxother);
