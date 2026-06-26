@@ -8,7 +8,6 @@
 #include "MPEditor.h"
 #include "Scene.h"
 #include "Track.h"
-#include "PacketCmd.h"
 #include "lua_platform.h"
 
 #include "SmallMap.h"

@@ -251,6 +251,11 @@ void CGameApp::GotoScene(CGameScene* scene, bool isDelCurScene, bool IsShowLoadi
 
 	if (!_pCurScene->_Init()) {
 		_SceneError(RES_STRING(CL_LANGUAGE_MATCH_73), _pCurScene);
+		if (dynamic_cast<CSelectChaScene*>(scene)) {
+			CGameApp::Waiting(false);
+			LoadScriptScene(enumLoginScene);
+			return;
+		}
 		SetIsRun(false);
 		return;
 	}

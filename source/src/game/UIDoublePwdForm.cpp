@@ -119,7 +119,10 @@ bool CDoublePwdMgr::IsPwdValid(const char* szStr) {
 void CDoublePwdMgr::ShowCreateForm() {
 	CloseAllForm();
 
-	if (frmDoublePwdCreate && !frmDoublePwdCreate->GetIsShow()) {
+	if (!frmDoublePwdCreate)
+		return;
+
+	if (!frmDoublePwdCreate->GetIsShow()) {
 		edtDoublePwdCreate->SetCaption("");
 		edtDoublePwdCreateRetry->SetCaption("");
 
@@ -133,9 +136,11 @@ void CDoublePwdMgr::ShowCreateForm() {
 		frmDoublePwdInfo->SetIsShow(true);
 	}
 
-	frmDoublePwdInput->SetPos(frmDoublePwdCreate->GetRight(), frmDoublePwdCreate->GetTop());
-	frmDoublePwdInput->Refresh();
-	ShowDoublePwdKeyboardForm();
+	if (frmDoublePwdInput) {
+		frmDoublePwdInput->SetPos(frmDoublePwdCreate->GetRight(), frmDoublePwdCreate->GetTop());
+		frmDoublePwdInput->Refresh();
+		ShowDoublePwdKeyboardForm();
+	}
 }
 
 // 显示修改表单

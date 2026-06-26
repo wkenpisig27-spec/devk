@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include <botan/auto_rng.h>
 #include <botan/pkcs8.h>
 #include <botan/x509_key.h>
@@ -30,7 +31,7 @@ void WritePacketSequenceEncrypted(WPacket& wpk, const AES_KEY& aes_key, uint8_t 
 Botan::secure_vector<uint8_t> ReadPacketSequenceEncrypted(RPacket& rpk, const AES_KEY& aes_key);
 
 void WireBuildGcmNonce(uint8_t nonce[WIRE_GCM_NONCE_SIZE], const AES_IV& ivBase, uint64_t seq);
-void WireGcmEncryptInPlace(const AES_KEY& key, const AES_IV& ivBase, uint64_t seq, uint8_t* data, uLong& len, uLong capacity);
-void WireGcmDecryptInPlace(const AES_KEY& key, const AES_IV& ivBase, uint64_t seq, uint8_t* data, uLong& len);
+void WireGcmEncryptInPlace(const AES_KEY& key, const AES_IV& ivBase, uint64_t seq, uint8_t* data, uint32_t& len, uint32_t capacity);
+void WireGcmDecryptInPlace(const AES_KEY& key, const AES_IV& ivBase, uint64_t seq, uint8_t* data, uint32_t& len);
 
 } // namespace dbc

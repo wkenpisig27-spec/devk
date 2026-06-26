@@ -46,6 +46,7 @@
 #include "UIStateForm.h"
 #include "MapSet.h"
 #include <vector>
+#include <cstdio>
 
 #ifdef _TEST_CLIENT
 #include "..\..\TestClient\testclient.h"
@@ -171,10 +172,16 @@ BOOL SC_Login(LPRPACKET pk) {
 	if (l_errno) // ??
 	{
 		cChar* l_errtext = pk.ReadString();
+		(void)l_errtext;
 		NetLoginFailure(l_errno);
 	} else // ??
 	{
 		char l_chanum = pk.ReadChar();
+		if (l_chanum < 0 || l_chanum > 10) {
+			NetLoginFailure(ERR_MC_NETEXCP);
+			CGameApp::Waiting(false);
+			return FALSE;
+		}
 		NetChaBehave l_netcha[10];
 		uShort l_looklen;
 		for (int i = 0; i < l_chanum; i++) {
@@ -183,21 +190,37 @@ BOOL SC_Login(LPRPACKET pk) {
 				l_chanum--;
 				continue;
 			}
-			l_netcha[i].sCharName = pk.ReadString();
-			l_netcha[i].sJob = pk.ReadString();
+			cChar* l_name = pk.ReadString();
+			cChar* l_job = pk.ReadString();
+			if (!l_name || !l_job) {
+				NetLoginFailure(ERR_MC_NETEXCP);
+				CGameApp::Waiting(false);
+				return FALSE;
+			}
+			l_netcha[i].sCharName = l_name;
+			l_netcha[i].sJob = l_job;
 			l_netcha[i].iDegree = pk.ReadShort();
-			l_netcha[i].sLook = reinterpret_cast<const LOOK*>(pk.ReadSequence(l_looklen));
-			if (l_looklen != sizeof(LOOK)) {
+			cChar* l_look = pk.ReadSequence(l_looklen);
+			if (!l_look || l_looklen != sizeof(LOOK)) {
 				i--;
 				l_chanum--;
+				continue;
 			}
+			l_netcha[i].sLook = reinterpret_cast<const LOOK*>(l_look);
 		}
 
 		char chPassword = pk.ReadChar();
 
-		NetLoginSuccess(chPassword, l_chanum, l_netcha);
+		LOOK looks[10]{};
+		for (int i = 0; i < l_chanum; ++i) {
+			if (l_netcha[i].sLook) {
+				memcpy(&looks[i], l_netcha[i].sLook, sizeof(LOOK));
+				l_netcha[i].sLook = &looks[i];
+			}
+		}
 
 		DWORD dwFlag = pk.ReadLong(); // 0x3214
+		(void)dwFlag;
 
 		memcpy(g_NetIF->m_cs_iv, g_NetIF->m_IV, AES_IV_LENGTH);
 		g_NetIF->m_cs_iv[0] ^= 0x01;
@@ -224,6 +247,8 @@ BOOL SC_Login(LPRPACKET pk) {
 		extern CGameWG g_oGameWG;
 		g_oGameWG.SafeTerminateThread();
 		g_oGameWG.BeginThread();
+
+		NetLoginSuccess(chPassword, l_chanum, l_netcha);
 	}
 	updateDiscordPresence("Selecting Character", "");
 	return TRUE;

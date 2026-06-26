@@ -45,7 +45,7 @@ void WireBuildGcmNonce(uint8_t nonce[WIRE_GCM_NONCE_SIZE], const AES_IV& ivBase,
 	}
 }
 
-void WireGcmEncryptInPlace(const AES_KEY& key, const AES_IV& ivBase, uint64_t seq, uint8_t* data, uLong& len, uLong capacity) {
+void WireGcmEncryptInPlace(const AES_KEY& key, const AES_IV& ivBase, uint64_t seq, uint8_t* data, uint32_t& len, uint32_t capacity) {
 	if (len + WIRE_GCM_TAG_SIZE > capacity) {
 		throw Botan::Invalid_Argument("wire GCM encrypt buffer too small");
 	}
@@ -57,10 +57,10 @@ void WireGcmEncryptInPlace(const AES_KEY& key, const AES_IV& ivBase, uint64_t se
 	Botan::secure_vector<uint8_t> buf(data, data + len);
 	aead->finish(buf);
 	memcpy(data, buf.data(), buf.size());
-	len = static_cast<uLong>(buf.size());
+	len = static_cast<uint32_t>(buf.size());
 }
 
-void WireGcmDecryptInPlace(const AES_KEY& key, const AES_IV& ivBase, uint64_t seq, uint8_t* data, uLong& len) {
+void WireGcmDecryptInPlace(const AES_KEY& key, const AES_IV& ivBase, uint64_t seq, uint8_t* data, uint32_t& len) {
 	if (len < WIRE_GCM_TAG_SIZE) {
 		throw Botan::Invalid_Authentication_Tag("wire GCM packet truncated");
 	}
@@ -72,7 +72,7 @@ void WireGcmDecryptInPlace(const AES_KEY& key, const AES_IV& ivBase, uint64_t se
 	Botan::secure_vector<uint8_t> buf(data, data + len);
 	aead->finish(buf);
 	memcpy(data, buf.data(), buf.size());
-	len = static_cast<uLong>(buf.size());
+	len = static_cast<uint32_t>(buf.size());
 }
 
 } // namespace dbc

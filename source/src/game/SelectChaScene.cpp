@@ -125,7 +125,6 @@ CSelectChaScene::~CSelectChaScene() {
 //-----------------------------------------------------------------------
 bool CSelectChaScene::_Init() {
 	if (!CGameScene::_Init()) {
-		// ????_Init()??,?????false.
 		return false;
 	}
 
@@ -588,25 +587,33 @@ bool CSelectChaScene::_InitUI() {
 	if (!btnExit)
 		return false;
 	btnAlter = dynamic_cast<CTextButton*>(frmSelectCha->Find("btnAlter"));
-	if (!btnAlter)
-		return false;
 
 	CForm* frmUpdPas = CFormMgr::s_Mgr.Find("frmUpdPas");
-	btnChangePassConf = dynamic_cast<CTextButton*>(frmUpdPas->Find("btnChangePassConf"));
-	btnChangePassConf->evtMouseClick = _OnClickUpdatePass;
-	btnChangePassConf->SetIsEnabled(true);
-	CEdit* edtPassword = dynamic_cast<CEdit*>(frmUpdPas->Find("edtPassword"));
-	CEdit* edtPassword2 = dynamic_cast<CEdit*>(frmUpdPas->Find("edtPassword2"));
-	CEdit* confirmPIN = dynamic_cast<CEdit*>(frmUpdPas->Find("confirmPIN"));
-
-	edtPassword->SetIsPassWord(true);
-	edtPassword2->SetIsPassWord(true);
-	confirmPIN->SetIsPassWord(true);
+	if (frmUpdPas) {
+		btnChangePassConf = dynamic_cast<CTextButton*>(frmUpdPas->Find("btnChangePassConf"));
+		if (btnChangePassConf) {
+			btnChangePassConf->evtMouseClick = _OnClickUpdatePass;
+			btnChangePassConf->SetIsEnabled(true);
+		}
+		CEdit* edtPassword = dynamic_cast<CEdit*>(frmUpdPas->Find("edtPassword"));
+		CEdit* edtPassword2 = dynamic_cast<CEdit*>(frmUpdPas->Find("edtPassword2"));
+		CEdit* confirmPIN = dynamic_cast<CEdit*>(frmUpdPas->Find("confirmPIN"));
+		if (edtPassword)
+			edtPassword->SetIsPassWord(true);
+		if (edtPassword2)
+			edtPassword2->SetIsPassWord(true);
+		if (confirmPIN)
+			confirmPIN->SetIsPassWord(true);
+	}
 
 	CForm* frmGMLogin = CFormMgr::s_Mgr.Find("frmGMLogin");
-	CTextButton* btnGMLogin = dynamic_cast<CTextButton*>(frmGMLogin->Find("btnGMLogin"));
-	btnGMLogin->evtMouseClick = _OnClickGMLogin;
-	btnGMLogin->SetIsEnabled(true);
+	if (frmGMLogin) {
+		CTextButton* btnGMLogin = dynamic_cast<CTextButton*>(frmGMLogin->Find("btnGMLogin"));
+		if (btnGMLogin) {
+			btnGMLogin->evtMouseClick = _OnClickGMLogin;
+			btnGMLogin->SetIsEnabled(true);
+		}
+	}
 
 	btnCreate->SetFlashCycle();
 
@@ -620,30 +627,31 @@ bool CSelectChaScene::_InitUI() {
 
 	// ???????????   ?�???????j?"????????????
 	frmWelcomeNotice = CFormMgr::s_Mgr.Find("frmWelcomeNotice");
-	if (!frmWelcomeNotice)
-		return false;
-	frmWelcomeNotice->evtEntrustMouseEvent = _evtWelcomeNoticeEvent;
+	if (frmWelcomeNotice)
+		frmWelcomeNotice->evtEntrustMouseEvent = _evtWelcomeNoticeEvent;
 
 	// ??????d????????????????   ?�????????"??????h??????J???????????
 	frmCreateOKNotice = CFormMgr::s_Mgr.Find("frmCreateOKNotice");
-	if (!frmCreateOKNotice)
-		return false;
-	frmCreateOKNotice->evtEntrustMouseEvent = _evtCreateOKNoticeEvent;
+	if (frmCreateOKNotice)
+		frmCreateOKNotice->evtEntrustMouseEvent = _evtCreateOKNoticeEvent;
 
 	// ??????t????????
 	UpdateButton();
 
 	frmChaNameAlter = CFormMgr::s_Mgr.Find("frmChaNameAlter");
-	if (!frmChaNameAlter)
-		return false;
-	frmChaNameAlter->evtEntrustMouseEvent = _evtChaNameAlterMouseEvent;
+	if (frmChaNameAlter)
+		frmChaNameAlter->evtEntrustMouseEvent = _evtChaNameAlterMouseEvent;
 
 	return true;
 }
 
 void CSelectChaScene::_OnClickGMLogin(CGuiData* pSender, int x, int y, DWORD key) {
 	CForm* frmGMLogin = CFormMgr::s_Mgr.Find("frmGMLogin");
+	if (!frmGMLogin)
+		return;
 	CEdit* edtCha = dynamic_cast<CEdit*>(frmGMLogin->Find("edtCha"));
+	if (!edtCha)
+		return;
 	CS_BeginPlay(edtCha->GetCaption());
 }
 
@@ -721,7 +729,6 @@ void CSelectChaScene::_SelChaFrmMouseEvent(CCompent* pSender, int nMsgType,
 		CS_Disconnect(DS_DISCONN);
 		g_pGameApp->LoadScriptScene(enumLoginScene);
 	} else if (strName == "btnAlter") {
-		// ??????
 		g_stUIDoublePwd.ShowAlterForm();
 	} else if (strName == "btnChangePass") {
 		CForm* frmUpdPas = CFormMgr::s_Mgr.Find("frmUpdPas");
@@ -865,6 +872,10 @@ bool CSelectChaScene::SelectCharacters(NetChaBehave* chabehave, int num) {
 	stNetChangeChaPart* part = nullptr;
 	num = min(3, num);
 	for (int i = 0; i < num; i++) {
+		if (!chabehave[i].sLook) {
+			LG("select", "SelectCharacters: skip slot %d (no look data)\n", i);
+			continue;
+		}
 		part = (stNetChangeChaPart*)chabehave[i].sLook;
 
 		CCharacter* pCha = this->AddCharacter(part->sTypeID);
@@ -937,8 +948,9 @@ void CSelectChaScene::UpdateButton() {
 
 	if (!g_Config.m_IsDoublePwd) {
 		btnCreate->SetIsEnabled(false);
-		btnAlter->SetIsEnabled(false);
-	} else {
+		if (btnAlter)
+			btnAlter->SetIsEnabled(false);
+	} else if (btnAlter) {
 		btnAlter->SetIsEnabled(true);
 	}
 }
@@ -955,9 +967,9 @@ int CSelectChaScene::GetChaCount() {
 }
 
 void CSelectChaScene::ShowWelcomeNotice(bool bShow) {
-	if (frmWelcomeNotice) {
-		frmWelcomeNotice->ShowModal();
-	}
+	if (!frmWelcomeNotice || !bShow)
+		return;
+	frmWelcomeNotice->ShowModal();
 }
 
 // ??????? ?�?????
@@ -965,7 +977,7 @@ void CSelectChaScene::_evtWelcomeNoticeEvent(CCompent* pSender, int nMsgType, in
 	string strName = pSender->GetName();
 	CSelectChaScene* pSelectChaScene = dynamic_cast<CSelectChaScene*>(g_pGameApp->GetCurScene());
 
-	if (pSelectChaScene) {
+	if (pSelectChaScene && pSelectChaScene->frmWelcomeNotice) {
 		if (strName == "btnYes") {
 			pSelectChaScene->frmWelcomeNotice->Close();
 		}
@@ -977,7 +989,7 @@ void CSelectChaScene::_evtCreateOKNoticeEvent(CCompent* pSender, int nMsgType, i
 	string strName = pSender->GetName();
 	CSelectChaScene* pSelectChaScene = dynamic_cast<CSelectChaScene*>(g_pGameApp->GetCurScene());
 
-	if (pSelectChaScene) {
+	if (pSelectChaScene && pSelectChaScene->frmCreateOKNotice) {
 		if (strName == "btnYes") {
 			pSelectChaScene->frmCreateOKNotice->Close();
 		}
@@ -989,9 +1001,9 @@ void CSelectChaScene::_evtChaNameAlterMouseEvent(CCompent* pSender, int nMsgType
 	string strName = pSender->GetName();
 	CSelectChaScene* pSelectChaScene = dynamic_cast<CSelectChaScene*>(g_pGameApp->GetCurScene());
 
-	if (pSelectChaScene) {
+	if (pSelectChaScene && pSelectChaScene->frmChaNameAlter) {
 		if (strName == "btnYes") {
-			pSelectChaScene->frmCreateOKNotice->Close();
+			pSelectChaScene->frmChaNameAlter->Close();
 		}
 	}
 }

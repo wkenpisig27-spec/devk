@@ -96,6 +96,10 @@ private:
 	static bool OpcodeHandle_CmKitbagUnlock(void* ctx, DataSocket* datasock, RPacket& recvbuf);
 	static bool OpcodeHandle_CmItemUnlockAsk(void* ctx, DataSocket* datasock, RPacket& recvbuf);
 	static bool OpcodeHandle_CmEndAction(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_TransmitCall(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_CmOfflineMode(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_RouteCmToGame(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_RouteCpToGroup(void* ctx, DataSocket* datasock, RPacket& recvbuf);
 
 	bool AllowConnectionRate(cChar* peerIp);
 	bool IsWhitelisted(cChar* peerIp) const;
@@ -118,6 +122,8 @@ private:
 	std::unordered_map<std::string, ConnRateEntry> m_connRateMap;
 
 	InterLockedLong m_atexit, m_calltotal;
+	uShort m_lastRecvCmd{0};
+	bool m_dispatchStopProcessing{false};
 	volatile uShort m_maxcon;
 	uShort m_version;
 	int _comm_enc; // communication encryption
@@ -249,8 +255,10 @@ public:
 	void SetSync(bool sync = true) { m_bSync = sync; }
 	// End
 
-	// ???
-	bool IsReady() { return (!m_bSync && _connected); }
+	// Linked = TCP login to GroupServer finished (_gs.datasock valid).
+	bool IsGroupLinked() const { return _connected && _gs.datasock != nullptr; }
+	// Ready = linked and not in the middle of SYNC_PLYLST replay.
+	bool IsReady() { return IsGroupLinked() && !m_bSync; }
 
 private:
 	void TaskDispatcher(Task* task) final;
@@ -365,7 +373,8 @@ public:
 	TransmitCall(uLong size) : PreAllocTask(size){};
 	void Init(DataSocket* datasock, RPacket& recvbuf) {
 		m_datasock = datasock;
-		m_recvbuf = recvbuf;
+		// Own a copy — recvbuf shares the receiver buffer until the next packet.
+		m_recvbuf = RPacket(WPacket(recvbuf).Duplicate());
 	}
 	int Process();
 

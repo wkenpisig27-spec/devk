@@ -108,13 +108,15 @@ inline static CCharacter* GetCharacter(unsigned int nID, const char* error = nul
 //----------------------------------------------------------------------------
 
 void NetLoginSuccess(char byPassword, char iCharNum, NetChaBehave chabehave[]) {
-	// ??�????????????
 	g_Config.m_IsDoublePwd = byPassword ? true : false;
 
-	//  LG( "select", "NetLoginSuccess - CharNum:%d\n", iCharNum );
+	LG("select", "NetLoginSuccess - CharNum:%d\n", iCharNum);
 
 	stNetChangeChaPart* part = nullptr;
 	for (int i = 0; i < iCharNum; i++) {
+		if (!chabehave[i].sLook) {
+			continue;
+		}
 		part = (stNetChangeChaPart*)chabehave[i].sLook;
 		LG("select", RES_STRING(CL_LANGUAGE_MATCH_248), chabehave[i].sCharName, chabehave[i].sJob, chabehave[i].iDegree, part->sTypeID, part->SLink[0].sID, part->SLink[1].sID, part->SLink[2].sID, part->SLink[3].sID, part->SLink[4].sID);
 	}
@@ -128,7 +130,15 @@ void NetLoginSuccess(char byPassword, char iCharNum, NetChaBehave chabehave[]) {
 
 	g_pGameApp->LoadScriptScene(enumSelectChaScene);
 
-	CSelectChaScene::GetCurrScene().SelectCharacters(chabehave, iCharNum);
+	CSelectChaScene* pSelectScene =
+		dynamic_cast<CSelectChaScene*>(CGameApp::GetCurScene());
+	if (!pSelectScene) {
+		LG("protocol", "NetLoginSuccess: select scene missing after LoadScriptScene\n");
+		CGameApp::Waiting(false);
+		return;
+	}
+
+	pSelectScene->SelectCharacters(chabehave, iCharNum);
 	CGameApp::Waiting(false);
 }
 

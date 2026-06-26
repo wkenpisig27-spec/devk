@@ -2,8 +2,8 @@
 
 // Wire and receive-buffer limits (I2). recvbuf_cap should match pkt_maxlen per link.
 namespace NetLimits {
-constexpr unsigned kClientMaxPacket = 8192;        // Gate <-> game client
-constexpr unsigned kClientGameMaxPacket = 16384;     // Game client <-> gate
+constexpr unsigned kClientMaxPacket = 32768;       // Gate <-> game client (login rsp with chars can exceed 16KB)
+constexpr unsigned kClientGameMaxPacket = 32768;     // Game client <-> gate
 constexpr unsigned kInterServerMaxPacket = 32768;    // Gate <-> Game / Group
 constexpr unsigned kGameServerMaxPacket = 32768;     // Game <-> Gate
 constexpr unsigned kGroupServerMaxPacket = 16384;    // Group server links

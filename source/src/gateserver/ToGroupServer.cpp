@@ -88,7 +88,9 @@ int ConnectGroupServer::Process() {
 				pk.WriteShort(g_version);
 				pk.WriteString(_tgps->_myself.c_str());
 
-				RPacket retpk = _tgps->SyncCall(datasock, pk);
+				LG("Connect", "TP_LOGIN SyncCall begin...\n");
+				RPacket retpk = _tgps->SyncCall(datasock, pk, 15 * 1000);
+				LG("Connect", "TP_LOGIN SyncCall end, hasData=%d\n", retpk.HasData() ? 1 : 0);
 				int err = retpk.ReadShort();
 				if (!retpk.HasData() || err == ERR_PT_LOGFAIL) {
 					LG("Connect", "%s\n", RES_STRING(GS_TOGROUPSERVER_CPP_00003));
@@ -171,11 +173,20 @@ void ToGroupServer::OnDisconnect(DataSocket* datasock, int reason) // reasonÖµ
 
 	if (!g_appexit) {
 		_connected = false;
+		SetSync(false);
 		// Clear the datasock pointer so no thread can use the stale socket
 		// after Finally() deletes its RPCInfo. Only clear if it matches
 		// the disconnecting socket (a new connection may already exist).
 		if (_gs.datasock == datasock) {
 			_gs.datasock = nullptr;
+		}
+		// GroupServer restart invalidates all gp_addr handles; clear them so
+		// SYNC_PLYLST does not confirm stale players and reject new logins.
+		if (g_gtsvr) {
+			RunChainGetArmor<Player> lock(g_gtsvr->m_plylst);
+			for (Player* ply = g_gtsvr->m_plylst.GetNextItem(); ply; ply = g_gtsvr->m_plylst.GetNextItem()) {
+				ply->gp_addr = 0;
+			}
 		}
 	}
 }

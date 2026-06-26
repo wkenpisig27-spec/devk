@@ -108,6 +108,18 @@ WPacket WPacket::Duplicate() const {
 	return l_ret;
 }
 //--------------------------------------------------------------------
+RPacket RPacket::Duplicate() const {
+	if (!bool(*this)) {
+		return RPacket(__tca);
+	}
+	// Delegate to WPacket::Duplicate — same path used throughout gate routing.
+	RPacket dup(WPacket(*this).Duplicate());
+	// Keep the original receive timestamp so async handlers (TransmitCall) do not
+	// treat queue wait time as packet age and hit the handshake/login timeout path.
+	dup.m_tickcount = m_tickcount;
+	return dup;
+}
+//--------------------------------------------------------------------
 void WPacket::WritePktLen() const {
 	uLong l_lenl;
 	uShort l_lens;

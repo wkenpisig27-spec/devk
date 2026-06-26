@@ -2,6 +2,7 @@
 #include "log.h"
 #include "common/NetLimits.h"
 #include "common/OpcodeHandlerRegistry.h"
+#include "common/OpcodeMeta.h"
 #include "common/PacketReader.h"
 #include "common/PacketWriter.h"
 #include <stdexcept>
@@ -11,6 +12,7 @@ using namespace dbc;
 using namespace std;
 #include <sstream>
 #include <algorithm>
+#include <vector>
 
 // External function to log security events to terminal and log file
 extern void LogSecurityEvent(const char* ip, const char* action, const char* reason);
@@ -26,6 +28,115 @@ unsigned ReadAntiDDoSUInt(const IniSection& ddos, const char* key, unsigned defa
 	} catch (...) {
 		return defaultVal;
 	}
+}
+
+bool IsTransmitCallOpcode(uint16_t cmd) {
+	switch (cmd) {
+	case CMD_CM_LOGOUT:
+	case CMD_CM_BGNPLAY:
+	case CMD_CM_ENDPLAY:
+	case CMD_CM_NEWCHA:
+	case CMD_CM_DELCHA:
+	case CMD_CM_CREATE_PASSWORD2:
+	case CMD_CM_UPDATE_PASSWORD2:
+	case CMD_CM_REGISTER:
+	case CMD_CP_CHANGEPASS:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool IsExplicitCmOpcode(uint16_t cmd) {
+	return IsTransmitCallOpcode(cmd) ||
+		cmd == CMD_CM_LOGIN ||
+		cmd == CMD_CM_RSA_HANDSHAKE_1 ||
+		cmd == CMD_CM_SAY ||
+		cmd == CMD_CM_KITBAG_UNLOCK ||
+		cmd == CMD_CM_ITEM_UNLOCK_ASK ||
+		cmd == CMD_CM_ENDACTION ||
+		cmd == CMD_CM_OFFLINE_MODE;
+}
+
+bool IsExplicitCpOpcode(uint16_t cmd) {
+	return cmd == CMD_CP_PING || cmd == CMD_CP_CHANGEPASS;
+}
+
+// SyncCall handlers must run on the comm thread. Queuing to the processor pool
+// lets recvbuf age past the 10s deadline and CM_* returns ERR_MC_NETEXCP.
+void DispatchSyncClientOpcode(ToClient* cli, DataSocket* datasock, RPacket& recvbuf, uShort cmd) {
+	switch (cmd) {
+	case CMD_CM_LOGIN:
+		cli->CM_LOGIN(datasock, recvbuf);
+		break;
+	case CMD_CM_LOGOUT:
+		cli->CM_LOGOUT(datasock, recvbuf);
+		cli->Disconnect(datasock, 50, -27);
+		break;
+	case CMD_CM_BGNPLAY:
+		cli->CM_BGNPLAY(datasock, recvbuf);
+		break;
+	case CMD_CM_ENDPLAY:
+		cli->CM_ENDPLAY(datasock, recvbuf);
+		break;
+	case CMD_CM_NEWCHA:
+		cli->CM_NEWCHA(datasock, recvbuf);
+		break;
+	case CMD_CM_DELCHA:
+		cli->CM_DELCHA(datasock, recvbuf);
+		break;
+	case CMD_CM_CREATE_PASSWORD2:
+		cli->CM_CREATE_PASSWORD2(datasock, recvbuf);
+		break;
+	case CMD_CM_UPDATE_PASSWORD2:
+		cli->CM_UPDATE_PASSWORD2(datasock, recvbuf);
+		break;
+	case CMD_CM_REGISTER:
+		cli->CM_REGISTER(datasock, recvbuf);
+		break;
+	case CMD_CP_CHANGEPASS:
+		cli->CP_CHANGEPASS(datasock, recvbuf);
+		break;
+	default:
+		break;
+	}
+}
+
+void RegisterAllToClientOpcodeHandlers() {
+	std::vector<OpcodeHandlerEntry> entries;
+	entries.reserve(600);
+
+	auto add = [&](uint16_t op, OpcodeHandlerFn fn, const char* name) {
+		entries.push_back({op, fn, name});
+	};
+
+	add(CMD_CP_PING, &ToClient::OpcodeHandle_CpPing, "CMD_CP_PING");
+	add(CMD_CM_SAY, &ToClient::OpcodeHandle_CmSay, "CMD_CM_SAY");
+	add(CMD_CM_KITBAG_UNLOCK, &ToClient::OpcodeHandle_CmKitbagUnlock, "CMD_CM_KITBAG_UNLOCK");
+	add(CMD_CM_ITEM_UNLOCK_ASK, &ToClient::OpcodeHandle_CmItemUnlockAsk, "CMD_CM_ITEM_UNLOCK_ASK");
+	add(CMD_CM_ENDACTION, &ToClient::OpcodeHandle_CmEndAction, "CMD_CM_ENDACTION");
+	add(CMD_CM_OFFLINE_MODE, &ToClient::OpcodeHandle_CmOfflineMode, "CMD_CM_OFFLINE_MODE");
+
+	// Account / RSA opcodes use OpcodeHandle_TransmitCall fast-path in OnProcessData
+	// (not registered here — avoids async buffer races via duplicated packet in Init).
+
+	for (uint16_t op = static_cast<uint16_t>(CMD_CM_BASE); op < static_cast<uint16_t>(CMD_MC_BASE); ++op) {
+		if (!IsExplicitCmOpcode(op)) {
+			add(op, &ToClient::OpcodeHandle_RouteCmToGame, OpcodeName(op));
+		}
+	}
+
+	for (uint16_t op = static_cast<uint16_t>(CMD_CP_BASE); op < static_cast<uint16_t>(CMD_OS_BASE); ++op) {
+		if (!IsExplicitCpOpcode(op)) {
+			add(op, &ToClient::OpcodeHandle_RouteCpToGroup, OpcodeName(op));
+		}
+	}
+
+	if (!RegisterOpcodeHandlers(entries.data(), entries.size())) {
+		throw std::runtime_error("RegisterAllToClientOpcodeHandlers failed\n");
+	}
+
+	printf("ToClient opcode registry: %zu handlers\n", OpcodeHandlerCount());
 }
 } // namespace
 
@@ -47,6 +158,9 @@ ToClient::ToClient(char const* fname, ThreadPool* proc, ThreadPool* comm)
 	const std::string ip = is["IP"];
 	uShort port = std::stoi(is["Port"]);
 	_comm_enc = std::stoi(is["CommEncrypt"]);
+	if (m_handshakeTimeout == 0) {
+		m_handshakeTimeout = 10;
+	}
 	
 	// Proxy Protocol support (CRITICAL for SmartProxy integration)
 	IniSection& ddos = inf["AntiDDoS"];
@@ -104,16 +218,7 @@ ToClient::ToClient(char const* fname, ThreadPool* proc, ThreadPool* comm)
 	m_serverPrivateKey = new Botan::RSA_PrivateKey(rng, 3072);
 	printf("Key generated!\n");
 
-	{
-		static const OpcodeHandlerEntry kGatePilotHandlers[] = {
-			{CMD_CP_PING, &ToClient::OpcodeHandle_CpPing, "CMD_CP_PING"},
-			{CMD_CM_SAY, &ToClient::OpcodeHandle_CmSay, "CMD_CM_SAY"},
-			{CMD_CM_KITBAG_UNLOCK, &ToClient::OpcodeHandle_CmKitbagUnlock, "CMD_CM_KITBAG_UNLOCK"},
-			{CMD_CM_ITEM_UNLOCK_ASK, &ToClient::OpcodeHandle_CmItemUnlockAsk, "CMD_CM_ITEM_UNLOCK_ASK"},
-			{CMD_CM_ENDACTION, &ToClient::OpcodeHandle_CmEndAction, "CMD_CM_ENDACTION"},
-		};
-		RegisterOpcodeHandlers(kGatePilotHandlers, sizeof(kGatePilotHandlers) / sizeof(kGatePilotHandlers[0]));
-	}
+	RegisterAllToClientOpcodeHandlers();
 }
 
 ToClient::~ToClient() {
@@ -361,8 +466,8 @@ bool ToClient::OnConnect(DataSocket* datasock) {
 		}
 	}
 	
-	// Check GroupServer ready
-	if (!g_gtsvr->gp_conn->IsReady()) {
+	// Require GroupServer link; SYNC_PLYLST must not block new TCP accepts.
+	if (!g_gtsvr->gp_conn->IsGroupLinked()) {
 		LG("GateServer", "client: %s\tcome, groupserver isn't ready, force disconnect...\n", datasock->GetPeerIP());
 		return false;
 	}
@@ -438,8 +543,8 @@ void ToClient::CM_RSA_HANDSHAKE1(DataSocket* datasock, RPacket& recvbuf) {
 			
 			// === RSA KEY VALIDATION (prevent CPU exhaustion attack) ===
 			// Validate PEM format before attempting expensive crypto operations
-			if (!pemKey || len < 100 || len > 4096) {
-				// Invalid key length - legitimate RSA-3072 keys are ~1700-2000 bytes in PEM
+			if (!pemKey || len < 100 || len > 8192) {
+				// Invalid key length - legitimate RSA-3072 private keys are ~2400 bytes in PEM
 				LG("GateServer", "[Security] %s: Invalid RSA key length: %d\n", datasock->GetPeerIP(), len);
 				l_lockStat.unlock();
 				Disconnect(datasock, 100, -31);
@@ -555,24 +660,29 @@ void ToClient::ReRouteToGameServer(dbc::DataSocket* datasock, dbc::RPacket& recv
 
 void ToClient::ReRouteToGroupServer(dbc::DataSocket* datasock, dbc::RPacket& recvbuf) {
 	Player* l_ply = (Player*)datasock->GetPointer();
-	if (l_ply) {
-		if (!g_gtsvr->gp_conn->IsReady()) {
-			LG("ToGroupServerError", "l_cmd = %d IsReady \n", recvbuf.ReadCmd());
+	if (!l_ply) {
+		return;
+	}
+
+	if (!g_gtsvr->gp_conn->IsReady()) {
+		if (l_ply->gp_addr) {
+			LG("ToGroupServerError", "l_cmd = %d IsReady \n", m_lastRecvCmd);
 			dbc::WPacket l_wpk = GetWPacket();
 			l_wpk.WriteCmd(CMD_MC_LOGIN);
 			l_wpk.WriteShort(ERR_MC_NETEXCP); // ������
 			SendData(datasock, l_wpk);		  // �����ͻ���
 			this->Disconnect(datasock, 100, -31);
 		}
+		return;
+	}
 
-		const long long l_gpaddr = l_ply->gp_addr;
-		const long long l_gmaddr = l_ply->gm_addr;
-		if (l_gpaddr && l_gmaddr) {
-			WPacket l_wpk = WPacket(recvbuf).Duplicate();
-			l_wpk.WriteLongLong(MakeULong(l_ply));
-			l_wpk.WriteLongLong(l_gpaddr);
-			g_gtsvr->gp_conn->SendData(g_gtsvr->gp_conn->get_datasock(), l_wpk);
-		}
+	const long long l_gpaddr = l_ply->gp_addr;
+	const long long l_gmaddr = l_ply->gm_addr;
+	if (l_gpaddr && l_gmaddr) {
+		WPacket l_wpk = WPacket(recvbuf).Duplicate();
+		l_wpk.WriteLongLong(MakeULong(l_ply));
+		l_wpk.WriteLongLong(l_gpaddr);
+		g_gtsvr->gp_conn->SendData(g_gtsvr->gp_conn->get_datasock(), l_wpk);
 	}
 }
 
@@ -580,13 +690,14 @@ bool ToClient::OpcodeHandle_CpPing(void* ctx, DataSocket* datasock, RPacket& rec
 	ToClient* self = static_cast<ToClient*>(ctx);
 	Player* l_ply = (Player*)datasock->GetPointer();
 	if (l_ply && l_ply->gp_addr && l_ply->gm_addr && g_gtsvr->gp_conn->IsReady()) {
-		net::PacketWriter wpk(self->GetWPacket());
+		WPacket l_wpk = self->GetWPacket();
+		net::PacketWriter wpk(l_wpk);
 		wpk.Cmd(CMD_CP_PING);
 		wpk.Long(GetTickCount() - l_ply->m_pingtime);
 		l_ply->m_pingtime = 0;
 		wpk.LongLong(MakeULong(l_ply));
 		wpk.LongLong(l_ply->gp_addr);
-		g_gtsvr->gp_conn->SendData(g_gtsvr->gp_conn->get_datasock(), wpk.Raw());
+		g_gtsvr->gp_conn->SendData(g_gtsvr->gp_conn->get_datasock(), l_wpk);
 	}
 	return true;
 }
@@ -653,11 +764,12 @@ bool ToClient::OpcodeHandle_CmItemUnlockAsk(void* ctx, DataSocket* datasock, RPa
 	}
 
 	const auto seq = ReadPacketSequenceEncrypted(recvbuf, ply->m_AESKey);
-	net::PacketWriter wpk(self->GetWPacket());
+	WPacket l_wpk = self->GetWPacket();
+	net::PacketWriter wpk(l_wpk);
 	wpk.Cmd(CMD_CM_ITEM_UNLOCK_ASK);
-	wpk.Sequence((cChar*)seq.data(), seq.size());
+	wpk.Sequence((cChar*)seq.data(), static_cast<uShort>(seq.size()));
 	wpk.Char(recvbuf.ReadChar());
-	recvbuf = wpk.Raw();
+	recvbuf = l_wpk;
 	self->ReRouteToGameServer(datasock, recvbuf);
 	return true;
 }
@@ -668,8 +780,176 @@ bool ToClient::OpcodeHandle_CmEndAction(void* ctx, DataSocket* datasock, RPacket
 	return true;
 }
 
+bool ToClient::OpcodeHandle_TransmitCall(void* ctx, DataSocket* datasock, RPacket& recvbuf) {
+	ToClient* self = static_cast<ToClient*>(ctx);
+	if (!g_gtsvr->gp_conn->IsGroupLinked()) {
+		LG("ToGroupServerError", "l_cmd = %d Login (GroupServer not linked)\n", self->m_lastRecvCmd);
+		dbc::WPacket l_wpk = self->GetWPacket();
+		l_wpk.WriteCmd(CMD_MC_LOGIN);
+		l_wpk.WriteShort(ERR_MC_NETEXCP);
+		self->SendData(datasock, l_wpk);
+		self->Disconnect(datasock, 100, -31);
+		return true;
+	}
+
+	++self->m_calltotal;
+	if (self->m_calltotal > 28) {
+		--self->m_calltotal;
+		LG("Security", "[SyncCall] Thread cap reached, rejecting CMD %d from %s\n",
+			self->m_lastRecvCmd, datasock->GetPeerIP());
+		dbc::WPacket l_wpk = self->GetWPacket();
+		l_wpk.WriteCmd(CMD_MC_LOGIN);
+		l_wpk.WriteShort(ERR_MC_NETEXCP);
+		self->SendData(datasock, l_wpk);
+		self->Disconnect(datasock, 100, -31);
+		return true;
+	}
+	if (self->m_atexit) {
+		--self->m_calltotal;
+		self->m_dispatchStopProcessing = true;
+		return true;
+	}
+
+	TransmitCall* l_tc = g_gtsvr->m_tch.Get();
+	l_tc->Init(datasock, recvbuf);
+	self->GetProcessor()->AddTask(l_tc);
+	return true;
+}
+
+bool ToClient::OpcodeHandle_CmOfflineMode(void* ctx, DataSocket* datasock, RPacket& recvbuf) {
+	ToClient* self = static_cast<ToClient*>(ctx);
+	MutexArmor lock(g_gtsvr->_mtxother);
+	Player* player = (Player*)datasock->GetPointer();
+	if (!player) {
+		return true;
+	}
+
+	if (!player->game) {
+		return true;
+	}
+
+	MutexArmor lock_stat(player->m_mtxstat);
+	if (player->m_status != 2) {
+		return true;
+	}
+
+	auto wpk = self->GetWPacket();
+	wpk.WriteCmd(CMD_TM_OFFLINE_MODE);
+	wpk.WriteLongLong(MakeULong(player));
+	wpk.WriteLongLong(player->gm_addr);
+
+	auto rpk = self->SyncCall(player->game->m_datasock, wpk, 10 * 1000);
+	if (!rpk.HasData()) {
+		return true;
+	}
+
+	switch (const auto return_code = static_cast<ReturnCode::OfflineMode>(rpk.ReadChar())) {
+	case ReturnCode::OfflineMode::Success: {
+		try {
+			{
+				WPacket l_wpk = self->GetWPacket();
+				l_wpk.WriteCmd(CMD_TP_DISC);
+				l_wpk.WriteLong(player->m_actid);
+				l_wpk.WriteLong(inet_addr(datasock->GetPeerIP()));
+				l_wpk.WriteString("Offline stall mode activated");
+				g_gtsvr->gp_conn->SendData(g_gtsvr->gp_conn->get_datasock(), l_wpk);
+			}
+
+			GameServer* l_game = player->game;
+			if (player->gm_addr && l_game && l_game->m_datasock) {
+				WPacket l_wpk = l_game->m_datasock->GetWPacket();
+				l_wpk.WriteCmd(CMD_TM_GOOUTMAP);
+				l_wpk.WriteChar(1);
+				l_wpk.WriteLongLong(MakeULong(player));
+				l_wpk.WriteLongLong(player->gm_addr);
+				self->SendData(l_game->m_datasock, l_wpk);
+				player->game = nullptr;
+				player->gm_addr = 0;
+			}
+
+			{
+				DataSocket* gp_ds = g_gtsvr->gp_conn->get_datasock();
+				if (gp_ds) {
+					WPacket l_wpk = g_gtsvr->gp_conn->GetWPacket();
+					l_wpk.WriteCmd(CMD_TP_USER_LOGOUT);
+					l_wpk.WriteLongLong(MakeULong(player));
+					l_wpk.WriteLongLong(player->gp_addr);
+					player->gp_addr = 0;
+					g_gtsvr->gp_conn->SyncCall(gp_ds, l_wpk, 10 * 1000);
+				} else {
+					player->gp_addr = 0;
+				}
+			}
+
+			player->EndRun();
+			self->TC_DISCONNECT(player->m_datasock, -33);
+		} catch (...) {
+			LG("GateServer", "Error offline mode!\n");
+		}
+
+		player->m_datasock = nullptr;
+		datasock->SetPointer(nullptr);
+		player->Free();
+	} break;
+	case ReturnCode::OfflineMode::Disabled: {
+		player->SendSysInfo("Offline stall mode is disabled.");
+	} break;
+	case ReturnCode::OfflineMode::NotSafeZone: {
+		player->SendSysInfo("Offline stall is only available in safe zones.");
+	} break;
+	case ReturnCode::OfflineMode::NotStalling: {
+		player->SendSysInfo("You must have an active stall to use offline mode.");
+	} break;
+	default: {
+		player->SendSysInfo("Something went wrong trying to use offline mode.");
+		LG("ErrServer", "Offline stall failed for a player, return code: %d\n", static_cast<int>(return_code));
+	} break;
+	}
+	return true;
+}
+
+bool ToClient::OpcodeHandle_RouteCmToGame(void* ctx, DataSocket* datasock, RPacket& recvbuf) {
+	ToClient* self = static_cast<ToClient*>(ctx);
+	self->ReRouteToGameServer(datasock, recvbuf);
+	return true;
+}
+
+bool ToClient::OpcodeHandle_RouteCpToGroup(void* ctx, DataSocket* datasock, RPacket& recvbuf) {
+	ToClient* self = static_cast<ToClient*>(ctx);
+	const uint16_t l_cmd = self->m_lastRecvCmd;
+	auto l_ply = static_cast<Player*>(datasock->GetPointer());
+	if (!l_ply) {
+		return true;
+	}
+
+	if (l_cmd == CMD_CP_SAY2TRADE ||
+		l_cmd == CMD_CP_SAY2ALL ||
+		l_cmd == CMD_CP_SAY2YOU ||
+		l_cmd == CMD_CP_SAY2GUD ||
+		l_cmd == CMD_CP_SESS_SAY) {
+		IniFile inf("GateServer.cfg");
+		if (std::stoi(inf["Chaos"]["IsActive"])) {
+			const char* chamap = l_ply->GetMapName();
+			if (strcmp(chamap, inf["Chaos"]["Map"].c_str()) == 0) {
+				WPacket b_wpk = datasock->GetWPacket();
+				b_wpk.WriteCmd(CMD_MC_SYSINFO);
+				const char* msg = "Unable to chat in this map!";
+				b_wpk.WriteSequence(msg, uShort(strlen(msg)) + 1);
+				g_gtsvr->cli_conn->SendData(l_ply->m_datasock, b_wpk);
+				self->m_dispatchStopProcessing = true;
+				return true;
+			}
+		}
+	}
+
+	self->ReRouteToGroupServer(datasock, recvbuf);
+	return true;
+}
+
 void ToClient::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 	uShort l_cmd = recvbuf.ReadCmd();
+	m_lastRecvCmd = l_cmd;
+	m_dispatchStopProcessing = false;
 	try {
 		// Validate CMD is within a valid range for GateServer (client-facing)
 		// Valid ranges: CMD_CM (0-499) client→game, CMD_CP (6000-6499) client→group
@@ -684,8 +964,8 @@ void ToClient::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 			return;
 		}
 
-		// Anti-Exploit: Check for oversized packets (max 8KB for client packets)
-		const int MAX_CLIENT_PACKET_SIZE = 8192;
+		// Anti-Exploit: Check for oversized packets
+		const int MAX_CLIENT_PACKET_SIZE = static_cast<int>(NetLimits::kClientMaxPacket);
 		int packetSize = recvbuf.GetDataLen();
 		if (packetSize > MAX_CLIENT_PACKET_SIZE) {
 			const char* ip = datasock->GetPeerIP();
@@ -696,181 +976,22 @@ void ToClient::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 			return;
 		}
 
-		Player* l_ply = (Player*)datasock->GetPointer();
-
-		if (DispatchOpcodeHandler(l_cmd, this, datasock, recvbuf)) {
-			// Handled by OpcodeHandlerRegistry (M2-prep pilots).
-		} else switch (l_cmd) {
-		case CMD_CM_LOGIN:	 // �����û���/����Խ�����֤,�����û����µ����з��������ϵ���Ч��ɫ�б�.
-		case CMD_CM_LOGOUT:	 // ͬ������
-		case CMD_CM_BGNPLAY: // ����ѡ��Ľ�ɫ������GroupServer��֤��Ȼ��֪ͨGameServerʹ��ɫ������ͼ�ռ�.
-		case CMD_CM_ENDPLAY:
-		case CMD_CM_NEWCHA:
-		case CMD_CM_DELCHA:
-		case CMD_CM_CREATE_PASSWORD2:
-		case CMD_CM_UPDATE_PASSWORD2:
-		case CMD_CM_REGISTER:
-		case CMD_CP_CHANGEPASS:
-		case CMD_CM_RSA_HANDSHAKE_1: {
-			if (!g_gtsvr->gp_conn->IsReady()) {
-				LG("ToGroupServerError", "l_cmd = %d Login \n", l_cmd);
-				dbc::WPacket l_wpk = GetWPacket();
-				l_wpk.WriteCmd(CMD_MC_LOGIN);
-				l_wpk.WriteShort(ERR_MC_NETEXCP);
-				SendData(datasock, l_wpk);
-				this->Disconnect(datasock, 100, -31);
-				break;
-			}
-
-			// Anti-exhaustion: Cap concurrent SyncCall tasks to reserve threads for active players
-			// Increment first (atomic), then check — prevents race where two threads both read 27 and pass
-			++m_calltotal;
-			if (m_calltotal > 28) {
-				--m_calltotal;
-				LG("Security", "[SyncCall] Thread cap reached, rejecting CMD %d from %s\n",
-					l_cmd, datasock->GetPeerIP());
-				dbc::WPacket l_wpk = GetWPacket();
-				l_wpk.WriteCmd(CMD_MC_LOGIN);
-				l_wpk.WriteShort(ERR_MC_NETEXCP);
-				SendData(datasock, l_wpk);
-				this->Disconnect(datasock, 100, -31);
-				break;
-			}
-			if (m_atexit) {
-				--m_calltotal;
-				return;
-			}
-
-			TransmitCall* l_tc = g_gtsvr->m_tch.Get();
-			l_tc->Init(datasock, recvbuf);
-			GetProcessor()->AddTask(l_tc);
-		} break;
-		case CMD_CM_OFFLINE_MODE: {
-			MutexArmor lock(g_gtsvr->_mtxother);
-			Player* player = (Player*)datasock->GetPointer();
-			if (!player) {
-				break;
-			}
-
-			if (!player->game) {
-				break;
-			}
-
-			MutexArmor lock_stat(player->m_mtxstat);
-			if (player->m_status != 2) {
-				break;
-			}
-
-			auto wpk = GetWPacket();
-			wpk.WriteCmd(CMD_TM_OFFLINE_MODE);
-			wpk.WriteLongLong(MakeULong(player));
-			wpk.WriteLongLong(player->gm_addr);
-
-			auto rpk = SyncCall(player->game->m_datasock, wpk, 10 * 1000);
-			if (!rpk.HasData()) {
-				break;
-			}
-
-			switch (const auto return_code = static_cast<ReturnCode::OfflineMode>(rpk.ReadChar())) {
-			case ReturnCode::OfflineMode::Success: {
-				try {
-					// Notify GroupServer about disconnect (like normal logout)
-					// This is important so the account status gets set to OFFLINE
-					{
-						WPacket l_wpk = GetWPacket();
-						l_wpk.WriteCmd(CMD_TP_DISC);
-						l_wpk.WriteLong(player->m_actid);
-						l_wpk.WriteLong(inet_addr(datasock->GetPeerIP()));
-						l_wpk.WriteString("Offline stall mode activated");
-						g_gtsvr->gp_conn->SendData(g_gtsvr->gp_conn->get_datasock(), l_wpk);
-					}
-
-					// Notify GameServer to clean up player (but keep the offline stall NPC)
-					GameServer* l_game = player->game;
-					if (player->gm_addr && l_game && l_game->m_datasock) {
-						WPacket l_wpk = l_game->m_datasock->GetWPacket();
-						l_wpk.WriteCmd(CMD_TM_GOOUTMAP);
-						l_wpk.WriteChar(1); // 1 = offline stall mode, preserve stall
-						l_wpk.WriteLongLong(MakeULong(player));
-						l_wpk.WriteLongLong(player->gm_addr);
-						SendData(l_game->m_datasock, l_wpk);
-						player->game = nullptr;
-						player->gm_addr = 0;
-					}
-
-					// Notify GroupServer about logout (this sets account to OFFLINE)
-					// MUST use SyncCall (not SendData) because CMD_TP_USER_LOGOUT is only
-					// handled in OnServeCall. SendData routes to OnProcessData which has
-					// no handler for it, causing the logout to be silently dropped.
-					{
-						DataSocket* gp_ds = g_gtsvr->gp_conn->get_datasock();
-						if (gp_ds) {
-							WPacket l_wpk = g_gtsvr->gp_conn->GetWPacket();
-							l_wpk.WriteCmd(CMD_TP_USER_LOGOUT);
-							l_wpk.WriteLongLong(MakeULong(player));
-							l_wpk.WriteLongLong(player->gp_addr);
-							player->gp_addr = 0;
-							g_gtsvr->gp_conn->SyncCall(gp_ds, l_wpk, 10 * 1000);
-						} else {
-							player->gp_addr = 0;
-						}
-					}
-
-					player->EndRun();
-					TC_DISCONNECT(player->m_datasock, -33);
-				} catch (...) {
-					LG("GateServer", "Error offline mode!\n");
-				}
-
-				player->m_datasock = nullptr;
-				datasock->SetPointer(nullptr);
-				player->Free();
-			} break;
-			case ReturnCode::OfflineMode::Disabled: {
-				player->SendSysInfo("Offline stall mode is disabled.");
-			} break;
-			case ReturnCode::OfflineMode::NotSafeZone: {
-				player->SendSysInfo("Offline stall is only available in safe zones.");
-			} break;
-			case ReturnCode::OfflineMode::NotStalling: {
-				player->SendSysInfo("You must have an active stall to use offline mode.");
-			} break;
-			default: {
-				player->SendSysInfo("Something went wrong trying to use offline mode.");
-				LG("ErrServer", "Offline stall failed for a player, return code: %d\n", static_cast<int>(return_code));
-			} break;
-			}
-		} break;
-
-		default:									// ȱʡ��ת����GroupServer����GameServer
-			if (l_cmd / 500 == CMD_CM_BASE / 500) { // ת����GameServer
-				ReRouteToGameServer(datasock, recvbuf);
-			} else if (l_cmd / 500 == CMD_CP_BASE / 500) { // ת����GroupServer
-				auto l_ply = static_cast<Player*>(datasock->GetPointer());
-				if (l_ply) {
-					if (l_cmd == CMD_CP_SAY2TRADE ||
-						l_cmd == CMD_CP_SAY2ALL ||
-						l_cmd == CMD_CP_SAY2YOU ||
-						l_cmd == CMD_CP_SAY2GUD ||
-						l_cmd == CMD_CP_SESS_SAY) {
-						IniFile inf("GateServer.cfg");
-						if (std::stoi(inf["Chaos"]["IsActive"])) {
-							const char* chamap = l_ply->GetMapName();
-							if (strcmp(chamap, inf["Chaos"]["Map"].c_str()) == 0) {
-								WPacket b_wpk = datasock->GetWPacket();
-								b_wpk.WriteCmd(CMD_MC_SYSINFO);
-								const char* msg = "Unable to chat in this map!";
-								b_wpk.WriteSequence(msg, uShort(strlen(msg)) + 1);
-								g_gtsvr->cli_conn->SendData(l_ply->m_datasock, b_wpk);
-								return;
-							}
-						}
-					}
-					ReRouteToGroupServer(datasock, recvbuf);
-				}
-			}
-			break;
+		if (l_cmd == CMD_CM_RSA_HANDSHAKE_1) {
+			// Process RSA on the comm thread — async TransmitCall queue wait was
+			// tripping the packet-age timeout and disconnecting with -25 (~140 ms).
+			CM_RSA_HANDSHAKE1(datasock, recvbuf);
+		} else if (IsTransmitCallOpcode(l_cmd) || l_cmd == CMD_CM_LOGIN) {
+			// Login, begin-play, and other GroupServer SyncCalls must not be queued.
+			DispatchSyncClientOpcode(this, datasock, recvbuf, l_cmd);
+		} else if (!DispatchOpcodeHandler(l_cmd, this, datasock, recvbuf)) {
+			LG("Security", "[OpcodeRegistry] Unhandled CMD %u from %s\n",
+				static_cast<unsigned int>(l_cmd), datasock->GetPeerIP());
 		}
+
+		if (m_dispatchStopProcessing) {
+			return;
+		}
+
 		if (m_connRateEnabled && !IsWhitelisted(datasock->GetPeerIP()) &&
 			(datasock->m_recvbyteps.load(std::memory_order_relaxed) > m_maxRecvBytesPerSec ||
 				datasock->m_recvpktps.load(std::memory_order_relaxed) > m_maxRecvPktsPerSec)) {
@@ -979,8 +1100,13 @@ void ToClient::CM_LOGIN(DataSocket* datasock, RPacket& recvbuf) {
 
 		recvbuf.DiscardLast(static_cast<uLong>(sizeof(uShort)));
 
-		if (!l_ply) // 组织重复进入
-		{
+		if (!l_ply) {
+			WPacket l_wpk = GetWPacket();
+			l_wpk.WriteCmd(CMD_MC_LOGIN);
+			l_wpk.WriteShort(ERR_MC_NETEXCP);
+			SendData(datasock, l_wpk);
+			LG("GateServer", "client: %s\tlogin error: missing player object\n", datasock->GetPeerIP());
+			Disconnect(datasock, 100, -31);
 			return;
 		}
 
@@ -1011,14 +1137,24 @@ void ToClient::CM_LOGIN(DataSocket* datasock, RPacket& recvbuf) {
 		} else {
 			l_ply->m_status = 1; // 置于选/建/删角色状态
 
-			l_ply->gp_addr = l_rpk.ReverseReadLongLong();	// ���������GroupServer�ϵ��ڴ��ַ
-			l_ply->m_loginID = l_rpk.ReverseReadLong(); //  Account DB id
-			l_ply->m_actid = l_rpk.ReverseReadLong();
-			
-			BYTE byPassword = l_rpk.ReverseReadChar();
-			l_rpk.DiscardLast(sizeof(LLong) + 2 * sizeof(uLong) + sizeof(char));
+			// Parse gate-local tail fields from a copy so the forward body stays intact.
+			RPacket l_body = l_rpk.Duplicate();
+			l_ply->gp_addr = l_body.ReverseReadLongLong();
+			l_ply->m_loginID = l_body.ReverseReadLong();
+			l_ply->m_actid = l_body.ReverseReadLong();
+			BYTE byPassword = l_body.ReverseReadChar();
+			const uLong kTailLen = sizeof(unsigned long long) + 2 * sizeof(uLong) + sizeof(char);
+			if (!l_body.DiscardLast(kTailLen)) {
+				WPacket l_wpk = GetWPacket();
+				l_wpk.WriteCmd(CMD_MC_LOGIN);
+				l_wpk.WriteShort(ERR_MC_NETEXCP);
+				SendData(datasock, l_wpk);
+				LG("GateServer", "client: %s\tlogin error: response trim failed\n", datasock->GetPeerIP());
+				Disconnect(datasock, 100, -31);
+				return;
+			}
 
-			l_wpk = WPacket(l_rpk).Duplicate();
+			WPacket l_wpk = WPacket(l_body).Duplicate();
 			l_wpk.WriteCmd(CMD_MC_LOGIN);
 			l_wpk.WriteChar(byPassword);
 			l_wpk.WriteLong(0x3214);
@@ -1026,7 +1162,9 @@ void ToClient::CM_LOGIN(DataSocket* datasock, RPacket& recvbuf) {
 			// l_line<<newln<<"客户端: "<<datasock->GetPeerIP()<<"	登陆成功。"<<endln;
 			LG("GateServer", "client: %s\tlogin ok.\n", datasock->GetPeerIP());
 
-			// 开始加密
+			// Start encryption after plaintext login response is queued.
+			l_ply->m_gcmSeqToClient = 0;
+			l_ply->m_gcmSeqFromClient = 0;
 			l_ply->enc = true;
 		}
 	} else {
@@ -1227,13 +1365,17 @@ void ToClient::CM_BGNPLAY(DataSocket* datasock, RPacket& recvbuf) {
 							l_game->m_plynum++;	 // 不用同步，只是简单参考
 
 							// 通知GameServer进入地图
-							// l_line<<newln<<"客户端: "<<datasock->GetPeerIP()<<":"<<datasock->GetPeerPort()<<"	BeginPlay入地图,Gate向["
-							//<<l_game->m_datasock->GetPeerIP()<<"]发送了EnterMap命令,dbid:"<<l_ply->m_dbid
-							//<<uppercase<<hex<<",附带Gate地址:"<<MakeULong(l_ply)<<dec<<nouppercase<<endln;
 							LG("GateServer", "client: %s:%d\tBeginPlay entry map,Gate to[%s]send EnterMap command,dbid:%u,Gate address:%llX\n",
 								datasock->GetPeerIP(), datasock->GetPeerPort(),
 								l_game->m_datasock->GetPeerIP(), l_ply->m_dbid, MakeULong(l_ply));
 							l_game->EnterMap(l_ply, l_ply->m_loginID, l_ply->m_dbid, l_ply->m_worldid, l_map, -1, 0, 0, 0, l_ply->m_sGarnerWiner); // 根据地图查找GameServer，然后请求GameServer以进入这个地图。
+						} else {
+							LG("GateServer", "CM_BGNPLAY: kick check failed gs=%d/%d dbid=%u\n",
+								static_cast<int>(datasock->m_gsCheck), totalgs, l_ply->m_dbid);
+							l_wpk = datasock->GetWPacket();
+							l_wpk.WriteCmd(CMD_MC_BGNPLAY);
+							l_wpk.WriteShort(ERR_MC_NETEXCP);
+							SendData(datasock, l_wpk);
 						}
 					}
 					}
