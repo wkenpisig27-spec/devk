@@ -2,6 +2,7 @@
 #include "gateserver.h"
 #include "log.h"
 #include "common/NetLimits.h"
+#include "BackplaneAuth.h"
 #include <stdexcept>
 #include <condition_variable>
 using namespace std;
@@ -15,6 +16,7 @@ ToGameServer::ToGameServer(char const* fname, ThreadPool* proc, ThreadPool* comm
 
 	// ¿ªÊ¼¼àÌý
 	IniFile inf(fname);
+	BackplaneAuth::SetClusterConfig(BackplaneAuth::LoadFromIni(inf));
 	IniSection& is = inf["ToGameServer"];
 	const std::string ip = is["IP"];
 	uShort port = std::stoi(is["Port"]);
@@ -89,12 +91,14 @@ bool ToGameServer::OnConnect(DataSocket* datasock) // ·µ»ØÖµ:true-ÔÊÐí
 	datasock->SetSendBuf(64 * 1024);
 	// l_line<<newln<<"GameServer= ["<<datasock->GetPeerIP()<<"] À´ÁË,SocketÊýÄ¿= "<<GetSockTotal()+1;
 	LG("GateServer", "GameServer= [%s] come,Socket num= %d\n", datasock->GetPeerIP(), GetSockTotal() + 1);
+	BackplaneAuth::OnInboundConnect(datasock);
 	return true;
 }
 
 void ToGameServer::OnDisconnect(DataSocket* datasock, int reason) // reasonÖµ:0-±¾µØ³ÌÐòÕý³£ÍË³ö£»-3-ÍøÂç±»¶Ô·½¹Ø±Õ£»-1-Socket´íÎó;-5-°ü³¤¶È³¬¹ýÏÞÖÆ¡£
 {
 	LG("GateServer", "GameServer= [%s] gone,Socket num= %d,reason= %s\n", datasock->GetPeerIP(), GetSockTotal() + 1, GetDisconnectErrText(reason).c_str());
+	BackplaneAuth::OnSocketClosed(datasock);
 
 	if (reason == DS_SHUTDOWN || reason == DS_DISCONN) {
 		return;
@@ -188,21 +192,19 @@ void ToGameServer::OnDisconnect(DataSocket* datasock, int reason) // reasonÖµ:
 }
 
 WPacket ToGameServer::OnServeCall(DataSocket* datasock, RPacket& in_para) {
-	/*
-	GameServer* l_game = (GameServer *)(datasock->GetPointer());
-	WPacket l_retpk = GetWPacket();
 	uShort l_cmd = in_para.ReadCmd();
-
-	return l_retpk;
-	*/
-
+	if (l_cmd == CMD_OS_BACKPLANE_HELLO) {
+		return BackplaneAuth::ServeHello(this, datasock, in_para);
+	}
 	return nullptr;
 }
 
 void ToGameServer::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
-	GameServer* l_game = (GameServer*)(datasock->GetPointer());
-
 	uShort l_cmd = recvbuf.ReadCmd();
+	if (!BackplaneAuth::AllowProcessData(datasock, l_cmd, this))
+		return;
+
+	GameServer* l_game = (GameServer*)(datasock->GetPointer());
 	// LG("ToGameServer", "-->l_cmd = %d\n", l_cmd);
 
 	// printf("Incoming from GameServer Packet CMD ID: %d\n", l_cmd);

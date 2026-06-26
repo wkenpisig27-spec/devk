@@ -14,6 +14,7 @@
 #include "Script.h"
 #include "Parser.h"
 #include "common/NetLimits.h"
+#include "BackplaneAuth.h"
 
 using namespace std;
 
@@ -195,6 +196,7 @@ GroupServerApp::GroupServerApp(ThreadPool* proc, ThreadPool* comm)
 		LG("gpsvr_error", "Exception reading KeepAlive config, using default: %d\n", l_alive);
 	}
 	BeginWork(l_alive);
+	BackplaneAuth::SetClusterConfig(BackplaneAuth::LoadFromIni(m_cfg));
 	m_mtxDB.Create(false);
 	m_mtxlogin.Create(false);
 	m_mtxSyn.Create(false);

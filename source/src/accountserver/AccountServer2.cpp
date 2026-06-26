@@ -19,6 +19,7 @@
 #include "Auth.h"
 #include "PacketSanitizer.h"
 #include "common/NetLimits.h"
+#include "BackplaneAuth.h"
 
 using namespace std;
 
@@ -97,6 +98,7 @@ AccountServer2::AccountServer2(ThreadPool* proc, ThreadPool* comm)
 #endif
 
 	OpenListenSocket(port, ip.c_str());
+	BackplaneAuth::SetClusterConfig(BackplaneAuth::LoadFromIni(inf));
 
 	ResetMembersCount();
 }
@@ -121,10 +123,13 @@ LONG AccountServer2::GetMembersCount() {
 }
 
 bool AccountServer2::OnConnect(DataSocket* datasock) {
+	BackplaneAuth::OnInboundConnect(datasock);
 	return true;
 }
 void AccountServer2::OnProcessData(DataSocket* datasock, RPacket& rpkt) {
 	unsigned short usCmd = rpkt.ReadCmd();
+	if (!BackplaneAuth::AllowProcessData(datasock, usCmd, this))
+		return;
 
 	// Validate CMD range - AccountServer only accepts CMD_PA (3000-3050)
 	if (usCmd < 3000 || usCmd > 3050) {
@@ -227,6 +232,10 @@ void AccountServer2::OnProcessData(DataSocket* datasock, RPacket& rpkt) {
 WPacket AccountServer2::OnServeCall(DataSocket* datasock, RPacket& rpkt) {
 	unsigned short usCmd = rpkt.ReadCmd();
 
+	if (usCmd == CMD_OS_BACKPLANE_HELLO) {
+		return BackplaneAuth::ServeHello(this, datasock, rpkt);
+	}
+
 	// Validate CMD range - AccountServer only accepts CMD_PA (3000-3050)
 	if (usCmd < 3000 || usCmd > 3050) {
 		LG("Security", "[AccountServer] Invalid CMD %u in ServeCall, rejecting\n", usCmd);
@@ -254,6 +263,7 @@ WPacket AccountServer2::ProcessUnknownCmd(RPacket rpkt) {
 	return wpkt;
 }
 void AccountServer2::OnDisconnect(DataSocket* datasock, int reason) {
+	BackplaneAuth::OnSocketClosed(datasock);
 	Gs_Logout(datasock);
 }
 

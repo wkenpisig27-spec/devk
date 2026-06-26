@@ -11,6 +11,8 @@
 #include "TryUtil.h"
 #include "OfflineStall.h"
 #include "common/NetLimits.h"
+#include "BackplaneAuth.h"
+#include "IniFile.h"
 
 _DBC_USING
 // 不要修改下面的行,谢谢合作!
@@ -192,6 +194,11 @@ GameServerApp::GameServerApp(ThreadPool* proc, ThreadPool* comm)
 	SetPKParse(0, 2, NetLimits::kGameServerMaxPacket, 400, NetLimits::kGameServerMaxPacket);
 	BeginWork(g_Config.m_lSocketAlive);
 
+	{
+		IniFile inf("GameServer.cfg");
+		BackplaneAuth::SetClusterConfig(BackplaneAuth::LoadFromIni(inf));
+	}
+
 	// LG("init", "ServerApp构造结束\n");
 	LG("init", "ServerApp init over\n");
 	T_E
@@ -222,6 +229,7 @@ bool GameServerApp::OnConnect(DataSocket* datasock) {
 void GameServerApp::OnDisconnect(DataSocket* datasock, int reason) {
 	T_B
 		LG("Connect", "GateServer Disconnect! IP = [%s] port = %d, reason = [%s]\n", datasock->GetPeerIP(), datasock->GetPeerPort(), GetDisconnectErrText(reason).c_str());
+	BackplaneAuth::OnSocketClosed(datasock);
 
 	GateServer* gt = (GateServer*)datasock->GetPointer();
 	if (gt == nullptr)
@@ -256,7 +264,9 @@ void GameServerApp::OnDisconnect(DataSocket* datasock, int reason) {
 
 void GameServerApp::OnProcessData(DataSocket* datasock, RPacket& pk) {
 	T_B
-		AddPK(datasock, pk);
+	if (!BackplaneAuth::AllowProcessData(datasock, 0, this))
+		return;
+	AddPK(datasock, pk);
 	T_E
 }
 
@@ -451,6 +461,9 @@ void GameServerApp::ConnectGate(GateServer* pGate) {
 	if (datasock == nullptr) {
 		// LG("Connect", "连接 GateServer 失败, ip = %s, port = %d.\n", pGate->GetIP().c_str(), pGate->GetPort() );
 		LG("Connect", "connect to  GateServer failed, ip = %s, port = %d.\n", pGate->GetIP().c_str(), pGate->GetPort());
+	} else if (!BackplaneAuth::PerformOutboundHandshake(this, this, datasock)) {
+		LG("BackplaneAuth", "Gate backplane handshake failed ip=%s port=%d\n", pGate->GetIP().c_str(), pGate->GetPort());
+		Disconnect(datasock, 0, kBackplaneAuthDisconnectReason);
 	} else {
 		pGate->SetDataSock(datasock);
 		datasock->SetPointer(pGate);

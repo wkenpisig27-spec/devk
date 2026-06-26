@@ -8,6 +8,7 @@
 #include "Script.h"
 #include "Parser.h"
 #include "log.h"
+#include "BackplaneAuth.h"
 
 using namespace std;
 
@@ -207,6 +208,13 @@ void InitACTSvrConnect(GroupServerApp& gpapp) {
 			memset(buffer, 0, sizeof(buffer));
 			sprintf(buffer, RES_STRING(GP_GROUPSERVERAPPINIT_CPP_00005), l_ip.c_str(), l_port);
 			std::cout << buffer << std::endl;
+			Sleep(5000);
+			continue;
+		}
+		if (!BackplaneAuth::PerformOutboundHandshake(&gpapp, &gpapp, gpapp.m_acctsock)) {
+			LG("BackplaneAuth", "AccountServer backplane handshake failed, retry in 5s\n");
+			gpapp.Disconnect(gpapp.m_acctsock, 0, kBackplaneAuthDisconnectReason);
+			gpapp.m_acctsock = 0;
 			Sleep(5000);
 			continue;
 		}

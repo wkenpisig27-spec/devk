@@ -183,6 +183,7 @@
     <Lib />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\serversdk\BackplaneAuth.cpp" />
     <ClCompile Include="..\..\src\serversdk\AcceptConnect.cpp" />
     <ClCompile Include="..\..\src\serversdk\Comm.cpp" />
     <ClCompile Include="..\..\src\serversdk\CommRPC.cpp" />
@@ -201,6 +202,7 @@
     <ClCompile Include="..\..\src\serversdk\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\serversdk\BackplaneAuth.h" />
     <ClInclude Include="..\include\BaseBuf.h" />
     <ClInclude Include="..\include\Comm.h" />
     <ClInclude Include="..\include\CommRPC.h" />

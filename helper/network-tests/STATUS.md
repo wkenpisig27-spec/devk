@@ -62,10 +62,30 @@ Track progress for autonomous refactoring. Update after each completed task.
 | B | M2 Bulk migration — GameAppNet (B5) | **done** | batch 3: 35 handlers total (2026-06-27) |
 | B | M2 Bulk migration — CharacterPrl (B6) | **done** | 2026-06-27 — 112 handlers; legacy switch empty |
 | C | M6 Zero-copy gate forwarding | pending | Drop `Duplicate()` in `ReRouteToGameServer` |
-| D | M4 Backplane PSK auth | pending | Gate↔Game/Group/Account |
+| D | M4 Backplane PSK auth | **done** | 2026-06-27 — `BackplaneAuth` HMAC-SHA256; OS/SO opcodes 6510/7010 |
 | E | M5 PacketReader everywhere | pending | After each B-batch migration |
 
 **Phase 3 exit gate:** Legacy switches empty or assert-only; session handles primary; backplane auth in default configs; 30-min soak clean.
+
+### Track D — Backplane PSK auth (2026-06-27)
+
+Mutual HMAC-SHA256 handshake on inter-server TCP links before normal protocol traffic.
+
+| Link | Initiator | Listener | Integration |
+|------|-----------|----------|-------------|
+| Game → Gate | `GameServerApp::ConnectGate` | `ToGameServer::OnServeCall` | SyncCall hello before `CMD_MM_GATE_CONNECT` |
+| Gate → Group | `ConnectGroupServer` | `GroupServerApp::OnServeCall` | SyncCall hello before `CMD_TP_LOGIN` |
+| Group → Account | `InitACTSvrConnect` | `AccountServer2::OnServeCall` | SyncCall hello before `CMD_PA_LOGIN` |
+
+Wire opcodes (Monitor band, internal only): `CMD_OS_BACKPLANE_HELLO` (6510) / `CMD_SO_BACKPLANE_HELLO` (7010).
+
+Config: `[Backplane]` `PSK`, `RequireAuth`, `HandshakeTimeoutMs` in `server/*.cfg`. Empty PSK + `RequireAuth=0` = legacy accept.
+
+Files: `BackplaneAuth.h/cpp`, `NetCommand.h`, Gate/Game/Group/Account integration, default cfgs enabled.
+
+Build: Release\|x64 LIBDBC + Gate + Game + Group + Account (see build log).
+
+Manual: matching PSK → login/enter/chat; wrong PSK → backplane disconnect reason -41 in `BackplaneAuth` log.
 
 ### Track B6 — CharacterPrl registry (batch 1, 2026-06-27)
 

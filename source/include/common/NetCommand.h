@@ -902,3 +902,8 @@
 #define CMD_SO_OFF_LINE CMD_SO_BASE + 6
 #define CMD_SO_ENTER_MAP CMD_SO_BASE + 7
 #define CMD_SO_LEAVE_MAP CMD_SO_BASE + 8
+
+// Backplane PSK mutual auth (Track D / M4) — inter-server links only; not used on client wire.
+// Initiator (outbound connector) sends CMD_OS_BACKPLANE_HELLO via SyncCall; listener responds CMD_SO_BACKPLANE_HELLO.
+#define CMD_OS_BACKPLANE_HELLO CMD_OS_BASE + 10 // 6510 Monitor-band internal: backplane auth hello
+#define CMD_SO_BACKPLANE_HELLO CMD_SO_BASE + 10 // 7010 backplane auth hello reply

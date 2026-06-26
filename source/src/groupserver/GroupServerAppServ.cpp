@@ -11,6 +11,7 @@
 #include "GuildBankMsg.h"
 #include "conformity.h"
 #include "PacketSanitizer.h"
+#include "BackplaneAuth.h"
 
 using namespace std;
 
@@ -284,10 +285,12 @@ bool GroupServerApp::OnConnect(DataSocket* datasock) // Connection callback: tru
 		LG("Connect", "GateServer:%s,%d come ! Socket num:%d\n", peerIP, peerPort, GetSockTotal() + 1);
 		std::cout << "GateServer:" << peerIP << "," << peerPort << "come ! Socket num:" << GetSockTotal() + 1 << std::endl;
 	}
+	BackplaneAuth::OnInboundConnect(datasock);
 	return true;
 }
 
 void GroupServerApp::OnDisconnect(DataSocket* datasock, int reason) {
+	BackplaneAuth::OnSocketClosed(datasock);
 	if (!datasock->IsServer()) {
 		m_mtxlogin.lock();
 		try {
@@ -343,6 +346,10 @@ void GroupServerApp::OnDisconnect(DataSocket* datasock, int reason) {
 
 WPacket GroupServerApp::OnServeCall(DataSocket* datasock, RPacket& pk) {
 	uShort l_cmd = pk.ReadCmd();
+
+	if (l_cmd == CMD_OS_BACKPLANE_HELLO) {
+		return BackplaneAuth::ServeHello(this, datasock, pk);
+	}
 
 	// Validate CMD is within a valid range for GroupServer SyncCalls
 	// Valid ranges: CMD_TP (2000-2050), CMD_OS (6500-6550)
@@ -574,6 +581,8 @@ WPacket GroupServerApp::TP_REGISTER(DataSocket* datasock, RPacket& pk) {
 void GroupServerApp::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 	try {
 		uShort l_cmd = recvbuf.ReadCmd();
+		if (!BackplaneAuth::AllowProcessData(datasock, l_cmd, this))
+			return;
 
 		// Validate CMD is within a valid range for GroupServer
 		// Valid ranges: CMD_TP (2000-2050), CMD_AP (3500-3550), CMD_MP (5500-5550), CMD_CP (6000-6500)

@@ -2,6 +2,7 @@
 #include "gateserver.h"
 #include "log.h"
 #include "common/NetLimits.h"
+#include "BackplaneAuth.h"
 #include <condition_variable>
 
 using namespace dbc;
@@ -81,6 +82,13 @@ int ConnectGroupServer::Process() {
 				LG("Connect", "%s\n", RES_STRING(GS_TOGROUPSERVER_CPP_00002));
 				Sleep(5000);
 				continue;
+			}
+			if (!BackplaneAuth::PerformOutboundHandshake(_tgps, _tgps, datasock)) {
+				LG("BackplaneAuth", "GroupServer backplane handshake failed, retry in 5s\n");
+				_tgps->Disconnect(datasock, 0, kBackplaneAuthDisconnectReason);
+				datasock = nullptr;
+				Sleep(5000);
+				continue;
 			} else {
 				// µÇÂ¼µ½ GroupServer
 				WPacket pk = _tgps->GetWPacket();
@@ -123,6 +131,7 @@ ToGroupServer::ToGroupServer(char const* fname, ThreadPool* proc, ThreadPool* co
 	: TcpClientApp(this, proc, comm), RPCMGR(this), _gs(), _connected(false), m_atexit(0), m_calltotal(0),
 	  _myself() {
 	IniFile inf(fname);
+	BackplaneAuth::SetClusterConfig(BackplaneAuth::LoadFromIni(inf));
 	IniSection& is = inf["GroupServer"];
 	_myself = inf["Main"]["Name"];
 	_gs.ip = is["IP"];
@@ -170,6 +179,7 @@ void ToGroupServer::OnDisconnect(DataSocket* datasock, int reason) // reasonÖµ
 {																   // ¼¤»î ConnnectGroupServer Ïß³Ì
 	// l_line<<newln<<"ÓëGroupServerµÄÍøÂçÁ¬½ÓÖÐ¶Ï,SocketÊýÄ¿: "<<GetSockTotal()<<",reason ="<<GetDisconnectErrText(reason).c_str()<<"£¬Á¢¼´ÖØÁ¬..."<<endln;
 	LG("Connect", "disconnection with GroupServer,Socket num: %d,reason =%s, reconnecting...\n", GetSockTotal(), GetDisconnectErrText(reason).c_str());
+	BackplaneAuth::OnSocketClosed(datasock);
 
 	if (!g_appexit) {
 		_connected = false;
@@ -193,19 +203,17 @@ void ToGroupServer::OnDisconnect(DataSocket* datasock, int reason) // reasonÖµ
 
 WPacket ToGroupServer::OnServeCall(DataSocket* datasock, RPacket& in_para) {
 	uShort l_cmd = in_para.ReadCmd();
-	WPacket retpk = GetWPacket();
-
-	switch (l_cmd) {
-	case 0:
-	default:
-		break;
+	if (l_cmd == CMD_OS_BACKPLANE_HELLO) {
+		return BackplaneAuth::ServeHello(this, datasock, in_para);
 	}
-
+	WPacket retpk = GetWPacket();
 	return retpk;
 }
 
 void ToGroupServer::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 	uShort l_cmd = recvbuf.ReadCmd();
+	if (!BackplaneAuth::AllowProcessData(datasock, l_cmd, this))
+		return;
 	LG("ToGroupServer", "OnProcessData-->l_cmd = %d\n", l_cmd);
 	try {
 		switch (l_cmd) {
