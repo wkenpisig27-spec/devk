@@ -273,11 +273,13 @@ Mutual **HMAC-SHA256** handshake before normal protocol traffic.
 | `source/include/serversdk/BackplaneAuth.h` | API |
 | `source/src/serversdk/BackplaneAuth.cpp` | HMAC, state machine |
 
-**Config** (`server/*.cfg` section `[Backplane]`):
+**Config** (`server/*.cfg` section `[Backplane]` — one per server process: `GateServer.cfg`, `GameServer.cfg`, `GroupServer.cfg`, `AccountServer.cfg`):
 ```ini
 RequireAuth=1
-PSK=pko-backplane-dev-shared-secret   ; rotate for production
+PSK=pko-backplane-dev-shared-secret   ; required when RequireAuth=1; rotate for production
 HandshakeTimeoutMs=5000
+; RequireAuth=1 with empty PSK → server refuses start (BackplaneAuth FATAL, exit 1)
+; RequireAuth=0 → legacy accept (no backplane handshake)
 ```
 
 **Integration points:**

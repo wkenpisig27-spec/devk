@@ -15,6 +15,14 @@ The stack is a **2003-era `dbc` transport** (`select()` + thread pools + length-
 
 **Verdict:** Suitable to operate and worth **incremental modernization (Option B)** — not a full rewrite. Strengths: net/logic thread separation, pooled buffers, real client handshake. Liabilities: `select()` scale ceiling, legacy switch dispatch on GameServer, raw-pointer identity on backplane, unencrypted inter-server links.
 
+### Ops — SessionManager capacity (F-07, F-08)
+
+Each `SessionManager` instance (Gate, Group, Game per gate link) uses a **fixed 65536-slot** table (`SessionManager::kMaxSlots`). Slots are reused via a generation-stamped free list; exhaustion returns an invalid handle and logs `SessionManager Allocate REJECT` with an active-count estimate (`m_nextSlot - freeList.size()`). Monitor this log under high concurrency; sustained rejects mean the cap is reached for that process.
+
+### Ops — Backplane PSK misconfiguration (F-04)
+
+`RequireAuth=1` with an empty `[Backplane] PSK` is **fail-closed at startup**: `BackplaneAuth::SetClusterConfig` logs `FATAL` and exits. Set a non-empty shared PSK on all four server cfgs, or use `RequireAuth=0` for legacy (unauthenticated) inter-server links.
+
 **Production validation (2026-06-27):** Login → character select → enter world → chat confirmed after:
 - Raising client packet limits to 32 KB (`NetLimits.h`) for large login responses
 - Running Gate SyncCall opcodes on the comm thread (login, begin-play, etc.) to avoid packet-age timeouts

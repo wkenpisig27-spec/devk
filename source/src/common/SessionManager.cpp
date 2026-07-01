@@ -1,5 +1,7 @@
 #include "common/SessionManager.h"
 
+#include "util/log.h"
+
 #include <algorithm>
 
 SessionHandle SessionManager::Allocate(void* owner) {
@@ -16,6 +18,11 @@ SessionHandle SessionManager::Allocate(void* owner) {
 	} else if (m_nextSlot < kMaxSlots) {
 		slot = m_nextSlot++;
 	} else {
+		const uint32_t activeEstimate =
+			m_nextSlot - static_cast<uint32_t>(m_freeList.size());
+		LG("SessionManager",
+		   "Allocate REJECT: slot table exhausted active~=%u cap=%u free=%zu owner=%p\n",
+		   activeEstimate, kMaxSlots, m_freeList.size(), owner);
 		return {};
 	}
 

@@ -17,6 +17,7 @@
 #include <botan/mac.h>
 #include <algorithm>
 #include <chrono>
+#include <cstdlib>
 #include <cstring>
 #include <mutex>
 #include <string>
@@ -114,6 +115,12 @@ BackplaneAuthConfig BackplaneAuth::LoadFromIni(const IniFile& inf) {
 }
 
 void BackplaneAuth::SetClusterConfig(const BackplaneAuthConfig& cfg) {
+	if (cfg.requireAuth && cfg.psk.empty()) {
+		LG("BackplaneAuth",
+		   "FATAL: RequireAuth=1 but PSK is empty — set [Backplane] PSK in server *.cfg or use RequireAuth=0\n");
+		std::exit(1);
+	}
+
 	g_clusterConfig = cfg;
 	if (cfg.IsEnabled()) {
 		LG("BackplaneAuth", "enabled RequireAuth=1 PSK len=%zu timeout=%u ms\n",

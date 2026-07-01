@@ -64,7 +64,7 @@ Track progress for autonomous refactoring. Update after each completed task.
 | B | M2 Bulk migration — CharacterPrl (B6) | **done** | 2026-06-27 — 112 handlers; legacy switch empty |
 | C | M6 Zero-copy gate forwarding | **done** | `WPacket::ForwardFromReceive` in ReRoute paths (2026-07-01) |
 
-**Audit remediation (post `a04ce8d6`):** [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md) — batches R1–R7 from principal review. **R5 session model completion done (2026-07-02):** R5.1 MP_ENTERMAP, R5.2 TM_ENTERMAP, R5.3 TP_SYNC_PLYLST session restore.
+**Audit remediation (post `a04ce8d6`):** [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md) — batches R1–R7 from principal review. **R3 backplane + ops hardening done (2026-07-02):** R3.1 PSK fail-closed, R3.2 session slot exhaustion logging. **R5 session model completion done (2026-07-02):** R5.1 MP_ENTERMAP, R5.2 TM_ENTERMAP, R5.3 TP_SYNC_PLYLST session restore.
 | D | M4 Backplane PSK auth | **done** | 2026-06-27 — `BackplaneAuth` HMAC-SHA256; OS/SO opcodes 6510/7010 |
 | E | M5 PacketReader everywhere | **done** | Track E batch 10: ViewItemInfo PacketReader (2026-07-01) |
 
@@ -82,7 +82,7 @@ Mutual HMAC-SHA256 handshake on inter-server TCP links before normal protocol tr
 
 Wire opcodes (Monitor band, internal only): `CMD_OS_BACKPLANE_HELLO` (6510) / `CMD_SO_BACKPLANE_HELLO` (7010).
 
-Config: `[Backplane]` `PSK`, `RequireAuth`, `HandshakeTimeoutMs` in `server/*.cfg`. Empty PSK + `RequireAuth=0` = legacy accept.
+Config: `[Backplane]` `PSK`, `RequireAuth`, `HandshakeTimeoutMs` in `server/*.cfg` (`GateServer.cfg`, `GameServer.cfg`, `GroupServer.cfg`, `AccountServer.cfg`). Empty PSK + `RequireAuth=0` = legacy accept. **`RequireAuth=1` with empty PSK → FATAL at startup (exit 1, R3.1).**
 
 Files: `BackplaneAuth.h/cpp`, `NetCommand.h`, Gate/Game/Group/Account integration, default cfgs enabled.
 
@@ -1050,4 +1050,4 @@ See last-smoke-result.txt for automated output.
 
 ## Resume prompt for next session
 
-> Continue **Audit Remediation** — read [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md). **R1–R2.2 + R5 complete** (`d16d375a`..`f2b1d3db`). Next: optional **R2.3** or **R3.1** (backplane PSK fail-closed) or **R4.1** (PM broadcast). **Manual T0 pending for R5:** login → enter → ENDPLAY → char switch; **Group restart soak** for TP_SYNC_PLYLST session restore. Deploy matched Gate+Group (+Game for R5.2) from same build.
+> Continue **Audit Remediation** — read [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md). **R1–R2.2 + R3 + R5 complete.** Next: optional **R2.3** or **R4.1** (PM broadcast) or **R6.1** (30-min soak + Phase 3 exit). **Manual T0 pending for R5:** login → enter → ENDPLAY → char switch; **Group restart soak** for TP_SYNC_PLYLST session restore. Deploy matched Gate+Group (+Game for R5.2) from same build.

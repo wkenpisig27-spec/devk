@@ -164,7 +164,7 @@
 | **Action** | In `SetClusterConfig` or server startup: if `requireAuth && psk.empty()` → log fatal + `exit(1)` (or refuse to accept connections with explicit error). Document in `server/*.cfg` comments. |
 | **Build** | LIBDBC + all servers linking BackplaneAuth |
 | **Acceptance** | Valid PSK → login works; empty PSK + RequireAuth=1 → server refuses start OR logs clear fatal. |
-| **Status** | pending |
+| **Status** | **done** |
 
 ### R3.2 — Session slot monitoring (document + log)
 
@@ -173,7 +173,7 @@
 | **Audit refs** | F-07, F-08 |
 | **Files** | `SessionManager.cpp`, `docs/NETWORK_AUDIT.md` |
 | **Action** | On failed `Allocate`, log active count estimate (`m_nextSlot - freeList.size()`). Add ops note: 65536 slot cap per SessionManager instance. |
-| **Status** | pending |
+| **Status** | **done** |
 
 **R3 commit suggestion:** `fix(security): R3 backplane misconfig fail-closed (F-04)`
 
@@ -318,8 +318,8 @@
 | R2.1 | **done** | 2026-06-26 | `89cef60a` |
 | R2.2 | **done** | 2026-06-26 | `89cef60a` |
 | R2.3 | pending | | |
-| R3.1 | pending | | |
-| R3.2 | pending | | |
+| R3.1 | **done** | 2026-07-02 | TBD |
+| R3.2 | **done** | 2026-07-02 | TBD |
 | R4.1 | pending | | |
 | R4.2 | pending | | |
 | R5.1 | **done** | 2026-07-02 | `d16d375a` |
@@ -332,7 +332,7 @@
 
 ## Resume prompt (copy for agents)
 
-> Continue **Audit Remediation Plan** (`helper/network-tests/AUDIT_REMEDIATION_PLAN.md`). **R1–R2.2 + R5 complete.** Next: optional **R2.3** or **R3** (backplane PSK fail-closed) or **R4** (PM broadcast). Manual T0 required for R5 (especially Group restart / TP_SYNC_PLYLST). Deploy Gate+Group+Game together when touching sessions/ingress.
+> Continue **Audit Remediation Plan** (`helper/network-tests/AUDIT_REMEDIATION_PLAN.md`). **R1–R2.2 + R3 + R5 complete.** Next: optional **R2.3** or **R4** (PM broadcast) or **R6** (Phase 3 exit soak). Manual T0 required for R5 (especially Group restart / TP_SYNC_PLYLST). Deploy Gate+Group+Game together when touching sessions/ingress.
 
 ---
 
