@@ -903,9 +903,20 @@ WPacket GroupServerApp::TP_SYNC_PLYLST(DataSocket* datasock, RPacket& pk) {
 					l_retpk.WriteLongLong(reinterpret_cast<uintptr_t>(l_ply));
 
 					l_ply->m_gate = pServer;
-					l_ply->m_gtAddr = pk.ReverseReadLongLong();
 					l_ply->m_acctLoginID = pk.ReadLong();
 					l_ply->m_acctid = pk.ReadLong();
+					const uint32_t slot = static_cast<uint32_t>(pk.ReadLong());
+					const uint32_t generation = static_cast<uint32_t>(pk.ReadLong());
+					l_ply->m_gtAddr = pk.ReadLongLong();
+					const SessionHandle gateSession = SessionHandle::FromWire(slot, generation);
+					if (gateSession.IsValid()) {
+						BindPlayerSession(gateSession, l_ply);
+						LG("SessionManager", "TP_SYNC_PLYLST bound session slot=%u gen=%u player=%p gtAddr=%llX\n",
+						   gateSession.slot, gateSession.generation, l_ply, l_ply->m_gtAddr);
+					} else {
+						LG("SessionManager", "TP_SYNC_PLYLST: no session slot/gen for gtAddr=%llX acctLogin=%u (pointer-only restore)\n",
+						   l_ply->m_gtAddr, l_ply->m_acctLoginID);
+					}
 
 					l_ply->BeginRun();
 				} else {

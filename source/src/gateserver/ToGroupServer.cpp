@@ -36,9 +36,18 @@ int ConnectGroupServer::Process() {
 
 				int i = 0;
 				for (auto l_ply = g_gtsvr->m_plylst.GetNextItem(); l_ply; l_ply = g_gtsvr->m_plylst.GetNextItem()) {
-					pk.WriteLongLong(reinterpret_cast<uintptr_t>(l_ply)); // 64-bit player address
+					g_gtsvr->EnsurePlayerSession(l_ply);
 					pk.WriteLong(l_ply->m_loginID);
 					pk.WriteLong(l_ply->m_actid);
+					if (l_ply->m_sessionHandle.IsValid()) {
+						pk.WriteLong(l_ply->m_sessionHandle.slot);
+						pk.WriteLong(l_ply->m_sessionHandle.generation);
+					} else {
+						pk.WriteLong(0);
+						pk.WriteLong(0);
+						LG("SessionManager", "TP_SYNC_PLYLST: player %p dbid=%u missing session\n", l_ply, l_ply->m_dbid);
+					}
+					pk.WriteLongLong(reinterpret_cast<uintptr_t>(l_ply));
 
 					ply_array[i++] = l_ply;
 				}
@@ -63,7 +72,7 @@ int ConnectGroupServer::Process() {
 						// NOTE(Ogge): What is this? Investigate
 						for (int i = 0; i < num; i++) {
 							if (retpk.ReadShort() == 1) {
-								ply_array[i]->gp_addr = retpk.ReverseReadLongLong();
+								ply_array[i]->gp_addr = retpk.ReadLongLong();
 							}
 						}
 					}
