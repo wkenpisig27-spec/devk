@@ -375,15 +375,12 @@ WPacket GroupServerApp::OnServeCall(DataSocket* datasock, RPacket& pk) {
 		return TP_REGISTER(datasock, pk);
 	}
 
-	// SyncCall player trailer: Group player ptr + Gate player ptr (legacy, 16 bytes at tail).
-	uintptr_t l_plyptr = static_cast<uintptr_t>(pk.ReverseReadLongLong());
-	unsigned long long l_gtaddr = pk.ReverseReadLongLong();
-	Player* l_ply = ValidatePlayerPointer(l_plyptr, l_gtaddr, 0, true);
+	// SyncCall player trailer: session slot + generation + Group player ptr (16 bytes at tail).
+	Player* l_ply = ResolvePlayerFromGateTrailer(pk, l_cmd);
 
 	if (!l_ply) {
-		// Player pointer is invalid (stale, unregistered, or mismatched)
-		LG("Security", "OnServeCall CMD %d: Invalid player pointer 0x%llX from %s\n",
-		   l_cmd, static_cast<unsigned long long>(l_plyptr), datasock->GetPeerIP());
+		LG("Security", "OnServeCall CMD %d: Invalid player trailer from %s\n",
+		   l_cmd, datasock->GetPeerIP());
 		WPacket l_retpk = GetWPacket();
 		l_retpk.WriteShort(ERR_PT_KICKUSER);
 		return l_retpk;

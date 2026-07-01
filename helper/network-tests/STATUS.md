@@ -58,7 +58,7 @@ Track progress for autonomous refactoring. Update after each completed task.
 
 | Track | Task | Status | Notes |
 |-------|------|--------|-------|
-| A | M3 Session handles (slot + generation) | **in progress** | Phases 1–4 + revert done; **phase 5** (TP SyncCall full migration) pending — see below |
+| A | M3 Session handles (slot + generation) | **in progress** | Phases 1–3 + 5a–5e done; **5f–5g** pending (legacy cleanup + soak) |
 | B | M2 Bulk migration — Gate lifecycle (B1) | mostly done | SyncCall on comm thread covers login/BGNPLAY |
 | B | M2 Bulk migration — GameAppNet (B5) | **done** | batch 3: 35 handlers total (2026-06-27) |
 | B | M2 Bulk migration — CharacterPrl (B6) | **done** | 2026-06-27 — 112 handlers; legacy switch empty |
@@ -290,7 +290,7 @@ Reverse read on Game: gm_addr, generation, slot
 
 ### Track A — M3 session handles (phase 4, 2026-07-01) — **REVERTED for SyncCall**
 
-**Decision (2026-07-01):** TP SyncCall (login/char-select: `TP_BGNPLAY`, `TP_ENDPLAY`, `TP_USER_LOGOUT`, etc.) stays on the **legacy 16-byte pointer trailer** (`WriteLongLong(MakeULong(gate_ply))` + `WriteLongLong(gp_addr)`). Session trailers apply only to **in-game forwards** (`AppendInGameGroupTrailer` / `AppendInGameGameTrailer` on CP/MP/TM after enter-map).
+**Decision (2026-07-01):** TP SyncCall (login/char-select: `TP_BGNPLAY`, `TP_ENDPLAY`, `TP_USER_LOGOUT`, etc.) uses **session trailer** `{slot, generation, gp_addr}` after phase 5c/5d (same 16-byte layout as in-game CP/MP). Phase 4 legacy pointer trailer was the interim baseline between failed phase 4 attempt and 5a login bind.
 
 **Why reverted:** Phase 4 put session trailers on SyncCall while Gate still sent legacy bytes (or vice versa). Group `OnServeCall` misread legacy tail as `{gp_addr, gen, slot}` → `ValidatePlayerPointer` saw `expectedGtAddr=1` (generation) → **ERR_PT_KICKUSER (529)** on BGNPLAY. Logs: `Group REJECT cmd=2005 session slot=0 gen=1`, `gtAddr mismatch (expected=1, got=…)`, `OnServeCall CMD 2005: Invalid player trailer`.
 
@@ -345,9 +345,9 @@ slot = ReverseReadLong()
 |-----|------|--------|-----------------|
 | **5a** | **Group session bind at login** — on `TP_USER_LOGIN` success, read Gate session from request tail and `BindPlayerSession`; echo handle in response tail for Gate mirror | **done (2026-07-01)** | `GroupServerAppServ.cpp` (`TP_USER_LOGIN`), `ToClient.cpp` (login request/response parse) |
 | **5b** | **Gate login request trailer** — `AppendTpLoginRequestTrailer` (or inline): `{slot, gen}` before `{MakeULong(gate_ply)}`; keep `EnsurePlayerSession` before SyncCall | **done (2026-07-01)** | `GateServer.cpp`, `GateServer.h`, `ToClient.cpp` |
-| **5c** | **Migrate `AppendTpGroupSyncTrailer`** — write `{slot, gen, gp_addr}` (same helper body as `AppendInGameGroupTrailer`; consider merge/dedupe) | pending | `GateServer.cpp` |
-| **5d** | **Group `OnServeCall` session resolve** — replace legacy reverse-read + `syncCallLegacy=true` with `ResolvePlayerFromGateTrailer`-style session path; retain legacy fallback behind compile flag or one-release dual-read | pending | `GroupServerAppServ.cpp`, `GroupServerApp.h` |
-| **5e** | **Opcode sweep** — all SyncCall call sites use session trailer (see table below) | pending | `ToClient.cpp` |
+| **5c** | **Migrate `AppendTpGroupSyncTrailer`** — write `{slot, gen, gp_addr}` (same helper body as `AppendInGameGroupTrailer`; consider merge/dedupe) | **done (2026-07-01)** | `GateServer.cpp` |
+| **5d** | **Group `OnServeCall` session resolve** — replace legacy reverse-read + `syncCallLegacy=true` with `ResolvePlayerFromGateTrailer`-style session path; retain legacy fallback behind compile flag or one-release dual-read | **done (2026-07-01)** | `GroupServerAppServ.cpp`, `GroupServerApp.h` |
+| **5e** | **Opcode sweep** — all SyncCall call sites use session trailer (see table below) | **done (2026-07-01)** | `ToClient.cpp` (via `AppendTpGroupSyncTrailer`) |
 | **5f** | **Remove legacy SyncCall fallback** — drop pointer-only `ValidatePlayerPointer(..., syncCallLegacy=true)` path once soak clean | pending | `GroupServerAppServ.cpp` |
 | **5g** | **Docs + exit gate** — update this file + `PACKET_SYSTEM_REFACTOR.md`; T0 full lifecycle soak | pending | docs |
 
@@ -1047,4 +1047,4 @@ See last-smoke-result.txt for automated output.
 
 ## Resume prompt for next session
 
-> Continue Option B Phase 3. **Track A phase 5 next** — full TP SyncCall session migration (5a login bind → 5c trailer → 5d OnServeCall resolve); deploy gate+group atomically. Phase 4 legacy SyncCall is stable baseline. See `Track A — phase 5` in this file.
+> Continue Option B Phase 3. **Track A phase 5f–5g** — remove `syncCallLegacy` fallback, 30-min soak. Phases 5a–5e done (login bind + SyncCall session trailer). Deploy gate+group atomically.

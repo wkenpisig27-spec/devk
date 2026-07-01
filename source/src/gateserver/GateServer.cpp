@@ -533,14 +533,22 @@ bool GateServer::AppendInGameGameTrailer(WPacket& wpk, Player* ply, uShort cmdFo
 }
 
 bool GateServer::AppendTpGroupSyncTrailer(WPacket& wpk, Player* ply, uShort cmdForLog) {
-	// TP SyncCall (OnServeCall) uses legacy pointer trailer: gate ptr + Group player ptr.
-	// Session trailers apply to in-game SendData forwards (CP/MP), not SyncCall ServeCall.
+	// TP SyncCall uses the same session trailer as in-game Gate→Group forwards.
 	if (!ply || !ply->gp_addr) {
 		LG("SessionManager", "TP SyncCall REJECT cmd=%u: missing gp_addr player=%p\n",
 		   cmdForLog, ply);
 		return false;
 	}
-	wpk.WriteLongLong(MakeULong(ply));
+	if (!ply->m_sessionHandle.IsValid()) {
+		LG("SessionManager", "TP SyncCall REJECT cmd=%u: no valid session player=%p\n",
+		   cmdForLog, ply);
+		return false;
+	}
+	LG("SessionManager", "TP SyncCall cmd=%u session slot=%u gen=%u player=%p gp_addr=0x%llX\n",
+	   cmdForLog, ply->m_sessionHandle.slot, ply->m_sessionHandle.generation, ply,
+	   static_cast<unsigned long long>(ply->gp_addr));
+	wpk.WriteLong(ply->m_sessionHandle.slot);
+	wpk.WriteLong(ply->m_sessionHandle.generation);
 	wpk.WriteLongLong(ply->gp_addr);
 	return true;
 }
