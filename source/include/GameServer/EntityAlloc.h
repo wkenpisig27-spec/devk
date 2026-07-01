@@ -28,6 +28,25 @@
 #define defENTI_ALLOC_TYPE_ENTTRANSIT defENTI_ENTBASE(3)  // 传送类型事件实体
 #define defENTI_ALLOC_TYPE_ENTBERTH defENTI_ENTBASE(4)	  // 停泊类型事件实体
 
+// ---------------------------------------------------------------------------
+// Entity pool ownership invariants (entity-lifetime hardening baseline)
+//
+// Authoritative owner: CEntityAlloc / CPlayerAlloc (swap-and-pop CAlloc pools).
+// Entities are never deleted with delete; they are returned via Entity::Free() or
+// CPlayer::Free(), which call destroy(handleIndex) on the matching pool.
+//
+// Handle encoding: high byte selects pool (defENTI_ALLOC_TYPE_*). Low 24 bits are
+// the slot index passed to CAlloc::destroy(LONG lID). destroy(T*) delegates to
+// destroy(handleIndex) after verifying the object belongs to this pool.
+//
+// Cross-pool return is undefined behavior (e.g. CTalkNpc slot via m_ChaAlloc).
+// SubMap eyeshot/state grids and CGameApp::_PlayerIdx hold non-owning pointers;
+// deregister / DelPlayerIdx must happen before Free() recycles the slot.
+//
+// Destruction order: SubMap::GoOut (if in world) -> type-specific Finally() chain
+// -> pool slot marked free (SetHoldID(-1)). Do not use a pointer after Free().
+// ---------------------------------------------------------------------------
+
 template <class T>
 class CAlloc {
 public:
@@ -126,7 +145,16 @@ T* CAlloc<T>::alloc() {
 
 template <class T>
 void CAlloc<T>::destroy(T* pData) {
-	// 暂未实现，机制原因目前支持下面的接口
+	if (!pData) {
+		return;
+	}
+
+	const LONG lHandle = pData->GetHandle();
+	if ((lHandle & 0xff000000) != static_cast<LONG>(m_lFlag)) {
+		return;
+	}
+
+	destroy(lHandle & 0x00ffffff);
 }
 
 template <class T>

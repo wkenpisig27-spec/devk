@@ -277,7 +277,7 @@ typedef struct _MISSION_DATA {
 	WORD wParam5;
 	WORD wParam6;
 
-	void* pData; // 运行时临时数据
+	LONG lEntityHandle; // 运行时护送NPC实体池句柄；不持久化到数据库
 } MISSION_DATA, *PMISSION_DATA;
 
 typedef struct _MISSION_INFO {

@@ -1033,17 +1033,17 @@ void CGameApp::ReleaseGamePlayer(CPlayer* pPlayer) {
 			pCCha->SetPos(SSrcPos);
 		}
 
-		DelPlayerIdx(pPlayer->GetDBChaId());
+		const DWORD dbChaId = pPlayer->GetDBChaId();
+		DelPlayerIdx(dbChaId);
 		g_pGameApp->m_dwPlayerCnt--;
-		pPlayer->Free();
 
-		//////////////////////////////////////////////////////////////////////////
-		// 删除gate server对应的维护信息
+		// Gate list cleanup uses Next/Prev — must run before pool recycles this slot.
 		pPlayer->OnLogoff();
 		DELPLAYER(pPlayer);
-		//////////////////////////////////////////////////////////////////////////
 
-		LG("enter_map", "cha_id = %d, goout\n", pPlayer->GetDBChaId());
+		pPlayer->Free();
+
+		LG("enter_map", "cha_id = %d, goout\n", dbChaId);
 	}
 	T_E
 }

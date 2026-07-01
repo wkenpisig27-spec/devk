@@ -136,8 +136,35 @@ Entity* CEntityAlloc::GetEntity(int lID) {
 // 释放一个有效实体
 //=============================================================================
 void CEntityAlloc::ReturnEntity(int lID) {
-	T_B int lType = lID & 0xff000000;
-	int lEntiID = lID & 0x00ffffff;
+	T_B
+		const int lType = lID & 0xff000000;
+	const int lEntiID = lID & 0x00ffffff;
+
+	Entity* pEnt = GetEntity(lID);
+	if (pEnt) {
+		const int handleType = pEnt->GetHandle() & 0xff000000;
+		if (handleType != lType) {
+			LG("EntityAlloc", "ReturnEntity: handle type mismatch id=0x%08X entityHandle=0x%08X\n", lID, pEnt->GetHandle());
+			return;
+		}
+
+		if (lType == defENTI_ALLOC_TYPE_CHA) {
+			if (!pEnt->IsCharacter() || pEnt->IsNpc()) {
+				LG("EntityAlloc", "ReturnEntity: object is not a character-pool entity id=0x%08X\n", lID);
+				return;
+			}
+		} else if (lType == defENTI_ALLOC_TYPE_ITEM) {
+			if (!pEnt->IsItem()) {
+				LG("EntityAlloc", "ReturnEntity: object is not an item id=0x%08X\n", lID);
+				return;
+			}
+		} else if (lType == defENTI_ALLOC_TYPE_TNPC) {
+			if (!pEnt->IsNpc()) {
+				LG("EntityAlloc", "ReturnEntity: object is not a talk NPC id=0x%08X\n", lID);
+				return;
+			}
+		}
+	}
 
 	if (lType == defENTI_ALLOC_TYPE_CHA) {
 		return m_ChaAlloc.destroy(lEntiID);

@@ -483,10 +483,9 @@ void CCharacter::SwitchMap(SubMap* pCSrcMap, cChar* szTarMapName, Long lTarX, Lo
 			g_pGameApp->DelPlayerIdx(pPlayer->GetDBChaId());
 			g_pGameApp->m_dwPlayerCnt--;
 
-			pPlayer->Free();
-			// 删除gate server对应的维护信息
 			pPlayer->OnLogoff();
 			DELPLAYER(pPlayer);
+			pPlayer->Free();
 			// LG("enter_map", "结束进入地图\n\n");
 			LG("enter_map", "finish enter map\n\n");
 		}
