@@ -302,8 +302,7 @@ private:
 };
 
 inline CGameApp* GameServerApp::GetGameApp() const {
-	extern CGameApp* g_pGameApp;
-	return m_pGameApp ? m_pGameApp : g_pGameApp;
+	return m_pGameApp;
 }
 
 inline bool GameServerApp::BeginGetplayer(GateServer* gt) {

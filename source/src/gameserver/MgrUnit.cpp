@@ -326,8 +326,8 @@ void CMgrUnit::StateRun(unsigned int ulCurTick, SubMap* pCMap) {
 	} else if (m_pCChaCross && m_pCChaCross->m_pCEntity) {
 		pApp = m_pCChaCross->m_pCEntity->GetOwnerApp();
 	}
-	if (!pApp) {
-		pApp = g_pGameApp;
+	if (!pApp && pCMap) {
+		pApp = pCMap->GetOwnerApp();
 	}
 	for (char j = 0; j < chStateNum; j++) {
 		pSStateUnit = m_CSkillState.GetSStateByNum(chCount);

@@ -41,7 +41,7 @@ namespace BossTimer
     static CGameApp* g_pOwnerApp = nullptr;
 
     static CGameApp* OwnerApp() {
-        return g_pOwnerApp ? g_pOwnerApp : g_pGameApp;
+        return g_pOwnerApp;
     }
 
     //--------------------------------------------------------------------------
@@ -203,6 +203,11 @@ namespace BossTimer
     // Public API
     //--------------------------------------------------------------------------
 
+    void BindOwnerApp(CGameApp* pApp)
+    {
+        g_pOwnerApp = pApp;
+    }
+
     void Initialize()
     {
         if (g_Initialized)
@@ -217,8 +222,6 @@ namespace BossTimer
         LoadConfig();
         LoadState();
 
-        g_pOwnerApp = g_pGameApp;
-        
         g_Initialized = true;
         LG("BossTimer", "=== BossTimer Ready ===\n");
     }
@@ -582,7 +585,8 @@ namespace BossTimer
                ps.chaId, GetBossName(ps.chaId), ps.mapName.c_str(), ps.posX, ps.posY);
 
             bool spawned = false;
-            CMapRes* pMapRes = OwnerApp()->FindMapByName(ps.mapName.c_str());
+            CGameApp* pApp = OwnerApp();
+            CMapRes* pMapRes = pApp ? pApp->FindMapByName(ps.mapName.c_str()) : nullptr;
             if (pMapRes && pMapRes->IsOpen())
             {
                 SubMap* pSubMap = pMapRes->GetCopy(0);

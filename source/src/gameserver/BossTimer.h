@@ -10,6 +10,7 @@
 
 // Forward declarations
 class CCharacter;
+class CGameApp;
 class SubMap;
 
 namespace BossTimer
@@ -48,6 +49,9 @@ namespace BossTimer
         unsigned char status;         // 0 = Alive, 1 = Dead (respawning)
         unsigned int remainingSeconds;
     };
+
+    // Bind owning CGameApp (call from CGameApp ctor before Initialize).
+    void BindOwnerApp(CGameApp* pApp);
 
     // Initialize the system - call once at server startup BEFORE map loading
     void Initialize();

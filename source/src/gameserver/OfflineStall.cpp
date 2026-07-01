@@ -387,7 +387,7 @@ COfflineStallMgr& COfflineStallMgr::Instance() {
 }
 
 CGameApp* COfflineStallMgr::App() const {
-    return m_pOwnerApp ? m_pOwnerApp : g_pGameApp;
+    return m_pOwnerApp;
 }
 
 COfflineStallMgr::COfflineStallMgr()

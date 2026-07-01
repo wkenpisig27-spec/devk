@@ -303,6 +303,7 @@ CGameApp::CGameApp()
 	g_pGameApp = this;
 	g_StoreSystem.BindOwnerApp(this);
 	g_OfflineStallMgr.BindOwnerApp(this);
+	BossTimer::BindOwnerApp(this);
 	for (int i = 0; i < MAX_GATE; i++)
 		m_GatePlayer[i].pCPlayerL = 0;
 	for (int i = 0; i <= defMAX_SKILL_NO; i++)

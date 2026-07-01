@@ -295,8 +295,8 @@ void CStateCell::StateRun(unsigned int ulCurTick, SubMap* pCMap) {
 	} else if (m_pCChaCross && m_pCChaCross->m_pCCha) {
 		pApp = m_pCChaCross->m_pCCha->GetOwnerApp();
 	}
-	if (!pApp) {
-		pApp = g_pGameApp;
+	if (!pApp && pCMap) {
+		pApp = pCMap->GetOwnerApp();
 	}
 	m_CSkillState.BeginGetState();
 	while (pSStateUnit = m_CSkillState.GetNextState()) {

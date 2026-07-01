@@ -67,7 +67,7 @@ public:
 	bool IsRun(void) { return m_bIsRun; }
 
 	const char* GetName(void) { return m_pCMapRes->GetName(); }
-	CGameApp* GetOwnerApp() const { return m_pOwnerApp ? m_pOwnerApp : g_pGameApp; }
+	CGameApp* GetOwnerApp() const { return m_pOwnerApp; }
 
 	// pt返回在管理单元中的坐标.
 	Rect GetEyeshot(Point& pt) const;

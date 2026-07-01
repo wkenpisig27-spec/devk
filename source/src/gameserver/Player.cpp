@@ -157,20 +157,16 @@ void CPlayer::Finally() {
 void CPlayer::Free() {
 	T_B
 		CPlayerAlloc* pSpace = m_pPlySpace;
-		if (!pSpace && g_pGameApp) {
-			pSpace = g_pGameApp->m_pCPlySpace;
+		if (!pSpace) {
+			LG("Player", "Free: player handle=0x%08X has no owning pool\n", m_lHandle);
+			return;
 		}
-		if (pSpace) {
-			pSpace->ReturnPly(m_lHandle);
-		}
+		pSpace->ReturnPly(m_lHandle);
 	T_E
 }
 
 CGameApp* CPlayer::GetOwnerApp() const {
-	if (m_pPlySpace && m_pPlySpace->GetOwnerApp()) {
-		return m_pPlySpace->GetOwnerApp();
-	}
-	return g_pGameApp;
+	return m_pPlySpace ? m_pPlySpace->GetOwnerApp() : nullptr;
 }
 
 void CPlayer::SetIMP(int imp, bool sync) {
