@@ -1186,7 +1186,15 @@ void ToClient::CM_LOGIN(DataSocket* datasock, RPacket& recvbuf) {
 		l_wpk.WriteSequence((cChar*)plaintext.data(), plaintext.size());
 		l_wpk.WriteLong(inet_addr(datasock->GetPeerIP()));
 		l_wpk.WriteLongLong(MakeULong(l_ply)); // Gate player address for GroupServer
-		g_gtsvr->EnsurePlayerSession(l_ply);
+		if (!g_gtsvr->AppendTpLoginRequestTrailer(l_wpk, l_ply)) {
+			l_wpk = GetWPacket();
+			l_wpk.WriteCmd(CMD_MC_LOGIN);
+			l_wpk.WriteShort(ERR_MC_NETEXCP);
+			SendData(datasock, l_wpk);
+			LG("GateServer", "client: %s\tlogin error: session allocation failed\n", datasock->GetPeerIP());
+			Disconnect(datasock, 100, -31);
+			return;
+		}
 
 		RPacket l_rpk = l_gps->SyncCall(l_gps->get_datasock(), l_wpk, l_ulMilliseconds);
 		

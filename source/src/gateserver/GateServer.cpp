@@ -545,6 +545,22 @@ bool GateServer::AppendTpGroupSyncTrailer(WPacket& wpk, Player* ply, uShort cmdF
 	return true;
 }
 
+bool GateServer::AppendTpLoginRequestTrailer(WPacket& wpk, Player* ply) {
+	if (!ply) {
+		return false;
+	}
+	EnsurePlayerSession(ply);
+	if (!ply->m_sessionHandle.IsValid()) {
+		LG("SessionManager", "TP_USER_LOGIN REJECT: failed to allocate session player=%p\n", ply);
+		return false;
+	}
+	wpk.WriteLong(ply->m_sessionHandle.generation);
+	wpk.WriteLong(ply->m_sessionHandle.slot);
+	LG("SessionManager", "TP_USER_LOGIN request session slot=%u gen=%u player=%p\n",
+	   ply->m_sessionHandle.slot, ply->m_sessionHandle.generation, ply);
+	return true;
+}
+
 bool GateServer::IsPlayerRegistered(Player* ply) const {
 	if (!ply) return false;
 	

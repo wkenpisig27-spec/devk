@@ -1166,10 +1166,22 @@ WPacket GroupServerApp::TP_USER_LOGIN(DataSocket* datasock, RPacket& pk) {
 		g_gpsvr->RegisterPlayer(l_ply);
 
 		l_ply->m_gate = (GateServer*)datasock->GetPointer();
+		const uint32_t loginSessionSlot = static_cast<uint32_t>(pk.ReverseReadLong());
+		const uint32_t loginSessionGen = static_cast<uint32_t>(pk.ReverseReadLong());
 		l_ply->m_gtAddr = pk.ReverseReadLongLong();
 		in_addr l_ina;
 		l_ina.s_addr = pk.ReverseReadLong();
 		strcpy(l_ply->m_clientip, inet_ntoa(l_ina));
+
+		const SessionHandle gateSession = SessionHandle::FromWire(loginSessionSlot, loginSessionGen);
+		if (!gateSession.IsValid()) {
+			LG("SessionManager", "TP_USER_LOGIN REJECT: invalid session trailer from gate gtAddr=%llu\n",
+			   l_ply->m_gtAddr);
+			l_ply->Free();
+			l_retpk = GetWPacket();
+			l_retpk.WriteShort(ERR_PT_INERR);
+			return l_retpk;
+		}
 
 		// Read this stuff but ignore it, as the packet was duplicated.
 		//@to-do: add ReverseReadSequence/ReverseReadString.
@@ -1291,6 +1303,9 @@ WPacket GroupServerApp::TP_USER_LOGIN(DataSocket* datasock, RPacket& pk) {
 			}
 
 			l_ply->BeginRun();
+			BindPlayerSession(gateSession, l_ply);
+			LG("SessionManager", "TP_USER_LOGIN bound session slot=%u gen=%u player=%p acct=%s\n",
+			   gateSession.slot, gateSession.generation, l_ply, l_ply->m_acctname.c_str());
 			// AddPlayerToList(l_ply->m_chaid[l_ply->m_currcha], l_ply);
 			LG("GroupServer", "(%s):[%s]login success, \t nline/total:%d/%d\n", l_ply->m_clientip, l_ply->m_acctname.c_str(), m_plylst.GetTotal(), int(m_curChaNum));
 		}

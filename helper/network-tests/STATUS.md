@@ -343,8 +343,8 @@ slot = ReverseReadLong()
 
 | Sub | Task | Status | Files (primary) |
 |-----|------|--------|-----------------|
-| **5a** | **Group session bind at login** — on `TP_USER_LOGIN` success, read Gate session from request tail and `BindPlayerSession`; echo handle in response tail for Gate mirror | pending | `GroupServerAppServ.cpp` (`TP_USER_LOGIN`), `ToClient.cpp` (login request/response parse) |
-| **5b** | **Gate login request trailer** — `AppendTpLoginRequestTrailer` (or inline): `{slot, gen}` before `{MakeULong(gate_ply)}`; keep `EnsurePlayerSession` before SyncCall | pending | `GateServer.cpp`, `GateServer.h`, `ToClient.cpp` |
+| **5a** | **Group session bind at login** — on `TP_USER_LOGIN` success, read Gate session from request tail and `BindPlayerSession`; echo handle in response tail for Gate mirror | **done (2026-07-01)** | `GroupServerAppServ.cpp` (`TP_USER_LOGIN`), `ToClient.cpp` (login request/response parse) |
+| **5b** | **Gate login request trailer** — `AppendTpLoginRequestTrailer` (or inline): `{slot, gen}` before `{MakeULong(gate_ply)}`; keep `EnsurePlayerSession` before SyncCall | **done (2026-07-01)** | `GateServer.cpp`, `GateServer.h`, `ToClient.cpp` |
 | **5c** | **Migrate `AppendTpGroupSyncTrailer`** — write `{slot, gen, gp_addr}` (same helper body as `AppendInGameGroupTrailer`; consider merge/dedupe) | pending | `GateServer.cpp` |
 | **5d** | **Group `OnServeCall` session resolve** — replace legacy reverse-read + `syncCallLegacy=true` with `ResolvePlayerFromGateTrailer`-style session path; retain legacy fallback behind compile flag or one-release dual-read | pending | `GroupServerAppServ.cpp`, `GroupServerApp.h` |
 | **5e** | **Opcode sweep** — all SyncCall call sites use session trailer (see table below) | pending | `ToClient.cpp` |
