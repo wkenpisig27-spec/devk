@@ -230,14 +230,14 @@ Full detail with code paths was documented 2026-06-26. Summary by category:
 
 | Track | Goal | Priority | Key files |
 |-------|------|----------|-----------|
-| **A — M3** | Slot+generation session handles | High | `GateServer.cpp`, `GameAppNet.cpp`, `ToClient.cpp` |
+| **A — M3** | Slot+generation session handles | High | In-game done (phases 1–3); **phase 5:** TP SyncCall — `GateServer.cpp`, `GroupServerAppServ.cpp`, `ToClient.cpp` |
 | **B — M2** | Migrate GameServer `CharacterPrl.cpp` to registry | High | **Done** — 112 handlers |
 | **B — M2** | Migrate GameServer `GameAppNet.cpp` to registry | High | **Done** — 35 handlers |
 | **C — M6** | Zero-copy gate forward (drop `Duplicate()`) | Med | `ToClient.cpp` `ReRouteToGameServer` |
 | **D — M4** | Backplane PSK / mutual auth | High | `Comm.cpp`, `ToGameServer.cpp`, `ToGroupServer.cpp` |
 | **E — M5** | PacketReader rollout + opcode-table-driven validation | Med | All CM/CP handlers |
 
-**Suggested order:** **B6 done.** Next: **B5** (GameAppNet top-level ~14 cases) or **Track A** (M3 session handles).
+**Suggested order:** Tracks B, D, E largely done. **Next: Track A phase 5** (TP SyncCall session migration — see `helper/network-tests/STATUS.md`) or Phase 3 exit soak + Track C.
 
 ### Phase 4 — Long-term (after Phase 3 exit)
 
@@ -279,7 +279,7 @@ flowchart TD
 
 **Copy-paste for agents:**
 
-> Continue Option B / Phase-6. Phase 2 exit gate passed. Start Phase 3 Track B6 (CharacterPrl registry pilots) or Track A (M3 session handles). Read `docs/NETWORK_AUDIT.md` and `helper/network-tests/STATUS.md`. Wire format unchanged.
+> Continue Option B / Phase-6. Phase 3 in progress. **Track A phase 5 next** — full TP SyncCall session migration. Read `helper/network-tests/STATUS.md` (Track A phase 5) and `docs/PACKET_SYSTEM_REFACTOR.md`. Wire size unchanged (16-byte trailer).
 
 ---
 

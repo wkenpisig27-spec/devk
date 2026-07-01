@@ -613,9 +613,9 @@ GatePlayer* GameServerApp::ResolvePlayerFromGateTrailer(GateServer* pGate, RPack
 	}
 
 	const unsigned long long gmAddr = recvbuf.ReverseReadLongLong();
-	const SessionHandle gateSession = SessionHandle::FromWire(
-		static_cast<uint32_t>(recvbuf.ReverseReadLong()),
-		static_cast<uint32_t>(recvbuf.ReverseReadLong()));
+	const uint32_t generation = static_cast<uint32_t>(recvbuf.ReverseReadLong());
+	const uint32_t slot = static_cast<uint32_t>(recvbuf.ReverseReadLong());
+	const SessionHandle gateSession = SessionHandle::FromWire(slot, generation);
 
 	if (!gateSession.IsValid()) {
 		LG("SessionManager", "Game REJECT cmd=%u: invalid session trailer gmAddr=%llX\n",

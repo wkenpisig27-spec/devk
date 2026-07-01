@@ -532,6 +532,19 @@ bool GateServer::AppendInGameGameTrailer(WPacket& wpk, Player* ply, uShort cmdFo
 	return true;
 }
 
+bool GateServer::AppendTpGroupSyncTrailer(WPacket& wpk, Player* ply, uShort cmdForLog) {
+	// TP SyncCall (OnServeCall) uses legacy pointer trailer: gate ptr + Group player ptr.
+	// Session trailers apply to in-game SendData forwards (CP/MP), not SyncCall ServeCall.
+	if (!ply || !ply->gp_addr) {
+		LG("SessionManager", "TP SyncCall REJECT cmd=%u: missing gp_addr player=%p\n",
+		   cmdForLog, ply);
+		return false;
+	}
+	wpk.WriteLongLong(MakeULong(ply));
+	wpk.WriteLongLong(ply->gp_addr);
+	return true;
+}
+
 bool GateServer::IsPlayerRegistered(Player* ply) const {
 	if (!ply) return false;
 	

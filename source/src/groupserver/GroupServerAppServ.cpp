@@ -113,7 +113,7 @@ void GroupServerApp::UnregisterPlayer(Player* ply) {
 	}
 }
 
-Player* GroupServerApp::ValidatePlayerPointer(uintptr_t ptr, uint64_t expectedGtAddr, uint32_t generation) {
+Player* GroupServerApp::ValidatePlayerPointer(uintptr_t ptr, uint64_t expectedGtAddr, uint32_t generation, bool syncCallLegacy) {
 	if (ptr == 0) {
 		return nullptr;
 	}
@@ -141,7 +141,7 @@ Player* GroupServerApp::ValidatePlayerPointer(uintptr_t ptr, uint64_t expectedGt
 	Player* ply = reinterpret_cast<Player*>(ptr);
 	
 	try {
-		if (ply->GetSessionHandle().IsValid()) {
+		if (!syncCallLegacy && ply->GetSessionHandle().IsValid()) {
 			if (expectedGtAddr != 0 && ply->m_gtAddr != expectedGtAddr) {
 				LG("SessionManager", "Group INVALID: Player %p gtAddr mismatch (expected=%llu, got=%llu)\n",
 				   ply, expectedGtAddr, ply->m_gtAddr);
@@ -218,9 +218,9 @@ bool GroupServerApp::ValidatePlayerSession(Player* ply) const {
 
 Player* GroupServerApp::ResolvePlayerFromGateTrailer(RPacket& recvbuf, uShort cmd) {
 	const unsigned long long gpAddr = recvbuf.ReverseReadLongLong();
-	const SessionHandle gateSession = SessionHandle::FromWire(
-		static_cast<uint32_t>(recvbuf.ReverseReadLong()),
-		static_cast<uint32_t>(recvbuf.ReverseReadLong()));
+	const uint32_t generation = static_cast<uint32_t>(recvbuf.ReverseReadLong());
+	const uint32_t slot = static_cast<uint32_t>(recvbuf.ReverseReadLong());
+	const SessionHandle gateSession = SessionHandle::FromWire(slot, generation);
 
 	if (!gateSession.IsValid()) {
 		LG("SessionManager", "Group REJECT cmd=%u: invalid session trailer gpAddr=%llX\n",
@@ -375,13 +375,11 @@ WPacket GroupServerApp::OnServeCall(DataSocket* datasock, RPacket& pk) {
 		return TP_REGISTER(datasock, pk);
 	}
 
-	// Read player pointer and gate address from packet
+	// SyncCall player trailer: Group player ptr + Gate player ptr (legacy, 16 bytes at tail).
 	uintptr_t l_plyptr = static_cast<uintptr_t>(pk.ReverseReadLongLong());
 	unsigned long long l_gtaddr = pk.ReverseReadLongLong();
-	
-	// Use safe validation system to get player pointer
-	Player* l_ply = ValidatePlayerPointer(l_plyptr, l_gtaddr);
-	
+	Player* l_ply = ValidatePlayerPointer(l_plyptr, l_gtaddr, 0, true);
+
 	if (!l_ply) {
 		// Player pointer is invalid (stale, unregistered, or mismatched)
 		LG("Security", "OnServeCall CMD %d: Invalid player pointer 0x%llX from %s\n",

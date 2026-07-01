@@ -932,10 +932,10 @@ bool ToClient::OpcodeHandle_CmOfflineMode(void* ctx, DataSocket* datasock, RPack
 				if (gp_ds) {
 					WPacket l_wpk = g_gtsvr->gp_conn->GetWPacket();
 					l_wpk.WriteCmd(CMD_TP_USER_LOGOUT);
-					l_wpk.WriteLongLong(MakeULong(player));
-					l_wpk.WriteLongLong(player->gp_addr);
+					if (g_gtsvr->AppendTpGroupSyncTrailer(l_wpk, player, CMD_TP_USER_LOGOUT)) {
+						g_gtsvr->gp_conn->SyncCall(gp_ds, l_wpk, 10 * 1000);
+					}
 					player->gp_addr = 0;
-					g_gtsvr->gp_conn->SyncCall(gp_ds, l_wpk, 10 * 1000);
 				} else {
 					player->gp_addr = 0;
 				}
@@ -1185,7 +1185,8 @@ void ToClient::CM_LOGIN(DataSocket* datasock, RPacket& recvbuf) {
 		l_wpk.WriteCmd(CMD_TP_USER_LOGIN);
 		l_wpk.WriteSequence((cChar*)plaintext.data(), plaintext.size());
 		l_wpk.WriteLong(inet_addr(datasock->GetPeerIP()));
-		l_wpk.WriteLongLong(MakeULong(l_ply)); // 附加上在GateServer上的内存地址
+		l_wpk.WriteLongLong(MakeULong(l_ply)); // Gate player address for GroupServer
+		g_gtsvr->EnsurePlayerSession(l_ply);
 
 		RPacket l_rpk = l_gps->SyncCall(l_gps->get_datasock(), l_wpk, l_ulMilliseconds);
 		
@@ -1307,16 +1308,16 @@ WPacket ToClient::CM_LOGOUT(DataSocket* datasock, RPacket& recvbuf) {
 				l_ply->gm_addr = 0; // ��ֹ����ĵ�GameServer������
 			}
 
-			{ // ֪ͨGroupServer Logout
+			{ // notify GroupServer Logout
 				WPacket l_wpk = g_gtsvr->gp_conn->GetWPacket();
 				l_wpk.WriteCmd(CMD_TP_USER_LOGOUT);
-				l_wpk.WriteLongLong(MakeULong(l_ply));
-				l_wpk.WriteLongLong(l_ply->gp_addr);
-				l_ply->gp_addr = 0;
-				DataSocket* gp_ds = g_gtsvr->gp_conn->get_datasock();
-				if (gp_ds) {
-					l_retpk = g_gtsvr->gp_conn->SyncCall(gp_ds, l_wpk, l_ulMilliseconds);
+				if (g_gtsvr->AppendTpGroupSyncTrailer(l_wpk, l_ply, CMD_TP_USER_LOGOUT)) {
+					DataSocket* gp_ds = g_gtsvr->gp_conn->get_datasock();
+					if (gp_ds) {
+						l_retpk = g_gtsvr->gp_conn->SyncCall(gp_ds, l_wpk, l_ulMilliseconds);
+					}
 				}
+				l_ply->gp_addr = 0;
 			}
 		} catch (...) {
 			LG("GateServer", "Error exit!\n");
@@ -1355,8 +1356,14 @@ void ToClient::CM_BGNPLAY(DataSocket* datasock, RPacket& recvbuf) {
 				// 验证所玩角色合法性
 				WPacket l_wpk = WPacket(recvbuf).Duplicate();
 				l_wpk.WriteCmd(CMD_TP_BGNPLAY);
-				l_wpk.WriteLongLong(MakeULong(l_ply));
-				l_wpk.WriteLongLong(l_ply->gp_addr);
+				if (!g_gtsvr->AppendTpGroupSyncTrailer(l_wpk, l_ply, CMD_TP_BGNPLAY)) {
+					l_wpk = datasock->GetWPacket();
+					l_wpk.WriteCmd(CMD_MC_BGNPLAY);
+					l_wpk.WriteShort(ERR_MC_NETEXCP);
+					SendData(datasock, l_wpk);
+					l_lockStat.unlock();
+					return;
+				}
 				RPacket l_rpk = g_gtsvr->gp_conn->SyncCall(g_gtsvr->gp_conn->get_datasock(), l_wpk, l_ulMilliseconds);
 				uShort l_errno;
 				if (!l_rpk.HasData()) // 网络错误
@@ -1514,8 +1521,7 @@ void ToClient::CM_ENDPLAY(DataSocket* datasock, RPacket& recvbuf) {
 
 				l_wpk = WPacket(recvbuf).Duplicate();
 				l_wpk.WriteCmd(CMD_TP_ENDPLAY);
-				l_wpk.WriteLongLong(MakeULong(l_ply));
-				l_wpk.WriteLongLong(l_ply->gp_addr);
+				if (g_gtsvr->AppendTpGroupSyncTrailer(l_wpk, l_ply, CMD_TP_ENDPLAY)) {
 				LG("GateServer", "CMD_TP_ENDPLAY: l_ply=%p gp_addr=0x%llx\n", l_ply, (unsigned long long)l_ply->gp_addr);
 				l_wpk = g_gtsvr->gp_conn->SyncCall(g_gtsvr->gp_conn->get_datasock(), l_wpk, l_ulMilliseconds);
 				if (!l_wpk.HasData()) {
@@ -1541,6 +1547,7 @@ void ToClient::CM_ENDPLAY(DataSocket* datasock, RPacket& recvbuf) {
 						l_ply->m_worldid = 0;
 					}
 				}
+				}
 			}
 		}
 		l_lockStat.unlock();
@@ -1558,8 +1565,12 @@ void ToClient::CP_CHANGEPASS(DataSocket* datasock, RPacket& recvbuf) {
 			MutexArmor l_lockStat(l_ply->m_mtxstat);
 			WPacket l_wpk = WPacket(recvbuf).Duplicate();
 			l_wpk.WriteCmd(CMD_TP_CHANGEPASS);
-			l_wpk.WriteLongLong(MakeULong(l_ply));
-			l_wpk.WriteLongLong(l_ply->gp_addr);
+			if (!g_gtsvr->AppendTpGroupSyncTrailer(l_wpk, l_ply, CMD_TP_CHANGEPASS)) {
+				l_wpk = datasock->GetWPacket();
+				l_wpk.WriteCmd(CMD_MC_LOGIN);
+				l_wpk.WriteShort(ERR_MC_NETEXCP);
+				SendData(datasock, l_wpk);
+			} else {
 			l_wpk = g_gtsvr->gp_conn->SyncCall(g_gtsvr->gp_conn->get_datasock(), l_wpk, l_ulMilliseconds);
 			if (l_wpk.HasData()) {
 				SendData(datasock, l_wpk);
@@ -1569,6 +1580,7 @@ void ToClient::CP_CHANGEPASS(DataSocket* datasock, RPacket& recvbuf) {
 				l_wpk.WriteCmd(CMD_MC_LOGIN);
 				l_wpk.WriteShort(ERR_MC_NETEXCP);
 				SendData(datasock, l_wpk);
+			}
 			}
 			l_lockStat.unlock();
 		}
@@ -1588,8 +1600,13 @@ void ToClient::CM_REGISTER(DataSocket* datasock, RPacket& recvbuf) {
 			MutexArmor l_lockStat(l_ply->m_mtxstat);
 			WPacket l_wpk = WPacket(recvbuf).Duplicate();
 			l_wpk.WriteCmd(CMD_TP_REGISTER);
-			l_wpk.WriteLongLong(MakeULong(l_ply));
-			l_wpk.WriteLongLong(l_ply->gp_addr);
+			if (!g_gtsvr->AppendTpGroupSyncTrailer(l_wpk, l_ply, CMD_TP_REGISTER)) {
+				l_wpk = datasock->GetWPacket();
+				l_wpk.WriteCmd(CMD_MC_LOGIN);
+				l_wpk.WriteShort(ERR_MC_NETEXCP);
+				SendData(datasock, l_wpk);
+				Disconnect(datasock, 100, -25);
+			} else {
 			l_wpk = g_gtsvr->gp_conn->SyncCall(g_gtsvr->gp_conn->get_datasock(), l_wpk, l_ulMilliseconds);
 			if (l_wpk.HasData()) {
 				l_wpk.WriteCmd(CMD_PC_REGISTER);
@@ -1601,6 +1618,7 @@ void ToClient::CM_REGISTER(DataSocket* datasock, RPacket& recvbuf) {
 				l_wpk.WriteShort(ERR_MC_NETEXCP);
 				SendData(datasock, l_wpk);
 				Disconnect(datasock, 100, -25);
+			}
 			}
 		}
 	} else {
@@ -1638,8 +1656,13 @@ void ToClient::CM_NEWCHA(DataSocket* datasock, RPacket& recvbuf) {
 				// 调用GroupServer
 				WPacket l_wpk = WPacket(recvbuf).Duplicate();
 				l_wpk.WriteCmd(CMD_TP_NEWCHA);
-				l_wpk.WriteLongLong(MakeULong(l_ply));
-				l_wpk.WriteLongLong(l_ply->gp_addr); // 附带地址
+				if (!g_gtsvr->AppendTpGroupSyncTrailer(l_wpk, l_ply, CMD_TP_NEWCHA)) {
+					l_wpk = datasock->GetWPacket();
+					l_wpk.WriteCmd(CMD_MC_NEWCHA);
+					l_wpk.WriteShort(ERR_MC_NETEXCP);
+					SendData(datasock, l_wpk);
+					Disconnect(datasock, 100, -25);
+				} else {
 				l_wpk = g_gtsvr->gp_conn->SyncCall(g_gtsvr->gp_conn->get_datasock(), l_wpk, l_ulMilliseconds);
 				if (!l_wpk.HasData()) {
 					l_wpk = datasock->GetWPacket();
@@ -1654,6 +1677,7 @@ void ToClient::CM_NEWCHA(DataSocket* datasock, RPacket& recvbuf) {
 					if (RPacket(l_wpk).ReadShort() == ERR_PT_KICKUSER) {
 						Disconnect(datasock, 100, -25);
 					}
+				}
 				}
 			}
 			l_lockStat.unlock();
@@ -1698,8 +1722,13 @@ void ToClient::CM_DELCHA(DataSocket* datasock, RPacket& recvbuf) {
 				l_wpk.WriteCmd(CMD_TP_DELCHA);
 				l_wpk.WriteSequence(cha_name, cha_name_len);
 				l_wpk.WriteSequence((cChar*)password.data(), password.size());
-				l_wpk.WriteLongLong(MakeULong(l_ply));
-				l_wpk.WriteLongLong(l_ply->gp_addr); // ������ַ
+				if (!g_gtsvr->AppendTpGroupSyncTrailer(l_wpk, l_ply, CMD_TP_DELCHA)) {
+					l_wpk = datasock->GetWPacket();
+					l_wpk.WriteCmd(CMD_MC_DELCHA);
+					l_wpk.WriteShort(ERR_MC_NETEXCP);
+					SendData(datasock, l_wpk);
+					Disconnect(datasock, 100, -25);
+				} else {
 				l_wpk = g_gtsvr->gp_conn->SyncCall(g_gtsvr->gp_conn->get_datasock(), l_wpk, l_ulMilliseconds);
 				if (!l_wpk.HasData()) {
 					l_wpk = datasock->GetWPacket();
@@ -1714,6 +1743,7 @@ void ToClient::CM_DELCHA(DataSocket* datasock, RPacket& recvbuf) {
 					if (RPacket(l_wpk).ReadShort() == ERR_PT_KICKUSER) {
 						Disconnect(datasock, 100, -25);
 					}
+				}
 				}
 			}
 			l_lockStat.unlock();
@@ -1747,8 +1777,13 @@ void ToClient::CM_CREATE_PASSWORD2(DataSocket* datasock, RPacket& recvbuf) {
 				auto l_wpk = datasock->GetWPacket();
 				l_wpk.WriteCmd(CMD_TP_CREATE_PASSWORD2);
 				l_wpk.WriteSequence((cChar*)password.data(), password.size());
-				l_wpk.WriteLongLong(MakeULong(l_ply));
-				l_wpk.WriteLongLong(l_ply->gp_addr); // ������ַ
+				if (!g_gtsvr->AppendTpGroupSyncTrailer(l_wpk, l_ply, CMD_TP_CREATE_PASSWORD2)) {
+					l_wpk = datasock->GetWPacket();
+					l_wpk.WriteCmd(CMD_MC_CREATE_PASSWORD2);
+					l_wpk.WriteShort(ERR_MC_NETEXCP);
+					SendData(datasock, l_wpk);
+					Disconnect(datasock, 100, -25);
+				} else {
 				l_wpk = g_gtsvr->gp_conn->SyncCall(g_gtsvr->gp_conn->get_datasock(), l_wpk, l_ulMilliseconds);
 				if (!l_wpk.HasData()) {
 					l_wpk = datasock->GetWPacket();
@@ -1763,6 +1798,7 @@ void ToClient::CM_CREATE_PASSWORD2(DataSocket* datasock, RPacket& recvbuf) {
 					if (RPacket(l_wpk).ReadShort() == ERR_PT_KICKUSER) {
 						Disconnect(datasock, 100, -25);
 					}
+				}
 				}
 			}
 			l_lockStat.unlock();
@@ -1799,8 +1835,13 @@ void ToClient::CM_UPDATE_PASSWORD2(DataSocket* datasock, RPacket& recvbuf) {
 				l_wpk.WriteCmd(CMD_TP_UPDATE_PASSWORD2);
 				l_wpk.WriteSequence((cChar*)old_password.data(), old_password.size());
 				l_wpk.WriteSequence((cChar*)new_password.data(), new_password.size());
-				l_wpk.WriteLongLong(MakeULong(l_ply));
-				l_wpk.WriteLongLong(l_ply->gp_addr); // ������ַ
+				if (!g_gtsvr->AppendTpGroupSyncTrailer(l_wpk, l_ply, CMD_TP_UPDATE_PASSWORD2)) {
+					l_wpk = datasock->GetWPacket();
+					l_wpk.WriteCmd(CMD_MC_UPDATE_PASSWORD2);
+					l_wpk.WriteShort(ERR_MC_NETEXCP);
+					SendData(datasock, l_wpk);
+					Disconnect(datasock, 100, -25);
+				} else {
 				l_wpk = g_gtsvr->gp_conn->SyncCall(g_gtsvr->gp_conn->get_datasock(), l_wpk, l_ulMilliseconds);
 				if (!l_wpk.HasData()) {
 					l_wpk = datasock->GetWPacket();
@@ -1815,6 +1856,7 @@ void ToClient::CM_UPDATE_PASSWORD2(DataSocket* datasock, RPacket& recvbuf) {
 					if (RPacket(l_wpk).ReadShort() == ERR_PT_KICKUSER) {
 						Disconnect(datasock, 100, -25);
 					}
+				}
 				}
 			}
 			l_lockStat.unlock();

@@ -210,7 +210,7 @@ public:
 	//   ptr - The raw pointer value from the packet
 	//   expectedGtAddr - The expected GateServer address for validation
 	//   generation - The generation counter from when player was registered (optional, 0 to skip)
-	Player* ValidatePlayerPointer(uintptr_t ptr, uint64_t expectedGtAddr, uint32_t generation = 0);
+	Player* ValidatePlayerPointer(uintptr_t ptr, uint64_t expectedGtAddr, uint32_t generation = 0, bool syncCallLegacy = false);
 	Player* ResolvePlayerFromGateTrailer(RPacket& recvbuf, uShort cmd);
 	bool ValidatePlayerSession(Player* ply) const;
 	
