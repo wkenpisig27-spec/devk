@@ -23,7 +23,21 @@ We modernized a 2003-era `dbc` packet stack **without changing the on-wire proto
 | **Backplane PSK** | Plaintext inter-server TCP | Done (Track D) |
 | **OpcodeIngress + PacketReader** | Fail-closed ingress + typed reads | **Done** (Track E batches 1–10) |
 
-**Deferred:** Track C (zero-copy gate forwarding — negligible gain at current load).
+**Deferred:** None for Phase 3 core tracks.
+
+---
+
+## Track C — Gate forward without recv-buffer sharing (M6, 2026-07-01)
+
+**Problem:** `ReRouteToGameServer` / `ReRouteToGroupServer` used `WPacket(recvbuf).Duplicate()` then appended a 16-byte session trailer. `Duplicate()` allocated exactly `GetPktLen()` bytes, so each `WriteLong`/`WriteLongLong` often triggered a **grow + recopy** (up to 3 extra copies per forward).
+
+**Unsafe alternative (not done):** `WPacket(recvbuf)` without copy shares the receive `rbuf`; appending the trailer **mutates the live recv buffer**.
+
+**Solution:** `WPacket::ForwardFromReceive(rpk, NetLimits::kGateSessionTrailerBytes)` — one allocation sized `pktLen + 16`, one `MemCpy`, trailer append without realloc.
+
+**Scope:** In-game `ReRouteToGameServer` / `ReRouteToGroupServer` only. SyncCall paths (login, BGNPLAY) still use `Duplicate()` — they may change cmd/body and must not touch `recvbuf`.
+
+**Files:** `Packet.h/cpp`, `NetLimits.h`, `ToClient.cpp`
 
 ---
 
@@ -35,7 +49,7 @@ Understanding boundaries is as important as the new code:
 - **16-byte gate trailers** — still `{identity, addr}` = 8 + 8 bytes; identity field *meaning* changed internally (session slot/gen vs raw pointer) but **size and position are the same**.
 - **Login / char-select SyncCall path** — session trailers on all TP_* after login bind (Track A phase 5, 2026-07-01).
 - **Game logic thread model** — single `PKQueue` game thread preserved.
-- **Track C** — Gate still `Duplicate()`s packets on forward; not optimized yet.
+- **Track C** — ReRoute uses `ForwardFromReceive` (one alloc + one copy); SyncCall paths still `Duplicate()`.
 
 ---
 

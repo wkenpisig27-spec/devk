@@ -16,4 +16,7 @@ constexpr unsigned kGateMaxRecvBytesPerSec = 12 * 1024;
 constexpr unsigned kGateMaxRecvPktsPerSec = 500;
 constexpr unsigned kGateConnBlockMinutes = 1;
 constexpr size_t kGateMaxTrackedConnIps = 50000;
+
+// Gate→Game/Group session trailer: WriteLong(slot) + WriteLong(gen) + WriteLongLong(addr)
+constexpr unsigned kGateSessionTrailerBytes = 16;
 } // namespace NetLimits

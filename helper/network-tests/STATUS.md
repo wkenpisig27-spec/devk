@@ -62,7 +62,7 @@ Track progress for autonomous refactoring. Update after each completed task.
 | B | M2 Bulk migration — Gate lifecycle (B1) | mostly done | SyncCall on comm thread covers login/BGNPLAY |
 | B | M2 Bulk migration — GameAppNet (B5) | **done** | batch 3: 35 handlers total (2026-06-27) |
 | B | M2 Bulk migration — CharacterPrl (B6) | **done** | 2026-06-27 — 112 handlers; legacy switch empty |
-| C | M6 Zero-copy gate forwarding | pending | Drop `Duplicate()` in `ReRouteToGameServer` |
+| C | M6 Zero-copy gate forwarding | **done** | `WPacket::ForwardFromReceive` in ReRoute paths (2026-07-01) |
 | D | M4 Backplane PSK auth | **done** | 2026-06-27 — `BackplaneAuth` HMAC-SHA256; OS/SO opcodes 6510/7010 |
 | E | M5 PacketReader everywhere | **done** | Track E batch 10: ViewItemInfo PacketReader (2026-07-01) |
 
@@ -1049,4 +1049,4 @@ See last-smoke-result.txt for automated output.
 
 ## Resume prompt for next session
 
-> Continue Option B Phase 3. **Track A complete.** Next: Phase 3 exit soak (30 min) or Track C (zero-copy gate forward). Tracks B, D, E done.
+> Continue Option B Phase 3 exit. **Track C done.** Tracks A–E complete. Next: 30-min soak to close Phase 3.

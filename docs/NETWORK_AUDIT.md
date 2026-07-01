@@ -131,7 +131,7 @@ Full detail with code paths was documented 2026-06-26. Summary by category:
 
 | ID | Issue | Status |
 |----|-------|--------|
-| P1 | `Duplicate()` on every gate forward | Open — M6 |
+| P1 | `Duplicate()` + grow on every gate ReRoute forward | **Fixed** — M6 `ForwardFromReceive` (2026-07-01) |
 | P2 | WPacket grow loop | Open — low priority |
 | P3 | Global lock on player registry | Open — M3 |
 | P4 | Full socket list walk every 2 ms | Open — L1 |
@@ -233,7 +233,7 @@ Full detail with code paths was documented 2026-06-26. Summary by category:
 | **A — M3** | Slot+generation session handles | High | **Done** (phases 1–3 + phase 5 TP SyncCall, 2026-07-01) |
 | **B — M2** | Migrate GameServer `CharacterPrl.cpp` to registry | High | **Done** — 112 handlers |
 | **B — M2** | Migrate GameServer `GameAppNet.cpp` to registry | High | **Done** — 35 handlers |
-| **C — M6** | Zero-copy gate forward (drop `Duplicate()`) | Med | `ToClient.cpp` `ReRouteToGameServer` |
+| **C — M6** | Zero-copy gate forward (drop `Duplicate()` on ReRoute) | Med | **Done** — `ForwardFromReceive` in `ToClient.cpp` |
 | **D — M4** | Backplane PSK / mutual auth | High | `Comm.cpp`, `ToGameServer.cpp`, `ToGroupServer.cpp` |
 | **E — M5** | PacketReader rollout + opcode-table-driven validation | Med | All CM/CP handlers |
 

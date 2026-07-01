@@ -108,6 +108,27 @@ WPacket WPacket::Duplicate() const {
 	return l_ret;
 }
 //--------------------------------------------------------------------
+WPacket WPacket::ForwardFromReceive(const RPacket& rpk, uLong reserveTailBytes) {
+	WPacket src(rpk);
+	if (!src) {
+		return WPacket(nullptr);
+	}
+
+	const uLong pktLen = src.GetPktLen();
+	WPacket l_ret = src.__tca;
+	if (src.__tca) {
+		l_ret = __bufheap.Get(pktLen + reserveTailBytes);
+	}
+
+	l_ret.m_offset = 0;
+	l_ret.m_wpos = src.m_wpos;
+	l_ret.m_cpos = 0;
+	if (bool(src)) {
+		MemCpy(const_cast<char*>(l_ret.GetPktAddr()), src.GetPktAddr(), pktLen);
+	}
+	return l_ret;
+}
+//--------------------------------------------------------------------
 RPacket RPacket::Duplicate() const {
 	if (!bool(*this)) {
 		return RPacket(__tca);

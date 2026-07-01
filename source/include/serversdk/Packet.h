@@ -45,6 +45,9 @@ public:
 	WPacket& operator=(const RPacket& rpk);
 
 	WPacket Duplicate() const;
+	// Single-copy forward buffer with tail room for gate session trailer (Track C / M6).
+	// Does not share or mutate the receive buffer (unlike WPacket(RPacket) assignment).
+	static WPacket ForwardFromReceive(const RPacket& rpk, uLong reserveTailBytes);
 
 	bool WriteCmd(uShort cmd);
 	bool WriteChar(uChar ch);

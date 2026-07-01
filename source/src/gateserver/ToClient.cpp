@@ -695,7 +695,10 @@ void ToClient::ReRouteToGameServer(dbc::DataSocket* datasock, dbc::RPacket& recv
 				   m_lastRecvCmd, l_ply, l_ply->m_dbid);
 				return;
 			}
-			WPacket l_wpk = WPacket(recvbuf).Duplicate();
+			WPacket l_wpk = WPacket::ForwardFromReceive(recvbuf, NetLimits::kGateSessionTrailerBytes);
+			if (!l_wpk) {
+				return;
+			}
 			if (!g_gtsvr->AppendInGameGameTrailer(l_wpk, l_ply, m_lastRecvCmd)) {
 				return;
 			}
@@ -730,7 +733,10 @@ void ToClient::ReRouteToGroupServer(dbc::DataSocket* datasock, dbc::RPacket& rec
 			   m_lastRecvCmd, l_ply, l_ply->m_dbid);
 			return;
 		}
-		WPacket l_wpk = WPacket(recvbuf).Duplicate();
+		WPacket l_wpk = WPacket::ForwardFromReceive(recvbuf, NetLimits::kGateSessionTrailerBytes);
+		if (!l_wpk) {
+			return;
+		}
 		if (!g_gtsvr->AppendInGameGroupTrailer(l_wpk, l_ply, m_lastRecvCmd)) {
 			return;
 		}
