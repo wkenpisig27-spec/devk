@@ -266,15 +266,16 @@
 |-------|-------|
 | **Action** | Run stack 30 min with 1–2 clients: login, enter, move, skill, chat, party/guild PM, logout, re-login. |
 | **Log grep** | No `Invalid player trailer`, no `[reject]` storms, no `SessionManager REJECT` during normal play. |
-| **Update** | Mark Phase 3 exit gate **done** in `STATUS.md`. |
-| **Status** | pending |
+| **Checklist** | [`R6_SOAK_CHECKLIST.md`](R6_SOAK_CHECKLIST.md) |
+| **Update** | Mark Phase 3 exit gate **done** in `STATUS.md` after manual soak sign-off. |
+| **Status** | **pending user soak** — automated T0 PASS 2026-07-02 (`net-smoke.py`); 30-min manual soak not run |
 
 ### R6.2 — Release tag + audit closure note
 
 | Field | Value |
 |-------|-------|
 | **Action** | Tag commit; add `AUDIT_REMEDIATION_PLAN.md` closure section listing deferred R7 items. |
-| **Status** | pending |
+| **Status** | **done** | 2026-07-02 | tag `phase3-audit-remediation` |
 
 ---
 
@@ -320,19 +321,19 @@
 | R2.3 | pending | | |
 | R3.1 | **done** | 2026-07-02 | `3cbfa091` |
 | R3.2 | **done** | 2026-07-02 | `3cbfa091` |
-| R4.1 | **done** | 2026-07-02 | `cc484178` |
-| R4.2 | **done** | 2026-07-02 | `cc484178` |
+| R4.1 | **done** | 2026-07-02 | `ca5d2751` |
+| R4.2 | **done** | 2026-07-02 | `ca5d2751` |
 | R5.1 | **done** | 2026-07-02 | `d16d375a` |
 | R5.2 | **done** | 2026-07-02 | `2215d9de` |
 | R5.3 | **done** | 2026-07-02 | `f2b1d3db` |
-| R6.1 | pending | | |
-| R6.2 | pending | | |
+| R6.1 | **pending user soak** | 2026-07-02 | automated T0 PASS; manual 30-min soak — see [`R6_SOAK_CHECKLIST.md`](R6_SOAK_CHECKLIST.md) |
+| R6.2 | **done** | 2026-07-02 | tag `phase3-audit-remediation` |
 
 ---
 
 ## Resume prompt (copy for agents)
 
-> Continue **Audit Remediation Plan** (`helper/network-tests/AUDIT_REMEDIATION_PLAN.md`). **R1–R2.2 + R3 + R4 + R5 complete.** Next: optional **R2.3** or **R6** (Phase 3 exit soak). Manual T0 required for R5 (especially Group restart / TP_SYNC_PLYLST). Deploy Gate+Group+Game together when touching sessions/ingress.
+> **Phase 3 audit remediation R1–R5 complete; R6.2 tagged.** Manual **R6.1** 30-min soak pending user sign-off ([`R6_SOAK_CHECKLIST.md`](R6_SOAK_CHECKLIST.md)). Optional backlog: **R2.3** (Group ingress tighten), **R7.x** (see closure section). Maintenance mode — no mandatory remediation batches unless new audit findings.
 
 ---
 
@@ -358,3 +359,49 @@
 | F-16 READ_* in GameAppNet | R7.1 |
 | F-17 select/IOCP | R7.2 |
 | F-18 MC/MP MakePointer fan-out | R7.4 |
+
+---
+
+## Closure — Phase 3 audit remediation (2026-07-02)
+
+### Summary
+
+| Batch | Status | Key commits |
+|-------|--------|-------------|
+| **R1** Dead code cleanup | **done** | `ab0fe7d3` |
+| **R2.1–R2.2** Ingress fail-closed | **done** | `311a7cf4` |
+| **R2.3** Group ProcessData ingress (optional) | **deferred** | — |
+| **R3** Backplane + session ops | **done** | `3cbfa091` |
+| **R4** PM broadcast + Garner2 | **done** | `ca5d2751` |
+| **R5** Session model completion | **done** | `d16d375a` … `f2b1d3db` |
+| **R6.1** 30-min soak | **pending user soak** | automated T0 PASS 2026-07-02 |
+| **R6.2** Release tag + closure | **done** | tag `phase3-audit-remediation` |
+
+Principal audit findings F-01–F-15 addressed in R1–R5. F-16–F-18 deferred to R7 backlog.
+
+### Phase 3 exit criteria
+
+| Criterion | Status |
+|-----------|--------|
+| Legacy switches empty or assert-only | **met** (R1, B5/B6) |
+| Session handles primary on Gate→Group/Game paths | **met** (R5, Track A phase 5) |
+| Backplane auth in default configs | **met** (R3.1) |
+| 30-min soak clean | **pending** — user sign-off via [`R6_SOAK_CHECKLIST.md`](R6_SOAK_CHECKLIST.md) |
+
+**Automated T0 (2026-07-02):** `net-smoke.py` → T0-connect **PASS**, T0-ping **PASS** (`127.0.0.1:1973`).  
+**Log grep (2026-07-02):** No bad patterns in available logs; historical hits on 2026-07-01 pre–phase-5 revert window only.
+
+### R7 backlog (post Phase 3, optional)
+
+| ID | Audit ref | Task |
+|----|-----------|------|
+| R7.1 | F-16 | GameAppNet `READ_*` → PacketReader |
+| R7.2 | F-17 | IOCP transport (L1) |
+| R7.3 | F-09 | SyncCall `ForwardFromReceive` where safe |
+| R7.4 | F-18 | MC/MP fan-out session migration |
+| R7.5 | — | `CharacterCmd.cpp` READ_* migration |
+| R7.6 | — | Group `TP_USER_LOGIN` use Duplicate for Account SyncCall |
+
+### Deferred optional
+
+- **R2.3** — Group ProcessData ingress tighten (F-06 related); test Account login thoroughly before enabling.

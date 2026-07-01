@@ -68,7 +68,13 @@ Track progress for autonomous refactoring. Update after each completed task.
 | D | M4 Backplane PSK auth | **done** | 2026-06-27 — `BackplaneAuth` HMAC-SHA256; OS/SO opcodes 6510/7010 |
 | E | M5 PacketReader everywhere | **done** | Track E batch 10: ViewItemInfo PacketReader (2026-07-01) |
 
-**Phase 3 exit gate:** Legacy switches empty or assert-only; session handles primary; backplane auth in default configs; 30-min soak clean.
+**Phase 3 exit gate:** Legacy switches empty or assert-only; session handles primary; backplane auth in default configs; **30-min soak — pending user sign-off** ([`R6_SOAK_CHECKLIST.md`](R6_SOAK_CHECKLIST.md)).
+
+**R6 automated T0 (2026-07-02):** `net-smoke.py` → T0-connect **PASS**, T0-ping **PASS** (`127.0.0.1:1973`). Manual 30-min soak not run this session.
+
+**R6 log grep (available logs):** `server/LOG/**/2026-07-02` — no `Invalid player trailer`, `[OpcodeIngress] [reject]`, `SessionManager REJECT`, `PM broadcast reject`, `MP_ENTERMAP REJECT`, or `TM_ENTERMAP trailer too short`. Historical rejects on 2026-07-01 (pre–phase-5 SyncCall fix) and 2026-06-27 (crash window) only.
+
+**Audit remediation closure:** R1–R5 complete; tag `phase3-audit-remediation`. See [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md) closure section. Next: R7 backlog or maintenance mode.
 
 ### Track D — Backplane PSK auth (2026-06-27)
 
@@ -1040,6 +1046,7 @@ Blockers: none. **Track B5 complete** — both ProcessPacket and ProcessInterGam
 ## Last smoke test run
 
 ```
+2026-07-02 00:49:16 — T0-connect PASS, T0-ping PASS (127.0.0.1:1973) — R6 automated T0
 2026-06-26 15:48:13 — T0-connect PASS, T0-ping PASS (127.0.0.1:1973)
 2026-06-27 — T0-login, T0-enter, chat PASS (manual, post 665a8778)
 2026-07-01 — Track A phase 5 T0 PASS: login, BGNPLAY, enter map, ENDPLAY, char switch, logout/re-login
@@ -1050,4 +1057,4 @@ See last-smoke-result.txt for automated output.
 
 ## Resume prompt for next session
 
-> Continue **Audit Remediation** — read [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md). **R1–R2.2 + R3 + R4 + R5 complete.** Next: optional **R2.3** or **R6.1** (30-min soak + Phase 3 exit). **Manual T0 pending for R5:** login → enter → ENDPLAY → char switch; **Group restart soak** for TP_SYNC_PLYLST session restore. Deploy matched Gate+Group (+Game for R5.2) from same build.
+> **Phase 3 audit remediation R1–R5 complete; R6.2 tagged (`phase3-audit-remediation`).** Manual **R6.1** 30-min soak pending — follow [`R6_SOAK_CHECKLIST.md`](R6_SOAK_CHECKLIST.md), then mark Phase 3 exit gate done. Optional backlog: **R2.3**, **R7.x** ([`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md) closure section). Maintenance mode otherwise.
