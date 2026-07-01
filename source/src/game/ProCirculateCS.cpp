@@ -6,9 +6,11 @@
 #include "ChaAttr.h"
 #include "GameConfig.h"
 #include "util2.h"
+#include "algo.h"
 #include "LoginScene.h"
 #include "netprotocol.h"
 #include "AreaRecord.h"
+#include "Password2.h"
 
 using namespace std;
 #ifdef _TEST_CLIENT
@@ -179,8 +181,10 @@ void CProCirculateCS::BeginAction(CCharacter* pCha, DWORD type, void* param, CAc
 		}
 		case enumACTION_ITEM_UNLOCK: {
 			stNetUnlockItem* pUnlockItem = (stNetUnlockItem*)param;
+			char szMD5[33] = {0};
+			Password2::HashPassword2(pUnlockItem->szPwd, szMD5);
 			pk.WriteShort(pUnlockItem->sGridID);
-			pk.WriteString(pUnlockItem->szPwd);
+			pk.WriteString(szMD5);
 			pCNetIf->SendPacketMessage(pk);
 
 			LG(szLogName, "###Send(Unlock Item):\tTick:[%d]\n", GetTickCount());
@@ -465,13 +469,10 @@ void CProCirculate::NewCha2(const char* chaname, const char* birth, int type, in
 }
 
 void CProCirculate::DelCha(const char* cha, const char szPassword2[]) {
-	char szMD5[33] = {0};
-	md5string(szPassword2, szMD5);
-
 	WPacket pk = pCNetIf->GetWPacket();
 	pk.WriteCmd(CMD_CM_DELCHA);
 	pk.WriteString(cha);
-	WritePacketSequenceEncrypted(pk, pCNetIf->m_AESKey, (uint8_t*)szPassword2, strlen(szMD5) + 1);
+	Password2::AppendEncryptedPassword2(pk, pCNetIf->m_AESKey, szPassword2);
 	pCNetIf->SendPacketMessage(pk);
 }
 

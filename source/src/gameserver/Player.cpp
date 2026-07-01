@@ -44,6 +44,28 @@ CPlayer::CPlayer() : m_sGarnerWiner(0) {
 	T_E
 }
 
+void CPlayer::SetPassword(const char szPassword[]) {
+	if (!szPassword) {
+		m_szPassword[0] = '\0';
+		return;
+	}
+	strncpy(m_szPassword, szPassword, ROLE_MAXSIZE_PASSWORD2);
+	m_szPassword[ROLE_MAXSIZE_PASSWORD2] = '\0';
+}
+
+Password2VerifyResult CPlayer::VerifyPassword2(cChar* clientMd5) const {
+	if (!clientMd5 || clientMd5[0] == '\0') {
+		return Password2Verify_NoClientHash;
+	}
+	if (m_szPassword[0] == '\0') {
+		return Password2Verify_Ok;
+	}
+	if (strncmp(clientMd5, m_szPassword, 32) == 0) {
+		return Password2Verify_Ok;
+	}
+	return Password2Verify_Mismatch;
+}
+
 void CPlayer::Initially() {
 	T_B
 		bIsValid = true;
@@ -52,7 +74,7 @@ void CPlayer::Initially() {
 	m_chGMLev = 0;
 	_dwTeamLeaderID = 0;
 
-	m_szPassword[0] = 0;
+	memset(m_szPassword, 0, sizeof(m_szPassword));
 	m_dwDBActId = 0;
 	m_pCtrlCha = 0;
 	m_pMainCha = nullptr;

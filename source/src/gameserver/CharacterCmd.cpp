@@ -1544,11 +1544,7 @@ Short CCharacter::Cmd_LockItem(Char chPosType) {
 	T_E
 }
 
-#include "algo.h"
-
-// ... existing code ...
-
-Short CCharacter::Cmd_UnlockItem(Char chPosType, const char input_password[]) {
+Short CCharacter::Cmd_UnlockItemAtGrid(Char chPosType) {
 	T_B auto wpk = GETWPACKET();
 	WRITE_CMD(wpk, CMD_MC_ITEM_UNLOCK_ASR);
 	CCharacter* pMainCha = GetPlyMainCha();
@@ -1567,30 +1563,6 @@ Short CCharacter::Cmd_UnlockItem(Char chPosType, const char input_password[]) {
 		return enumITEMOPT_ERROR_KBLOCK;
 	}
 
-	if (!input_password) {
-		WRITE_CHAR(wpk, 0);
-		pMainCha->ReflectINFof(pMainCha, wpk);
-		return enumITEMOPT_ERROR_NOPASS;
-	}
-
-	CPlayer* pCply = pMainCha->GetPlayer();
-	cChar* database_password = pCply->GetPassword();
-	
-	bool password_match = false;
-	if (database_password && database_password[0] != '\0') {
-		// Database has a password (MD5 hash). Client sends MD5 hash, compare directly.
-		password_match = (strcmp(input_password, database_password) == 0);
-	} else {
-		// Database has no password. Input must be empty.
-		password_match = (input_password[0] == '\0');
-	}
-
-	if (!password_match) {
-		WRITE_CHAR(wpk, 2);
-		pMainCha->ReflectINFof(pMainCha, wpk);
-		return enumITEMOPT_ERROR_UNLOCK;
-	}
-
 	if (SItemGrid* item = pMainCha->m_CKitbag.GetGridContByID(chPosType); item) {
 		if (CItemRecord* pCItemRec = GetItemRecordInfo(item->sID); pCItemRec) {
 			if (CPlayer* pPlayer = pMainCha->GetPlayer(); pPlayer) {
@@ -1607,6 +1579,38 @@ Short CCharacter::Cmd_UnlockItem(Char chPosType, const char input_password[]) {
 	WRITE_CHAR(wpk, 0);
 	pMainCha->ReflectINFof(pMainCha, wpk);
 	return enumITEMOPT_ERROR_NONE;
+	T_E
+}
+
+Short CCharacter::Cmd_UnlockItem(Char chPosType, const char input_password[]) {
+	T_B auto wpk = GETWPACKET();
+	WRITE_CMD(wpk, CMD_MC_ITEM_UNLOCK_ASR);
+	CCharacter* pMainCha = GetPlyMainCha();
+
+	if (!pMainCha) {
+		return enumITEMOPT_ERROR_MAINCHA;
+	}
+
+	if (!input_password) {
+		WRITE_CHAR(wpk, 0);
+		pMainCha->ReflectINFof(pMainCha, wpk);
+		return enumITEMOPT_ERROR_NOPASS;
+	}
+
+	CPlayer* pCply = pMainCha->GetPlayer();
+	switch (pCply ? pCply->VerifyPassword2(input_password) : Password2Verify_Mismatch) {
+	case Password2Verify_Ok:
+		return Cmd_UnlockItemAtGrid(chPosType);
+	case Password2Verify_NoClientHash:
+		WRITE_CHAR(wpk, 0);
+		pMainCha->ReflectINFof(pMainCha, wpk);
+		return enumITEMOPT_ERROR_NOPASS;
+	case Password2Verify_Mismatch:
+	default:
+		WRITE_CHAR(wpk, 2);
+		pMainCha->ReflectINFof(pMainCha, wpk);
+		return enumITEMOPT_ERROR_UNLOCK;
+	}
 	T_E
 }
 
@@ -3345,12 +3349,11 @@ void CCharacter::Cmd_LockKitbag() {
 // ��������
 void CCharacter::Cmd_UnlockKitbag(const char szPassword[]) {
 	T_B
-		Char sState; // 0:δ���� 1:������
+		Char sState; // 0:未锁定 1:已锁定
 
 	CPlayer* pCply = GetPlayer();
-	cChar* szPwd2 = pCply->GetPassword();
 
-	if ((szPwd2[0] == 0) || (!strcmp(szPassword, szPwd2))) {
+	if (pCply && pCply->VerifyPassword2(szPassword) == Password2Verify_Ok) {
 		m_CKitbag.PwdUnlock();
 	}
 	sState = m_CKitbag.IsPwdLocked() ? 1 : 0;

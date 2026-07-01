@@ -5,6 +5,7 @@
 #include "Character.h"
 #include "actor.h"
 #include "procirculate.h"
+#include "Password2.h"
 
 #include "UIStoreForm.h"
 _DBC_USING
@@ -200,25 +201,22 @@ void CS_StallSearch(int ItemID) {
 
 // ������������
 void CS_CreatePassword2(const char szPassword[]) {
-	char szMD5[33];
-	md5string(szPassword, szMD5);
-
 	WPacket pk = g_NetIF->GetWPacket();
-	pk.WriteCmd(CMD_CM_CREATE_PASSWORD2); // 结束行动
-	WritePacketSequenceEncrypted(pk, g_NetIF->m_AESKey, (uint8_t*)szMD5, strlen(szMD5) + 1);
+	pk.WriteCmd(CMD_CM_CREATE_PASSWORD2);
+	Password2::AppendEncryptedPassword2(pk, g_NetIF->m_AESKey, szPassword);
 	g_NetIF->SendPacketMessage(pk);
 }
 
 void CS_UpdatePassword2(const char szOld[], const char szPassword[]) {
 	char szOldMD5[33] = {0};
 	char szNewMD5[33] = {0};
-	md5string(szOld, szOldMD5);
-	md5string(szPassword, szNewMD5);
+	Password2::HashPassword2(szOld, szOldMD5);
+	Password2::HashPassword2(szPassword, szNewMD5);
 
 	WPacket pk = g_NetIF->GetWPacket();
-	pk.WriteCmd(CMD_CM_UPDATE_PASSWORD2); // 结束行动
-	WritePacketSequenceEncrypted(pk, g_NetIF->m_AESKey, (uint8_t*)szOldMD5, strlen(szOldMD5) + 1);
-	WritePacketSequenceEncrypted(pk, g_NetIF->m_AESKey, (uint8_t*)szNewMD5, strlen(szNewMD5) + 1);
+	pk.WriteCmd(CMD_CM_UPDATE_PASSWORD2);
+	Password2::AppendEncryptedPassword2Md5(pk, g_NetIF->m_AESKey, szOldMD5);
+	Password2::AppendEncryptedPassword2Md5(pk, g_NetIF->m_AESKey, szNewMD5);
 	g_NetIF->SendPacketMessage(pk);
 }
 
@@ -232,12 +230,10 @@ void CS_LockKitbag() {
 
 // ��������
 void CS_UnlockKitbag(const char szPassword[]) {
-	char szMD5[33] = {0};
-	md5string(szPassword, szMD5);
 	WPacket pk = g_NetIF->GetWPacket();
 
 	pk.WriteCmd(CMD_CM_KITBAG_UNLOCK);
-	WritePacketSequenceEncrypted(pk, g_NetIF->m_AESKey, (uint8_t*)szMD5, strlen(szMD5) + 1);
+	Password2::AppendEncryptedPassword2(pk, g_NetIF->m_AESKey, szPassword);
 	g_NetIF->SendPacketMessage(pk);
 }
 
@@ -883,12 +879,9 @@ void CS_ItemForgeAsk(bool bSure, int nType, int arPacketPos[], int nPosCount) {
 
 // ���̳�
 void CS_StoreOpenAsk(const char szPassword[]) {
-	char szMD5[33] = {0};
-	md5string(szPassword, szMD5);
-
 	WPacket packet = g_NetIF->GetWPacket();
 	packet.WriteCmd(CMD_CM_STORE_OPEN_ASK);
-	WritePacketSequenceEncrypted(packet, g_NetIF->m_AESKey, (uint8_t*)szMD5, strlen(szMD5) + 1);
+	Password2::AppendEncryptedPassword2(packet, g_NetIF->m_AESKey, szPassword);
 	g_NetIF->SendPacketMessage(packet);
 }
 
@@ -1233,12 +1226,9 @@ void CS_DropLock(int slot) {
 }
 
 void CS_UnlockItem(const char szPassword[], int slot) {
-	char szMD5[33] = {0};
-	md5string(szPassword, szMD5);
-
 	WPacket pk = g_NetIF->GetWPacket();
 	pk.WriteCmd(CMD_CM_ITEM_UNLOCK_ASK);
-	WritePacketSequenceEncrypted(pk, g_NetIF->m_AESKey, (uint8_t*)szMD5, strlen(szMD5) + 1);
+	Password2::AppendEncryptedPassword2(pk, g_NetIF->m_AESKey, szPassword);
 	pk.WriteChar(slot);
 	g_NetIF->SendPacketMessage(pk);
 }
@@ -1246,7 +1236,7 @@ void CS_UnlockItem(const char szPassword[], int slot) {
 void CS_SendGameRequest(const char szPassword[]) {
 	WPacket pk = g_NetIF->GetWPacket();
 	pk.WriteCmd(CMD_CM_GAME_REQUEST_PIN);
-	pk.WriteString(szPassword);
+	Password2::AppendEncryptedPassword2(pk, g_NetIF->m_AESKey, szPassword);
 	g_NetIF->SendPacketMessage(pk);
 }
 

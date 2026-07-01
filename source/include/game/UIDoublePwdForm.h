@@ -52,7 +52,7 @@ public:
 	static const int STORE_OPEN_ASK = 3;   // 商城打开
 	static const int ITEM_UNLOCK = 4;	   // 道具解锁  ning.yan 2008-11-10
 	static const int MULTI_ITEM_UNLOCK = 5;
-	static const int SHOW_EXCHANGEFORM = 5;
+	static const int SHOW_EXCHANGEFORM = 6;
 
 protected:
 	virtual bool Init();

@@ -233,6 +233,7 @@
     <ClCompile Include="..\..\src\game\NetProtocol.cpp" />
     <ClCompile Include="..\..\src\game\NPCHelper.cpp" />
     <ClCompile Include="..\..\src\game\PacketCmd_CS.cpp" />
+    <ClCompile Include="..\..\src\game\Password2.cpp" />
     <ClCompile Include="..\..\src\game\PacketCmd_SC.cpp" />
     <ClCompile Include="..\..\src\game\PackFile.cpp" />
     <ClCompile Include="..\..\src\game\ProCirculateCC.cpp" />

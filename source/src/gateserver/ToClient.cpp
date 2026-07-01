@@ -14,6 +14,8 @@ using namespace std;
 #include <sstream>
 #include <algorithm>
 #include <vector>
+#include <functional>
+#include <string>
 
 // External function to log security events to terminal and log file
 extern void LogSecurityEvent(const char* ip, const char* action, const char* reason);
@@ -87,6 +89,7 @@ bool IsExplicitCmOpcode(uint16_t cmd) {
 		cmd == CMD_CM_KITBAG_UNLOCK ||
 		cmd == CMD_CM_STORE_OPEN_ASK ||
 		cmd == CMD_CM_ITEM_UNLOCK_ASK ||
+		cmd == CMD_CM_GAME_REQUEST_PIN ||
 		cmd == CMD_CM_ENDACTION ||
 		cmd == CMD_CM_BEGINACTION ||
 		cmd == CMD_CM_CHECK_PING ||
@@ -152,6 +155,7 @@ void RegisterAllToClientOpcodeHandlers() {
 	add(CMD_CM_KITBAG_UNLOCK, &ToClient::OpcodeHandle_CmKitbagUnlock, "CMD_CM_KITBAG_UNLOCK", 0);
 	add(CMD_CM_STORE_OPEN_ASK, &ToClient::OpcodeHandle_CmStoreOpenAsk, "CMD_CM_STORE_OPEN_ASK", 0);
 	add(CMD_CM_ITEM_UNLOCK_ASK, &ToClient::OpcodeHandle_CmItemUnlockAsk, "CMD_CM_ITEM_UNLOCK_ASK", 0);
+	add(CMD_CM_GAME_REQUEST_PIN, &ToClient::OpcodeHandle_CmGameRequestPin, "CMD_CM_GAME_REQUEST_PIN", 0);
 	add(CMD_CM_ENDACTION, &ToClient::OpcodeHandle_CmEndAction, "CMD_CM_ENDACTION", 0);
 	add(CMD_CM_OFFLINE_MODE, &ToClient::OpcodeHandle_CmOfflineMode, "CMD_CM_OFFLINE_MODE", 0);
 	add(CMD_CM_BEGINACTION, &ToClient::OpcodeHandle_RouteCmToGame, OpcodeName(CMD_CM_BEGINACTION), 5);
@@ -181,6 +185,46 @@ void RegisterAllToClientOpcodeHandlers() {
 	printf("ToClient opcode registry: %zu handlers\n", OpcodeHandlerCount(OpcodeDispatchDomain::Gate));
 }
 } // namespace
+
+bool ToClient::DecryptClientPassword2Md5(DataSocket* datasock, RPacket& recvbuf, std::string& outMd5) {
+	auto ply = (Player*)datasock->GetPointer();
+	if (!ply) {
+		return false;
+	}
+
+	const auto seq = ReadPacketSequenceEncrypted(recvbuf, ply->m_AESKey);
+	if (seq.empty()) {
+		return false;
+	}
+
+	outMd5.assign(reinterpret_cast<const char*>(seq.data()), seq.size());
+	const auto nullPos = outMd5.find('\0');
+	if (nullPos != std::string::npos) {
+		outMd5.resize(nullPos);
+	}
+	if (outMd5.size() > 32) {
+		outMd5.resize(32);
+	}
+	return !outMd5.empty();
+}
+
+bool ToClient::ForwardPassword2ToGame(
+	DataSocket* datasock,
+	RPacket& recvbuf,
+	uint16_t cmd,
+	const std::string& passwordMd5,
+	const std::function<void(net::PacketWriter&)>& trailingFields) {
+	WPacket l_wpk = GetWPacket();
+	net::PacketWriter wpk(l_wpk);
+	wpk.Cmd(cmd);
+	wpk.String(passwordMd5.c_str());
+	if (trailingFields) {
+		trailingFields(wpk);
+	}
+	recvbuf = l_wpk;
+	ReRouteToGameServer(datasock, recvbuf);
+	return true;
+}
 
 ToClient::ToClient(char const* fname, ThreadPool* proc, ThreadPool* comm)
 	: TcpServerApp(this, proc, comm, false), RPCMGR(this), m_maxcon(500), m_atexit(0), m_calltotal(0) {
@@ -803,59 +847,43 @@ bool ToClient::OpcodeHandle_CmSay(void* ctx, DataSocket* datasock, RPacket& recv
 
 bool ToClient::OpcodeHandle_CmKitbagUnlock(void* ctx, DataSocket* datasock, RPacket& recvbuf) {
 	ToClient* self = static_cast<ToClient*>(ctx);
-	auto ply = (Player*)datasock->GetPointer();
-	if (!ply) {
+	std::string passwordMd5;
+	if (!DecryptClientPassword2Md5(datasock, recvbuf, passwordMd5)) {
 		return true;
 	}
-
-	const auto seq = ReadPacketSequenceEncrypted(recvbuf, ply->m_AESKey);
-	WPacket wpk = self->GetWPacket();
-	net::PacketWriter writer(wpk);
-	writer.Cmd(CMD_CM_KITBAG_UNLOCK);
-	writer.Sequence(reinterpret_cast<cChar*>(seq.data()), static_cast<uShort>(seq.size()));
-	recvbuf = wpk;
-	self->ReRouteToGameServer(datasock, recvbuf);
-	return true;
+	return self->ForwardPassword2ToGame(datasock, recvbuf, CMD_CM_KITBAG_UNLOCK, passwordMd5);
 }
 
 bool ToClient::OpcodeHandle_CmStoreOpenAsk(void* ctx, DataSocket* datasock, RPacket& recvbuf) {
 	ToClient* self = static_cast<ToClient*>(ctx);
-	auto ply = (Player*)datasock->GetPointer();
-	if (!ply) {
+	std::string passwordMd5;
+	if (!DecryptClientPassword2Md5(datasock, recvbuf, passwordMd5)) {
 		return true;
 	}
+	return self->ForwardPassword2ToGame(datasock, recvbuf, CMD_CM_STORE_OPEN_ASK, passwordMd5);
+}
 
-	const auto seq = ReadPacketSequenceEncrypted(recvbuf, ply->m_AESKey);
-	WPacket wpk = self->GetWPacket();
-	net::PacketWriter writer(wpk);
-	writer.Cmd(CMD_CM_STORE_OPEN_ASK);
-	writer.Sequence(reinterpret_cast<cChar*>(seq.data()), static_cast<uShort>(seq.size()));
-	recvbuf = wpk;
-	self->ReRouteToGameServer(datasock, recvbuf);
-	return true;
+bool ToClient::OpcodeHandle_CmGameRequestPin(void* ctx, DataSocket* datasock, RPacket& recvbuf) {
+	ToClient* self = static_cast<ToClient*>(ctx);
+	std::string passwordMd5;
+	if (!DecryptClientPassword2Md5(datasock, recvbuf, passwordMd5)) {
+		return true;
+	}
+	return self->ForwardPassword2ToGame(datasock, recvbuf, CMD_CM_GAME_REQUEST_PIN, passwordMd5);
 }
 
 bool ToClient::OpcodeHandle_CmItemUnlockAsk(void* ctx, DataSocket* datasock, RPacket& recvbuf) {
 	ToClient* self = static_cast<ToClient*>(ctx);
-	auto ply = (Player*)datasock->GetPointer();
-	if (!ply) {
+	std::string passwordMd5;
+	if (!DecryptClientPassword2Md5(datasock, recvbuf, passwordMd5)) {
 		return true;
 	}
-
-	const auto seq = ReadPacketSequenceEncrypted(recvbuf, ply->m_AESKey);
-	WPacket l_wpk = self->GetWPacket();
-	net::PacketWriter wpk(l_wpk);
-	wpk.Cmd(CMD_CM_ITEM_UNLOCK_ASK);
-	wpk.Sequence((cChar*)seq.data(), static_cast<uShort>(seq.size()));
-	net::PacketReader reader(recvbuf);
-	uChar slot = 0;
-	if (!reader.Char(slot)) {
+	if (recvbuf.RemainData() < sizeof(uChar)) {
 		return true;
 	}
-	wpk.Char(slot);
-	recvbuf = l_wpk;
-	self->ReRouteToGameServer(datasock, recvbuf);
-	return true;
+	const uChar slot = recvbuf.ReadChar();
+	return self->ForwardPassword2ToGame(datasock, recvbuf, CMD_CM_ITEM_UNLOCK_ASK, passwordMd5,
+		[slot](net::PacketWriter& wpk) { wpk.Char(slot); });
 }
 
 bool ToClient::OpcodeHandle_CmEndAction(void* ctx, DataSocket* datasock, RPacket& recvbuf) {
@@ -1421,8 +1449,9 @@ void ToClient::CM_BGNPLAY(DataSocket* datasock, RPacket& recvbuf) {
 					memset(l_ply->m_password, 0, sizeof(l_ply->m_password));
 					cChar* l_pw2 = l_rpk.ReadString();
 					if (l_pw2) {
-						strncpy(l_ply->m_password, l_pw2, ROLE_MAXSIZE_PASSWORD2 - 1);
-						l_ply->m_password[ROLE_MAXSIZE_PASSWORD2 - 1] = '\0';
+						// MD5 is 32 hex chars; copy all ROLE_MAXSIZE_PASSWORD2 bytes (not -1).
+						strncpy(l_ply->m_password, l_pw2, ROLE_MAXSIZE_PASSWORD2);
+						l_ply->m_password[ROLE_MAXSIZE_PASSWORD2] = '\0';
 					}
 
 					l_ply->m_dbid = l_rpk.ReadLong();	 // 角色ID;

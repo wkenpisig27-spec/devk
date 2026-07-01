@@ -14,6 +14,8 @@
 #include <algo.h>
 #include <PacketEncryption.h>
 #include <memory>
+#include <functional>
+#include <string>
 #include <stdlib.h>
 #include <unordered_map>
 #include <unordered_set>
@@ -23,6 +25,10 @@
 #include "pi_Alloc.h"
 #include "NetRetCode.h"
 #include "common/NetLimits.h"
+
+namespace net {
+class PacketWriter;
+}
 #include "common/SessionHandle.h"
 #include "common/SessionManager.h"
 
@@ -98,11 +104,20 @@ private:
 	static bool OpcodeHandle_CmKitbagUnlock(void* ctx, DataSocket* datasock, RPacket& recvbuf);
 	static bool OpcodeHandle_CmStoreOpenAsk(void* ctx, DataSocket* datasock, RPacket& recvbuf);
 	static bool OpcodeHandle_CmItemUnlockAsk(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_CmGameRequestPin(void* ctx, DataSocket* datasock, RPacket& recvbuf);
 	static bool OpcodeHandle_CmEndAction(void* ctx, DataSocket* datasock, RPacket& recvbuf);
 	static bool OpcodeHandle_TransmitCall(void* ctx, DataSocket* datasock, RPacket& recvbuf);
 	static bool OpcodeHandle_CmOfflineMode(void* ctx, DataSocket* datasock, RPacket& recvbuf);
 	static bool OpcodeHandle_RouteCmToGame(void* ctx, DataSocket* datasock, RPacket& recvbuf);
 	static bool OpcodeHandle_RouteCpToGroup(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+
+	static bool DecryptClientPassword2Md5(DataSocket* datasock, RPacket& recvbuf, std::string& outMd5);
+	bool ForwardPassword2ToGame(
+		DataSocket* datasock,
+		RPacket& recvbuf,
+		uint16_t cmd,
+		const std::string& passwordMd5,
+		const std::function<void(net::PacketWriter&)>& trailingFields = {});
 
 	bool AllowConnectionRate(cChar* peerIp);
 	bool IsWhitelisted(cChar* peerIp) const;

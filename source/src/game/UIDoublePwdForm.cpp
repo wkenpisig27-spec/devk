@@ -218,10 +218,7 @@ void CDoublePwdMgr::ShowDoublePwdKeyboardForm() {
 void CDoublePwdMgr::SendDeleteCharactor() {
 	CSelectChaScene* pScene = dynamic_cast<CSelectChaScene*>(g_pGameApp->GetCurScene());
 
-	char szMD5[33] = {0};
-	md5string(g_stUIDoublePwd.edtDoublePwd->GetCaption(), szMD5);
-
-	pScene->SendDelChaToServer(szMD5);
+	pScene->SendDelChaToServer(g_stUIDoublePwd.edtDoublePwd->GetCaption());
 	CGameApp::Waiting();
 }
 
@@ -257,12 +254,10 @@ void CDoublePwdMgr::SendUnlockSelectedItems() {
 			continue;
 		}
 
-		stNetUnlockItem info;
-		info.sGridID = i;
-		info.szPwd = g_stUIDoublePwd.edtDoublePwd->GetCaption();
-		CS_BeginAction(g_stUIBoat.GetHuman(), enumACTION_ITEM_UNLOCK, &info);
+		CS_UnlockItem(g_stUIDoublePwd.edtDoublePwd->GetCaption(), i);
 	}
 	grid->ResetItemSelections();
+	g_stUIDoublePwd.CloseAllForm();
 }
 // end
 
@@ -449,6 +444,7 @@ void CDoublePwdMgr::_evtDoublePwdFromMouseEvent(CCompent* pSender, int nMsgType,
 
 		case MULTI_ITEM_UNLOCK:
 			g_stUIDoublePwd.SendUnlockSelectedItems();
+			break;
 
 		case MC_REQUEST:
 			g_stUIDoublePwd.SendGameRequest();

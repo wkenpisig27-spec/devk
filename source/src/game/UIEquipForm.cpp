@@ -533,7 +533,8 @@ bool CEquipMgr::Init() {
 				return;
 			}
 			if (selected == menu_string[3]) {
-				if (g_stUIEquip.GetGoodsGrid()->GetSelectedItemCount() == 1) {
+				// Right-click unlock uses rightClickItemIndex; allow 0 or 1 selected slots.
+				if (g_stUIEquip.GetGoodsGrid()->GetSelectedItemCount() <= 1) {
 					g_stUIDoublePwd.SetLockGridID(g_stUIEquip.rightClickItemIndex);
 					g_stUIDoublePwd.SetType(CDoublePwdMgr::ITEM_UNLOCK);
 					g_stUIDoublePwd.ShowDoublePwdForm();

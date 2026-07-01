@@ -32,6 +32,12 @@ class GateServer;
 #define ACT_NAME_LEN 64
 #define PLAYER_INVALID_FLAG 0xF0F0F0F0L
 
+enum Password2VerifyResult {
+	Password2Verify_Ok = 0,
+	Password2Verify_NoClientHash = 1,
+	Password2Verify_Mismatch = 2,
+};
+
 // NOTE(Ogge): This should describe a player as a entity
 class CPlayer : public GatePlayer, public mission::CCharMission {
 public:
@@ -47,8 +53,9 @@ public:
 
 	bool IsValidFlag() { return m_dwValidFlag == PLAYER_INVALID_FLAG; }
 
-	void SetPassword(const char szPassword[]) { strncpy(m_szPassword, szPassword, ROLE_MAXSIZE_PASSWORD2); }
-	const char* GetPassword() { return m_szPassword; }
+	void SetPassword(const char szPassword[]);
+	const char* GetPassword() const { return m_szPassword; }
+	Password2VerifyResult VerifyPassword2(cChar* clientMd5) const;
 
 	void Free();
 	void Initially();

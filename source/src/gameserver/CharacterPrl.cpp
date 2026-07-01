@@ -1701,9 +1701,8 @@ bool CCharacter::OpcodeHandle_CmStoreOpenAsk(void* ctx, DataSocket* /*sock*/, RP
 	pMainCha->ResetStoreTime();
 
 	CPlayer* pCply = pMainCha->GetPlayer();
-	cChar* szPwd2 = pCply->GetPassword();
 
-	if ((szPwd2[0] == 0) || (!strcmp(szPwd, szPwd2)) || g_Config.m_bInstantIGS) {
+	if (pCply && (pCply->VerifyPassword2(szPwd) == Password2Verify_Ok || g_Config.m_bInstantIGS)) {
 		pMainCha->SetStoreEnable(true);
 		HandleStoreOperate(cha, reader.Raw(), CMD_CM_STORE_OPEN_ASK);
 	} else {
@@ -1849,16 +1848,29 @@ bool CCharacter::OpcodeHandle_CmItemLockAsk(void* ctx, DataSocket* /*sock*/, RPa
 bool CCharacter::OpcodeHandle_CmItemUnlockAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	net::PacketReader reader(pk);
-	cChar* input_password = nullptr;
-	if (!reader.String(input_password)) {
+	cChar* szPwd = nullptr;
+	if (!reader.String(szPwd) || !szPwd) {
 		return true;
 	}
 	uChar chPosTypeRaw = 0;
 	if (!reader.Char(chPosTypeRaw)) {
 		return true;
 	}
-	if (CCharacter* pMainCha = cha->GetPlyMainCha(); pMainCha) {
-		pMainCha->Cmd_UnlockItem(static_cast<Char>(chPosTypeRaw), input_password);
+	CCharacter* pMainCha = cha->GetPlyMainCha();
+	if (!pMainCha) {
+		return true;
+	}
+
+	CPlayer* pCply = pMainCha->GetPlayer();
+	const Password2VerifyResult verify = pCply ? pCply->VerifyPassword2(szPwd) : Password2Verify_Mismatch;
+
+	if (pCply && (verify == Password2Verify_Ok || g_Config.m_bInstantIGS)) {
+		pMainCha->Cmd_UnlockItemAtGrid(static_cast<Char>(chPosTypeRaw));
+	} else {
+		WPACKET wpk = GETWPACKET();
+		WRITE_CMD(wpk, CMD_MC_ITEM_UNLOCK_ASR);
+		WRITE_CHAR(wpk, 2);
+		pMainCha->ReflectINFof(pMainCha, wpk);
 	}
 	return true;
 }
@@ -1884,8 +1896,7 @@ bool CCharacter::OpcodeHandle_CmGameRequestPin(void* ctx, DataSocket* /*sock*/, 
 	}
 
 	CPlayer* pCply = pMainCha->GetPlayer();
-	cChar* szPwd2 = pCply->GetPassword();
-	if ((szPwd2[0] == 0) || (!strcmp(szPwd, szPwd2))) {
+	if (pCply && pCply->VerifyPassword2(szPwd) == Password2Verify_Ok) {
 		g_CParser.DoString("HandlePinRequest", enumSCRIPT_RETURN_NUMBER, 1, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, cha, enumSCRIPT_PARAM_NUMBER, 1, cha->requestType, DOSTRING_PARAM_END);
 		if (!g_CParser.GetReturnNumber(0))
 			return true;

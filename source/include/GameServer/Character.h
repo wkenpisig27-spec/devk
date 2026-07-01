@@ -286,6 +286,7 @@ public:
 	dbc::Short Cmd_ThrowItem(dbc::Short sKbPage, dbc::Short sKbGrid, dbc::Short* psThrowNum, dbc::Long lPosX, dbc::Long lPosY, bool bRefresh = true, bool bForcible = false);
 	dbc::Short Cmd_LockItem(dbc::Char chPosType);
 	dbc::Short Cmd_UnlockItem(dbc::Char chPosType, const char input_password[]);
+	dbc::Short Cmd_UnlockItemAtGrid(dbc::Char chPosType);
 	dbc::Short Cmd_ItemSwitchPos(dbc::Short sKbPage, dbc::Short sSrcGrid, dbc::Short sSrcNum, dbc::Short sTarGrid);
 	dbc::Short Cmd_DelItem(dbc::Short sKbPage, dbc::Short sKbGrid, dbc::Short* psThrowNum, bool bRefresh = true, bool bForcible = false);
 	dbc::Short Cmd_BankOper(dbc::Char chSrcType, dbc::Short sSrcGridID, dbc::Short sSrcNum, dbc::Char chTarType, dbc::Short sTarGridID);

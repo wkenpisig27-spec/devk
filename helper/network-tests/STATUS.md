@@ -3,7 +3,7 @@
 Track progress for autonomous refactoring. Update after each completed task.
 
 **Current phase:** Phase 3 exit + **Audit remediation** (see [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md))  
-**Last updated:** 2026-07-02  
+**Last updated:** 2026-06-26  
 **Master audit:** [`docs/NETWORK_AUDIT.md`](../../docs/NETWORK_AUDIT.md)  
 **Refactor guide:** [`docs/PACKET_SYSTEM_REFACTOR.md`](../../docs/PACKET_SYSTEM_REFACTOR.md)
 
@@ -50,7 +50,19 @@ Track progress for autonomous refactoring. Update after each completed task.
 | M2-prep Handler registry + pilots | done | 2026-06-26 | Gate: PING, SAY, KITBAG_UNLOCK, etc. |
 | M2 ToClient full registry migration | done | 2026-06-26 | Bulk CM/CP route handlers |
 | **Production hotfixes** | done | 2026-06-27 | 32 KB client packet limits; SyncCall on comm thread (login, BGNPLAY); commit `665a8778` |
+| **Password2 / item unlock** | done | 2026-06-26 | Gate BGNPLAY stores full 32-char MD5; gate decrypts + forwards; GameServer `VerifyPassword2` (same as shop) |
 | **Phase 2 exit gate** | **done** | 2026-06-27 | T0-login + T0-enter + chat verified |
+
+### Password2 wire convention (2026-06-26)
+
+| Layer | Rule |
+|-------|------|
+| Client | `Password2::AppendEncryptedPassword2` — AES-CBC encrypted MD5 hex (32 chars) on CM opcodes |
+| Gate | `DecryptClientPassword2Md5` → `ForwardPassword2ToGame` (WriteString MD5 + trailing fields); no gate-side password reject for unlock |
+| Game | `CPlayer::VerifyPassword2` compares 32-char MD5; empty stored hash = no 2nd password set |
+| BGNPLAY | Copy `ROLE_MAXSIZE_PASSWORD2` (32) bytes into `Player::m_password`, not `ROLE_MAXSIZE_PASSWORD2 - 1` |
+
+**Affected CM opcodes:** `CMD_CM_ITEM_UNLOCK_ASK`, `CMD_CM_STORE_OPEN_ASK`, delete-char (GroupServer path).
 
 ---
 
