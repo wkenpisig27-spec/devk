@@ -37,7 +37,18 @@ Entity::Entity() : m_cat(0), m_ID(0) {
 
 void Entity::Free() {
 	T_B
-		g_pGameApp->m_pCEntSpace->ReturnEntity(m_lHandle);
+		if (g_pCSystemCha && IsCharacter() == g_pCSystemCha) {
+			LG("Entity", "Free ignored for g_pCSystemCha sentinel (handle=0x%08X)\n", m_lHandle);
+			return;
+		}
+
+		CEntityAlloc* pSpace = m_pEntSpace;
+		if (!pSpace && g_pGameApp) {
+			pSpace = g_pGameApp->m_pCEntSpace;
+		}
+		if (pSpace) {
+			pSpace->ReturnEntity(m_lHandle);
+		}
 	T_E
 }
 

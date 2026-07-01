@@ -773,7 +773,12 @@ extern bool g_bLogEntity;
 
 extern CGameApp* g_pGameApp;
 extern CItemRecordAttr* g_pCItemAttr;
-extern CCharacter* g_pCSystemCha;	 // 系统角色
+// g_pCSystemCha: process-lifetime sentinel character (not on any map).
+// Used as the "system caster" for AddSkillState, item spawns, weather, etc.
+// IsLiveingEntity / IsMapEntity / IsLifeEntity skip map/life checks when
+// pEnti->IsCharacter() == g_pCSystemCha. Never call Free() on it; Entity::Free
+// ignores the sentinel. Do not reuse this pattern for gameplay entities.
+extern CCharacter* g_pCSystemCha;
 extern SubMap* g_pScriptMap;		 // 脚本用初始化地图信息全局变量
 extern int g_lDeftMMaskLight;		 // 大地图默认照亮范围
 extern std::string g_strChaState[2]; // 0，存放主角色的技能状态。1，存放船的技能状态

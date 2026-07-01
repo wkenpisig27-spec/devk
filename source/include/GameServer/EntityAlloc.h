@@ -28,12 +28,16 @@
 #define defENTI_ALLOC_TYPE_ENTTRANSIT defENTI_ENTBASE(3)  // 传送类型事件实体
 #define defENTI_ALLOC_TYPE_ENTBERTH defENTI_ENTBASE(4)	  // 停泊类型事件实体
 
+class CEntityAlloc;
+
 // ---------------------------------------------------------------------------
 // Entity pool ownership invariants (entity-lifetime hardening baseline)
 //
 // Authoritative owner: CEntityAlloc / CPlayerAlloc (swap-and-pop CAlloc pools).
 // Entities are never deleted with delete; they are returned via Entity::Free() or
 // CPlayer::Free(), which call destroy(handleIndex) on the matching pool.
+// Each Entity stores its owning CEntityAlloc* (set at pool create) so Free()
+// does not require g_pGameApp.
 //
 // Handle encoding: high byte selects pool (defENTI_ALLOC_TYPE_*). Low 24 bits are
 // the slot index passed to CAlloc::destroy(LONG lID). destroy(T*) delegates to
@@ -67,6 +71,7 @@ public:
 
 	// 分配指定类型数据
 	bool create(LONG lSize, LONG lFlag = 0);
+	void bindEntSpace(CEntityAlloc* pSpace);
 	T* alloc();
 	void destroy(T* pData);
 	void destroy(LONG lID);
@@ -133,6 +138,13 @@ bool CAlloc<T>::create(LONG lSize, LONG lFlag) {
 	}
 
 	return true;
+}
+
+template <class T>
+void CAlloc<T>::bindEntSpace(CEntityAlloc* pSpace) {
+	for (LONG i = 0; i < m_lAllocSize; i++) {
+		m_pAlloc[i].SetEntSpace(pSpace);
+	}
 }
 
 template <class T>
@@ -259,6 +271,11 @@ public:
 	int getAllocCharacterNum() const { return m_ChaAlloc.getAllocSize(); }
 	int getAllocTalkNpcNum() const { return m_TalkNpcAlloc.getAllocSize(); }
 
+	void bindEntSpace(CEntityAlloc* pSpace) {
+		m_ChaAlloc.bindEntSpace(pSpace);
+		m_TalkNpcAlloc.bindEntSpace(pSpace);
+	}
+
 private:
 	CAlloc<CCharacter> m_ChaAlloc;
 	CAlloc<mission::CTalkNpc> m_TalkNpcAlloc;
@@ -299,6 +316,8 @@ public:
 	int GetAllocTNpcNum(void) { return m_CharPool.getAllocTalkNpcNum(); }
 
 private:
+	void bindEntSpace();
+
 	CCharacterPool m_CharPool;
 	typedef CAlloc<CItem> ITEM_ALLOC;
 	ITEM_ALLOC m_ItemAlloc;

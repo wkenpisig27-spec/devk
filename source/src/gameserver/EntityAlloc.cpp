@@ -130,7 +130,15 @@ CEntityAlloc::CEntityAlloc(int lChaNum, int lItemNum, int lTNpcNum) {
 	m_ItemAlloc.create(lItemNum, defENTI_ALLOC_TYPE_ITEM);
 	m_BerthAlloc.create(1000, defENTI_ALLOC_TYPE_ENTBERTH);
 	m_ResourceAlloc.create(1000, defENTI_ALLOC_TYPE_ENTRESOURCE);
+	bindEntSpace();
 	T_E
+}
+
+void CEntityAlloc::bindEntSpace() {
+	m_CharPool.bindEntSpace(this);
+	m_ItemAlloc.bindEntSpace(this);
+	m_BerthAlloc.bindEntSpace(this);
+	m_ResourceAlloc.bindEntSpace(this);
 }
 
 CEntityAlloc::~CEntityAlloc() {

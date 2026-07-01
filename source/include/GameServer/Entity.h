@@ -21,6 +21,7 @@ class CChaListNode;
 class SubMap;
 class CEyeshotCell;
 struct SSkillStateUnit;
+class CEntityAlloc;
 
 // using	namespace	GAME;
 
@@ -47,6 +48,9 @@ class CEventEntity;
 // CTalkNpc vs CCharacter: CTalkNpc inherits CCharacter but uses a separate
 // CTalkNpc pool (defENTI_ALLOC_TYPE_TNPC). CCharacterPool routes both kinds.
 // Long-term: unify pools with explicit type tag (Phase 6 epic).
+//
+// Teardown: Entity::Free() returns the slot via m_pEntSpace (bound at pool
+// create). Falls back to g_pGameApp->m_pCEntSpace only if unbound.
 // ---------------------------------------------------------------------------
 
 /**
@@ -61,6 +65,7 @@ class Entity {
 	friend class CAction;
 	friend class CFightAble;
 	friend class CGameApp;
+	friend class CEntityAlloc;
 	friend class CChaSpawn;
 	friend class CMapSwitchEntitySpawn;
 
@@ -177,6 +182,8 @@ public:
 protected:
 	Entity();
 
+	void SetEntSpace(CEntityAlloc* pSpace) { m_pEntSpace = pSpace; }
+
 	virtual void WritePK(WPACKET& wpk); // 写入玩家本身及其所有附加结构(如召唤兽等)的所有数据
 	virtual void ReadPK(RPACKET& rpk);	// 重构玩家本身及其所有附加结构(如召唤兽等)
 
@@ -244,6 +251,7 @@ public:
 
 	dbc::uShort m_usAreaAttr[2]; // 实体所在地表的区域属性，0表示之前的区域属性，1表示现在的，参见CompCommand.h的EAreaMask
 	dbc::uChar m_ucIslandID[2];	 // 实体所在地表的岛屿信息，0表示之前的岛屿信息，1表示现在的
+	CEntityAlloc* m_pEntSpace{nullptr};
 };
 
 extern void NotiPkToWorld(WPACKET chginf);

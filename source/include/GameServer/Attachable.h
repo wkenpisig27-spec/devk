@@ -18,7 +18,6 @@ class CPassengerMgr;
  *	Lark.li
  */
 class CAttachable : public Entity {
-	friend class CConjureMgr;
 	friend class CPassengerMgr;
 	friend class Entity;
 
@@ -42,9 +41,6 @@ protected:
 	CPassengerMgr* m_pCShip;
 
 private:
-	CAttachable* m_pCConjureLast;
-	CAttachable* m_pCConjureNext;
-
 	CAttachable* m_pCPassengerLast;
 	CAttachable* m_pCPassengerNext;
 };

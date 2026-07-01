@@ -24,10 +24,7 @@
 
 CAttachable::CAttachable() {
 	T_B
-		m_pCConjureLast = 0;
-	m_pCConjureNext = 0;
-
-	m_pCPassengerLast = 0;
+		m_pCPassengerLast = 0;
 	m_pCPassengerNext = 0;
 
 	m_pCPlayer = 0;
@@ -39,9 +36,6 @@ CAttachable::CAttachable() {
 void CAttachable::Initially() {
 	T_B
 	Entity::Initially();
-
-	m_pCConjureLast = 0;
-	m_pCConjureNext = 0;
 
 	m_pCPassengerLast = 0;
 	m_pCPassengerNext = 0;
