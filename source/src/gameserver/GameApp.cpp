@@ -309,8 +309,8 @@ CGameApp::CGameApp()
 	m_fGlobalExpRate = 1.0f;
 	ChaAttrMaxValInit(false);
 	
-	// Reserve space for fast lookup table
-	_PlayerIdxFast.reserve(1000);
+	// Reserve space for player DB index
+	_PlayerIdx.reserve(1000);
 	
 	T_E
 }
@@ -358,7 +358,7 @@ CGameApp::~CGameApp() {
 	}
 
 	m_vecVolunteerList.clear();
-	_PlayerIdxFast.clear();
+	_PlayerIdx.clear();
 	_PlayerIdxGen.clear();
 	T_E
 }

@@ -29,7 +29,6 @@
 
 // Performance optimization includes
 #include <unordered_map>
-#include <atomic>
 #include <thread>
 #include <mutex>
 
@@ -333,12 +332,8 @@ protected:
 	CLifeLvRecordSet* m_CLifeLvRecord;
 	CHairRecordSet* m_CHairRecord;
 
-	std::map<DWORD, CPlayer*> _PlayerIdx; // 从DB ID映射到Player指针
-	
-	// Performance optimizations: use unordered_map for O(1) lookups instead of std::map O(log n)
-	std::unordered_map<DWORD, CPlayer*> _PlayerIdxFast; // Fast lookup table
+	std::unordered_map<DWORD, CPlayer*> _PlayerIdx;     // DB character ID -> player (non-owning)
 	std::unordered_map<DWORD, uint32_t> _PlayerIdxGen;  // Generation at index registration
-	std::atomic<bool> _bUseFastLookup{true}; // Toggle for fast lookups
 
 	std::vector<SVolunteer> m_vecVolunteerList; // 志愿者列表
 
@@ -380,56 +375,28 @@ inline CMapRes* CGameApp::GetMap(int no) {
 
 inline void CGameApp::AddPlayerIdx(DWORD dwDBID, CPlayer* pPlayer) {
 	T_B
-	// Use both for compatibility, but unordered_map is much faster (O(1) vs O(log n))
 	_PlayerIdx[dwDBID] = pPlayer;
 	if (pPlayer) {
 		_PlayerIdxGen[dwDBID] = pPlayer->GetGeneration();
 	}
-	if (_bUseFastLookup.load()) {
-		_PlayerIdxFast[dwDBID] = pPlayer;
-	}
-	// LG("player_idx", "添加DB ID = %d对应的Player\n", dwDBID);
 	T_E
 }
 
 inline void CGameApp::DelPlayerIdx(DWORD dwDBID) {
 	T_B
-	// LG("player_idx", "清除DB ID = %d对应的Player\n", dwDBID);
-	
-	// Remove from fast lookup
-	if (_bUseFastLookup.load()) {
-		_PlayerIdxFast.erase(dwDBID);
-	}
+	_PlayerIdx.erase(dwDBID);
 	_PlayerIdxGen.erase(dwDBID);
-	
-	// Remove from standard map
-	std::map<DWORD, CPlayer*>::iterator it = _PlayerIdx.find(dwDBID);
-	if (it != _PlayerIdx.end()) {
-		_PlayerIdx.erase(it);
-	} else {
-		// LG("player_idx", "清除PlayerIdx的时候出现错误, DB ID = %d 没有发现索引\n", dwDBID);
-		LG("player_idx", "when delete PlayerIdx it appear error, DB ID = %d no find index\n", dwDBID);
-	}
-	// LG("player_idx", "Idx Size = %d\n\n", _PlayerIdx.size());
 	T_E
 }
 
 inline CPlayer* CGameApp::GetPlayerByDBID(DWORD dwDBID) {
 	T_B
-	CPlayer* pPlayer = nullptr;
-
-	if (_bUseFastLookup.load()) {
-		auto it = _PlayerIdxFast.find(dwDBID);
-		if (it != _PlayerIdxFast.end()) {
-			pPlayer = it->second;
-		}
-	} else {
-		auto it = _PlayerIdx.find(dwDBID);
-		if (it != _PlayerIdx.end()) {
-			pPlayer = it->second;
-		}
+	auto it = _PlayerIdx.find(dwDBID);
+	if (it == _PlayerIdx.end()) {
+		return nullptr;
 	}
 
+	CPlayer* pPlayer = it->second;
 	if (!pPlayer || !pPlayer->IsValid()) {
 		return nullptr;
 	}
@@ -457,17 +424,14 @@ inline CPlayer* CGameApp::GetPlayerByMainChaName(const char* sMainChaName) {
 	T_B if (!sMainChaName) {
 		return nullptr;
 	};
-	std::map<DWORD, CPlayer*>::iterator it = _PlayerIdx.begin();
-	while (it != _PlayerIdx.end()) {
-		if (it->second) {
-			if (it->second->GetMainCha()) {
-				if (!strcmp(it->second->GetMainCha()->GetName(), sMainChaName)) {
-					return it->second;
-				}
+	for (const auto& entry : _PlayerIdx) {
+		CPlayer* pPlayer = GetPlayerByDBID(entry.first);
+		if (pPlayer && pPlayer->GetMainCha()) {
+			if (!strcmp(pPlayer->GetMainCha()->GetName(), sMainChaName)) {
+				return pPlayer;
 			}
-		};
-		++it;
-	};
+		}
+	}
 	return nullptr;
 	T_E
 };

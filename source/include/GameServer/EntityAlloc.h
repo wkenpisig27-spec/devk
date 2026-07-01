@@ -40,7 +40,7 @@
 // destroy(handleIndex) after verifying the object belongs to this pool.
 //
 // Cross-pool return is undefined behavior (e.g. CTalkNpc slot via m_ChaAlloc).
-// SubMap eyeshot/state grids and CGameApp::_PlayerIdx hold non-owning pointers;
+// SubMap eyeshot/state grids and CGameApp player index hold non-owning pointers;
 // deregister / DelPlayerIdx must happen before Free() recycles the slot.
 //
 // Destruction order: SubMap::GoOut (if in world) -> type-specific Finally() chain
