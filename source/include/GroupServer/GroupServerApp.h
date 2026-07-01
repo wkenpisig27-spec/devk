@@ -222,6 +222,8 @@ public:
 	void FinalizePlayerPoolRelease(Player* ply);
 	bool ReleasePlayerToPool(Player* ply);
 	void DrainLivePlayers();
+	bool ReleaseGuildToPool(Guild* guild);
+	void DrainLiveGuilds();
 
 	SessionManager m_sessionManager;
 	void BindPlayerSession(SessionHandle handle, Player* ply);

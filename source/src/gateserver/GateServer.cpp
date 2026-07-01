@@ -306,6 +306,11 @@ bool Player::InitReference(dbc::DataSocket* datasock) {
 				if (l_ply) {
 					l_ply->m_datasock = nullptr;
 					datasock->SetPointer(nullptr);
+					if (g_gtsvr->IsPlayerRegistered(l_ply)) {
+						if (l_ply->EndRun()) {
+							g_gtsvr->ScheduleDeferredPlayerFree(l_ply);
+						}
+					}
 				}
 			} catch (...) {
 				LG("GateServer", RES_STRING(GS_GATESERVER_CPP_00014), datasock->GetPeerIP());

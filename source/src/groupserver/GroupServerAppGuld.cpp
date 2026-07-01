@@ -150,6 +150,7 @@ void GroupServerApp::MP_GUILD_DISBAND(Player* ply, DataSocket* datasock, RPacket
 		LG("Guild", "GroupServer guild data exception, please contact developer...\n");
 		return;
 	}
+	const uLong l_guildId = l_guild->m_id;
 	l_guild->m_leader = nullptr;
 	l_guild->m_leaderID = 0;
 
@@ -173,6 +174,13 @@ void GroupServerApp::MP_GUILD_DISBAND(Player* ply, DataSocket* datasock, RPacket
 	l.unlock();
 
 	SendToClient(l_plylst, l_plynum, l_wpk);
+
+	if (auto db = GetDB()) {
+		db->tblguilds->Disband(l_guildId);
+	}
+	if (!ReleaseGuildToPool(l_guild)) {
+		LG("GroupServer", "MP_GUILD_DISBAND: failed to release guild id=%u to pool\n", l_guildId);
+	}
 }
 void GroupServerApp::MP_GUILD_MOTTO(Player* ply, DataSocket* datasock, RPacket& pk) {
 	Guild* l_guild = ply->GetGuild();

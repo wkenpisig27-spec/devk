@@ -13,6 +13,7 @@
 #include "PacketSanitizer.h"
 #include "BackplaneAuth.h"
 #include "common/OpcodeIngress.h"
+#include <vector>
 
 using namespace std;
 
@@ -161,6 +162,35 @@ void GroupServerApp::DrainLivePlayers() {
 			ply->EndPlay(nullptr);
 			if (!ReleasePlayerToPool(ply)) {
 				LG("GroupServer", "DrainLivePlayers: failed to release player [%s]\n", ply->m_acctname.c_str());
+				break;
+			}
+		}
+	}
+}
+
+bool GroupServerApp::ReleaseGuildToPool(Guild* guild) {
+	if (!guild) {
+		return false;
+	}
+	if (!guild->EndRun()) {
+		LG("GroupServer", "ReleaseGuildToPool: EndRun failed for guild id=%u, skipping pool free\n", guild->m_id);
+		return false;
+	}
+	guild->Free();
+	return true;
+}
+
+void GroupServerApp::DrainLiveGuilds() {
+	for (;;) {
+		Guild* guild = nullptr;
+		{
+			RunChainGetArmor<Guild> l(m_gldlst);
+			guild = m_gldlst.GetNextItem();
+			if (!guild) {
+				break;
+			}
+			if (!ReleaseGuildToPool(guild)) {
+				LG("GroupServer", "DrainLiveGuilds: failed to release guild id=%u\n", guild->m_id);
 				break;
 			}
 		}
@@ -938,6 +968,8 @@ void GroupServerApp::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 // Add by lark.li 20081119 begin
 WPacket GroupServerApp::TP_SYNC_PLYLST(DataSocket* datasock, RPacket& pk) {
 	WPacket l_retpk = GetWPacket();
+	std::vector<Player*> restoredPlayers;
+	restoredPlayers.reserve(64);
 
 	m_mtxSyn.lock();
 
@@ -951,20 +983,20 @@ WPacket GroupServerApp::TP_SYNC_PLYLST(DataSocket* datasock, RPacket& pk) {
 
 			l_retpk.WriteShort((uShort)num);
 			for (int i = 0; i < (int)num; i++) {
-				Player* l_ply = g_gpsvr->m_plyheap.Get();
+				const uLong acctLoginId = pk.ReadLong();
+				const uLong acctId = pk.ReadLong();
+				const uint32_t slot = static_cast<uint32_t>(pk.ReadLong());
+				const uint32_t generation = static_cast<uint32_t>(pk.ReadLong());
+				const unsigned long long gtAddr = pk.ReadLongLong();
+
+				Player* l_ply = m_plyheap.Get();
 				if (l_ply) {
-					// Register player in validation registry immediately after allocation
-					g_gpsvr->RegisterPlayer(l_ply);
-					
-					l_retpk.WriteShort(1);
-					l_retpk.WriteLongLong(reinterpret_cast<uintptr_t>(l_ply));
+					RegisterPlayer(l_ply);
 
 					l_ply->m_gate = pServer;
-					l_ply->m_acctLoginID = pk.ReadLong();
-					l_ply->m_acctid = pk.ReadLong();
-					const uint32_t slot = static_cast<uint32_t>(pk.ReadLong());
-					const uint32_t generation = static_cast<uint32_t>(pk.ReadLong());
-					l_ply->m_gtAddr = pk.ReadLongLong();
+					l_ply->m_acctLoginID = acctLoginId;
+					l_ply->m_acctid = acctId;
+					l_ply->m_gtAddr = gtAddr;
 					const SessionHandle gateSession = SessionHandle::FromWire(slot, generation);
 					if (gateSession.IsValid()) {
 						BindPlayerSession(gateSession, l_ply);
@@ -975,14 +1007,30 @@ WPacket GroupServerApp::TP_SYNC_PLYLST(DataSocket* datasock, RPacket& pk) {
 						   l_ply->m_gtAddr, l_ply->m_acctLoginID);
 					}
 
-					l_ply->BeginRun();
+					if (l_ply->BeginRun()) {
+						restoredPlayers.push_back(l_ply);
+						l_retpk.WriteShort(1);
+						l_retpk.WriteLongLong(reinterpret_cast<uintptr_t>(l_ply));
+					} else {
+						LG("GroupServer", "TP_SYNC_PLYLST: BeginRun failed for acctLogin=%u\n", acctLoginId);
+						UnregisterPlayer(l_ply);
+						l_ply->Free();
+						l_retpk.WriteShort(0);
+					}
 				} else {
+					LG("GroupServer", "TP_SYNC_PLYLST: player pool exhausted for acctLogin=%u\n", acctLoginId);
 					l_retpk.WriteShort(0);
 				}
 			}
-		} else
+		} else {
 			l_retpk.WriteShort(ERR_PT_LOGFAIL);
+		}
 	} catch (...) {
+		for (Player* ply : restoredPlayers) {
+			ReleasePlayerToPool(ply);
+		}
+		restoredPlayers.clear();
+		l_retpk = GetWPacket();
 		l_retpk.WriteShort(ERR_PT_LOGFAIL);
 	}
 	m_mtxSyn.unlock();

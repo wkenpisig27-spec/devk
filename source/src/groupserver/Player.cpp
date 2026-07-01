@@ -166,13 +166,19 @@ void Player::EndPlay(DataSocket* datasock) {
 		}
 		{
 			auto db = g_gpsvr->GetDB();
+			const int chaId = m_chaid[m_currcha];
+			--(g_gpsvr->m_curChaNum);
+
+			if (db) {
+				db->tblcharaters->SetAddr(chaId, 0);
+			} else {
+				LG("GroupServer", "EndPlay: no DB for %s — SetAddr(0) not persisted for cha_id %d\n",
+				   m_chaname[m_currcha].c_str(), chaId);
+			}
+
 			if (!db) {
-				LG("GroupServer", "EndPlay: Failed to get DB connection for %s, skipping notifications\n", m_chaname[m_currcha].c_str());
-				--(g_gpsvr->m_curChaNum);
 				return;
 			}
-			db->tblcharaters->SetAddr(m_chaid[m_currcha], 0);
-			--(g_gpsvr->m_curChaNum);
 
 			// Friends offline notification
 			{

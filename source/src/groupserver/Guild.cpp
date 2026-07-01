@@ -98,6 +98,9 @@ void ChkGuild::Process() {
 					auto db = g_gpsvr->GetDB();
 					if (db) db->tblguilds->Disband(l_gld->m_id);
 				}
+					if (!g_gpsvr->ReleaseGuildToPool(l_gld)) {
+						LG("GroupServer", "ChkGuild: failed to release guild id=%u to pool\n", l_gld->m_id);
+					}
 				}
 			}
 		}
