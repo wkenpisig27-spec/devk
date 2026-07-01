@@ -5125,6 +5125,7 @@ bool CTableItem::UnlockItem(SItemGrid* sig, int iChaId) {
 // ============================================
 
 #include "OfflineStall.h"
+#include <memory>
 #include "Config.h"
 
 // Helper function to decode hex string to binary
@@ -5200,7 +5201,7 @@ bool CGameDB::LoadOfflineStalls(const char* szMapName, COfflineStallMgr* pMgr) {
 			continue;
 		}
 		
-		SOfflineStallInfo* pInfo = new SOfflineStallInfo();
+		auto pInfo = std::make_unique<SOfflineStallInfo>();
 		if (!pInfo) continue;
 		
 		// Parse columns in order from stored procedure:
@@ -5244,7 +5245,6 @@ bool CGameDB::LoadOfflineStalls(const char* szMapName, COfflineStallMgr* pMgr) {
 			if (decodedSize < minDataSize) {
 				LG("offline_stall", "WARNING: Item data too small! Decoded %zu bytes (byItemCount=%d, min=%zu). Skipping stall %u.\n",
 				   decodedSize, pInfo->byItemCount, minDataSize, pInfo->dwStallID);
-				delete pInfo;
 				continue;
 			}
 			
@@ -5253,9 +5253,8 @@ bool CGameDB::LoadOfflineStalls(const char* szMapName, COfflineStallMgr* pMgr) {
 			// already contains the implicit trailing zeros that ODBC stripped.
 			size_t fullDataSize = sizeof(SOfflineStallItem) * pInfo->byItemCount + 1 + sizeof(SSoldItemInfo) * OFFLINE_STALL_MAX_ITEMS;
 			if (fullDataSize > sizeof(itemDataBuf)) fullDataSize = sizeof(itemDataBuf);
-			if (!COfflineStallMgr::DeserializeStallItems(itemDataBuf, fullDataSize, pInfo->byItemCount, pInfo)) {
+			if (!COfflineStallMgr::DeserializeStallItems(itemDataBuf, fullDataSize, pInfo->byItemCount, pInfo.get())) {
 				LG("offline_stall", "WARNING: Failed to deserialize item data for stall %u. Skipping.\n", pInfo->dwStallID);
-				delete pInfo;
 				continue;
 			}
 			
@@ -5265,8 +5264,6 @@ bool CGameDB::LoadOfflineStalls(const char* szMapName, COfflineStallMgr* pMgr) {
 				if (pInfo->items[itemIdx].itemGrid.sID <= 0 || pInfo->items[itemIdx].itemGrid.sID > 10000) {
 					LG("offline_stall", "WARNING: Invalid item ID %d at index %d in stall %u, skipping entire stall\n",
 					   pInfo->items[itemIdx].itemGrid.sID, itemIdx, pInfo->dwStallID);
-					delete pInfo;
-					pInfo = nullptr;
 					bValid = false;
 					break;
 				}
@@ -5318,19 +5315,18 @@ bool CGameDB::LoadOfflineStalls(const char* szMapName, COfflineStallMgr* pMgr) {
 			pInfo->sAngle = (short)atoi(row[19].c_str());
 		}
 		
-		// Initialize runtime state
-		pInfo->pVirtualNPC = nullptr;
+		// Initialize runtime state (pVirtualNPC default-constructed null)
 		pInfo->dwWorldID = 0;
 		pInfo->bActive = false;
 		
 		// Add to manager
 		LG("offline_stall", "Adding stall: ID=%u, Name=%s, Map=%s, Items=%d\n",
 			pInfo->dwStallID, pInfo->szChaName, pInfo->szMapName, pInfo->byItemCount);
-		if (pMgr->AddLoadedStall(pInfo)) {
+		DWORD dwStallID = pInfo->dwStallID;
+		if (pMgr->AddLoadedStall(std::move(pInfo))) {
 			rowCount++;
 		} else {
-			LG("offline_stall", "FAILED to add stall ID %u\n", pInfo->dwStallID);
-			delete pInfo;
+			LG("offline_stall", "FAILED to add stall ID %u\n", dwStallID);
 		}
 	}
 	

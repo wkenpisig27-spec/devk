@@ -135,7 +135,6 @@ void COfflineStallNPC::Initialize(SOfflineStallInfo* pStallInfo) {
 
 void COfflineStallNPC::Cleanup() {
     if (m_pStallInfo) {
-        m_pStallInfo->pVirtualNPC = nullptr;
         m_pStallInfo->bActive = false;
         m_pStallInfo = nullptr;
     }
@@ -417,11 +416,9 @@ bool COfflineStallMgr::Initialize() {
 void COfflineStallMgr::Shutdown() {
     LG("offline_stall", "Shutting down Offline Stall Manager...\n");
     
-    // Remove all virtual NPCs
     for (auto& pair : m_mapStalls) {
         if (pair.second) {
-            RemoveVirtualNPC(pair.second);
-            delete pair.second;
+            RemoveVirtualNPC(pair.second.get());
         }
     }
     
@@ -588,7 +585,7 @@ bool COfflineStallMgr::CreateOfflineStall(CPlayer* pPlayer, CCharacter* pStaller
        pStaller->GetName(), dwStallID, itemCount, g_Config.m_dwStallTime);
     
     // Create in-memory stall info structure
-    SOfflineStallInfo* pInfo = new SOfflineStallInfo();
+    auto pInfo = std::make_unique<SOfflineStallInfo>();
     if (!pInfo) {
         LG("offline_stall", "Failed to allocate stall info for %s\n", pStaller->GetName());
         return false;
@@ -613,9 +610,9 @@ bool COfflineStallMgr::CreateOfflineStall(CPlayer* pPlayer, CCharacter* pStaller
     pInfo->llLastSaleGold = 0;
     pInfo->tCreated = time(nullptr);
     pInfo->tExpire = pInfo->tCreated + (g_Config.m_dwStallTime * 3600);  // Hours to seconds
-    pInfo->bActive = true;
+    pInfo->bActive = false;
     pInfo->bMapNotFound = false;
-    pInfo->pVirtualNPC = nullptr;
+    pInfo->pVirtualNPC.reset();
     pInfo->dwWorldID = 0;
     pInfo->bySoldCount = 0;  // No items sold yet
     memset(pInfo->soldItems, 0, sizeof(pInfo->soldItems));
@@ -628,16 +625,15 @@ bool COfflineStallMgr::CreateOfflineStall(CPlayer* pPlayer, CCharacter* pStaller
     memcpy(pInfo->items, tempItems, sizeof(SOfflineStallItem) * itemCount);
     
     // Add to tracking maps
-    m_mapStalls[dwStallID] = pInfo;
+    m_mapStalls[dwStallID] = std::move(pInfo);
     m_mapOwnerToStall[dwChaID] = dwStallID;
     
     // DON'T create the virtual NPC immediately! The player is still in the game at that position.
     // Mark as inactive - the NPC will be created automatically when the player disconnects.
-    // See OnPlayerDisconnect() which will detect pending stalls and create NPCs safely.
-    pInfo->bActive = false;  // Will be set to true when NPC spawns
+    // See Update() which detects pending stalls and creates NPCs safely.
     
     LG("offline_stall", "Created offline stall for %s (stall_id: %u). Virtual NPC will spawn after player disconnects.\n",
-       pInfo->szChaName, dwStallID);
+       m_mapStalls[dwStallID]->szChaName, dwStallID);
     
     return true;
 }
@@ -662,7 +658,7 @@ __int64 COfflineStallMgr::RemoveOfflineStall(DWORD dwChaID, SSoldItemInfo* pSold
     __int64 llPendingGold = 0;
     
     if (itStall != m_mapStalls.end() && itStall->second) {
-        SOfflineStallInfo* pInfo = itStall->second;
+        SOfflineStallInfo* pInfo = itStall->second.get();
         llPendingGold = pInfo->llPendingGold;
         
         // Copy sold items info BEFORE deleting the stall
@@ -676,15 +672,9 @@ __int64 COfflineStallMgr::RemoveOfflineStall(DWORD dwChaID, SSoldItemInfo* pSold
         // Remove virtual NPC from world
         RemoveVirtualNPC(pInfo);
         
-        // Remove from world ID map
-        if (pInfo->dwWorldID != 0) {
-            m_mapWorldIDToNPC.erase(pInfo->dwWorldID);
-        }
-        
         LG("offline_stall", "Removed offline stall for cha_id %u (pending gold: %lld, sold items: %d)\n",
            dwChaID, llPendingGold, pInfo->bySoldCount);
         
-        delete pInfo;
         m_mapStalls.erase(itStall);
     }
     
@@ -718,7 +708,7 @@ SOfflineStallInfo* COfflineStallMgr::GetStallByOwner(DWORD dwChaID) {
         return nullptr;
     }
     
-    return itStall->second;
+    return itStall->second.get();
 }
 
 COfflineStallNPC* COfflineStallMgr::GetStallNPC(DWORD dwWorldID) {
@@ -775,7 +765,7 @@ void COfflineStallMgr::Update(DWORD dwCurTime) {
             auto itStall = m_mapStalls.find(itOwner->second);
             if (itStall == m_mapStalls.end() || !itStall->second) continue;
             
-            SOfflineStallInfo* pInfo = itStall->second;
+            SOfflineStallInfo* pInfo = itStall->second.get();
             
             // Remove NPC from world (stall is empty, nothing more to sell)
             RemoveVirtualNPC(pInfo);
@@ -793,7 +783,7 @@ void COfflineStallMgr::Update(DWORD dwCurTime) {
     time_t nowSpawn = time(nullptr);
     std::vector<SOfflineStallInfo*> stallsToActivate;
     for (auto& pair : m_mapStalls) {
-        SOfflineStallInfo* pInfo = pair.second;
+        SOfflineStallInfo* pInfo = pair.second.get();
         if (!pInfo || pInfo->bActive || pInfo->bMapNotFound) continue;
         
         // Never re-spawn an expired stall. CleanupExpiredStalls() sets bActive=false but keeps
@@ -939,14 +929,16 @@ bool COfflineStallMgr::CreateVirtualNPC(SOfflineStallInfo* pInfo) {
         return false;
     }
     
-    // Create virtual NPC
-    COfflineStallNPC* pNPC = new COfflineStallNPC();
+    // Create virtual NPC (heap-owned, not entity pool)
+    auto pNPC = std::make_unique<COfflineStallNPC>();
     if (!pNPC) return false;
+    
+    COfflineStallNPC* pNPCRaw = pNPC.get();
     
     // Assign world ID
     pInfo->dwWorldID = GenerateWorldID();
     LG("offline_stall", "Generated WorldID=%u for stall ID %u\n", pInfo->dwWorldID, pInfo->dwStallID);
-    pNPC->Initialize(pInfo);
+    pNPCRaw->Initialize(pInfo);
     
     // Set up the shape for entering the map
     Square shape;
@@ -957,35 +949,29 @@ bool COfflineStallMgr::CreateVirtualNPC(SOfflineStallInfo* pInfo) {
     LG("offline_stall", "Attempting to enter NPC into SubMap at [%d, %d]\n", pInfo->nPosX, pInfo->nPosY);
     
     // Add NPC to the SubMap so it can be found by FindCharacter
-    if (!pSubMap->Enter(&shape, pNPC, -1)) { // -1 = force enter (no collision check)
+    if (!pSubMap->Enter(&shape, pNPCRaw, -1)) { // -1 = force enter (no collision check)
         LG("offline_stall", "Failed to enter NPC into SubMap at [%d, %d]\n", 
            pInfo->nPosX, pInfo->nPosY);
-        delete pNPC;
         return false;
     }
     
     LG("offline_stall", "Successfully entered NPC into SubMap\n");
     
     // Add stall skill state (SSTATE_STALL = 99) so the stall icon shows
-    // We use g_pCSystemCha as the source because our NPC isn't in the entity space
-    // (it was created with 'new' not from the entity pool, so IsValidEntity fails)
-    // This is the same pattern used by CCharacter::Hide()
-    // Use the saved stall level to get the correct booth appearance (default to 1)
     BYTE byStallLv = (pInfo->byStallLevel > 0) ? pInfo->byStallLevel : 1;
-    pNPC->AddSkillState(0, g_pCSystemCha->GetID(), g_pCSystemCha->GetHandle(), 
+    pNPCRaw->AddSkillState(0, g_pCSystemCha->GetID(), g_pCSystemCha->GetHandle(), 
                         enumSKILL_TYPE_SELF, enumSKILL_TAR_LORS, enumSKILL_EFF_HELPFUL, 
                         SSTATE_STALL, byStallLv, -1);
     
-    // Broadcast stall name to players in eyeshot (this shows the stall title above the character)
-    pNPC->SynStallName();
+    pNPCRaw->SynStallName();
     
     LG("offline_stall", "Created offline stall NPC world_id=%u at map=%s pos=[%d,%d] title='%s'\n",
        pInfo->dwWorldID, pInfo->szMapName, pInfo->nPosX, pInfo->nPosY, pInfo->szStallTitle);
     
-    pInfo->pVirtualNPC = pNPC;
+    pInfo->pVirtualNPC = std::move(pNPC);
     pInfo->bActive = true;
     
-    m_mapWorldIDToNPC[pInfo->dwWorldID] = pNPC;
+    m_mapWorldIDToNPC[pInfo->dwWorldID] = pInfo->pVirtualNPC.get();
     
     return true;
 }
@@ -1003,26 +989,22 @@ void COfflineStallMgr::RemoveVirtualNPC(SOfflineStallInfo* pInfo) {
     
     LG("offline_stall", "RemoveVirtualNPC: Removing NPC for stall ID %u on map %s\n", pInfo->dwStallID, pInfo->szMapName);
     
-    COfflineStallNPC* pNPC = dynamic_cast<COfflineStallNPC*>(pInfo->pVirtualNPC);
-    if (pNPC) {
-        // Remove world ID mapping first
+    COfflineStallNPC* pNPC = pInfo->pVirtualNPC.get();
+    
+    if (pInfo->dwWorldID != 0) {
         m_mapWorldIDToNPC.erase(pInfo->dwWorldID);
-        
-        // Remove from SubMap
-        SubMap* pSubMap = pNPC->GetSubMap();
-        if (pSubMap) {
-            pSubMap->GoOut(pNPC);
-        }
-        
-        // Cleanup and delete the NPC
-        pNPC->Cleanup();
-        delete pNPC;
-        
-        LG("offline_stall", "Removed offline stall NPC world_id=%u\n", pInfo->dwWorldID);
     }
     
-    pInfo->pVirtualNPC = nullptr;
+    SubMap* pSubMap = pNPC->GetSubMap();
+    if (pSubMap) {
+        pSubMap->GoOut(pNPC);
+    }
+    
+    pNPC->Cleanup();
+    pInfo->pVirtualNPC.reset();
     pInfo->bActive = false;
+    
+    LG("offline_stall", "Removed offline stall NPC world_id=%u\n", pInfo->dwWorldID);
 }
 
 void COfflineStallMgr::CleanupExpiredStalls() {
@@ -1036,17 +1018,18 @@ void COfflineStallMgr::CleanupExpiredStalls() {
     
     for (auto& pair : m_mapStalls) {
         if (pair.second && now >= pair.second->tExpire) {
+            SOfflineStallInfo* pInfo = pair.second.get();
             // Remove NPC from world if still active
-            if (pair.second->bActive) {
-                RemoveVirtualNPC(pair.second);
+            if (pInfo->bActive) {
+                RemoveVirtualNPC(pInfo);
             }
             
             // Only fully remove if no sold items or gold pending claim
-            if (pair.second->bySoldCount == 0 && pair.second->llPendingGold == 0) {
-                expiredOwners.push_back(pair.second->dwChaID);
+            if (pInfo->bySoldCount == 0 && pInfo->llPendingGold == 0) {
+                expiredOwners.push_back(pInfo->dwChaID);
             } else {
                 LG("offline_stall", "Expired stall for cha_id %u preserved: %d sold items, %lld gold pending claim\n",
-                   pair.second->dwChaID, pair.second->bySoldCount, pair.second->llPendingGold);
+                   pInfo->dwChaID, pInfo->bySoldCount, pInfo->llPendingGold);
             }
         }
     }
@@ -1062,11 +1045,9 @@ void COfflineStallMgr::CleanupExpiredStalls() {
         auto itStall = m_mapStalls.find(dwStallID);
         
         if (itStall != m_mapStalls.end() && itStall->second) {
-            // NPC already removed above, clean up world ID map
             if (itStall->second->dwWorldID != 0) {
                 m_mapWorldIDToNPC.erase(itStall->second->dwWorldID);
             }
-            delete itStall->second;
             m_mapStalls.erase(itStall);
         }
         
@@ -1238,28 +1219,29 @@ bool COfflineStallMgr::CleanupForReturningPlayer(CCharacter* pMainCha, DWORD dwC
 }
 
 // Add a new stall to the manager (called from DB load)
-bool COfflineStallMgr::AddLoadedStall(SOfflineStallInfo* pInfo) {
+bool COfflineStallMgr::AddLoadedStall(std::unique_ptr<SOfflineStallInfo> pInfo) {
     if (!pInfo) {
         LG("offline_stall", "AddLoadedStall: pInfo is NULL\n");
         return false;
     }
     
-    LG("offline_stall", "AddLoadedStall: ID=%u, ChaID=%u, Map=%s\n", pInfo->dwStallID, pInfo->dwChaID, pInfo->szMapName);
+    SOfflineStallInfo* raw = pInfo.get();
+    LG("offline_stall", "AddLoadedStall: ID=%u, ChaID=%u, Map=%s\n", raw->dwStallID, raw->dwChaID, raw->szMapName);
     
-    m_mapStalls[pInfo->dwStallID] = pInfo;
-    m_mapOwnerToStall[pInfo->dwChaID] = pInfo->dwStallID;
-    pInfo->bMapNotFound = false;
+    m_mapStalls[raw->dwStallID] = std::move(pInfo);
+    m_mapOwnerToStall[raw->dwChaID] = raw->dwStallID;
+    raw->bMapNotFound = false;
     
     // Fully-sold stalls still need in-memory registration for owner cleanup,
     // but must not spawn an NPC with zero items.
-    if (pInfo->byItemCount > 0) {
-        LG("offline_stall", "Calling CreateVirtualNPC for stall ID %u\n", pInfo->dwStallID);
-        CreateVirtualNPC(pInfo);
+    if (raw->byItemCount > 0) {
+        LG("offline_stall", "Calling CreateVirtualNPC for stall ID %u\n", raw->dwStallID);
+        CreateVirtualNPC(raw);
     } else {
         LG("offline_stall", "Stall ID %u has 0 items (fully sold) — skipping NPC, awaiting owner login\n",
-           pInfo->dwStallID);
+           raw->dwStallID);
     }
     
-    LG("offline_stall", "AddLoadedStall complete: WorldID=%u\n", pInfo->dwWorldID);
+    LG("offline_stall", "AddLoadedStall complete: WorldID=%u\n", raw->dwWorldID);
     return true;
 }
