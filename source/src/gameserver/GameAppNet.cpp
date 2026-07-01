@@ -684,18 +684,14 @@ bool CGameApp::OpcodeHandle_TmEntermap(void* ctx, DataSocket* /*sock*/, RPacket&
 	short swiner = 0;
 	unsigned long long l_gtaddr = 0;
 	const uLong trailerRemain = recv.RemainData();
-	if (trailerRemain >= 18) {
-		l_gtaddr = recv.ReadLongLong();
-		swiner = static_cast<short>(recv.ReadShort());
-		gateSession.slot = static_cast<uint32_t>(recv.ReadLong());
-		gateSession.generation = static_cast<uint32_t>(recv.ReadLong());
-	} else if (trailerRemain >= 10) {
-		swiner = READ_SHORT_R(recv);
-		l_gtaddr = recv.ReverseReadLongLong();
-	} else {
-		LG("enter_map", "TM_ENTERMAP trailer too short (%u bytes) dbid=%u\n", trailerRemain, l_dbid);
+	if (trailerRemain < 18) {
+		LG("enter_map", "TM_ENTERMAP trailer too short (%u bytes, need 18) dbid=%u\n", trailerRemain, l_dbid);
 		return true;
 	}
+	l_gtaddr = recv.ReadLongLong();
+	swiner = static_cast<short>(recv.ReadShort());
+	gateSession.slot = static_cast<uint32_t>(recv.ReadLong());
+	gateSession.generation = static_cast<uint32_t>(recv.ReadLong());
 
 	if (gateSession.IsValid()) {
 		LG("SessionManager", "TM_ENTERMAP gate session slot=%u gen=%u gtaddr=%llX dbid=%u\n",

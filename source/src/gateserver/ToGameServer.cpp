@@ -564,6 +564,10 @@ void GameServer::Finally() {
 
 void GameServer::EnterMap(Player* ply, uLong actid, uLong dbid, uLong worldid, cChar* map, Long lMapCpyNO, uLong x, uLong y, char entertype, short swiner) {
 	g_gtsvr->EnsurePlayerSession(ply);
+	if (!ply->m_sessionHandle.IsValid()) {
+		LG("SessionManager", "EnterMap TM_ENTERMAP REJECT: no valid session player %p dbid=%u\n", ply, dbid);
+		return;
+	}
 
 	WPacket l_wpk = m_datasock->GetWPacket();
 	l_wpk.WriteCmd(CMD_TM_ENTERMAP);
@@ -578,12 +582,10 @@ void GameServer::EnterMap(Player* ply, uLong actid, uLong dbid, uLong worldid, c
 	l_wpk.WriteChar(entertype);
 	l_wpk.WriteLongLong(MakeULong(ply)); // Gate address (reverse-read by GameServer)
 	l_wpk.WriteShort(swiner);
-	if (ply->m_sessionHandle.IsValid()) {
-		l_wpk.WriteLong(ply->m_sessionHandle.slot);
-		l_wpk.WriteLong(ply->m_sessionHandle.generation);
-		LG("SessionManager", "EnterMap TM_ENTERMAP session slot=%u gen=%u player %p dbid=%u\n",
-		   ply->m_sessionHandle.slot, ply->m_sessionHandle.generation, ply, dbid);
-	}
+	l_wpk.WriteLong(ply->m_sessionHandle.slot);
+	l_wpk.WriteLong(ply->m_sessionHandle.generation);
+	LG("SessionManager", "EnterMap TM_ENTERMAP session slot=%u gen=%u player %p dbid=%u\n",
+	   ply->m_sessionHandle.slot, ply->m_sessionHandle.generation, ply, dbid);
 	g_gtsvr->gm_conn->SendData(m_datasock, l_wpk);
 	ply->SetMapName(map); // Chaos Blind
 }
