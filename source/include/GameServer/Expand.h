@@ -11,6 +11,7 @@
 #include "stdafx.h" //add by alfred.shi 20080304
 
 #include "Character.h"
+#include "GameAppAccess.h"
 #include "lua_bridge.h"
 #include "LogFile.h"
 #include "excp.h"
@@ -449,7 +450,7 @@ inline int lua_SetSkillRange(lua_State* pLS) {
 	short sRangeE[defSKILL_RANGE_EXTEP_NUM];
 	for (int i = 0; i < nParaNum; i++)
 		sRangeE[i] = (short)lua_tonumber(pLS, i + 1);
-	g_pGameApp->SetSkillTDataRange(sRangeE);
+	AppFromNoticeChar()->SetSkillTDataRange(sRangeE);
 
 End:
 	if (bSuccess) {
@@ -493,7 +494,7 @@ inline int lua_SetRangeState(lua_State* pLS) {
 	short sState[defSKILL_STATE_PARAM_NUM];
 	for (int i = 0; i < nParaNum; i++)
 		sState[i] = (short)lua_tonumber(pLS, i + 1);
-	g_pGameApp->SetSkillTDataState(sState);
+	AppFromNoticeChar()->SetSkillTDataState(sState);
 
 End:
 	if (bSuccess) {
@@ -2930,8 +2931,8 @@ inline int lua_LuaPrint(lua_State* pLS) {
 
 inline int lua_Stop(lua_State* pLS) {
 	T_B
-		g_pGameApp->m_CTimerReset.Begin(1000);
-	g_pGameApp->m_ulLeftSec = (int)lua_tonumber(pLS, 1);
+		AppFromNoticeChar()->m_CTimerReset.Begin(1000);
+	AppFromNoticeChar()->m_ulLeftSec = (int)lua_tonumber(pLS, 1);
 
 	return 0;
 	T_E
@@ -2942,7 +2943,7 @@ inline int lua_Notice(lua_State* pLS) {
 	T_B if (!lua_isstring(pLS, 1)) return 0;
 
 	const char* cszNotiStr = lua_tostring(pLS, 1);
-	g_pGameApp->WorldNotice(cszNotiStr);
+	AppFromNoticeChar()->WorldNotice(cszNotiStr);
 
 	// if (strstr(cszNotiStr, "海盗广播"))
 	if (strstr(cszNotiStr, RES_STRING(GM_EXPAND_H_00102)))
@@ -2959,7 +2960,7 @@ inline int lua_GuildNotice(lua_State* pLS) {
 
 	DWORD guildID = (DWORD)lua_tonumber(pLS, 1);
 	const char* cszNotiStr = lua_tostring(pLS, 2);
-	g_pGameApp->GuildNotice(guildID, cszNotiStr);
+	AppFromNoticeChar()->GuildNotice(guildID, cszNotiStr);
 	return 0;
 	T_E
 }
@@ -2979,7 +2980,7 @@ inline int lua_ScrollNotice(lua_State* L) {
 	int SetNum = (int)lua_tonumber(L, 2);
 	DWORD color = (DWORD)lua_tonumber(L, 3);
 	const char* cszNotiStr = lua_tostring(L, 1);
-	g_pGameApp->ScrollNotice(cszNotiStr, SetNum, color);
+	AppFromNoticeChar()->ScrollNotice(cszNotiStr, SetNum, color);
 
 	// if (strstr(cszNotiStr, "海盗广播"))
 	if (strstr(cszNotiStr, RES_STRING(GM_EXPAND_H_00102)))
@@ -2995,7 +2996,7 @@ inline int lua_ScrollNotice(lua_State* L) {
 // Add by sunny.sun 20080821
 inline int lua_GMNotice(lua_State* pLS) {
 	T_B const char* gmNotice = lua_tostring(pLS, 1);
-	g_pGameApp->GMNotice(gmNotice);
+	AppFromNoticeChar()->GMNotice(gmNotice);
 	if (strstr(gmNotice, RES_STRING(GM_EXPAND_H_00102)))
 		if (g_cchLogMapEntry)
 			// LG("地图入口流程", "系统通告：%s\n", cszNotiStr);
@@ -3012,7 +3013,7 @@ inline int lua_ChaNotice(lua_State* pLS) {
 
 	const char* cszChaName = lua_tostring(pLS, 1);
 	const char* cszNotiStr = lua_tostring(pLS, 2);
-	g_pGameApp->ChaNotice(cszNotiStr, cszChaName);
+	AppFromNoticeChar()->ChaNotice(cszNotiStr, cszChaName);
 	// if (strstr(cszNotiStr, "海盗广播"))
 	if (strstr(cszNotiStr, RES_STRING(GM_EXPAND_H_00102)))
 		if (g_cchLogMapEntry)
@@ -4073,7 +4074,7 @@ inline int lua_CallMapEntry(lua_State* pLS) {
 
 	{
 		const char* szMapN = (const char*)lua_tostring(pLS, 1);
-		CMapRes* pCMap = g_pGameApp->FindMapByName(szMapN);
+		CMapRes* pCMap = AppFromNoticeChar()->FindMapByName(szMapN);
 		if (!pCMap) {
 #ifdef defPARSE_LOG
 			// g_pCLogObj->Log("\t地图不存在，调用失败\n");
@@ -4427,7 +4428,7 @@ inline int lua_CloseMapEntry(lua_State* pLS) {
 		goto End;
 	}
 	{
-		CMapRes* pCMap = g_pGameApp->FindMapByName(lua_tostring(pLS, 1));
+		CMapRes* pCMap = AppFromNoticeChar()->FindMapByName(lua_tostring(pLS, 1));
 
 		if (!pCMap || !pCMap->CloseEntry()) {
 			bSuccess = false;
@@ -4474,7 +4475,7 @@ inline int lua_CloseMapCopy(lua_State* pLS) {
 			sCopyNO = (short)lua_tonumber(pLS, 2) - 1;
 		if (sCopyNO < 0)
 			sCopyNO = 0;
-		CMapRes* pCMap = g_pGameApp->FindMapByName(lua_tostring(pLS, 1));
+		CMapRes* pCMap = AppFromNoticeChar()->FindMapByName(lua_tostring(pLS, 1));
 		if (!pCMap || !pCMap->ReleaseCopy(sCopyNO)) {
 			bSuccess = false;
 			goto End;
@@ -5183,7 +5184,7 @@ inline int lua_GetChaMapType(lua_State* pLS) {
 			pCMap = pCCha->GetSubMap()->GetMapRes();
 		}
 		if (!pCMap) {
-			pCMap = g_pGameApp->FindMapByName(pCCha->GetBirthMap(), true);
+			pCMap = AppFromNoticeChar()->FindMapByName(pCCha->GetBirthMap(), true);
 		}
 		if (pCMap) {
 			chMapType = pCMap->GetType();
@@ -6581,7 +6582,7 @@ inline int lua_IsValidTeam(lua_State* pLS) {
 		CCharacter* pCCha = LB_GetCha(pLS, 1);
 	CPlayer* pTeamPlayer = pCCha->GetPlayer();
 	int masterID = pTeamPlayer->GetDBChaId();
-	// CPlayer*	player = g_pGameApp->GetPlayerByDBID(masterID);
+	// CPlayer*	player = AppFromNoticeChar()->GetPlayerByDBID(masterID);
 
 	if (pTeamPlayer == nullptr) {
 		lua_pushnumber(pLS, (int)-4);
@@ -6868,8 +6869,8 @@ inline int lua_GetCaptainByMapId(lua_State* pLS) {
 			Capid2 = atoi(Captainid2.c_str());
 		}
 
-		player1 = g_pGameApp->GetPlayerByDBID(Capid1);
-		player2 = g_pGameApp->GetPlayerByDBID(Capid2);
+		player1 = AppFromNoticeChar()->GetPlayerByDBID(Capid1);
+		player2 = AppFromNoticeChar()->GetPlayerByDBID(Capid2);
 
 		if (player2 == nullptr) {
 			pCCha1 = player1->GetMainCha();

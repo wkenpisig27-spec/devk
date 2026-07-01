@@ -32,7 +32,8 @@
 using namespace dbc;
 using namespace std;
 
-// GateServer �����ṹ
+// GateServer connection wrapper
+class CGameApp;
 class GameServerApp;
 class GateServer {
 public:
@@ -279,6 +280,9 @@ public:
 	GatePlayer* ResolvePlayerFromGateTrailer(GateServer* pGate, dbc::RPacket& recvbuf, uShort cmd) const;
 	bool IsPlayerRegistered(GatePlayer* ply) const;
 
+	void BindGameApp(CGameApp* pApp) { m_pGameApp = pApp; }
+	CGameApp* GetGameApp() const;
+
 public:
 	int m_count;
 	dbc::DataSocket* m_groupsock;
@@ -294,7 +298,13 @@ private:
 	InfoServer m_IfServer;
 
 	std::string m_strGameName;
+	CGameApp* m_pGameApp = nullptr;
 };
+
+inline CGameApp* GameServerApp::GetGameApp() const {
+	extern CGameApp* g_pGameApp;
+	return m_pGameApp ? m_pGameApp : g_pGameApp;
+}
 
 inline bool GameServerApp::BeginGetplayer(GateServer* gt) {
 	if (gt == nullptr)

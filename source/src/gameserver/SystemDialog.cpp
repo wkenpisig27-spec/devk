@@ -1,6 +1,6 @@
 ﻿
 #include "Stdafx.h"
-#include "GameApp.h"
+#include "GameAppAccess.h"
 #include "resource.h"
 #include "SystemDialog.h"
 #include "lua_gamectrl.h"
@@ -45,7 +45,7 @@ INT_PTR CALLBACK DlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 	case WM_INITDIALOG: {
 		HWND hCheck = GetDlgItem(hwndDlg, IDC_CHECK_CHA_LOG);
 		SendMessage(hCheck, BM_SETCHECK, BST_UNCHECKED, 0);
-		g_pGameApp->SetEntityEnableLog(false);
+		ActiveGameApp()->SetEntityEnableLog(false);
 
 		// Add by lark.li 20080330 begin
 		::SetDlgItemText(hwndDlg, IDD_DLG_MAIN, RES_STRING(GM_SYSTEMDIALOG_CPP_00002));
@@ -80,15 +80,15 @@ INT_PTR CALLBACK DlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		} else if (wParam == IDC_CHECK_CHA_LOG) {
 			HWND hCheck = GetDlgItem(hwndDlg, IDC_CHECK_CHA_LOG);
 			if (BST_CHECKED == SendMessage(hCheck, BM_GETCHECK, 0, 0))
-				g_pGameApp->SetEntityEnableLog(true);
+				ActiveGameApp()->SetEntityEnableLog(true);
 			else
-				g_pGameApp->SetEntityEnableLog(false);
+				ActiveGameApp()->SetEntityEnableLog(false);
 		}
 		break;
 	}
 	case WM_USER_LOG: // 通过SendMessage把log送往窗口线程的列表
 	{
-		// g_pGameApp->AddLog((const char*)lParam);
+		// ActiveGameApp()->AddLog((const char*)lParam);
 		break;
 	}
 	case WM_CLOSE: {
@@ -99,7 +99,7 @@ INT_PTR CALLBACK DlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		}
 		// Initiate graceful shutdown with 3-second countdown instead of immediate quit
 		// This allows SaveAllPlayer to run in the game thread without blocking the UI
-		if (!g_bShutdownInitiated && g_pGameApp != nullptr) {
+		if (!g_bShutdownInitiated && ActiveGameApp() != nullptr) {
 			g_bShutdownInitiated = TRUE;
 			InitiateGracefulShutdown(3);
 			SetWindowText(hwndDlg, "GameServer (Shutting Down...)");
@@ -170,7 +170,7 @@ INT_PTR CALLBACK ReportDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			int n = GetWindowText(hEdit1, szText, 8192);
 			fwrite(szText, n, 1, fp);
 			fclose(fp);
-			g_pGameApp->m_bExecLuaCmd = TRUE;
+			ActiveGameApp()->m_bExecLuaCmd = TRUE;
 			break;
 		}
 		case IDC_CLEAR: {
@@ -360,7 +360,7 @@ INT_PTR CALLBACK MapDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			int h = rc.bottom - rc.top;
 
 			DrawMgrUnit(hdc, g_lViewAtMapX, g_lViewAtMapY, w, h);
-			DrawMapUnit(g_pGameApp->GetMap(0)->GetCopy(0), hdc, g_lViewAtMapX, g_lViewAtMapY, w, h);
+			DrawMapUnit(ActiveGameApp()->GetMap(0)->GetCopy(0), hdc, g_lViewAtMapX, g_lViewAtMapY, w, h);
 
 			DeleteObject(brMonster);
 		}
@@ -396,13 +396,13 @@ void CreateMainDialog(HINSTANCE hInst, HWND hParent) {
 
 void SystemReport(DWORD dwTimeParam) {
 	T_B
-		g_pGameApp->HandleLogList();
+		ActiveGameApp()->HandleLogList();
 
 	static DWORD dwLastReportTime = 0;
 
 	HWND hRunFlag = GetDlgItem(g_ReportView, IDC_RUNFLAG);
 	char szInfo[64];
-	sprintf(szInfo, "%d", g_pGameApp->m_dwRunStep);
+	sprintf(szInfo, "%d", ActiveGameApp()->m_dwRunStep);
 	if (hRunFlag)
 		SetWindowText(hRunFlag, szInfo);
 
@@ -444,39 +444,39 @@ void SystemReport(DWORD dwTimeParam) {
 	HWND hPerLogCnt = GetDlgItem(g_ReportView, IDC_PERLOGCNT);
 
 	char szFPS[64];
-	sprintf(szFPS, "%d", g_pGameApp->m_dwFPS);
+	sprintf(szFPS, "%d", ActiveGameApp()->m_dwFPS);
 	if (hFPS)
 		SetWindowText(hFPS, szFPS);
-	const SEntityPoolStats poolStats = g_pGameApp->GetEntityPoolStats();
-	sprintf(szFPS, "%d  P:%d/%d C:%d/%d T:%d/%d", g_pGameApp->m_dwRunCnt,
+	const SEntityPoolStats poolStats = ActiveGameApp()->GetEntityPoolStats();
+	sprintf(szFPS, "%d  P:%d/%d C:%d/%d T:%d/%d", ActiveGameApp()->m_dwRunCnt,
 		poolStats.nPlyHold, poolStats.nPlyMax,
 		poolStats.nChaHold, poolStats.nChaMax,
 		poolStats.nTNpcHold, poolStats.nTNpcMax);
 	if (hLoop)
 		SetWindowText(hLoop, szFPS);
-	sprintf(szFPS, "%d", g_pGameApp->m_dwChaCnt);
+	sprintf(szFPS, "%d", ActiveGameApp()->m_dwChaCnt);
 	if (hChaCnt)
 		SetWindowText(hChaCnt, szFPS);
-	sprintf(szFPS, "%d", g_pGameApp->m_dwPlayerCnt);
+	sprintf(szFPS, "%d", ActiveGameApp()->m_dwPlayerCnt);
 	if (hPlayerCnt)
 		SetWindowText(hPlayerCnt, szFPS);
-	sprintf(szFPS, "%d", g_pGameApp->m_dwActiveMgrUnit);
+	sprintf(szFPS, "%d", ActiveGameApp()->m_dwActiveMgrUnit);
 	if (hActiveUnit)
 		SetWindowText(hActiveUnit, szFPS);
-	sprintf(szFPS, "%d", g_pGameApp->m_dwRunStep);
+	sprintf(szFPS, "%d", ActiveGameApp()->m_dwRunStep);
 	if (hRunFlag)
 		SetWindowText(hRunFlag, szFPS);
-	sprintf(szFPS, "%d", g_pGameApp->GetLogLeft());
+	sprintf(szFPS, "%d", ActiveGameApp()->GetLogLeft());
 	if (hDBLogLeft)
 		SetWindowText(hDBLogLeft, szFPS);
-	sprintf(szFPS, "%d", g_pGameApp->GetPerLogCnt());
+	sprintf(szFPS, "%d", ActiveGameApp()->GetPerLogCnt());
 	if (hPerLogCnt)
 		SetWindowText(hPerLogCnt, szFPS);
 
 	char szText[128];
 
 	if (rand() % 2 == 0) {
-		CMapRes* pCMap = g_pGameApp->FindMapByName("teampk");
+		CMapRes* pCMap = ActiveGameApp()->FindMapByName("teampk");
 		if (pCMap) {
 			// 清空列表框
 			HWND hPKList = GetDlgItem(g_ReportView, IDC_PK_LIST);

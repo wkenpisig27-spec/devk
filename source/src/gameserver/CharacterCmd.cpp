@@ -93,7 +93,7 @@ bool CCharacter::Cmd_EnterMap(cChar* l_map, Long lMapCopyNO, uLong l_x, uLong l_
 				goto Error;
 			}
 			SetBirthMap(pSBirthP->szMapName);
-			pCMapRes = g_pGameApp->FindMapByName(pSBirthP->szMapName);
+			pCMapRes = GetOwnerApp()->FindMapByName(pSBirthP->szMapName);
 			l_x = (pSBirthP->x + 2 - rand() % 4) * 100;
 			l_y = (pSBirthP->y + 2 - rand() % 4) * 100;
 		} else {
@@ -107,13 +107,13 @@ bool CCharacter::Cmd_EnterMap(cChar* l_map, Long lMapCopyNO, uLong l_x, uLong l_
 					goto Error;
 				}
 
-				pCMapRes = g_pGameApp->FindMapByName(pCCtrlCha->GetBirthMap());
+				pCMapRes = GetOwnerApp()->FindMapByName(pCCtrlCha->GetBirthMap());
 				l_x = pCCtrlCha->GetPos().x;
 				l_y = pCCtrlCha->GetPos().y;
 			} else // 地图切换
 			{
 				chEnterType = enumENTER_MAP_EDGE;
-				pCMapRes = g_pGameApp->FindMapByName(l_map);
+				pCMapRes = GetOwnerApp()->FindMapByName(l_map);
 			}
 
 			if (chLogin == 0) {
@@ -267,7 +267,7 @@ bool CCharacter::Cmd_EnterMap(cChar* l_map, Long lMapCopyNO, uLong l_x, uLong l_
 		// WriteKitbag(*m_pCKitbagTmp, pkret, enumSYN_KITBAG_INIT); // 临时背包!!!不要放在entermap里
 
 		WRITE_CHAR(pkret, chLogin);
-		WRITE_LONG(pkret, g_pGameApp->m_dwPlayerCnt);
+		WRITE_LONG(pkret, GetOwnerApp()->m_dwPlayerCnt);
 		WRITE_LONGLONG(pkret, MakeULong(pCPlayer)); // 告诉GateServer自己的Player描述结构地址
 		ReflectINFof(this, pkret);
 
@@ -296,7 +296,7 @@ Error:
 	pCPlayer->SetLoginCha(enumLOGIN_CHA_MAIN, 0);
 	pCPlayer->SetCtrlCha(GetPlyMainCha());
 	game_db.SavePlayerPos(pCPlayer);
-	g_pGameApp->GoOutGame(pCPlayer, true);
+	GetOwnerApp()->GoOutGame(pCPlayer, true);
 
 	// LG("enter_map", "进入游戏场景失败 %s(%s)\n", GetLogName(), GetPlyCtrlCha()->GetLogName());
 	LG("enter_map", "enter game scene failed %s(%s)\n", GetLogName(), GetPlyCtrlCha()->GetLogName());
@@ -381,7 +381,7 @@ void CCharacter::Cmd_BeginMove(Short sPing, Point* pPath, Char chPointNum, Char 
 // ������Ŀ��ʵ��
 //=============================================================================
 void CCharacter::Cmd_BeginMoveDirect(Entity* pTar) {
-	T_B if (!pTar || !g_pGameApp->IsLiveingEntity(pTar->GetID(), pTar->GetHandle())) // ������Ч
+	T_B if (!pTar || !GetOwnerApp()->IsLiveingEntity(pTar->GetID(), pTar->GetHandle())) // ������Ч
 	{
 		// m_CLog.Log("ʵ�岻����\n");
 		m_CLog.Log("entity is inexistence\n");
@@ -465,7 +465,7 @@ void CCharacter::Cmd_BeginSkill(Short sPing, Point* pPath, Char chPointNum,
 			return;
 		}
 	}
-	CSkillTempData* pCSkillTData = g_pGameApp->GetSkillTData(pSSkillCont->sID, pSSkillCont->chLv);
+	CSkillTempData* pCSkillTData = GetOwnerApp()->GetSkillTData(pSSkillCont->sID, pSSkillCont->chLv);
 	if (!pCSkillTData) {
 		// LG("���ܴ���", "��ɫ��%s\tû��ȡ���ü���(SkillID: %u, SkillLv: %u)����ʱ����\n", GetLogName(), pSSkillCont->sID, pSSkillCont->chLv);
 		LG("skill error", "character:%s\t hasn't get the skill(SkillID: %u, SkillLv: %u)'s temp data\n", GetLogName(), pSSkillCont->sID, pSSkillCont->chLv);
@@ -501,7 +501,7 @@ void CCharacter::Cmd_BeginSkill(Short sPing, Point* pPath, Char chPointNum,
 
 	if (SkillTarIsEntity(pSkill)) // ���ö�����ID
 	{
-		Entity* pTarEnt = g_pGameApp->IsMapEntity(lTarInfo1, lTarInfo2);
+		Entity* pTarEnt = GetOwnerApp()->IsMapEntity(lTarInfo1, lTarInfo2);
 		if (!pTarEnt) // ���󲻴���
 		{
 			FailedActionNoti(enumACTION_SKILL, enumFACTION_NOOBJECT);
@@ -573,7 +573,7 @@ void CCharacter::Cmd_BeginSkill(Short sPing, Point* pPath, Char chPointNum,
 }
 
 void CCharacter::Cmd_BeginSkillDirect(Long lSkillNo, Entity* pTar, bool bIntelligent) {
-	T_B if (!pTar || !g_pGameApp->IsMapEntity(pTar->GetID(), pTar->GetHandle())) // ������Ч
+	T_B if (!pTar || !GetOwnerApp()->IsMapEntity(pTar->GetID(), pTar->GetHandle())) // ������Ч
 	{
 		// m_CLog.Log("ʵ�岻����\n");
 		m_CLog.Log("entity is inexistence\n");
@@ -1203,7 +1203,7 @@ Short CCharacter::Cmd_PickupItem(uLong ulID, Long lHandle) {
 		return enumITEMOPT_ERROR_STATE;
 	}
 
-	Entity* pCEnt = g_pGameApp->IsLiveingEntity(ulID, lHandle);
+	Entity* pCEnt = GetOwnerApp()->IsLiveingEntity(ulID, lHandle);
 	if (!pCEnt)
 		return enumITEMOPT_ERROR_NONE;
 	CItem* pCItem = pCEnt->IsItem();
@@ -1254,7 +1254,7 @@ Short CCharacter::Cmd_PickupItem(uLong ulID, Long lHandle) {
 			if (pCItem->GetProtType() == enumITEM_PROT_OWN)
 				return enumITEMOPT_ERROR_PROTECT;
 
-			Entity* pBelongEnt = g_pGameApp->IsLifeEntity(pCItem->GetProtChaID(), pCItem->GetProtChaHandle());
+			Entity* pBelongEnt = GetOwnerApp()->IsLifeEntity(pCItem->GetProtChaID(), pCItem->GetProtChaHandle());
 			if (pBelongEnt) {
 				CPlayer* pBelongPlayer = pBelongEnt->IsCharacter()->GetPlayer();
 				if (pBelongPlayer && (!pBelongPlayer->getTeamLeaderID() || pBelongPlayer->getTeamLeaderID() != GetPlayer()->getTeamLeaderID())) {
@@ -2304,7 +2304,7 @@ void CCharacter::Cmd_FightAsk(dbc::Char chType, dbc::Long lTarID, dbc::Long lTar
 		return;
 	}
 
-	Entity* pCTarEnti = g_pGameApp->IsValidEntity(lTarID, lTarHandle);
+	Entity* pCTarEnti = GetOwnerApp()->IsValidEntity(lTarID, lTarHandle);
 	CCharacter* pCTarCha;
 	if (!pCTarEnti || !(pCTarCha = pCTarEnti->IsCharacter())) {
 		// SystemNotice("������Ч!");
@@ -2544,14 +2544,14 @@ void CCharacter::Cmd_FightAnswer(bool bFight) {
 	Long lFightType = pCPly->GetChallengeType();
 
 	CPlayer *pCSrcPly, *pCTarPly;
-	pCSrcPly = g_pGameApp->IsValidPlayer(lID, lHandle);
+	pCSrcPly = GetOwnerApp()->IsValidPlayer(lID, lHandle);
 	if (!pCSrcPly || !pCSrcPly->HasChallengeObj()) {
 		// SystemNotice("�������Ѿ���Ч!");
 		SystemNotice(RES_STRING(GM_CHARACTERCMD_CPP_00031));
 		return;
 	}
 	Char chObjNum = (Char)pCSrcPly->GetChallengeParam(0);
-	pCTarPly = g_pGameApp->IsValidPlayer(pCSrcPly->GetChallengeParam(2 + (chObjNum - 1) * 2), pCSrcPly->GetChallengeParam(2 + (chObjNum - 1) * 2 + 1));
+	pCTarPly = GetOwnerApp()->IsValidPlayer(pCSrcPly->GetChallengeParam(2 + (chObjNum - 1) * 2), pCSrcPly->GetChallengeParam(2 + (chObjNum - 1) * 2 + 1));
 	if (!pCTarPly || !pCTarPly->HasChallengeObj()) {
 		// SystemNotice("�������Ѿ���Ч!");
 		SystemNotice(RES_STRING(GM_CHARACTERCMD_CPP_00031));
@@ -2668,7 +2668,7 @@ void CCharacter::Cmd_FightAnswer(bool bFight) {
 	Long lEnterChaNum = 0;
 	pCSrcPly->ClearChallengeObj();
 	for (Char i = 0; i < chLoop; i++) {
-		pCFightMem = g_pGameApp->IsValidPlayer(pCSrcPly->GetChallengeParam(i * 2 + 2), pCSrcPly->GetChallengeParam(i * 2 + 2 + 1));
+		pCFightMem = GetOwnerApp()->IsValidPlayer(pCSrcPly->GetChallengeParam(i * 2 + 2), pCSrcPly->GetChallengeParam(i * 2 + 2 + 1));
 		if (!pCFightMem)
 			continue;
 		pCFightCha = pCFightMem->GetCtrlCha();
@@ -3398,7 +3398,7 @@ BOOL CCharacter::Cmd_AddVolunteer() {
 	}
 	// check if map is garner2
 
-	BOOL ret = g_pGameApp->AddVolunteer(this);
+	BOOL ret = GetOwnerApp()->AddVolunteer(this);
 	if (!ret) {
 		SystemNotice(RES_STRING(GM_CHARACTER_CPP_00135));
 	} else {
@@ -3410,7 +3410,7 @@ BOOL CCharacter::Cmd_AddVolunteer() {
 
 BOOL CCharacter::Cmd_DelVolunteer() {
 	T_B
-		BOOL ret = g_pGameApp->DelVolunteer(this);
+		BOOL ret = GetOwnerApp()->DelVolunteer(this);
 	if (!ret) {
 		SystemNotice(RES_STRING(GM_CHARACTER_CPP_00137));
 	} else {
@@ -3429,13 +3429,13 @@ BOOL CCharacter::Cmd_ApplyVolunteer(const char* szName) {
 }
 
 CCharacter* CCharacter::FindVolunteer(const char* szName) {
-	SVolunteer* pVolInfo = g_pGameApp->FindVolunteer(szName);
+	SVolunteer* pVolInfo = GetOwnerApp()->FindVolunteer(szName);
 	if (!pVolInfo) {
 		return nullptr;
 	}
 
 	CCharacter* pCha = nullptr;
-	CPlayer* pPly = g_pGameApp->GetPlayerByDBID(pVolInfo->ulID);
+	CPlayer* pPly = GetOwnerApp()->GetPlayerByDBID(pVolInfo->ulID);
 	if (pPly) {
 		pCha = pPly->GetMainCha();
 	}

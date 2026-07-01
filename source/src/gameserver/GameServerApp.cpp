@@ -293,7 +293,7 @@ void GameServerApp::ProcessData(DataSocket* datasock, RPacket& pk) {
 		break;
 	}
 
-	g_pGameApp->ProcessNetMsg(msg_id, gt, pk);
+	g_gmsvr->GetGameApp()->ProcessNetMsg(msg_id, gt, pk);
 	T_E
 }
 
@@ -312,7 +312,7 @@ void GameServerApp::ProcessData(pNetMessage msg, short sType) {
 		break;
 	}
 
-	g_pGameApp->ProcessInfoMsg(msg, sType, GetInfoServer());
+	g_gmsvr->GetGameApp()->ProcessInfoMsg(msg, sType, GetInfoServer());
 	T_E
 }
 
@@ -333,14 +333,15 @@ WPacket GameServerApp::TM_KICKCHA(DataSocket* datasock, RPacket& pkt) {
 	WPacket l_retpk = GetWPacket();
 
 	int lChaDbID = READ_LONG(pkt);
-	CPlayer* pCOldPly = g_pGameApp->FindPlayerByDBChaID(lChaDbID);
+	CGameApp* pApp = g_gmsvr->GetGameApp();
+	CPlayer* pCOldPly = pApp ? pApp->FindPlayerByDBChaID(lChaDbID) : nullptr;
 	if (!pCOldPly || !pCOldPly->IsValid()) {
 		l_retpk.WriteChar(0);
 	} else {
 		pCOldPly->GetCtrlCha()->BreakAction();
 		pCOldPly->MisLogout();
 		pCOldPly->MisGooutMap();
-		g_pGameApp->ReleaseGamePlayer(pCOldPly);
+		pApp->ReleaseGamePlayer(pCOldPly);
 		l_retpk.WriteChar(1);
 	}
 	return l_retpk;
@@ -434,7 +435,7 @@ dbc::WPacket GameServerApp::TM_OFFLINE_MODE(dbc::DataSocket* datasock, RPacket& 
 		return wpk;
 	}
 
-	g_pGameApp->CanReceiveRequests(player->GetID(), false); // Notify GroupServer
+	g_gmsvr->GetGameApp()->CanReceiveRequests(player->GetID(), false); // Notify GroupServer
 	player->SetCanReceiveRequests(false); // Set local GameServer flag
 	
 	// Mark the player for offline stall mode - they will be disconnected by GateServer

@@ -763,7 +763,7 @@ inline int lua_FindNpc(lua_State* L) {
 	const char* pszNpc = lua_tostring(L, 1);
 	CNpc* pNpc = nullptr;
 	try {
-		pNpc = g_pGameApp->FindNpc(pszNpc);
+		pNpc = AppFromNoticeChar()->FindNpc(pszNpc);
 	} catch (...) {
 		LG("find_npc", "findnpc error，exception!");
 	}
@@ -783,7 +783,7 @@ inline int lua_FindNpc(lua_State* L) {
 inline int lua_ReloadNpcInfo(lua_State* L) {
 	T_B
 		// LoadScript();
-		// if( g_pGameApp->ReloadNpcInfo( *this ) )
+		// if( AppFromNoticeChar()->ReloadNpcInfo( *this ) )
 		//{
 		//	printf( "NPC对话和任务lua脚本更新成功！" );
 		// }
@@ -998,7 +998,7 @@ inline int lua_SummonNpc(lua_State* L) {
 	const char* pszNpc = lua_tostring(L, 3);
 	USHORT sTime = (USHORT)lua_tonumber(L, 4);
 
-	BOOL bRet = g_pGameApp->SummonNpc(byMapID, sAreaID, pszNpc, sTime);
+	BOOL bRet = AppFromNoticeChar()->SummonNpc(byMapID, sAreaID, pszNpc, sTime);
 
 	lua_pushnumber(L, (bRet) ? LUA_TRUE : LUA_FALSE);
 

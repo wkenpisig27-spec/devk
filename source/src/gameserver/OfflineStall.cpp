@@ -386,6 +386,10 @@ COfflineStallMgr& COfflineStallMgr::Instance() {
     return instance;
 }
 
+CGameApp* COfflineStallMgr::App() const {
+    return m_pOwnerApp ? m_pOwnerApp : g_pGameApp;
+}
+
 COfflineStallMgr::COfflineStallMgr()
     : m_dwNextWorldID(0x80000000)  // Start high to avoid conflicts with normal entities
     , m_dwLastCleanupTime(0)
@@ -792,7 +796,7 @@ void COfflineStallMgr::Update(DWORD dwCurTime) {
         if (nowSpawn >= pInfo->tExpire) continue;
         
         // Check if player is still online
-        CPlayer* pOwner = g_pGameApp->GetPlayerByDBID(pInfo->dwChaID);
+        CPlayer* pOwner = App()->GetPlayerByDBID(pInfo->dwChaID);
         if (!pOwner && pInfo->byItemCount > 0) {
             // Player disconnected and stall still has items — safe to spawn NPC now
             stallsToActivate.push_back(pInfo);
@@ -915,7 +919,7 @@ bool COfflineStallMgr::CreateVirtualNPC(SOfflineStallInfo* pInfo) {
     if (!pInfo) return false;
     
     // Find the map by name
-    CMapRes* pMapRes = g_pGameApp->FindMapByName(pInfo->szMapName);
+    CMapRes* pMapRes = App()->FindMapByName(pInfo->szMapName);
     if (!pMapRes) {
         // Map not on this server — expected in multi-server setups
         pInfo->bMapNotFound = true;

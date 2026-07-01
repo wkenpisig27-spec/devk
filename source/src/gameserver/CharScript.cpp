@@ -5002,7 +5002,7 @@ inline int lua_GetRoleByID(lua_State* L) {
 		return 0;
 	}
 	DWORD dwChaDBID = (DWORD)lua_tonumber(L, 1);
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(dwChaDBID);
+	CPlayer* pPlayer = AppFromNoticeChar()->GetPlayerByDBID(dwChaDBID);
 	if (pPlayer) {
 		CCharacter* pCha = (CCharacter*)pPlayer->GetMainCha();
 		LB_PushCha(L, (CCharacter*)pCha);
@@ -5412,9 +5412,9 @@ inline int lua_DealAllInGuild(lua_State* L) {
 
 	if (lua_isstring(L, 3)) {
 		const char* luaParam = lua_tostring(L, 3);
-		g_pGameApp->DealAllInGuild(guildID, luaFunc, luaParam);
+		AppFromNoticeChar()->DealAllInGuild(guildID, luaFunc, luaParam);
 	} else {
-		g_pGameApp->DealAllInGuild(guildID, luaFunc, "");
+		AppFromNoticeChar()->DealAllInGuild(guildID, luaFunc, "");
 	}
 
 	return 0;
@@ -5429,7 +5429,7 @@ inline int lua_GetPlayerByName(lua_State* L) {
 		return 0;
 	}
 	const char* chaName = lua_tostring(L, 1);
-	CCharacter* pCha = g_pGameApp->FindPlayerChaByNameLua(chaName);
+	CCharacter* pCha = AppFromNoticeChar()->FindPlayerChaByNameLua(chaName);
 	if (pCha) {
 		LB_PushCha(L, (CCharacter*)pCha);
 		return 1;
@@ -5447,7 +5447,7 @@ inline int lua_GetPlayerByActName(lua_State* L) {
 	}
 	const char* chaName = lua_tostring(L, 1);
 	CCharacter* pChas[3];
-	int count = g_pGameApp->FindPlayerChaByActNameLua(chaName, pChas);
+	int count = AppFromNoticeChar()->FindPlayerChaByActNameLua(chaName, pChas);
 	if (count > 0) {
 		for (int i = 0; i < count; i++) {
 			LB_PushCha(L, (CCharacter*)pChas[i]);
@@ -5562,7 +5562,7 @@ int lua_BanActRole(lua_State* L) {
 	}
 	// pChar->PopupNotice("Ban! Reason: Violation of server rules.");
 	KICKPLAYER(pChar->GetPlayer(), 1);
-	g_pGameApp->BanAccount(actName);
+	AppFromNoticeChar()->BanAccount(actName);
 	return 0;
 }
 
@@ -5577,7 +5577,7 @@ int lua_BanActName(lua_State* L) {
 		E_LUANULL;
 		return 0;
 	}
-	g_pGameApp->BanAccount(actName);
+	AppFromNoticeChar()->BanAccount(actName);
 	return 0;
 }
 
@@ -5592,7 +5592,7 @@ int lua_UnbanAct(lua_State* L) {
 		E_LUANULL;
 		return 0;
 	}
-	g_pGameApp->UnbanAccount(actName);
+	AppFromNoticeChar()->UnbanAccount(actName);
 	return 0;
 }
 
@@ -5608,7 +5608,7 @@ int lua_MuteCha(lua_State* L) {
 		E_LUANULL;
 		return 0;
 	}
-	// g_pGameApp->UnbanAccount(pCCha->GetPlyMainCha(), );
+	// AppFromNoticeChar()->UnbanAccount(pCCha->GetPlyMainCha(), );
 	return 0;
 }
 
@@ -5677,7 +5677,7 @@ inline int lua_SetGlobalRates(lua_State* L) {
 	float droprate = lua_tonumber(L, 1);
 	float exprate = lua_tonumber(L, 2);
 	if (droprate && exprate) {
-		g_pGameApp->SetGlobalRates(droprate, exprate);
+		AppFromNoticeChar()->SetGlobalRates(droprate, exprate);
 		return 1;
 	}
 	return 0;

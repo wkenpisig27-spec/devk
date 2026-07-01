@@ -194,7 +194,7 @@ BOOL CTalkNpc::Load(const CNpcRecord& recNpc, const CChaRecord& recChar) {
 	strncpy(m_name, recNpc.szName, 32 - 1);
 	strncpy(m_szMsgProc, recNpc.szMsgProc, ROLE_MAXSIZE_MSGPROC - 1);
 
-	m_ID = g_pGameApp->m_Ident.GetID();
+	m_ID = GetOwnerApp()->m_Ident.GetID();
 	Char szLogName[defLOG_NAME_LEN] = "";
 	sprintf(szLogName, "Cha-%s+%u", GetName(), GetID());
 	m_CLog.SetLogName(szLogName);

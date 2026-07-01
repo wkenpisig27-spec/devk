@@ -102,13 +102,13 @@ void TL(int nType, const char* pszCha1, const char* pszCha2, const char* pszTrad
 		}
 
 		LG(strName.c_str(), "%7s [%17s] [%17s] [%s]\n", g_TradeName[nType], pszCha1, pszCha2, pszTrade);
-		g_pGameApp->Log(g_TradeName[nType], pszCha1, "", pszCha2, "", pszTrade);
+		AppFromNoticeChar()->Log(g_TradeName[nType], pszCha1, "", pszCha2, "", pszTrade);
 		sInit = 0;
 	} else {
 		// Add by lark.li 20080324 begin
 		// static CThrdLock lock;
 		// lock.Lock();
-		// g_pGameApp->TradeLog(g_TradeName[nType], pszCha1, pszCha2,pszTrade);
+		// AppFromNoticeChar()->TradeLog(g_TradeName[nType], pszCha1, pszCha2,pszTrade);
 		// lock.Unlock();
 		// End
 	}
@@ -179,9 +179,9 @@ int lua_AddHelpNPC(lua_State* L) {
 	const char* pszName = (const char*)lua_tostring(L, 1); // 获得帮助NPC的名字
 
 	// 按名字查找NPC对象
-	g_pGameApp->BeginGetTNpc();
+	AppFromNoticeChar()->BeginGetTNpc();
 	mission::CTalkNpc* pCTNpc;
-	while (pCTNpc = g_pGameApp->GetNextTNpc()) {
+	while (pCTNpc = AppFromNoticeChar()->GetNextTNpc()) {
 		if (!strcmp(pCTNpc->GetName(), pszName))
 			AddHelpNPC(pCTNpc);
 	}
@@ -208,7 +208,7 @@ int lua_TestDBLog(lua_State* L) {
 	MPTimer t;
 	t.Begin();
 	for (int i = 0; i < nCnt; i++) {
-		g_pGameApp->Log("newtest", "abcdefg", "1234567", "000000", "qqqppp", "abcdefghijklmnopqrstuvwxyz");
+		AppFromNoticeChar()->Log("newtest", "abcdefg", "1234567", "000000", "qqqppp", "abcdefghijklmnopqrstuvwxyz");
 	}
 	LG("dblog", "Add Time = %d\n", t.End());
 
@@ -227,7 +227,7 @@ int lua_GetMapDataByName(lua_State* L) {
 		PARAM_ERROR;
 		return 0;
 	}
-	CMapRes* pMap = g_pGameApp->FindMapByName(mpName);
+	CMapRes* pMap = AppFromNoticeChar()->FindMapByName(mpName);
 	if (pMap) {
 		lua_pushlightuserdata(L, (CMapRes*)pMap);
 		return 1;

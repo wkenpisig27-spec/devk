@@ -936,7 +936,7 @@ void CMoveAble::NotiSelfMov() {
 bool CMoveAble::GetMoveTargetShape(Square* pSTarShape) {
 	T_B if (m_SMoveInit.STargetInfo.chType == 1) // 目标是物体
 	{
-		Entity* pTarObj = g_pGameApp->IsMapEntity(m_SMoveInit.STargetInfo.lInfo1, m_SMoveInit.STargetInfo.lInfo2);
+		Entity* pTarObj = GetOwnerApp() ? GetOwnerApp()->IsMapEntity(m_SMoveInit.STargetInfo.lInfo1, m_SMoveInit.STargetInfo.lInfo2) : nullptr;
 		if (!pTarObj)
 			return false;
 		if (pSTarShape) {

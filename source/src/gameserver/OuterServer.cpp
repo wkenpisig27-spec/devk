@@ -106,7 +106,7 @@ void OuterServer::ProcessData(DataSocket* datasock, RPacket pk) {
 		break;
 	}
 
-	g_pGameApp->ProcessNetMsg(msg_id, gt, pk);
+	g_gmsvr->GetGameApp()->ProcessNetMsg(msg_id, gt, pk);
 	T_E
 }
 
@@ -136,9 +136,10 @@ int ToGateServer::Process() {
 		// 对未连接的 GateServer 进行连接
 		if (dwCurTick - dwTick >= dwConnectTick) {
 			dwTick = dwCurTick;
-			for (int i = 0; i < g_pGameApp->m_gatenum; i++)
-				if (!g_pGameApp->m_gate[i].IsValid())
-					g_gmsvr->LoginGate(&g_pGameApp->m_gate[i]);
+			CGameApp* pApp = g_gmsvr->GetGameApp();
+			for (int i = 0; pApp && i < pApp->m_gatenum; i++)
+				if (!pApp->m_gate[i].IsValid())
+					g_gmsvr->LoginGate(&pApp->m_gate[i]);
 		}
 	}
 

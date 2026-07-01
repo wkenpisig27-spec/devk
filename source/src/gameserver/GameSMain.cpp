@@ -228,6 +228,7 @@ BOOL GameServer_Begin() {
 	l_comm = ThreadPool::CreatePool(8, 8, 512); //,THREAD_PRIORITY_ABOVE_NORMAL);
 
 	g_gmsvr = new GameServerApp(0, l_comm);
+	g_gmsvr->BindGameApp(g_pGameApp);
 
 	// 启动 GateServer 连接线程
 	// LG("init", "启动Gate服务器连接线程...\n");

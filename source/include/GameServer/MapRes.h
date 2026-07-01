@@ -22,6 +22,7 @@
 class CChaSpawn;
 class CMapSwitchEntitySpawn;
 class CNpcSpawn;
+class CGameApp;
 class SubMap;
 
 namespace mission {
@@ -116,6 +117,8 @@ public:
 	virtual ~CMapRes();
 
 	bool Init(void);
+	void BindOwnerApp(CGameApp* pApp) { m_pOwnerApp = pApp; }
+	CGameApp* GetOwnerApp() const { return m_pOwnerApp; }
 	bool IsValid(void) { return m_bValid; }
 	bool IsOpen(void) { return m_bValid && m_chState == enumMAP_STATE_OPEN; }
 	bool SetCopyNum(dbc::Short sCpyNum);
@@ -261,6 +264,8 @@ private:
 	dbc::Short m_sUsedCopySearch;
 
 	bool m_bGuildWar;
+
+	CGameApp* m_pOwnerApp = nullptr;
 };
 
 // 地图ID产生器，根据地图名唯一性保证ID唯一,方便地图操作

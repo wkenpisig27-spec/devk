@@ -97,7 +97,8 @@ void CStateCell::DelCharacter(CChaListNode* pCEntNode) {
 		pCCha->m_CSkillState.ResetChangeFlag();
 		for (unsigned char j = 0; j < m_CSkillState.GetStateNum(); j++) {
 			pSStateUnit = m_CSkillState.GetSStateByNum(j);
-			lOnTime = g_pGameApp->GetSStateTraOnTime(pSStateUnit->GetStateID(), pSStateUnit->GetStateLv());
+			CGameApp* pApp = pCCha->GetOwnerApp();
+			lOnTime = pApp ? pApp->GetSStateTraOnTime(pSStateUnit->GetStateID(), pSStateUnit->GetStateLv()) : 0;
 			ResetStateToCharacter(j, pCCha, lOnTime, enumSSTATE_ADD_EQUALORLARGER, false);
 		}
 		pCCha->SynSkillStateToEyeshot();
@@ -221,7 +222,8 @@ bool CStateCell::ResetStateToCharacter(unsigned char uchStateNo, CCharacter* pCC
 	pSStateUnit = m_CSkillState.GetSStateByNum(uchStateNo);
 	if (!pSStateUnit)
 		return false;
-	pCSrcEnt = g_pGameApp->IsValidEntity(pSStateUnit->ulSrcWorldID, pSStateUnit->lSrcHandle);
+	CGameApp* pApp = pCCha->GetOwnerApp();
+	pCSrcEnt = pApp ? pApp->IsValidEntity(pSStateUnit->ulSrcWorldID, pSStateUnit->lSrcHandle) : nullptr;
 	if (pCSrcEnt) {
 		pCSrcCha = pCSrcEnt->IsCharacter();
 		if (pCCha->m_CSkillState.NeedResetState(pSStateUnit->GetStateID())) {
@@ -245,7 +247,8 @@ bool CStateCell::AddStateToCharacter(unsigned char uchStateNo, CCharacter* pCCha
 	pSStateUnit = m_CSkillState.GetSStateByNum(uchStateNo);
 	if (!pSStateUnit)
 		return false;
-	pCSrcEnt = g_pGameApp->IsValidEntity(pSStateUnit->ulSrcWorldID, pSStateUnit->lSrcHandle);
+	CGameApp* pApp = pCCha->GetOwnerApp();
+	pCSrcEnt = pApp ? pApp->IsValidEntity(pSStateUnit->ulSrcWorldID, pSStateUnit->lSrcHandle) : nullptr;
 	if (pCSrcEnt) {
 		pCSrcCha = pCSrcEnt->IsCharacter();
 		if (pCCha->IsRightSkillTar(pCSrcCha, pSStateUnit->chObjType, pSStateUnit->chObjHabitat, pSStateUnit->chEffType, true))
@@ -264,7 +267,8 @@ bool CStateCell::AddStateToCharacter(SSkillStateUnit* pSStateUnit, CCharacter* p
 	T_B if (!pCCha->IsLiveing()) return false;
 	CCharacter* pCSrcCha;
 	Entity* pCSrcEnt;
-	pCSrcEnt = g_pGameApp->IsValidEntity(pSStateUnit->ulSrcWorldID, pSStateUnit->lSrcHandle);
+	CGameApp* pApp = pCCha->GetOwnerApp();
+	pCSrcEnt = pApp ? pApp->IsValidEntity(pSStateUnit->ulSrcWorldID, pSStateUnit->lSrcHandle) : nullptr;
 	if (pCSrcEnt) {
 		pCSrcCha = pCSrcEnt->IsCharacter();
 		if (pCCha->IsRightSkillTar(pCSrcCha, pSStateUnit->chObjType, pSStateUnit->chObjHabitat, pSStateUnit->chEffType, true))
@@ -285,12 +289,21 @@ void CStateCell::StateRun(unsigned int ulCurTick, SubMap* pCMap) {
 	SSkillStateUnit* pSStateUnit;
 	int lOnTime;
 	CChaListNode* pNode;
+	CGameApp* pApp = nullptr;
+	if (m_pCChaIn && m_pCChaIn->m_pCCha) {
+		pApp = m_pCChaIn->m_pCCha->GetOwnerApp();
+	} else if (m_pCChaCross && m_pCChaCross->m_pCCha) {
+		pApp = m_pCChaCross->m_pCCha->GetOwnerApp();
+	}
+	if (!pApp) {
+		pApp = g_pGameApp;
+	}
 	m_CSkillState.BeginGetState();
 	while (pSStateUnit = m_CSkillState.GetNextState()) {
 		if (pSStateUnit->lOnTick > 0) {
 			if (ulCurTick - pSStateUnit->ulStartTick >= (unsigned int)pSStateUnit->lOnTick * 1000) // 状态计时完成
 			{
-				lOnTime = g_pGameApp->GetSStateTraOnTime(pSStateUnit->GetStateID(), pSStateUnit->GetStateLv());
+				lOnTime = pApp ? pApp->GetSStateTraOnTime(pSStateUnit->GetStateID(), pSStateUnit->GetStateLv()) : 0;
 				pNode = m_pCChaIn;
 				while (pNode) {
 					AddStateToCharacter(pSStateUnit, pNode->m_pCCha, lOnTime, enumSSTATE_ADD_EQUALORLARGER);

@@ -1,7 +1,7 @@
 ﻿#include "Character.h"
 #include "lua_bridge.h"
 #include "script.h"
-#include "GameApp.h"
+#include "GameAppAccess.h"
 #include "HarmRec.h"
 #include "GameAppNet.h"
 #include "SubMap.h"
@@ -100,7 +100,7 @@ inline int lua_SetCurMap(lua_State* L) {
 	}
 
 	const char* pszName = (const char*)lua_tostring(L, 1);
-	CMapRes* pMap = g_pGameApp->FindMapByName(pszName);
+	CMapRes* pMap = AppFromNoticeChar()->FindMapByName(pszName);
 	if (pMap == nullptr) {
 		// LG("lua_ai", "没有找到指定地图[%s], 维持原地图!\n", pszName);
 		LG("lua_ai", "can't find pointer map[%s], keep former map!\n", pszName);
@@ -316,7 +316,7 @@ inline int lua_ChaMoveToSleep(lua_State* L) {
 	CCharacter* pCCha = LB_GetCha(L, 1);
 	if (pCCha) {
 		// char szInfo[255]; sprintf(szInfo, "%s回去休眠,ChaMoveToSleep\n", pCCha->GetName());
-		// g_pGameApp->WorldNotice(szInfo);
+		// AppFromNoticeChar()->WorldNotice(szInfo);
 		int x = (int)lua_tonumber(L, 2);
 		int y = (int)lua_tonumber(L, 3);
 		Point Path[2] = {pCCha->GetPos(), {x, y}};
@@ -1903,7 +1903,7 @@ inline int lua_UnlockItem(lua_State* L) {
 	char* pszChaName = (char*)lua_tostring(L, 1);
 	int iItemDBID = (int)lua_tonumber(L, 2);
 
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByMainChaName(pszChaName);
+	CPlayer* pPlayer = AppFromNoticeChar()->GetPlayerByMainChaName(pszChaName);
 	if (pPlayer) {
 		int iCapacity = pPlayer->GetMainCha()->m_CKitbag.GetCapacity();
 

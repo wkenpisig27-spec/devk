@@ -53,6 +53,7 @@ SubMap::~SubMap() {
 bool SubMap::Init(CMapRes* pCMapRes, dbc::Short sCopyNO) {
 	T_B
 		m_pCMapRes = pCMapRes;
+	m_pOwnerApp = pCMapRes ? pCMapRes->GetOwnerApp() : nullptr;
 	m_pCBaseRange = 0;
 
 	// 状态单元
@@ -133,7 +134,7 @@ CItem* SubMap::ItemSpawn(const SItemGrid* pItemInfo, Long lPosX, Long lPosY, Cha
 	pCItemRec = GetItemRecordInfo(pItemInfo->sID);
 	if (!pCItemRec)
 		return 0;
-	pCItem = g_pGameApp->GetNewItem();
+	pCItem = GetOwnerApp()->GetNewItem();
 	if (!pCItem)
 		return 0;
 	memcpy(&pCItem->m_SGridContent, pItemInfo, sizeof(SItemGrid));
@@ -148,7 +149,7 @@ CItem* SubMap::ItemSpawn(const SItemGrid* pItemInfo, Long lPosX, Long lPosY, Cha
 		pCItem->SetEvent(*pCEvent);
 	pCItem->SetName(pCItemRec->szName);
 	pCItem->SetCat(pItemInfo->sID);
-	pCItem->m_ID = g_pGameApp->m_Ident.GetID();
+	pCItem->m_ID = GetOwnerApp()->m_Ident.GetID();
 	pCItem->SetSpawnType(chSpawnType);
 	pCItem->SetFromID(lFromEntityID);
 	Square SShape = {{lPosX, lPosY}, 0};
@@ -200,7 +201,7 @@ CCharacter* SubMap::ChaSpawn(Long lChaInfoID, Char chCtrlType, Short sAngle, Poi
 	pCChaRecord = GetChaRecordInfo(lChaInfoID);
 	if (pCChaRecord == nullptr)
 		return 0;
-	pCCha = g_pGameApp->GetNewCharacter();
+	pCCha = GetOwnerApp()->GetNewCharacter();
 	if (!pCCha)
 		return 0;
 	pCCha->m_CChaAttr.Init(lChaInfoID);
@@ -209,7 +210,7 @@ CCharacter* SubMap::ChaSpawn(Long lChaInfoID, Char chCtrlType, Short sAngle, Poi
 	pCCha->setAttr(ATTR_CHATYPE, chCtrlType);
 	pCCha->m_pCChaRecord = pCChaRecord;
 	pCCha->SetCat((short)(pCCha->m_pCChaRecord->lID));
-	pCCha->SetID(g_pGameApp->m_Ident.GetID());
+	pCCha->SetID(GetOwnerApp()->m_Ident.GetID());
 	pCCha->m_AIType = (BYTE)(pCChaRecord->lAiNo);
 	pCCha->m_sChaseRange = (short)(pCChaRecord->lCDis);
 	pCCha->SetAngle(sAngle);

@@ -441,7 +441,7 @@ BOOL CCharBoat::Create(CCharacter& owner, USHORT sBoatID, USHORT sBerthID) {
 		return FALSE;
 	}
 
-	CCharacter* pBoat = g_pGameApp->GetNewCharacter();
+	CCharacter* pBoat = owner.GetOwnerApp()->GetNewCharacter();
 	if (pBoat == nullptr) {
 		// owner.SystemNotice( "创建船只失败，分配船只内存失败!ID[%d]", sBoatID );
 		owner.SystemNotice(RES_STRING(GM_CHARBOAT_CPP_00013), sBoatID);
@@ -1066,7 +1066,7 @@ BOOL CCharBoat::LoadBoat(CCharacter& owner, char chType) {
 
 CCharacter* CCharBoat::SummonBoat(USHORT sBoatID) {
 	T_B
-		CCharacter* pBoat = g_pGameApp->GetNewCharacter();
+		CCharacter* pBoat = ActiveGameApp()->GetNewCharacter();
 	if (pBoat == nullptr) {
 		// LG( "monsterboat_error", "角色上线装载船只分配船只内存失败!" );
 		LG("monsterboat_error", "when character online,loading boat and assign memory failed ");
@@ -1186,7 +1186,7 @@ BOOL CCharBoat::CreateBoat(CCharacter& owner, DWORD dwBoatID, char chType) {
 		return TRUE;
 	}
 
-		CCharacter* pBoat = g_pGameApp->GetNewCharacter();
+		CCharacter* pBoat = owner.GetOwnerApp()->GetNewCharacter();
 	if (pBoat == nullptr) {
 		// owner.SystemNotice( "角色上线装载船只分配船只内存失败!" );
 		owner.SystemNotice(RES_STRING(GM_CHARBOAT_CPP_00034));

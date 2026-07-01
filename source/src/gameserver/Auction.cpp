@@ -1,7 +1,7 @@
 ﻿// add by ALLEN 2007-10-19
 #include "stdafx.h"
 #include "Auction.h"
-#include "GameApp.h"
+#include "GameAppAccess.h"
 #include "GameDB.h"
 
 CAuctionSystem g_AuctionSystem;
@@ -54,7 +54,7 @@ BOOL CAuctionSystem::EndAuction(short sItemID) {
 	if (pAucItem->GetCurChaID() > 0) {
 		BOOL bOnline = false;
 		CCharacter* pCha = nullptr;
-		CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(pAucItem->GetCurChaID());
+		CPlayer* pPlayer = AppFromNoticeChar()->GetPlayerByDBID(pAucItem->GetCurChaID());
 		if (pPlayer)
 			pCha = pPlayer->GetMainCha();
 		if (pCha) {

@@ -4045,7 +4045,7 @@ bool CTableGuild::Approve(CCharacter* pCha, uLong chaid) {
 	char msg[SQL_MAXLEN];
 	_snprintf_s(msg, sizeof(msg), _TRUNCATE, "%s has been accepted to the guild!", cha_name.c_str());
 	DWORD guildIDDword = pCha->GetGuildID();
-	g_pGameApp->GuildNotice(guildIDDword, msg);
+	AppFromCharacter(pCha)->GuildNotice(guildIDDword, msg);
 
 	return true;
 }
@@ -4247,7 +4247,7 @@ bool CTableGuild::Leave(CCharacter* pCha) {
 	char msg[SQL_MAXLEN];
 	_snprintf_s(msg, sizeof(msg), _TRUNCATE, "%s has left the guild!", pCha->GetName());
 	DWORD guildIDDword = pCha->GetGuildID();
-	g_pGameApp->GuildNotice(guildIDDword, msg);
+	AppFromCharacter(pCha)->GuildNotice(guildIDDword, msg);
 
 	pCha->SetGuildID(0);
 	pCha->SetGuildName("");

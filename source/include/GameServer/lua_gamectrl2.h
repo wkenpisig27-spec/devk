@@ -44,7 +44,7 @@ inline int lua_GetTeamCha(lua_State* L) {
 		return 0;
 	}
 
-	CPlayer* pMember = g_pGameApp->GetPlayerByDBID(pPlayer->GetTeamMemberDBID(nNo));
+	CPlayer* pMember = AppFromCharacter(pCha)->GetPlayerByDBID(pPlayer->GetTeamMemberDBID(nNo));
 	if (!pMember) {
 		// LG("harm", "该位置[%d], 队员不存在!\n", nNo);
 		return 0;
@@ -153,7 +153,7 @@ inline int lua_SetChaAttrMax(lua_State* L) {
 	if (nNo < ATTR_MAX_NUM) {
 		LONG64 lValue = (LONG64)lua_tonumber(L, 2);
 		g_lMaxChaAttr[nNo] = lValue;
-		g_pGameApp->ChaAttrMaxValInit(true);
+		ActiveGameApp()->ChaAttrMaxValInit(true);
 	}
 	return 0;
 	T_E

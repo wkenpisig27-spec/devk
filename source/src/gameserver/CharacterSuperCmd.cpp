@@ -103,7 +103,7 @@ BOOL CCharacter::DoGMCommand(const char* pszCmd, const char* pszParam) {
 		return TRUE;
 	} else if (strCmd == g_Command.m_cNotice) // 系统通告
 	{
-		g_pGameApp->WorldNotice(pszParam);
+		GetOwnerApp()->WorldNotice(pszParam);
 		LG("ServerRunLog", "ChaID: %i, ChaName: %s, CMD: %s, Param: %s\n", GetPlayer()->GetID(), GetName(), pszCmd, pszParam);
 		return TRUE;
 	} else if (strCmd == g_Command.m_cHide) // 隐身
@@ -212,11 +212,11 @@ BOOL CCharacter::DoGMCommand(const char* pszCmd, const char* pszParam) {
 		cChar* pszSkillInfo = "skillinfo";
 		cChar* pszItemInfo = "iteminfo";
 		if (!strcmp(szComParam, pszChaInfo))
-			g_pGameApp->LoadCharacterInfo();
+			GetOwnerApp()->LoadCharacterInfo();
 		else if (!strcmp(szComParam, pszSkillInfo))
-			g_pGameApp->LoadSkillInfo();
+			GetOwnerApp()->LoadSkillInfo();
 		else if (!strcmp(szComParam, pszItemInfo))
-			g_pGameApp->LoadItemInfo();
+			GetOwnerApp()->LoadItemInfo();
 		else {
 			SystemNotice("Available argument: iteminfo, skillinfo, and characterinfo", szComParam);
 			return TRUE;
@@ -269,14 +269,14 @@ BOOL CCharacter::DoGMCommand(const char* pszCmd, const char* pszParam) {
 		return TRUE;
 	} else if (!strcmp(szComHead, g_Command.m_cGamesvrstop)) // 结束游戏服务器进程
 	{
-		g_pGameApp->m_CTimerReset.Begin(1000);
-		g_pGameApp->m_ulLeftSec = atoi(szComParam);
+		GetOwnerApp()->m_CTimerReset.Begin(1000);
+		GetOwnerApp()->m_ulLeftSec = atoi(szComParam);
 		LG("ServerRunLog", "ChaID: %i, ChaName: %s, CMD: %s, Param: %s\n", GetPlayer()->GetID(), GetName(), pszCmd, pszParam);
 		return TRUE;
 	} else if (!strcmp(szComHead, g_Command.m_cUpdateall)) // 脚本lua更新
 	{
 		LoadScript();
-		if (g_pGameApp->ReloadNpcInfo(*this)) {
+		if (GetOwnerApp()->ReloadNpcInfo(*this)) {
 			// Force full Lua GC after NPC data rebuild to prevent memory overflow
 			// on repeated &updateall usage. NPC init creates many temp tables.
 			int memBefore = lua_gc(g_pLuaState, LUA_GCCOUNT, 0);
@@ -311,7 +311,7 @@ BOOL CCharacter::DoGMCommand(const char* pszCmd, const char* pszParam) {
 	} else if (!strcmp(szComHead, g_Command.m_cMisreload)) // 任务脚本更新
 	{
 		LoadScript();
-		if (g_pGameApp->ReloadNpcInfo(*this)) {
+		if (GetOwnerApp()->ReloadNpcInfo(*this)) {
 			// Force full Lua GC after NPC data rebuild (same as &updateall)
 			int memBefore = lua_gc(g_pLuaState, LUA_GCCOUNT, 0);
 			lua_gc(g_pLuaState, LUA_GCCOLLECT, 0);
@@ -610,7 +610,7 @@ BOOL CCharacter::DoGMCommand(const char* pszCmd, const char* pszParam) {
 		int n = Util_ResolveTextLine(szComParam, strList, 10, ',');
 		LONG64 lAddExp = _atoi64(strList[0].c_str());
 		if (n >= 2) {
-			CCharacter* pCCha = g_pGameApp->FindChaByName(strList[1].c_str());
+			CCharacter* pCCha = GetOwnerApp()->FindChaByName(strList[1].c_str());
 			if (!pCCha) {
 				SystemNotice("[addexp] Player '%s' not found on this server.", strList[1].c_str());
 				return FALSE;
@@ -637,7 +637,7 @@ BOOL CCharacter::DoGMCommand(const char* pszCmd, const char* pszParam) {
 
 		CCharacter* pTarget = this;
 		if (n >= 2) {
-			pTarget = g_pGameApp->FindChaByName(strList[1].c_str());
+			pTarget = GetOwnerApp()->FindChaByName(strList[1].c_str());
 			if (!pTarget) {
 				SystemNotice("[setlv] Player '%s' not found on this server.", strList[1].c_str());
 				return FALSE;
@@ -740,7 +740,7 @@ BOOL CCharacter::DoGMCommand(const char* pszCmd, const char* pszParam) {
 		LONG64 lAttrVal = _atoi64(strList[1].c_str());
 
 		if (n == 3)
-			pCCha = g_pGameApp->FindChaByID(Str2Int(strList[2]));
+			pCCha = GetOwnerApp()->FindChaByID(Str2Int(strList[2]));
 		if (!pCCha) {
 			// SystemNotice("没有搜索到目标或目标不是角色类对象!");
 			SystemNotice(RES_STRING(GM_CHARACTERSUPERCMD_CPP_00028));
@@ -827,7 +827,7 @@ BOOL CCharacter::DoGMCommand(const char* pszCmd, const char* pszParam) {
 
 		uLong ulWorldID = Str2Int(strList[0]);
 		short sAttrID = Str2Int(strList[1]);
-		CCharacter* pCCha = g_pGameApp->FindChaByID(ulWorldID);
+		CCharacter* pCCha = GetOwnerApp()->FindChaByID(ulWorldID);
 		if (!pCCha) {
 			// SystemNotice("没有搜索到目标或目标不是角色类对象!");
 			SystemNotice(RES_STRING(GM_CHARACTERSUPERCMD_CPP_00028));
@@ -955,7 +955,7 @@ BOOL CCharacter::DoGMCommand(const char* pszCmd, const char* pszParam) {
 		short sAddCap = Str2Int(strList[0]);
 		CCharacter* pCCha = this;
 		if (n == 2)
-			pCCha = g_pGameApp->FindChaByID(Str2Int(strList[1]));
+			pCCha = GetOwnerApp()->FindChaByID(Str2Int(strList[1]));
 		if (!pCCha) {
 			// SystemNotice("增加背包容量失败（找不到该角色）.!");
 			SystemNotice(RES_STRING(GM_CHARACTERSUPERCMD_CPP_00034));
@@ -994,11 +994,11 @@ BOOL CCharacter::DoGMCommand(const char* pszCmd, const char* pszParam) {
 			LG("ServerRunLog", "ChaID: %i, ChaName: %s, CMD: %s, Param: %s\n", GetPlayer()->GetID(), GetName(), pszCmd, pszParam);
 		return TRUE;
 	} else if (!strcmp(szComHead, "scroll")) {
-		g_pGameApp->ScrollNotice(szComParam, 2);
+		GetOwnerApp()->ScrollNotice(szComParam, 2);
 		return TRUE;
 	} else if (!strcmp(szComHead, "generatecharbag")) {
 		const char* charname = szComParam;
-		CCharacter* player = g_pGameApp->FindChaByName(charname);
+		CCharacter* player = GetOwnerApp()->FindChaByName(charname);
 		if (!player)
 			return FALSE;
 		CKitbag inventory[2];
@@ -1132,7 +1132,7 @@ BOOL CCharacter::DoGMCommand(const char* pszCmd, const char* pszParam) {
 		int ATTR_TYPE = Str2Int(strList[2]);
 		int ATTR_VALUE = Str2Int(strList[3]);
 		int TYPE = Str2Int(strList[4]);
-		CCharacter* player = g_pGameApp->FindChaByName(charname);
+		CCharacter* player = GetOwnerApp()->FindChaByName(charname);
 		if (!player)
 			return FALSE;
 		char buffer[32];
@@ -1151,13 +1151,13 @@ BOOL CCharacter::DoGMCommand(const char* pszCmd, const char* pszParam) {
 		return TRUE;
 	} else if (!strcmp(szComHead, "saveall")) {
 		// Force-save all online players on this GameServer instance to the database
-		g_pGameApp->SaveAllPlayer();
+		GetOwnerApp()->SaveAllPlayer();
 		SystemNotice("[saveall] All online players on this server have been saved.");
 		LG("ServerRunLog", "ChaID: %i, ChaName: %s, CMD: %s, Param: %s\n", GetPlayer()->GetID(), GetName(), pszCmd, pszParam);
 		return TRUE;
 	} else if (!strcmp(szComHead, "getid")) {
 		// Format: getid player_name  ->  returns the database char_id of the named player
-		CCharacter* pCCha = g_pGameApp->FindChaByName(szComParam);
+		CCharacter* pCCha = GetOwnerApp()->FindChaByName(szComParam);
 		if (!pCCha) {
 			SystemNotice("[getid] Player '%s' not found on this server.", szComParam);
 			return FALSE;
@@ -1181,7 +1181,7 @@ BOOL CCharacter::DoGMCommand(const char* pszCmd, const char* pszParam) {
 			SystemNotice("[give] Invalid quantity %d (must be 1-999).", sQty);
 			return FALSE;
 		}
-		CCharacter* pCCha = g_pGameApp->FindChaByName(szTargetName);
+		CCharacter* pCCha = GetOwnerApp()->FindChaByName(szTargetName);
 		if (!pCCha) {
 			SystemNotice("[give] Player '%s' not found on this server.", szTargetName);
 			return FALSE;
@@ -1222,9 +1222,9 @@ void CCharacter::DoCommand_CheckStatus(cChar* pszCommand, uLong ulLen) {
 	if (strCmd == "game_status") // 返回gameserver的状态
 	{
 		char szInfo[255];
-		sprintf(szInfo, "fps:%d tick:%d player:%d mgr:%d\n", g_pGameApp->m_dwFPS,
-				g_pGameApp->m_dwRunCnt, g_pGameApp->m_dwPlayerCnt,
-				g_pGameApp->m_dwActiveMgrUnit);
+		sprintf(szInfo, "fps:%d tick:%d player:%d mgr:%d\n", GetOwnerApp()->m_dwFPS,
+				GetOwnerApp()->m_dwRunCnt, GetOwnerApp()->m_dwPlayerCnt,
+				GetOwnerApp()->m_dwActiveMgrUnit);
 		SystemNotice(szInfo);
 	} else if (strCmd == "ping_game") // 查询角色到GameServer逻辑层的ping值
 	{

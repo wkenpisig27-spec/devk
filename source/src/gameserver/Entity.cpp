@@ -746,7 +746,7 @@ SubMap* Entity::GetSubMapFar(void) {
 		CCharacter* pCCha = this->IsCharacter();
 		if (pCCha) {
 			pCMainCha = pCCha->GetPlyMainCha();
-			CMapRes* pCMapRes = g_pGameApp->FindMapByName(pCMainCha->GetBirthMap(), true);
+			CMapRes* pCMapRes = GetOwnerApp()->FindMapByName(pCMainCha->GetBirthMap(), true);
 			if (pCMapRes)
 				pCMap = pCMapRes->GetCopy();
 		}

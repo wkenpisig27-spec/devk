@@ -46,7 +46,7 @@ inline int lua_CreateEventEntity(lua_State* L) {
 	DWORD dwxPos = (DWORD)lua_tonumber(L, 6);
 	DWORD dwyPos = (DWORD)lua_tonumber(L, 7);
 	USHORT sDir = (USHORT)lua_tonumber(L, 8);
-	pEntity = g_pGameApp->CreateEntity(byType);
+	pEntity = pMap->GetOwnerApp()->CreateEntity(byType);
 	if (!pMap || !pEntity) {
 		E_LUANULL;
 		return 0;

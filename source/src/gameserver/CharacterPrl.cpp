@@ -884,7 +884,7 @@ bool CCharacter::OpcodeHandle_CmRefreshData(void* ctx, DataSocket* /*sock*/, RPa
 	if (!reader.Long(lWorldID) || !reader.Long(lHandle)) {
 		return true;
 	}
-	Entity* pCEnt = g_pGameApp->IsLiveingEntity(lWorldID, lHandle);
+	Entity* pCEnt = cha->GetOwnerApp()->IsLiveingEntity(lWorldID, lHandle);
 	if (pCEnt) {
 		CCharacter* pCCha = pCEnt->IsCharacter();
 		if (pCCha && pCCha->GetPlayer() == cha->GetPlayer()) {
@@ -2075,7 +2075,7 @@ bool CCharacter::OpcodeHandle_CmVolunterOpen(void* ctx, DataSocket* /*sock*/, RP
 		return true;
 	}
 
-	int nVolNum = g_pGameApp->GetVolNum();
+	int nVolNum = cha->GetOwnerApp()->GetVolNum();
 	int nStart = 0;
 	short sRetNum = (nVolNum - nStart < sNum) ? (nVolNum - nStart) : sNum;
 	if (sRetNum < 0)
@@ -2089,7 +2089,7 @@ bool CCharacter::OpcodeHandle_CmVolunterOpen(void* ctx, DataSocket* /*sock*/, RP
 	WRITE_SHORT(packet, sPageNum);
 	WRITE_SHORT(packet, sRetNum);
 	for (int i = 0; i < sRetNum; i++) {
-		SVolunteer* pVolunteer = g_pGameApp->GetVolInfo(nStart + i);
+		SVolunteer* pVolunteer = cha->GetOwnerApp()->GetVolInfo(nStart + i);
 		WRITE_STRING(packet, pVolunteer->szName);
 		WRITE_LONG(packet, pVolunteer->lLevel);
 		WRITE_LONG(packet, pVolunteer->lJob);
@@ -2108,7 +2108,7 @@ bool CCharacter::OpcodeHandle_CmVolunterList(void* ctx, DataSocket* /*sock*/, RP
 		return true;
 	}
 
-	int nVolNum = g_pGameApp->GetVolNum();
+	int nVolNum = cha->GetOwnerApp()->GetVolNum();
 	int nStart = (sPage - 1) * sNum;
 	short sRetNum = (nVolNum - nStart < sNum) ? (nVolNum - nStart) : sNum;
 	if (sRetNum < 0)
@@ -2121,7 +2121,7 @@ bool CCharacter::OpcodeHandle_CmVolunterList(void* ctx, DataSocket* /*sock*/, RP
 	WRITE_SHORT(packet, sPage);
 	WRITE_SHORT(packet, sRetNum);
 	for (int i = 0; i < sRetNum; i++) {
-		SVolunteer* pVolunteer = g_pGameApp->GetVolInfo(nStart + i);
+		SVolunteer* pVolunteer = cha->GetOwnerApp()->GetVolInfo(nStart + i);
 		WRITE_STRING(packet, pVolunteer->szName);
 		WRITE_LONG(packet, pVolunteer->lLevel);
 		WRITE_LONG(packet, pVolunteer->lJob);
@@ -2202,7 +2202,7 @@ bool CCharacter::OpcodeHandle_CmVolunterAsr(void* ctx, DataSocket* /*sock*/, RPa
 	if (!reader.String(szName) || !szName) {
 		return true;
 	}
-	CCharacter* pSrcCha = g_pGameApp->FindChaByName(szName);
+	CCharacter* pSrcCha = cha->GetOwnerApp()->FindChaByName(szName);
 	if (!pSrcCha) {
 		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00012), szName);
 		return true;
@@ -2594,7 +2594,7 @@ bool CCharacter::OpcodeHandle_CmGuildPerm(void* ctx, DataSocket* /*sock*/, RPack
 	}
 
 	// update in game
-	CPlayer* targetPly = g_pGameApp->GetPlayerByDBID(targetID);
+	CPlayer* targetPly = cha->GetOwnerApp()->GetPlayerByDBID(targetID);
 	if (targetPly) {
 		targetPly->GetMainCha()->guildPermission = permission;
 	}
@@ -3895,7 +3895,7 @@ void CCharacter::BeginAction(RPACKET pk) {
 		}
 		Long lID = static_cast<Long>(lIDRaw);
 		Long lHandle = static_cast<Long>(lHandleRaw);
-		Entity* pCObj = g_pGameApp->IsLiveingEntity(lID, lHandle);
+		Entity* pCObj = GetOwnerApp()->IsLiveingEntity(lID, lHandle);
 		if (!pCObj) {
 			// m_CLog.Log("?????????\n");
 			m_CLog.Log("it inexistent this entity in this map");

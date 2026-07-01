@@ -455,7 +455,7 @@ void CPlayer::NoticeTeamLeaderID(void) {
 
 // 获得玩家同队的成员角色
 CCharacter* CPlayer::GetTeamMemberCha(int nNo) {
-	CPlayer* pOther = g_pGameApp->GetPlayerByDBID(_Team[nNo].m_dwDBChaId);
+	CPlayer* pOther = GetOwnerApp()->GetPlayerByDBID(_Team[nNo].m_dwDBChaId);
 	if (!pOther)
 		return 0;
 	return pOther->GetCtrlCha();
@@ -465,7 +465,7 @@ CPlayer* CPlayer::GetNextTeamPly(void) {
 	Short sMemCnt = (Short)GetTeamMemberCnt();
 	CPlayer* pCPly;
 	while (m_sGetTeamPlyCount < sMemCnt) {
-		pCPly = g_pGameApp->GetPlayerByDBID(_Team[m_sGetTeamPlyCount++].m_dwDBChaId);
+		pCPly = GetOwnerApp()->GetPlayerByDBID(_Team[m_sGetTeamPlyCount++].m_dwDBChaId);
 		if (pCPly)
 			return pCPly;
 	}
@@ -496,7 +496,7 @@ void CPlayer::ClearChallengeObj(bool bAll) {
 			chLoop = MAX_TEAM_MEMBER * 2;
 		CPlayer* pCPly;
 		for (Char i = 0; i < chLoop; i++) {
-			pCPly = g_pGameApp->IsValidPlayer(GetChallengeParam(i * 2 + 2), GetChallengeParam(i * 2 + 2 + 1));
+			pCPly = GetOwnerApp()->IsValidPlayer(GetChallengeParam(i * 2 + 2), GetChallengeParam(i * 2 + 2 + 1));
 			if (!pCPly)
 				continue;
 			pCPly->SetChallengeType(enumFIGHT_NONE);
