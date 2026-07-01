@@ -317,8 +317,11 @@ CGameApp::CGameApp()
 
 CGameApp::~CGameApp() {
 	T_B
-		// Shutdown BossTimer system first (saves state)
-		BossTimer::Shutdown();
+		ShutdownActivePlayers();
+	ReleaseRemainingWorldEntities();
+
+	// Shutdown BossTimer system first (saves state)
+	BossTimer::Shutdown();
 
 		// Log("关闭", "haha", "", "" ,"", "");
 		Log("close", "haha", "", "", "", "");
@@ -356,6 +359,7 @@ CGameApp::~CGameApp() {
 
 	m_vecVolunteerList.clear();
 	_PlayerIdxFast.clear();
+	_PlayerIdxGen.clear();
 	T_E
 }
 
@@ -1346,6 +1350,73 @@ void CGameApp::BeginGetTNpc(void) {
 
 mission::CTalkNpc* CGameApp::GetNextTNpc(void) {
 	T_B return m_pCEntSpace->GetNextTNpc();
+	T_E
+}
+
+void CGameApp::ShutdownActivePlayers(void) {
+	T_B
+	std::vector<CPlayer*> playersToLogout;
+
+	BEGINGETGATE();
+	GateServer* pGateServer = nullptr;
+	while (pGateServer = GETNEXTGATE()) {
+		if (!BEGINGETPLAYER(pGateServer)) {
+			continue;
+		}
+
+		CPlayer* pCPlayer = nullptr;
+		int nCount = 0;
+		while (pCPlayer = (CPlayer*)GETNEXTPLAYER(pGateServer)) {
+			if (++nCount > GETPLAYERCOUNT(pGateServer)) {
+				LG("player chain list error", "ShutdownActivePlayers: player list walk exceeded count\n");
+				break;
+			}
+			playersToLogout.push_back(pCPlayer);
+		}
+	}
+
+	for (CPlayer* pPlayer : playersToLogout) {
+		if (pPlayer && pPlayer->IsValid()) {
+			GoOutGame(pPlayer, true);
+		}
+	}
+	T_E
+}
+
+void CGameApp::ReleaseRemainingWorldEntities(void) {
+	T_B
+	if (!m_pCEntSpace) {
+		return;
+	}
+
+	std::vector<LONG> entityHandles;
+
+	m_pCEntSpace->BeginGetCha();
+	while (CCharacter* pCha = m_pCEntSpace->GetNextCha()) {
+		if (pCha->GetSubMap()) {
+			entityHandles.push_back(pCha->GetHandle());
+		}
+	}
+
+	m_pCEntSpace->BeginGetItem();
+	while (CItem* pItem = m_pCEntSpace->GetNextItem()) {
+		if (pItem->GetSubMap()) {
+			entityHandles.push_back(pItem->GetHandle());
+		}
+	}
+
+	m_pCEntSpace->BeginGetTNpc();
+	while (mission::CTalkNpc* pNpc = m_pCEntSpace->GetNextTNpc()) {
+		if (pNpc->GetSubMap()) {
+			entityHandles.push_back(pNpc->GetHandle());
+		}
+	}
+
+	for (LONG handle : entityHandles) {
+		if (Entity* pEnt = m_pCEntSpace->GetEntity(handle)) {
+			pEnt->Free();
+		}
+	}
 	T_E
 }
 

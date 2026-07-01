@@ -227,6 +227,8 @@ public:
 
 	void NotiGameReset(unsigned int ulLeftSec);
 	void SaveAllPlayer(void);
+	void ShutdownActivePlayers(void);
+	void ReleaseRemainingWorldEntities(void);
 
 	void SetEntityEnableLog(bool bValid = true);
 	CSkillTempData* GetSkillTData(short sSkillNo, char chSkillLv);
@@ -335,6 +337,7 @@ protected:
 	
 	// Performance optimizations: use unordered_map for O(1) lookups instead of std::map O(log n)
 	std::unordered_map<DWORD, CPlayer*> _PlayerIdxFast; // Fast lookup table
+	std::unordered_map<DWORD, uint32_t> _PlayerIdxGen;  // Generation at index registration
 	std::atomic<bool> _bUseFastLookup{true}; // Toggle for fast lookups
 
 	std::vector<SVolunteer> m_vecVolunteerList; // 志愿者列表
@@ -379,6 +382,9 @@ inline void CGameApp::AddPlayerIdx(DWORD dwDBID, CPlayer* pPlayer) {
 	T_B
 	// Use both for compatibility, but unordered_map is much faster (O(1) vs O(log n))
 	_PlayerIdx[dwDBID] = pPlayer;
+	if (pPlayer) {
+		_PlayerIdxGen[dwDBID] = pPlayer->GetGeneration();
+	}
 	if (_bUseFastLookup.load()) {
 		_PlayerIdxFast[dwDBID] = pPlayer;
 	}
@@ -394,6 +400,7 @@ inline void CGameApp::DelPlayerIdx(DWORD dwDBID) {
 	if (_bUseFastLookup.load()) {
 		_PlayerIdxFast.erase(dwDBID);
 	}
+	_PlayerIdxGen.erase(dwDBID);
 	
 	// Remove from standard map
 	std::map<DWORD, CPlayer*>::iterator it = _PlayerIdx.find(dwDBID);
@@ -409,12 +416,40 @@ inline void CGameApp::DelPlayerIdx(DWORD dwDBID) {
 
 inline CPlayer* CGameApp::GetPlayerByDBID(DWORD dwDBID) {
 	T_B
-	// Use fast unordered_map lookup (O(1) instead of O(log n))
+	CPlayer* pPlayer = nullptr;
+
 	if (_bUseFastLookup.load()) {
 		auto it = _PlayerIdxFast.find(dwDBID);
-		return (it != _PlayerIdxFast.end()) ? it->second : nullptr;
+		if (it != _PlayerIdxFast.end()) {
+			pPlayer = it->second;
+		}
+	} else {
+		auto it = _PlayerIdx.find(dwDBID);
+		if (it != _PlayerIdx.end()) {
+			pPlayer = it->second;
+		}
 	}
-	return _PlayerIdx[dwDBID];
+
+	if (!pPlayer || !pPlayer->IsValid()) {
+		return nullptr;
+	}
+
+	auto genIt = _PlayerIdxGen.find(dwDBID);
+	if (genIt == _PlayerIdxGen.end() || genIt->second != pPlayer->GetGeneration()) {
+		return nullptr;
+	}
+
+	if (!m_pCPlySpace) {
+		return nullptr;
+	}
+
+	const LONG slot = pPlayer->GetHandle() & 0x00ffffff;
+	CPlayer* pPooled = m_pCPlySpace->GetPly(slot);
+	if (pPooled != pPlayer || pPooled->GetHoldID() < 0) {
+		return nullptr;
+	}
+
+	return pPlayer;
 	T_E
 }
 

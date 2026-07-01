@@ -426,24 +426,17 @@ void SubMap::Delete(Entity* pCEnt) {
 	T_B
 		CCharacter* pCCha = pCEnt->IsCharacter();
 	Point l_pt = pCEnt->GetPos();
-	// const Rect	&m_area = GetRange();
-	// if (l_pt.x < m_area.ltop.x || l_pt.x >= m_area.rbtm.x || l_pt.y < m_area.ltop.y || l_pt.y >= m_area.rbtm.y)
-	//{
-	//	LG("地图角色操作错误", "（切换）从地图 %s 删除实体 %s 时，发现该实体的位置[%d, %d]非法\n", GetName(), pCEnt->GetLogName(), l_pt.x, l_pt.y);
-	//	return;
-	// }
-	Rect l_rect = GetEyeshot(l_pt);
 
 	if (!pCEnt->m_pCEyeshotHost) {
-		// LG("地图角色操作错误", "（切换）地图 %s 从视野单元[%d, %d]删除实体 %s 时，发现不在视野单元中\n", GetName(), l_pt.x, l_pt.y, pCEnt->GetLogName());
 		LG("map character operator error", "(switch)map %s from eyeshot[%d, %d] delete entity %s ，find it isn't in eyeshot cell.\n", GetName(), l_pt.x, l_pt.y, pCEnt->GetLogName());
 		return;
 	}
-	if (pCEnt->m_pCEyeshotHost != &m_pCEyeshotCell[l_pt.y][l_pt.x]) {
-		// LG("地图角色操作错误", "（切换）地图 %s 从视野单元[%d, %d]删除实体 %s 时，发现其与记录视野单元[%d, %d]不符\n", GetName(), l_pt.x, l_pt.y, pCEnt->GetLogName(), pCEnt->m_pCEyeshotHost->m_sPosX, pCEnt->m_pCEyeshotHost->m_sPosY);
-		LG("map character operatot error", "(switch)map %s from eyeshot[%d, %d]delete entity %s，find it isn't agree with log eyeshot cell[%d, %d].\n", GetName(), l_pt.x, l_pt.y, pCEnt->GetLogName(), pCEnt->m_pCEyeshotHost->m_sPosX, pCEnt->m_pCEyeshotHost->m_sPosY);
-		return;
+
+	CEyeshotCell* pHostCell = pCEnt->m_pCEyeshotHost;
+	if (pHostCell != &m_pCEyeshotCell[l_pt.y][l_pt.x]) {
+		LG("map character operatot error", "(switch)map %s from eyeshot[%d, %d]delete entity %s，find it isn't agree with log eyeshot cell[%d, %d].\n", GetName(), l_pt.x, l_pt.y, pCEnt->GetLogName(), pHostCell->m_sPosX, pHostCell->m_sPosY);
 	}
+
 	pCEnt->m_pCEyeshotHost = 0;
 
 	if (pCCha) {
@@ -452,12 +445,10 @@ void SubMap::Delete(Entity* pCEnt) {
 
 		if (pCCha->IsPlayerOwnCha()) {
 			m_lPlayerNum--;
-			// if(pCCha->IsLiveing())
-			//	m_lActivePlayerNum--;
 		}
 	}
 
-	m_pCEyeshotCell[l_pt.y][l_pt.x].DelEntity(pCEnt);
+	pHostCell->DelEntity(pCEnt);
 	CStateCellNode* pCNode = pCEnt->m_pCStateCellHead;
 	if (pCCha) {
 		while (pCNode) {

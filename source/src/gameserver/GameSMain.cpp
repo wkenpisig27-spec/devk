@@ -263,12 +263,20 @@ BOOL GameServer_Begin() {
 void GameServer_End() {
 	T_B
 	LG("init", "start to exit game map server\n");
-	
-	// Wait for game thread to actually finish (up to 10 seconds)
-	DWORD waitResult = WaitForSingleObject(hGameT, 10000);
+
+	if (!g_bGameEnd) {
+		g_bGameEnd = TRUE;
+	}
+
+	// Cooperative shutdown: wait for game thread to finish its tick loop (up to 60 seconds).
+	const DWORD kShutdownWaitMs = 60000;
+	DWORD waitResult = WaitForSingleObject(hGameT, kShutdownWaitMs);
 	if (waitResult == WAIT_TIMEOUT) {
-		LG("init", "WARNING: Game thread did not exit in time\n");
-		TerminateThread(hGameT, 0);
+		LG("init", "ERROR: Game thread did not exit within %u ms — skipping TerminateThread\n", kShutdownWaitMs);
+	} else if (waitResult == WAIT_OBJECT_0) {
+		LG("init", "Game thread exited cleanly\n");
+	} else {
+		LG("init", "WARNING: WaitForSingleObject returned %u\n", waitResult);
 	}
 	CloseHandle(hGameT);
 

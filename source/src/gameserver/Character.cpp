@@ -228,8 +228,7 @@ void CCharacter::Finally() {
 		
 		// Skip submap cleanup during shutdown to avoid access violations
 		// The submap might already be partially destroyed
-		extern volatile BOOL g_bGameEnd;
-		if (m_submap && !g_bGameEnd) {
+		if (m_submap) {
 			m_submap->GoOut(this);
 		}
 		m_submap = nullptr;  // Clear the pointer to avoid double-cleanup

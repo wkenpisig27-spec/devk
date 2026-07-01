@@ -23,23 +23,35 @@ CEyeshotCell::CEyeshotCell() {
 }
 
 CEyeshotCell::~CEyeshotCell() {
-	Entity *pCEnt, *pCHeadEnt;
+	Entity* pCEnt = nullptr;
+	Entity* pCHeadEnt = nullptr;
 
 	pCHeadEnt = m_pCChaL;
-	while (pCEnt = pCHeadEnt) {
+	if (pCHeadEnt) {
+		LG("EyeshotCell", "WARNING: ~CEyeshotCell freeing cha list with entities still linked\n");
+	}
+	while (pCHeadEnt) {
+		pCEnt = pCHeadEnt;
 		pCHeadEnt = pCHeadEnt->m_pCEyeshotCellNext;
 		pCEnt->m_pCEyeshotCellNext = 0;
 		pCEnt->m_pCEyeshotCellLast = 0;
-		pCEnt->Free();
+		pCEnt->m_pCEyeshotHost = 0;
 	}
 
 	pCHeadEnt = m_pCItemL;
-	while (pCEnt = pCHeadEnt) {
+	if (pCHeadEnt) {
+		LG("EyeshotCell", "WARNING: ~CEyeshotCell freeing item list with entities still linked\n");
+	}
+	while (pCHeadEnt) {
+		pCEnt = pCHeadEnt;
 		pCHeadEnt = pCHeadEnt->m_pCEyeshotCellNext;
 		pCEnt->m_pCEyeshotCellNext = 0;
 		pCEnt->m_pCEyeshotCellLast = 0;
-		pCEnt->Free();
+		pCEnt->m_pCEyeshotHost = 0;
 	}
+
+	m_pCChaL = 0;
+	m_pCItemL = 0;
 }
 
 // 实体pCEnt进入视野单元，执行可视化操作
