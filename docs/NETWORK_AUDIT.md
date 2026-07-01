@@ -230,14 +230,14 @@ Full detail with code paths was documented 2026-06-26. Summary by category:
 
 | Track | Goal | Priority | Key files |
 |-------|------|----------|-----------|
-| **A — M3** | Slot+generation session handles | High | In-game done (phases 1–3); **phase 5:** TP SyncCall — `GateServer.cpp`, `GroupServerAppServ.cpp`, `ToClient.cpp` |
+| **A — M3** | Slot+generation session handles | High | **Done** (phases 1–3 + phase 5 TP SyncCall, 2026-07-01) |
 | **B — M2** | Migrate GameServer `CharacterPrl.cpp` to registry | High | **Done** — 112 handlers |
 | **B — M2** | Migrate GameServer `GameAppNet.cpp` to registry | High | **Done** — 35 handlers |
 | **C — M6** | Zero-copy gate forward (drop `Duplicate()`) | Med | `ToClient.cpp` `ReRouteToGameServer` |
 | **D — M4** | Backplane PSK / mutual auth | High | `Comm.cpp`, `ToGameServer.cpp`, `ToGroupServer.cpp` |
 | **E — M5** | PacketReader rollout + opcode-table-driven validation | Med | All CM/CP handlers |
 
-**Suggested order:** Tracks B, D, E largely done. **Next: Track A phase 5** (TP SyncCall session migration — see `helper/network-tests/STATUS.md`) or Phase 3 exit soak + Track C.
+**Suggested order:** Track A complete. **Next:** Phase 3 exit soak (30 min) or Track C (zero-copy gate forward).
 
 ### Phase 4 — Long-term (after Phase 3 exit)
 

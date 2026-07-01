@@ -113,7 +113,7 @@ void GroupServerApp::UnregisterPlayer(Player* ply) {
 	}
 }
 
-Player* GroupServerApp::ValidatePlayerPointer(uintptr_t ptr, uint64_t expectedGtAddr, uint32_t generation, bool syncCallLegacy) {
+Player* GroupServerApp::ValidatePlayerPointer(uintptr_t ptr, uint64_t expectedGtAddr, uint32_t generation) {
 	if (ptr == 0) {
 		return nullptr;
 	}
@@ -141,7 +141,7 @@ Player* GroupServerApp::ValidatePlayerPointer(uintptr_t ptr, uint64_t expectedGt
 	Player* ply = reinterpret_cast<Player*>(ptr);
 	
 	try {
-		if (!syncCallLegacy && ply->GetSessionHandle().IsValid()) {
+		if (ply->GetSessionHandle().IsValid()) {
 			if (expectedGtAddr != 0 && ply->m_gtAddr != expectedGtAddr) {
 				LG("SessionManager", "Group INVALID: Player %p gtAddr mismatch (expected=%llu, got=%llu)\n",
 				   ply, expectedGtAddr, ply->m_gtAddr);

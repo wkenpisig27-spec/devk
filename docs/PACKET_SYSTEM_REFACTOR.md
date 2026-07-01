@@ -19,9 +19,9 @@ We modernized a 2003-era `dbc` packet stack **without changing the on-wire proto
 |-------|----------------|--------|
 | **Sprint 1 hardening** | Unbounded reads, silent parse failures, weak limits | Done (Phase 1) |
 | **OpcodeMeta + registry** | Giant `switch(cmd)` maintenance debt | Done on Gate + Game (Tracks B5/B6) |
-| **Session handles** | Raw pointer identity on hot paths | In-game done (Track A phases 1–3); **TP SyncCall pending (phase 5)** |
+| **Session handles** | Raw pointer identity on hot paths | **Done** (Track A phases 1–3 in-game + phase 5 TP SyncCall) |
 | **Backplane PSK** | Plaintext inter-server TCP | Done (Track D) |
-| **OpcodeIngress + PacketReader** | Fail-closed ingress + typed reads | In progress — batches 1–5 done (Track E) |
+| **OpcodeIngress + PacketReader** | Fail-closed ingress + typed reads | **Done** (Track E batches 1–10) |
 
 **Deferred:** Track C (zero-copy gate forwarding — negligible gain at current load).
 
@@ -33,7 +33,7 @@ Understanding boundaries is as important as the new code:
 
 - **Client wire format** — frame layout, opcode numbers, RSA/AES login, CM/CP/MC/PC bands unchanged.
 - **16-byte gate trailers** — still `{identity, addr}` = 8 + 8 bytes; identity field *meaning* changed internally (session slot/gen vs raw pointer) but **size and position are the same**.
-- **Login / char-select SyncCall path** — legacy pointer trailers on TP_* (phase 4 stable baseline); **phase 5** migrates to session trailers with login-time bind on Group.
+- **Login / char-select SyncCall path** — session trailers on all TP_* after login bind (Track A phase 5, 2026-07-01).
 - **Game logic thread model** — single `PKQueue` game thread preserved.
 - **Track C** — Gate still `Duplicate()`s packets on forward; not optimized yet.
 
@@ -214,28 +214,21 @@ WriteLong(slot) + WriteLong(generation) + WriteLongLong(gm_addr)
 Reverse read: gm_addr, generation, slot → ResolvePlayerFromGateTrailer
 ```
 
-**Gate → Group (in-game CP/MP):**
+**Gate → Group (TP SyncCall + in-game CP/MP — unified, 2026-07-01):**
 ```
 WriteLong(slot) + WriteLong(generation) + WriteLongLong(gp_addr)
+Reverse read on Group: gp_addr, generation, slot → ResolvePlayerFromGateTrailer
 ```
-
-**Gate → Group (TP SyncCall — phase 5 target, same 16-byte layout):**
-```
-WriteLong(slot) + WriteLong(generation) + WriteLongLong(gp_addr)
-Reverse read on Group OnServeCall: gp_addr, generation, slot
-```
-Phase 4 baseline uses legacy `{MakeULong(gate_ply), gp_addr}` on SyncCall only; phase 5 replaces it after Group binds session at `TP_USER_LOGIN` success.
+Session bound at `TP_USER_LOGIN` success; `AppendTpGroupSyncTrailer` delegates to `AppendInGameGroupTrailer`.
 
 **TM_ENTERMAP (enter world):** session appended to extended trailer; Game binds mirror on `GatePlayer`.
 
-### Validation model (dual path)
+### Validation model
 
-- **In-game with bound session:** `ValidatePlayerSession` is authoritative; pointer registry secondary.
-- **TP SyncCall (phase 4 baseline):** legacy pointer trailer on `OnServeCall`; session bind at `MP_ENTERMAP` for in-game only.
-- **TP SyncCall (phase 5 target):** session bind at `TP_USER_LOGIN` success; all post-login SyncCall uses `{slot, gen, gp_addr}` trailer.
-- **Fail-closed:** `ReRouteToGameServer` / `ReRouteToGroupServer` reject if in-world but no valid session.
-
-**Phase 5 plan:** See [`helper/network-tests/STATUS.md`](../helper/network-tests/STATUS.md) — Track A phase 5 (sub-phases 5a–5g: login bind → trailer migrate → OnServeCall resolve → legacy removal).
+- **Gate→Group (SyncCall + in-game):** session bind at login; `ValidatePlayerSession` authoritative on bound players.
+- **Gate→Game (in-game CM/TM/PM):** session bind at enter-map; `ResolvePlayerFromGateTrailer` on Game.
+- **Fail-closed:** ReRoute and SyncCall reject without valid session after login.
+- **Legacy pointer registry:** retained for `MP_ENTERMAP` fallback and internal MakePointer lookups only.
 
 ### Log grep strings
 

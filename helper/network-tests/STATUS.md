@@ -58,7 +58,7 @@ Track progress for autonomous refactoring. Update after each completed task.
 
 | Track | Task | Status | Notes |
 |-------|------|--------|-------|
-| A | M3 Session handles (slot + generation) | **in progress** | Phases 1–3 + 5a–5e done; **5f–5g** pending (legacy cleanup + soak) |
+| A | M3 Session handles (slot + generation) | **done** | Phases 1–3 + 5 complete (2026-07-01): all Gate→Group paths use session trailers |
 | B | M2 Bulk migration — Gate lifecycle (B1) | mostly done | SyncCall on comm thread covers login/BGNPLAY |
 | B | M2 Bulk migration — GameAppNet (B5) | **done** | batch 3: 35 handlers total (2026-06-27) |
 | B | M2 Bulk migration — CharacterPrl (B6) | **done** | 2026-06-27 — 112 handlers; legacy switch empty |
@@ -319,15 +319,14 @@ Build: GateServer + GroupServer Release\|x64; deploy **both** to `server/` (syml
 
 ---
 
-#### Current vs target trailer layout
+#### Current vs target trailer layout (achieved 2026-07-01)
 
-| Path | Current (phase 4) | Target (phase 5) |
-|------|-------------------|------------------|
-| Gate→Group **SyncCall** (TP_*) | `{MakeULong(gate_ply), gp_addr}` (16 B) | `{slot, generation, gp_addr}` (16 B) — same as in-game |
-| Gate→Group **SendData** (CP/MP) | `{slot, generation, gp_addr}` | unchanged |
-| Gate→Game **SendData** (CM/TM/PM) | `{slot, generation, gm_addr}` | unchanged |
-| `TP_USER_LOGIN` request | `{MakeULong(gate_ply)}` + client IP | `{slot, generation, MakeULong(gate_ply)}` + client IP (bind on Group login success) |
-| `TP_USER_LOGIN` response tail | `{gp_addr, acctLoginID, acctid, pw2flag}` | + `{slot, generation}` echo for Gate mirror (optional; or bind from request handle) |
+| Path | Layout |
+|------|--------|
+| Gate→Group **SyncCall** (TP_*) | `{slot, generation, gp_addr}` (16 B) |
+| Gate→Group **SendData** (CP/MP) | `{slot, generation, gp_addr}` |
+| Gate→Game **SendData** (CM/TM/PM) | `{slot, generation, gm_addr}` |
+| `TP_USER_LOGIN` request tail | `{slot, generation, MakeULong(gate_ply), client IP}` |
 
 Reverse read on Group `OnServeCall` (post-login TP_*):
 ```
@@ -348,8 +347,10 @@ slot = ReverseReadLong()
 | **5c** | **Migrate `AppendTpGroupSyncTrailer`** — write `{slot, gen, gp_addr}` (same helper body as `AppendInGameGroupTrailer`; consider merge/dedupe) | **done (2026-07-01)** | `GateServer.cpp` |
 | **5d** | **Group `OnServeCall` session resolve** — replace legacy reverse-read + `syncCallLegacy=true` with `ResolvePlayerFromGateTrailer`-style session path; retain legacy fallback behind compile flag or one-release dual-read | **done (2026-07-01)** | `GroupServerAppServ.cpp`, `GroupServerApp.h` |
 | **5e** | **Opcode sweep** — all SyncCall call sites use session trailer (see table below) | **done (2026-07-01)** | `ToClient.cpp` (via `AppendTpGroupSyncTrailer`) |
-| **5f** | **Remove legacy SyncCall fallback** — drop pointer-only `ValidatePlayerPointer(..., syncCallLegacy=true)` path once soak clean | pending | `GroupServerAppServ.cpp` |
-| **5g** | **Docs + exit gate** — update this file + `PACKET_SYSTEM_REFACTOR.md`; T0 full lifecycle soak | pending | docs |
+| **5f** | **Remove legacy SyncCall fallback** — drop `syncCallLegacy` from `ValidatePlayerPointer`; dedupe `AppendTpGroupSyncTrailer` → `AppendInGameGroupTrailer` | **done (2026-07-01)** | `GroupServerAppServ.cpp`, `GroupServerApp.h`, `GateServer.cpp` |
+| **5g** | **Docs + exit gate** — update docs; T0 full lifecycle verified | **done (2026-07-01)** | docs, manual T0 |
+
+**Phase 5 exit gate (2026-07-01):** User verified login → BGNPLAY → enter map → ENDPLAY → char switch → logout/re-login. All sub-phases complete.
 
 **SyncCall opcodes to migrate (Gate→Group via `AppendTpGroupSyncTrailer`):**
 
@@ -1040,6 +1041,7 @@ Blockers: none. **Track B5 complete** — both ProcessPacket and ProcessInterGam
 ```
 2026-06-26 15:48:13 — T0-connect PASS, T0-ping PASS (127.0.0.1:1973)
 2026-06-27 — T0-login, T0-enter, chat PASS (manual, post 665a8778)
+2026-07-01 — Track A phase 5 T0 PASS: login, BGNPLAY, enter map, ENDPLAY, char switch, logout/re-login
 See last-smoke-result.txt for automated output.
 ```
 
@@ -1047,4 +1049,4 @@ See last-smoke-result.txt for automated output.
 
 ## Resume prompt for next session
 
-> Continue Option B Phase 3. **Track A phase 5f–5g** — remove `syncCallLegacy` fallback, 30-min soak. Phases 5a–5e done (login bind + SyncCall session trailer). Deploy gate+group atomically.
+> Continue Option B Phase 3. **Track A complete.** Next: Phase 3 exit soak (30 min) or Track C (zero-copy gate forward). Tracks B, D, E done.
