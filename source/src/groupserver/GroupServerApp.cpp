@@ -250,6 +250,8 @@ GroupServerApp::GroupServerApp(ThreadPool* proc, ThreadPool* comm)
 
 GroupServerApp::~GroupServerApp() {
 	ShutDown(12 * 1000);
+	DrainLivePlayers();
+	DrainLiveGuilds();
 
 	// DBPool destructor handles cleanup of all connections and table objects
 	CloseLuaScript();

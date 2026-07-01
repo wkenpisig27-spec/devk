@@ -29,7 +29,6 @@
 
 // Performance optimization includes
 #include <unordered_map>
-#include <atomic>
 #include <thread>
 #include <mutex>
 
@@ -112,6 +111,21 @@ struct SVolunteer {
 	char szMapName[256];			 // 地图
 };
 
+struct SEntityPoolStats {
+	int nPlyHold;
+	int nPlyMax;
+	int nPlyAlloc;
+	int nChaHold;
+	int nChaMax;
+	int nChaAlloc;
+	int nItemHold;
+	int nItemMax;
+	int nItemAlloc;
+	int nTNpcHold;
+	int nTNpcMax;
+	int nTNpcAlloc;
+};
+
 class CGameApp : public CDBLogMgr {
 public:
 	CGameApp();
@@ -190,6 +204,7 @@ public:
 	CItem* GetNewItem();
 	mission::CTalkNpc* GetNewTNpc();
 	Entity* GetEntity(int lHandle);
+	SEntityPoolStats GetEntityPoolStats() const;
 	Entity* IsValidEntity(unsigned int ulID, int lHandle);
 	Entity* IsLiveingEntity(unsigned int ulID, int lHandle);
 	Entity* IsMapEntity(unsigned int ulID, int lHandle);
@@ -227,6 +242,8 @@ public:
 
 	void NotiGameReset(unsigned int ulLeftSec);
 	void SaveAllPlayer(void);
+	void ShutdownActivePlayers(void);
+	void ReleaseRemainingWorldEntities(void);
 
 	void SetEntityEnableLog(bool bValid = true);
 	CSkillTempData* GetSkillTData(short sSkillNo, char chSkillLv);
@@ -289,6 +306,12 @@ public:
 	dbc::PreAllocHeap<CStateCell> m_MapStateCellHeap;
 	dbc::PreAllocHeap<CChaListNode> m_ChaListHeap;
 	dbc::PreAllocHeap<CStateCellNode> m_StateCellNodeHeap;
+	// PreAlloc lifetime notes:
+	//   m_StallDataHeap / m_TradeDataHeap — session scoped; RAII or Release* helpers required on failure.
+	//   m_CabinHeap — owned by boat via SetShip; freed when cabin PreAlloc recycles (Finally -> FreeAll).
+	//   m_ChaListHeap / m_StateCellNodeHeap — paired with DelCharacter / OutMgrUnit -> Free().
+	//   m_MapStateCellHeap — map-scoped cells; live for SubMap lifetime (CheckStateCell).
+	//   m_SkillTDataHeap — cached in m_pCSkillTData[][]; process lifetime, not per cast.
 
 	// 用于信息统计
 	dbc::Long m_lCabinHeapNum;
@@ -331,11 +354,8 @@ protected:
 	CLifeLvRecordSet* m_CLifeLvRecord;
 	CHairRecordSet* m_CHairRecord;
 
-	std::map<DWORD, CPlayer*> _PlayerIdx; // 从DB ID映射到Player指针
-	
-	// Performance optimizations: use unordered_map for O(1) lookups instead of std::map O(log n)
-	std::unordered_map<DWORD, CPlayer*> _PlayerIdxFast; // Fast lookup table
-	std::atomic<bool> _bUseFastLookup{true}; // Toggle for fast lookups
+	std::unordered_map<DWORD, CPlayer*> _PlayerIdx;     // DB character ID -> player (non-owning)
+	std::unordered_map<DWORD, uint32_t> _PlayerIdxGen;  // Generation at index registration
 
 	std::vector<SVolunteer> m_vecVolunteerList; // 志愿者列表
 
@@ -377,44 +397,48 @@ inline CMapRes* CGameApp::GetMap(int no) {
 
 inline void CGameApp::AddPlayerIdx(DWORD dwDBID, CPlayer* pPlayer) {
 	T_B
-	// Use both for compatibility, but unordered_map is much faster (O(1) vs O(log n))
 	_PlayerIdx[dwDBID] = pPlayer;
-	if (_bUseFastLookup.load()) {
-		_PlayerIdxFast[dwDBID] = pPlayer;
+	if (pPlayer) {
+		_PlayerIdxGen[dwDBID] = pPlayer->GetGeneration();
 	}
-	// LG("player_idx", "添加DB ID = %d对应的Player\n", dwDBID);
 	T_E
 }
 
 inline void CGameApp::DelPlayerIdx(DWORD dwDBID) {
 	T_B
-	// LG("player_idx", "清除DB ID = %d对应的Player\n", dwDBID);
-	
-	// Remove from fast lookup
-	if (_bUseFastLookup.load()) {
-		_PlayerIdxFast.erase(dwDBID);
-	}
-	
-	// Remove from standard map
-	std::map<DWORD, CPlayer*>::iterator it = _PlayerIdx.find(dwDBID);
-	if (it != _PlayerIdx.end()) {
-		_PlayerIdx.erase(it);
-	} else {
-		// LG("player_idx", "清除PlayerIdx的时候出现错误, DB ID = %d 没有发现索引\n", dwDBID);
-		LG("player_idx", "when delete PlayerIdx it appear error, DB ID = %d no find index\n", dwDBID);
-	}
-	// LG("player_idx", "Idx Size = %d\n\n", _PlayerIdx.size());
+	_PlayerIdx.erase(dwDBID);
+	_PlayerIdxGen.erase(dwDBID);
 	T_E
 }
 
 inline CPlayer* CGameApp::GetPlayerByDBID(DWORD dwDBID) {
 	T_B
-	// Use fast unordered_map lookup (O(1) instead of O(log n))
-	if (_bUseFastLookup.load()) {
-		auto it = _PlayerIdxFast.find(dwDBID);
-		return (it != _PlayerIdxFast.end()) ? it->second : nullptr;
+	auto it = _PlayerIdx.find(dwDBID);
+	if (it == _PlayerIdx.end()) {
+		return nullptr;
 	}
-	return _PlayerIdx[dwDBID];
+
+	CPlayer* pPlayer = it->second;
+	if (!pPlayer || !pPlayer->IsValid()) {
+		return nullptr;
+	}
+
+	auto genIt = _PlayerIdxGen.find(dwDBID);
+	if (genIt == _PlayerIdxGen.end() || genIt->second != pPlayer->GetGeneration()) {
+		return nullptr;
+	}
+
+	if (!m_pCPlySpace) {
+		return nullptr;
+	}
+
+	const LONG slot = pPlayer->GetHandle() & 0x00ffffff;
+	CPlayer* pPooled = m_pCPlySpace->GetPly(slot);
+	if (pPooled != pPlayer || pPooled->GetHoldID() < 0) {
+		return nullptr;
+	}
+
+	return pPlayer;
 	T_E
 }
 
@@ -422,17 +446,14 @@ inline CPlayer* CGameApp::GetPlayerByMainChaName(const char* sMainChaName) {
 	T_B if (!sMainChaName) {
 		return nullptr;
 	};
-	std::map<DWORD, CPlayer*>::iterator it = _PlayerIdx.begin();
-	while (it != _PlayerIdx.end()) {
-		if (it->second) {
-			if (it->second->GetMainCha()) {
-				if (!strcmp(it->second->GetMainCha()->GetName(), sMainChaName)) {
-					return it->second;
-				}
+	for (const auto& entry : _PlayerIdx) {
+		CPlayer* pPlayer = GetPlayerByDBID(entry.first);
+		if (pPlayer && pPlayer->GetMainCha()) {
+			if (!strcmp(pPlayer->GetMainCha()->GetName(), sMainChaName)) {
+				return pPlayer;
 			}
-		};
-		++it;
-	};
+		}
+	}
 	return nullptr;
 	T_E
 };
@@ -758,7 +779,12 @@ extern bool g_bLogEntity;
 
 extern CGameApp* g_pGameApp;
 extern CItemRecordAttr* g_pCItemAttr;
-extern CCharacter* g_pCSystemCha;	 // 系统角色
+// g_pCSystemCha: process-lifetime sentinel character (not on any map).
+// Used as the "system caster" for AddSkillState, item spawns, weather, etc.
+// IsLiveingEntity / IsMapEntity / IsLifeEntity skip map/life checks when
+// pEnti->IsCharacter() == g_pCSystemCha. Never call Free() on it; Entity::Free
+// ignores the sentinel. Do not reuse this pattern for gameplay entities.
+extern CCharacter* g_pCSystemCha;
 extern SubMap* g_pScriptMap;		 // 脚本用初始化地图信息全局变量
 extern int g_lDeftMMaskLight;		 // 大地图默认照亮范围
 extern std::string g_strChaState[2]; // 0，存放主角色的技能状态。1，存放船的技能状态

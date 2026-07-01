@@ -21,6 +21,11 @@ class CChaListNode;
 class SubMap;
 class CEyeshotCell;
 struct SSkillStateUnit;
+class CEntityAlloc;
+class CGameApp;
+
+template <class T>
+class CAlloc;
 
 // using	namespace	GAME;
 
@@ -30,6 +35,27 @@ class CEventEntity;
 }; // namespace mission
 
 #define defENTITY_NAME_LEN 32
+
+// ---------------------------------------------------------------------------
+// Entity lifecycle state machine (Phase 6 documentation)
+//
+// Pool slot states (CAlloc in EntityAlloc.h):
+//   UNALLOCATED  HoldID == -1, slot not in active use
+//   ACTIVE       alloc() -> Initially(): m_bValid == true, IsValid() == true
+//   TEARDOWN     destroy() -> Finally(): m_bValid == false, map/eyeshot detached
+//   RECYCLED     slot returned to free list, HoldID == -1, safe for reuse
+//
+// World presence (orthogonal to pool slot):
+//   m_submap == nullptr  entity not on a map (may still be ACTIVE in pool)
+//   m_submap != nullptr  entity registered in SubMap eyeshot/state grids
+//
+// CTalkNpc vs CCharacter: CTalkNpc inherits CCharacter but uses a separate
+// CTalkNpc pool (defENTI_ALLOC_TYPE_TNPC). CCharacterPool routes both kinds.
+// Long-term: unify pools with explicit type tag (Phase 6 epic).
+//
+// Teardown: Entity::Free() returns the slot via m_pEntSpace (bound at pool
+// create). Falls back to g_pGameApp->m_pCEntSpace only if unbound.
+// ---------------------------------------------------------------------------
 
 /**
  * @alias 实体
@@ -43,6 +69,9 @@ class Entity {
 	friend class CAction;
 	friend class CFightAble;
 	friend class CGameApp;
+	friend class CEntityAlloc;
+	template <class T>
+	friend class CAlloc;
 	friend class CChaSpawn;
 	friend class CMapSwitchEntitySpawn;
 
@@ -135,6 +164,8 @@ public:
 	dbc::Short GetEyeshotHeight(void) { return GetEyeshotWidth(); }
 	bool IsInEyeshot(Entity* pCTarEnti);
 
+	CGameApp* GetOwnerApp() const;
+
 	// 实体切换地图单元网格事件处理函数
 	virtual void GotoMapUnit(){};
 
@@ -158,6 +189,8 @@ public:
 
 protected:
 	Entity();
+
+	void SetEntSpace(CEntityAlloc* pSpace) { m_pEntSpace = pSpace; }
 
 	virtual void WritePK(WPACKET& wpk); // 写入玩家本身及其所有附加结构(如召唤兽等)的所有数据
 	virtual void ReadPK(RPACKET& rpk);	// 重构玩家本身及其所有附加结构(如召唤兽等)
@@ -226,6 +259,7 @@ public:
 
 	dbc::uShort m_usAreaAttr[2]; // 实体所在地表的区域属性，0表示之前的区域属性，1表示现在的，参见CompCommand.h的EAreaMask
 	dbc::uChar m_ucIslandID[2];	 // 实体所在地表的岛屿信息，0表示之前的岛屿信息，1表示现在的
+	CEntityAlloc* m_pEntSpace{nullptr};
 };
 
 extern void NotiPkToWorld(WPACKET chginf);

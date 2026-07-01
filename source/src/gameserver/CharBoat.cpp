@@ -885,9 +885,25 @@ BOOL CCharBoat::MakeBoat(CCharacter& owner, RPACKET& packet) {
 	}
 	pBoat->m_pCChaRecord = pRec;
 	pBoat->m_CChaAttr.Init(pInfo->sCharID, FALSE);
-	pBoat->SetID(g_pGameApp->m_Ident.GetID());
+	CGameApp* pApp = owner.GetOwnerApp();
+	if (!pApp) {
+		pBoat->Free();
+		owner.SetBoat(nullptr);
+		owner.SystemNotice(RES_STRING(GM_CHARBOAT_CPP_00028), pInfo->sCharID);
+		return FALSE;
+	}
+	pBoat->SetID(pApp->m_Ident.GetID());
 	pBoat->SetRadius(pBoat->m_pCChaRecord->sRadii);
-	pBoat->SetShip(g_pGameApp->m_CabinHeap.Get());
+	{
+		CPassengerMgr* pCabin = pApp->m_CabinHeap.Get();
+		if (!pCabin) {
+			pBoat->Free();
+			owner.SetBoat(nullptr);
+			owner.SystemNotice(RES_STRING(GM_CHARBOAT_CPP_00028), pInfo->sCharID);
+			return FALSE;
+		}
+		pBoat->SetShip(pCabin);
+	}
 	pBoat->setAttr(ATTR_CHATYPE, enumCHACTRL_PLAYER);
 	pBoat->EnrichSkillBag();
 
@@ -1224,9 +1240,25 @@ BOOL CCharBoat::CreateBoat(CCharacter& owner, DWORD dwBoatID, char chType) {
 	}
 	pBoat->m_pCChaRecord = pRec;
 	pBoat->m_CChaAttr.Init(pInfo->sCharID, FALSE);
-	pBoat->SetID(g_pGameApp->m_Ident.GetID());
+	CGameApp* pApp = owner.GetOwnerApp();
+	if (!pApp) {
+		pBoat->Free();
+		owner.SetBoat(nullptr);
+		owner.SystemNotice(RES_STRING(GM_CHARBOAT_CPP_00028), pInfo->sCharID);
+		return FALSE;
+	}
+	pBoat->SetID(pApp->m_Ident.GetID());
 	pBoat->SetRadius(pBoat->m_pCChaRecord->sRadii);
-	pBoat->SetShip(g_pGameApp->m_CabinHeap.Get());
+	{
+		CPassengerMgr* pCabin = pApp->m_CabinHeap.Get();
+		if (!pCabin) {
+			pBoat->Free();
+			owner.SetBoat(nullptr);
+			owner.SystemNotice(RES_STRING(GM_CHARBOAT_CPP_00028), pInfo->sCharID);
+			return FALSE;
+		}
+		pBoat->SetShip(pCabin);
+	}
 	pBoat->setAttr(ATTR_CHATYPE, enumCHACTRL_PLAYER);
 	pBoat->EnrichSkillBag();
 

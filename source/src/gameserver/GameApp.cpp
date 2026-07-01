@@ -309,16 +309,19 @@ CGameApp::CGameApp()
 	m_fGlobalExpRate = 1.0f;
 	ChaAttrMaxValInit(false);
 	
-	// Reserve space for fast lookup table
-	_PlayerIdxFast.reserve(1000);
+	// Reserve space for player DB index
+	_PlayerIdx.reserve(1000);
 	
 	T_E
 }
 
 CGameApp::~CGameApp() {
 	T_B
-		// Shutdown BossTimer system first (saves state)
-		BossTimer::Shutdown();
+		ShutdownActivePlayers();
+	ReleaseRemainingWorldEntities();
+
+	// Shutdown BossTimer system first (saves state)
+	BossTimer::Shutdown();
 
 		// Log("关闭", "haha", "", "" ,"", "");
 		Log("close", "haha", "", "", "", "");
@@ -355,7 +358,8 @@ CGameApp::~CGameApp() {
 	}
 
 	m_vecVolunteerList.clear();
-	_PlayerIdxFast.clear();
+	_PlayerIdx.clear();
+	_PlayerIdxGen.clear();
 	T_E
 }
 
@@ -436,6 +440,8 @@ BOOL CGameApp::Init() {
 		LG("init", RES_STRING(GM_GAMEAPP_CPP_00017));
 		return FALSE;
 	}
+	m_pCPlySpace->SetOwnerApp(this);
+	m_pCEntSpace->SetOwnerApp(this);
 	g_pCSystemCha = GetNewCharacter();
 	g_pCSystemCha->SetID(m_Ident.GetID());
 	// g_pCSystemCha->SetName("系统");
@@ -672,11 +678,12 @@ void CGameApp::MgrUnitRun(DWORD dwCurTime) {
 	static DWORD dwTick = 0;
 	if (dwCurTime - dwTick >= 1 * 60 * 1000) {
 		dwTick = dwCurTime;
+		const SEntityPoolStats stats = GetEntityPoolStats();
 		LG("EntityNum", "Ply[%5d %5d %5d],\tCha[%5d %5d %5d],\tItem[%5d %5d %5d],\tTNpc[%5d %5d %5d]\n",
-		   m_pCPlySpace->GetHoldPlyNum(), m_pCPlySpace->GetMaxHoldPlyNum(), m_pCPlySpace->GetAllocPlyNum(),
-		   m_pCEntSpace->GetHoldChaNum(), m_pCEntSpace->GetMaxHoldChaNum(), m_pCEntSpace->GetAllocChaNum(),
-		   m_pCEntSpace->GetHoldItemNum(), m_pCEntSpace->GetMaxHoldItemNum(), m_pCEntSpace->GetAllocItemNum(),
-		   m_pCEntSpace->GetHoldTNpcNum(), m_pCEntSpace->GetMaxHoldTNpcNum(), m_pCEntSpace->GetAllocTNpcNum());
+		   stats.nPlyHold, stats.nPlyMax, stats.nPlyAlloc,
+		   stats.nChaHold, stats.nChaMax, stats.nChaAlloc,
+		   stats.nItemHold, stats.nItemMax, stats.nItemAlloc,
+		   stats.nTNpcHold, stats.nTNpcMax, stats.nTNpcAlloc);
 	}
 
 	CEyeshotCell* pCMgrUnit;
@@ -1033,17 +1040,17 @@ void CGameApp::ReleaseGamePlayer(CPlayer* pPlayer) {
 			pCCha->SetPos(SSrcPos);
 		}
 
-		DelPlayerIdx(pPlayer->GetDBChaId());
+		const DWORD dbChaId = pPlayer->GetDBChaId();
+		DelPlayerIdx(dbChaId);
 		g_pGameApp->m_dwPlayerCnt--;
-		pPlayer->Free();
 
-		//////////////////////////////////////////////////////////////////////////
-		// 删除gate server对应的维护信息
+		// Gate list cleanup uses Next/Prev — must run before pool recycles this slot.
 		pPlayer->OnLogoff();
 		DELPLAYER(pPlayer);
-		//////////////////////////////////////////////////////////////////////////
 
-		LG("enter_map", "cha_id = %d, goout\n", pPlayer->GetDBChaId());
+		pPlayer->Free();
+
+		LG("enter_map", "cha_id = %d, goout\n", dbChaId);
 	}
 	T_E
 }
@@ -1114,10 +1121,31 @@ Entity* CGameApp::GetEntity(int lHandle) {
 	T_E
 }
 
+SEntityPoolStats CGameApp::GetEntityPoolStats() const {
+	SEntityPoolStats stats{};
+	if (m_pCPlySpace) {
+		stats.nPlyHold = m_pCPlySpace->GetHoldPlyNum();
+		stats.nPlyMax = m_pCPlySpace->GetMaxHoldPlyNum();
+		stats.nPlyAlloc = m_pCPlySpace->GetAllocPlyNum();
+	}
+	if (m_pCEntSpace) {
+		stats.nChaHold = m_pCEntSpace->GetHoldChaNum();
+		stats.nChaMax = m_pCEntSpace->GetMaxHoldChaNum();
+		stats.nChaAlloc = m_pCEntSpace->GetAllocChaNum();
+		stats.nItemHold = m_pCEntSpace->GetHoldItemNum();
+		stats.nItemMax = m_pCEntSpace->GetMaxHoldItemNum();
+		stats.nItemAlloc = m_pCEntSpace->GetAllocItemNum();
+		stats.nTNpcHold = m_pCEntSpace->GetHoldTNpcNum();
+		stats.nTNpcMax = m_pCEntSpace->GetMaxHoldTNpcNum();
+		stats.nTNpcAlloc = m_pCEntSpace->GetAllocTNpcNum();
+	}
+	return stats;
+}
+
 // 角色是有效实体
 Entity* CGameApp::IsValidEntity(unsigned int ulID, int lHandle) {
 	T_B
-		Entity* pEnti = g_pGameApp->GetEntity(lHandle);
+	Entity* pEnti = GetEntity(lHandle);
 	if (!pEnti)
 		return 0;
 	if (!pEnti->IsValid() || ulID != pEnti->GetID())
@@ -1346,6 +1374,73 @@ void CGameApp::BeginGetTNpc(void) {
 
 mission::CTalkNpc* CGameApp::GetNextTNpc(void) {
 	T_B return m_pCEntSpace->GetNextTNpc();
+	T_E
+}
+
+void CGameApp::ShutdownActivePlayers(void) {
+	T_B
+	std::vector<CPlayer*> playersToLogout;
+
+	BEGINGETGATE();
+	GateServer* pGateServer = nullptr;
+	while (pGateServer = GETNEXTGATE()) {
+		if (!BEGINGETPLAYER(pGateServer)) {
+			continue;
+		}
+
+		CPlayer* pCPlayer = nullptr;
+		int nCount = 0;
+		while (pCPlayer = (CPlayer*)GETNEXTPLAYER(pGateServer)) {
+			if (++nCount > GETPLAYERCOUNT(pGateServer)) {
+				LG("player chain list error", "ShutdownActivePlayers: player list walk exceeded count\n");
+				break;
+			}
+			playersToLogout.push_back(pCPlayer);
+		}
+	}
+
+	for (CPlayer* pPlayer : playersToLogout) {
+		if (pPlayer && pPlayer->IsValid()) {
+			GoOutGame(pPlayer, true);
+		}
+	}
+	T_E
+}
+
+void CGameApp::ReleaseRemainingWorldEntities(void) {
+	T_B
+	if (!m_pCEntSpace) {
+		return;
+	}
+
+	std::vector<LONG> entityHandles;
+
+	m_pCEntSpace->BeginGetCha();
+	while (CCharacter* pCha = m_pCEntSpace->GetNextCha()) {
+		if (pCha->GetSubMap()) {
+			entityHandles.push_back(pCha->GetHandle());
+		}
+	}
+
+	m_pCEntSpace->BeginGetItem();
+	while (CItem* pItem = m_pCEntSpace->GetNextItem()) {
+		if (pItem->GetSubMap()) {
+			entityHandles.push_back(pItem->GetHandle());
+		}
+	}
+
+	m_pCEntSpace->BeginGetTNpc();
+	while (mission::CTalkNpc* pNpc = m_pCEntSpace->GetNextTNpc()) {
+		if (pNpc->GetSubMap()) {
+			entityHandles.push_back(pNpc->GetHandle());
+		}
+	}
+
+	for (LONG handle : entityHandles) {
+		if (Entity* pEnt = m_pCEntSpace->GetEntity(handle)) {
+			pEnt->Free();
+		}
+	}
 	T_E
 }
 

@@ -127,6 +127,23 @@ public:
 
 private:
 	void ResetItemState(CCharacter& character, CTradeData& TradeData);
+	void DetachTradeParticipants(CTradeData* pTradeData, bool bUnlockBags = true, bool bResetTradeAction = true);
+	void ReleaseTradeData(CTradeData* pTradeData, bool bUnlockExecution = false);
+};
+
+// RAII guard: releases trade execution lock on scope exit unless dismissed
+class CTradeExecutionGuard {
+public:
+	explicit CTradeExecutionGuard(CTradeData* pData) : m_pData(pData) {}
+	~CTradeExecutionGuard() {
+		if (m_pData && m_pData->IsExecuting()) {
+			m_pData->UnlockExecution();
+		}
+	}
+	void Dismiss() { m_pData = nullptr; }
+
+private:
+	CTradeData* m_pData;
 };
 
 #pragma pack(push, before_InfoNet)

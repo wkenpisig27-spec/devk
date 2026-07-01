@@ -15,6 +15,25 @@
 
 using namespace std;
 //---------------------------------------------------------
+
+namespace {
+
+class StallDataGuard {
+public:
+	explicit StallDataGuard(mission::CStallData* pData) : m_pData(pData) {}
+	~StallDataGuard() {
+		if (m_pData) {
+			m_pData->Free();
+		}
+	}
+	void release() { m_pData = nullptr; }
+
+private:
+	mission::CStallData* m_pData;
+};
+
+} // namespace
+
 mission::CStallSystem g_StallSystem;
 
 namespace mission {
@@ -116,11 +135,18 @@ void CStallSystem::StartStall(CCharacter& staller, RPACKET& packet) {
 		return;
 	}
 
-	CStallData* pData = g_pGameApp->m_StallDataHeap.Get();
+	CGameApp* pApp = staller.GetOwnerApp();
+	if (!pApp) {
+		staller.SystemNotice(RES_STRING(GM_CHARSTALL_CPP_00009));
+		return;
+	}
+
+	CStallData* pData = pApp->m_StallDataHeap.Get();
 	if (!pData) {
 		staller.SystemNotice(RES_STRING(GM_CHARSTALL_CPP_00009));
 		return;
 	}
+	StallDataGuard stallGuard(pData);
 
 	// NPC附近无法摆摊 add by ryan wang 2006 03 23----------------
 	SubMap* pMap = staller.GetSubMap();
@@ -206,7 +232,6 @@ void CStallSystem::StartStall(CCharacter& staller, RPACKET& packet) {
 	_snprintf_s(szLog, sizeof(szLog), _TRUNCATE, RES_STRING(GM_CHARSTALL_CPP_00013), staller.GetName());
 	pData->m_byNum = packet.ReadChar();
 	if (pData->m_byNum == 0 || pData->m_byNum > byStallNum) {
-		pData->Free();
 		// staller.SystemNotice( "开始摆摊：角色《%s》提交摆摊货物数据数量超出范围！[%d]", staller.GetName(), pData->m_byNum );
 		staller.SystemNotice(RES_STRING(GM_CHARSTALL_CPP_00014), staller.GetName(), pData->m_byNum);
 		// LG( "stall_error", "开始摆摊：角色《%s》提交摆摊货物数据数量超出范围！[%d]", staller.GetName(), pData->m_byNum );
@@ -247,7 +272,6 @@ void CStallSystem::StartStall(CCharacter& staller, RPACKET& packet) {
 		pData->m_Goods[i].byIndex = index;
 
 		if (pData->m_Goods[i].byGrid >= byStallNum) {
-			pData->Free();
 			// staller.SystemNotice( "开始摆摊：角色《%s》提交摆摊货物数据索引超出范围！GRID[%d]", staller.GetName(), pData->m_Goods[i].byGrid );
 			staller.SystemNotice(RES_STRING(GM_CHARSTALL_CPP_00016), staller.GetName(), pData->m_Goods[i].byGrid);
 			// LG( "stall_error", "开始摆摊：角色《%s》提交摆摊货物数据索引超出范围！GRID[%d]", staller.GetName(), pData->m_Goods[i].byGrid );
@@ -257,7 +281,6 @@ void CStallSystem::StartStall(CCharacter& staller, RPACKET& packet) {
 
 		__int64 n64Temp = (__int64)(pData->m_Goods[i].llMoney) * pData->m_Goods[i].byCount;
 		if (n64Temp > MAX_STALL_MONEY && pData->m_Goods[i].llMoney <= 100000000000LL) {
-			pData->Free();
 			// staller.SystemNotice( "摆摊失败，物品价格叫价过高！" );
 			staller.SystemNotice(RES_STRING(GM_CHARSTALL_CPP_00017));
 			return;
@@ -272,14 +295,12 @@ void CStallSystem::StartStall(CCharacter& staller, RPACKET& packet) {
 			pData->Free();*/
 			staller.SystemNotice(RES_STRING(GM_CHARSTALL_CPP_00018), staller.GetName(), pData->m_Goods[i].byIndex);
 			LG("stall_error", "start to stall：character《%s》submit data inexistence of stall goods！ID[%d]", staller.GetName(), pData->m_Goods[i].byIndex);
-			pData->Free();
 			return;
 		}
 
 		pData->m_Goods[i].sItemID = staller.m_CKitbag.GetID(pData->m_Goods[i].byIndex);
 		CItemRecord* pItem = (CItemRecord*)GetItemRecordInfo(pData->m_Goods[i].sItemID);
 		if (pItem == nullptr) {
-			pData->Free();
 			/*staller.SystemNotice( "开始摆摊：物品ID错误，无法找到该物品信息！ID = %d", pData->m_Goods[i].sItemID );
 			LG( "stall_error", "开始摆摊：物品ID错误，无法找到该物品信息！ID = %d", pData->m_Goods[i].sItemID );*/
 			staller.SystemNotice(RES_STRING(GM_CHARSTALL_CPP_00019), pData->m_Goods[i].sItemID);
@@ -289,12 +310,10 @@ void CStallSystem::StartStall(CCharacter& staller, RPACKET& packet) {
 		::SItemGrid* grid2 = staller.m_CKitbag.GetGridContByID(pData->m_Goods[i].byIndex);
 
 		if (grid2 && grid2->dwDBID) {
-			pData->Free();
 			staller.SystemNotice(RES_STRING(GM_CHARACTER_CPP_00142), pItem->szName);
 			return;
 		}
 		if (!pItem->chIsTrade || !staller.m_CKitbag.GetGridContByID(pData->m_Goods[i].byIndex)->GetInstAttr(ITEMATTR_TRADABLE)) {
-			pData->Free();
 			/*staller.SystemNotice( "开始摆摊：物品《%s》不可交易！", pItem->szName );
 			LG( "stall_error", "开始摆摊：物品《%s》不可交易！", pItem->szName );*/
 			staller.SystemNotice(RES_STRING(GM_CHARSTALL_CPP_00020), pItem->szName);
@@ -312,7 +331,6 @@ void CStallSystem::StartStall(CCharacter& staller, RPACKET& packet) {
 			pData->Free();*/
 			staller.SystemNotice(RES_STRING(GM_CHARSTALL_CPP_00021), staller.GetName(), pData->m_Goods[i].byIndex);
 			LG("stall_error", "start to stall：character《%s》submit res of staller number error！ID[%d]", staller.GetName(), pData->m_Goods[i].byIndex);
-			pData->Free();
 			return;
 		}
 
@@ -322,7 +340,6 @@ void CStallSystem::StartStall(CCharacter& staller, RPACKET& packet) {
 				continue;
 			if (pData->m_Goods[j].byGrid == pData->m_Goods[i].byGrid ||
 				pData->m_Goods[j].byIndex == pData->m_Goods[i].byIndex) {
-				pData->Free();
 				/*staller.SystemNotice( "开始摆摊：角色《%s》提交摆摊货物数据索引重复！ID[%d]", staller.GetName(), pData->m_Goods[i].byGrid );
 				LG( "stall_error", "开始摆摊：角色《%s》提交摆摊货物数据索引重复！ID[%d]", staller.GetName(), pData->m_Goods[i].byGrid );*/
 				staller.SystemNotice(RES_STRING(GM_CHARSTALL_CPP_00022), staller.GetName(), pData->m_Goods[i].byGrid);
@@ -339,7 +356,6 @@ void CStallSystem::StartStall(CCharacter& staller, RPACKET& packet) {
 				LG( "stall_error", "开始摆摊：交易未发现船长证明的船只信息。ID[0x%X]", dwBoatID );*/
 				staller.SystemNotice(RES_STRING(GM_CHARSTALL_CPP_00023), dwBoatID);
 				LG("stall_error", "start to stall：it cannot find the information of the boat that captain to confirm in this trade。ID[0x%X]", dwBoatID);
-				pData->Free();
 				return;
 			} else {
 				// sprintf( szTemp, "，%d艘船只《%s》，ID[0x%X]", pData->m_Goods[i].byCount, pBoat->GetName(), pData->m_Goods[i].byCount, dwBoatID );
@@ -352,6 +368,7 @@ void CStallSystem::StartStall(CCharacter& staller, RPACKET& packet) {
 	}
 
 	TL(CHA_VENDOR, staller.GetName(), "", szLog);
+	stallGuard.release();
 	staller.SetStallData(pData);
 	staller.StallAction();
 	staller.SetStallName(pData->m_szName);

@@ -7,10 +7,20 @@
 #include "stdafx.h"
 #include "StateCell.h"
 #include "SubMap.h"
+#include "GameApp.h"
 
 CChaListNode* CStateCell::AddCharacter(CCharacter* pCCha, bool bIn) {
 	T_B
-		CChaListNode* pNode = g_pGameApp->m_ChaListHeap.Get();
+		CGameApp* pApp = pCCha ? pCCha->GetOwnerApp() : nullptr;
+	if (!pApp) {
+		return nullptr;
+	}
+
+	CChaListNode* pNode = pApp->m_ChaListHeap.Get();
+	if (!pNode) {
+		LG("StateCell", "AddCharacter: ChaListNode heap exhausted\n");
+		return nullptr;
+	}
 	pNode->m_pCCha = pCCha;
 	pNode->m_bIn = bIn;
 	if (bIn) {
@@ -27,6 +37,21 @@ CChaListNode* CStateCell::AddCharacter(CCharacter* pCCha, bool bIn) {
 		m_pCChaCross = pNode;
 
 		pNode->m_pCEntStateNode = pCCha->EnterStateCell(this, pNode); // 实体记录所在的管理单元
+	}
+	if (!pNode->m_pCEntStateNode) {
+		if (pNode->m_pCLast)
+			pNode->m_pCLast->m_pCNext = pNode->m_pCNext;
+		if (pNode->m_pCNext)
+			pNode->m_pCNext->m_pCLast = pNode->m_pCLast;
+		if (bIn) {
+			if (m_pCChaIn == pNode)
+				m_pCChaIn = pNode->m_pCNext;
+		} else {
+			if (m_pCChaCross == pNode)
+				m_pCChaCross = pNode->m_pCNext;
+		}
+		pNode->Free();
+		return nullptr;
 	}
 	m_lChaNum++;
 

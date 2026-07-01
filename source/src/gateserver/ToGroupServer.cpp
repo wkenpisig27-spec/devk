@@ -4,9 +4,36 @@
 #include "common/NetLimits.h"
 #include "BackplaneAuth.h"
 #include <condition_variable>
+#include <vector>
 
 using namespace dbc;
 using namespace std;
+
+static void RejectGatePlayerAfterSyncFailure(Player* ply) {
+	if (!ply || !g_gtsvr) {
+		return;
+	}
+	ply->gp_addr = 0;
+	ply->gm_addr = 0;
+	ply->game = nullptr;
+	if (ply->m_datasock && g_gtsvr->cli_conn) {
+		try {
+			g_gtsvr->cli_conn->Disconnect(ply->m_datasock, 100, -31);
+		} catch (...) {
+		}
+	}
+	if (g_gtsvr->IsPlayerRegistered(ply)) {
+		if (ply->EndRun()) {
+			g_gtsvr->ScheduleDeferredPlayerFree(ply);
+		}
+	}
+}
+
+static void RejectAllGatePlayersAfterSyncFailure(Player* const* players, int count) {
+	for (int i = 0; i < count; ++i) {
+		RejectGatePlayerAfterSyncFailure(players[i]);
+	}
+}
 
 dbc::cuShort g_version = 103;
 
@@ -56,6 +83,7 @@ int ConnectGroupServer::Process() {
 				int err = retpk.ReadShort();
 
 				if (!retpk.HasData() || err == ERR_PT_LOGFAIL) {
+					RejectAllGatePlayersAfterSyncFailure(ply_array.get(), ply_cnt);
 					Sleep(5000);
 					DataSocket* ds = _tgps->get_datasock();
 					if (ds) _tgps->Disconnect(ds);
@@ -64,20 +92,23 @@ int ConnectGroupServer::Process() {
 					int num = retpk.ReadShort();
 
 					if (num != ply_cnt) {
+						RejectAllGatePlayersAfterSyncFailure(ply_array.get(), ply_cnt);
 						Sleep(5000);
 						DataSocket* ds = _tgps->get_datasock();
 						if (ds) _tgps->Disconnect(ds);
 						// Ê§°ÜÁË
 					} else {
-						// NOTE(Ogge): What is this? Investigate
 						for (int i = 0; i < num; i++) {
 							if (retpk.ReadShort() == 1) {
 								ply_array[i]->gp_addr = retpk.ReadLongLong();
+							} else {
+								LG("GateServer", "TP_SYNC_PLYLST: GroupServer rejected player %p dbid=%u\n",
+								   ply_array[i], ply_array[i]->m_dbid);
+								RejectGatePlayerAfterSyncFailure(ply_array[i]);
 							}
 						}
+						_tgps->SetSync(false);
 					}
-
-					_tgps->SetSync(false);
 				}
 			}
 

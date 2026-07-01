@@ -204,6 +204,8 @@ public:
 
 	GameServer* find(cChar* mapname);
 	GameServer* GetGameList() { return _game_list; }
+	void ClearPlayersGameBinding(GameServer* game);
+	void DrainLiveGameServers();
 
 private:
 	virtual void TaskDispatcher(Task* task) final;
@@ -226,6 +228,9 @@ private:
 	void _del_game(GameServer* game);
 	std::map<std::string, GameServer*> _map_game; // �ӵ�ͼ����Ӧ GameServer ��������
 	Mutex _mut_game;
+
+	bool RemoveDisconnectedGameServer(DataSocket* datasock);
+	void DisconnectClientsOnGameServer(GameServer* game);
 
 	IMPLEMENT_CDELETE(ToGameServer)
 };
@@ -437,6 +442,9 @@ public:
 	bool AppendInGameGroupTrailer(WPacket& wpk, Player* ply, uShort cmdForLog);
 	bool AppendInGameGameTrailer(WPacket& wpk, Player* ply, uShort cmdForLog);
 	bool AppendTpLoginRequestTrailer(WPacket& wpk, Player* ply);
+
+	void ScheduleDeferredPlayerFree(Player* ply);
+	void ShutdownReleaseLiveObjects();
 
 	SessionManager m_sessionManager;
 

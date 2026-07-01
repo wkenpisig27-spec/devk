@@ -447,7 +447,11 @@ void SystemReport(DWORD dwTimeParam) {
 	sprintf(szFPS, "%d", g_pGameApp->m_dwFPS);
 	if (hFPS)
 		SetWindowText(hFPS, szFPS);
-	sprintf(szFPS, "%d", g_pGameApp->m_dwRunCnt);
+	const SEntityPoolStats poolStats = g_pGameApp->GetEntityPoolStats();
+	sprintf(szFPS, "%d  P:%d/%d C:%d/%d T:%d/%d", g_pGameApp->m_dwRunCnt,
+		poolStats.nPlyHold, poolStats.nPlyMax,
+		poolStats.nChaHold, poolStats.nChaMax,
+		poolStats.nTNpcHold, poolStats.nTNpcMax);
 	if (hLoop)
 		SetWindowText(hLoop, szFPS);
 	sprintf(szFPS, "%d", g_pGameApp->m_dwChaCnt);

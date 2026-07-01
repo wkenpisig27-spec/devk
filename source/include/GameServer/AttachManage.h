@@ -2,7 +2,7 @@
 // FileName: AttachManage.h
 // Creater: ZhangXuedong
 // Date: 2004.10.19
-// Comment: CConjureMgr class
+// Comment: CPassengerMgr class
 //=============================================================================
 
 #ifndef ATTACHMANAGE_H
@@ -10,29 +10,6 @@
 
 #include "Attachable.h"
 #include "GameAppNet.h"
-
-class CConjureMgr {
-public:
-	CConjureMgr();
-	~CConjureMgr();
-
-	void Add(CAttachable* pCAttach);
-	void Delete(CAttachable* pCAttach);
-	bool SetLeader(CAttachable* pCAttach);
-	CAttachable* GetLeader();
-	void FreeAll();
-	CAttachable* GetTail();
-
-	void BeginGet(void);
-	CAttachable* GetNext(void);
-
-protected:
-private:
-	CAttachable* m_pCLstHead{}; // 链首对象也是主控对象
-	CAttachable* m_pCLstTail{};
-
-	CAttachable* m_pCur{};
-};
 
 class CPassengerMgr : public dbc::PreAllocStru {
 public:
@@ -49,6 +26,8 @@ public:
 
 	void FreeAll();
 	void DeleteAll();
+
+	int GetCount() const { return m_lNum; }
 
 protected:
 private:

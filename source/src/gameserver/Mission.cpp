@@ -7,11 +7,41 @@
 #include "Script.h"
 #include "RoleCommon.h"
 #include "GameAppNet.h"
+#include "GameApp.h"
 #include "Player.h"
 #include "lua_gamectrl.h"
 
 //---------------------------------------------------------
 namespace mission {
+
+namespace {
+
+CCharacter* MisResolveFollowNpc(LONG lEntityHandle) {
+	if (lEntityHandle == 0 || !g_pGameApp) {
+		return nullptr;
+	}
+
+	Entity* pEnt = g_pGameApp->GetEntity(lEntityHandle);
+	if (!pEnt) {
+		return nullptr;
+	}
+
+	return pEnt->IsCharacter();
+}
+
+void MisFreeFollowNpc(LONG& lEntityHandle) {
+	if (lEntityHandle == 0) {
+		return;
+	}
+
+	CCharacter* pCha = MisResolveFollowNpc(lEntityHandle);
+	lEntityHandle = 0;
+	if (pCha) {
+		pCha->Free();
+	}
+}
+
+} // namespace
 
 // #define ROLE_DEBUG_INFO
 
@@ -1646,9 +1676,8 @@ BOOL CCharMission::MisCancelRole(WORD wRoleID) {
 			// 清除护送的npc分配内存
 			if (m_Mission[i].byType == MIS_RAND_CONVOY) {
 				for (int j = 0; j < ROLE_MAXNUM_RAND_DATA; j++) {
-					if (m_Mission[i].RandData[j].pData && m_Mission[i].RandData[j].wParam1 > 0) {
-						((CCharacter*)m_Mission[i].RandData[j].pData)->Free();
-						m_Mission[i].RandData[j].pData = nullptr;
+					if (m_Mission[i].RandData[j].lEntityHandle != 0 && m_Mission[i].RandData[j].wParam1 > 0) {
+						MisFreeFollowNpc(m_Mission[i].RandData[j].lEntityHandle);
 					}
 				}
 			}
@@ -1675,9 +1704,8 @@ BOOL CCharMission::MisClearRole(WORD wRoleID) {
 			// 清除护送的npc分配内存
 			if (m_Mission[i].byType == MIS_RAND_CONVOY) {
 				for (int j = 0; j < ROLE_MAXNUM_RAND_DATA; j++) {
-					if (m_Mission[i].RandData[j].pData && m_Mission[i].RandData[j].wParam1 > 0) {
-						((CCharacter*)m_Mission[i].RandData[j].pData)->Free();
-						m_Mission[i].RandData[j].pData = nullptr;
+					if (m_Mission[i].RandData[j].lEntityHandle != 0 && m_Mission[i].RandData[j].wParam1 > 0) {
+						MisFreeFollowNpc(m_Mission[i].RandData[j].lEntityHandle);
 					}
 				}
 			}
@@ -1781,7 +1809,7 @@ BOOL CCharMission::MisAddFollowNpc(WORD wRoleID, BYTE byIndex, WORD wNpcCharID, 
 		return FALSE;
 	}
 
-	m_Mission[index].RandData[byIndex].pData = pNpc;
+	m_Mission[index].RandData[byIndex].lEntityHandle = pNpc ? pNpc->GetHandle() : 0;
 	m_Mission[index].RandData[byIndex].wParam1 = wNpcCharID;
 	m_Mission[index].RandData[byIndex].wParam2 = byAiType;
 	return TRUE;
@@ -1805,9 +1833,8 @@ BOOL CCharMission::MisClearAllFollowNpc(WORD wRoleID) {
 
 	if (m_Mission[index].byType == MIS_RAND_CONVOY) {
 		for (int j = 0; j < ROLE_MAXNUM_RAND_DATA; j++) {
-			if (m_Mission[i].RandData[j].pData && m_Mission[i].RandData[j].wParam1 > 0) {
-				((CCharacter*)m_Mission[i].RandData[j].pData)->Free();
-				m_Mission[i].RandData[j].pData = nullptr;
+			if (m_Mission[i].RandData[j].lEntityHandle != 0 && m_Mission[i].RandData[j].wParam1 > 0) {
+				MisFreeFollowNpc(m_Mission[i].RandData[j].lEntityHandle);
 			}
 		}
 	}
@@ -1836,9 +1863,8 @@ BOOL CCharMission::MisClearFollowNpc(WORD wRoleID, BYTE byIndex) {
 		return FALSE;
 	}
 
-	if (m_Mission[index].RandData[byIndex].wParam1 > 0 && m_Mission[index].RandData[byIndex].pData) {
-		((CCharacter*)m_Mission[index].RandData[byIndex].pData)->Free();
-		m_Mission[index].RandData[byIndex].pData = nullptr;
+	if (m_Mission[index].RandData[byIndex].wParam1 > 0 && m_Mission[index].RandData[byIndex].lEntityHandle != 0) {
+		MisFreeFollowNpc(m_Mission[index].RandData[byIndex].lEntityHandle);
 		m_Mission[index].RandData[byIndex].wParam1 = 0;
 		return TRUE;
 	}
@@ -1866,7 +1892,7 @@ BOOL CCharMission::MisHasFollowNpc(WORD wRoleID, BYTE byIndex) {
 		return FALSE;
 	}
 
-	if (m_Mission[index].RandData[byIndex].wParam1 > 0 && m_Mission[index].RandData[byIndex].pData)
+	if (m_Mission[index].RandData[byIndex].wParam1 > 0 && m_Mission[index].RandData[byIndex].lEntityHandle != 0)
 		return TRUE;
 
 	return FALSE;
@@ -2313,9 +2339,8 @@ void CCharMission::MisGooutMap() {
 	for (int i = 0; i < m_byNumMission; i++) {
 		if (m_Mission[i].byType == MIS_RAND_CONVOY) {
 			for (int j = 0; j < ROLE_MAXNUM_RAND_DATA; j++) {
-				if (m_Mission[i].RandData[j].pData && m_Mission[i].RandData[j].wParam1 > 0) {
-					((CCharacter*)m_Mission[i].RandData[j].pData)->Free();
-					m_Mission[i].RandData[j].pData = nullptr;
+				if (m_Mission[i].RandData[j].lEntityHandle != 0 && m_Mission[i].RandData[j].wParam1 > 0) {
+					MisFreeFollowNpc(m_Mission[i].RandData[j].lEntityHandle);
 				}
 			}
 		}

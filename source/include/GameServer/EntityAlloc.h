@@ -28,6 +28,35 @@
 #define defENTI_ALLOC_TYPE_ENTTRANSIT defENTI_ENTBASE(3)  // 传送类型事件实体
 #define defENTI_ALLOC_TYPE_ENTBERTH defENTI_ENTBASE(4)	  // 停泊类型事件实体
 
+class CEntityAlloc;
+class CGameApp;
+
+// ---------------------------------------------------------------------------
+// Entity pool ownership invariants (entity-lifetime hardening baseline)
+//
+// Authoritative owner: CEntityAlloc / CPlayerAlloc (swap-and-pop CAlloc pools).
+// Entities are never deleted with delete; they are returned via Entity::Free() or
+// CPlayer::Free(), which call destroy(handleIndex) on the matching pool.
+// Each Entity stores its owning CEntityAlloc* (set at pool create) so Free()
+// does not require g_pGameApp.
+//
+// Handle encoding: high byte selects pool (defENTI_ALLOC_TYPE_*). Low 24 bits are
+// the slot index passed to CAlloc::destroy(LONG lID). destroy(T*) delegates to
+// destroy(handleIndex) after verifying the object belongs to this pool.
+//
+// Cross-pool return is undefined behavior (e.g. CTalkNpc slot via m_ChaAlloc).
+// SubMap eyeshot/state grids and CGameApp player index hold non-owning pointers;
+// deregister / DelPlayerIdx must happen before Free() recycles the slot.
+//
+// Destruction order: SubMap::GoOut (if in world) -> type-specific Finally() chain
+// -> pool slot marked free (SetHoldID(-1)). Do not use a pointer after Free().
+//
+// CTalkNpc satisfies IsCharacter() and IsNpc(); ReturnEntity disambiguates by handle
+// prefix and pool kind. Physical storage remains split (CCharacter vs CTalkNpc
+// layout) because monsters must keep IsNpc()==nullptr while talk NPCs are CNpc.
+// CCharacterPool provides a single ownership module and handle router (Phase 6).
+// ---------------------------------------------------------------------------
+
 template <class T>
 class CAlloc {
 public:
@@ -43,6 +72,7 @@ public:
 
 	// 分配指定类型数据
 	bool create(LONG lSize, LONG lFlag = 0);
+	void bindEntSpace(CEntityAlloc* pSpace);
 	T* alloc();
 	void destroy(T* pData);
 	void destroy(LONG lID);
@@ -56,6 +86,13 @@ public:
 	T* revnext();
 
 	T* getinfo(LONG lID);
+
+	template <class Fn>
+	void forEachAllocSlot(Fn&& fn) {
+		for (LONG i = 0; i < m_lAllocSize; i++) {
+			fn(m_pAlloc[i]);
+		}
+	}
 
 private:
 	LONG m_lCur{};
@@ -112,6 +149,13 @@ bool CAlloc<T>::create(LONG lSize, LONG lFlag) {
 }
 
 template <class T>
+void CAlloc<T>::bindEntSpace(CEntityAlloc* pSpace) {
+	for (LONG i = 0; i < m_lAllocSize; i++) {
+		m_pAlloc[i].SetEntSpace(pSpace);
+	}
+}
+
+template <class T>
 T* CAlloc<T>::alloc() {
 	if (m_lHoldSize < m_lAllocSize) {
 		m_pHold[m_lHoldSize]->SetHoldID(m_lHoldSize);
@@ -126,7 +170,16 @@ T* CAlloc<T>::alloc() {
 
 template <class T>
 void CAlloc<T>::destroy(T* pData) {
-	// 暂未实现，机制原因目前支持下面的接口
+	if (!pData) {
+		return;
+	}
+
+	const LONG lHandle = pData->GetHandle();
+	if ((lHandle & 0xff000000) != static_cast<LONG>(m_lFlag)) {
+		return;
+	}
+
+	destroy(lHandle & 0x00ffffff);
 }
 
 template <class T>
@@ -202,6 +255,40 @@ T* CAlloc<T>::revnext() {
 	return m_pHold[m_lCur--];
 }
 
+// Unified character-family pool: one router over CCharacter and CTalkNpc storage.
+class CCharacterPool {
+public:
+	bool create(int lChaNum, int lTNpcNum);
+	void clear();
+
+	CCharacter* allocCharacter();
+	mission::CTalkNpc* allocTalkNpc();
+	Entity* getinfo(int lType, int lSlotId);
+	void destroy(int lType, int lSlotId);
+	void destroy(Entity* pEnt);
+
+	void revbeginCharacter() { m_ChaAlloc.revbegin(); }
+	CCharacter* revnextCharacter() { return m_ChaAlloc.revnext(); }
+	void revbeginTalkNpc() { m_TalkNpcAlloc.revbegin(); }
+	mission::CTalkNpc* revnextTalkNpc() { return m_TalkNpcAlloc.revnext(); }
+
+	int getHoldCharacterNum() const { return m_ChaAlloc.getHoldSize(); }
+	int getHoldTalkNpcNum() const { return m_TalkNpcAlloc.getHoldSize(); }
+	int getMaxHoldCharacterNum() const { return m_ChaAlloc.getMaxHoldSize(); }
+	int getMaxHoldTalkNpcNum() const { return m_TalkNpcAlloc.getMaxHoldSize(); }
+	int getAllocCharacterNum() const { return m_ChaAlloc.getAllocSize(); }
+	int getAllocTalkNpcNum() const { return m_TalkNpcAlloc.getAllocSize(); }
+
+	void bindEntSpace(CEntityAlloc* pSpace) {
+		m_ChaAlloc.bindEntSpace(pSpace);
+		m_TalkNpcAlloc.bindEntSpace(pSpace);
+	}
+
+private:
+	CAlloc<CCharacter> m_ChaAlloc;
+	CAlloc<mission::CTalkNpc> m_TalkNpcAlloc;
+};
+
 class CEntityAlloc {
 public:
 	CEntityAlloc(int lChaNum = 5000, int lItemNum = 3000, int lTNpcNum = 200);
@@ -216,33 +303,36 @@ public:
 	Entity* GetEntity(int lID);
 	void ReturnEntity(int lID);
 
-	void BeginGetTNpc(void) { m_TalkNpcAlloc.revbegin(); }
-	mission::CTalkNpc* GetNextTNpc(void) { return m_TalkNpcAlloc.revnext(); }
+	void BeginGetTNpc(void) { m_CharPool.revbeginTalkNpc(); }
+	mission::CTalkNpc* GetNextTNpc(void) { return m_CharPool.revnextTalkNpc(); }
+
+	void BeginGetCha(void) { m_CharPool.revbeginCharacter(); }
+	CCharacter* GetNextCha(void) { return m_CharPool.revnextCharacter(); }
 
 	void BeginGetItem(void) { m_ItemAlloc.revbegin(); }
 	CItem* GetNextItem(void) { return m_ItemAlloc.revnext(); }
 
-	void BeginGetCha(void) { m_ChaAlloc.revbegin(); }
-	CCharacter* GetNextCha(void) { return m_ChaAlloc.revnext(); }
-
-	int GetHoldChaNum(void) { return m_ChaAlloc.getHoldSize(); }
+	int GetHoldChaNum(void) { return m_CharPool.getHoldCharacterNum(); }
 	int GetHoldItemNum(void) { return m_ItemAlloc.getHoldSize(); }
-	int GetHoldTNpcNum(void) { return m_TalkNpcAlloc.getHoldSize(); }
-	int GetMaxHoldChaNum(void) { return m_ChaAlloc.getMaxHoldSize(); }
+	int GetHoldTNpcNum(void) { return m_CharPool.getHoldTalkNpcNum(); }
+	int GetMaxHoldChaNum(void) { return m_CharPool.getMaxHoldCharacterNum(); }
 	int GetMaxHoldItemNum(void) { return m_ItemAlloc.getMaxHoldSize(); }
-	int GetMaxHoldTNpcNum(void) { return m_TalkNpcAlloc.getMaxHoldSize(); }
+	int GetMaxHoldTNpcNum(void) { return m_CharPool.getMaxHoldTalkNpcNum(); }
 
-	int GetAllocChaNum(void) { return m_ChaAlloc.getAllocSize(); }
+	int GetAllocChaNum(void) { return m_CharPool.getAllocCharacterNum(); }
 	int GetAllocItemNum(void) { return m_ItemAlloc.getAllocSize(); }
-	int GetAllocTNpcNum(void) { return m_TalkNpcAlloc.getAllocSize(); }
+	int GetAllocTNpcNum(void) { return m_CharPool.getAllocTalkNpcNum(); }
+
+	void SetOwnerApp(CGameApp* pApp) { m_pOwnerApp = pApp; }
+	CGameApp* GetOwnerApp() const { return m_pOwnerApp; }
 
 private:
-	typedef CAlloc<CCharacter> CHA_ALLOC;
-	CHA_ALLOC m_ChaAlloc;
+	void bindEntSpace();
+
+	CGameApp* m_pOwnerApp{nullptr};
+	CCharacterPool m_CharPool;
 	typedef CAlloc<CItem> ITEM_ALLOC;
 	ITEM_ALLOC m_ItemAlloc;
-	typedef CAlloc<mission::CTalkNpc> TALKNPC_ALLOC;
-	TALKNPC_ALLOC m_TalkNpcAlloc;
 	typedef CAlloc<mission::CBerthEntity> BERTH_ALLOC;
 	BERTH_ALLOC m_BerthAlloc;
 	typedef CAlloc<mission::CResourceEntity> RESOURCE_ALLOC;
@@ -251,7 +341,7 @@ private:
 
 class CPlayerAlloc {
 public:
-	CPlayerAlloc(int lPlyNum = 3000) { m_PlyAlloc.create(lPlyNum); }
+	explicit CPlayerAlloc(int lPlyNum = 3000);
 	~CPlayerAlloc() { m_PlyAlloc.clear(); }
 
 	CPlayer* GetNewPly();
@@ -262,8 +352,14 @@ public:
 	int GetMaxHoldPlyNum(void) { return m_PlyAlloc.getMaxHoldSize(); }
 	int GetAllocPlyNum(void) { return m_PlyAlloc.getAllocSize(); }
 
+	void SetOwnerApp(CGameApp* pApp) { m_pOwnerApp = pApp; }
+	CGameApp* GetOwnerApp() const { return m_pOwnerApp; }
+
 protected:
 private:
+	void bindPlySpace();
+
+	CGameApp* m_pOwnerApp{nullptr};
 	typedef CAlloc<CPlayer> PLAYER_ALLOC;
 	PLAYER_ALLOC m_PlyAlloc;
 };

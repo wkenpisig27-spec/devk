@@ -13,6 +13,7 @@
 #include "PacketSanitizer.h"
 #include "BackplaneAuth.h"
 #include "common/OpcodeIngress.h"
+#include <vector>
 
 using namespace std;
 
@@ -110,6 +111,89 @@ void GroupServerApp::UnregisterPlayer(Player* ply) {
 		LG("Security", "UnregisterPlayer: ptr=0x%llX gen=%u remaining=%zu\n",
 		   static_cast<unsigned long long>(ptr), ply->m_generation, m_playerRegistry.size() - 1);
 		m_playerRegistry.erase(it);
+	}
+}
+
+void GroupServerApp::ClearInvitationsFromPlayer(Player* inviter) {
+	if (!inviter) {
+		return;
+	}
+
+	RunChainGetArmor<Player> l(m_plylst);
+	for (Player* ply = m_plylst.GetNextItem(); ply; ply = m_plylst.GetNextItem()) {
+		ply->TeamEndInvited(inviter);
+		ply->FrndEndInvited(inviter);
+		ply->MasterEndInvited(inviter);
+	}
+	l.unlock();
+}
+
+void GroupServerApp::FinalizePlayerPoolRelease(Player* ply) {
+	if (!ply) {
+		return;
+	}
+	m_LoginList.Remove(ply->m_acctname);
+	ply->Free();
+}
+
+bool GroupServerApp::ReleasePlayerToPool(Player* ply) {
+	if (!ply) {
+		return false;
+	}
+	if (!ply->EndRun()) {
+		LG("GroupServer", "ReleasePlayerToPool: EndRun failed for [%s], skipping pool free\n", ply->m_acctname.c_str());
+		return false;
+	}
+	FinalizePlayerPoolRelease(ply);
+	return true;
+}
+
+void GroupServerApp::DrainLivePlayers() {
+	for (;;) {
+		Player* ply = nullptr;
+		{
+			RunChainGetArmor<Player> l(m_plylst);
+			ply = m_plylst.GetNextItem();
+			if (!ply) {
+				break;
+			}
+			ClearInvitationsFromPlayer(ply);
+			RemovePlayerFromGuildBankQueue(ply);
+			ply->EndPlay(nullptr);
+			if (!ReleasePlayerToPool(ply)) {
+				LG("GroupServer", "DrainLivePlayers: failed to release player [%s]\n", ply->m_acctname.c_str());
+				break;
+			}
+		}
+	}
+}
+
+bool GroupServerApp::ReleaseGuildToPool(Guild* guild) {
+	if (!guild) {
+		return false;
+	}
+	if (!guild->EndRun()) {
+		LG("GroupServer", "ReleaseGuildToPool: EndRun failed for guild id=%u, skipping pool free\n", guild->m_id);
+		return false;
+	}
+	guild->Free();
+	return true;
+}
+
+void GroupServerApp::DrainLiveGuilds() {
+	for (;;) {
+		Guild* guild = nullptr;
+		{
+			RunChainGetArmor<Guild> l(m_gldlst);
+			guild = m_gldlst.GetNextItem();
+			if (!guild) {
+				break;
+			}
+			if (!ReleaseGuildToPool(guild)) {
+				LG("GroupServer", "DrainLiveGuilds: failed to release guild id=%u\n", guild->m_id);
+				break;
+			}
+		}
 	}
 }
 
@@ -295,10 +379,13 @@ void GroupServerApp::OnDisconnect(DataSocket* datasock, int reason) {
 
 		// Reconnect to AccountServer in a detached background thread so we don't
 		// block a processor thread (which would starve RPC handling from GateServer).
-		std::thread([&gpapp = *g_gpsvr]() {
+		std::thread([]() {
 			std::cout << "after 5 seconds reconnect AccountServer......" << std::endl;
 			Sleep(5000);
-			InitACTSvrConnect(const_cast<GroupServerApp&>(gpapp));
+			if (g_exit || !g_gpsvr) {
+				return;
+			}
+			InitACTSvrConnect(*g_gpsvr);
 		}).detach();
 	} else {
 		GateServer* l_gate = (GateServer*)datasock->GetPointer();
@@ -881,6 +968,8 @@ void GroupServerApp::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 // Add by lark.li 20081119 begin
 WPacket GroupServerApp::TP_SYNC_PLYLST(DataSocket* datasock, RPacket& pk) {
 	WPacket l_retpk = GetWPacket();
+	std::vector<Player*> restoredPlayers;
+	restoredPlayers.reserve(64);
 
 	m_mtxSyn.lock();
 
@@ -894,20 +983,20 @@ WPacket GroupServerApp::TP_SYNC_PLYLST(DataSocket* datasock, RPacket& pk) {
 
 			l_retpk.WriteShort((uShort)num);
 			for (int i = 0; i < (int)num; i++) {
-				Player* l_ply = g_gpsvr->m_plyheap.Get();
+				const uLong acctLoginId = pk.ReadLong();
+				const uLong acctId = pk.ReadLong();
+				const uint32_t slot = static_cast<uint32_t>(pk.ReadLong());
+				const uint32_t generation = static_cast<uint32_t>(pk.ReadLong());
+				const unsigned long long gtAddr = pk.ReadLongLong();
+
+				Player* l_ply = m_plyheap.Get();
 				if (l_ply) {
-					// Register player in validation registry immediately after allocation
-					g_gpsvr->RegisterPlayer(l_ply);
-					
-					l_retpk.WriteShort(1);
-					l_retpk.WriteLongLong(reinterpret_cast<uintptr_t>(l_ply));
+					RegisterPlayer(l_ply);
 
 					l_ply->m_gate = pServer;
-					l_ply->m_acctLoginID = pk.ReadLong();
-					l_ply->m_acctid = pk.ReadLong();
-					const uint32_t slot = static_cast<uint32_t>(pk.ReadLong());
-					const uint32_t generation = static_cast<uint32_t>(pk.ReadLong());
-					l_ply->m_gtAddr = pk.ReadLongLong();
+					l_ply->m_acctLoginID = acctLoginId;
+					l_ply->m_acctid = acctId;
+					l_ply->m_gtAddr = gtAddr;
 					const SessionHandle gateSession = SessionHandle::FromWire(slot, generation);
 					if (gateSession.IsValid()) {
 						BindPlayerSession(gateSession, l_ply);
@@ -918,14 +1007,30 @@ WPacket GroupServerApp::TP_SYNC_PLYLST(DataSocket* datasock, RPacket& pk) {
 						   l_ply->m_gtAddr, l_ply->m_acctLoginID);
 					}
 
-					l_ply->BeginRun();
+					if (l_ply->BeginRun()) {
+						restoredPlayers.push_back(l_ply);
+						l_retpk.WriteShort(1);
+						l_retpk.WriteLongLong(reinterpret_cast<uintptr_t>(l_ply));
+					} else {
+						LG("GroupServer", "TP_SYNC_PLYLST: BeginRun failed for acctLogin=%u\n", acctLoginId);
+						UnregisterPlayer(l_ply);
+						l_ply->Free();
+						l_retpk.WriteShort(0);
+					}
 				} else {
+					LG("GroupServer", "TP_SYNC_PLYLST: player pool exhausted for acctLogin=%u\n", acctLoginId);
 					l_retpk.WriteShort(0);
 				}
 			}
-		} else
+		} else {
 			l_retpk.WriteShort(ERR_PT_LOGFAIL);
+		}
 	} catch (...) {
+		for (Player* ply : restoredPlayers) {
+			ReleasePlayerToPool(ply);
+		}
+		restoredPlayers.clear();
+		l_retpk = GetWPacket();
 		l_retpk.WriteShort(ERR_PT_LOGFAIL);
 	}
 	m_mtxSyn.unlock();
@@ -1319,6 +1424,7 @@ void GroupServerApp::AP_KICKUSER2(DataSocket* datasock, uLong acctid) {
 		}
 	}
 	if (l_ply) {
+		ClearInvitationsFromPlayer(l_ply);
 		l_ply->EndPlay(datasock);
 		if (l_ply->EndRun()) {
 			if (l_ply->m_currcha != -1) {
@@ -1340,9 +1446,10 @@ void GroupServerApp::AP_KICKUSER2(DataSocket* datasock, uLong acctid) {
 			SendToClient(l_ply, l_wpk);
 			// �?�?3�1|
 			LG("GroupServer", "recieved killed acctid/acctname:[%d]/[%s] command!\n", l_acctid, l_ply->m_acctname.c_str());
+			FinalizePlayerPoolRelease(l_ply);
+		} else {
+			LG("GroupServer", "AP_KICKUSER2: EndRun failed for [%s], skipping pool free\n", l_ply->m_acctname.c_str());
 		}
-		m_LoginList.Remove(l_ply->m_acctname);
-		l_ply->Free();
 	} else {
 		l.unlock();
 		LG("GroupServer", "recieved kill acctid:[%d] command(not in play list)!\n", l_acctid);
@@ -1358,6 +1465,7 @@ void GroupServerApp::KillUserByName(const char* accoutName) {
 		}
 	}
 	if (l_ply) {
+		ClearInvitationsFromPlayer(l_ply);
 		l_ply->EndPlay(nullptr);
 		{
 			// Notify AccountServer about logout
@@ -1374,11 +1482,9 @@ void GroupServerApp::KillUserByName(const char* accoutName) {
 			
 			LG("GroupServer", "KillUserByName: killed account [%s]\n", l_ply->m_acctname.c_str());
 		}
-		// Remove from login list
-		m_LoginList.Remove(l_ply->m_acctname);
-		// Remove from player list and free
-		l_ply->EndRun();
-		l_ply->Free();
+		if (!ReleasePlayerToPool(l_ply)) {
+			LG("GroupServer", "KillUserByName: EndRun failed for [%s], skipping pool free\n", l_ply->m_acctname.c_str());
+		}
 	} else {
 		l.unlock();
 	}
@@ -1394,6 +1500,7 @@ void GroupServerApp::AP_KICKUSER(DataSocket* datasock, RPacket& pk) {
 		}
 	}
 	if (l_ply) {
+		ClearInvitationsFromPlayer(l_ply);
 		l_ply->EndPlay(datasock);
 		if (l_ply->EndRun()) {
 			if (l_ply->m_currcha != -1) {
@@ -1417,9 +1524,10 @@ void GroupServerApp::AP_KICKUSER(DataSocket* datasock, RPacket& pk) {
 			l_wpk.WriteCmd(CMD_AP_KICKUSER);
 			SendToClient(l_ply, l_wpk);
 			LG("GroupServer", "kicked acctid/acctname:[%d]/[%s] due to duplicate login\n", l_ply->m_acctid, l_ply->m_acctname.c_str());
+			FinalizePlayerPoolRelease(l_ply);
+		} else {
+			LG("GroupServer", "AP_KICKUSER: EndRun failed for [%s], skipping pool free\n", l_ply->m_acctname.c_str());
 		}
-		m_LoginList.Remove(l_ply->m_acctname);
-		l_ply->Free();
 	} else {
 		l.unlock();
 		// Player not found - likely stale session after server restart
@@ -1492,12 +1600,16 @@ WPacket GroupServerApp::TP_USER_LOGOUT(Player* ply, DataSocket* datasock, RPacke
 	// Clean up any pending guild bank requests for this player
 	RemovePlayerFromGuildBankQueue(ply);
 
+	ClearInvitationsFromPlayer(ply);
+
 	if (ply->m_bCheat) {
 		if (m_dwCheatCount > 0)
 			m_dwCheatCount--;
 	}
 
 	ply->EndPlay(datasock);
+
+	const bool wasWG = ply->m_bWG;
 
 	if (ply->EndRun()) {
 		if (ply->m_currcha != -1) {
@@ -1512,16 +1624,16 @@ WPacket GroupServerApp::TP_USER_LOGOUT(Player* ply, DataSocket* datasock, RPacke
 		SendData(m_acctsock, l_wpk);
 		// ????
 		LG("GroupServer", "(%s):[%s]logout,\t online/total:%d/%d\n", ply->m_clientip, ply->m_acctname.c_str(), m_plylst.GetTotal(), int(m_curChaNum));
+		FinalizePlayerPoolRelease(ply);
 	} else {
 		LG("GroupServer", "(%s):[%s]%s%d/%d\n", ply->m_clientip, ply->m_acctname.c_str(), RES_STRING(GP_GROUPSERVERAPPSERV_CPP_00026), m_plylst.GetTotal(), int(m_curChaNum));
+		LG("GroupServer", "TP_USER_LOGOUT: EndRun failed for [%s], skipping pool free\n", ply->m_acctname.c_str());
 	}
 
-	if (ply->m_bWG) {
+	if (wasWG) {
 		m_curWGChaNum--;
 	}
 
-	m_LoginList.Remove(ply->m_acctname);
-	ply->Free();
 	l.unlock();
 	// ???????
 	l_retpk.WriteShort(ERR_SUCCESS);

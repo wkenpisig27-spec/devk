@@ -42,10 +42,7 @@ void CItem::Initially() {
 
 void CItem::Finally() {
 	T_B
-	// Safety check: only call GoOut if we have a valid submap
-	// and we're not in a shutdown state
-	extern volatile BOOL g_bGameEnd;
-	if (m_submap && !g_bGameEnd) {
+	if (m_submap) {
 		try {
 			m_submap->GoOut(this);
 		} catch (...) {

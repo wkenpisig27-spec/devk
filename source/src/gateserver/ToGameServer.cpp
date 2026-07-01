@@ -5,6 +5,7 @@
 #include "BackplaneAuth.h"
 #include <stdexcept>
 #include <condition_variable>
+#include <vector>
 using namespace std;
 using namespace dbc;
 
@@ -72,6 +73,97 @@ void ToGameServer::_del_game(GameServer* game) {
 	}
 }
 
+void ToGameServer::ClearPlayersGameBinding(GameServer* game) {
+	if (!game || !g_gtsvr) {
+		return;
+	}
+	dbc::RunChainGetArmor<Player> l(g_gtsvr->m_plylst);
+	for (Player* ply = g_gtsvr->m_plylst.GetNextItem(); ply; ply = g_gtsvr->m_plylst.GetNextItem()) {
+		if (ply->game == game) {
+			ply->game = nullptr;
+			ply->gm_addr = 0;
+		}
+	}
+	l.unlock();
+}
+
+void ToGameServer::DrainLiveGameServers() {
+	MutexArmor lock(_mut_game);
+	while (_game_list) {
+		GameServer* game = _game_list;
+		ClearPlayersGameBinding(game);
+		_del_game(game);
+		for (int i = 0; i < game->mapcnt; ++i) {
+			_map_game.erase(game->maplist[i]);
+		}
+		game->mapcnt = 0;
+		if (game->m_datasock) {
+			game->m_datasock->SetPointer(nullptr);
+			game->m_datasock = nullptr;
+		}
+		game->Free();
+	}
+}
+
+void ToGameServer::DisconnectClientsOnGameServer(GameServer* game) {
+	if (!game || !g_gtsvr) {
+		return;
+	}
+
+	std::vector<Player*> affected;
+	{
+		RunChainGetArmor<Player> l(g_gtsvr->m_plylst);
+		for (Player* ply = g_gtsvr->m_plylst.GetNextItem(); ply; ply = g_gtsvr->m_plylst.GetNextItem()) {
+			if (ply->game != game) {
+				continue;
+			}
+			if (!g_gtsvr->ValidatePlayerPointer(ply)) {
+				continue;
+			}
+			affected.push_back(ply);
+		}
+		l.unlock();
+	}
+
+	LG("GateServer", "GameServer disconnect: notifying %zu client(s)\n", affected.size());
+	for (Player* ply : affected) {
+		try {
+			g_gtsvr->cli_conn->post_mapcrash_msg(ply);
+		} catch (...) {
+		}
+	}
+	for (Player* ply : affected) {
+		if (!ply->m_datasock) {
+			continue;
+		}
+		try {
+			LG("GateServer", "GameServer disconnect: disconnect [%s]\n", ply->m_datasock->GetPeerIP());
+			g_gtsvr->cli_conn->Disconnect(ply->m_datasock, 100, -29);
+		} catch (...) {
+		}
+	}
+}
+
+bool ToGameServer::RemoveDisconnectedGameServer(DataSocket* datasock) {
+	MutexArmor lock(_mut_game);
+	GameServer* l_game = static_cast<GameServer*>(datasock->GetPointer());
+	if (!l_game) {
+		return false;
+	}
+
+	LG("GateServer", " delete [%s]\n", l_game->gamename.c_str());
+	ClearPlayersGameBinding(l_game);
+	_del_game(l_game);
+	for (int i = 0; i < l_game->mapcnt; ++i) {
+		LG("GateServer", "delete map [%s]\n", l_game->maplist[i].c_str());
+		_map_game.erase(l_game->maplist[i]);
+	}
+	l_game->mapcnt = 0;
+	l_game->Free();
+	datasock->SetPointer(nullptr);
+	return true;
+}
+
 void ToGameServer::TaskDispatcher(Task* task) {
 	extern std::mutex global_gate_ready_mutex;
 	extern std::condition_variable global_gate_ready_cv;
@@ -100,94 +192,38 @@ void ToGameServer::OnDisconnect(DataSocket* datasock, int reason) // reasonÖµ:
 	LG("GateServer", "GameServer= [%s] gone,Socket num= %d,reason= %s\n", datasock->GetPeerIP(), GetSockTotal() + 1, GetDisconnectErrText(reason).c_str());
 	BackplaneAuth::OnSocketClosed(datasock);
 
-	if (reason == DS_SHUTDOWN || reason == DS_DISCONN) {
-		return;
-	}
-
-	auto l_game = static_cast<GameServer*>(datasock->GetPointer());
+	GameServer* l_game = static_cast<GameServer*>(datasock->GetPointer());
 	if (!l_game) {
 		return;
 	}
 
-	bool already_delete = false;
-	// ´ÓÁ´±íÖÐÉ¾³ý´Ë GameServer
-	_mut_game.lock();
-	try {
-		// NOTE(Ogge): Is it checking twice because of multithreading?
-		//  Once before locking, then as safety after locking?
-		l_game = static_cast<GameServer*>(datasock->GetPointer());
-		if (l_game) {
-			LG("GateServer", " delete [%s]\n", l_game->gamename.c_str());
-			_del_game(l_game);
-			for (int i = 0; i < l_game->mapcnt; ++i) {
-				LG("GateServer", "delete map [%s]\n", l_game->maplist[i].c_str());
-				_map_game.erase(l_game->maplist[i]);
-			}
-			l_game->mapcnt = 0;
-			l_game->Free();
-			datasock->SetPointer(nullptr);
+	const bool gracefulClose = (reason == DS_SHUTDOWN || reason == DS_DISCONN);
 
-			} else {
-			already_delete = true;
+	// Gate shutdown: drop game-server registry only; player drain runs in ~GateServer.
+	if (gracefulClose && g_appexit) {
+		try {
+			RemoveDisconnectedGameServer(datasock);
+		} catch (...) {
+			LG("GateServer", "Exception raised from OnDisconnect during gate shutdown\n");
+		}
+		return;
+	}
+
+	// GameServer stopped (graceful or not) while Gate keeps running: kick map clients first.
+	if (!g_appexit) {
+		try {
+			DisconnectClientsOnGameServer(l_game);
+		} catch (...) {
+			LG("GateServer", "Exception raised from OnDisconnect{notify map clients}\n");
+		}
+	}
+
+	try {
+		if (!RemoveDisconnectedGameServer(datasock)) {
+			return;
 		}
 	} catch (...) {
-		// l_line<<newln<<"Exception raised from OnDisconnect{´ÓÁ´±íÖÐÉ¾³ý´Ë GameServer}"<<endln;
 		LG("GateServer", "Exception raised from OnDisconnect{delete GameServer from list}\n");
-	}
-	_mut_game.unlock();
-
-	if (already_delete)
-		return;
-
-	// Í¨ÖªÍ¨¹ý´ËGateServerÁ¬ÉÏ´ËGameServerµÄËùÓÐÓÃ»§£ºµØÍ¼·þÎñÆ÷¹ÊÕÏ
-	RPacket retpk = g_gtsvr->gp_conn->get_playerlist();
-	uShort ply_cnt = retpk.ReverseReadShort(); // ´ËGateServerÉÏËùÓÐÍæ¼Ò¸öÊý
-
-	Player* ply_addr{};
-	uLong db_id{};
-	auto ply_array = std::make_unique<Player*[]>(ply_cnt);
-	uShort l_notcount = 0;
-	for (uShort i = 0; i < ply_cnt; ++i) {
-		ply_addr = (Player*)MakePointer(retpk.ReadLongLong());
-		db_id = (uLong)retpk.ReadLong();
-		
-		// Validate player pointer before accessing any members
-		if (!g_gtsvr->ValidatePlayerPointer(ply_addr)) {
-			l_notcount++;
-			continue;
-		}
-		
-		if (l_game == ply_addr->game) {
-			ply_array[i - l_notcount] = ply_addr;
-		} else {
-			l_notcount++;
-			continue;
-		}
-
-		// Verify dbid matches
-		if (ply_addr->m_dbid != db_id) {
-			// Character already offline
-			continue;
-		}
-
-		try {
-			g_gtsvr->cli_conn->post_mapcrash_msg(ply_addr); // Notify user of map server failure
-		} catch (...) {
-			continue;
-		}
-
-		continue;
-	}
-
-	ply_cnt -= l_notcount;
-	LG("GateServer", "because GameServer trouble, notice %d user offline\n", ply_cnt);
-	for (int i = 0; i < ply_cnt; ++i) {
-		try // Á¢¼´¶ÏµôÕâÌõÁ¬½Ó
-		{
-			LG("GateServer", "because GameServer trouble, disconnect [%s]\n", ply_array[i]->m_datasock->GetPeerIP());
-			g_gtsvr->cli_conn->Disconnect(ply_array[i]->m_datasock, 100, -29);
-		} catch (...) {
-		}
 	}
 }
 
@@ -402,7 +438,10 @@ void ToGameServer::MT_SWITCHMAP(DataSocket* datasock, RPacket& recvbuf) {
 	GameServer* l_game = g_gtsvr->gm_conn->find(l_map);
 
 	if (l_game) {
-		l_ply->game->m_plynum--;
+		GameServer* l_oldgame = l_ply->game;
+		if (l_oldgame) {
+			l_oldgame->m_plynum--;
+		}
 		l_ply->game = 0;
 		l_ply->gm_addr = 0;
 		// l_line<<newln<<"客户端: "<<l_ply->m_datasock->GetPeerIP()<<":"<<l_ply->m_datasock->GetPeerPort()

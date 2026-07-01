@@ -735,7 +735,7 @@ void ToClient::ReRouteToGameServer(dbc::DataSocket* datasock, dbc::RPacket& recv
 		const long long l_gmaddr = l_ply->gm_addr;
 		GameServer* l_game = l_ply->game;
 
-		if (l_gpaddr && l_gmaddr && l_game) {
+		if (l_gpaddr && l_gmaddr && l_game && l_game->m_datasock) {
 			if (!l_ply->m_sessionHandle.IsValid()) {
 				LG("SessionManager", "ReRoute REJECT cmd=%u: no valid session player=%p dbid=%u\n",
 				   m_lastRecvCmd, l_ply, l_ply->m_dbid);
@@ -995,14 +995,11 @@ bool ToClient::OpcodeHandle_CmOfflineMode(void* ctx, DataSocket* datasock, RPack
 			}
 
 			player->EndRun();
-			self->TC_DISCONNECT(player->m_datasock, -33);
+			self->TC_DISCONNECT(player->m_datasock, -33, 100);
+			g_gtsvr->ScheduleDeferredPlayerFree(player);
 		} catch (...) {
 			LG("GateServer", "Error offline mode!\n");
 		}
-
-		player->m_datasock = nullptr;
-		datasock->SetPointer(nullptr);
-		player->Free();
 	} break;
 	case ReturnCode::OfflineMode::Disabled: {
 		player->SendSysInfo("Offline stall mode is disabled.");
@@ -1339,7 +1336,9 @@ WPacket ToClient::CM_LOGOUT(DataSocket* datasock, RPacket& recvbuf) {
 			if (l_ply->m_status == 0) {
 				l_retpk = datasock->GetWPacket();
 				l_retpk.WriteShort(ERR_MC_NOTLOGIN);
-				l_ply->Free();
+				if (g_gtsvr->IsPlayerRegistered(l_ply)) {
+					l_ply->Free();
+				}
 				return l_retpk;
 			}
 
@@ -1386,7 +1385,9 @@ WPacket ToClient::CM_LOGOUT(DataSocket* datasock, RPacket& recvbuf) {
 			LG("GateServer", "Error exit!\n");
 		}
 		l_lockStat.unlock();
-		l_ply->Free();
+		if (g_gtsvr->IsPlayerRegistered(l_ply)) {
+			l_ply->Free();
+		}
 	}
 	return l_retpk;
 }

@@ -37,8 +37,26 @@ Entity::Entity() : m_cat(0), m_ID(0) {
 
 void Entity::Free() {
 	T_B
-		g_pGameApp->m_pCEntSpace->ReturnEntity(m_lHandle);
+		if (g_pCSystemCha && IsCharacter() == g_pCSystemCha) {
+			LG("Entity", "Free ignored for g_pCSystemCha sentinel (handle=0x%08X)\n", m_lHandle);
+			return;
+		}
+
+		CEntityAlloc* pSpace = m_pEntSpace;
+		if (!pSpace && g_pGameApp) {
+			pSpace = g_pGameApp->m_pCEntSpace;
+		}
+		if (pSpace) {
+			pSpace->ReturnEntity(m_lHandle);
+		}
 	T_E
+}
+
+CGameApp* Entity::GetOwnerApp() const {
+	if (m_pEntSpace && m_pEntSpace->GetOwnerApp()) {
+		return m_pEntSpace->GetOwnerApp();
+	}
+	return g_pGameApp;
 }
 
 void Entity::Initially() {
@@ -562,7 +580,16 @@ bool Entity::IsLiveing(void) {
 }
 
 CStateCellNode* Entity::EnterStateCell(CStateCell* pStateCell, CChaListNode* pEntiNode, bool bIsIn) {
-	CStateCellNode* pCMgrNode = g_pGameApp->m_StateCellNodeHeap.Get();
+	CGameApp* pApp = GetOwnerApp();
+	if (!pApp) {
+		return nullptr;
+	}
+
+	CStateCellNode* pCMgrNode = pApp->m_StateCellNodeHeap.Get();
+	if (!pCMgrNode) {
+		LG("Entity", "EnterStateCell: StateCellNode heap exhausted handle=0x%08X\n", m_lHandle);
+		return nullptr;
+	}
 	pCMgrNode->m_pCStateCell = pStateCell;
 	pCMgrNode->m_pCChaNode = pEntiNode;
 	if (bIsIn) // 作为首节点加入

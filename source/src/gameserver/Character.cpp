@@ -228,8 +228,7 @@ void CCharacter::Finally() {
 		
 		// Skip submap cleanup during shutdown to avoid access violations
 		// The submap might already be partially destroyed
-		extern volatile BOOL g_bGameEnd;
-		if (m_submap && !g_bGameEnd) {
+		if (m_submap) {
 			m_submap->GoOut(this);
 		}
 		m_submap = nullptr;  // Clear the pointer to avoid double-cleanup
@@ -483,10 +482,9 @@ void CCharacter::SwitchMap(SubMap* pCSrcMap, cChar* szTarMapName, Long lTarX, Lo
 			g_pGameApp->DelPlayerIdx(pPlayer->GetDBChaId());
 			g_pGameApp->m_dwPlayerCnt--;
 
-			pPlayer->Free();
-			// 删除gate server对应的维护信息
 			pPlayer->OnLogoff();
 			DELPLAYER(pPlayer);
+			pPlayer->Free();
 			// LG("enter_map", "结束进入地图\n\n");
 			LG("enter_map", "finish enter map\n\n");
 		}

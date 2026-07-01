@@ -19,10 +19,13 @@
 #include <vector>
 #include <string>
 #include <mutex>
+#include <memory>
 
 // Maximum items per stall (must match ROLE_MAXNUM_STALL_GOODS)
 #define OFFLINE_STALL_MAX_ITEMS 20
 #define OFFLINE_STALL_MAX_KITBAG 48
+
+class COfflineStallNPC;
 
 // Tracks a sold item for kitbag cleanup when owner logs back in
 struct SSoldItemInfo {
@@ -100,7 +103,7 @@ struct SOfflineStallInfo {
     SOfflineStallEquipLook equipLook[34]; // enumEQUIP_NUM = 34
     
     // Runtime state (not persisted)
-    CCharacter* pVirtualNPC;    // Virtual NPC representing this stall
+    std::unique_ptr<COfflineStallNPC> pVirtualNPC; // Owned stall NPC (heap, not entity pool)
     DWORD dwWorldID;            // World ID assigned to virtual NPC
     bool  bActive;              // Is stall currently active in world
     bool  bMapNotFound;         // Map not hosted on this server (multi-GS setup)
@@ -205,7 +208,7 @@ public:
     bool CleanupForReturningPlayer(CCharacter* pMainCha, DWORD dwChaId);
     
     // Add a loaded stall to the manager (called from DB load)
-    bool AddLoadedStall(SOfflineStallInfo* pInfo);
+    bool AddLoadedStall(std::unique_ptr<SOfflineStallInfo> pInfo);
     
     // Save stall update to database
     bool SaveStallUpdate(SOfflineStallInfo* pInfo);
@@ -231,13 +234,13 @@ private:
     DWORD GenerateWorldID();
     
 private:
-    // Map of stall ID -> stall info
-    std::map<DWORD, SOfflineStallInfo*> m_mapStalls;
+    // Map of stall ID -> stall info (owns SOfflineStallInfo and embedded virtual NPC)
+    std::map<DWORD, std::unique_ptr<SOfflineStallInfo>> m_mapStalls;
     
     // Map of character ID -> stall ID (for quick lookup)
     std::map<DWORD, DWORD> m_mapOwnerToStall;
     
-    // Map of world ID -> stall NPC
+    // Map of world ID -> stall NPC (non-owning; owned by SOfflineStallInfo)
     std::map<DWORD, COfflineStallNPC*> m_mapWorldIDToNPC;
     
     // Set of character IDs pending deferred removal
