@@ -18,8 +18,7 @@ CConjureMgr::CConjureMgr() {
 }
 
 CConjureMgr::~CConjureMgr() {
-	m_pCLstHead = 0;
-	m_pCLstTail = 0;
+	FreeAll();
 }
 
 void CConjureMgr::Add(CAttachable* pCAttach) {

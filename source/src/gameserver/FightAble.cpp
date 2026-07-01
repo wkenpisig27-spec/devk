@@ -23,6 +23,7 @@
 #include "HarmRec.h"
 #include "lua_gamectrl.h"
 #include "BossLastHit.h"
+#include "AttachManage.h"
 
 using namespace std;
 
@@ -1622,9 +1623,16 @@ bool CFightAble::SkillOutBoat(Long lPosX, Long lPosY, Short sDir) // 下船
 // 该例程内部的语句顺序非常严格，不可随便更改！！！
 bool CFightAble::SkillPushBoat(CCharacter* pCBoat, bool bFree) // 收船
 {
-	T_B if (bFree)
-		pCBoat->GetShip()
-			->Free(); // 此处要完善，收船时，“乘客“必须为空
+	T_B
+	if (bFree) {
+		CPassengerMgr* pShip = pCBoat->GetShip();
+		if (pShip) {
+			if (pShip->GetCount() > 0) {
+				pShip->FreeAll();
+			}
+			pShip->Free();
+		}
+	}
 
 	pCBoat->BreakAction();
 	pCBoat->m_CSkillState.Reset();

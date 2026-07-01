@@ -486,17 +486,10 @@ BOOL CTradeSystem::Cancel(BYTE byType, CCharacter& character, DWORD dwCharID) {
 		return FALSE;
 	}
 
-	// æ¸…é™¤é“å…·æ ä½é”å®šçŠ¶æ€
-	pTradeData1->pAccept->m_CKitbag.UnLock();
-	pTradeData1->pRequest->m_CKitbag.UnLock();
+	// Clear kitbag locks and trade state on both participants
+	DetachTradeParticipants(pTradeData1);
 
-	ResetItemState(*pTradeData1->pAccept, *pTradeData1);
-	ResetItemState(*pTradeData1->pRequest, *pTradeData1);
-
-	pTradeData1->pAccept->SetTradeData(nullptr);
-	pTradeData1->pRequest->SetTradeData(nullptr);
-
-	// å–æ¶ˆè§’è‰²äº¤æ˜“
+	// Cancel trade UI for both clients
 	WPACKET packet = GETWPACKET();
 	WRITE_CMD(packet, CMD_MC_CHARTRADE);
 	WRITE_SHORT(packet, CMD_MC_CHARTRADE_CANCEL);
@@ -505,11 +498,7 @@ BOOL CTradeSystem::Cancel(BYTE byType, CCharacter& character, DWORD dwCharID) {
 	pTradeData1->pAccept->ReflectINFof(pMain, packet);
 	pTradeData1->pRequest->ReflectINFof(pMain, packet);
 
-	// å–æ¶ˆè§’è‰²é”å®šçŠ¶æ€
-	pTradeData1->pAccept->TradeAction(FALSE);
-	pTradeData1->pRequest->TradeAction(FALSE);
-
-	pTradeData1->Free();
+	ReleaseTradeData(pTradeData1);
 
 	return TRUE;
 	T_E
@@ -542,43 +531,29 @@ BOOL CTradeSystem::Clear(BYTE byType, CCharacter& character) {
 	// SECURITY FIX: Validate pointers before accessing
 	if (!pTradeData->pRequest || !pTradeData->pAccept) {
 		LG("trade_error", "Clear: Invalid trade participant pointers");
-		pTradeData->Free();
+		ReleaseTradeData(pTradeData);
 		return FALSE;
 	}
 
+	CCharacter* pPartner = nullptr;
 	if (pTradeData->pRequest == pMain) {
-		// å–æ¶ˆè§’è‰²äº¤æ˜“
-		WPACKET packet = GETWPACKET();
-		WRITE_CMD(packet, CMD_MC_CHARTRADE);
-		WRITE_SHORT(packet, CMD_MC_CHARTRADE_CANCEL);
-		WRITE_LONG(packet, pMain->GetID());
-		pTradeData->pAccept->ReflectINFof(pMain, packet);
-		pTradeData->pAccept->SetTradeData(nullptr);
-
-		// æ¸…é™¤é“å…·æ ä½é”å®šçŠ¶æ€
-		pTradeData->pAccept->m_CKitbag.UnLock();
-		pTradeData->pAccept->TradeAction(FALSE);
-		ResetItemState(*pTradeData->pAccept, *pTradeData);
+		pPartner = pTradeData->pAccept;
 	} else if (pTradeData->pAccept == pMain) {
-		// å–æ¶ˆè§’è‰²äº¤æ˜“
-		WPACKET packet = GETWPACKET();
-		WRITE_CMD(packet, CMD_MC_CHARTRADE);
-		WRITE_SHORT(packet, CMD_MC_CHARTRADE_CANCEL);
-		WRITE_LONG(packet, pMain->GetID());
-		pTradeData->pRequest->ReflectINFof(pMain, packet);
-		pTradeData->pRequest->SetTradeData(nullptr);
-
-		// æ¸…é™¤é“å…·æ ä½é”å®šçŠ¶æ€
-		pTradeData->pRequest->m_CKitbag.UnLock();
-		pTradeData->pRequest->TradeAction(FALSE);
-		ResetItemState(*pTradeData->pRequest, *pTradeData);
+		pPartner = pTradeData->pRequest;
 	} else {
-		// LG( "Trade", "åˆ é™¤è§’è‰²æ—¶ï¼Œæ¸…é™¤å…¶äº¤æ˜“ä¿¡æ¯å‘çŽ°é”™è¯¯(ä¸åŒ¹é…çš„è§’è‰²æŒ‡é’ˆ)ï¼"  );
-		LG("Trade", "when delete characterï¼Œit find error while clear trade information,the error is:(unsuited charcter pointer)ï¼");
+		LG("Trade", "when delete character,it find error while clear trade information,the error is:(unsuited charcter pointer)!");
+		ReleaseTradeData(pTradeData);
 		return FALSE;
 	}
 
-	pTradeData->Free();
+	WPACKET packet = GETWPACKET();
+	WRITE_CMD(packet, CMD_MC_CHARTRADE);
+	WRITE_SHORT(packet, CMD_MC_CHARTRADE_CANCEL);
+	WRITE_LONG(packet, pMain->GetID());
+	pPartner->ReflectINFof(pMain, packet);
+
+	DetachTradeParticipants(pTradeData);
+	ReleaseTradeData(pTradeData);
 	return TRUE;
 	T_E
 }
@@ -1159,7 +1134,7 @@ BOOL CTradeSystem::ValidateTrade(BYTE byType, CCharacter& character, DWORD dwCha
 	// SECURITY FIX: Validate both trade participants are still connected
 	if (!pTradeData->ValidateParticipants()) {
 		LG("trade_error", "ValidateTrade: One or both trade participants are no longer valid");
-		pTradeData->Clear();
+		ReleaseTradeData(pTradeData);
 		return FALSE;
 	}
 
@@ -1203,6 +1178,7 @@ BOOL CTradeSystem::ValidateTrade(BYTE byType, CCharacter& character, DWORD dwCha
 			   pTradeData->pRequest->GetName(), pTradeData->pAccept->GetName());
 			return FALSE;
 		}
+		CTradeExecutionGuard execGuard(pTradeData);
 
 		CCharacter* pRequest = pTradeData->pRequest;
 		CCharacter* pAccept = pTradeData->pAccept;
@@ -1307,14 +1283,8 @@ BOOL CTradeSystem::ValidateTrade(BYTE byType, CCharacter& character, DWORD dwCha
 			bBagSucc = false;
 		}
 		if (!bBagSucc) {
-			pAccept->SetTradeData(nullptr);
-			pRequest->SetTradeData(nullptr);
+			DetachTradeParticipants(pTradeData);
 
-			// å–æ¶ˆè§’è‰²é”å®šçŠ¶æ€
-			pAccept->TradeAction(FALSE);
-			pRequest->TradeAction(FALSE);
-
-			// Send failure packet BEFORE freeing trade data
 			WPACKET packet = GETWPACKET();
 			WRITE_CMD(packet, CMD_MC_CHARTRADE);
 			WRITE_SHORT(packet, CMD_MC_CHARTRADE_RESULT);
@@ -1323,9 +1293,8 @@ BOOL CTradeSystem::ValidateTrade(BYTE byType, CCharacter& character, DWORD dwCha
 			pAccept->ReflectINFof(pMain, packet);
 			pRequest->ReflectINFof(pMain, packet);
 
-			// SECURITY FIX: Unlock execution before freeing
-			pTradeData->UnlockExecution();
-			pTradeData->Free();
+			execGuard.Dismiss();
+			ReleaseTradeData(pTradeData, true);
 
 			return FALSE;
 		}
@@ -1847,7 +1816,8 @@ BOOL CTradeSystem::ValidateTrade(BYTE byType, CCharacter& character, DWORD dwCha
 			pRequest->ReflectINFof(pMain, packet);
 
 			// Free trade data after all uses complete (fixes use-after-free bug)
-			pTradeData->Free();
+			execGuard.Dismiss();
+			ReleaseTradeData(pTradeData, true);
 
 			return FALSE;
 		} else {
@@ -1984,7 +1954,8 @@ BOOL CTradeSystem::ValidateTrade(BYTE byType, CCharacter& character, DWORD dwCha
 		   pTradeData->ReqTradeData.byItemCount, pTradeData->AcpTradeData.byItemCount);
 
 		// Free trade data now that all processing is complete (fixes use-after-free bug)
-		pTradeData->Free();
+		execGuard.Dismiss();
+		ReleaseTradeData(pTradeData, true);
 
 		// è§’è‰²äº¤æ˜“æˆåŠŸ
 		WPACKET packet = GETWPACKET();
@@ -2012,6 +1983,51 @@ BOOL CTradeSystem::ValidateTrade(BYTE byType, CCharacter& character, DWORD dwCha
 
 	return TRUE;
 	T_E
+}
+
+void CTradeSystem::DetachTradeParticipants(CTradeData* pTradeData, bool bUnlockBags, bool bResetTradeAction) {
+	if (!pTradeData) {
+		return;
+	}
+
+	CCharacter* pRequest = pTradeData->pRequest;
+	CCharacter* pAccept = pTradeData->pAccept;
+
+	if (pRequest) {
+		if (pRequest->GetTradeData() == pTradeData) {
+			pRequest->SetTradeData(nullptr);
+		}
+		if (bUnlockBags) {
+			pRequest->m_CKitbag.UnLock();
+		}
+		if (bResetTradeAction) {
+			pRequest->TradeAction(FALSE);
+		}
+		ResetItemState(*pRequest, *pTradeData);
+	}
+
+	if (pAccept) {
+		if (pAccept->GetTradeData() == pTradeData) {
+			pAccept->SetTradeData(nullptr);
+		}
+		if (bUnlockBags) {
+			pAccept->m_CKitbag.UnLock();
+		}
+		if (bResetTradeAction) {
+			pAccept->TradeAction(FALSE);
+		}
+		ResetItemState(*pAccept, *pTradeData);
+	}
+}
+
+void CTradeSystem::ReleaseTradeData(CTradeData* pTradeData, bool bUnlockExecution) {
+	if (!pTradeData) {
+		return;
+	}
+	if (bUnlockExecution && pTradeData->IsExecuting()) {
+		pTradeData->UnlockExecution();
+	}
+	pTradeData->Free();
 }
 
 void CTradeSystem::ResetItemState(CCharacter& character, CTradeData& TradeData) {

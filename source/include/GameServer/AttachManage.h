@@ -50,6 +50,8 @@ public:
 	void FreeAll();
 	void DeleteAll();
 
+	int GetCount() const { return m_lNum; }
+
 protected:
 private:
 	void Initially();
