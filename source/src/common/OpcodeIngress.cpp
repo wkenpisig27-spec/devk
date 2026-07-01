@@ -204,6 +204,11 @@ bool ValidateGameCharacterOpcode(uint16_t cmd, dbc::RPacket& pk, const char* pee
 bool ValidateGameAppOpcode(uint16_t cmd, dbc::RPacket& pk, const char* peer) {
 	const OpcodeHandlerEntry* entry = LookupOpcodeHandler(OpcodeDispatchDomain::GameApp, cmd);
 	if (!entry) {
+		const OpcodeBand band = OpcodeBandFor(cmd);
+		if (IsGameAppBand(band)) {
+			LogReject(cmd, "unregistered opcode", peer);
+			return false;
+		}
 		return true;
 	}
 

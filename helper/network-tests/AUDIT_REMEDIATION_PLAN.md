@@ -123,7 +123,7 @@
 | **Design note** | All 35 GameApp handlers are registered (B5 complete). Unregistered in-band opcode = bug or attack → reject. |
 | **Build** | Common + GameServer |
 | **Acceptance** | Full T0 + guild/party PM if available; grep logs for spurious `[reject]`. |
-| **Status** | pending |
+| **Status** | **done** |
 
 ### R2.2 — Gate disconnect on unhandled registered opcode
 
@@ -134,7 +134,7 @@
 | **Action** | After `ValidateClientToGateOpcode` passes and `DispatchOpcodeHandler` returns false → log + `Disconnect(datasock, 50, -32)` (same as invalid opcode). |
 | **Build** | GateServer |
 | **Acceptance** | Normal play unaffected; automated connect/ping still PASS. |
-| **Status** | pending |
+| **Status** | **done** |
 
 ### R2.3 — Group ProcessData ingress (optional tighten)
 
@@ -306,13 +306,13 @@
 
 | Batch | Status | Date | Commit |
 |-------|--------|------|--------|
-| R1.1 | **done** | 2026-07-01 | |
-| R1.2 | **done** | 2026-07-01 | |
-| R1.3 | **done** | 2026-07-01 | |
-| R1.4 | **done** | 2026-07-01 | |
-| R1.5 | **done** | 2026-07-01 | |
-| R2.1 | pending | | |
-| R2.2 | pending | | |
+| R1.1 | **done** | 2026-07-01 | `ab0fe7d3` |
+| R1.2 | **done** | 2026-07-01 | `ab0fe7d3` |
+| R1.3 | **done** | 2026-07-01 | `ab0fe7d3` |
+| R1.4 | **done** | 2026-07-01 | `ab0fe7d3` |
+| R1.5 | **done** | 2026-07-01 | `ab0fe7d3` |
+| R2.1 | **done** | 2026-06-26 | `89cef60a` |
+| R2.2 | **done** | 2026-06-26 | `89cef60a` |
 | R2.3 | pending | | |
 | R3.1 | pending | | |
 | R3.2 | pending | | |

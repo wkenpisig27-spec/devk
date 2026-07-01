@@ -1050,4 +1050,4 @@ See last-smoke-result.txt for automated output.
 
 ## Resume prompt for next session
 
-> Continue **Audit Remediation** — read [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md). **R1 done.** Next: **R2** (ingress fail-closed). One batch per session.
+> Continue **Audit Remediation** — read [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md). **R1–R2.2 done.** Next: optional **R2.3** or **R3** (backplane PSK fail-closed).

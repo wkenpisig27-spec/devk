@@ -1061,6 +1061,8 @@ void ToClient::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 		} else if (!DispatchOpcodeHandler(OpcodeDispatchDomain::Gate, l_cmd, this, datasock, recvbuf)) {
 			LG("Security", "[OpcodeRegistry] Unhandled CMD %u from %s\n",
 				static_cast<unsigned int>(l_cmd), datasock->GetPeerIP());
+			Disconnect(datasock, 50, -32);
+			return;
 		}
 
 		if (m_dispatchStopProcessing) {
