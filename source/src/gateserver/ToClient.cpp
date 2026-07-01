@@ -1325,7 +1325,7 @@ WPacket ToClient::CM_LOGOUT(DataSocket* datasock, RPacket& recvbuf) {
 			{ // notify GroupServer Logout
 				WPacket l_wpk = g_gtsvr->gp_conn->GetWPacket();
 				l_wpk.WriteCmd(CMD_TP_USER_LOGOUT);
-				if (player->gp_addr && g_gtsvr->AppendInGameGroupTrailer(l_wpk, l_ply, CMD_TP_USER_LOGOUT)) {
+				if (l_ply->gp_addr && g_gtsvr->AppendInGameGroupTrailer(l_wpk, l_ply, CMD_TP_USER_LOGOUT)) {
 					DataSocket* gp_ds = g_gtsvr->gp_conn->get_datasock();
 					if (gp_ds) {
 						l_retpk = g_gtsvr->gp_conn->SyncCall(gp_ds, l_wpk, l_ulMilliseconds);
@@ -1535,7 +1535,7 @@ void ToClient::CM_ENDPLAY(DataSocket* datasock, RPacket& recvbuf) {
 
 				l_wpk = WPacket(recvbuf).Duplicate();
 				l_wpk.WriteCmd(CMD_TP_ENDPLAY);
-				if (player->gp_addr && g_gtsvr->AppendInGameGroupTrailer(l_wpk, l_ply, CMD_TP_ENDPLAY)) {
+				if (l_ply->gp_addr && g_gtsvr->AppendInGameGroupTrailer(l_wpk, l_ply, CMD_TP_ENDPLAY)) {
 				LG("GateServer", "CMD_TP_ENDPLAY: l_ply=%p gp_addr=0x%llx\n", l_ply, (unsigned long long)l_ply->gp_addr);
 				l_wpk = g_gtsvr->gp_conn->SyncCall(g_gtsvr->gp_conn->get_datasock(), l_wpk, l_ulMilliseconds);
 				if (!l_wpk.HasData()) {
