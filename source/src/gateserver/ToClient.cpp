@@ -85,6 +85,7 @@ bool IsExplicitCmOpcode(uint16_t cmd) {
 		cmd == CMD_CM_RSA_HANDSHAKE_1 ||
 		cmd == CMD_CM_SAY ||
 		cmd == CMD_CM_KITBAG_UNLOCK ||
+		cmd == CMD_CM_STORE_OPEN_ASK ||
 		cmd == CMD_CM_ITEM_UNLOCK_ASK ||
 		cmd == CMD_CM_ENDACTION ||
 		cmd == CMD_CM_BEGINACTION ||
@@ -149,6 +150,7 @@ void RegisterAllToClientOpcodeHandlers() {
 	add(CMD_CP_PING, &ToClient::OpcodeHandle_CpPing, "CMD_CP_PING", 0);
 	add(CMD_CM_SAY, &ToClient::OpcodeHandle_CmSay, "CMD_CM_SAY", 0);
 	add(CMD_CM_KITBAG_UNLOCK, &ToClient::OpcodeHandle_CmKitbagUnlock, "CMD_CM_KITBAG_UNLOCK", 0);
+	add(CMD_CM_STORE_OPEN_ASK, &ToClient::OpcodeHandle_CmStoreOpenAsk, "CMD_CM_STORE_OPEN_ASK", 0);
 	add(CMD_CM_ITEM_UNLOCK_ASK, &ToClient::OpcodeHandle_CmItemUnlockAsk, "CMD_CM_ITEM_UNLOCK_ASK", 0);
 	add(CMD_CM_ENDACTION, &ToClient::OpcodeHandle_CmEndAction, "CMD_CM_ENDACTION", 0);
 	add(CMD_CM_OFFLINE_MODE, &ToClient::OpcodeHandle_CmOfflineMode, "CMD_CM_OFFLINE_MODE", 0);
@@ -810,6 +812,23 @@ bool ToClient::OpcodeHandle_CmKitbagUnlock(void* ctx, DataSocket* datasock, RPac
 	WPacket wpk = self->GetWPacket();
 	net::PacketWriter writer(wpk);
 	writer.Cmd(CMD_CM_KITBAG_UNLOCK);
+	writer.Sequence(reinterpret_cast<cChar*>(seq.data()), static_cast<uShort>(seq.size()));
+	recvbuf = wpk;
+	self->ReRouteToGameServer(datasock, recvbuf);
+	return true;
+}
+
+bool ToClient::OpcodeHandle_CmStoreOpenAsk(void* ctx, DataSocket* datasock, RPacket& recvbuf) {
+	ToClient* self = static_cast<ToClient*>(ctx);
+	auto ply = (Player*)datasock->GetPointer();
+	if (!ply) {
+		return true;
+	}
+
+	const auto seq = ReadPacketSequenceEncrypted(recvbuf, ply->m_AESKey);
+	WPacket wpk = self->GetWPacket();
+	net::PacketWriter writer(wpk);
+	writer.Cmd(CMD_CM_STORE_OPEN_ASK);
 	writer.Sequence(reinterpret_cast<cChar*>(seq.data()), static_cast<uShort>(seq.size()));
 	recvbuf = wpk;
 	self->ReRouteToGameServer(datasock, recvbuf);

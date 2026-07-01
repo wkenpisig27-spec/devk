@@ -96,6 +96,7 @@ private:
 	static bool OpcodeHandle_CpPing(void* ctx, DataSocket* datasock, RPacket& recvbuf);
 	static bool OpcodeHandle_CmSay(void* ctx, DataSocket* datasock, RPacket& recvbuf);
 	static bool OpcodeHandle_CmKitbagUnlock(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_CmStoreOpenAsk(void* ctx, DataSocket* datasock, RPacket& recvbuf);
 	static bool OpcodeHandle_CmItemUnlockAsk(void* ctx, DataSocket* datasock, RPacket& recvbuf);
 	static bool OpcodeHandle_CmEndAction(void* ctx, DataSocket* datasock, RPacket& recvbuf);
 	static bool OpcodeHandle_TransmitCall(void* ctx, DataSocket* datasock, RPacket& recvbuf);

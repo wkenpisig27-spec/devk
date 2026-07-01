@@ -307,7 +307,8 @@ void HandleStoreOperate(CCharacter* cha, RPacket& pk, uint16_t usCmd) {
 	}
 
 	lua_pushlightuserdata(g_pLuaState, (void*)cha);
-	lua_pushlightuserdata(g_pLuaState, (void*)&pk);
+	RPacket luaPk = pk.Duplicate();
+	lua_pushlightuserdata(g_pLuaState, (void*)&luaPk);
 	int nStatus = lua_pcall(g_pLuaState, 2, 0, 0);
 	lua_settop(g_pLuaState, 0);
 

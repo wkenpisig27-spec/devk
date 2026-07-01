@@ -284,8 +284,8 @@ void CMiniMapMgr::_MiniFormMouseEvent(CCompent* pSender, int nMsgType, int x, in
 		CUIInterface::MainChaMove();
 		// g_stUIStore.ShowTempKitbag();
 	} else if (name == "btnOpenStore") {
-		// ���̳������������
-		g_stUIStore.OpenStoreAsk();
+		g_stUIDoublePwd.SetType(CDoublePwdMgr::STORE_OPEN_ASK);
+		g_stUIDoublePwd.ShowDoublePwdForm();
 	} else if (name == "btnteam") {
 		CS_VolunteerOpen(10);
 	} else if (name == "btnBossTimer") {
