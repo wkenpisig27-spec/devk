@@ -532,15 +532,6 @@ bool GateServer::AppendInGameGameTrailer(WPacket& wpk, Player* ply, uShort cmdFo
 	return true;
 }
 
-bool GateServer::AppendTpGroupSyncTrailer(WPacket& wpk, Player* ply, uShort cmdForLog) {
-	if (!ply || !ply->gp_addr) {
-		LG("SessionManager", "TP SyncCall REJECT cmd=%u: missing gp_addr player=%p\n",
-		   cmdForLog, ply);
-		return false;
-	}
-	return AppendInGameGroupTrailer(wpk, ply, cmdForLog);
-}
-
 bool GateServer::AppendTpLoginRequestTrailer(WPacket& wpk, Player* ply) {
 	if (!ply) {
 		return false;

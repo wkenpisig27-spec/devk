@@ -3020,12 +3020,6 @@ void CCharacter::ProcessPacket(unsigned short usCmd, RPACKET pk) {
 	if (DispatchOpcodeHandler(OpcodeDispatchDomain::GameCharacter, usCmd, this, nullptr, pk)) {
 		return;
 	}
-
-	T_B switch (usCmd) {
-	default:
-		break;
-	}
-	T_E
 }
 
 void CCharacter::BeginAction(RPACKET pk) {

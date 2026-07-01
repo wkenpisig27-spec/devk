@@ -420,7 +420,6 @@ public:
 	void ReleasePlayerSession(Player* ply);
 	bool AppendInGameGroupTrailer(WPacket& wpk, Player* ply, uShort cmdForLog);
 	bool AppendInGameGameTrailer(WPacket& wpk, Player* ply, uShort cmdForLog);
-	bool AppendTpGroupSyncTrailer(WPacket& wpk, Player* ply, uShort cmdForLog);
 	bool AppendTpLoginRequestTrailer(WPacket& wpk, Player* ply);
 
 	SessionManager m_sessionManager;

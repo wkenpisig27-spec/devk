@@ -233,7 +233,7 @@ Reverse read: gm_addr, generation, slot → ResolvePlayerFromGateTrailer
 WriteLong(slot) + WriteLong(generation) + WriteLongLong(gp_addr)
 Reverse read on Group: gp_addr, generation, slot → ResolvePlayerFromGateTrailer
 ```
-Session bound at `TP_USER_LOGIN` success; `AppendTpGroupSyncTrailer` delegates to `AppendInGameGroupTrailer`.
+Session bound at `TP_USER_LOGIN` success; SyncCall and in-game CP/MP use `AppendInGameGroupTrailer` (R1.3 removed thin wrapper).
 
 **TM_ENTERMAP (enter world):** session appended to extended trailer; Game binds mirror on `GatePlayer`.
 

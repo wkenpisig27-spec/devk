@@ -113,7 +113,7 @@ void GroupServerApp::UnregisterPlayer(Player* ply) {
 	}
 }
 
-Player* GroupServerApp::ValidatePlayerPointer(uintptr_t ptr, uint64_t expectedGtAddr, uint32_t generation) {
+Player* GroupServerApp::ValidatePlayerPointer(uintptr_t ptr, uint64_t expectedGtAddr) {
 	if (ptr == 0) {
 		return nullptr;
 	}
@@ -126,13 +126,6 @@ Player* GroupServerApp::ValidatePlayerPointer(uintptr_t ptr, uint64_t expectedGt
 			// Pointer not registered - definitely invalid
 			LG("Security", "ValidatePlayerPointer: REJECTED unregistered ptr=0x%llX\n",
 			   static_cast<unsigned long long>(ptr));
-			return nullptr;
-		}
-		
-		// If generation was provided, verify it matches
-		if (generation != 0 && it->second != generation) {
-			LG("Security", "ValidatePlayerPointer: REJECTED stale ptr=0x%llX expected_gen=%u actual_gen=%u\n",
-			   static_cast<unsigned long long>(ptr), generation, it->second);
 			return nullptr;
 		}
 	}

@@ -2,7 +2,7 @@
 
 Track progress for autonomous refactoring. Update after each completed task.
 
-**Current phase:** Phase 3 — Medium-term core (Tracks A–E)  
+**Current phase:** Phase 3 exit + **Audit remediation** (see [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md))  
 **Last updated:** 2026-07-01  
 **Master audit:** [`docs/NETWORK_AUDIT.md`](../../docs/NETWORK_AUDIT.md)  
 **Refactor guide:** [`docs/PACKET_SYSTEM_REFACTOR.md`](../../docs/PACKET_SYSTEM_REFACTOR.md)
@@ -63,6 +63,8 @@ Track progress for autonomous refactoring. Update after each completed task.
 | B | M2 Bulk migration — GameAppNet (B5) | **done** | batch 3: 35 handlers total (2026-06-27) |
 | B | M2 Bulk migration — CharacterPrl (B6) | **done** | 2026-06-27 — 112 handlers; legacy switch empty |
 | C | M6 Zero-copy gate forwarding | **done** | `WPacket::ForwardFromReceive` in ReRoute paths (2026-07-01) |
+
+**Audit remediation (post `a04ce8d6`):** [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md) — batches R1–R7 from principal review.
 | D | M4 Backplane PSK auth | **done** | 2026-06-27 — `BackplaneAuth` HMAC-SHA256; OS/SO opcodes 6510/7010 |
 | E | M5 PacketReader everywhere | **done** | Track E batch 10: ViewItemInfo PacketReader (2026-07-01) |
 
@@ -294,14 +296,13 @@ Reverse read on Game: gm_addr, generation, slot
 
 **Why reverted:** Phase 4 put session trailers on SyncCall while Gate still sent legacy bytes (or vice versa). Group `OnServeCall` misread legacy tail as `{gp_addr, gen, slot}` → `ValidatePlayerPointer` saw `expectedGtAddr=1` (generation) → **ERR_PT_KICKUSER (529)** on BGNPLAY. Logs: `Group REJECT cmd=2005 session slot=0 gen=1`, `gtAddr mismatch (expected=1, got=…)`, `OnServeCall CMD 2005: Invalid player trailer`.
 
-**Gate (SyncCall):**
-- `AppendTpGroupSyncTrailer` — legacy `{MakeULong(ply), gp_addr}` only; rejects if `!gp_addr`
-- `TP_USER_LOGIN` — `WriteLongLong(MakeULong(l_ply))` only (no session trailer); `EnsurePlayerSession` on Gate for later in-game use
-- Removed dead `AppendTpLoginRequestTrailer`
+**Gate (SyncCall, post phase 5):**
+- TP SyncCall uses `AppendInGameGroupTrailer` after `gp_addr` check (same `{slot, gen, gp_addr}` as in-game CP/MP)
+- `TP_USER_LOGIN` — `AppendTpLoginRequestTrailer` + `WriteLongLong(MakeULong(l_ply))`
 
 **Group (SyncCall):**
-- `OnServeCall` — reverse-read `gp_addr` then gate ptr; `ValidatePlayerPointer(..., syncCallLegacy=true)` skips session branch
-- Session bind remains at `CMD_MP_ENTERMAP` / in-game `ResolvePlayerFromGateTrailer` only
+- `OnServeCall` — `ResolvePlayerFromGateTrailer` (session resolve)
+- Session bind at `TP_USER_LOGIN` success; `MP_ENTERMAP` fallback retained until R5.1
 
 **Still session-based (by design):** in-game Gate→Group CP/MP (`AppendInGameGroupTrailer`); Gate→Game CM/TM/PM (`AppendInGameGameTrailer`); `CMD_MP_ENTERMAP` bind event.
 
@@ -346,13 +347,13 @@ slot = ReverseReadLong()
 | **5b** | **Gate login request trailer** — `AppendTpLoginRequestTrailer` (or inline): `{slot, gen}` before `{MakeULong(gate_ply)}`; keep `EnsurePlayerSession` before SyncCall | **done (2026-07-01)** | `GateServer.cpp`, `GateServer.h`, `ToClient.cpp` |
 | **5c** | **Migrate `AppendTpGroupSyncTrailer`** — write `{slot, gen, gp_addr}` (same helper body as `AppendInGameGroupTrailer`; consider merge/dedupe) | **done (2026-07-01)** | `GateServer.cpp` |
 | **5d** | **Group `OnServeCall` session resolve** — replace legacy reverse-read + `syncCallLegacy=true` with `ResolvePlayerFromGateTrailer`-style session path; retain legacy fallback behind compile flag or one-release dual-read | **done (2026-07-01)** | `GroupServerAppServ.cpp`, `GroupServerApp.h` |
-| **5e** | **Opcode sweep** — all SyncCall call sites use session trailer (see table below) | **done (2026-07-01)** | `ToClient.cpp` (via `AppendTpGroupSyncTrailer`) |
-| **5f** | **Remove legacy SyncCall fallback** — drop `syncCallLegacy` from `ValidatePlayerPointer`; dedupe `AppendTpGroupSyncTrailer` → `AppendInGameGroupTrailer` | **done (2026-07-01)** | `GroupServerAppServ.cpp`, `GroupServerApp.h`, `GateServer.cpp` |
+| **5e** | **Opcode sweep** — all SyncCall call sites use session trailer | **done (2026-07-01)** | `ToClient.cpp` → `AppendInGameGroupTrailer` |
+| **5f** | **Remove legacy SyncCall fallback** | **done (2026-07-01)** | `ValidatePlayerPointer` session path; R1.3 removed `AppendTpGroupSyncTrailer` wrapper |
 | **5g** | **Docs + exit gate** — update docs; T0 full lifecycle verified | **done (2026-07-01)** | docs, manual T0 |
 
 **Phase 5 exit gate (2026-07-01):** User verified login → BGNPLAY → enter map → ENDPLAY → char switch → logout/re-login. All sub-phases complete.
 
-**SyncCall opcodes to migrate (Gate→Group via `AppendTpGroupSyncTrailer`):**
+**SyncCall opcodes (Gate→Group via `AppendInGameGroupTrailer` + `gp_addr` check):**
 
 | Opcode | Handler | Notes |
 |--------|---------|-------|
@@ -1049,4 +1050,4 @@ See last-smoke-result.txt for automated output.
 
 ## Resume prompt for next session
 
-> Continue Option B Phase 3 exit. **Track C done.** Tracks A–E complete. Next: 30-min soak to close Phase 3.
+> Continue **Audit Remediation** — read [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md). **R1 done.** Next: **R2** (ingress fail-closed). One batch per session.

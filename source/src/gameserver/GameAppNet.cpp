@@ -415,31 +415,13 @@ void CGameApp::ProcessPacket(GateServer* pGate, RPACKET pkt) {
 		if (cmd / 500 == CMD_MM_BASE / 500) {
 			ProcessInterGameMsg(cmd, pGate, pkt);
 		} else {
-			const bool isSessionBand =
-				cmd / 500 == CMD_CM_BASE / 500 ||
-				cmd / 500 == CMD_TM_BASE / 500 ||
-				cmd / 500 == CMD_PM_BASE / 500;
-			if (isSessionBand) {
-				l_player = static_cast<CPlayer*>(g_gmsvr->ResolvePlayerFromGateTrailer(pGate, pkt, cmd));
-				if (!l_player) {
-					if (cmd / 500 == CMD_PM_BASE / 500) {
-						ProcessGroupBroadcast(cmd, pGate, pkt);
-					}
-					break;
-				}
-			} else {
-				l_player = (CPlayer*)MakePointer(pkt.ReverseReadLongLong());
-				if (cmd / 500 == CMD_PM_BASE / 500 && !l_player) {
+			// CM/TM/PM — all valid non-MM bands use session trailer (Track A).
+			l_player = static_cast<CPlayer*>(g_gmsvr->ResolvePlayerFromGateTrailer(pGate, pkt, cmd));
+			if (!l_player) {
+				if (cmd / 500 == CMD_PM_BASE / 500) {
 					ProcessGroupBroadcast(cmd, pGate, pkt);
-					break;
 				}
-				const unsigned long long l_gateaddr = READ_LONGLONG_R(pkt);
-				if (!g_gmsvr->ValidatePlayerPointer(l_player, l_gateaddr)) {
-					if (l_player) {
-						LG("session", "Action cmd=%d: Invalid player %p or stale session ignored\n", cmd, l_player);
-					}
-					break;
-				}
+				break;
 			}
 			if (!l_player->IsValid())
 				break;
@@ -1700,11 +1682,6 @@ void CGameApp::ProcessInterGameMsg(unsigned short usCmd, GateServer* pGate, RPAC
 		if (DispatchOpcodeHandler(OpcodeDispatchDomain::GameApp, usCmd, &ctx, nullptr, pkt)) {
 			return;
 		}
-	}
-
-	switch (usCmd) {
-	default:
-		break;
 	}
 	T_E
 }
