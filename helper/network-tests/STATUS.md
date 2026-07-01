@@ -3,8 +3,9 @@
 Track progress for autonomous refactoring. Update after each completed task.
 
 **Current phase:** Phase 3 — Medium-term core (Tracks A–E)  
-**Last updated:** 2026-06-27  
-**Master audit:** [`docs/NETWORK_AUDIT.md`](../../docs/NETWORK_AUDIT.md)
+**Last updated:** 2026-07-01  
+**Master audit:** [`docs/NETWORK_AUDIT.md`](../../docs/NETWORK_AUDIT.md)  
+**Refactor guide:** [`docs/PACKET_SYSTEM_REFACTOR.md`](../../docs/PACKET_SYSTEM_REFACTOR.md)
 
 ---
 
@@ -63,7 +64,7 @@ Track progress for autonomous refactoring. Update after each completed task.
 | B | M2 Bulk migration — CharacterPrl (B6) | **done** | 2026-06-27 — 112 handlers; legacy switch empty |
 | C | M6 Zero-copy gate forwarding | pending | Drop `Duplicate()` in `ReRouteToGameServer` |
 | D | M4 Backplane PSK auth | **done** | 2026-06-27 — `BackplaneAuth` HMAC-SHA256; OS/SO opcodes 6510/7010 |
-| E | M5 PacketReader everywhere | **in_progress** | Track E batch 5: MP min map + boat/guild PacketReader (2026-06-27) |
+| E | M5 PacketReader everywhere | **done** | Track E batch 10: ViewItemInfo PacketReader (2026-07-01) |
 
 **Phase 3 exit gate:** Legacy switches empty or assert-only; session handles primary; backplane auth in default configs; 30-min soak clean.
 
@@ -483,7 +484,7 @@ Blockers: none. **Track B6 complete.**
 | CMD_CM_ITEM_UNLOCK_ASK | 0 | encrypted + slot |
 | CMD_CM_ENDACTION | 0 | route-only |
 | CMD_CM_OFFLINE_MODE | 0 | route-only |
-| CMD_CM_BEGINACTION | 4 | world ID |
+| CMD_CM_BEGINACTION | 5 | world ID + action type char |
 | CMD_CM_CHECK_PING | 0 | empty body OK |
 | CMD_CM_SYNATTR | 0 | variable attrs |
 | CMD_CM_REFRESH_DATA | 8 | two longs |
@@ -672,6 +673,146 @@ Blockers: none. **Track B6 complete.**
 
 **Recommended batch 6:** Character store/volunteer/lifeskill PacketReader tail; Group CP team-kick/friend-refuse mins; Gate DELCHA probe; 30-min Phase 3 exit soak.
 
+### Track E — OpcodeIngress + PacketReader (batch 6, 2026-06-27)
+
+**Gate DELCHA pre-check:**
+- `ProbeDelChaPayload` — char name string + minimum encrypted sequence header on duplicate buffer
+- Fail-closed: `CMD_MC_DELCHA` + `ERR_MC_NETEXCP` before SyncCall
+
+**Group CP min map additions:**
+
+| Opcode | min | Notes |
+|--------|-----|-------|
+| CMD_CP_TEAM_KICK | 4 | kicked cha ID long |
+| CMD_CP_FRND_REFUSE | 4 | inviter cha ID long |
+| CMD_CP_FRND_DELETE | 4 | deleted friend cha ID long |
+
+**Character PacketReader (~14 handlers + registry mins):**
+- Tiger: `CmTigerStart` (10), `CmTigerStop` (6)
+- Store: `CmStoreOpenAsk` (string via reader; remainder to Lua via `reader.Raw()`)
+- Lifeskill: `CmLifeskillAsk`, `CmLifeskillAsr` (type+npc+grids; preserves case fallthrough)
+- Volunteer: `CmVolunterOpen` (2), `CmVolunterList` (4), `CmVolunterSel`, `CmVolunterAsr` (2+string)
+- Misc: `CmItemLockAsk` (1), `CmGameRequestPin` (string)
+
+**Manual test checklist:** login → del char (if used) → IGS store open/buy → tiger game → lifeskill NPC → volunteer list → party kick / friend delete → grep `OpcodeIngress [reject]`.
+
+**Recommended batch 7:** Master/prentice CM handlers; guild disband/motto PacketReader; remaining `BeginAction`/movement tail; Phase 3 30-min soak sign-off.
+
+### Track E — OpcodeIngress + PacketReader (batch 7, 2026-06-27)
+
+**Character PacketReader (~17 handlers + registry mins):**
+- Master/prentice: `CmMasterInvite`, `CmMasterAsr`, `CmMasterDel`, `CmPrenticeInvite`, `CmPrenticeAsr`, `CmPrenticeDel` (string+long or short+string+long)
+- Guild: `CmGuildPutname` (1), `CmGuildPerm` (8), `CmGuildDisband`, `CmGuildMotto`, `CmGuildChallenge` (5), `CmGuildLeizhu` (5)
+- Social/misc: `TmChangePersoninfo` (2), `CmSay2camp`, `CmPkCtrl` (1), `PmPushToGuildbank`
+- Movement: `CmBeginAction` now passes `reader.Raw()` to `BeginAction` (world ID consumed first)
+
+**Registry minPayloadBytes additions:**
+
+| Opcode group | min | Notes |
+|--------------|-----|-------|
+| CM_MASTER/PRENTICE invite+del | 4 | char ID long |
+| CM_MASTER/PRENTICE asr | 2 | response short |
+| TM_CHANGE_PERSONINFO | 2 | icon short |
+| CM_GUILD_PUTNAME | 1 | confirm char |
+| CM_GUILD_PERM | 8 | target + permission longs |
+| CM_GUILD_CHALLENGE/LEIZHU | 5 | level char + money long |
+| CM_PK_CTRL | 1 | mode char |
+
+Build: Release\|x64 **PASS** (`GameServer.vcxproj`, `CharacterPrl.cpp` compiled and linked).
+
+**Manual test checklist:** login → master/prentice invite+accept → guild create/motto/disband → camp chat on CTF/guild war map → PK toggle → person info icon → grep `OpcodeIngress [reject]`.
+
+**Recommended batch 8:** Remaining READ_* tail (stall, bank, GM send, cheat check, lottery); Phase 3 30-min soak sign-off.
+
+### Track E — OpcodeIngress + PacketReader (batch 8, 2026-06-27)
+
+**Character PacketReader (~12 handlers/helpers + registry mins):**
+- Guild bank: `HandlePmGuildBank` (bankType char + item/gold sub-ops)
+- Chat: `CmSay` (sequence via `reader.Raw().ReadSequence`)
+- Lottery: `CmItemLotteryAsk` (confirm char + grid groups; mirrors forge pattern)
+- Kitbag: `CmItemUnlockAsk` (password string + slot char; inlined from `ItemUnlockRequest`)
+- Hair: `Cmd_ChangeHair` (script ID short + per-item grid shorts)
+- GM/IGS: `CmGmSend` (npc long + title/content strings), `CmGmRecv` (npc long)
+- Anti-cheat: `CmCheatCheck` (answer string)
+- Auction: `CmBidup` (npc long + item short + price long, YORN-gated)
+- Misc: `CmRequestChestPreview` (chest item ID long)
+
+**Registry minPayloadBytes additions:**
+
+| Opcode | min | Notes |
+|--------|-----|-------|
+| CMD_PM_GUILDBANK | 1 | bankType char |
+| CMD_CM_GM_SEND | 4 | npc ID long before strings |
+| CMD_CM_GM_RECV | 4 | npc ID long |
+| CMD_CM_CHEAT_CHECK | 0 | variable string |
+| CMD_CM_BIDUP | 0 | YORN script gate before fixed header |
+| CMD_CM_ITEM_LOTTERY_ASK | 1 | confirm char |
+| CMD_CM_REQUEST_CHEST_PREVIEW | 4 | chest item ID long |
+| CMD_CM_UPDATEHAIR | 2 | hair script ID short |
+| CMD_CM_STALL_OPEN | 4 | staller char ID long |
+| CMD_CM_STALL_BUY | 7 | char ID + grid char + count short |
+
+**Skipped (no READ_* in CharacterPrl handler body):**
+- `CmStallAlldata`, `CmStallClose` — delegate full `RPacket` to `CharStall.cpp` (`packet.ReadString`/`ReadLong`, not READ_* macros here)
+- `CmCreateBoat`, `CmUpdateboatPart` — delegate to `CharBoat.cpp`
+- `CmSynAttr`, `CmEndAction`, `CmKitbagtempSync` — delegate remainder to existing methods/Lua
+
+**Remaining READ_* in CharacterPrl.cpp (pre-batch 9):** ~58 occurrences, all in `BeginAction()` action sub-switch — **migrated in batch 9**.
+
+Build: Release\|x64 **PASS** (`GameServer.vcxproj`, `CharacterPrl.cpp` compiled and linked).
+
+**Manual test checklist:** login → chat → stall open/buy → guild bank deposit/withdraw → hair change → GM send/recv (IGS) → lottery → chest preview → grep `OpcodeIngress [reject]`.
+
+**Recommended next:** Commit batches 6–9; 30-min Phase 3 exit soak.
+
+### Track E — OpcodeIngress + PacketReader (batch 9, 2026-07-01)
+
+**BeginAction sub-switch PacketReader migration (`CharacterPrl.cpp`):**
+- `BeginAction(RPACKET pk)` — single `net::PacketReader` after pre-checks; all action subtype reads migrated from READ_* macros
+- **55 READ_* migrated** across action cases: MOVE (sequence), SKILL (move path + sequence + skill/target longs), STOP_STATE, LEAN, ITEM_PICK/THROW/LOCK/UNLOCK/USE/UNFIX/POS/DELETE/INFO, BANK, REQUESTGUILDLOGS, SHORTCUT, TEMP, EVENT, FACE, SKILL_POSE, PK_CTRL
+- **2 READ_SEQ** → `reader.Raw().ReadSequence()` (MOVE + SKILL move-then-cast path)
+- Fail-closed: truncated payload → early `return` (void handler; matches registry handler style)
+- `enumACTION_ITEM_INFO` passes `reader.Raw()` to `ViewItemInfo()` (helper still uses READ_* in `Character.cpp`)
+
+**Registry minPayloadBytes update:**
+
+| Opcode | min | Notes |
+|--------|-----|-------|
+| CMD_CM_BEGINACTION | 5 | world ID long + action type char (was 4) |
+
+**Remaining READ_* after batch 9:**
+- `CharacterPrl.cpp`: **0 active** (2 commented-out in `enumACTION_LOOK` stub)
+- `Character.cpp`: **3** in `ViewItemInfo()` (delegated from `enumACTION_ITEM_INFO`)
+
+**Skipped (no active reads):**
+- `enumACTION_LOOK` — client payload reads commented out; broadcast stub empty
+- `enumACTION_CLOSE_BANK`, `enumACTION_REQUESTGUILDBANK`, `enumACTION_UPDATEGUILDLOGS` — no packet reads
+
+Build: Release\|x64 **PASS** (`GameServer.vcxproj`, `CharacterPrl.cpp` compiled and linked).
+
+**Gate follow-up:** `ToClient.cpp` `CMD_CM_BEGINACTION` registry min aligned **4 → 5** (matches Game + ingress table). GateServer Release\|x64 **PASS**.
+
+**Manual test checklist:** login → move (CM_BEGINACTION MOVE) → skill with move path → item pick/use/throw/pos → bank deposit/withdraw in action → guild bank open → shortcut bar → temp appearance → event NPC → face/sit pose → PK toggle → grep `OpcodeIngress [reject]` during normal play.
+
+**Recommended next:** Commit batches 6–10; 30-min Phase 3 exit soak.
+
+### Track E — OpcodeIngress + PacketReader (batch 10, 2026-07-01)
+
+**ViewItemInfo PacketReader (`Character.cpp`):**
+- `CCharacter::ViewItemInfo` — view type char + grid short (bag) or trade index short (trade paths)
+- Fail-closed: truncated payload → `return FALSE`
+- Called from `BeginAction` `enumACTION_ITEM_INFO` via `reader.Raw()` (action type already consumed)
+
+**Remaining READ_* in Character handler paths:**
+- `CharacterPrl.cpp`: **0 active** (2 commented-out in `enumACTION_LOOK` stub)
+- `Character.cpp` (`ViewItemInfo`): **0** (migrated)
+
+Build: Release\|x64 **PASS** (`GameServer.vcxproj`, `Character.cpp` compiled and linked).
+
+**Manual test checklist:** login → inspect bag item → inspect trade boat item (if available) → grep `OpcodeIngress [reject]`.
+
+**Recommended next:** Commit batches 6–10; 30-min Phase 3 exit soak; Track A session-handle tail; Track C (optional).
+
 ### Track B5 — GameAppNet registry (batch 1, 2026-06-27)
 
 `CGameApp::ProcessPacket` now tries `DispatchOpcodeHandler` first (via `GameAppPacketContext { app, gate }`); unmigrated opcodes fall through to legacy switch + default router.
@@ -786,4 +927,4 @@ See last-smoke-result.txt for automated output.
 
 ## Resume prompt for next session
 
-> Continue Option B Phase 3. **Track E batch 1–4 committed** (`5b4d7f2e`). **Track E batch 5 in tree** (Gate BGNPLAY/NEWCHA probe, Group MP mins, boat/guild PacketReader). Next: manual T0 verify, commit batch 5, 30-min Phase 3 exit soak. Read `docs/NETWORK_AUDIT.md` and this file.
+> Continue Option B Phase 3. **Track E batches 6–10 in tree** (batch 10: ViewItemInfo PacketReader; Track E handler migration complete). Next: manual T0 verify (item inspect), commit batches 6–10, 30-min Phase 3 exit soak. Read `docs/PACKET_SYSTEM_REFACTOR.md` and this file.

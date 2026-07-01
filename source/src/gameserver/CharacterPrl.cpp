@@ -318,7 +318,16 @@ void HandleStoreOperate(CCharacter* cha, RPacket& pk, uint16_t usCmd) {
 }
 
 void HandlePmGuildBank(CCharacter* cha, RPacket& pk) {
-	Char bankType = READ_CHAR(pk);
+	net::PacketReader reader(pk);
+	uChar bankTypeRaw = 0;
+	if (!reader.Char(bankTypeRaw)) {
+		WPACKET WtPk = GETWPACKET();
+		WRITE_CMD(WtPk, CMD_MP_GUILDBANK);
+		WRITE_LONG(WtPk, cha->GetGuildID());
+		cha->ReflectINFof(cha, WtPk);
+		return;
+	}
+	Char bankType = static_cast<Char>(bankTypeRaw);
 
 	// Rate limit guild bank DB operations (1s cooldown)
 	// NOTE: must NOT break here - ack must always be sent or GroupServer queue gets permanently stuck
@@ -347,11 +356,20 @@ void HandlePmGuildBank(CCharacter* cha, RPacket& pk) {
 		switch (bankType) {
 
 		case 0: { // bankoper
-			Char chSrcType = READ_CHAR(pk);
-			Short sSrcGrid = READ_SHORT(pk);
-			Short sSrcNum = READ_SHORT(pk);
-			Char chTarType = READ_CHAR(pk);
-			Short sTarGrid = READ_SHORT(pk);
+			uChar chSrcTypeRaw = 0;
+			uChar chTarTypeRaw = 0;
+			uShort sSrcGrid = 0;
+			uShort sSrcNum = 0;
+			uShort sTarGrid = 0;
+			if (!reader.Char(chSrcTypeRaw) || !reader.Short(sSrcGrid) || !reader.Short(sSrcNum) ||
+				!reader.Char(chTarTypeRaw) || !reader.Short(sTarGrid)) {
+				break;
+			}
+			Char chSrcType = static_cast<Char>(chSrcTypeRaw);
+			Short sSrcGridS = static_cast<Short>(sSrcGrid);
+			Short sSrcNumS = static_cast<Short>(sSrcNum);
+			Char chTarType = static_cast<Char>(chTarTypeRaw);
+			Short sTarGridS = static_cast<Short>(sTarGrid);
 			Short sRet;
 			int guildID = cha->GetGuildID();
 			std::vector<CTableGuild::BankLog> logs = game_db.GetGuildLog(guildID);
@@ -362,7 +380,7 @@ void HandlePmGuildBank(CCharacter* cha, RPacket& pk) {
 				CKitbag bag;
 
 				l.time = time(0);
-				l.quantity = sSrcNum;
+				l.quantity = sSrcNumS;
 				l.userID = cha->GetPlyMainCha()->m_ID;
 
 				if (chTarType == 0) {
@@ -372,10 +390,10 @@ void HandlePmGuildBank(CCharacter* cha, RPacket& pk) {
 					bag = cha->GetPlyMainCha()->m_CKitbag;
 					l.type = 3;
 				}
-				l.parameter = bag.GetID(sSrcGrid);
+				l.parameter = bag.GetID(sSrcGridS);
 				logs.push_back(l);
 			}
-			sRet = cha->Cmd_GuildBankOper(chSrcType, sSrcGrid, sSrcNum, chTarType, sTarGrid);
+			sRet = cha->Cmd_GuildBankOper(chSrcType, sSrcGridS, sSrcNumS, chTarType, sTarGridS);
 			if (sRet != enumITEMOPT_SUCCESS || !game_db.SetGuildLog(logs, guildID)) {
 				cha->ItemOprateFailed(sRet);
 			}
@@ -384,10 +402,15 @@ void HandlePmGuildBank(CCharacter* cha, RPacket& pk) {
 		}
 
 		case 1: { // withdraw/deposit gold
-			Char action = READ_CHAR(pk);
+			uChar actionRaw = 0;
+			unsigned long long goldRaw = 0;
+			if (!reader.Char(actionRaw) || !reader.LongLong(goldRaw)) {
+				break;
+			}
+			Char action = static_cast<Char>(actionRaw);
+			long long gold = static_cast<long long>(goldRaw);
 
 			int guildID = cha->GetGuildID();
-			long long gold = READ_LONGLONG(pk);
 
 			// SANITIZE: Validate gold amount before processing
 			if (gold < 0) {
@@ -572,22 +595,22 @@ void RegisterAllCharacterOpcodeHandlers() {
 	add(CMD_CM_KITBAG_UNLOCK, &CCharacter::OpcodeHandle_CmKitbagUnlock, OpcodeName(CMD_CM_KITBAG_UNLOCK), 0);
 	add(CMD_CM_BOAT_GETINFO, &CCharacter::OpcodeHandle_CmBoatGetinfo, OpcodeName(CMD_CM_BOAT_GETINFO), 0);
 	add(CMD_CM_STALL_ALLDATA, &CCharacter::OpcodeHandle_CmStallAlldata, OpcodeName(CMD_CM_STALL_ALLDATA), 0);
-	add(CMD_CM_BEGINACTION, &CCharacter::OpcodeHandle_CmBeginAction, OpcodeName(CMD_CM_BEGINACTION), 4);
+	add(CMD_CM_BEGINACTION, &CCharacter::OpcodeHandle_CmBeginAction, OpcodeName(CMD_CM_BEGINACTION), 5);
 	add(CMD_CM_FORGE, &CCharacter::OpcodeHandle_CmForge, OpcodeName(CMD_CM_FORGE), 1);
 	add(CMD_CM_BOAT_CANCEL, &CCharacter::OpcodeHandle_CmBoatCancel, OpcodeName(CMD_CM_BOAT_CANCEL));
 	add(CMD_CM_CREATE_BOAT, &CCharacter::OpcodeHandle_CmCreateBoat, OpcodeName(CMD_CM_CREATE_BOAT));
 	add(CMD_CM_UPDATEBOAT_PART, &CCharacter::OpcodeHandle_CmUpdateboatPart, OpcodeName(CMD_CM_UPDATEBOAT_PART));
-	add(CMD_CM_STALL_OPEN, &CCharacter::OpcodeHandle_CmStallOpen, OpcodeName(CMD_CM_STALL_OPEN));
+	add(CMD_CM_STALL_OPEN, &CCharacter::OpcodeHandle_CmStallOpen, OpcodeName(CMD_CM_STALL_OPEN), 4);
 	add(CMD_CM_STALL_CLOSE, &CCharacter::OpcodeHandle_CmStallClose, OpcodeName(CMD_CM_STALL_CLOSE));
 	add(CMD_CM_KITBAG_AUTOLOCK, &CCharacter::OpcodeHandle_CmKitbagAutolock, OpcodeName(CMD_CM_KITBAG_AUTOLOCK), 1);
 	add(CMD_CM_KITBAG_LOCK, &CCharacter::OpcodeHandle_CmKitbagLock, OpcodeName(CMD_CM_KITBAG_LOCK), 0);
-	add(CMD_CM_UPDATEHAIR, &CCharacter::OpcodeHandle_CmUpdatehair, OpcodeName(CMD_CM_UPDATEHAIR));
+	add(CMD_CM_UPDATEHAIR, &CCharacter::OpcodeHandle_CmUpdatehair, OpcodeName(CMD_CM_UPDATEHAIR), 2);
 	add(CMD_CM_SKILLUPGRADE, &CCharacter::OpcodeHandle_CmSkillupgrade, OpcodeName(CMD_CM_SKILLUPGRADE), 3);
 	add(CMD_CM_TEAM_FIGHT_ASK, &CCharacter::OpcodeHandle_CmTeamFightAsk, OpcodeName(CMD_CM_TEAM_FIGHT_ASK), 9);
 	add(CMD_CM_TEAM_FIGHT_ASR, &CCharacter::OpcodeHandle_CmTeamFightAsr, OpcodeName(CMD_CM_TEAM_FIGHT_ASR), 1);
 	add(CMD_CM_ITEM_REPAIR_ASK, &CCharacter::OpcodeHandle_CmItemRepairAsk, OpcodeName(CMD_CM_ITEM_REPAIR_ASK), 10);
 	add(CMD_CM_ITEM_REPAIR_ASR, &CCharacter::OpcodeHandle_CmItemRepairAsr, OpcodeName(CMD_CM_ITEM_REPAIR_ASR), 1);
-	add(CMD_CM_STALL_BUY, &CCharacter::OpcodeHandle_CmStallBuy, OpcodeName(CMD_CM_STALL_BUY));
+	add(CMD_CM_STALL_BUY, &CCharacter::OpcodeHandle_CmStallBuy, OpcodeName(CMD_CM_STALL_BUY), 7);
 	add(CMD_CM_BOAT_LUANCH, &CCharacter::OpcodeHandle_CmBoatLuanch, OpcodeName(CMD_CM_BOAT_LUANCH), 5);
 	add(CMD_CM_BOAT_BAGSEL, &CCharacter::OpcodeHandle_CmBoatBagsel, OpcodeName(CMD_CM_BOAT_BAGSEL), 5);
 	add(CMD_CM_BOAT_SELECT, &CCharacter::OpcodeHandle_CmBoatSelect, OpcodeName(CMD_CM_BOAT_SELECT), 6);
@@ -596,26 +619,26 @@ void RegisterAllCharacterOpcodeHandlers() {
 	add(CMD_CM_VALIDATE_SLOT_ITEM, &CCharacter::OpcodeHandle_CmValidateSlotItem, OpcodeName(CMD_CM_VALIDATE_SLOT_ITEM), 4);
 	add(CMD_CM_ITEM_FORGE_ASK, &CCharacter::OpcodeHandle_CmItemForgeAsk, OpcodeName(CMD_CM_ITEM_FORGE_ASK), 1);
 	add(CMD_CM_ITEM_FORGE_ASR, &CCharacter::OpcodeHandle_CmItemForgeAsr, OpcodeName(CMD_CM_ITEM_FORGE_ASR), 1);
-	add(CMD_CM_ITEM_LOTTERY_ASK, &CCharacter::OpcodeHandle_CmItemLotteryAsk, OpcodeName(CMD_CM_ITEM_LOTTERY_ASK));
-	add(CMD_CM_LIFESKILL_ASK, &CCharacter::OpcodeHandle_CmLifeskillAsk, OpcodeName(CMD_CM_LIFESKILL_ASK));
-	add(CMD_CM_LIFESKILL_ASR, &CCharacter::OpcodeHandle_CmLifeskillAsr, OpcodeName(CMD_CM_LIFESKILL_ASR));
+	add(CMD_CM_ITEM_LOTTERY_ASK, &CCharacter::OpcodeHandle_CmItemLotteryAsk, OpcodeName(CMD_CM_ITEM_LOTTERY_ASK), 1);
+	add(CMD_CM_LIFESKILL_ASK, &CCharacter::OpcodeHandle_CmLifeskillAsk, OpcodeName(CMD_CM_LIFESKILL_ASK), 8);
+	add(CMD_CM_LIFESKILL_ASR, &CCharacter::OpcodeHandle_CmLifeskillAsr, OpcodeName(CMD_CM_LIFESKILL_ASR), 8);
 	add(CMD_CM_KITBAG_EXPAND, &CCharacter::OpcodeHandle_CmKitbagExpand, OpcodeName(CMD_CM_KITBAG_EXPAND));
 	add(CMD_CM_PING, &CCharacter::OpcodeHandle_CmPing, OpcodeName(CMD_CM_PING), 28);
-	add(CMD_CM_TIGER_START, &CCharacter::OpcodeHandle_CmTigerStart, OpcodeName(CMD_CM_TIGER_START));
-	add(CMD_CM_TIGER_STOP, &CCharacter::OpcodeHandle_CmTigerStop, OpcodeName(CMD_CM_TIGER_STOP));
-	add(CMD_CM_KITBAGTEMP_SYNC, &CCharacter::OpcodeHandle_CmKitbagtempSync, OpcodeName(CMD_CM_KITBAGTEMP_SYNC));
-	add(CMD_CM_STORE_OPEN_ASK, &CCharacter::OpcodeHandle_CmStoreOpenAsk, OpcodeName(CMD_CM_STORE_OPEN_ASK));
-	add(CMD_CM_STORE_LIST_ASK, &CCharacter::OpcodeHandle_CmStoreListAsk, OpcodeName(CMD_CM_STORE_LIST_ASK));
-	add(CMD_CM_STORE_BUY_ASK, &CCharacter::OpcodeHandle_CmStoreBuyAsk, OpcodeName(CMD_CM_STORE_BUY_ASK));
-	add(CMD_CM_STORE_CHANGE_ASK, &CCharacter::OpcodeHandle_CmStoreChangeAsk, OpcodeName(CMD_CM_STORE_CHANGE_ASK));
-	add(CMD_CM_STORE_QUERY, &CCharacter::OpcodeHandle_CmStoreQuery, OpcodeName(CMD_CM_STORE_QUERY));
-	add(CMD_CM_STORE_VIP, &CCharacter::OpcodeHandle_CmStoreVip, OpcodeName(CMD_CM_STORE_VIP));
-	add(CMD_CM_STORE_CLOSE, &CCharacter::OpcodeHandle_CmStoreClose, OpcodeName(CMD_CM_STORE_CLOSE));
+	add(CMD_CM_TIGER_START, &CCharacter::OpcodeHandle_CmTigerStart, OpcodeName(CMD_CM_TIGER_START), 10);
+	add(CMD_CM_TIGER_STOP, &CCharacter::OpcodeHandle_CmTigerStop, OpcodeName(CMD_CM_TIGER_STOP), 6);
+	add(CMD_CM_KITBAGTEMP_SYNC, &CCharacter::OpcodeHandle_CmKitbagtempSync, OpcodeName(CMD_CM_KITBAGTEMP_SYNC), 0);
+	add(CMD_CM_STORE_OPEN_ASK, &CCharacter::OpcodeHandle_CmStoreOpenAsk, OpcodeName(CMD_CM_STORE_OPEN_ASK), 0);
+	add(CMD_CM_STORE_LIST_ASK, &CCharacter::OpcodeHandle_CmStoreListAsk, OpcodeName(CMD_CM_STORE_LIST_ASK), 0);
+	add(CMD_CM_STORE_BUY_ASK, &CCharacter::OpcodeHandle_CmStoreBuyAsk, OpcodeName(CMD_CM_STORE_BUY_ASK), 0);
+	add(CMD_CM_STORE_CHANGE_ASK, &CCharacter::OpcodeHandle_CmStoreChangeAsk, OpcodeName(CMD_CM_STORE_CHANGE_ASK), 0);
+	add(CMD_CM_STORE_QUERY, &CCharacter::OpcodeHandle_CmStoreQuery, OpcodeName(CMD_CM_STORE_QUERY), 0);
+	add(CMD_CM_STORE_VIP, &CCharacter::OpcodeHandle_CmStoreVip, OpcodeName(CMD_CM_STORE_VIP), 0);
+	add(CMD_CM_STORE_CLOSE, &CCharacter::OpcodeHandle_CmStoreClose, OpcodeName(CMD_CM_STORE_CLOSE), 0);
 	add(CMD_CM_REQUESTTALK, &CCharacter::OpcodeHandle_CmRequestTalkOrTrade, OpcodeName(CMD_CM_REQUESTTALK), 4);
 	add(CMD_CM_REQUESTTRADE, &CCharacter::OpcodeHandle_CmRequestTalkOrTrade, OpcodeName(CMD_CM_REQUESTTRADE), 4);
-	add(CMD_CM_ITEM_LOCK_ASK, &CCharacter::OpcodeHandle_CmItemLockAsk, OpcodeName(CMD_CM_ITEM_LOCK_ASK));
-	add(CMD_CM_ITEM_UNLOCK_ASK, &CCharacter::OpcodeHandle_CmItemUnlockAsk, OpcodeName(CMD_CM_ITEM_UNLOCK_ASK));
-	add(CMD_CM_GAME_REQUEST_PIN, &CCharacter::OpcodeHandle_CmGameRequestPin, OpcodeName(CMD_CM_GAME_REQUEST_PIN));
+	add(CMD_CM_ITEM_LOCK_ASK, &CCharacter::OpcodeHandle_CmItemLockAsk, OpcodeName(CMD_CM_ITEM_LOCK_ASK), 1);
+	add(CMD_CM_ITEM_UNLOCK_ASK, &CCharacter::OpcodeHandle_CmItemUnlockAsk, OpcodeName(CMD_CM_ITEM_UNLOCK_ASK), 0);
+	add(CMD_CM_GAME_REQUEST_PIN, &CCharacter::OpcodeHandle_CmGameRequestPin, OpcodeName(CMD_CM_GAME_REQUEST_PIN), 0);
 	add(CMD_CM_CHARTRADE_REQUEST, &CCharacter::OpcodeHandle_CmChartradeRequest, OpcodeName(CMD_CM_CHARTRADE_REQUEST), 5);
 	add(CMD_CM_CHARTRADE_ACCEPT, &CCharacter::OpcodeHandle_CmChartradeAccept, OpcodeName(CMD_CM_CHARTRADE_ACCEPT), 5);
 	add(CMD_CM_CHARTRADE_REJECT, &CCharacter::OpcodeHandle_CmChartradeReject, OpcodeName(CMD_CM_CHARTRADE_REJECT), 0);
@@ -624,23 +647,23 @@ void RegisterAllCharacterOpcodeHandlers() {
 	add(CMD_CM_CHARTRADE_MONEY, &CCharacter::OpcodeHandle_CmChartradeMoney, OpcodeName(CMD_CM_CHARTRADE_MONEY), 7);
 	add(CMD_CM_CHARTRADE_VALIDATEDATA, &CCharacter::OpcodeHandle_CmChartradeValidatedata, OpcodeName(CMD_CM_CHARTRADE_VALIDATEDATA), 5);
 	add(CMD_CM_CHARTRADE_VALIDATE, &CCharacter::OpcodeHandle_CmChartradeValidate, OpcodeName(CMD_CM_CHARTRADE_VALIDATE), 5);
-	add(CMD_CM_VOLUNTER_OPEN, &CCharacter::OpcodeHandle_CmVolunterOpen, OpcodeName(CMD_CM_VOLUNTER_OPEN));
-	add(CMD_CM_VOLUNTER_LIST, &CCharacter::OpcodeHandle_CmVolunterList, OpcodeName(CMD_CM_VOLUNTER_LIST));
-	add(CMD_CM_VOLUNTER_ADD, &CCharacter::OpcodeHandle_CmVolunterAdd, OpcodeName(CMD_CM_VOLUNTER_ADD));
-	add(CMD_CM_VOLUNTER_DEL, &CCharacter::OpcodeHandle_CmVolunterDel, OpcodeName(CMD_CM_VOLUNTER_DEL));
-	add(CMD_CM_VOLUNTER_SEL, &CCharacter::OpcodeHandle_CmVolunterSel, OpcodeName(CMD_CM_VOLUNTER_SEL));
-	add(CMD_CM_VOLUNTER_ASR, &CCharacter::OpcodeHandle_CmVolunterAsr, OpcodeName(CMD_CM_VOLUNTER_ASR));
-	add(CMD_CM_MASTER_INVITE, &CCharacter::OpcodeHandle_CmMasterInvite, OpcodeName(CMD_CM_MASTER_INVITE));
-	add(CMD_CM_MASTER_ASR, &CCharacter::OpcodeHandle_CmMasterAsr, OpcodeName(CMD_CM_MASTER_ASR));
-	add(CMD_CM_MASTER_DEL, &CCharacter::OpcodeHandle_CmMasterDel, OpcodeName(CMD_CM_MASTER_DEL));
-	add(CMD_CM_PRENTICE_DEL, &CCharacter::OpcodeHandle_CmPrenticeDel, OpcodeName(CMD_CM_PRENTICE_DEL));
-	add(CMD_CM_PRENTICE_INVITE, &CCharacter::OpcodeHandle_CmPrenticeInvite, OpcodeName(CMD_CM_PRENTICE_INVITE));
-	add(CMD_CM_PRENTICE_ASR, &CCharacter::OpcodeHandle_CmPrenticeAsr, OpcodeName(CMD_CM_PRENTICE_ASR));
-	add(CMD_PM_GUILDBANK, &CCharacter::OpcodeHandle_PmGuildbank, OpcodeName(CMD_PM_GUILDBANK));
-	add(CMD_PM_PUSHTOGUILDBANK, &CCharacter::OpcodeHandle_PmPushToGuildbank, OpcodeName(CMD_PM_PUSHTOGUILDBANK));
-	add(CMD_TM_CHANGE_PERSONINFO, &CCharacter::OpcodeHandle_TmChangePersoninfo, OpcodeName(CMD_TM_CHANGE_PERSONINFO));
-	add(CMD_CM_GUILD_PERM, &CCharacter::OpcodeHandle_CmGuildPerm, OpcodeName(CMD_CM_GUILD_PERM));
-	add(CMD_CM_GUILD_PUTNAME, &CCharacter::OpcodeHandle_CmGuildPutname, OpcodeName(CMD_CM_GUILD_PUTNAME));
+	add(CMD_CM_VOLUNTER_OPEN, &CCharacter::OpcodeHandle_CmVolunterOpen, OpcodeName(CMD_CM_VOLUNTER_OPEN), 2);
+	add(CMD_CM_VOLUNTER_LIST, &CCharacter::OpcodeHandle_CmVolunterList, OpcodeName(CMD_CM_VOLUNTER_LIST), 4);
+	add(CMD_CM_VOLUNTER_ADD, &CCharacter::OpcodeHandle_CmVolunterAdd, OpcodeName(CMD_CM_VOLUNTER_ADD), 0);
+	add(CMD_CM_VOLUNTER_DEL, &CCharacter::OpcodeHandle_CmVolunterDel, OpcodeName(CMD_CM_VOLUNTER_DEL), 0);
+	add(CMD_CM_VOLUNTER_SEL, &CCharacter::OpcodeHandle_CmVolunterSel, OpcodeName(CMD_CM_VOLUNTER_SEL), 0);
+	add(CMD_CM_VOLUNTER_ASR, &CCharacter::OpcodeHandle_CmVolunterAsr, OpcodeName(CMD_CM_VOLUNTER_ASR), 2);
+	add(CMD_CM_MASTER_INVITE, &CCharacter::OpcodeHandle_CmMasterInvite, OpcodeName(CMD_CM_MASTER_INVITE), 4);
+	add(CMD_CM_MASTER_ASR, &CCharacter::OpcodeHandle_CmMasterAsr, OpcodeName(CMD_CM_MASTER_ASR), 2);
+	add(CMD_CM_MASTER_DEL, &CCharacter::OpcodeHandle_CmMasterDel, OpcodeName(CMD_CM_MASTER_DEL), 4);
+	add(CMD_CM_PRENTICE_DEL, &CCharacter::OpcodeHandle_CmPrenticeDel, OpcodeName(CMD_CM_PRENTICE_DEL), 4);
+	add(CMD_CM_PRENTICE_INVITE, &CCharacter::OpcodeHandle_CmPrenticeInvite, OpcodeName(CMD_CM_PRENTICE_INVITE), 4);
+	add(CMD_CM_PRENTICE_ASR, &CCharacter::OpcodeHandle_CmPrenticeAsr, OpcodeName(CMD_CM_PRENTICE_ASR), 2);
+	add(CMD_PM_GUILDBANK, &CCharacter::OpcodeHandle_PmGuildbank, OpcodeName(CMD_PM_GUILDBANK), 1);
+	add(CMD_PM_PUSHTOGUILDBANK, &CCharacter::OpcodeHandle_PmPushToGuildbank, OpcodeName(CMD_PM_PUSHTOGUILDBANK), 0);
+	add(CMD_TM_CHANGE_PERSONINFO, &CCharacter::OpcodeHandle_TmChangePersoninfo, OpcodeName(CMD_TM_CHANGE_PERSONINFO), 2);
+	add(CMD_CM_GUILD_PERM, &CCharacter::OpcodeHandle_CmGuildPerm, OpcodeName(CMD_CM_GUILD_PERM), 8);
+	add(CMD_CM_GUILD_PUTNAME, &CCharacter::OpcodeHandle_CmGuildPutname, OpcodeName(CMD_CM_GUILD_PUTNAME), 1);
 	add(CMD_CM_GUILD_TRYFOR, &CCharacter::OpcodeHandle_CmGuildTryfor, OpcodeName(CMD_CM_GUILD_TRYFOR), 4);
 	add(CMD_CM_GUILD_TRYFORCFM, &CCharacter::OpcodeHandle_CmGuildTryforcfm, OpcodeName(CMD_CM_GUILD_TRYFORCFM), 1);
 	add(CMD_CM_GUILD_LISTTRYPLAYER, &CCharacter::OpcodeHandle_CmGuildListtryplayer, OpcodeName(CMD_CM_GUILD_LISTTRYPLAYER));
@@ -648,22 +671,22 @@ void RegisterAllCharacterOpcodeHandlers() {
 	add(CMD_CM_GUILD_REJECT, &CCharacter::OpcodeHandle_CmGuildReject, OpcodeName(CMD_CM_GUILD_REJECT), 4);
 	add(CMD_CM_GUILD_KICK, &CCharacter::OpcodeHandle_CmGuildKick, OpcodeName(CMD_CM_GUILD_KICK), 4);
 	add(CMD_CM_GUILD_LEAVE, &CCharacter::OpcodeHandle_CmGuildLeave, OpcodeName(CMD_CM_GUILD_LEAVE));
-	add(CMD_CM_GUILD_DISBAND, &CCharacter::OpcodeHandle_CmGuildDisband, OpcodeName(CMD_CM_GUILD_DISBAND));
-	add(CMD_CM_GUILD_MOTTO, &CCharacter::OpcodeHandle_CmGuildMotto, OpcodeName(CMD_CM_GUILD_MOTTO));
+	add(CMD_CM_GUILD_DISBAND, &CCharacter::OpcodeHandle_CmGuildDisband, OpcodeName(CMD_CM_GUILD_DISBAND), 0);
+	add(CMD_CM_GUILD_MOTTO, &CCharacter::OpcodeHandle_CmGuildMotto, OpcodeName(CMD_CM_GUILD_MOTTO), 0);
 	add(CMD_PM_GUILD_DISBAND, &CCharacter::OpcodeHandle_PmGuildDisband, OpcodeName(CMD_PM_GUILD_DISBAND));
-	add(CMD_CM_GUILD_CHALLENGE, &CCharacter::OpcodeHandle_CmGuildChallenge, OpcodeName(CMD_CM_GUILD_CHALLENGE));
-	add(CMD_CM_GUILD_LEIZHU, &CCharacter::OpcodeHandle_CmGuildLeizhu, OpcodeName(CMD_CM_GUILD_LEIZHU));
-	add(CMD_CM_SAY2CAMP, &CCharacter::OpcodeHandle_CmSay2camp, OpcodeName(CMD_CM_SAY2CAMP));
-	add(CMD_CM_GM_SEND, &CCharacter::OpcodeHandle_CmGmSend, OpcodeName(CMD_CM_GM_SEND));
-	add(CMD_CM_GM_RECV, &CCharacter::OpcodeHandle_CmGmRecv, OpcodeName(CMD_CM_GM_RECV));
-	add(CMD_CM_PK_CTRL, &CCharacter::OpcodeHandle_CmPkCtrl, OpcodeName(CMD_CM_PK_CTRL));
-	add(CMD_CM_CHEAT_CHECK, &CCharacter::OpcodeHandle_CmCheatCheck, OpcodeName(CMD_CM_CHEAT_CHECK));
-	add(CMD_CM_BIDUP, &CCharacter::OpcodeHandle_CmBidup, OpcodeName(CMD_CM_BIDUP));
+	add(CMD_CM_GUILD_CHALLENGE, &CCharacter::OpcodeHandle_CmGuildChallenge, OpcodeName(CMD_CM_GUILD_CHALLENGE), 5);
+	add(CMD_CM_GUILD_LEIZHU, &CCharacter::OpcodeHandle_CmGuildLeizhu, OpcodeName(CMD_CM_GUILD_LEIZHU), 5);
+	add(CMD_CM_SAY2CAMP, &CCharacter::OpcodeHandle_CmSay2camp, OpcodeName(CMD_CM_SAY2CAMP), 0);
+	add(CMD_CM_GM_SEND, &CCharacter::OpcodeHandle_CmGmSend, OpcodeName(CMD_CM_GM_SEND), 4);
+	add(CMD_CM_GM_RECV, &CCharacter::OpcodeHandle_CmGmRecv, OpcodeName(CMD_CM_GM_RECV), 4);
+	add(CMD_CM_PK_CTRL, &CCharacter::OpcodeHandle_CmPkCtrl, OpcodeName(CMD_CM_PK_CTRL), 1);
+	add(CMD_CM_CHEAT_CHECK, &CCharacter::OpcodeHandle_CmCheatCheck, OpcodeName(CMD_CM_CHEAT_CHECK), 0);
+	add(CMD_CM_BIDUP, &CCharacter::OpcodeHandle_CmBidup, OpcodeName(CMD_CM_BIDUP), 0);
 	add(CMD_CM_ANTIINDULGENCE, &CCharacter::OpcodeHandle_CmAntiindulgence, OpcodeName(CMD_CM_ANTIINDULGENCE));
 	add(CMD_CM_REQUEST_DROP_RATE, &CCharacter::OpcodeHandle_CmRequestDropRate, OpcodeName(CMD_CM_REQUEST_DROP_RATE));
 	add(CMD_CM_REQUEST_EXP_RATE, &CCharacter::OpcodeHandle_CmRequestExpRate, OpcodeName(CMD_CM_REQUEST_EXP_RATE));
 	add(CMD_CM_GET_PLAYER_BATTLE_POINT, &CCharacter::OpcodeHandle_CmGetPlayerBattlePoint, OpcodeName(CMD_CM_GET_PLAYER_BATTLE_POINT));
-	add(CMD_CM_REQUEST_CHEST_PREVIEW, &CCharacter::OpcodeHandle_CmRequestChestPreview, OpcodeName(CMD_CM_REQUEST_CHEST_PREVIEW));
+	add(CMD_CM_REQUEST_CHEST_PREVIEW, &CCharacter::OpcodeHandle_CmRequestChestPreview, OpcodeName(CMD_CM_REQUEST_CHEST_PREVIEW), 4);
 
 	if (!RegisterOpcodeHandlers(OpcodeDispatchDomain::GameCharacter, entries.data(), entries.size())) {
 		throw std::runtime_error("RegisterAllCharacterOpcodeHandlers failed");
@@ -792,8 +815,9 @@ bool CCharacter::OpcodeHandle_CmSay(void* ctx, DataSocket* /*sock*/, RPacket& pk
 		LG("dialog error", "when character%s is dialog,the map is null!\n", cha->m_CLog.GetLogName());
 		return true;
 	}
-	uShort l_retlen;
-	cChar* l_content = READ_SEQ(pk, l_retlen);
+	uShort l_retlen = 0;
+	net::PacketReader reader(pk);
+	cChar* l_content = reader.Raw().ReadSequence(l_retlen);
 	if (!l_content)
 		return true;
 
@@ -937,9 +961,9 @@ bool CCharacter::OpcodeHandle_CmBeginAction(void* ctx, DataSocket* /*sock*/, RPa
 
 	if (cha->GetPlayer()) {
 		if (cha->GetPlayer()->GetCtrlCha() && ulWorldID == cha->GetPlayer()->GetCtrlCha()->GetID())
-			cha->GetPlayer()->GetCtrlCha()->BeginAction(pk);
+			cha->GetPlayer()->GetCtrlCha()->BeginAction(reader.Raw());
 		else if (cha->GetPlayer()->GetMainCha() && ulWorldID == cha->GetPlayer()->GetMainCha()->GetID())
-			cha->GetPlayer()->GetMainCha()->BeginAction(pk);
+			cha->GetPlayer()->GetMainCha()->BeginAction(reader.Raw());
 	}
 	return true;
 }
@@ -1312,7 +1336,12 @@ bool CCharacter::OpcodeHandle_CmItemForgeAsk(void* ctx, DataSocket* /*sock*/, RP
 
 bool CCharacter::OpcodeHandle_CmItemLotteryAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	if (READ_CHAR(pk) == 0) {
+	net::PacketReader reader(pk);
+	uChar first = 0;
+	if (!reader.Char(first)) {
+		return true;
+	}
+	if (first == 0) {
 		cha->ForgeAction(false);
 		return true;
 	}
@@ -1320,14 +1349,25 @@ bool CCharacter::OpcodeHandle_CmItemLotteryAsk(void* ctx, DataSocket* /*sock*/, 
 	SLotteryItem SLtrItem;
 	bool validLottery = true;
 	for (int i = 0; i < defMAX_ITEM_LOTTERY_GROUP && validLottery; i++) {
-		SLtrItem.SGroup[i].sGridNum = READ_SHORT(pk);
+		uShort sGridNum = 0;
+		if (!reader.Short(sGridNum)) {
+			cha->ForgeAction(false);
+			return true;
+		}
+		SLtrItem.SGroup[i].sGridNum = static_cast<short>(sGridNum);
 		if (SLtrItem.SGroup[i].sGridNum < 0 || SLtrItem.SGroup[i].sGridNum > defMAX_KBITEM_NUM_PER_TYPE) {
 			validLottery = false;
 			break;
 		}
 		for (short j = 0; j < SLtrItem.SGroup[i].sGridNum; j++) {
-			SLtrItem.SGroup[i].SGrid[j].sGridID = READ_SHORT(pk);
-			SLtrItem.SGroup[i].SGrid[j].sItemNum = READ_SHORT(pk);
+			uShort sGridID = 0;
+			uShort sItemNum = 0;
+			if (!reader.Short(sGridID) || !reader.Short(sItemNum)) {
+				cha->ForgeAction(false);
+				return true;
+			}
+			SLtrItem.SGroup[i].SGrid[j].sGridID = static_cast<short>(sGridID);
+			SLtrItem.SGroup[i].SGrid[j].sItemNum = static_cast<short>(sItemNum);
 
 			if (!PS::ValidateKitbagSlot(static_cast<int>(SLtrItem.SGroup[i].SGrid[j].sGridID))) {
 				LG("Security", "[Lottery] Invalid grid ID %d from character %s\n", SLtrItem.SGroup[i].SGrid[j].sGridID, cha->GetName());
@@ -1362,88 +1402,126 @@ bool CCharacter::OpcodeHandle_CmItemForgeAsr(void* ctx, DataSocket* /*sock*/, RP
 
 bool CCharacter::OpcodeHandle_CmLifeskillAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	int type = READ_LONG(pk);
-	if (type >= 0 && type < 4) {
-		int dwNpcID = READ_LONG(pk);
-
-		SLifeSkillItem LifeSkillItem;
-		LifeSkillItem.sbagCount = g_sLiveSkillNeedItemNum[type];
-		for (int i = 0; i < LifeSkillItem.sbagCount; i++) {
-			LifeSkillItem.sGridID[i] = READ_SHORT(pk);
-		}
-		switch (type) {
-		case 0: {
-			LifeSkillItem.sReturn = atoi(cha->GetPlayer()->GetLifeSkillinfo().c_str());
-			break;
-		}
-		case 1: {
-			string strVer[2];
-			Util_ResolveTextLine(cha->GetPlayer()->GetLifeSkillinfo().c_str(), strVer, 2, ',');
-			if (atoi(strVer[0].c_str()) > atoi(strVer[1].c_str()))
-				LifeSkillItem.sReturn = 1;
-			else
-				LifeSkillItem.sReturn = 0;
-			break;
-		}
-		case 2: {
-			short sret = READ_SHORT(pk);
-			string strVer[3];
-			Util_ResolveTextLine(cha->GetPlayer()->GetLifeSkillinfo().c_str(), strVer, 3, ',');
-			int count = atoi(strVer[0].c_str()) + atoi(strVer[1].c_str()) + atoi(strVer[2].c_str());
-			count -= 9;
-			if (count > 0)
-				count = 1;
-			else
-				count = 0;
-			if (count == sret)
-				LifeSkillItem.sReturn = 1;
-			else
-				LifeSkillItem.sReturn = 0;
-			break;
-		}
-		case 3: {
-			LifeSkillItem.sReturn = READ_SHORT(pk);
-			break;
-		}
-		}
-		cha->Cmd_LifeSkillItemAsk(type, &LifeSkillItem);
+	net::PacketReader reader(pk);
+	uLong type = 0;
+	uLong dwNpcID = 0;
+	if (!reader.Long(type) || !reader.Long(dwNpcID)) {
+		return true;
 	}
+	(void)dwNpcID;
+	if (type >= 4) {
+		return true;
+	}
+
+	SLifeSkillItem LifeSkillItem;
+	LifeSkillItem.sbagCount = g_sLiveSkillNeedItemNum[type];
+	for (int i = 0; i < LifeSkillItem.sbagCount; i++) {
+		uShort gridId = 0;
+		if (!reader.Short(gridId)) {
+			return true;
+		}
+		LifeSkillItem.sGridID[i] = gridId;
+	}
+	switch (type) {
+	case 0: {
+		LifeSkillItem.sReturn = atoi(cha->GetPlayer()->GetLifeSkillinfo().c_str());
+		break;
+	}
+	case 1: {
+		string strVer[2];
+		Util_ResolveTextLine(cha->GetPlayer()->GetLifeSkillinfo().c_str(), strVer, 2, ',');
+		if (atoi(strVer[0].c_str()) > atoi(strVer[1].c_str()))
+			LifeSkillItem.sReturn = 1;
+		else
+			LifeSkillItem.sReturn = 0;
+		break;
+	}
+	case 2: {
+		uShort sret = 0;
+		if (!reader.Short(sret)) {
+			return true;
+		}
+		string strVer[3];
+		Util_ResolveTextLine(cha->GetPlayer()->GetLifeSkillinfo().c_str(), strVer, 3, ',');
+		int count = atoi(strVer[0].c_str()) + atoi(strVer[1].c_str()) + atoi(strVer[2].c_str());
+		count -= 9;
+		if (count > 0)
+			count = 1;
+		else
+			count = 0;
+		if (count == sret)
+			LifeSkillItem.sReturn = 1;
+		else
+			LifeSkillItem.sReturn = 0;
+		break;
+	}
+	case 3: {
+		uShort sReturn = 0;
+		if (!reader.Short(sReturn)) {
+			return true;
+		}
+		LifeSkillItem.sReturn = sReturn;
+		break;
+	}
+	}
+	cha->Cmd_LifeSkillItemAsk(static_cast<int>(type), &LifeSkillItem);
 	return true;
 }
 
 bool CCharacter::OpcodeHandle_CmLifeskillAsr(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	int type = READ_LONG(pk);
-
-	if (type >= 0 && type < 4) {
-		int dwNpcID = READ_LONG(pk);
-		SLifeSkillItem LifeSkillItem;
-		LifeSkillItem.sbagCount = g_sLiveSkillNeedItemNum[type];
-		for (int i = 0; i < LifeSkillItem.sbagCount; i++) {
-			LifeSkillItem.sGridID[i] = READ_SHORT(pk);
-		}
-
-		switch (type) {
-		case 0: {
-			const char* pchar = READ_STRING(pk);
-			LifeSkillItem.sReturn = 1;
-		}
-		case 1: {
-			LifeSkillItem.sReturn = 0;
-		}
-		case 2: {
-			LifeSkillItem.sReturn = READ_SHORT(pk);
-
-			break;
-		}
-		case 3: {
-			LifeSkillItem.sReturn = READ_SHORT(pk);
-			break;
-		}
-		}
-
-		cha->Cmd_LifeSkillItemAsR(type, &LifeSkillItem);
+	net::PacketReader reader(pk);
+	uLong type = 0;
+	uLong dwNpcID = 0;
+	if (!reader.Long(type) || !reader.Long(dwNpcID)) {
+		return true;
 	}
+	(void)dwNpcID;
+	if (type >= 4) {
+		return true;
+	}
+
+	SLifeSkillItem LifeSkillItem;
+	LifeSkillItem.sbagCount = g_sLiveSkillNeedItemNum[type];
+	for (int i = 0; i < LifeSkillItem.sbagCount; i++) {
+		uShort gridId = 0;
+		if (!reader.Short(gridId)) {
+			return true;
+		}
+		LifeSkillItem.sGridID[i] = gridId;
+	}
+
+	switch (type) {
+	case 0: {
+		cChar* pchar = nullptr;
+		if (!reader.String(pchar)) {
+			return true;
+		}
+		(void)pchar;
+		LifeSkillItem.sReturn = 1;
+	}
+	case 1: {
+		LifeSkillItem.sReturn = 0;
+	}
+	case 2: {
+		uShort sReturn = 0;
+		if (!reader.Short(sReturn)) {
+			return true;
+		}
+		LifeSkillItem.sReturn = sReturn;
+		break;
+	}
+	case 3: {
+		uShort sReturn = 0;
+		if (!reader.Short(sReturn)) {
+			return true;
+		}
+		LifeSkillItem.sReturn = sReturn;
+		break;
+	}
+	}
+
+	cha->Cmd_LifeSkillItemAsR(static_cast<int>(type), &LifeSkillItem);
 	return true;
 }
 
@@ -1528,10 +1606,17 @@ bool CCharacter::OpcodeHandle_CmPing(void* ctx, DataSocket* /*sock*/, RPacket& p
 
 bool CCharacter::OpcodeHandle_CmTigerStart(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	DWORD dwNpcID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uLong dwNpcID = 0;
+	if (!reader.Long(dwNpcID)) {
+		return true;
+	}
 
 	for (int i = 0; i < 3; i++) {
-		short sTigerSel = READ_SHORT(pk);
+		uShort sTigerSel = 0;
+		if (!reader.Short(sTigerSel)) {
+			return true;
+		}
 		cha->m_sTigerSel[i] = (sTigerSel > 0) ? 1 : 0;
 	}
 
@@ -1546,13 +1631,20 @@ bool CCharacter::OpcodeHandle_CmTigerStart(void* ctx, DataSocket* /*sock*/, RPac
 
 bool CCharacter::OpcodeHandle_CmTigerStop(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	DWORD dwNpcID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uLong dwNpcID = 0;
+	if (!reader.Long(dwNpcID)) {
+		return true;
+	}
 	CCharacter* pCha = cha->m_submap->FindCharacter(dwNpcID, cha->GetShape().centre);
 	if (pCha == nullptr)
 		return true;
 
 	CCharacter* pMainCha = cha->GetPlyMainCha();
-	short sNum = READ_SHORT(pk);
+	uShort sNum = 0;
+	if (!reader.Short(sNum)) {
+		return true;
+	}
 
 	if (sNum < 1 || sNum > 3) {
 		pMainCha->ForgeAction(false);
@@ -1586,7 +1678,11 @@ bool CCharacter::OpcodeHandle_CmTigerStop(void* ctx, DataSocket* /*sock*/, RPack
 
 bool CCharacter::OpcodeHandle_CmStoreOpenAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	const char* szPwd = READ_STRING(pk);
+	net::PacketReader reader(pk);
+	cChar* szPwd = nullptr;
+	if (!reader.String(szPwd) || !szPwd) {
+		return true;
+	}
 	CCharacter* pMainCha = cha->GetPlyMainCha();
 	if (pMainCha->IsReadBook()) {
 		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00008));
@@ -1608,7 +1704,7 @@ bool CCharacter::OpcodeHandle_CmStoreOpenAsk(void* ctx, DataSocket* /*sock*/, RP
 
 	if ((szPwd2[0] == 0) || (!strcmp(szPwd, szPwd2)) || g_Config.m_bInstantIGS) {
 		pMainCha->SetStoreEnable(true);
-		HandleStoreOperate(cha, pk, CMD_CM_STORE_OPEN_ASK);
+		HandleStoreOperate(cha, reader.Raw(), CMD_CM_STORE_OPEN_ASK);
 	} else {
 		pMainCha->PopupNotice(RES_STRING(GM_CHARACTERPRL_CPP_00010));
 	}
@@ -1716,7 +1812,12 @@ bool CCharacter::OpcodeHandle_CmItemLockAsk(void* ctx, DataSocket* /*sock*/, RPa
 			return true;
 		}
 
-		dbc::Char chPosType = READ_CHAR(pk);
+		uChar chPosTypeRaw = 0;
+		net::PacketReader reader(pk);
+		if (!reader.Char(chPosTypeRaw)) {
+			return true;
+		}
+		dbc::Char chPosType = static_cast<dbc::Char>(chPosTypeRaw);
 
 		if (!PS::ValidateKitbagSlot(chPosType)) {
 			LG("Security", "[ItemLock] Invalid slot %d from character %s\n", chPosType, cha->GetName());
@@ -1745,7 +1846,19 @@ bool CCharacter::OpcodeHandle_CmItemLockAsk(void* ctx, DataSocket* /*sock*/, RPa
 }
 
 bool CCharacter::OpcodeHandle_CmItemUnlockAsk(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
-	static_cast<CCharacter*>(ctx)->ItemUnlockRequest(pk);
+	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	net::PacketReader reader(pk);
+	cChar* input_password = nullptr;
+	if (!reader.String(input_password)) {
+		return true;
+	}
+	uChar chPosTypeRaw = 0;
+	if (!reader.Char(chPosTypeRaw)) {
+		return true;
+	}
+	if (CCharacter* pMainCha = cha->GetPlyMainCha(); pMainCha) {
+		pMainCha->Cmd_UnlockItem(static_cast<Char>(chPosTypeRaw), input_password);
+	}
 	return true;
 }
 
@@ -1763,9 +1876,11 @@ bool CCharacter::OpcodeHandle_CmGameRequestPin(void* ctx, DataSocket* /*sock*/, 
 		return true;
 	}
 
-	const char* szPwd = READ_STRING(pk);
-	if (szPwd == nullptr)
+	const char* szPwd = nullptr;
+	net::PacketReader reader(pk);
+	if (!reader.String(szPwd) || !szPwd) {
 		return true;
+	}
 
 	CPlayer* pCply = pMainCha->GetPlayer();
 	cChar* szPwd2 = pCply->GetPassword();
@@ -1942,7 +2057,11 @@ bool CCharacter::OpcodeHandle_CmChartradeValidate(void* ctx, DataSocket* /*sock*
 bool CCharacter::OpcodeHandle_CmVolunterOpen(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	CCharacter* pMainCha = cha->GetPlyMainCha();
-	short sNum = READ_SHORT(pk);
+	net::PacketReader reader(pk);
+	uShort sNum = 0;
+	if (!reader.Short(sNum)) {
+		return true;
+	}
 
 	int nVolNum = g_pGameApp->GetVolNum();
 	int nStart = 0;
@@ -1970,8 +2089,12 @@ bool CCharacter::OpcodeHandle_CmVolunterOpen(void* ctx, DataSocket* /*sock*/, RP
 
 bool CCharacter::OpcodeHandle_CmVolunterList(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	short sPage = READ_SHORT(pk);
-	short sNum = READ_SHORT(pk);
+	net::PacketReader reader(pk);
+	uShort sPage = 0;
+	uShort sNum = 0;
+	if (!reader.Short(sPage) || !reader.Short(sNum)) {
+		return true;
+	}
 
 	int nVolNum = g_pGameApp->GetVolNum();
 	int nStart = (sPage - 1) * sNum;
@@ -2020,7 +2143,11 @@ bool CCharacter::OpcodeHandle_CmVolunterSel(void* ctx, DataSocket* /*sock*/, RPa
 		return true;
 	}
 
-	cChar* szName = READ_STRING(pk);
+	cChar* szName = nullptr;
+	net::PacketReader reader(pk);
+	if (!reader.String(szName) || !szName) {
+		return true;
+	}
 	CCharacter* pTarCha = cha->FindVolunteer(szName);
 	if (!pTarCha) {
 		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00012), szName);
@@ -2054,8 +2181,15 @@ bool CCharacter::OpcodeHandle_CmVolunterSel(void* ctx, DataSocket* /*sock*/, RPa
 bool CCharacter::OpcodeHandle_CmVolunterAsr(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	CCharacter* pMainCha = cha->GetPlyMainCha();
-	short sRet = READ_SHORT(pk);
-	cChar* szName = READ_STRING(pk);
+	net::PacketReader reader(pk);
+	uShort sRet = 0;
+	if (!reader.Short(sRet)) {
+		return true;
+	}
+	cChar* szName = nullptr;
+	if (!reader.String(szName) || !szName) {
+		return true;
+	}
 	CCharacter* pSrcCha = g_pGameApp->FindChaByName(szName);
 	if (!pSrcCha) {
 		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00012), szName);
@@ -2078,8 +2212,12 @@ bool CCharacter::OpcodeHandle_CmVolunterAsr(void* ctx, DataSocket* /*sock*/, RPa
 bool CCharacter::OpcodeHandle_CmMasterInvite(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	CCharacter* pMainCha = cha->GetPlyMainCha();
-	cChar* szName = READ_STRING(pk);
-	DWORD dwCharID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	cChar* szName = nullptr;
+	uLong dwCharID = 0;
+	if (!reader.String(szName) || !reader.Long(dwCharID)) {
+		return true;
+	}
 
 	if (!szName || strlen(szName) == 0 || strlen(szName) > PS::MAX_CHARACTER_NAME_LENGTH) {
 		LG("Security", "[Master] Invalid name from character %s\n", cha->GetName());
@@ -2139,9 +2277,13 @@ bool CCharacter::OpcodeHandle_CmMasterInvite(void* ctx, DataSocket* /*sock*/, RP
 bool CCharacter::OpcodeHandle_CmMasterAsr(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	CCharacter* pMainCha = cha->GetPlyMainCha();
-	short sRet = READ_SHORT(pk);
-	cChar* szName = READ_STRING(pk);
-	DWORD dwCharID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uShort sRet = 0;
+	cChar* szName = nullptr;
+	uLong dwCharID = 0;
+	if (!reader.Short(sRet) || !reader.String(szName) || !reader.Long(dwCharID)) {
+		return true;
+	}
 
 	pMainCha->SetInvited(false);
 
@@ -2186,8 +2328,12 @@ bool CCharacter::OpcodeHandle_CmMasterAsr(void* ctx, DataSocket* /*sock*/, RPack
 bool CCharacter::OpcodeHandle_CmMasterDel(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	CCharacter* pMainCha = cha->GetPlyMainCha();
-	cChar* szName = READ_STRING(pk);
-	uLong ulChaID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	cChar* szName = nullptr;
+	uLong ulChaID = 0;
+	if (!reader.String(szName) || !reader.Long(ulChaID)) {
+		return true;
+	}
 
 	if (pMainCha->GetLevel() > 40) {
 		pMainCha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00027));
@@ -2214,8 +2360,12 @@ bool CCharacter::OpcodeHandle_CmMasterDel(void* ctx, DataSocket* /*sock*/, RPack
 bool CCharacter::OpcodeHandle_CmPrenticeDel(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	CCharacter* pMainCha = cha->GetPlyMainCha();
-	cChar* szName = READ_STRING(pk);
-	uLong ulChaID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	cChar* szName = nullptr;
+	uLong ulChaID = 0;
+	if (!reader.String(szName) || !reader.Long(ulChaID)) {
+		return true;
+	}
 
 	int lCredit = (int)pMainCha->GetCredit();
 	if (lCredit < 0) {
@@ -2238,8 +2388,12 @@ bool CCharacter::OpcodeHandle_CmPrenticeDel(void* ctx, DataSocket* /*sock*/, RPa
 bool CCharacter::OpcodeHandle_CmPrenticeInvite(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	CCharacter* pMainCha = cha->GetPlyMainCha();
-	cChar* szName = READ_STRING(pk);
-	DWORD dwCharID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	cChar* szName = nullptr;
+	uLong dwCharID = 0;
+	if (!reader.String(szName) || !reader.Long(dwCharID)) {
+		return true;
+	}
 
 	if (cha->IsBoat()) {
 		cha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00023));
@@ -2288,9 +2442,13 @@ bool CCharacter::OpcodeHandle_CmPrenticeInvite(void* ctx, DataSocket* /*sock*/, 
 bool CCharacter::OpcodeHandle_CmPrenticeAsr(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	CCharacter* pMainCha = cha->GetPlyMainCha();
-	short sRet = READ_SHORT(pk);
-	cChar* szName = READ_STRING(pk);
-	DWORD dwCharID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uShort sRet = 0;
+	cChar* szName = nullptr;
+	uLong dwCharID = 0;
+	if (!reader.Short(sRet) || !reader.String(szName) || !reader.Long(dwCharID)) {
+		return true;
+	}
 
 	pMainCha->SetInvited(false);
 
@@ -2348,7 +2506,11 @@ bool CCharacter::OpcodeHandle_PmPushToGuildbank(void* ctx, DataSocket* /*sock*/,
 	pCSrcBag.SetChangeFlag(false);
 
 	SItemGrid SPopItem;
-	const char* strItem = READ_STRING(pk);
+	net::PacketReader reader(pk);
+	cChar* strItem = nullptr;
+	if (!reader.String(strItem)) {
+		return true;
+	}
 	String2Item(strItem, &SPopItem);
 
 	short sSrcGridID = defKITBAG_DEFPUSH_POS;
@@ -2369,11 +2531,18 @@ bool CCharacter::OpcodeHandle_PmPushToGuildbank(void* ctx, DataSocket* /*sock*/,
 
 bool CCharacter::OpcodeHandle_TmChangePersoninfo(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	cChar* motto = READ_STRING(pk);
+	net::PacketReader reader(pk);
+	cChar* motto = nullptr;
+	if (!reader.String(motto)) {
+		return true;
+	}
 	if (motto) {
 		cha->SetMotto(motto);
 	}
-	Short sIconID = READ_SHORT(pk);
+	uShort sIconID = 0;
+	if (!reader.Short(sIconID)) {
+		return true;
+	}
 
 	// SANITIZE: Validate icon ID range (valid icons are 1-100, 0 = no icon)
 	if (sIconID < 0 || sIconID > 100) {
@@ -2386,8 +2555,12 @@ bool CCharacter::OpcodeHandle_TmChangePersoninfo(void* ctx, DataSocket* /*sock*/
 
 bool CCharacter::OpcodeHandle_CmGuildPerm(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	int targetID = READ_LONG(pk);
-	unsigned int permission = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uLong targetID = 0;
+	uLong permission = 0;
+	if (!reader.Long(targetID) || !reader.Long(permission)) {
+		return true;
+	}
 
 	// SANITIZE: Validate permission value (must be valid bitmask)
 	const unsigned int VALID_PERM_MASK = 0xFF;  // All valid permission bits
@@ -2425,9 +2598,14 @@ bool CCharacter::OpcodeHandle_CmGuildPerm(void* ctx, DataSocket* /*sock*/, RPack
 
 bool CCharacter::OpcodeHandle_CmGuildPutname(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	bool l_confirm = READ_CHAR(pk) ? true : false;
-	cChar* l_guildname = READ_STRING(pk);
-	cChar* l_passwd = READ_STRING(pk);
+	net::PacketReader reader(pk);
+	uChar confirm = 0;
+	cChar* l_guildname = nullptr;
+	cChar* l_passwd = nullptr;
+	if (!reader.Char(confirm) || !reader.String(l_guildname) || !reader.String(l_passwd)) {
+		return true;
+	}
+	bool l_confirm = confirm != 0;
 
 	// SANITIZE: Validate guild name and password
 	if (!l_guildname || !l_passwd) {
@@ -2523,7 +2701,11 @@ bool CCharacter::OpcodeHandle_CmGuildLeave(void* ctx, DataSocket* /*sock*/, RPac
 
 bool CCharacter::OpcodeHandle_CmGuildDisband(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	cChar* l_passwd = READ_STRING(pk);
+	net::PacketReader reader(pk);
+	cChar* l_passwd = nullptr;
+	if (!reader.String(l_passwd)) {
+		return true;
+	}
 	int canDisband = (cha->GetPlyMainCha()->guildPermission & emGldPermDisband);
 	if (canDisband == emGldPermDisband) {
 		if (l_passwd && !strchr(l_passwd, '\'')) {
@@ -2535,10 +2717,12 @@ bool CCharacter::OpcodeHandle_CmGuildDisband(void* ctx, DataSocket* /*sock*/, RP
 
 bool CCharacter::OpcodeHandle_CmGuildMotto(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	uShort len;
-	cChar* l_motto = pk.ReadString(&len);
-	if (!l_motto)
+	net::PacketReader reader(pk);
+	uShort len = 0;
+	cChar* l_motto = nullptr;
+	if (!reader.String(l_motto, len)) {
 		return true;
+	}
 
 	if (len > 0 && !common::conformity::guild::motto::is_valid(l_motto, len))
 		return true;
@@ -2560,16 +2744,24 @@ bool CCharacter::OpcodeHandle_PmGuildDisband(void* ctx, DataSocket* /*sock*/, RP
 
 bool CCharacter::OpcodeHandle_CmGuildChallenge(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	BYTE byLevel = READ_CHAR(pk);
-	DWORD dwMoney = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uChar byLevel = 0;
+	uLong dwMoney = 0;
+	if (!reader.Char(byLevel) || !reader.Long(dwMoney)) {
+		return true;
+	}
 	Guild::cmd_GuildChallenge(cha->GetPlyMainCha(), byLevel, dwMoney);
 	return true;
 }
 
 bool CCharacter::OpcodeHandle_CmGuildLeizhu(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
-	BYTE byLevel = READ_CHAR(pk);
-	DWORD dwMoney = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uChar byLevel = 0;
+	uLong dwMoney = 0;
+	if (!reader.Char(byLevel) || !reader.Long(dwMoney)) {
+		return true;
+	}
 	Guild::cmd_GuildLeizhu(cha->GetPlyMainCha(), byLevel, dwMoney);
 	return true;
 }
@@ -2577,7 +2769,11 @@ bool CCharacter::OpcodeHandle_CmGuildLeizhu(void* ctx, DataSocket* /*sock*/, RPa
 bool CCharacter::OpcodeHandle_CmSay2camp(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	CCharacter* pMainCha = cha->GetPlyMainCha();
-	cChar* szContent = READ_STRING(pk);
+	net::PacketReader reader(pk);
+	cChar* szContent = nullptr;
+	if (!reader.String(szContent)) {
+		return true;
+	}
 	CCharacter* pCha = nullptr;
 	SubMap* pSubMap = cha->GetPlyCtrlCha()->GetSubMap();
 
@@ -2649,13 +2845,20 @@ bool CCharacter::OpcodeHandle_CmGmSend(void* ctx, DataSocket* /*sock*/, RPacket&
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	CCharacter* pMainCha = cha->GetPlyMainCha();
 
-	DWORD dwNpcID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uLong dwNpcID = 0;
+	if (!reader.Long(dwNpcID)) {
+		return true;
+	}
 	CCharacter* pCha = cha->m_submap->FindCharacter(dwNpcID, cha->GetShape().centre);
 	if (pCha == nullptr)
 		return true;
 
-	cChar* szTitle = READ_STRING(pk);
-	cChar* szContent = READ_STRING(pk);
+	cChar* szTitle = nullptr;
+	cChar* szContent = nullptr;
+	if (!reader.String(szTitle) || !reader.String(szContent)) {
+		return true;
+	}
 	// SANITIZE: null check before strlen to prevent crash on malformed packet
 	if (!szTitle || !szContent) {
 		LG("Security", "[GMSend] Null title or content from character %s\n", cha->GetName());
@@ -2673,7 +2876,11 @@ bool CCharacter::OpcodeHandle_CmGmRecv(void* ctx, DataSocket* /*sock*/, RPacket&
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	CCharacter* pMainCha = cha->GetPlyMainCha();
 
-	DWORD dwNpcID = READ_LONG(pk);
+	net::PacketReader reader(pk);
+	uLong dwNpcID = 0;
+	if (!reader.Long(dwNpcID)) {
+		return true;
+	}
 	CCharacter* pCha = cha->m_submap->FindCharacter(dwNpcID, cha->GetShape().centre);
 	if (pCha == nullptr)
 		return true;
@@ -2684,8 +2891,13 @@ bool CCharacter::OpcodeHandle_CmGmRecv(void* ctx, DataSocket* /*sock*/, RPacket&
 
 bool CCharacter::OpcodeHandle_CmPkCtrl(void* ctx, DataSocket* /*sock*/, RPacket& pk) {
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
+	net::PacketReader reader(pk);
+	uChar pkMode = 0;
+	if (!reader.Char(pkMode)) {
+		return true;
+	}
 
-	if (READ_CHAR(pk))
+	if (pkMode)
 		cha->Cmd_SetInPK();
 	else
 		cha->Cmd_SetInPK(false);
@@ -2697,7 +2909,11 @@ bool CCharacter::OpcodeHandle_CmCheatCheck(void* ctx, DataSocket* /*sock*/, RPac
 	CCharacter* cha = static_cast<CCharacter*>(ctx);
 	CCharacter* pMainCha = cha->GetPlyMainCha();
 
-	cChar* answer = READ_STRING(pk);
+	net::PacketReader reader(pk);
+	cChar* answer = nullptr;
+	if (!reader.String(answer)) {
+		return true;
+	}
 	pMainCha->CheatCheck(answer);
 	return true;
 }
@@ -2707,15 +2923,22 @@ bool CCharacter::OpcodeHandle_CmBidup(void* ctx, DataSocket* /*sock*/, RPacket& 
 	CCharacter* pMainCha = cha->GetPlyMainCha();
 	if (g_CParser.DoString("YORN", enumSCRIPT_RETURN_NUMBER, 1, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, pMainCha, DOSTRING_PARAM_END)) {
 		if (g_CParser.GetReturnNumber(0)) {
-			DWORD dwNpcID = READ_LONG(pk);
+			net::PacketReader reader(pk);
+			uLong dwNpcID = 0;
+			uShort sItemID = 0;
+			uLong price = 0;
+			if (!reader.Long(dwNpcID)) {
+				return true;
+			}
 			CCharacter* pNpc = cha->m_submap->FindCharacter(dwNpcID, cha->GetShape().centre);
 			if (pNpc == nullptr) {
 				cha->SystemNotice(RES_STRING(GM_CHARACTERPRL_CPP_00034), dwNpcID);
 				return true;
 			}
-			short sItemID = READ_SHORT(pk);
-			int price = READ_LONG(pk);
-			g_AuctionSystem.BidUp(pMainCha, sItemID, (uInt)price);
+			if (!reader.Short(sItemID) || !reader.Long(price)) {
+				return true;
+			}
+			g_AuctionSystem.BidUp(pMainCha, static_cast<short>(sItemID), static_cast<uInt>(price));
 			g_AuctionSystem.NotifyAuction(cha, pNpc);
 		}
 	}
@@ -2773,12 +2996,16 @@ bool CCharacter::OpcodeHandle_CmRequestChestPreview(void* ctx, DataSocket* /*soc
 		}
 		cha->m_dwLastChestPreviewTime = dwNow;
 
-		int chestItemID = READ_LONG(pk);
+		net::PacketReader reader(pk);
+		uLong chestItemID = 0;
+		if (!reader.Long(chestItemID)) {
+			return true;
+		}
 		if (chestItemID <= 0) {
 			return true;
 		}
 
-		SendChestPreviewPacket(pCha, chestItemID);
+		SendChestPreviewPacket(pCha, static_cast<int>(chestItemID));
 	}
 	return true;
 }
@@ -2819,11 +3046,18 @@ void CCharacter::BeginAction(RPACKET pk) {
 		return;
 	}
 
+	net::PacketReader reader(pk);
 	uLong ulPacketId = 0;
 #ifdef defPROTOCOL_HAVE_PACKETID
-	ulPacketId = READ_LONG(pk);
+	if (!reader.Long(ulPacketId)) {
+		return;
+	}
 #endif
-	Char chActionType = READ_CHAR(pk);
+	uChar chActionTypeRaw = 0;
+	if (!reader.Char(chActionTypeRaw)) {
+		return;
+	}
+	Char chActionType = static_cast<Char>(chActionTypeRaw);
 
 	m_CLog.Log("Begin Action: \t%d\tPacketID: %u\n", chActionType, ulPacketId);
 
@@ -2867,8 +3101,8 @@ void CCharacter::BeginAction(RPACKET pk) {
 		}
 		ResetPosState();
 
-		uShort ulTurnNum;
-		cChar* pData = READ_SEQ(pk, ulTurnNum);
+		uShort ulTurnNum = 0;
+		cChar* pData = reader.Raw().ReadSequence(ulTurnNum);
 		Point Path[defMOVE_INFLEXION_NUM];
 		Char chPointNum;
 		if (!pData) {
@@ -2942,15 +3176,23 @@ void CCharacter::BeginAction(RPACKET pk) {
 		}
 		ResetPosState();
 
-		char chMove = READ_CHAR(pk);
+		uChar chMoveRaw = 0;
+		if (!reader.Char(chMoveRaw)) {
+			return;
+		}
+		char chMove = static_cast<char>(chMoveRaw);
 		if (chMove == 2) // ????????????
 		{
-			Char chFightID = READ_CHAR(pk);
+			uChar chFightIDRaw = 0;
+			if (!reader.Char(chFightIDRaw)) {
+				return;
+			}
+			Char chFightID = static_cast<Char>(chFightIDRaw);
 			// ???
 			Point Path[defMOVE_INFLEXION_NUM];
 			Char chPointNum;
-			uShort ulTurnNum;
-			cChar* pData = READ_SEQ(pk, ulTurnNum);
+			uShort ulTurnNum = 0;
+			cChar* pData = reader.Raw().ReadSequence(ulTurnNum);
 			if (!pData) {
 				FailedActionNoti(enumACTION_SKILL, enumFACTION_MOVEPATH);
 				// SystemNotice("??????,???????\n");
@@ -2972,9 +3214,21 @@ void CCharacter::BeginAction(RPACKET pk) {
 			m_CLog.Log("move path(ulTurnNum: %d)[PacketID: %u]\n", ulTurnNum, ulPacketId);
 			memcpy(Path, pData, chPointNum * sizeof(Point));
 			// ???
-			dbc::uLong ulSkillID = READ_LONG(pk);
-			Long lTarInfo1 = READ_LONG(pk);
-			Long lTarInfo2 = READ_LONG(pk);
+			uLong ulSkillIDRaw = 0;
+			uLong lTarInfo1Raw = 0;
+			uLong lTarInfo2Raw = 0;
+			if (!reader.Long(ulSkillIDRaw)) {
+				return;
+			}
+			if (!reader.Long(lTarInfo1Raw)) {
+				return;
+			}
+			if (!reader.Long(lTarInfo2Raw)) {
+				return;
+			}
+			dbc::uLong ulSkillID = ulSkillIDRaw;
+			Long lTarInfo1 = static_cast<Long>(lTarInfo1Raw);
+			Long lTarInfo2 = static_cast<Long>(lTarInfo2Raw);
 			
 			// SANITIZE: Validate skill ID range
 			if (!PS::ValidateRange(static_cast<int>(ulSkillID), 1, PS::MAX_SKILL_ID)) {
@@ -3013,7 +3267,11 @@ void CCharacter::BeginAction(RPACKET pk) {
 			return;
 		}
 
-		Short sStateID = READ_SHORT(pk);
+		uShort sStateIDRaw = 0;
+		if (!reader.Short(sStateIDRaw)) {
+			return;
+		}
+		Short sStateID = static_cast<Short>(sStateIDRaw);
 
 		CSkillStateRecord* pSSkillState = GetCSkillStateRecordInfo((uChar)sStateID);
 		if (!pSSkillState)
@@ -3042,11 +3300,31 @@ void CCharacter::BeginAction(RPACKET pk) {
 		m_SSeat.chIsSeat = 0;
 
 		m_SLean.ulPacketID = ulPacketId;
-		m_SLean.lPose = READ_LONG(pk);
-		m_SLean.lAngle = READ_LONG(pk);
-		m_SLean.lPosX = READ_LONG(pk);
-		m_SLean.lPosY = READ_LONG(pk);
-		m_SLean.lHeight = READ_LONG(pk);
+		uLong lPoseRaw = 0;
+		uLong lAngleRaw = 0;
+		uLong lPosXRaw = 0;
+		uLong lPosYRaw = 0;
+		uLong lHeightRaw = 0;
+		if (!reader.Long(lPoseRaw)) {
+			return;
+		}
+		if (!reader.Long(lAngleRaw)) {
+			return;
+		}
+		if (!reader.Long(lPosXRaw)) {
+			return;
+		}
+		if (!reader.Long(lPosYRaw)) {
+			return;
+		}
+		if (!reader.Long(lHeightRaw)) {
+			return;
+		}
+		m_SLean.lPose = static_cast<Long>(lPoseRaw);
+		m_SLean.lAngle = static_cast<Long>(lAngleRaw);
+		m_SLean.lPosX = static_cast<Long>(lPosXRaw);
+		m_SLean.lPosY = static_cast<Long>(lPosYRaw);
+		m_SLean.lHeight = static_cast<Long>(lHeightRaw);
 		m_SLean.chState = 0;
 
 		// ??
@@ -3076,8 +3354,16 @@ void CCharacter::BeginAction(RPACKET pk) {
 		/// item picks
 	case enumACTION_ITEM_PICK: // ???
 	{
-		Long lWorldID = READ_LONG(pk);
-		Long lHandle = READ_LONG(pk);
+		uLong lWorldIDRaw = 0;
+		uLong lHandleRaw = 0;
+		if (!reader.Long(lWorldIDRaw)) {
+			return;
+		}
+		if (!reader.Long(lHandleRaw)) {
+			return;
+		}
+		Long lWorldID = static_cast<Long>(lWorldIDRaw);
+		Long lHandle = static_cast<Long>(lHandleRaw);
 		
 		// Rate limit pickup: allow burst of up to 30 per second (Ctrl+A loot-all),
 		// then throttle sustained floods that could saturate GateServer/GroupServer.
@@ -3101,10 +3387,26 @@ void CCharacter::BeginAction(RPACKET pk) {
 	} break;
 	case enumACTION_ITEM_THROW: // ???(????????)
 	{
-		Short sGridID = READ_SHORT(pk);
-		Short lNum = READ_SHORT(pk);
-		Long lPosX = READ_LONG(pk);
-		Long lPosY = READ_LONG(pk);
+		uShort sGridIDRaw = 0;
+		uShort lNumRaw = 0;
+		uLong lPosXRaw = 0;
+		uLong lPosYRaw = 0;
+		if (!reader.Short(sGridIDRaw)) {
+			return;
+		}
+		if (!reader.Short(lNumRaw)) {
+			return;
+		}
+		if (!reader.Long(lPosXRaw)) {
+			return;
+		}
+		if (!reader.Long(lPosYRaw)) {
+			return;
+		}
+		Short sGridID = static_cast<Short>(sGridIDRaw);
+		Short lNum = static_cast<Short>(lNumRaw);
+		Long lPosX = static_cast<Long>(lPosXRaw);
+		Long lPosY = static_cast<Long>(lPosYRaw);
 		
 		// SANITIZE: Validate grid, count, and position
 		if (!PS::ValidateKitbagSlot(static_cast<int>(sGridID))) {
@@ -3125,22 +3427,41 @@ void CCharacter::BeginAction(RPACKET pk) {
 			ItemOprateFailed(sRet);
 	} break;
 	case enumACTION_ITEM_LOCK: {
-		Short sGridID = READ_SHORT(pk);
+		uShort sGridIDRaw = 0;
+		if (!reader.Short(sGridIDRaw)) {
+			return;
+		}
+		Short sGridID = static_cast<Short>(sGridIDRaw);
 		Short sRet = Cmd_LockItem(sGridID);
 		if (sRet != enumITEMOPT_SUCCESS)
 			ItemOprateFailed(sRet);
 	} break;
 	case enumACTION_ITEM_UNLOCK: {
-		Short sGridID = READ_SHORT(pk);
-		const char* szPwd = READ_STRING(pk);
+		uShort sGridIDRaw = 0;
+		if (!reader.Short(sGridIDRaw)) {
+			return;
+		}
+		Short sGridID = static_cast<Short>(sGridIDRaw);
+		cChar* szPwd = nullptr;
+		if (!reader.String(szPwd)) {
+			return;
+		}
 		Short sRet = Cmd_UnlockItem(sGridID, szPwd);
 		if (sRet != enumITEMOPT_SUCCESS)
 			ItemOprateFailed(sRet);
 	} break;
 	case enumACTION_ITEM_USE: // ????
 	{
-		Short sFromGridID = READ_SHORT(pk);
-		Short sToGridID = READ_SHORT(pk);
+		uShort sFromGridIDRaw = 0;
+		uShort sToGridIDRaw = 0;
+		if (!reader.Short(sFromGridIDRaw)) {
+			return;
+		}
+		if (!reader.Short(sToGridIDRaw)) {
+			return;
+		}
+		Short sFromGridID = static_cast<Short>(sFromGridIDRaw);
+		Short sToGridID = static_cast<Short>(sToGridIDRaw);
 		
 		// SANITIZE: Validate grid IDs
 		if (!PS::ValidateKitbagSlot(static_cast<int>(sFromGridID))) {
@@ -3164,13 +3485,31 @@ void CCharacter::BeginAction(RPACKET pk) {
 		Char chDir;
 		Long lParam1, lParam2;
 
-		Char chLinkID = READ_CHAR(pk);
-		Short sGridID = READ_SHORT(pk);
+		Char chLinkID;
+		Short sGridID;
+		uChar chLinkIDRaw = 0;
+		uShort sGridIDRaw = 0;
+		if (!reader.Char(chLinkIDRaw)) {
+			return;
+		}
+		if (!reader.Short(sGridIDRaw)) {
+			return;
+		}
+		chLinkID = static_cast<Char>(chLinkIDRaw);
+		sGridID = static_cast<Short>(sGridIDRaw);
 		if (sGridID == -2) // ????
 		{
 			chDir = 0;
-			lParam1 = READ_LONG(pk);
-			lParam2 = READ_LONG(pk);
+			uLong lParam1Raw = 0;
+			uLong lParam2Raw = 0;
+			if (!reader.Long(lParam1Raw)) {
+				return;
+			}
+			if (!reader.Long(lParam2Raw)) {
+				return;
+			}
+			lParam1 = static_cast<Long>(lParam1Raw);
+			lParam2 = static_cast<Long>(lParam2Raw);
 		} else if (sGridID == -1) // ?????,????
 		{
 			chDir = 1;
@@ -3193,9 +3532,21 @@ void CCharacter::BeginAction(RPACKET pk) {
 	} break;
 	case enumACTION_ITEM_POS: // ??????
 	{
-		Short sSrcGrid = READ_SHORT(pk);
-		Short sSrcNum = READ_SHORT(pk);
-		Short sTarGrid = READ_SHORT(pk);
+		uShort sSrcGridRaw = 0;
+		uShort sSrcNumRaw = 0;
+		uShort sTarGridRaw = 0;
+		if (!reader.Short(sSrcGridRaw)) {
+			return;
+		}
+		if (!reader.Short(sSrcNumRaw)) {
+			return;
+		}
+		if (!reader.Short(sTarGridRaw)) {
+			return;
+		}
+		Short sSrcGrid = static_cast<Short>(sSrcGridRaw);
+		Short sSrcNum = static_cast<Short>(sSrcNumRaw);
+		Short sTarGrid = static_cast<Short>(sTarGridRaw);
 		
 		// SANITIZE: Validate grid IDs and count
 		if (!PS::ValidateKitbagSlot(static_cast<int>(sSrcGrid)) || 
@@ -3214,9 +3565,21 @@ void CCharacter::BeginAction(RPACKET pk) {
 	} break;
 	case enumACTION_KITBAGTMP_DRAG: // ??????
 	{
-		Short sSrcGrid = READ_SHORT(pk);
-		Short sSrcNum = READ_SHORT(pk);
-		Short sTarGrid = READ_SHORT(pk);
+		uShort sSrcGridRaw = 0;
+		uShort sSrcNumRaw = 0;
+		uShort sTarGridRaw = 0;
+		if (!reader.Short(sSrcGridRaw)) {
+			return;
+		}
+		if (!reader.Short(sSrcNumRaw)) {
+			return;
+		}
+		if (!reader.Short(sTarGridRaw)) {
+			return;
+		}
+		Short sSrcGrid = static_cast<Short>(sSrcGridRaw);
+		Short sSrcNum = static_cast<Short>(sSrcNumRaw);
+		Short sTarGrid = static_cast<Short>(sTarGridRaw);
 		
 		// SANITIZE: Validate grid IDs and count
 		if (!PS::ValidateKitbagSlot(static_cast<int>(sSrcGrid)) || 
@@ -3235,7 +3598,11 @@ void CCharacter::BeginAction(RPACKET pk) {
 	} break;
 	case enumACTION_ITEM_DELETE: // ????
 	{
-		Short sFromGridID = READ_SHORT(pk);
+		uShort sFromGridIDRaw = 0;
+		if (!reader.Short(sFromGridIDRaw)) {
+			return;
+		}
+		Short sFromGridID = static_cast<Short>(sFromGridIDRaw);
 		
 		// SANITIZE: Validate grid ID
 		if (!PS::ValidateKitbagSlot(static_cast<int>(sFromGridID))) {
@@ -3250,18 +3617,38 @@ void CCharacter::BeginAction(RPACKET pk) {
 	} break;
 	case enumACTION_ITEM_INFO: // ????
 	{
-		ViewItemInfo(pk);
+		ViewItemInfo(reader.Raw());
 	} break;
 	case enumACTION_BANK:
 
 	{
 		if (IsEconomyBlockedByDB(*this))
 			break;
-		Char chSrcType = READ_CHAR(pk);
-		Short sSrcGrid = READ_SHORT(pk);
-		Short sSrcNum = READ_SHORT(pk);
-		Char chTarType = READ_CHAR(pk);
-		Short sTarGrid = READ_SHORT(pk);
+		uChar chSrcTypeRaw = 0;
+		uShort sSrcGridRaw = 0;
+		uShort sSrcNumRaw = 0;
+		uChar chTarTypeRaw = 0;
+		uShort sTarGridRaw = 0;
+		if (!reader.Char(chSrcTypeRaw)) {
+			return;
+		}
+		if (!reader.Short(sSrcGridRaw)) {
+			return;
+		}
+		if (!reader.Short(sSrcNumRaw)) {
+			return;
+		}
+		if (!reader.Char(chTarTypeRaw)) {
+			return;
+		}
+		if (!reader.Short(sTarGridRaw)) {
+			return;
+		}
+		Char chSrcType = static_cast<Char>(chSrcTypeRaw);
+		Short sSrcGrid = static_cast<Short>(sSrcGridRaw);
+		Short sSrcNum = static_cast<Short>(sSrcNumRaw);
+		Char chTarType = static_cast<Char>(chTarTypeRaw);
+		Short sTarGrid = static_cast<Short>(sTarGridRaw);
 		Short sRet;
 		
 		// SANITIZE: Validate bank operation parameters
@@ -3363,7 +3750,11 @@ void CCharacter::BeginAction(RPACKET pk) {
 
 		std::vector<CTableGuild::BankLog> logs = game_db.GetGuildLog(guildID);
 
-		uShort curSize = READ_SHORT(pk);
+		uShort curSizeRaw = 0;
+		if (!reader.Short(curSizeRaw)) {
+			return;
+		}
+		uShort curSize = curSizeRaw;
 
 		WPACKET WtPk = GETWPACKET();
 		WRITE_CMD(WtPk, CMD_MC_NOTIACTION);
@@ -3388,9 +3779,21 @@ void CCharacter::BeginAction(RPACKET pk) {
 		break;
 	}
 	case enumACTION_SHORTCUT: {
-		char chIndex = READ_CHAR(pk);
-		char chType = READ_CHAR(pk);
-		short sGrid = READ_SHORT(pk);
+		uChar chIndexRaw = 0;
+		uChar chTypeRaw = 0;
+		uShort sGridRaw = 0;
+		if (!reader.Char(chIndexRaw)) {
+			return;
+		}
+		if (!reader.Char(chTypeRaw)) {
+			return;
+		}
+		if (!reader.Short(sGridRaw)) {
+			return;
+		}
+		char chIndex = static_cast<char>(chIndexRaw);
+		char chType = static_cast<char>(chTypeRaw);
+		short sGrid = static_cast<short>(sGridRaw);
 
 		if (chIndex < 0 || chIndex >= SHORT_CUT_NUM)
 			break;
@@ -3421,8 +3824,16 @@ void CCharacter::BeginAction(RPACKET pk) {
 			m_dwLastBroadcastTime = dwNow;
 		}
 
-		short tempItemID = (short)(READ_LONG(pk));
-		short tempPartID = (short)(READ_LONG(pk));
+		uLong tempItemIDRaw = 0;
+		uLong tempPartIDRaw = 0;
+		if (!reader.Long(tempItemIDRaw)) {
+			return;
+		}
+		if (!reader.Long(tempPartIDRaw)) {
+			return;
+		}
+		short tempItemID = static_cast<short>(tempItemIDRaw);
+		short tempPartID = static_cast<short>(tempPartIDRaw);
 		
 		// Security validation: Check that item ID exists in ItemInfo
 		// This prevents attackers from broadcasting invalid IDs that crash other clients
@@ -3468,15 +3879,27 @@ void CCharacter::BeginAction(RPACKET pk) {
 			m_dwLastNpcInteractTime = dwNow;
 		}
 
-		Long lID = READ_LONG(pk);
-		Long lHandle = READ_LONG(pk);
+		uLong lIDRaw = 0;
+		uLong lHandleRaw = 0;
+		if (!reader.Long(lIDRaw)) {
+			return;
+		}
+		if (!reader.Long(lHandleRaw)) {
+			return;
+		}
+		Long lID = static_cast<Long>(lIDRaw);
+		Long lHandle = static_cast<Long>(lHandleRaw);
 		Entity* pCObj = g_pGameApp->IsLiveingEntity(lID, lHandle);
 		if (!pCObj) {
 			// m_CLog.Log("?????????\n");
 			m_CLog.Log("it inexistent this entity in this map");
 			break;
 		}
-		uShort usEventID = READ_SHORT(pk);
+		uShort usEventIDRaw = 0;
+		if (!reader.Short(usEventIDRaw)) {
+			return;
+		}
+		uShort usEventID = usEventIDRaw;
 		ExecuteEvent(pCObj, usEventID);
 	} break;
 	case enumACTION_FACE: {
@@ -3487,8 +3910,16 @@ void CCharacter::BeginAction(RPACKET pk) {
 			m_dwLastBroadcastTime = dwNow;
 		}
 
-		Short sAngle = READ_SHORT(pk);
-		Short sPose = READ_SHORT(pk);
+		uShort sAngleRaw = 0;
+		uShort sPoseRaw = 0;
+		if (!reader.Short(sAngleRaw)) {
+			return;
+		}
+		if (!reader.Short(sPoseRaw)) {
+			return;
+		}
+		Short sAngle = static_cast<Short>(sAngleRaw);
+		Short sPose = static_cast<Short>(sPoseRaw);
 
 		// ??
 		WPACKET WtPk = GETWPACKET();
@@ -3520,8 +3951,16 @@ void CCharacter::BeginAction(RPACKET pk) {
 		if (GetMoveState() == enumMSTATE_ON || GetFightState() == enumFSTATE_ON || !GetActControl(enumACTCONTROL_MOVE))
 			break;
 
-		Short sAngle = READ_SHORT(pk);
-		Short sPose = READ_SHORT(pk);
+		uShort sAngleRaw = 0;
+		uShort sPoseRaw = 0;
+		if (!reader.Short(sAngleRaw)) {
+			return;
+		}
+		if (!reader.Short(sPoseRaw)) {
+			return;
+		}
+		Short sAngle = static_cast<Short>(sAngleRaw);
+		Short sPose = static_cast<Short>(sPoseRaw);
 
 		// ??
 		WPACKET WtPk = GETWPACKET();
@@ -3563,7 +4002,11 @@ void CCharacter::BeginAction(RPACKET pk) {
 			m_sPoseState = enumPoseStand;
 	} break;
 	case enumACTION_PK_CTRL: {
-		if (READ_CHAR(pk))
+		uChar pkModeRaw = 0;
+		if (!reader.Char(pkModeRaw)) {
+			return;
+		}
+		if (pkModeRaw)
 			Cmd_SetInPK();
 		else
 			Cmd_SetInPK(false);
@@ -3579,7 +4022,12 @@ void CCharacter::BeginAction(RPACKET pk) {
 void CCharacter::Cmd_ChangeHair(RPACKET& pk) {
 	T_B char szRes[128];
 
-	short sScriptID = READ_SHORT(pk);
+	net::PacketReader reader(pk);
+	uShort sScriptIDRaw = 0;
+	if (!reader.Short(sScriptIDRaw)) {
+		return;
+	}
+	short sScriptID = static_cast<short>(sScriptIDRaw);
 
 	TradeAction(false); // ??????, ????????
 	HairAction(false);	// ??????
@@ -3611,7 +4059,13 @@ void CCharacter::Cmd_ChangeHair(RPACKET& pk) {
 		short sNeedItemID = (short)(pHair->dwNeedItem[i][0]);
 		if (sNeedItemID > 0) {
 			BOOL bOK = TRUE;
-			short sGridLoc = READ_SHORT(pk);
+			uShort sGridLocRaw = 0;
+			if (!reader.Short(sGridLocRaw)) {
+				sprintf(szRes, RES_STRING(GM_CHARACTERPRL_CPP_00044));
+				Prl_ChangeHairResult(0, szRes);
+				return;
+			}
+			short sGridLoc = static_cast<short>(sGridLocRaw);
 			if (sGridLoc == -1)
 				bOK = FALSE;
 

@@ -287,6 +287,7 @@ flowchart TD
 
 | Document | Purpose |
 |----------|---------|
+| [`docs/PACKET_SYSTEM_REFACTOR.md`](PACKET_SYSTEM_REFACTOR.md) | Change log & architecture guide for packet refactor (Tracks A–E) |
 | [`helper/network-tests/BASELINE.md`](../helper/network-tests/BASELINE.md) | Build targets, ports, limits, smoke tests |
 | [`helper/network-tests/data/opcodes.csv`](../helper/network-tests/data/opcodes.csv) | Machine-readable opcode inventory |
 | [`docs/SECURITY_AUDIT.md`](SECURITY_AUDIT.md) | Broader security review (DB, auth) |

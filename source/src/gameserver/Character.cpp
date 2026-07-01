@@ -27,6 +27,7 @@
 #include "HarmRec.h"
 #include "lua_gamectrl.h"
 #include "MapEntry.h"
+#include "common/PacketReader.h"
 #include "lua_gamectrl.h"
 #include "BossTimer.h"
 #include "CharStall.h"
@@ -6468,9 +6469,18 @@ CCharacter* CCharacter::GetBoat() {
 }
 
 BOOL CCharacter::ViewItemInfo(RPACKET& pk) {
-	BYTE byType = READ_CHAR(pk);
+	net::PacketReader reader(pk);
+	uChar byTypeRaw = 0;
+	if (!reader.Char(byTypeRaw)) {
+		return FALSE;
+	}
+	BYTE byType = static_cast<BYTE>(byTypeRaw);
 	if (byType == mission::VIEW_CHAR_BAG) {
-		Short sGridID = READ_SHORT(pk);
+		uShort sGridIDRaw = 0;
+		if (!reader.Short(sGridIDRaw)) {
+			return FALSE;
+		}
+		Short sGridID = static_cast<Short>(sGridIDRaw);
 		CItemRecord* pItem = (CItemRecord*)GetItemRecordInfo(m_CKitbag.GetID(sGridID));
 		if (pItem == nullptr) {
 			// SystemNotice( "ViewItemInfo::物品ID错误，无法找到该物品信息!ID = %d, grid = %d", m_CKitbag.GetID( sGridID ), sGridID );
@@ -6482,7 +6492,11 @@ BOOL CCharacter::ViewItemInfo(RPACKET& pk) {
 			return g_CharBoat.GetBoatInfo(*this, m_CKitbag.GetDBParam(enumITEMDBP_INST_ID, sGridID));
 		}
 	} else {
-		BYTE byIndex = (BYTE)READ_SHORT(pk);
+		uShort byIndexRaw = 0;
+		if (!reader.Short(byIndexRaw)) {
+			return FALSE;
+		}
+		BYTE byIndex = static_cast<BYTE>(byIndexRaw);
 		USHORT sItemID;
 		DWORD dwBoatID;
 		CCharacter* pOwner = nullptr;

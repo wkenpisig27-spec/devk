@@ -64,6 +64,21 @@ bool ProbeSyncClientStrings(RPacket& recvbuf, int stringCount) {
 	return true;
 }
 
+bool ProbeDelChaPayload(RPacket& recvbuf) {
+	if (!ProbeSyncClientStrings(recvbuf, 1)) {
+		return false;
+	}
+	WPacket copy = WPacket(recvbuf).Duplicate();
+	RPacket probe(copy);
+	net::PacketReader reader(probe);
+	cChar* chaName = nullptr;
+	if (!reader.String(chaName) || !chaName) {
+		return false;
+	}
+	// Encrypted password2 sequence follows char name (WritePacketSequenceEncrypted).
+	return probe.RemainData() >= sizeof(uShort);
+}
+
 bool IsExplicitCmOpcode(uint16_t cmd) {
 	return IsTransmitCallOpcode(cmd) ||
 		cmd == CMD_CM_LOGIN ||
@@ -137,7 +152,7 @@ void RegisterAllToClientOpcodeHandlers() {
 	add(CMD_CM_ITEM_UNLOCK_ASK, &ToClient::OpcodeHandle_CmItemUnlockAsk, "CMD_CM_ITEM_UNLOCK_ASK", 0);
 	add(CMD_CM_ENDACTION, &ToClient::OpcodeHandle_CmEndAction, "CMD_CM_ENDACTION", 0);
 	add(CMD_CM_OFFLINE_MODE, &ToClient::OpcodeHandle_CmOfflineMode, "CMD_CM_OFFLINE_MODE", 0);
-	add(CMD_CM_BEGINACTION, &ToClient::OpcodeHandle_RouteCmToGame, OpcodeName(CMD_CM_BEGINACTION), 4);
+	add(CMD_CM_BEGINACTION, &ToClient::OpcodeHandle_RouteCmToGame, OpcodeName(CMD_CM_BEGINACTION), 5);
 	add(CMD_CM_CHECK_PING, &ToClient::OpcodeHandle_RouteCmToGame, OpcodeName(CMD_CM_CHECK_PING), 0);
 	add(CMD_CM_SYNATTR, &ToClient::OpcodeHandle_RouteCmToGame, OpcodeName(CMD_CM_SYNATTR), 0);
 	add(CMD_CM_REFRESH_DATA, &ToClient::OpcodeHandle_RouteCmToGame, OpcodeName(CMD_CM_REFRESH_DATA), 8);
@@ -1666,6 +1681,14 @@ void ToClient::CM_DELCHA(DataSocket* datasock, RPacket& recvbuf) {
 				l_wpk.WriteShort(ERR_MC_NOTSELCHA);
 				SendData(datasock, l_wpk);
 			} else {
+				if (!ProbeDelChaPayload(recvbuf)) {
+					WPacket errPk = datasock->GetWPacket();
+					errPk.WriteCmd(CMD_MC_DELCHA);
+					errPk.WriteShort(ERR_MC_NETEXCP);
+					SendData(datasock, errPk);
+					l_lockStat.unlock();
+					return;
+				}
 				// ����GroupServer
 				dbc::uShort cha_name_len;
 				const auto cha_name = recvbuf.ReadSequence(cha_name_len);

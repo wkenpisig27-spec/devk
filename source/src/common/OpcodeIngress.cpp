@@ -76,6 +76,9 @@ uint16_t LookupGroupProcessDataMinPayload(uint16_t cmd) {
 	case CMD_CP_TEAM_ACCEPT:
 	case CMD_CP_TEAM_REFUSE:
 	case CMD_CP_FRND_ACCEPT:
+	case CMD_CP_TEAM_KICK:
+	case CMD_CP_FRND_REFUSE:
+	case CMD_CP_FRND_DELETE:
 	case CMD_CP_SESS_SAY:
 	case CMD_CP_SESS_ADD:
 	case CMD_CP_SESS_LEAVE:
