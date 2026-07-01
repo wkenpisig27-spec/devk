@@ -3,7 +3,7 @@
 Track progress for autonomous refactoring. Update after each completed task.
 
 **Current phase:** Phase 3 exit + **Audit remediation** (see [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md))  
-**Last updated:** 2026-07-01  
+**Last updated:** 2026-07-02  
 **Master audit:** [`docs/NETWORK_AUDIT.md`](../../docs/NETWORK_AUDIT.md)  
 **Refactor guide:** [`docs/PACKET_SYSTEM_REFACTOR.md`](../../docs/PACKET_SYSTEM_REFACTOR.md)
 
@@ -64,7 +64,7 @@ Track progress for autonomous refactoring. Update after each completed task.
 | B | M2 Bulk migration — CharacterPrl (B6) | **done** | 2026-06-27 — 112 handlers; legacy switch empty |
 | C | M6 Zero-copy gate forwarding | **done** | `WPacket::ForwardFromReceive` in ReRoute paths (2026-07-01) |
 
-**Audit remediation (post `a04ce8d6`):** [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md) — batches R1–R7 from principal review.
+**Audit remediation (post `a04ce8d6`):** [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md) — batches R1–R7 from principal review. **R5 session model completion done (2026-07-02):** R5.1 MP_ENTERMAP, R5.2 TM_ENTERMAP, R5.3 TP_SYNC_PLYLST session restore.
 | D | M4 Backplane PSK auth | **done** | 2026-06-27 — `BackplaneAuth` HMAC-SHA256; OS/SO opcodes 6510/7010 |
 | E | M5 PacketReader everywhere | **done** | Track E batch 10: ViewItemInfo PacketReader (2026-07-01) |
 
@@ -1050,4 +1050,4 @@ See last-smoke-result.txt for automated output.
 
 ## Resume prompt for next session
 
-> Continue **Audit Remediation** — read [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md). **R1–R2.2 done.** Next: optional **R2.3** or **R3** (backplane PSK fail-closed).
+> Continue **Audit Remediation** — read [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md). **R1–R2.2 + R5 complete** (`d16d375a`..`f2b1d3db`). Next: optional **R2.3** or **R3.1** (backplane PSK fail-closed) or **R4.1** (PM broadcast). **Manual T0 pending for R5:** login → enter → ENDPLAY → char switch; **Group restart soak** for TP_SYNC_PLYLST session restore. Deploy matched Gate+Group (+Game for R5.2) from same build.

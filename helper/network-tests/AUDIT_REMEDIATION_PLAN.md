@@ -224,7 +224,7 @@
 | **Pre-check** | Confirm Gate always sends session trailer on MP_ENTERMAP (`ToGameServer.cpp` 494–499). |
 | **Deploy** | Gate + Group together |
 | **Acceptance** | Login → enter → move; ENDPLAY → re-enter different char. |
-| **Status** | pending |
+| **Status** | **done** |
 
 ### R5.2 — Remove legacy TM_ENTERMAP 10-byte trailer path
 
@@ -235,7 +235,7 @@
 | **Action** | Require 18-byte session trailer; reject short trailer with log. Remove `else if (trailerRemain >= 10)` branch. |
 | **Deploy** | Gate + Game |
 | **Acceptance** | Enter map only via session path; no enter failures. |
-| **Status** | pending |
+| **Status** | **done** |
 
 ### R5.3 — `TP_SYNC_PLYLST` session restore
 
@@ -243,10 +243,14 @@
 |-------|-------|
 | **Audit refs** | F-05, F-18 |
 | **Files** | `ToGroupServer.cpp`, `GroupServerAppServ.cpp` |
-| **Action** | Extend wire format: Gate sends `{slot, gen, gate_ptr, gp_addr}` per player on sync list. Group `BindPlayerSession` on restore. **Wire change** — Gate+Group atomic deploy. Fallback: force disconnect all clients on Gate–Group reconnect (document in ops). |
+| **Action** | Extend wire format: Gate sends `{loginID, actid, slot, gen, gate_ptr}` per player (24 B forward). Group `BindPlayerSession` on restore. **Wire change** — Gate+Group atomic deploy. |
+| **Wire format (request, per player, forward read):** `loginID(4) + actid(4) + slot(4) + gen(4) + gate_ptr(8)` |
+| **Response (unchanged size):** `short ok + gp_addr(8)` per player; Gate now reads `gp_addr` forward (was reverse). |
+| **Fallback:** If Gate player has no session at sync time, sends `slot=0 gen=0`; Group logs pointer-only restore and skips bind. In-world CP/MP may fail until re-login. |
 | **Design choice** | Prefer session restore if Gate still has `m_sessionHandle` for each Player; else document mandatory re-login after Group restart. |
 | **Acceptance** | Restart Group only → clients recover OR clean re-login prompt; no pointer-only resync. |
-| **Status** | pending |
+| **Manual test needed** | Group restart with 1+ logged-in clients; grep `TP_SYNC_PLYLST bound session`; verify party/friend CP after restore. |
+| **Status** | **done** |
 
 **R5 commit suggestion (per sub-batch):** `feat(network): R5.x session model completion (F-03, F-05, F-09)`
 
@@ -318,9 +322,9 @@
 | R3.2 | pending | | |
 | R4.1 | pending | | |
 | R4.2 | pending | | |
-| R5.1 | pending | | |
-| R5.2 | pending | | |
-| R5.3 | pending | | |
+| R5.1 | **done** | 2026-07-02 | `d16d375a` |
+| R5.2 | **done** | 2026-07-02 | `2215d9de` |
+| R5.3 | **done** | 2026-07-02 | `f2b1d3db` |
 | R6.1 | pending | | |
 | R6.2 | pending | | |
 
@@ -328,7 +332,7 @@
 
 ## Resume prompt (copy for agents)
 
-> Continue **Audit Remediation Plan** (`helper/network-tests/AUDIT_REMEDIATION_PLAN.md`). Find lowest pending batch with satisfied dependencies. Implement one batch only; build Release|x64; run batch acceptance checklist; update status board + STATUS.md; commit with `R#` prefix. Do not start R5 until R1 complete. Deploy Gate+Group+Game together when touching sessions/ingress.
+> Continue **Audit Remediation Plan** (`helper/network-tests/AUDIT_REMEDIATION_PLAN.md`). **R1–R2.2 + R5 complete.** Next: optional **R2.3** or **R3** (backplane PSK fail-closed) or **R4** (PM broadcast). Manual T0 required for R5 (especially Group restart / TP_SYNC_PLYLST). Deploy Gate+Group+Game together when touching sessions/ingress.
 
 ---
 
