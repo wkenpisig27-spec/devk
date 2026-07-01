@@ -217,6 +217,12 @@ public:
 	// Check if a player pointer is currently registered (thread-safe)
 	bool IsPlayerRegistered(Player* ply);
 
+	// Lifetime helpers: only recycle pooled players after a successful EndRun().
+	void ClearInvitationsFromPlayer(Player* inviter);
+	void FinalizePlayerPoolRelease(Player* ply);
+	bool ReleasePlayerToPool(Player* ply);
+	void DrainLivePlayers();
+
 	SessionManager m_sessionManager;
 	void BindPlayerSession(SessionHandle handle, Player* ply);
 	void ReleasePlayerSession(Player* ply);

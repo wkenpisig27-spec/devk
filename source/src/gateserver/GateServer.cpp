@@ -60,21 +60,38 @@ class DelayLogout : public dbc::Timer, public dbc::RunBiDirectChain<Player> {
 public:
 	DelayLogout(dbc::uLong interval) : dbc::Timer(interval) {}
 	void AddPlayer(Player* ply) {
-		ply->_BeginRun(this);
+		if (ply) {
+			ply->_BeginRun(this);
+		}
 	}
 	void DelPlayer(Player* ply) {
-		ply->_EndRun();
+		if (ply) {
+			ply->_EndRun();
+		}
 	}
 
 private:
 	void Process() {
-		Player* l_ply{};
-		dbc::RunChainGetArmor<Player> l_lock(*this);
-		while (l_ply = GetNextItem()) {
+		if (!g_gtsvr) {
+			return;
 		}
-		l_lock.unlock();
+		dbc::RunChainGetArmor<Player> l(*this);
+		while (Player* ply = GetNextItem()) {
+			bool readyToFree = !ply->m_datasock;
+			if (!readyToFree) {
+				readyToFree = ply->m_datasock->GetPointer() != ply;
+			}
+			if (readyToFree) {
+				DelPlayer(ply);
+				if (g_gtsvr->IsPlayerRegistered(ply)) {
+					ply->Free();
+				}
+			}
+		}
+		l.unlock();
 	}
 };
+static DelayLogout* g_deferredPlayerRelease = nullptr;
 class HandshakeTimeoutTimer : public dbc::Timer {
 public:
 	HandshakeTimeoutTimer(dbc::uLong interval) : dbc::Timer(interval) {}
@@ -148,6 +165,8 @@ GateServer::GateServer(char const* fname)
 		m_clproc->AddTask(&g_timermgr);
 		g_timermgr.AddTimer(new DisableCloseButton(200));
 		g_timermgr.AddTimer(new HandshakeTimeoutTimer(1000)); // Check every second
+		g_deferredPlayerRelease = new DelayLogout(500);
+		g_timermgr.AddTimer(g_deferredPlayerRelease);
 		signal(SIGINT, ctrlc_dispatch);
 	} catch (...) {
 		if (gp_conn) {
@@ -172,13 +191,18 @@ GateServer::GateServer(char const* fname)
 }
 
 GateServer::~GateServer() {
+	g_appexit = true;
 	g_exit = 1;
 	while (g_ref) {
 		Sleep(1);
 	}
+	ShutdownReleaseLiveObjects();
 	delete cli_conn;
 	delete gp_conn;
 	delete gm_conn;
+	cli_conn = nullptr;
+	gp_conn = nullptr;
+	gm_conn = nullptr;
 	m_gmcomm->DestroyPool();
 	m_gpcomm->DestroyPool();
 	m_clcomm->DestroyPool();
@@ -369,6 +393,57 @@ void Player::Finally() {
 	memset(m_IV, 0, sizeof(m_IV));
 	m_enc_cipher.reset();
 	m_dec_cipher.reset();
+}
+
+void GateServer::ScheduleDeferredPlayerFree(Player* ply) {
+	if (g_deferredPlayerRelease && ply) {
+		g_deferredPlayerRelease->AddPlayer(ply);
+	} else if (ply && IsPlayerRegistered(ply)) {
+		ply->EndRun();
+		ply->Free();
+	}
+}
+
+void GateServer::ShutdownReleaseLiveObjects() {
+	if (g_deferredPlayerRelease) {
+		dbc::RunChainGetArmor<Player> deferredLock(*g_deferredPlayerRelease);
+		while (Player* ply = g_deferredPlayerRelease->GetNextItem()) {
+			g_deferredPlayerRelease->DelPlayer(ply);
+			if (IsPlayerRegistered(ply)) {
+				ply->Free();
+			}
+		}
+		deferredLock.unlock();
+	}
+
+	for (;;) {
+		Player* ply = nullptr;
+		{
+			dbc::RunChainGetArmor<Player> l(m_plylst);
+			ply = m_plylst.GetNextItem();
+			if (!ply) {
+				break;
+			}
+			if (ply->m_datasock) {
+				ply->m_datasock->SetPointer(nullptr);
+				ply->m_datasock = nullptr;
+			}
+			ply->game = nullptr;
+			ply->gm_addr = 0;
+			ply->gp_addr = 0;
+			if (!ply->EndRun()) {
+				LG("GateServer", "ShutdownReleaseLiveObjects: EndRun failed for player %p\n", ply);
+				break;
+			}
+			if (IsPlayerRegistered(ply)) {
+				ply->Free();
+			}
+		}
+	}
+
+	if (gm_conn) {
+		gm_conn->DrainLiveGameServers();
+	}
 }
 
 // Add by lark.li 20081119 begin
@@ -592,7 +667,9 @@ void GateServerApp::ServiceStart() {
 }
 void GateServerApp::ServiceStop() {
 	// 服务器退出
+	g_appexit = true;
 	delete g_gtsvr;
+	g_gtsvr = nullptr;
 	g_app = nullptr;
 
 	// cout << "GateServer 成功退出!" << endl;

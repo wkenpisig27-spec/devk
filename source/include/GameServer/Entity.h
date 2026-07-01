@@ -24,6 +24,9 @@ struct SSkillStateUnit;
 class CEntityAlloc;
 class CGameApp;
 
+template <class T>
+class CAlloc;
+
 // using	namespace	GAME;
 
 namespace mission {
@@ -67,6 +70,8 @@ class Entity {
 	friend class CFightAble;
 	friend class CGameApp;
 	friend class CEntityAlloc;
+	template <class T>
+	friend class CAlloc;
 	friend class CChaSpawn;
 	friend class CMapSwitchEntitySpawn;
 

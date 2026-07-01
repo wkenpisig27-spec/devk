@@ -587,19 +587,20 @@ void Player::DisablePlayer(cChar* plyname, uLong lTimes) {
 	// ?����???��?
 	Player* ply = g_gpsvr->FindPlayerByChaName(plyname);
 	if (ply) {
+		g_gpsvr->ClearInvitationsFromPlayer(ply);
 		ply->EndPlay(m_gate->GetDataSock());
 		if (ply->EndRun()) {
-			//?��AccountServer����?��?����???��??����?
+			//?AccountServer?????????
 
 
-			//?��AccountServer����?��Disable?����?
+			//?AccountServer???Disable???
 		WPacket l_wpk = g_gpsvr->GetWPacket();
 			l_wpk.WriteCmd(CMD_PA_USER_DISABLE);
 			l_wpk.WriteLong(ply->m_acctLoginID);
 			l_wpk.WriteLong(lTimes);
 			g_gpsvr->SendData(g_gpsvr->m_acctsock, l_wpk);
 
-			//?��GateServer����?����?��??����?
+			//?GateServer?????????
 			l_wpk = g_gpsvr->GetWPacket();
 			l_wpk.WriteCmd(CMD_AP_KICKUSER);
 			g_gpsvr->SendToClient(ply, l_wpk);
@@ -612,8 +613,10 @@ void Player::DisablePlayer(cChar* plyname, uLong lTimes) {
 			// ��?��?3��1|
 			// l_line<<newln<<"?���?��?acctid/acctname:["<<ply->m_acctid<<"]/["<<ply->m_acctname<<"],2��?��??��??��??��?��?????!"<<endln;
 			LG("GroupServer", "screen acctid/acctname:[%d]/[%s],kill the player!\n", ply->m_acctid, ply->m_acctname.c_str());
+			g_gpsvr->FinalizePlayerPoolRelease(ply);
+		} else {
+			LG("GroupServer", "DisablePlayer: EndRun failed for [%s], skipping pool free\n", ply->m_acctname.c_str());
 		}
-		ply->Free();
 	} else {
 		int cha_accid;
 		auto db = g_gpsvr->GetDB();

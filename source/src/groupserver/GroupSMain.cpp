@@ -107,6 +107,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 			Sleep(1);
 		}
 		delete g_gpsvr;
+		g_gpsvr = nullptr;
 
 		l_comm->DestroyPool();
 		l_proc->DestroyPool();
