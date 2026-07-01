@@ -28,6 +28,34 @@ struct GameAppPacketContext {
 	unsigned long long lGatePlayerAddr;
 };
 
+bool DeliverPacketToPlayer(CPlayer* l_player, uShort cmd, RPACKET& pkt) {
+	if (!l_player || !l_player->IsValid()) {
+		return false;
+	}
+	if (l_player->GetMainCha()->GetPlayer() != l_player) {
+		LG("error", "two player not matching??character name??%s??Gate address [local %p, guest %p]????cmd=%u\n",
+		   l_player->GetMainCha()->GetLogName(), l_player->GetMainCha()->GetPlayer(), l_player, cmd);
+	}
+
+	CCharacter* pCCha = l_player->GetCtrlCha();
+	if (!pCCha) {
+		return false;
+	}
+	if (!g_pGameApp->IsValidEntity(pCCha->GetID(), pCCha->GetHandle())) {
+		LG("error", "when receive CMD_CM_BASE message[%d], find character pCCha is null\n", cmd);
+		return false;
+	}
+
+	g_pNoticeChar = pCCha;
+	g_ulCurID = pCCha->GetID();
+	g_lCurHandle = pCCha->GetHandle();
+	pCCha->ProcessPacket(cmd, pkt);
+	g_ulCurID = defINVALID_CHA_ID;
+	g_lCurHandle = defINVALID_CHA_HANDLE;
+	g_pNoticeChar = nullptr;
+	return true;
+}
+
 } // namespace
 
 void CGameApp::ProcessNetMsg(int nMsgType, GateServer* pGate, RPACKET pkt) {
@@ -423,33 +451,8 @@ void CGameApp::ProcessPacket(GateServer* pGate, RPACKET pkt) {
 				}
 				break;
 			}
-			if (!l_player->IsValid())
-				break;
-				if (l_player->GetMainCha()->GetPlayer() != l_player) {
-					// LG("error", "????player????????????%s??Gate???[????%p, ????%p]????cmd=%u\n", l_player->GetMainCha()->GetLogName(), l_player->GetMainCha()->GetPlayer(), l_player, cmd);
-					LG("error", "two player not matching??character name??%s??Gate address [local %p, guest %p]????cmd=%u\n", l_player->GetMainCha()->GetLogName(), l_player->GetMainCha()->GetPlayer(), l_player, cmd);
-				}
-
-				CCharacter* pCCha = l_player->GetCtrlCha();
-				if (!pCCha)
-					break;
-				if (g_pGameApp->IsValidEntity(pCCha->GetID(), pCCha->GetHandle())) {
-					g_pNoticeChar = pCCha;
-
-					g_ulCurID = pCCha->GetID();
-					g_lCurHandle = pCCha->GetHandle();
-
-					pCCha->ProcessPacket(cmd, pkt);
-
-					g_ulCurID = defINVALID_CHA_ID;
-					g_lCurHandle = defINVALID_CHA_HANDLE;
-
-					g_pNoticeChar = nullptr;
-				} else {
-					// LG("error", "???CMD_CM_BASE?????[%d]?, ??????pCCha???\n", cmd);
-					LG("error", "when receive CMD_CM_BASE message[%d], find character pCCha is null\n", cmd);
-				}
-				break;
+			DeliverPacketToPlayer(l_player, cmd, pkt);
+			break;
 		}
 	}
 	T_E
@@ -1683,8 +1686,23 @@ void CGameApp::ProcessInterGameMsg(unsigned short usCmd, GateServer* pGate, RPAC
 }
 void CGameApp::ProcessGroupBroadcast(unsigned short usCmd, GateServer* pGate, RPACKET pkt) {
 	T_B
+	// Group->Gate->Game PM uses legacy pointer trailer (gmAddr + gatePtr), not session trailer.
+	// Registered GameApp handlers (team/guildinfo/say2all/...) run before this path.
+	RPacket trailer = pkt.Duplicate();
+	if (trailer.GetDataLen() >= sizeof(unsigned long long) * 2) {
+		const unsigned long long gmPlayerAddr = trailer.ReverseReadLongLong();
+		const unsigned long long gateAddr = trailer.ReverseReadLongLong();
+		CPlayer* l_player = static_cast<CPlayer*>(MakePointer(gmPlayerAddr));
+		if (l_player && g_gmsvr->ValidatePlayerPointer(l_player, gateAddr)) {
+			if (DeliverPacketToPlayer(l_player, usCmd, pkt)) {
+				return;
+			}
+		}
+	}
 
-		T_E
+	LG("SessionManager", "PM broadcast reject cmd=%u gate=%s: no session and no valid Group legacy trailer\n",
+	   static_cast<unsigned int>(usCmd), pGate ? pGate->GetName().c_str() : "(null)");
+	T_E
 }
 void CGameApp::ProcessGarner2Update(RPACKET pkt) // CMD_PM_GARNER2_UPDATE
 {
@@ -1705,7 +1723,7 @@ void CGameApp::ProcessGarner2Update(RPACKET pkt) // CMD_PM_GARNER2_UPDATE
 	}
 
 	for (int i = 1; i < 6 && chaid[i]; i++) {
-		pplay = FindPlayerByDBChaID(chaid[0]);
+		pplay = FindPlayerByDBChaID(chaid[i]);
 		if (pplay) {
 			pplay->SetGarnerWiner(i);
 		}

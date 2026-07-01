@@ -132,7 +132,7 @@ public:
 	void ProcessGuildChallPrizeMoney(GateServer* pGate, RPACKET pkt);
 	void ProcessDynMapEntry(GateServer* pGate, RPACKET pkt);
 	void ProcessInterGameMsg(unsigned short usCmd, GateServer* pGate, RPACKET pkt);
-	void ProcessGroupBroadcast(unsigned short usCmd, GateServer* pGate, RPACKET pkt);
+	void ProcessGroupBroadcast(unsigned short usCmd, GateServer* pGate, RPACKET pkt); // PM legacy trailer fallback
 	void ProcessGarner2Update(RPACKET pkt); // 乱斗白银城
 
 	// M2: GameAppNet opcode registry handlers (Track B5)

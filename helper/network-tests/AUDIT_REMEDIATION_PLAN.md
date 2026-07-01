@@ -192,7 +192,7 @@
 | **Action** | 1) Git history / pre-B5 behavior for PM broadcast when session resolve fails. 2) Either implement minimal broadcast (guild/world relay path) OR remove call sites and log `SessionManager PM broadcast reject cmd=…`. **Do not leave empty stub.** |
 | **Build** | GameServer |
 | **Acceptance** | Party/guild chat PM paths tested; no silent no-op. |
-| **Status** | pending |
+| **Status** | **done** |
 
 ### R4.2 — Pre-existing Garner2 bug (out of audit range, low hanging fruit)
 
@@ -202,7 +202,7 @@
 | **Files** | `GameAppNet.cpp` `ProcessGarner2Update` ~1735 |
 | **Action** | Change `FindPlayerByDBChaID(chaid[0])` → `chaid[i]` in loop. |
 | **Acceptance** | Code review only unless Garner2 event testable. |
-| **Status** | pending (optional) |
+| **Status** | **done** |
 
 **R4 commit suggestion:** `fix(game): R4 PM broadcast / Garner2 lookup (F-06, F-15)`
 
@@ -320,8 +320,8 @@
 | R2.3 | pending | | |
 | R3.1 | **done** | 2026-07-02 | `3cbfa091` |
 | R3.2 | **done** | 2026-07-02 | `3cbfa091` |
-| R4.1 | pending | | |
-| R4.2 | pending | | |
+| R4.1 | **done** | 2026-07-02 | `cc484178` |
+| R4.2 | **done** | 2026-07-02 | `cc484178` |
 | R5.1 | **done** | 2026-07-02 | `d16d375a` |
 | R5.2 | **done** | 2026-07-02 | `2215d9de` |
 | R5.3 | **done** | 2026-07-02 | `f2b1d3db` |
@@ -332,7 +332,7 @@
 
 ## Resume prompt (copy for agents)
 
-> Continue **Audit Remediation Plan** (`helper/network-tests/AUDIT_REMEDIATION_PLAN.md`). **R1–R2.2 + R3 + R5 complete.** Next: optional **R2.3** or **R4** (PM broadcast) or **R6** (Phase 3 exit soak). Manual T0 required for R5 (especially Group restart / TP_SYNC_PLYLST). Deploy Gate+Group+Game together when touching sessions/ingress.
+> Continue **Audit Remediation Plan** (`helper/network-tests/AUDIT_REMEDIATION_PLAN.md`). **R1–R2.2 + R3 + R4 + R5 complete.** Next: optional **R2.3** or **R6** (Phase 3 exit soak). Manual T0 required for R5 (especially Group restart / TP_SYNC_PLYLST). Deploy Gate+Group+Game together when touching sessions/ingress.
 
 ---
 

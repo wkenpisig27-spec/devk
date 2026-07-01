@@ -1050,4 +1050,4 @@ See last-smoke-result.txt for automated output.
 
 ## Resume prompt for next session
 
-> Continue **Audit Remediation** — read [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md). **R1–R2.2 + R3 + R5 complete.** Next: optional **R2.3** or **R4.1** (PM broadcast) or **R6.1** (30-min soak + Phase 3 exit). **Manual T0 pending for R5:** login → enter → ENDPLAY → char switch; **Group restart soak** for TP_SYNC_PLYLST session restore. Deploy matched Gate+Group (+Game for R5.2) from same build.
+> Continue **Audit Remediation** — read [`AUDIT_REMEDIATION_PLAN.md`](AUDIT_REMEDIATION_PLAN.md). **R1–R2.2 + R3 + R4 + R5 complete.** Next: optional **R2.3** or **R6.1** (30-min soak + Phase 3 exit). **Manual T0 pending for R5:** login → enter → ENDPLAY → char switch; **Group restart soak** for TP_SYNC_PLYLST session restore. Deploy matched Gate+Group (+Game for R5.2) from same build.
