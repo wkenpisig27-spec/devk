@@ -135,7 +135,13 @@ void CStallSystem::StartStall(CCharacter& staller, RPACKET& packet) {
 		return;
 	}
 
-	CStallData* pData = g_pGameApp->m_StallDataHeap.Get();
+	CGameApp* pApp = staller.GetOwnerApp();
+	if (!pApp) {
+		staller.SystemNotice(RES_STRING(GM_CHARSTALL_CPP_00009));
+		return;
+	}
+
+	CStallData* pData = pApp->m_StallDataHeap.Get();
 	if (!pData) {
 		staller.SystemNotice(RES_STRING(GM_CHARSTALL_CPP_00009));
 		return;

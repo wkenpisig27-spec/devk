@@ -261,3 +261,14 @@ CPlayer* CPlayerAlloc::GetNewPly() {
 	return pCPly;
 	T_E
 }
+
+CPlayerAlloc::CPlayerAlloc(int lPlyNum) {
+	if (!m_PlyAlloc.create(lPlyNum)) {
+		LG(g_szEntiAlloc, "msgFailed to create player pool\n");
+	}
+	bindPlySpace();
+}
+
+void CPlayerAlloc::bindPlySpace() {
+	m_PlyAlloc.forEachAllocSlot([this](CPlayer& ply) { ply.SetPlySpace(this); });
+}

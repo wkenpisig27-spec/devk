@@ -396,7 +396,12 @@ BOOL CTradeSystem::Accept(BYTE byType, CCharacter& character, DWORD dwRequestID)
 	}
 
 	// åˆ†é…çš„èµ„æºç”±äº¤æ˜“é‚€è¯·è€…é‡Šæ”¾
-	CTradeData* pData = g_pGameApp->m_TradeDataHeap.Get();
+	CGameApp* pApp = pMain->GetOwnerApp();
+	if (!pApp) {
+		pMain->SystemNotice(RES_STRING(GM_CHARTRADE_CPP_00031));
+		return FALSE;
+	}
+	CTradeData* pData = pApp->m_TradeDataHeap.Get();
 	if (pData == nullptr) {
 		// pMain->SystemNotice( "åˆ†é…äº¤æ˜“æ•°æ®ç¼“å†²å¤±è´¥ï¼" );
 		pMain->SystemNotice(RES_STRING(GM_CHARTRADE_CPP_00031));

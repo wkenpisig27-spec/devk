@@ -571,7 +571,7 @@ void CFightAble::NotiSkillSrcToEyeshot(Short sExecTime) {
 	WRITE_CHAR(pk, m_SFightInit.chTarType);
 	if (m_SFightInit.chTarType == 1) {
 		WRITE_LONG(pk, m_SFightInit.lTarInfo1);
-		Entity* pEnt = g_pGameApp->GetEntity(m_SFightInit.lTarInfo2);
+		Entity* pEnt = GetOwnerApp() ? GetOwnerApp()->GetEntity(m_SFightInit.lTarInfo2) : nullptr;
 		if (!pEnt) {
 			WRITE_LONG(pk, GetShape().centre.x);
 			WRITE_LONG(pk, GetShape().centre.y);
@@ -679,7 +679,7 @@ void CFightAble::NotiSkillSrcToSelf(Short sExecTime) {
 	WRITE_CHAR(pk, m_SFightInit.chTarType);
 	if (m_SFightInit.chTarType == 1) {
 		WRITE_LONG(pk, m_SFightInit.lTarInfo1);
-		Entity* pEnt = g_pGameApp->GetEntity(m_SFightInit.lTarInfo2);
+		Entity* pEnt = GetOwnerApp() ? GetOwnerApp()->GetEntity(m_SFightInit.lTarInfo2) : nullptr;
 		WRITE_LONG(pk, pEnt->GetShape().centre.x);
 		WRITE_LONG(pk, pEnt->GetShape().centre.y);
 	} else if (m_SFightInit.chTarType == 2) {
@@ -1482,15 +1482,19 @@ CCharacter* CFightAble::SkillPopBoat(Long lPosX, Long lPosY, Short sDir) // 放�
 			sDir = GetAngle();
 		pCCha = GetSubMap()->ChaSpawn(302, enumCHACTRL_PLAYER, sDir, &SPos, true, GetName(), 0);
 		if (pCCha) {
-			pCCha->SetShip(g_pGameApp->m_CabinHeap.Get());
+			CGameApp* pApp = GetOwnerApp();
+			CPassengerMgr* pCabin = pApp ? pApp->m_CabinHeap.Get() : nullptr;
+			if (pCabin) {
+				pCCha->SetShip(pCabin);
 
-			SSkillGrid SSkillCont;
-			SSkillCont.chState = enumSUSTATE_ACTIVE;
-			SSkillCont.sID = 39; // “登陆“技能
-			SSkillCont.chLv = 1;
-			pCCha->m_CSkillBag.Add(&SSkillCont);
+				SSkillGrid SSkillCont;
+				SSkillCont.chState = enumSUSTATE_ACTIVE;
+				SSkillCont.sID = 39; // “登陆“技能
+				SSkillCont.chLv = 1;
+				pCCha->m_CSkillBag.Add(&SSkillCont);
 
-			pCCha->SetShipMaster(pCCha->IsAttachable());
+				pCCha->SetShipMaster(pCCha->IsAttachable());
+			}
 		}
 	}
 

@@ -29,6 +29,7 @@
 #define defENTI_ALLOC_TYPE_ENTBERTH defENTI_ENTBASE(4)	  // 停泊类型事件实体
 
 class CEntityAlloc;
+class CGameApp;
 
 // ---------------------------------------------------------------------------
 // Entity pool ownership invariants (entity-lifetime hardening baseline)
@@ -85,6 +86,13 @@ public:
 	T* revnext();
 
 	T* getinfo(LONG lID);
+
+	template <class Fn>
+	void forEachAllocSlot(Fn&& fn) {
+		for (LONG i = 0; i < m_lAllocSize; i++) {
+			fn(m_pAlloc[i]);
+		}
+	}
 
 private:
 	LONG m_lCur{};
@@ -315,9 +323,13 @@ public:
 	int GetAllocItemNum(void) { return m_ItemAlloc.getAllocSize(); }
 	int GetAllocTNpcNum(void) { return m_CharPool.getAllocTalkNpcNum(); }
 
+	void SetOwnerApp(CGameApp* pApp) { m_pOwnerApp = pApp; }
+	CGameApp* GetOwnerApp() const { return m_pOwnerApp; }
+
 private:
 	void bindEntSpace();
 
+	CGameApp* m_pOwnerApp{nullptr};
 	CCharacterPool m_CharPool;
 	typedef CAlloc<CItem> ITEM_ALLOC;
 	ITEM_ALLOC m_ItemAlloc;
@@ -329,7 +341,7 @@ private:
 
 class CPlayerAlloc {
 public:
-	CPlayerAlloc(int lPlyNum = 3000) { m_PlyAlloc.create(lPlyNum); }
+	explicit CPlayerAlloc(int lPlyNum = 3000);
 	~CPlayerAlloc() { m_PlyAlloc.clear(); }
 
 	CPlayer* GetNewPly();
@@ -340,8 +352,14 @@ public:
 	int GetMaxHoldPlyNum(void) { return m_PlyAlloc.getMaxHoldSize(); }
 	int GetAllocPlyNum(void) { return m_PlyAlloc.getAllocSize(); }
 
+	void SetOwnerApp(CGameApp* pApp) { m_pOwnerApp = pApp; }
+	CGameApp* GetOwnerApp() const { return m_pOwnerApp; }
+
 protected:
 private:
+	void bindPlySpace();
+
+	CGameApp* m_pOwnerApp{nullptr};
 	typedef CAlloc<CPlayer> PLAYER_ALLOC;
 	PLAYER_ALLOC m_PlyAlloc;
 };

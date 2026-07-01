@@ -306,6 +306,12 @@ public:
 	dbc::PreAllocHeap<CStateCell> m_MapStateCellHeap;
 	dbc::PreAllocHeap<CChaListNode> m_ChaListHeap;
 	dbc::PreAllocHeap<CStateCellNode> m_StateCellNodeHeap;
+	// PreAlloc lifetime notes:
+	//   m_StallDataHeap / m_TradeDataHeap — session scoped; RAII or Release* helpers required on failure.
+	//   m_CabinHeap — owned by boat via SetShip; freed when cabin PreAlloc recycles (Finally -> FreeAll).
+	//   m_ChaListHeap / m_StateCellNodeHeap — paired with DelCharacter / OutMgrUnit -> Free().
+	//   m_MapStateCellHeap — map-scoped cells; live for SubMap lifetime (CheckStateCell).
+	//   m_SkillTDataHeap — cached in m_pCSkillTData[][]; process lifetime, not per cast.
 
 	// 用于信息统计
 	dbc::Long m_lCabinHeapNum;

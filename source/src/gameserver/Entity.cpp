@@ -52,6 +52,13 @@ void Entity::Free() {
 	T_E
 }
 
+CGameApp* Entity::GetOwnerApp() const {
+	if (m_pEntSpace && m_pEntSpace->GetOwnerApp()) {
+		return m_pEntSpace->GetOwnerApp();
+	}
+	return g_pGameApp;
+}
+
 void Entity::Initially() {
 	T_B
 		m_CLog.SetEnable(g_bLogEntity);
@@ -573,7 +580,16 @@ bool Entity::IsLiveing(void) {
 }
 
 CStateCellNode* Entity::EnterStateCell(CStateCell* pStateCell, CChaListNode* pEntiNode, bool bIsIn) {
-	CStateCellNode* pCMgrNode = g_pGameApp->m_StateCellNodeHeap.Get();
+	CGameApp* pApp = GetOwnerApp();
+	if (!pApp) {
+		return nullptr;
+	}
+
+	CStateCellNode* pCMgrNode = pApp->m_StateCellNodeHeap.Get();
+	if (!pCMgrNode) {
+		LG("Entity", "EnterStateCell: StateCellNode heap exhausted handle=0x%08X\n", m_lHandle);
+		return nullptr;
+	}
 	pCMgrNode->m_pCStateCell = pStateCell;
 	pCMgrNode->m_pCChaNode = pEntiNode;
 	if (bIsIn) // 作为首节点加入

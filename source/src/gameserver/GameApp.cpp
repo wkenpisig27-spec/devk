@@ -440,6 +440,8 @@ BOOL CGameApp::Init() {
 		LG("init", RES_STRING(GM_GAMEAPP_CPP_00017));
 		return FALSE;
 	}
+	m_pCPlySpace->SetOwnerApp(this);
+	m_pCEntSpace->SetOwnerApp(this);
 	g_pCSystemCha = GetNewCharacter();
 	g_pCSystemCha->SetID(m_Ident.GetID());
 	// g_pCSystemCha->SetName("系统");

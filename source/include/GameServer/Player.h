@@ -26,6 +26,8 @@ enum ELoginChaType {
 };
 
 class GateServer;
+class CPlayerAlloc;
+class CGameApp;
 
 #define MAX_TEAM_MEMBER 5
 #define MAX_BANK_NUM 1
@@ -40,6 +42,8 @@ enum Password2VerifyResult {
 
 // NOTE(Ogge): This should describe a player as a entity
 class CPlayer : public GatePlayer, public mission::CCharMission {
+	friend class CPlayerAlloc;
+
 public:
 	CPlayer();
 
@@ -60,12 +64,15 @@ public:
 	void Free();
 	void Initially();
 	void Finally();
+	CGameApp* GetOwnerApp() const;
 	void SetID(dbc::Long lID) { m_lID = lID; }
 	dbc::Long GetID(void) { return m_lID; }
 	void SetHandle(dbc::Long lHandle) { m_lHandle = lHandle; }
 	dbc::Long GetHandle(void) { return m_lHandle; }
 	void SetHoldID(dbc::Long lID) { m_lHoldID = lID; }
 	dbc::Long GetHoldID(void) { return m_lHoldID; }
+
+	void SetPlySpace(CPlayerAlloc* pSpace) { m_pPlySpace = pSpace; }
 
 	bool IsPlayer(void) { return bIsValid && (GetGate() ? true : false); }
 
@@ -295,6 +302,7 @@ private:
 	dbc::Long m_lID;
 	dbc::Long m_lHandle;
 	dbc::Long m_lHoldID;
+	CPlayerAlloc* m_pPlySpace{nullptr};
 	bool bReceiveRequests{true};
 	bool bIsValid;
 	bool m_bOfflineStallPending{false};  // Offline stall pending - NPC will spawn when player disconnects

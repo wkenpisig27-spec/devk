@@ -22,6 +22,7 @@ class SubMap;
 class CEyeshotCell;
 struct SSkillStateUnit;
 class CEntityAlloc;
+class CGameApp;
 
 // using	namespace	GAME;
 
@@ -157,6 +158,8 @@ public:
 	dbc::Short GetEyeshotWidth(void);
 	dbc::Short GetEyeshotHeight(void) { return GetEyeshotWidth(); }
 	bool IsInEyeshot(Entity* pCTarEnti);
+
+	CGameApp* GetOwnerApp() const;
 
 	// 实体切换地图单元网格事件处理函数
 	virtual void GotoMapUnit(){};

@@ -316,7 +316,12 @@ private:
 
 	void CheckStateCell(dbc::Long x, dbc::Long y) {
 		if (!m_pCStateCell[y][x]) {
-			m_pCStateCell[y][x] = g_pGameApp->m_MapStateCellHeap.Get();
+			CStateCell* pCell = g_pGameApp ? g_pGameApp->m_MapStateCellHeap.Get() : nullptr;
+			if (!pCell) {
+				LG("SubMap", "CheckStateCell: MapStateCell heap exhausted at (%ld,%ld)\n", x, y);
+				return;
+			}
+			m_pCStateCell[y][x] = pCell;
 			m_pCStateCell[y][x]->m_sPosX = (Short)x;
 			m_pCStateCell[y][x]->m_sPosY = (Short)y;
 			m_pCStateCell[y][x]->m_pCEyeshotCell = &m_pCEyeshotCell[y * GetStateCellWidth() / GetEyeshotCellWidth()][x * GetStateCellWidth() / GetEyeshotCellHeight()];
