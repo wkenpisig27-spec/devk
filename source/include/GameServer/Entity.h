@@ -31,6 +31,24 @@ class CEventEntity;
 
 #define defENTITY_NAME_LEN 32
 
+// ---------------------------------------------------------------------------
+// Entity lifecycle state machine (Phase 6 documentation)
+//
+// Pool slot states (CAlloc in EntityAlloc.h):
+//   UNALLOCATED  HoldID == -1, slot not in active use
+//   ACTIVE       alloc() -> Initially(): m_bValid == true, IsValid() == true
+//   TEARDOWN     destroy() -> Finally(): m_bValid == false, map/eyeshot detached
+//   RECYCLED     slot returned to free list, HoldID == -1, safe for reuse
+//
+// World presence (orthogonal to pool slot):
+//   m_submap == nullptr  entity not on a map (may still be ACTIVE in pool)
+//   m_submap != nullptr  entity registered in SubMap eyeshot/state grids
+//
+// CTalkNpc vs CCharacter: CTalkNpc inherits CCharacter but uses a separate
+// CTalkNpc pool (defENTI_ALLOC_TYPE_TNPC). CCharacterPool routes both kinds.
+// Long-term: unify pools with explicit type tag (Phase 6 epic).
+// ---------------------------------------------------------------------------
+
 /**
  * @alias 实体
  */

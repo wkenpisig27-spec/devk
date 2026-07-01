@@ -11,12 +11,123 @@
 
 char g_szEntiAlloc[256] = "EntityAlloc";
 
+namespace {
+
+bool ValidateReturnEntityKind(int lType, Entity* pEnt) {
+	if (!pEnt) {
+		return true;
+	}
+
+	if (lType == defENTI_ALLOC_TYPE_CHA) {
+		if (!pEnt->IsCharacter() || pEnt->IsNpc()) {
+			LG("EntityAlloc", "ReturnEntity: object is not a character-pool entity id=0x%08X\n", pEnt->GetHandle());
+			return false;
+		}
+	} else if (lType == defENTI_ALLOC_TYPE_TNPC) {
+		if (!pEnt->IsNpc()) {
+			LG("EntityAlloc", "ReturnEntity: object is not a talk NPC id=0x%08X\n", pEnt->GetHandle());
+			return false;
+		}
+	}
+
+	return true;
+}
+
+} // namespace
+
+bool CCharacterPool::create(int lChaNum, int lTNpcNum) {
+	clear();
+	if (lChaNum > 0) {
+		if (!m_ChaAlloc.create(lChaNum, defENTI_ALLOC_TYPE_CHA)) {
+			clear();
+			return false;
+		}
+	}
+	if (lTNpcNum > 0) {
+		if (!m_TalkNpcAlloc.create(lTNpcNum, defENTI_ALLOC_TYPE_TNPC)) {
+			clear();
+			return false;
+		}
+	}
+	return true;
+}
+
+void CCharacterPool::clear() {
+	m_ChaAlloc.clear();
+	m_TalkNpcAlloc.clear();
+}
+
+CCharacter* CCharacterPool::allocCharacter() {
+	CCharacter* pChar = m_ChaAlloc.alloc();
+	if (!pChar) {
+		LG(g_szEntiAlloc, RES_STRING(GM_GAMEAPP_CPP_00010));
+	}
+	return pChar;
+}
+
+mission::CTalkNpc* CCharacterPool::allocTalkNpc() {
+	mission::CTalkNpc* pNpc = m_TalkNpcAlloc.alloc();
+	if (!pNpc) {
+		LG(g_szEntiAlloc, RES_STRING(GM_GAMEAPP_CPP_00012));
+	}
+	return pNpc;
+}
+
+Entity* CCharacterPool::getinfo(int lType, int lSlotId) {
+	if (lType == defENTI_ALLOC_TYPE_CHA) {
+		return m_ChaAlloc.getinfo(lSlotId);
+	}
+	if (lType == defENTI_ALLOC_TYPE_TNPC) {
+		return m_TalkNpcAlloc.getinfo(lSlotId);
+	}
+	return nullptr;
+}
+
+void CCharacterPool::destroy(int lType, int lSlotId) {
+	Entity* pEnt = getinfo(lType, lSlotId);
+	if (pEnt) {
+		const int handleType = pEnt->GetHandle() & 0xff000000;
+		if (handleType != lType) {
+			LG("EntityAlloc", "ReturnEntity: handle type mismatch id=0x%08X entityHandle=0x%08X\n",
+			   lType | lSlotId, pEnt->GetHandle());
+			return;
+		}
+		if (!ValidateReturnEntityKind(lType, pEnt)) {
+			return;
+		}
+	}
+
+	if (lType == defENTI_ALLOC_TYPE_CHA) {
+		m_ChaAlloc.destroy(lSlotId);
+	} else if (lType == defENTI_ALLOC_TYPE_TNPC) {
+		m_TalkNpcAlloc.destroy(lSlotId);
+	}
+}
+
+void CCharacterPool::destroy(Entity* pEnt) {
+	if (!pEnt) {
+		return;
+	}
+
+	const int lHandle = pEnt->GetHandle();
+	const int lType = lHandle & 0xff000000;
+	const int lSlotId = lHandle & 0x00ffffff;
+
+	if ((lType != defENTI_ALLOC_TYPE_CHA && lType != defENTI_ALLOC_TYPE_TNPC) ||
+		pEnt != getinfo(lType, lSlotId)) {
+		LG("EntityAlloc", "ReturnEntity: entity pointer/handle mismatch handle=0x%08X\n", lHandle);
+		return;
+	}
+
+	destroy(lType, lSlotId);
+}
+
 CEntityAlloc::CEntityAlloc(int lChaNum, int lItemNum, int lTNpcNum) {
 	T_B
-		// 分配实体内存
-		m_ChaAlloc.create(lChaNum, defENTI_ALLOC_TYPE_CHA);
+		if (!m_CharPool.create(lChaNum, lTNpcNum)) {
+			LG(g_szEntiAlloc, "msgFailed to create unified character pool\n");
+		}
 	m_ItemAlloc.create(lItemNum, defENTI_ALLOC_TYPE_ITEM);
-	m_TalkNpcAlloc.create(lTNpcNum, defENTI_ALLOC_TYPE_TNPC);
 	m_BerthAlloc.create(1000, defENTI_ALLOC_TYPE_ENTBERTH);
 	m_ResourceAlloc.create(1000, defENTI_ALLOC_TYPE_ENTRESOURCE);
 	T_E
@@ -24,37 +135,22 @@ CEntityAlloc::CEntityAlloc(int lChaNum, int lItemNum, int lTNpcNum) {
 
 CEntityAlloc::~CEntityAlloc() {
 	T_B
-		m_ChaAlloc.clear();
+		m_CharPool.clear();
 	m_ItemAlloc.clear();
-	m_TalkNpcAlloc.clear();
 	m_BerthAlloc.clear();
 	m_ResourceAlloc.clear();
 	T_E
 }
 
-//=============================================================================
-// 取一个闲置的角色。
-//=============================================================================
 CCharacter* CEntityAlloc::GetNewCha() {
-	T_B
-		CCharacter* pChar = m_ChaAlloc.alloc();
-	if (!pChar) {
-		// LG(g_szEntiAlloc, "msg请求角色内存时出错,请增加角色内存！！！");
-		LG(g_szEntiAlloc, RES_STRING(GM_GAMEAPP_CPP_00010));
-		return nullptr;
-	}
-	return pChar;
+	T_B return m_CharPool.allocCharacter();
 	T_E
 }
 
-//=============================================================================
-// 取一个闲置的道具。
-//=============================================================================
 CItem* CEntityAlloc::GetNewItem() {
 	T_B
 		CItem* pItem = m_ItemAlloc.alloc();
 	if (!pItem) {
-		// LG( g_szEntiAlloc, "msg请求道具内存时出错,请增加道具内存！！！");
 		LG(g_szEntiAlloc, RES_STRING(GM_GAMEAPP_CPP_00011));
 		return nullptr;
 	}
@@ -62,83 +158,67 @@ CItem* CEntityAlloc::GetNewItem() {
 	T_E
 }
 
-//=============================================================================
-// 取一个闲置的对话NPC。
-//=============================================================================
 mission::CTalkNpc* CEntityAlloc::GetNewTNpc() {
-	T_B
-		mission::CTalkNpc* pNpc = m_TalkNpcAlloc.alloc();
-	if (!pNpc) {
-		// LG(g_szEntiAlloc, "msg请求对话NPC内存时出错,请增加对话NPC内存！！！");
-		LG(g_szEntiAlloc, RES_STRING(GM_GAMEAPP_CPP_00012));
-		return nullptr;
-	}
-	return pNpc;
+	T_B return m_CharPool.allocTalkNpc();
 	T_E
 }
 
-//=============================================================================
-// 取一个闲置的对话事件实体。
-//=============================================================================
 mission::CEventEntity* CEntityAlloc::GetEventEntity(BYTE byType) {
 	switch (byType) {
-	case mission::BASE_ENTITY: // 基本实体
-	{
+	case mission::BASE_ENTITY: {
 	} break;
 
-	case mission::RESOURCE_ENTITY: // 资源实体
-	{
+	case mission::RESOURCE_ENTITY: {
 		return m_ResourceAlloc.alloc();
 	} break;
 
-	case mission::TRANSIT_ENTITY: // 传送实体
-	{
+	case mission::TRANSIT_ENTITY: {
 	} break;
 
-	case mission::BERTH_ENTITY: // 停泊实体
-	{
+	case mission::BERTH_ENTITY: {
 		return m_BerthAlloc.alloc();
 	} break;
 	default: {
-		// LG(g_szEntiAlloc, "msg未知的请求事件实体创建类型！Type[%d]", byType);
 		LG(g_szEntiAlloc, RES_STRING(GM_GAMEAPP_CPP_00013), byType);
 		return nullptr;
 	} break;
 	}
-	// LG(g_szEntiAlloc, "msg请求事件实体内存时出错！！！Type[%d]", byType);
 	LG(g_szEntiAlloc, RES_STRING(GM_GAMEAPP_CPP_00014), byType);
 	return nullptr;
 }
 
-//=============================================================================
-// 取一个有效实体
-//=============================================================================
 Entity* CEntityAlloc::GetEntity(int lID) {
-	T_B int lType = lID & 0xff000000;
-	int lEntiID = lID & 0x00ffffff;
+	T_B
+		const int lType = lID & 0xff000000;
+	const int lEntiID = lID & 0x00ffffff;
 
-	if (lType == defENTI_ALLOC_TYPE_CHA) {
-		return m_ChaAlloc.getinfo(lEntiID);
-	} else if (lType == defENTI_ALLOC_TYPE_ITEM) {
+	Entity* pEnt = m_CharPool.getinfo(lType, lEntiID);
+	if (pEnt) {
+		return pEnt;
+	}
+
+	if (lType == defENTI_ALLOC_TYPE_ITEM) {
 		return m_ItemAlloc.getinfo(lEntiID);
-	} else if (lType == defENTI_ALLOC_TYPE_TNPC) {
-		return m_TalkNpcAlloc.getinfo(lEntiID);
-	} else if (lType == defENTI_ALLOC_TYPE_ENTBERTH) {
+	}
+	if (lType == defENTI_ALLOC_TYPE_ENTBERTH) {
 		return m_BerthAlloc.getinfo(lEntiID);
-	} else if (lType == defENTI_ALLOC_TYPE_ENTRESOURCE) {
+	}
+	if (lType == defENTI_ALLOC_TYPE_ENTRESOURCE) {
 		return m_ResourceAlloc.getinfo(lEntiID);
-	} else
-		return 0;
+	}
+	return nullptr;
 	T_E
 }
 
-//=============================================================================
-// 释放一个有效实体
-//=============================================================================
 void CEntityAlloc::ReturnEntity(int lID) {
 	T_B
 		const int lType = lID & 0xff000000;
 	const int lEntiID = lID & 0x00ffffff;
+
+	if (lType == defENTI_ALLOC_TYPE_CHA || lType == defENTI_ALLOC_TYPE_TNPC) {
+		m_CharPool.destroy(lType, lEntiID);
+		return;
+	}
 
 	Entity* pEnt = GetEntity(lID);
 	if (pEnt) {
@@ -147,50 +227,26 @@ void CEntityAlloc::ReturnEntity(int lID) {
 			LG("EntityAlloc", "ReturnEntity: handle type mismatch id=0x%08X entityHandle=0x%08X\n", lID, pEnt->GetHandle());
 			return;
 		}
-
-		if (lType == defENTI_ALLOC_TYPE_CHA) {
-			if (!pEnt->IsCharacter() || pEnt->IsNpc()) {
-				LG("EntityAlloc", "ReturnEntity: object is not a character-pool entity id=0x%08X\n", lID);
-				return;
-			}
-		} else if (lType == defENTI_ALLOC_TYPE_ITEM) {
-			if (!pEnt->IsItem()) {
-				LG("EntityAlloc", "ReturnEntity: object is not an item id=0x%08X\n", lID);
-				return;
-			}
-		} else if (lType == defENTI_ALLOC_TYPE_TNPC) {
-			if (!pEnt->IsNpc()) {
-				LG("EntityAlloc", "ReturnEntity: object is not a talk NPC id=0x%08X\n", lID);
-				return;
-			}
+		if (lType == defENTI_ALLOC_TYPE_ITEM && !pEnt->IsItem()) {
+			LG("EntityAlloc", "ReturnEntity: object is not an item id=0x%08X\n", lID);
+			return;
 		}
 	}
 
-	if (lType == defENTI_ALLOC_TYPE_CHA) {
-		return m_ChaAlloc.destroy(lEntiID);
-	} else if (lType == defENTI_ALLOC_TYPE_ITEM) {
-		return m_ItemAlloc.destroy(lEntiID);
-	} else if (lType == defENTI_ALLOC_TYPE_TNPC) {
-		return m_TalkNpcAlloc.destroy(lEntiID);
+	if (lType == defENTI_ALLOC_TYPE_ITEM) {
+		m_ItemAlloc.destroy(lEntiID);
 	} else if (lType == defENTI_ALLOC_TYPE_ENTBERTH) {
-		return m_BerthAlloc.destroy(lEntiID);
+		m_BerthAlloc.destroy(lEntiID);
 	} else if (lType == defENTI_ALLOC_TYPE_ENTRESOURCE) {
-		return m_ResourceAlloc.destroy(lEntiID);
+		m_ResourceAlloc.destroy(lEntiID);
 	}
 	T_E
 }
 
-//=============================================================================
-//=============================================================================
-
-//=============================================================================
-// 取一个闲置的玩家。
-//=============================================================================
 CPlayer* CPlayerAlloc::GetNewPly() {
 	T_B
 		CPlayer* pCPly = m_PlyAlloc.alloc();
 	if (!pCPly) {
-		// LG(g_szEntiAlloc, "msg请求玩家内存时出错,请增加玩家内存！！！");
 		LG(g_szEntiAlloc, RES_STRING(GM_GAMEAPP_CPP_00015));
 		return nullptr;
 	}

@@ -15,8 +15,6 @@
 // #define ROLE_DEBUG_INFO
 
 namespace mission {
-CTalkNpc* g_pTalkNpc = nullptr;
-
 //-----------------------------------------------------
 // class CNpc implemented
 

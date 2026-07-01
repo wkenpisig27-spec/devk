@@ -45,6 +45,11 @@
 //
 // Destruction order: SubMap::GoOut (if in world) -> type-specific Finally() chain
 // -> pool slot marked free (SetHoldID(-1)). Do not use a pointer after Free().
+//
+// CTalkNpc satisfies IsCharacter() and IsNpc(); ReturnEntity disambiguates by handle
+// prefix and pool kind. Physical storage remains split (CCharacter vs CTalkNpc
+// layout) because monsters must keep IsNpc()==nullptr while talk NPCs are CNpc.
+// CCharacterPool provides a single ownership module and handle router (Phase 6).
 // ---------------------------------------------------------------------------
 
 template <class T>
@@ -230,6 +235,35 @@ T* CAlloc<T>::revnext() {
 	return m_pHold[m_lCur--];
 }
 
+// Unified character-family pool: one router over CCharacter and CTalkNpc storage.
+class CCharacterPool {
+public:
+	bool create(int lChaNum, int lTNpcNum);
+	void clear();
+
+	CCharacter* allocCharacter();
+	mission::CTalkNpc* allocTalkNpc();
+	Entity* getinfo(int lType, int lSlotId);
+	void destroy(int lType, int lSlotId);
+	void destroy(Entity* pEnt);
+
+	void revbeginCharacter() { m_ChaAlloc.revbegin(); }
+	CCharacter* revnextCharacter() { return m_ChaAlloc.revnext(); }
+	void revbeginTalkNpc() { m_TalkNpcAlloc.revbegin(); }
+	mission::CTalkNpc* revnextTalkNpc() { return m_TalkNpcAlloc.revnext(); }
+
+	int getHoldCharacterNum() const { return m_ChaAlloc.getHoldSize(); }
+	int getHoldTalkNpcNum() const { return m_TalkNpcAlloc.getHoldSize(); }
+	int getMaxHoldCharacterNum() const { return m_ChaAlloc.getMaxHoldSize(); }
+	int getMaxHoldTalkNpcNum() const { return m_TalkNpcAlloc.getMaxHoldSize(); }
+	int getAllocCharacterNum() const { return m_ChaAlloc.getAllocSize(); }
+	int getAllocTalkNpcNum() const { return m_TalkNpcAlloc.getAllocSize(); }
+
+private:
+	CAlloc<CCharacter> m_ChaAlloc;
+	CAlloc<mission::CTalkNpc> m_TalkNpcAlloc;
+};
+
 class CEntityAlloc {
 public:
 	CEntityAlloc(int lChaNum = 5000, int lItemNum = 3000, int lTNpcNum = 200);
@@ -244,33 +278,30 @@ public:
 	Entity* GetEntity(int lID);
 	void ReturnEntity(int lID);
 
-	void BeginGetTNpc(void) { m_TalkNpcAlloc.revbegin(); }
-	mission::CTalkNpc* GetNextTNpc(void) { return m_TalkNpcAlloc.revnext(); }
+	void BeginGetTNpc(void) { m_CharPool.revbeginTalkNpc(); }
+	mission::CTalkNpc* GetNextTNpc(void) { return m_CharPool.revnextTalkNpc(); }
+
+	void BeginGetCha(void) { m_CharPool.revbeginCharacter(); }
+	CCharacter* GetNextCha(void) { return m_CharPool.revnextCharacter(); }
 
 	void BeginGetItem(void) { m_ItemAlloc.revbegin(); }
 	CItem* GetNextItem(void) { return m_ItemAlloc.revnext(); }
 
-	void BeginGetCha(void) { m_ChaAlloc.revbegin(); }
-	CCharacter* GetNextCha(void) { return m_ChaAlloc.revnext(); }
-
-	int GetHoldChaNum(void) { return m_ChaAlloc.getHoldSize(); }
+	int GetHoldChaNum(void) { return m_CharPool.getHoldCharacterNum(); }
 	int GetHoldItemNum(void) { return m_ItemAlloc.getHoldSize(); }
-	int GetHoldTNpcNum(void) { return m_TalkNpcAlloc.getHoldSize(); }
-	int GetMaxHoldChaNum(void) { return m_ChaAlloc.getMaxHoldSize(); }
+	int GetHoldTNpcNum(void) { return m_CharPool.getHoldTalkNpcNum(); }
+	int GetMaxHoldChaNum(void) { return m_CharPool.getMaxHoldCharacterNum(); }
 	int GetMaxHoldItemNum(void) { return m_ItemAlloc.getMaxHoldSize(); }
-	int GetMaxHoldTNpcNum(void) { return m_TalkNpcAlloc.getMaxHoldSize(); }
+	int GetMaxHoldTNpcNum(void) { return m_CharPool.getMaxHoldTalkNpcNum(); }
 
-	int GetAllocChaNum(void) { return m_ChaAlloc.getAllocSize(); }
+	int GetAllocChaNum(void) { return m_CharPool.getAllocCharacterNum(); }
 	int GetAllocItemNum(void) { return m_ItemAlloc.getAllocSize(); }
-	int GetAllocTNpcNum(void) { return m_TalkNpcAlloc.getAllocSize(); }
+	int GetAllocTNpcNum(void) { return m_CharPool.getAllocTalkNpcNum(); }
 
 private:
-	typedef CAlloc<CCharacter> CHA_ALLOC;
-	CHA_ALLOC m_ChaAlloc;
+	CCharacterPool m_CharPool;
 	typedef CAlloc<CItem> ITEM_ALLOC;
 	ITEM_ALLOC m_ItemAlloc;
-	typedef CAlloc<mission::CTalkNpc> TALKNPC_ALLOC;
-	TALKNPC_ALLOC m_TalkNpcAlloc;
 	typedef CAlloc<mission::CBerthEntity> BERTH_ALLOC;
 	BERTH_ALLOC m_BerthAlloc;
 	typedef CAlloc<mission::CResourceEntity> RESOURCE_ALLOC;

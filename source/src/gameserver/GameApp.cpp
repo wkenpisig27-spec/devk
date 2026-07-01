@@ -676,11 +676,12 @@ void CGameApp::MgrUnitRun(DWORD dwCurTime) {
 	static DWORD dwTick = 0;
 	if (dwCurTime - dwTick >= 1 * 60 * 1000) {
 		dwTick = dwCurTime;
+		const SEntityPoolStats stats = GetEntityPoolStats();
 		LG("EntityNum", "Ply[%5d %5d %5d],\tCha[%5d %5d %5d],\tItem[%5d %5d %5d],\tTNpc[%5d %5d %5d]\n",
-		   m_pCPlySpace->GetHoldPlyNum(), m_pCPlySpace->GetMaxHoldPlyNum(), m_pCPlySpace->GetAllocPlyNum(),
-		   m_pCEntSpace->GetHoldChaNum(), m_pCEntSpace->GetMaxHoldChaNum(), m_pCEntSpace->GetAllocChaNum(),
-		   m_pCEntSpace->GetHoldItemNum(), m_pCEntSpace->GetMaxHoldItemNum(), m_pCEntSpace->GetAllocItemNum(),
-		   m_pCEntSpace->GetHoldTNpcNum(), m_pCEntSpace->GetMaxHoldTNpcNum(), m_pCEntSpace->GetAllocTNpcNum());
+		   stats.nPlyHold, stats.nPlyMax, stats.nPlyAlloc,
+		   stats.nChaHold, stats.nChaMax, stats.nChaAlloc,
+		   stats.nItemHold, stats.nItemMax, stats.nItemAlloc,
+		   stats.nTNpcHold, stats.nTNpcMax, stats.nTNpcAlloc);
 	}
 
 	CEyeshotCell* pCMgrUnit;
@@ -1118,10 +1119,31 @@ Entity* CGameApp::GetEntity(int lHandle) {
 	T_E
 }
 
+SEntityPoolStats CGameApp::GetEntityPoolStats() const {
+	SEntityPoolStats stats{};
+	if (m_pCPlySpace) {
+		stats.nPlyHold = m_pCPlySpace->GetHoldPlyNum();
+		stats.nPlyMax = m_pCPlySpace->GetMaxHoldPlyNum();
+		stats.nPlyAlloc = m_pCPlySpace->GetAllocPlyNum();
+	}
+	if (m_pCEntSpace) {
+		stats.nChaHold = m_pCEntSpace->GetHoldChaNum();
+		stats.nChaMax = m_pCEntSpace->GetMaxHoldChaNum();
+		stats.nChaAlloc = m_pCEntSpace->GetAllocChaNum();
+		stats.nItemHold = m_pCEntSpace->GetHoldItemNum();
+		stats.nItemMax = m_pCEntSpace->GetMaxHoldItemNum();
+		stats.nItemAlloc = m_pCEntSpace->GetAllocItemNum();
+		stats.nTNpcHold = m_pCEntSpace->GetHoldTNpcNum();
+		stats.nTNpcMax = m_pCEntSpace->GetMaxHoldTNpcNum();
+		stats.nTNpcAlloc = m_pCEntSpace->GetAllocTNpcNum();
+	}
+	return stats;
+}
+
 // 角色是有效实体
 Entity* CGameApp::IsValidEntity(unsigned int ulID, int lHandle) {
 	T_B
-		Entity* pEnti = g_pGameApp->GetEntity(lHandle);
+	Entity* pEnti = GetEntity(lHandle);
 	if (!pEnti)
 		return 0;
 	if (!pEnti->IsValid() || ulID != pEnti->GetID())

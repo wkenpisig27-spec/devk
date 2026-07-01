@@ -17,11 +17,11 @@ namespace mission {
 namespace {
 
 CCharacter* MisResolveFollowNpc(LONG lEntityHandle) {
-	if (lEntityHandle == 0 || !g_pGameApp || !g_pGameApp->m_pCEntSpace) {
+	if (lEntityHandle == 0 || !g_pGameApp) {
 		return nullptr;
 	}
 
-	Entity* pEnt = g_pGameApp->m_pCEntSpace->GetEntity(lEntityHandle);
+	Entity* pEnt = g_pGameApp->GetEntity(lEntityHandle);
 	if (!pEnt) {
 		return nullptr;
 	}

@@ -111,6 +111,21 @@ struct SVolunteer {
 	char szMapName[256];			 // 地图
 };
 
+struct SEntityPoolStats {
+	int nPlyHold;
+	int nPlyMax;
+	int nPlyAlloc;
+	int nChaHold;
+	int nChaMax;
+	int nChaAlloc;
+	int nItemHold;
+	int nItemMax;
+	int nItemAlloc;
+	int nTNpcHold;
+	int nTNpcMax;
+	int nTNpcAlloc;
+};
+
 class CGameApp : public CDBLogMgr {
 public:
 	CGameApp();
@@ -189,6 +204,7 @@ public:
 	CItem* GetNewItem();
 	mission::CTalkNpc* GetNewTNpc();
 	Entity* GetEntity(int lHandle);
+	SEntityPoolStats GetEntityPoolStats() const;
 	Entity* IsValidEntity(unsigned int ulID, int lHandle);
 	Entity* IsLiveingEntity(unsigned int ulID, int lHandle);
 	Entity* IsMapEntity(unsigned int ulID, int lHandle);
