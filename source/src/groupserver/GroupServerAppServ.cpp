@@ -233,16 +233,6 @@ Player* GroupServerApp::ResolvePlayerFromGateTrailer(RPacket& recvbuf, uShort cm
 		return ply;
 	}
 
-	if (cmd == CMD_MP_ENTERMAP && gpAddr != 0) {
-		ply = ValidatePlayerPointer(static_cast<uintptr_t>(gpAddr), 0);
-		if (ply) {
-			BindPlayerSession(gateSession, ply);
-			LG("SessionManager", "Group MP_ENTERMAP bound session slot=%u gen=%u player=%p\n",
-			   gateSession.slot, gateSession.generation, ply);
-			return ply;
-		}
-	}
-
 	LG("SessionManager", "Group REJECT cmd=%u session slot=%u gen=%u gpAddr=%llX\n",
 	   cmd, gateSession.slot, gateSession.generation, gpAddr);
 	return nullptr;
