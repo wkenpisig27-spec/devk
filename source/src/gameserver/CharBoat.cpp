@@ -1064,9 +1064,14 @@ BOOL CCharBoat::LoadBoat(CCharacter& owner, char chType) {
 	T_E
 }
 
-CCharacter* CCharBoat::SummonBoat(USHORT sBoatID) {
+CCharacter* CCharBoat::SummonBoat(CCharacter& owner, USHORT sBoatID) {
 	T_B
-		CCharacter* pBoat = ActiveGameApp()->GetNewCharacter();
+		CGameApp* pApp = owner.GetOwnerApp();
+		if (!pApp) {
+			LG("monsterboat_error", "SummonBoat: owner has no app context\n");
+			return FALSE;
+		}
+		CCharacter* pBoat = pApp->GetNewCharacter();
 	if (pBoat == nullptr) {
 		// LG( "monsterboat_error", "角色上线装载船只分配船只内存失败!" );
 		LG("monsterboat_error", "when character online,loading boat and assign memory failed ");

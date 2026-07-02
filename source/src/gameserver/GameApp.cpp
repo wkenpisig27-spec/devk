@@ -299,7 +299,9 @@ CGameApp::CGameApp()
 	  m_StallDataHeap(1, ROLE_MAXSIZE_STALLDATA),
 	  m_mapnum(0),
 	  m_ulLeftSec(0) {
-	T_B 	extern CGameApp* g_pGameApp;
+	T_B
+	// Bootstrap: publish global for GameSMain lifecycle and ActiveGameApp().
+	extern CGameApp* g_pGameApp;
 	g_pGameApp = this;
 	g_StoreSystem.BindOwnerApp(this);
 	g_OfflineStallMgr.BindOwnerApp(this);

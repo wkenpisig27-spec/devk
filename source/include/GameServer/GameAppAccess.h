@@ -5,6 +5,19 @@
 #include "GameApp.h"
 #include "Script.h"
 
+// ---------------------------------------------------------------------------
+// GameApp access policy (post g_pGameApp narrowing)
+//
+// g_pGameApp is defined in GameSMain.cpp for bootstrap only (allocate, bind,
+// teardown). Runtime code should use owner-bound access:
+//   - Entity::GetOwnerApp() / CPlayer::GetOwnerApp() / SubMap::GetOwnerApp()
+//   - GameServerApp::GetGameApp() after BindGameApp()
+//
+// Use the helpers below only when no owner exists (script notice char, dev UI,
+// game-thread bootstrap). ActiveGameApp() is the single intentional read of the
+// global outside GameSMain allocation/teardown.
+// ---------------------------------------------------------------------------
+
 inline CGameApp* ActiveGameApp() {
 	return g_pGameApp;
 }
@@ -15,7 +28,7 @@ inline CGameApp* AppFromCharacter(CCharacter* pCha) {
 			return pApp;
 		}
 	}
-	return g_pGameApp;
+	return ActiveGameApp();
 }
 
 inline CGameApp* AppFromEntity(Entity* pEnt) {
@@ -24,7 +37,7 @@ inline CGameApp* AppFromEntity(Entity* pEnt) {
 			return pApp;
 		}
 	}
-	return g_pGameApp;
+	return ActiveGameApp();
 }
 
 inline CGameApp* AppFromSubMap(SubMap* pMap) {
@@ -33,7 +46,7 @@ inline CGameApp* AppFromSubMap(SubMap* pMap) {
 			return pApp;
 		}
 	}
-	return g_pGameApp;
+	return ActiveGameApp();
 }
 
 // Active mission / packet / opcode script context.

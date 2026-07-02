@@ -777,6 +777,8 @@ struct SSwitchMapInfo // 地图切换信息
 
 extern bool g_bLogEntity;
 
+// Bootstrap global: allocated/freed in GameSMain.cpp. Do not read directly;
+// use GetOwnerApp(), GameServerApp::GetGameApp(), or GameAppAccess.h helpers.
 extern CGameApp* g_pGameApp;
 extern CItemRecordAttr* g_pCItemAttr;
 // g_pCSystemCha: process-lifetime sentinel character (not on any map).

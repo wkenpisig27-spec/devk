@@ -5,6 +5,7 @@
 
 #include "GameAppNet.h"
 #include "GameApp.h"
+#include "GameServerApp.h"
 #include "SystemDialog.h"
 #include "Config.h"
 #include "GameDB.h"
@@ -43,6 +44,18 @@ volatile BOOL g_bShutdownInitiated = FALSE;
 // Forward declaration for graceful shutdown
 void InitiateGracefulShutdown(DWORD dwSecondsCountdown);
 
+// Prefer the bound app on GameServerApp; fall back during early bootstrap only.
+static CGameApp* GetRunningGameApp() {
+#ifndef USE_IOCP
+	if (g_gmsvr) {
+		if (CGameApp* pApp = g_gmsvr->GetGameApp()) {
+			return pApp;
+		}
+	}
+#endif
+	return g_pGameApp;
+}
+
 // Windows Console Control Handler for graceful shutdown
 // NOTE: This handler runs in a SEPARATE THREAD from main!
 #ifdef PKO_PLATFORM_WINDOWS
@@ -51,7 +64,7 @@ BOOL WINAPI ConsoleCtrlHandler(DWORD dwCtrlType) {
 	case CTRL_C_EVENT:
 	case CTRL_BREAK_EVENT:
 		// For Ctrl+C and Ctrl+Break, initiate graceful shutdown and return
-		if (!g_bShutdownInitiated && g_pGameApp != nullptr) {
+		if (!g_bShutdownInitiated && GetRunningGameApp() != nullptr) {
 			g_bShutdownInitiated = TRUE;
 			InitiateGracefulShutdown(3);
 		}
@@ -62,11 +75,11 @@ BOOL WINAPI ConsoleCtrlHandler(DWORD dwCtrlType) {
 	case CTRL_SHUTDOWN_EVENT:
 		// For close/logoff/shutdown events, we have limited time (~5 seconds)
 		// Save critical state immediately
-		if (!g_bShutdownInitiated && g_pGameApp != nullptr) {
+		if (!g_bShutdownInitiated && GetRunningGameApp() != nullptr) {
 			g_bShutdownInitiated = TRUE;
 			LG("init", "Console close event received - saving boss timers and players...\n");
 			BossTimer::Shutdown();
-			g_pGameApp->SaveAllPlayer();
+			GetRunningGameApp()->SaveAllPlayer();
 			LG("init", "Save complete - exiting...\n");
 		}
 		g_bGameEnd = TRUE;
@@ -82,16 +95,16 @@ BOOL WINAPI ConsoleCtrlHandler(DWORD dwCtrlType) {
 
 // Initiate graceful shutdown with countdown (called from handler thread)
 void InitiateGracefulShutdown(DWORD dwSecondsCountdown) {
-	if (g_pGameApp != nullptr) {
-		g_pGameApp->m_CTimerReset.Begin(1000);
-		g_pGameApp->m_ulLeftSec = dwSecondsCountdown;
+	if (CGameApp* pApp = GetRunningGameApp()) {
+		pApp->m_CTimerReset.Begin(1000);
+		pApp->m_ulLeftSec = dwSecondsCountdown;
 		LG("init", "Graceful shutdown initiated - %u seconds remaining\n", dwSecondsCountdown);
 	}
 }
 
 void sigintHandler(int sig_num) {
 	signal(SIGINT, sigintHandler);
-	if (!g_bShutdownInitiated && g_pGameApp != nullptr) {
+	if (!g_bShutdownInitiated && GetRunningGameApp() != nullptr) {
 		g_bShutdownInitiated = TRUE;
 		InitiateGracefulShutdown(3);
 	}
@@ -163,9 +176,9 @@ int main(int argc, char* argv[]) {
 				LG("init", "WM_QUIT received\n");
 				// Graceful shutdown already saved players via m_ulLeftSec countdown
 				// Only save here if shutdown wasn't initiated properly
-				if (!g_bShutdownInitiated && g_pGameApp != nullptr) {
+				if (!g_bShutdownInitiated && GetRunningGameApp() != nullptr) {
 					LG("init", "Emergency save - shutdown not properly initiated\n");
-					g_pGameApp->SaveAllPlayer();
+					GetRunningGameApp()->SaveAllPlayer();
 				}
 				g_bGameEnd = TRUE;
 				break;

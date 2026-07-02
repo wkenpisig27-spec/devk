@@ -29,7 +29,8 @@ public:
 
 	// 装载船只建造数据表信息
 	BOOL Load(const char szBoat[], const char szPart[]);
-	CCharacter* SummonBoat(USHORT sBoatID);
+	// Legacy summon helper (no call sites); owner supplies app context.
+	CCharacter* SummonBoat(CCharacter& owner, USHORT sBoatID);
 
 	// 建造船只
 	BOOL LoadBoat(CCharacter& owner, char chType);
