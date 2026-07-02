@@ -261,10 +261,12 @@ public:
 	void InValid() { m_bValid = false; }
 	void SetValid() { m_bValid = true; }
 	BOOL IsValid() { return m_bValid; }
+	void BindOwnerApp(CGameApp* pApp) { m_pOwnerApp = pApp; }
 
 	void Run(DWORD dwCurTime, DWORD dwIntervalTime, DWORD dwOrderTime); // 处理订单列表
 
 private:
+	CGameApp* App() const;
 	// 查询商品
 	int GetClassId(int lComID);
 	cChar* GetClassName(int lClsID);
@@ -283,6 +285,7 @@ private:
 	std::vector<ClassInfo> m_ItemClass;				   // 商品分类
 	std::vector<AfficheInfo> m_AfficheList;			   // 公告列表
 	BOOL m_bValid;
+	CGameApp* m_pOwnerApp = nullptr;
 };
 
 #pragma pack(pop, before_InfoNet)

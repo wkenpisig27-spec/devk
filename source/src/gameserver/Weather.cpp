@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "Weather.h"
 #include "Submap.h"
+#include "GameAppAccess.h"
 
 // 天气预报计时, 记录每一种天气上一次预报的时间
 DWORD g_dwLastWeatherTick[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -52,7 +53,7 @@ void CWeather::RandLocation(SubMap* pMap) {
 			// sprintf(szText, RES_STRING(GM_WEATHER_CPP_00001), SRange.ltop.x / 100,  SRange.ltop.y / 100, pEff->szDataName);
 			//  End
 
-			g_pGameApp->LocalNotice(szText);
+			AppFromSubMap(pMap)->LocalNotice(szText);
 			// LG("weather", "[%s]预报[%s], time = %d\n", pMap->GetName(), szText, dwCurTick / 1000);
 			LG("weather", "[%s]predict[%s], time = %d\n", pMap->GetName(), szText, dwCurTick / 1000);
 		}

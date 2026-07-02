@@ -38,6 +38,11 @@ namespace BossTimer
     // File paths
     static const char* CONFIG_FILE = "BossTracked.txt";
     static std::string g_StateFilePath;   // Set per-GS instance in Initialize() — e.g. BossTimers_GS1.txt
+    static CGameApp* g_pOwnerApp = nullptr;
+
+    static CGameApp* OwnerApp() {
+        return g_pOwnerApp;
+    }
 
     //--------------------------------------------------------------------------
     // Helper: Get boss name from ChaRecord
@@ -198,6 +203,11 @@ namespace BossTimer
     // Public API
     //--------------------------------------------------------------------------
 
+    void BindOwnerApp(CGameApp* pApp)
+    {
+        g_pOwnerApp = pApp;
+    }
+
     void Initialize()
     {
         if (g_Initialized)
@@ -211,7 +221,7 @@ namespace BossTimer
 
         LoadConfig();
         LoadState();
-        
+
         g_Initialized = true;
         LG("BossTimer", "=== BossTimer Ready ===\n");
     }
@@ -575,7 +585,8 @@ namespace BossTimer
                ps.chaId, GetBossName(ps.chaId), ps.mapName.c_str(), ps.posX, ps.posY);
 
             bool spawned = false;
-            CMapRes* pMapRes = g_pGameApp->FindMapByName(ps.mapName.c_str());
+            CGameApp* pApp = OwnerApp();
+            CMapRes* pMapRes = pApp ? pApp->FindMapByName(ps.mapName.c_str()) : nullptr;
             if (pMapRes && pMapRes->IsOpen())
             {
                 SubMap* pSubMap = pMapRes->GetCopy(0);

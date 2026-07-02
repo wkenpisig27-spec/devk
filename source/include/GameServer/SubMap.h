@@ -67,6 +67,7 @@ public:
 	bool IsRun(void) { return m_bIsRun; }
 
 	const char* GetName(void) { return m_pCMapRes->GetName(); }
+	CGameApp* GetOwnerApp() const { return m_pOwnerApp; }
 
 	// pt返回在管理单元中的坐标.
 	Rect GetEyeshot(Point& pt) const;
@@ -312,11 +313,13 @@ public:
 
 private:
 	CMapRes* m_pCMapRes;
+	CGameApp* m_pOwnerApp = nullptr;
 	CTimer m_timeSpecialRun;
 
 	void CheckStateCell(dbc::Long x, dbc::Long y) {
 		if (!m_pCStateCell[y][x]) {
-			CStateCell* pCell = g_pGameApp ? g_pGameApp->m_MapStateCellHeap.Get() : nullptr;
+			CGameApp* pApp = GetOwnerApp();
+			CStateCell* pCell = pApp ? pApp->m_MapStateCellHeap.Get() : nullptr;
 			if (!pCell) {
 				LG("SubMap", "CheckStateCell: MapStateCell heap exhausted at (%ld,%ld)\n", x, y);
 				return;

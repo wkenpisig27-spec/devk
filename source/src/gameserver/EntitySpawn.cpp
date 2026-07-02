@@ -296,7 +296,7 @@ int CNpcSpawn::Load(SubMap& submap) {
 
 		switch (pNpcRecord->sNpcType) {
 		case mission::CNpc::TALK: {
-			mission::CTalkNpc* pTalk = g_pGameApp->GetNewTNpc();
+			mission::CTalkNpc* pTalk = submap.GetOwnerApp()->GetNewTNpc();
 			if (pTalk == nullptr) {
 				break;
 			}

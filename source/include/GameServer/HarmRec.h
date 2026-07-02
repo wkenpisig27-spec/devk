@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "GameAppAccess.h"
+
 // 仇恨度系统 - 伤害值管理
 class CCharacter;
 
@@ -25,7 +27,11 @@ struct SHarmRec // 伤害记录
 		if (!pAtk) {
 			return false;
 		}
-		if (!g_pGameApp->IsLiveingEntity(dwID, pAtk->GetHandle())) {
+		if (CGameApp* pApp = pAtk->GetOwnerApp()) {
+			if (!pApp->IsLiveingEntity(dwID, pAtk->GetHandle())) {
+				return false;
+			}
+		} else {
 			return false;
 		}
 		return true;
@@ -122,7 +128,7 @@ inline void CHateMgr::AddHarm(CCharacter* pAtk, short sHarm, DWORD dwID) {
 			pHarm->sHate = sHarm;
 			pHarm->btValid = 3;
 			pHarm->dwID = dwID;
-			pHarm->dwTime = g_pGameApp->m_dwRunCnt;
+			pHarm->dwTime = pAtk->GetOwnerApp() ? pAtk->GetOwnerApp()->m_dwRunCnt : 0;
 			if (g_bLogHarmRec) {
 				// LG("harm", "添加新的攻击者[%s], 伤害 = %d\n", pAtk->GetName(), pHarm->sHarm);
 				LG("harm", "add new attacker[%s], harm = %d\n", pAtk->GetName(), pHarm->sHarm);
@@ -165,7 +171,7 @@ inline void CHateMgr::AddHate(CCharacter* pAtk, short sHate, DWORD dwID) {
 				pHarm->sHate = sHate;
 				pHarm->btValid = 3;
 				pHarm->dwID = dwID;
-				pHarm->dwTime = g_pGameApp->m_dwRunCnt;
+				pHarm->dwTime = pAtk->GetOwnerApp() ? pAtk->GetOwnerApp()->m_dwRunCnt : 0;
 				break;
 			}
 		}
@@ -260,6 +266,6 @@ inline void CHateMgr::DebugNotice(CCharacter* pSelf) {
 
 	if (bSend) {
 		LG("harm", "Notice = [%s]\n", strNotice.c_str());
-		g_pGameApp->WorldNotice((char*)(strNotice.c_str()));
+		AppFromCharacter(pSelf)->WorldNotice((char*)(strNotice.c_str()));
 	}
 }

@@ -24,8 +24,7 @@ void CCharacter::Run(uLong dwCurTime) {
 
 	bool bIsLiveing = IsLiveing();
 
-	extern CGameApp* g_pGameApp;
-	g_pGameApp->m_dwRunStep = 1000 + m_ID;
+	GetOwnerApp()->m_dwRunStep = 1000 + m_ID;
 
 	m_dwCellRunTime[chCount++] = t.End();
 
@@ -214,7 +213,7 @@ void CCharacter::Exit() {
 	WPACKET l_wpk = GETWPACKET();
 	WRITE_CMD(l_wpk, CMD_MT_PALYEREXIT);
 	ReflectINFof(this, l_wpk);
-	g_pGameApp->GoOutGame(this->GetPlayer(), true);
+	GetOwnerApp()->GoOutGame(this->GetPlayer(), true);
 
 	m_byExit = CHAEXIT_NONE;
 	m_timerExit.Reset();

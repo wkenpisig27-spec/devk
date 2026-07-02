@@ -137,7 +137,7 @@ void CCharacter::WriteSkillbag(WPACKET& pk, int nSynType) {
 	{
 		pSkillGrid = pCCtrlCha->m_CSkillBag.GetSkillContByNum(0);
 		if (pSkillGrid) {
-			pSkillTData = g_pGameApp->GetSkillTData(pSkillGrid->sID, pSkillGrid->chLv);
+			pSkillTData = GetOwnerApp()->GetSkillTData(pSkillGrid->sID, pSkillGrid->chLv);
 			if (pSkillTData) {
 				bAddBoatSkill = true;
 				sChangeSkillNum += 1;
@@ -163,7 +163,7 @@ void CCharacter::WriteSkillbag(WPACKET& pk, int nSynType) {
 		pSkillGrid = m_CSkillBag.GetChangeSkill(i);
 		if (!pSkillGrid)
 			return;
-		pSkillTData = g_pGameApp->GetSkillTData(pSkillGrid->sID, pSkillGrid->chLv);
+		pSkillTData = GetOwnerApp()->GetSkillTData(pSkillGrid->sID, pSkillGrid->chLv);
 		if (!pSkillTData)
 			return;
 		WRITE_SHORT(pk, pSkillGrid->sID);

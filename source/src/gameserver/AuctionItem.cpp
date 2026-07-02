@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "AuctionItem.h"
 #include "GameDB.h"
-#include "GameApp.h"
+#include "GameAppAccess.h"
 
 CAuctionItem::CAuctionItem(short sItemID, const string& strName, short sCount, uInt nBasePrice, uInt nMinBid) {
 	m_sItemID = sItemID;
@@ -84,7 +84,7 @@ BOOL CAuctionItem::BidUp(CCharacter* pCha, uInt price) {
 			}
 		} else {
 			CCharacter* pCha_ = nullptr;
-			CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(dwPreChaID);
+			CPlayer* pPlayer = AppFromCharacter(pCha)->GetPlayerByDBID(dwPreChaID);
 			if (pPlayer) {
 				pCha_ = pPlayer->GetMainCha();
 			}

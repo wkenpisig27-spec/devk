@@ -43,20 +43,16 @@ void Entity::Free() {
 		}
 
 		CEntityAlloc* pSpace = m_pEntSpace;
-		if (!pSpace && g_pGameApp) {
-			pSpace = g_pGameApp->m_pCEntSpace;
+		if (!pSpace) {
+			LG("Entity", "Free: entity handle=0x%08X has no owning pool\n", m_lHandle);
+			return;
 		}
-		if (pSpace) {
-			pSpace->ReturnEntity(m_lHandle);
-		}
+		pSpace->ReturnEntity(m_lHandle);
 	T_E
 }
 
 CGameApp* Entity::GetOwnerApp() const {
-	if (m_pEntSpace && m_pEntSpace->GetOwnerApp()) {
-		return m_pEntSpace->GetOwnerApp();
-	}
-	return g_pGameApp;
+	return m_pEntSpace ? m_pEntSpace->GetOwnerApp() : nullptr;
 }
 
 void Entity::Initially() {
@@ -746,7 +742,7 @@ SubMap* Entity::GetSubMapFar(void) {
 		CCharacter* pCCha = this->IsCharacter();
 		if (pCCha) {
 			pCMainCha = pCCha->GetPlyMainCha();
-			CMapRes* pCMapRes = g_pGameApp->FindMapByName(pCMainCha->GetBirthMap(), true);
+			CMapRes* pCMapRes = GetOwnerApp()->FindMapByName(pCMainCha->GetBirthMap(), true);
 			if (pCMapRes)
 				pCMap = pCMapRes->GetCopy();
 		}

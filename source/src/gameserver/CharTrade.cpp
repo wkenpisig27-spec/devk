@@ -17,6 +17,11 @@ mission::CTradeSystem g_TradeSystem;
 mission::CStoreSystem g_StoreSystem;
 
 namespace mission {
+
+CGameApp* CStoreSystem::App() const {
+	return m_pOwnerApp;
+}
+
 //----------------------------------------------------
 // CTradeData implemented
 
@@ -2357,7 +2362,7 @@ BOOL CStoreSystem::Accept(long long lOrderID, RoleInfo* ChaInfo) {
 		int lChaID = OrderInfo.ChaID;
 		int lComID = OrderInfo.lComID;
 		CCharacter* pCha = nullptr;
-		CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(lChaID);
+		CPlayer* pPlayer = App()->GetPlayerByDBID(lChaID);
 		if (pPlayer) {
 			pCha = pPlayer->GetMainCha();
 		}
@@ -2481,7 +2486,7 @@ BOOL CStoreSystem::Cancel(long long lOrderID) {
 	SOrderData OrderInfo = PopOrder(lOrderID);
 
 	CCharacter* pCha = nullptr;
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(OrderInfo.ChaID);
+	CPlayer* pPlayer = App()->GetPlayerByDBID(OrderInfo.ChaID);
 	if (pPlayer) {
 		pCha = pPlayer->GetMainCha();
 	}
@@ -2526,7 +2531,7 @@ void CStoreSystem::Run(DWORD dwCurTime, DWORD dwIntervalTime, DWORD dwOrderTime)
 				m_OrderList.erase(vec_it);
 
 				CCharacter* pCha = nullptr;
-				CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(dwChaID);
+				CPlayer* pPlayer = App()->GetPlayerByDBID(dwChaID);
 				if (pPlayer) {
 					pCha = pPlayer->GetMainCha();
 				}
@@ -2692,7 +2697,7 @@ BOOL CStoreSystem::AcceptVIP(long long lOrderID, RoleInfo* ChaInfo, DWORD dwVipP
 	}
 
 	CCharacter* pCha = nullptr;
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(OrderInfo.ChaID);
+	CPlayer* pPlayer = App()->GetPlayerByDBID(OrderInfo.ChaID);
 	if (pPlayer) {
 		pCha = pPlayer->GetMainCha();
 	}
@@ -2726,7 +2731,7 @@ BOOL CStoreSystem::CancelVIP(long long lOrderID) {
 	SOrderData OrderInfo = PopOrder(lOrderID);
 	if (OrderInfo.lOrderID != 0) {
 		CCharacter* pCha = nullptr;
-		CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(OrderInfo.ChaID);
+		CPlayer* pPlayer = App()->GetPlayerByDBID(OrderInfo.ChaID);
 		if (pPlayer) {
 			pCha = pPlayer->GetMainCha();
 		}
@@ -2810,7 +2815,7 @@ BOOL CStoreSystem::AcceptChange(long long lOrderID, RoleInfo* ChaInfo) {
 	}
 
 	CCharacter* pCha = nullptr;
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(OrderInfo.ChaID);
+	CPlayer* pPlayer = App()->GetPlayerByDBID(OrderInfo.ChaID);
 	if (pPlayer) {
 		pCha = pPlayer->GetMainCha();
 	}
@@ -2841,7 +2846,7 @@ BOOL CStoreSystem::CancelChange(long long lOrderID) {
 	if (OrderInfo.lOrderID != 0) {
 		// é€šçŸ¥çŽ©å®¶å…‘æ¢ä»£å¸å¤±è´¥
 		CCharacter* pCha = nullptr;
-		CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(OrderInfo.ChaID);
+		CPlayer* pPlayer = App()->GetPlayerByDBID(OrderInfo.ChaID);
 		if (pPlayer) {
 			pCha = pPlayer->GetMainCha();
 		}
@@ -2927,7 +2932,7 @@ BOOL CStoreSystem::AcceptRoleInfo(long long lOrderID, RoleInfo* ChaInfo) {
 	int lRplMoney = ChaInfo->rplMoney;
 	int lVip = ChaInfo->vip;
 	CCharacter* pCha = nullptr;
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(lChaID);
+	CPlayer* pPlayer = App()->GetPlayerByDBID(lChaID);
 	if (pPlayer) {
 		pCha = pPlayer->GetMainCha();
 	}
@@ -2958,7 +2963,7 @@ BOOL CStoreSystem::CancelRoleInfo(long long lOrderID) {
 
 	int lChaID = OrderInfo.ChaID;
 	CCharacter* pCha = nullptr;
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(lChaID);
+	CPlayer* pPlayer = App()->GetPlayerByDBID(lChaID);
 	if (pPlayer) {
 		pCha = pPlayer->GetMainCha();
 	}
@@ -3039,7 +3044,7 @@ BOOL CStoreSystem::AcceptRecord(long long lOrderID, HistoryInfo* pRecord) {
 	int lNum = OrderInfo.lNum;
 
 	CCharacter* pCha = nullptr;
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(OrderInfo.ChaID);
+	CPlayer* pPlayer = App()->GetPlayerByDBID(OrderInfo.ChaID);
 	if (pPlayer) {
 		pCha = pPlayer->GetMainCha();
 	}
@@ -3077,7 +3082,7 @@ BOOL CStoreSystem::CancelRecord(long long lOrderID) {
 	}
 
 	CCharacter* pCha = nullptr;
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(OrderInfo.ChaID);
+	CPlayer* pPlayer = App()->GetPlayerByDBID(OrderInfo.ChaID);
 	if (pPlayer) {
 		pCha = pPlayer->GetMainCha();
 	}
@@ -3146,7 +3151,7 @@ BOOL CStoreSystem::AcceptGMSend(long long lOrderID, int lMailID) {
 	}
 
 	CCharacter* pCha = nullptr;
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(OrderInfo.ChaID);
+	CPlayer* pPlayer = App()->GetPlayerByDBID(OrderInfo.ChaID);
 	if (pPlayer) {
 		pCha = pPlayer->GetMainCha();
 	}
@@ -3174,7 +3179,7 @@ BOOL CStoreSystem::CancelGMSend(long long lOrderID) {
 	}
 
 	CCharacter* pCha = nullptr;
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(OrderInfo.ChaID);
+	CPlayer* pPlayer = App()->GetPlayerByDBID(OrderInfo.ChaID);
 	if (pPlayer) {
 		pCha = pPlayer->GetMainCha();
 	}
@@ -3242,7 +3247,7 @@ BOOL CStoreSystem::AcceptGMRecv(long long lOrderID, MailInfo* pMi) {
 	}
 
 	CCharacter* pCha = nullptr;
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(OrderInfo.ChaID);
+	CPlayer* pPlayer = App()->GetPlayerByDBID(OrderInfo.ChaID);
 	if (pPlayer) {
 		pCha = pPlayer->GetMainCha();
 	}
@@ -3276,7 +3281,7 @@ BOOL CStoreSystem::CancelGMRecv(long long lOrderID) {
 	}
 
 	CCharacter* pCha = nullptr;
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(OrderInfo.ChaID);
+	CPlayer* pPlayer = App()->GetPlayerByDBID(OrderInfo.ChaID);
 	if (pPlayer) {
 		pCha = pPlayer->GetMainCha();
 	}

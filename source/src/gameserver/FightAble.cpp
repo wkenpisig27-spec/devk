@@ -1181,7 +1181,7 @@ void CFightAble::WriteLookEnergy(WPACKET& pk) {
 bool CFightAble::GetFightTargetShape(Square* pSTarShape) {
 	T_B if (m_SFightInit.chTarType == 1) // 目标是物体
 	{
-		Entity* pTarObj = g_pGameApp->IsMapEntity(m_SFightInit.lTarInfo1, m_SFightInit.lTarInfo2);
+		Entity* pTarObj = GetOwnerApp() ? GetOwnerApp()->IsMapEntity(m_SFightInit.lTarInfo1, m_SFightInit.lTarInfo2) : nullptr;
 		if (!pTarObj)
 			return false;
 		if (pSTarShape) {
@@ -1381,7 +1381,7 @@ bool CFightAble::SkillGeneral(Long lDist, Short sExecTime) // 普通技能
 		}									// 未定义
 	} else if (m_SFightInit.chTarType == 1) // 对象是ID
 	{
-		Entity* pTarObj = g_pGameApp->IsMapEntity(m_SFightInit.lTarInfo1, m_SFightInit.lTarInfo2);
+		Entity* pTarObj = GetOwnerApp() ? GetOwnerApp()->IsMapEntity(m_SFightInit.lTarInfo1, m_SFightInit.lTarInfo2) : nullptr;
 		if (!pTarObj) // 目标不存在
 		{
 			m_SFightProc.sState = enumFSTATE_TARGET_NO;
@@ -2275,7 +2275,7 @@ void CFightAble::OnSkillState(DWORD dwCurTick) {
 
 			pCCha = 0;
 			pSrcMainC = 0;
-			pCEnt = g_pGameApp->IsLiveingEntity(pSStateUnit->ulSrcWorldID, pSStateUnit->lSrcHandle);
+			pCEnt = GetOwnerApp() ? GetOwnerApp()->IsLiveingEntity(pSStateUnit->ulSrcWorldID, pSStateUnit->lSrcHandle) : nullptr;
 			if (pCEnt) {
 				pCCha = pCEnt->IsCharacter();
 				if (pCCha != g_pCSystemCha && pCCha != this) {
@@ -2516,7 +2516,9 @@ void CTimeSkillMgr::ExecTimeSkill(SMgrUnit* pFireInfo) {
 	T_B
 		// 搜索符合条件的目标
 		CCharacter* pSrcCha;
-	Entity* pSrcEnt = g_pGameApp->IsLiveingEntity(pFireInfo->SFireSrc.ulID, pFireInfo->SFireSrc.pCFightSrc->GetHandle());
+	CFightAble* pFightSrc = pFireInfo->SFireSrc.pCFightSrc;
+	CGameApp* pApp = pFightSrc ? pFightSrc->GetOwnerApp() : nullptr;
+	Entity* pSrcEnt = pApp ? pApp->IsLiveingEntity(pFireInfo->SFireSrc.ulID, pFightSrc->GetHandle()) : nullptr;
 	if (!pSrcEnt || !(pSrcCha = pSrcEnt->IsCharacter())) // 技能源已经无效
 		return;
 

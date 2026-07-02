@@ -416,7 +416,7 @@ void CCharacter::SwitchMap(SubMap* pCSrcMap, cChar* szTarMapName, Long lTarX, Lo
 		}
 
 		// Check if fast map switching is enabled and target map exists locally
-		CMapRes* pTarMapRes = g_Config.m_bFastMapSwitch ? g_pGameApp->FindMapByName(szTarMapName) : nullptr;
+		CMapRes* pTarMapRes = g_Config.m_bFastMapSwitch ? GetOwnerApp()->FindMapByName(szTarMapName) : nullptr;
 		
 		if (pTarMapRes) {
 			// ============ OPTIMIZED LOCAL MAP SWITCH (Single GameServer Mode) ============
@@ -479,8 +479,8 @@ void CCharacter::SwitchMap(SubMap* pCSrcMap, cChar* szTarMapName, Long lTarX, Lo
 				WRITE_CHAR(l_wpk, 0);
 			ReflectINFof(this, l_wpk);
 
-			g_pGameApp->DelPlayerIdx(pPlayer->GetDBChaId());
-			g_pGameApp->m_dwPlayerCnt--;
+			GetOwnerApp()->DelPlayerIdx(pPlayer->GetDBChaId());
+			GetOwnerApp()->m_dwPlayerCnt--;
 
 			pPlayer->OnLogoff();
 			DELPLAYER(pPlayer);
@@ -4233,7 +4233,7 @@ bool CCharacter::AddSkillState(uChar uchFightID, uLong ulSrcWorldID, Long lSrcHa
 	T_B if (uchStateID > SKILL_STATE_MAXID || uchStateLv > SKILL_STATE_LEVEL) return false;
 
 	CCharacter* pCCha = 0;
-	Entity* pCEnt = g_pGameApp->IsValidEntity(ulSrcWorldID, lSrcHandle);
+	Entity* pCEnt = GetOwnerApp()->IsValidEntity(ulSrcWorldID, lSrcHandle);
 	if (!pCEnt)
 		return false;
 	pCCha = pCEnt->IsCharacter();
@@ -4362,7 +4362,7 @@ bool CCharacter::DelSkillState(dbc::uChar uchStateID, bool bNotice) {
 	bool bDie = false;
 	if (pState) {
 		CCharacter* pCCha = 0;
-		Entity* pCEnt = g_pGameApp->IsValidEntity(pState->ulSrcWorldID, pState->lSrcHandle);
+		Entity* pCEnt = GetOwnerApp()->IsValidEntity(pState->ulSrcWorldID, pState->lSrcHandle);
 		if (pCEnt)
 			pCCha = pCEnt->IsCharacter();
 		char chEffType = pState->chEffType;
@@ -6706,7 +6706,7 @@ void CCharacter::AddMasterCredit(int lCredit) {
 		return;
 	}
 
-	CPlayer* pMasterPly = g_pGameApp->GetPlayerByDBID(lMasterID);
+	CPlayer* pMasterPly = GetOwnerApp()->GetPlayerByDBID(lMasterID);
 	CCharacter* pMaster = nullptr;
 	if (pMasterPly) {
 		pMaster = pMasterPly->GetMainCha();
@@ -6796,10 +6796,10 @@ void CCharacter::CheatRun(DWORD dwCurTime) {
 	{
 		m_sCheatX.Xtype = 2;
 		char buf[5];
-		buf[0] = g_pGameApp->m_PicSet->RandGetID();
-		buf[1] = g_pGameApp->m_PicSet->RandGetID();
-		buf[2] = g_pGameApp->m_PicSet->RandGetID();
-		buf[3] = g_pGameApp->m_PicSet->RandGetID();
+		buf[0] = GetOwnerApp()->m_PicSet->RandGetID();
+		buf[1] = GetOwnerApp()->m_PicSet->RandGetID();
+		buf[2] = GetOwnerApp()->m_PicSet->RandGetID();
+		buf[3] = GetOwnerApp()->m_PicSet->RandGetID();
 		buf[4] = '\0';
 		m_sCheatX.Xnum = buf;
 
@@ -6807,7 +6807,7 @@ void CCharacter::CheatRun(DWORD dwCurTime) {
 		WRITE_CMD(WtPk, CMD_MC_CHEAT_CHECK);
 		WRITE_SHORT(WtPk, 4);
 		for (int i = 0; i < 4; i++) {
-			CPicture* pPic = g_pGameApp->m_PicSet->GetPicture(buf[i]);
+			CPicture* pPic = GetOwnerApp()->m_PicSet->GetPicture(buf[i]);
 			uInt nSize = pPic->GetSize();
 
 			WRITE_SHORT(WtPk, nSize);
@@ -6901,7 +6901,7 @@ void CCharacter::CheatConfirm() {
 
 	GatePlayer* pGatePlyer = (GatePlayer*)GetPlayer();
 	g_gmsvr->KickPlayer2(pGatePlyer);
-	g_pGameApp->GoOutGame(GetPlayer(), true);
+	GetOwnerApp()->GoOutGame(GetPlayer(), true);
 }
 
 bool IsPersistStateID(unsigned char uchStateID) {
@@ -7083,7 +7083,7 @@ float CCharacter::GetDropRate() {
 	float partyBonus = 1.0;
 	float ampBonus = 1.0;
 	float fairyBonus = 1.0;
-	float globalRate = g_pGameApp->GetGlobalDropRate();
+	float globalRate = GetOwnerApp()->GetGlobalDropRate();
 
 	if (!globalRate) {
 		return 0;
@@ -7144,7 +7144,7 @@ float CCharacter::GetExpRate() {
 	CPlayer* cPly = GetPlayer();
 	float ampBonus = 1.0;
 	float fairyBonus = 1.0;
-	float globalRate = g_pGameApp->GetGlobalExpRate();
+	float globalRate = GetOwnerApp()->GetGlobalExpRate();
 	int partyCnt = 0;
 	int shareCnt = 0;
 	bool isTooFar = false;
@@ -7200,7 +7200,7 @@ float CCharacter::GetExpRate() {
 	// Fine Magic Token Fruit
 	if (m_CSkillState.HasState(127)) {
 		for (int i = 0; i < partyCnt; i++) {
-			CPlayer* pMember1 = g_pGameApp->GetPlayerByDBID(cPly->GetTeamMemberDBID(i));
+			CPlayer* pMember1 = GetOwnerApp()->GetPlayerByDBID(cPly->GetTeamMemberDBID(i));
 			if (!pMember1)
 				continue;
 			for (int k = 0; k < partyCnt; k++) {
@@ -7210,7 +7210,7 @@ float CCharacter::GetExpRate() {
 				}
 				if (i == k)
 					continue;
-				CPlayer* pMember2 = g_pGameApp->GetPlayerByDBID(cPly->GetTeamMemberDBID(k));
+				CPlayer* pMember2 = GetOwnerApp()->GetPlayerByDBID(cPly->GetTeamMemberDBID(k));
 				if (!pMember2)
 					continue;
 				if (GetDistance(pMember1->GetCtrlCha(), pMember2->GetCtrlCha()) > 4000) {
@@ -7248,7 +7248,7 @@ float CCharacter::GetExpRate() {
 	try {
 		// Check how many members are receiving the EXP, and do not share with those outside the maximum lua range (4000)
 		for (int i = 0; i < partyCnt; i++) {
-			CPlayer* pMember = g_pGameApp->GetPlayerByDBID(cPly->GetTeamMemberDBID(i));
+			CPlayer* pMember = GetOwnerApp()->GetPlayerByDBID(cPly->GetTeamMemberDBID(i));
 			// Check if this player is too far from any other party member. If he isn't, then we should not decrease shareCnt.
 			// If he is, then decrease shareCnt, because the other player is already excluded from receiving EXP (this is done is lua side, CheckExpShare)
 			if (pMember && GetDistance(pMember->GetMainCha(), this) > 4000) {

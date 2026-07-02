@@ -19,7 +19,11 @@ CEntityListNode* CMgrUnit::AddEntity(Entity* pCEnt, char chType) {
 		LG("管理单元实体", "[%d, %d]开始增加实体 %s，当前实体数 %d。\n", m_sPosX, m_sPosY, pCEnt->m_CLog.GetLogName(), m_lEntityNum);
 #endif
 	bool bAddState = false;
-	CEntityListNode* pNode = g_pGameApp->m_EntityListHeap.Get();
+	CGameApp* pApp = pCEnt ? pCEnt->GetOwnerApp() : nullptr;
+	CEntityListNode* pNode = pApp ? pApp->m_EntityListHeap.Get() : nullptr;
+	if (!pNode) {
+		return nullptr;
+	}
 	pNode->m_chEntiType = chType;
 	pNode->m_pCEntity = pCEnt;
 	if (chType == def_MGRUNIT_ENTITY_TYPE_CHAIN) {
@@ -165,7 +169,8 @@ void CMgrUnit::DelEntity(CEntityListNode* pCEntNode) {
 			pCCha->m_CSkillState.ResetChangeFlag();
 			for (char j = 0; j < m_CSkillState.m_chStateNum; j++) {
 				pSStateUnit = m_CSkillState.GetSStateByNum(j);
-				lOnTime = g_pGameApp->GetSStateTraOnTime(pSStateUnit->chStateID, pSStateUnit->chStateLv);
+			CGameApp* pApp = pCCha->GetOwnerApp();
+				lOnTime = pApp ? pApp->GetSStateTraOnTime(pSStateUnit->chStateID, pSStateUnit->chStateLv) : 0;
 				AddStateToCharacter(j, pCCha, lOnTime, enumSSTATE_ADD_EQUALORLARGER, false);
 			}
 			pCCha->SynSkillStateToEyeshot();
@@ -280,7 +285,8 @@ bool CMgrUnit::AddStateToCharacter(char chStateNo, CCharacter* pCCha, int lOnTim
 	pSStateUnit = m_CSkillState.GetSStateByNum(chStateNo);
 	if (!pSStateUnit)
 		return false;
-	pCSrcEnt = g_pGameApp->IsLiveingEntity(pSStateUnit->ulSrcWorldID, pSStateUnit->lSrcHandle);
+	CGameApp* pApp = pCCha->GetOwnerApp();
+	pCSrcEnt = pApp ? pApp->IsLiveingEntity(pSStateUnit->ulSrcWorldID, pSStateUnit->lSrcHandle) : nullptr;
 	if (pCSrcEnt) {
 		pCSrcCha = pCSrcEnt->IsCharacter();
 		if (pCSrcCha->IsObjRight(pSStateUnit->chEffectType, pCCha))
@@ -296,7 +302,8 @@ bool CMgrUnit::AddStateToCharacter(SSkillStateUnit* pSStateUnit, CCharacter* pCC
 		return false;
 	CCharacter* pCSrcCha;
 	Entity* pCSrcEnt;
-	pCSrcEnt = g_pGameApp->IsLiveingEntity(pSStateUnit->ulSrcWorldID, pSStateUnit->lSrcHandle);
+	CGameApp* pApp = pCCha->GetOwnerApp();
+	pCSrcEnt = pApp ? pApp->IsLiveingEntity(pSStateUnit->ulSrcWorldID, pSStateUnit->lSrcHandle) : nullptr;
 	if (pCSrcEnt) {
 		pCSrcCha = pCSrcEnt->IsCharacter();
 		if (pCSrcCha->IsObjRight(pSStateUnit->chEffectType, pCCha))
@@ -313,12 +320,21 @@ void CMgrUnit::StateRun(unsigned int ulCurTick, SubMap* pCMap) {
 	SSkillStateUnit* pSStateUnit;
 	int lOnTime;
 	CEntityListNode* pNode;
+	CGameApp* pApp = nullptr;
+	if (m_pCChaIn && m_pCChaIn->m_pCEntity) {
+		pApp = m_pCChaIn->m_pCEntity->GetOwnerApp();
+	} else if (m_pCChaCross && m_pCChaCross->m_pCEntity) {
+		pApp = m_pCChaCross->m_pCEntity->GetOwnerApp();
+	}
+	if (!pApp && pCMap) {
+		pApp = pCMap->GetOwnerApp();
+	}
 	for (char j = 0; j < chStateNum; j++) {
 		pSStateUnit = m_CSkillState.GetSStateByNum(chCount);
 		if (pSStateUnit->lOnTick > 0) {
 			if (ulCurTick - pSStateUnit->ulStartTick >= (unsigned int)pSStateUnit->lOnTick * 1000) // 状态计时完成
 			{
-				lOnTime = g_pGameApp->GetSStateTraOnTime(pSStateUnit->chStateID, pSStateUnit->chStateLv);
+				lOnTime = pApp ? pApp->GetSStateTraOnTime(pSStateUnit->chStateID, pSStateUnit->chStateLv) : 0;
 				pNode = m_pCChaIn;
 				while (pNode) {
 					AddStateToCharacter(pSStateUnit, pNode->m_pCEntity->IsCharacter(), lOnTime, enumSSTATE_ADD_EQUALORLARGER);

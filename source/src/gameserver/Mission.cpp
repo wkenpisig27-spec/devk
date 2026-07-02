@@ -7,7 +7,7 @@
 #include "Script.h"
 #include "RoleCommon.h"
 #include "GameAppNet.h"
-#include "GameApp.h"
+#include "GameAppAccess.h"
 #include "Player.h"
 #include "lua_gamectrl.h"
 
@@ -17,11 +17,16 @@ namespace mission {
 namespace {
 
 CCharacter* MisResolveFollowNpc(LONG lEntityHandle) {
-	if (lEntityHandle == 0 || !g_pGameApp) {
+	if (lEntityHandle == 0) {
 		return nullptr;
 	}
 
-	Entity* pEnt = g_pGameApp->GetEntity(lEntityHandle);
+	CGameApp* pApp = AppFromNoticeChar();
+	if (!pApp) {
+		return nullptr;
+	}
+
+	Entity* pEnt = pApp->GetEntity(lEntityHandle);
 	if (!pEnt) {
 		return nullptr;
 	}

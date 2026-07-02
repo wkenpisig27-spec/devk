@@ -97,7 +97,7 @@ void Guild::cmd_CreateGuild(CCharacter* pCha, bool confirm, cChar* guildname, cC
 			pCha->GetName(),
 			l_guildname);
 
-	g_pGameApp->ScrollNotice(l_str, 2);
+	pCha->GetOwnerApp()->ScrollNotice(l_str, 2);
 }
 BOOL Guild::lua_ListAllGuild(CCharacter* pCha) // 开始给客户端传递列表，向客户端发生一个开始列表命令，由NPC对话触发一次
 {

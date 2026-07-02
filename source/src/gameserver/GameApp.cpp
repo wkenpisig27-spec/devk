@@ -8,6 +8,7 @@
 #include "stdafx.h"
 #include <vector>
 #include "GameApp.h"
+#include "GameAppAccess.h"
 #include "GameAppNet.h"
 #include "SystemDialog.h"
 #include "lua_gamectrl.h"
@@ -83,7 +84,12 @@ void ChaException(uLong ulCurID, Long lCurHandle) {
 		return;
 	}
 
-	Entity* pCEnti = g_pGameApp->IsValidEntity(ulCurID, lCurHandle);
+	CGameApp* pApp = ActiveGameApp();
+	if (!pApp) {
+		return;
+	}
+
+	Entity* pCEnti = pApp->IsValidEntity(ulCurID, lCurHandle);
 	if (!pCEnti) {
 		// LG("exception3", "未知的实体（ID:%u, Handle:%d）发生了异常\n", ulCurID, lCurHandle);
 		LG("exception3", "unknown entity(ID:%u, Handle:%d)occur abnormity\n", ulCurID, lCurHandle);
@@ -106,7 +112,7 @@ void ChaException(uLong ulCurID, Long lCurHandle) {
 			LG("exception3", "player character[%s] [%s]occur abnormity, [GoOutGame]\n", pCurCha->GetLogName(), pCurCha->GetPlyMainCha()->GetLogName());
 			KICKPLAYER(pCPlayer, 0);
 			LG("exception3", "End [KICKPLAYER], Begin[GoOutGame]\n");
-			g_pGameApp->GoOutGame(pCPlayer, true);
+			pCurCha->GetOwnerApp()->GoOutGame(pCPlayer, true);
 			LG("exception3", "End [GoOutGame]\n");
 			return;
 		} else {
@@ -142,12 +148,17 @@ DWORD WINAPI g_GameLogicProcess(LPVOID lpParameter) {
 	while (!g_bGameEnd) {
 		T_B
 
+			CGameApp* pApp = ActiveGameApp();
+		if (!pApp) {
+			break;
+		}
+
 			DWORD dwInterval = 50; // 毫秒
 
 		// lua_FrameMove();
-		if (g_pGameApp->m_bExecLuaCmd) {
+		if (pApp->m_bExecLuaCmd) {
 			luaL_dofile(g_pLuaState, "tmp.txt");
-			g_pGameApp->m_bExecLuaCmd = FALSE;
+			pApp->m_bExecLuaCmd = FALSE;
 		}
 
 		/*GetLocalTime( &st );
@@ -160,7 +171,7 @@ DWORD WINAPI g_GameLogicProcess(LPVOID lpParameter) {
 
 		// 状态遍历
 		dwLastTick = (DWORD)GetTickCount64();
-		g_pGameApp->Run(dwLastTick);
+		pApp->Run(dwLastTick);
 		dwCurTick = (DWORD)GetTickCount64();
 		dwRunTick = dwCurTick - dwLastTick;
 
@@ -177,7 +188,7 @@ DWORD WINAPI g_GameLogicProcess(LPVOID lpParameter) {
 		dwCurTick = GetTickCount();
 		dwRunTick += dwCurTick - dwLastTick;
 
-		g_pGameApp->m_dwRunStep = 104;
+		pApp->m_dwRunStep = 104;
 
 		T_EXIT
 	}
@@ -288,8 +299,13 @@ CGameApp::CGameApp()
 	  m_StallDataHeap(1, ROLE_MAXSIZE_STALLDATA),
 	  m_mapnum(0),
 	  m_ulLeftSec(0) {
-	T_B extern CGameApp* g_pGameApp;
+	T_B
+	// Bootstrap: publish global for GameSMain lifecycle and ActiveGameApp().
+	extern CGameApp* g_pGameApp;
 	g_pGameApp = this;
+	g_StoreSystem.BindOwnerApp(this);
+	g_OfflineStallMgr.BindOwnerApp(this);
+	BossTimer::BindOwnerApp(this);
 	for (int i = 0; i < MAX_GATE; i++)
 		m_GatePlayer[i].pCPlayerL = 0;
 	for (int i = 0; i <= defMAX_SKILL_NO; i++)
@@ -980,7 +996,7 @@ CPlayer* CGameApp::CreateGamePlayer(const char szPassword[], uLong ulChaDBId, uL
 	}
 
 	AddPlayerIdx(ulChaDBId, l_player);
-	g_pGameApp->m_dwPlayerCnt++;
+	m_dwPlayerCnt++;
 
 	// LG("enter_map", "cha type = %d\n", pCMainCha->m_SChaPart.sTypeID);
 	// for(int i = 0; i < enumEQUIP_NUM; i++)
@@ -1042,7 +1058,7 @@ void CGameApp::ReleaseGamePlayer(CPlayer* pPlayer) {
 
 		const DWORD dbChaId = pPlayer->GetDBChaId();
 		DelPlayerIdx(dbChaId);
-		g_pGameApp->m_dwPlayerCnt--;
+		m_dwPlayerCnt--;
 
 		// Gate list cleanup uses Next/Prev — must run before pool recycles this slot.
 		pPlayer->OnLogoff();
@@ -1219,6 +1235,7 @@ BOOL CGameApp::InitMap() {
 	memset(m_MapList, 0, sizeof(CMapRes*) * MAX_MAP);
 	for (short i = 0; i < m_mapnum; i++) {
 		m_MapList[i] = new CMapRes();
+		m_MapList[i]->BindOwnerApp(this);
 		m_MapList[i]->SetName(g_Config.m_szMapList[i]);
 
 		// Build map file paths safely using _snprintf_s
@@ -1327,9 +1344,9 @@ void CGameApp::LoadItemInfo() {
 
 BOOL CGameApp::ReloadNpcInfo(CCharacter& character) {
 	T_B
-		g_pGameApp->BeginGetTNpc();
+		BeginGetTNpc();
 	mission::CTalkNpc* pTalkNpc = nullptr;
-	while ((pTalkNpc = g_pGameApp->GetNextTNpc())) {
+	while ((pTalkNpc = GetNextTNpc())) {
 		if (!pTalkNpc->InitScript(pTalkNpc->GetInitFunc(), pTalkNpc->GetName())) {
 			// character.SystemNotice( "重新装载NPC[%s]初始化信息脚本函数[%s]失败!", pTalkNpc->GetInitFunc(), pTalkNpc->GetName() );
 			character.SystemNotice(RES_STRING(GM_GAMEAPP_CPP_00001), pTalkNpc->GetInitFunc(), pTalkNpc->GetName());

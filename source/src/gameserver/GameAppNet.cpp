@@ -41,7 +41,8 @@ bool DeliverPacketToPlayer(CPlayer* l_player, uShort cmd, RPACKET& pkt) {
 	if (!pCCha) {
 		return false;
 	}
-	if (!g_pGameApp->IsValidEntity(pCCha->GetID(), pCCha->GetHandle())) {
+	CGameApp* pApp = l_player->GetOwnerApp();
+	if (!pApp || !pApp->IsValidEntity(pCCha->GetID(), pCCha->GetHandle())) {
 		LG("error", "when receive CMD_CM_BASE message[%d], find character pCCha is null\n", cmd);
 		return false;
 	}
@@ -367,9 +368,9 @@ void CGameApp::OnGateConnected(GateServer* pGate, RPACKET pkt) {
 		WPACKET wpk = GETWPACKET();
 	WRITE_CMD(wpk, CMD_MT_LOGIN);
 	WRITE_STRING(wpk, GETGMSVRNAME());
-	WRITE_STRING(wpk, g_pGameApp->m_strMapNameList.c_str());
+	WRITE_STRING(wpk, m_strMapNameList.c_str());
 
-	LG("Connect", "[%s]\n", g_pGameApp->m_strMapNameList.c_str());
+	LG("Connect", "[%s]\n", m_strMapNameList.c_str());
 
 	pGate->SendData(wpk);
 	T_E
@@ -534,26 +535,26 @@ bool CGameApp::OpcodeHandle_TmLoginAck(void* ctx, DataSocket* /*sock*/, RPacket&
 	if (sErrCode = READ_SHORT(recv)) {
 		LG("GameLogin", "enter GateServer: %s:%d failed [%s], register map[%s]\n",
 		   pGate->GetIP().c_str(), pGate->GetPort(), g_GameGateConnError(sErrCode),
-		   g_pGameApp->m_strMapNameList.c_str());
+		   GameAppCtx(ctx)->app->m_strMapNameList.c_str());
 		DISCONNECT(pGate->GetDataSock());
 	} else {
 		cChar* gateName = READ_STRING(recv);
 		if (!gateName || !strcmp(gateName, "")) {
 			LG("GameLogin", "entry GateServer: [%s:%d]success but do not get his name??so disconnection and entry again\n",
 			   pGate->GetIP().c_str(), pGate->GetPort(),
-			   g_pGameApp->m_strMapNameList.c_str());
+			   GameAppCtx(ctx)->app->m_strMapNameList.c_str());
 			DISCONNECT(pGate->GetDataSock());
 		} else {
 			pGate->GetName() = gateName;
 			LG("GameLogin", "entry GateServer: %s [%s:%d]success [MapName:%s]\n",
 			   pGate->GetName().c_str(), pGate->GetIP().c_str(), pGate->GetPort(),
-			   g_pGameApp->m_strMapNameList.c_str());
+			   GameAppCtx(ctx)->app->m_strMapNameList.c_str());
 		}
 	}
 	return true;
 }
 
-bool CGameApp::OpcodeHandle_TmMapentryNomap(void* /*ctx*/, DataSocket* /*sock*/, RPacket& /*recv*/) {
+bool CGameApp::OpcodeHandle_TmMapentryNomap(void* ctx, DataSocket* /*sock*/, RPacket& /*recv*/) {
 	return true;
 }
 
@@ -591,7 +592,7 @@ bool CGameApp::OpcodeHandle_PmSay2all(void* ctx, DataSocket* /*sock*/, RPacket& 
 	cChar* szContent = recv.ReadString();
 	int lChatMoney = recv.ReadLong();
 
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(ulChaID);
+	CPlayer* pPlayer = GameAppCtx(ctx)->app->GetPlayerByDBID(ulChaID);
 	if (pPlayer) {
 		CCharacter* pCha = pPlayer->GetMainCha();
 		if (!pCha->HasMoney(lChatMoney)) {
@@ -623,7 +624,7 @@ bool CGameApp::OpcodeHandle_PmSay2trade(void* ctx, DataSocket* /*sock*/, RPacket
 	cChar* szContent = recv.ReadString();
 	int lChatMoney = recv.ReadLong();
 
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(ulChaID);
+	CPlayer* pPlayer = GameAppCtx(ctx)->app->GetPlayerByDBID(ulChaID);
 	if (pPlayer) {
 		CCharacter* pCha = pPlayer->GetMainCha();
 		if (!pCha->HasMoney(lChatMoney)) {
@@ -800,11 +801,11 @@ bool CGameApp::OpcodeHandle_TmGooutmap(void* ctx, DataSocket* /*sock*/, RPacket&
 	return true;
 }
 
-bool CGameApp::OpcodeHandle_PmExpscale(void* /*ctx*/, DataSocket* /*sock*/, RPacket& recv) {
+bool CGameApp::OpcodeHandle_PmExpscale(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	uLong ulChaID = recv.ReadLong();
 	uLong ulTime = recv.ReadLong();
 
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(ulChaID);
+	CPlayer* pPlayer = GameAppCtx(ctx)->app->GetPlayerByDBID(ulChaID);
 
 	if (pPlayer) {
 		CCharacter* pCha = pPlayer->GetMainCha();
@@ -834,7 +835,7 @@ bool CGameApp::OpcodeHandle_PmExpscale(void* /*ctx*/, DataSocket* /*sock*/, RPac
 				pCha->PopupNotice(RES_STRING(GM_GAMEAPPNET_CPP_00002));
 			if (pCha->m_retry3 == 1) {
 				KICKPLAYER(pCha->GetPlayer(), 5);
-				g_pGameApp->GoOutGame(pCha->GetPlayer(), true);
+				GameAppCtx(ctx)->app->GoOutGame(pCha->GetPlayer(), true);
 			}
 			pCha->m_retry3++;
 		} break;
@@ -843,7 +844,7 @@ bool CGameApp::OpcodeHandle_PmExpscale(void* /*ctx*/, DataSocket* /*sock*/, RPac
 				pCha->PopupNotice(RES_STRING(GM_GAMEAPPNET_CPP_00003));
 			if (pCha->m_retry3 == 1) {
 				KICKPLAYER(pCha->GetPlayer(), 5);
-				g_pGameApp->GoOutGame(pCha->GetPlayer(), true);
+				GameAppCtx(ctx)->app->GoOutGame(pCha->GetPlayer(), true);
 			}
 
 			pCha->m_retry3++;
@@ -853,7 +854,7 @@ bool CGameApp::OpcodeHandle_PmExpscale(void* /*ctx*/, DataSocket* /*sock*/, RPac
 				pCha->PopupNotice(RES_STRING(GM_GAMEAPPNET_CPP_00008));
 			if (pCha->m_retry3 == 1) {
 				KICKPLAYER(pCha->GetPlayer(), 5);
-				g_pGameApp->GoOutGame(pCha->GetPlayer(), true);
+				GameAppCtx(ctx)->app->GoOutGame(pCha->GetPlayer(), true);
 			}
 			pCha->m_retry3++;
 		} break;
@@ -862,7 +863,7 @@ bool CGameApp::OpcodeHandle_PmExpscale(void* /*ctx*/, DataSocket* /*sock*/, RPac
 				pCha->PopupNotice(RES_STRING(GM_GAMEAPPNET_CPP_00008));
 			if (pCha->m_retry3 == 1) {
 				KICKPLAYER(pCha->GetPlayer(), 5);
-				g_pGameApp->GoOutGame(pCha->GetPlayer(), true);
+				GameAppCtx(ctx)->app->GoOutGame(pCha->GetPlayer(), true);
 			}
 
 			pCha->m_retry3++;
@@ -872,7 +873,7 @@ bool CGameApp::OpcodeHandle_PmExpscale(void* /*ctx*/, DataSocket* /*sock*/, RPac
 	return true;
 }
 
-bool CGameApp::OpcodeHandle_MmUpdateguildbank(void* /*ctx*/, DataSocket* /*sock*/, RPacket& recv) {
+bool CGameApp::OpcodeHandle_MmUpdateguildbank(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	int guildID = READ_LONG(recv);
 	BEGINGETGATE();
 	CPlayer* pCPlayer;
@@ -900,7 +901,7 @@ bool CGameApp::OpcodeHandle_MmUpdateguildbank(void* /*ctx*/, DataSocket* /*sock*
 	return true;
 }
 
-bool CGameApp::OpcodeHandle_MmUpdateguildbankgold(void* /*ctx*/, DataSocket* /*sock*/, RPacket& recv) {
+bool CGameApp::OpcodeHandle_MmUpdateguildbankgold(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	int guildID = READ_LONG(recv);
 	BEGINGETGATE();
 	CPlayer* pCPlayer;
@@ -997,7 +998,7 @@ bool CGameApp::OpcodeHandle_MmGuildDisband(void* ctx, DataSocket* /*sock*/, RPac
 
 bool CGameApp::OpcodeHandle_MmGuildKick(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	uLong l_chaid = GameAppCtx(ctx)->lSrcID;
-	CCharacter* pCha = g_pGameApp->FindMainPlayerChaByID(l_chaid);
+	CCharacter* pCha = GameAppCtx(ctx)->app->FindMainPlayerChaByID(l_chaid);
 	if (pCha) {
 		pCha->SetGuildName("");
 		cChar* l_gldname = READ_STRING(recv);
@@ -1014,7 +1015,7 @@ bool CGameApp::OpcodeHandle_MmGuildKick(void* ctx, DataSocket* /*sock*/, RPacket
 
 bool CGameApp::OpcodeHandle_MmGuildApprove(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	uLong l_chaid = GameAppCtx(ctx)->lSrcID;
-	CCharacter* pCha = g_pGameApp->FindMainPlayerChaByID(l_chaid);
+	CCharacter* pCha = GameAppCtx(ctx)->app->FindMainPlayerChaByID(l_chaid);
 	if (pCha) {
 		pCha->SetGuildID(READ_LONG(recv));
 		pCha->SetGuildState(0);
@@ -1030,7 +1031,7 @@ bool CGameApp::OpcodeHandle_MmGuildApprove(void* ctx, DataSocket* /*sock*/, RPac
 
 bool CGameApp::OpcodeHandle_MmGuildReject(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	uLong l_chaid = GameAppCtx(ctx)->lSrcID;
-	CCharacter* pCha = g_pGameApp->FindMainPlayerChaByID(l_chaid);
+	CCharacter* pCha = GameAppCtx(ctx)->app->FindMainPlayerChaByID(l_chaid);
 	if (pCha) {
 		pCha->SetGuildID(0);
 		pCha->SetGuildState(0);
@@ -1041,10 +1042,10 @@ bool CGameApp::OpcodeHandle_MmGuildReject(void* ctx, DataSocket* /*sock*/, RPack
 	return true;
 }
 
-bool CGameApp::OpcodeHandle_MmAddcredit(void* /*ctx*/, DataSocket* /*sock*/, RPacket& recv) {
+bool CGameApp::OpcodeHandle_MmAddcredit(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	DWORD dwChaDBID = READ_LONG(recv);
 	int lCredit = READ_LONG(recv);
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(dwChaDBID);
+	CPlayer* pPlayer = GameAppCtx(ctx)->app->GetPlayerByDBID(dwChaDBID);
 	if (pPlayer) {
 		CCharacter* pCha = pPlayer->GetMainCha();
 		pCha->SetCredit((int)pCha->GetCredit() + lCredit);
@@ -1053,12 +1054,12 @@ bool CGameApp::OpcodeHandle_MmAddcredit(void* /*ctx*/, DataSocket* /*sock*/, RPa
 	return true;
 }
 
-bool CGameApp::OpcodeHandle_MmAddmoney(void* /*ctx*/, DataSocket* /*sock*/, RPacket& recv) {
+bool CGameApp::OpcodeHandle_MmAddmoney(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	DWORD dwChaID = READ_LONG(recv);
 	DWORD dwMoney = READ_LONG(recv);
 
 	CCharacter* pCha = nullptr;
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(dwChaID);
+	CPlayer* pPlayer = GameAppCtx(ctx)->app->GetPlayerByDBID(dwChaID);
 	if (pPlayer) {
 		pCha = pPlayer->GetMainCha();
 	}
@@ -1077,7 +1078,7 @@ bool CGameApp::OpcodeHandle_MmNotice(void* ctx, DataSocket* /*sock*/, RPacket& r
 bool CGameApp::OpcodeHandle_MmQuerychaping(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	GameAppPacketContext* pc = GameAppCtx(ctx);
 	const char* cszChaName = READ_STRING(recv);
-	CCharacter* pCCha = g_pGameApp->FindPlayerChaByName(cszChaName);
+	CCharacter* pCCha = GameAppCtx(ctx)->app->FindPlayerChaByName(cszChaName);
 	if (!pCCha)
 		return true;
 
@@ -1096,7 +1097,7 @@ bool CGameApp::OpcodeHandle_MmQuerychaping(void* ctx, DataSocket* /*sock*/, RPac
 bool CGameApp::OpcodeHandle_MmQuerycha(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	GameAppPacketContext* pc = GameAppCtx(ctx);
 	const char* cszChaName = READ_STRING(recv);
-	CCharacter* pCCha = g_pGameApp->FindPlayerChaByName(cszChaName);
+	CCharacter* pCCha = GameAppCtx(ctx)->app->FindPlayerChaByName(cszChaName);
 	if (!pCCha || !pCCha->GetSubMap())
 		return true;
 
@@ -1118,7 +1119,7 @@ bool CGameApp::OpcodeHandle_MmQuerycha(void* ctx, DataSocket* /*sock*/, RPacket&
 bool CGameApp::OpcodeHandle_MmQuerychaitem(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	GameAppPacketContext* pc = GameAppCtx(ctx);
 	const char* cszChaName = READ_STRING(recv);
-	CCharacter* pCCha = g_pGameApp->FindPlayerChaByName(cszChaName);
+	CCharacter* pCCha = GameAppCtx(ctx)->app->FindPlayerChaByName(cszChaName);
 	if (!pCCha)
 		return true;
 	pCCha->m_CKitbag.SetChangeFlag();
@@ -1134,9 +1135,9 @@ bool CGameApp::OpcodeHandle_MmQuerychaitem(void* ctx, DataSocket* /*sock*/, RPac
 	return true;
 }
 
-bool CGameApp::OpcodeHandle_MmCallcha(void* /*ctx*/, DataSocket* /*sock*/, RPacket& recv) {
+bool CGameApp::OpcodeHandle_MmCallcha(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	const char* cszChaName = READ_STRING(recv);
-	CCharacter* pCCha = g_pGameApp->FindPlayerChaByName(cszChaName);
+	CCharacter* pCCha = GameAppCtx(ctx)->app->FindPlayerChaByName(cszChaName);
 	if (!pCCha || !pCCha->GetSubMap())
 		return true;
 	bool bTarIsBoat = READ_CHAR(recv) ? true : false;
@@ -1153,7 +1154,7 @@ bool CGameApp::OpcodeHandle_MmCallcha(void* /*ctx*/, DataSocket* /*sock*/, RPack
 bool CGameApp::OpcodeHandle_MmGotocha(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	GameAppPacketContext* pc = GameAppCtx(ctx);
 	const char* cszChaName = READ_STRING(recv);
-	CCharacter* pCCha = g_pGameApp->FindPlayerChaByName(cszChaName);
+	CCharacter* pCCha = GameAppCtx(ctx)->app->FindPlayerChaByName(cszChaName);
 	if (!pCCha || !pCCha->GetSubMap())
 		return true;
 	switch (READ_CHAR(recv)) {
@@ -1196,7 +1197,7 @@ bool CGameApp::OpcodeHandle_MmGotocha(void* ctx, DataSocket* /*sock*/, RPacket& 
 bool CGameApp::OpcodeHandle_MmKickcha(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	const char* cszChaName = READ_STRING(recv);
 	int lTime = READ_LONG(recv);
-	CCharacter* pCCha = g_pGameApp->FindPlayerChaByName(cszChaName);
+	CCharacter* pCCha = GameAppCtx(ctx)->app->FindPlayerChaByName(cszChaName);
 	if (!pCCha || !pCCha->GetSubMap())
 		return true;
 
@@ -1212,7 +1213,7 @@ bool CGameApp::OpcodeHandle_MmChaNotice(void* ctx, DataSocket* /*sock*/, RPacket
 	if (!strcmp(cszChaName, ""))
 		GameAppCtx(ctx)->app->LocalNotice(cszNotiCont);
 	else {
-		CCharacter* pCCha = g_pGameApp->FindPlayerChaByName(cszChaName);
+		CCharacter* pCCha = GameAppCtx(ctx)->app->FindPlayerChaByName(cszChaName);
 		if (!pCCha)
 			return true;
 
@@ -1224,7 +1225,7 @@ bool CGameApp::OpcodeHandle_MmChaNotice(void* ctx, DataSocket* /*sock*/, RPacket
 	return true;
 }
 
-bool CGameApp::OpcodeHandle_MmDoString(void* /*ctx*/, DataSocket* /*sock*/, RPacket& recv) {
+bool CGameApp::OpcodeHandle_MmDoString(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	const auto str = READ_STRING(recv);
 
 	LG("DO_STRING", "%s", str);
@@ -1237,10 +1238,10 @@ bool CGameApp::OpcodeHandle_MmLogin(void* ctx, DataSocket* /*sock*/, RPacket& re
 	return true;
 }
 
-bool CGameApp::OpcodeHandle_MmGuildChallPrizemoney(void* /*ctx*/, DataSocket* /*sock*/, RPacket& recv) {
+bool CGameApp::OpcodeHandle_MmGuildChallPrizemoney(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	DWORD dwChaDBID = READ_LONG(recv);
 	long long dwMoney = READ_LONGLONG(recv);
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(dwChaDBID);
+	CPlayer* pPlayer = GameAppCtx(ctx)->app->GetPlayerByDBID(dwChaDBID);
 	if (pPlayer) {
 		CCharacter* pCha = pPlayer->GetMainCha();
 		pCha->AddMoney(RES_STRING(GM_GAMEAPPNET_CPP_00017), dwMoney);
@@ -1251,11 +1252,11 @@ bool CGameApp::OpcodeHandle_MmGuildChallPrizemoney(void* /*ctx*/, DataSocket* /*
 	return true;
 }
 
-bool CGameApp::OpcodeHandle_MmStoreBuy(void* /*ctx*/, DataSocket* /*sock*/, RPacket& recv) {
+bool CGameApp::OpcodeHandle_MmStoreBuy(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	DWORD dwChaDBID = READ_LONG(recv);
 	int lComID = READ_LONG(recv);
 	int lRplMoney = READ_LONG(recv);
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(dwChaDBID);
+	CPlayer* pPlayer = GameAppCtx(ctx)->app->GetPlayerByDBID(dwChaDBID);
 	if (pPlayer) {
 		CCharacter* pCha = pPlayer->GetMainCha();
 		g_StoreSystem.Accept(pCha, lComID);
@@ -1264,11 +1265,11 @@ bool CGameApp::OpcodeHandle_MmStoreBuy(void* /*ctx*/, DataSocket* /*sock*/, RPac
 	return true;
 }
 
-bool CGameApp::OpcodeHandle_MmAuction(void* /*ctx*/, DataSocket* /*sock*/, RPacket& recv) {
+bool CGameApp::OpcodeHandle_MmAuction(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
 	DWORD dwChaID = READ_LONG(recv);
 
 	CCharacter* pCha = nullptr;
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(dwChaID);
+	CPlayer* pPlayer = GameAppCtx(ctx)->app->GetPlayerByDBID(dwChaID);
 	if (pPlayer) {
 		pCha = pPlayer->GetMainCha();
 	}
@@ -1287,7 +1288,7 @@ void CGameApp::ProcessGuildChallMoney(GateServer* pGate, RPACKET pkt) {
 	const char* pszGuild2 = READ_STRING(pkt);
 
 	//	2007-8-4	yangyinyu	change	begin!	//	?????????????????????????????????
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(dwChaDBID);
+	CPlayer* pPlayer = this->GetPlayerByDBID(dwChaDBID);
 	if (pPlayer) {
 		CCharacter* pCha = pPlayer->GetMainCha();
 		// pCha->AddMoney( "??", dwMoney );
@@ -1307,7 +1308,7 @@ void CGameApp::ProcessGuildChallPrizeMoney(GateServer* pGate, RPACKET pkt) {
 	T_B
 		DWORD dwChaDBID = READ_LONG(pkt);
 	long long dwMoney = READ_LONGLONG(pkt);
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(dwChaDBID);
+	CPlayer* pPlayer = this->GetPlayerByDBID(dwChaDBID);
 	if (pPlayer) {
 		CCharacter* pCha = pPlayer->GetMainCha();
 		pCha->AddMoney("??", dwMoney);
@@ -1326,7 +1327,7 @@ void CGameApp::ProcessGuildChallPrizeMoney(GateServer* pGate, RPACKET pkt) {
 void CGameApp::ProcessGuildMsg(GateServer* pGate, RPACKET pkt) {
 	T_B
 		DWORD dwChaDBID = READ_LONG(pkt);
-	CPlayer* pPlayer = g_pGameApp->GetPlayerByDBID(dwChaDBID);
+	CPlayer* pPlayer = this->GetPlayerByDBID(dwChaDBID);
 	if (pPlayer) {
 		CCharacter* pCha = pPlayer->GetCtrlCha();
 		DWORD dwGuildID = READ_LONG(pkt);

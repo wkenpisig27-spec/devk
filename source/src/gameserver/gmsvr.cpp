@@ -5,6 +5,7 @@
 #include "gmsvr.h"
 #include "gtplayer.h"
 #include "gameapp.h"
+#include "GameAppAccess.h"
 #ifdef _MSC_VER
 #pragma warning(disable : 4311)
 #endif
@@ -221,7 +222,7 @@ void myiocpclt::peekpkt(int ms /* = 0 */) {
 			break;
 
 		// dispatch packet
-		::g_pGameApp->ProcessNetMsg(msg->type, msg->gt, msg->pkt);
+		::ActiveGameApp()->ProcessNetMsg(msg->type, msg->gt, msg->pkt);
 		if (msg->pkt != nullptr)
 			msg->pkt->free();
 		msg->free();

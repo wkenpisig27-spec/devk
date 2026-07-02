@@ -191,6 +191,8 @@ public:
     
     // Get stall count
     size_t GetStallCount() const { return m_mapStalls.size(); }
+
+    void BindOwnerApp(CGameApp* pApp) { m_pOwnerApp = pApp; }
     
     // Serialize stall items from CStallData + CKitbag into SOfflineStallItem array.
     // Uses GetGridContByID(byIndex) since byIndex is a kitbag sPosID.
@@ -260,6 +262,9 @@ private:
     
     // Is initialized
     bool m_bInitialized;
+
+    CGameApp* m_pOwnerApp = nullptr;
+    CGameApp* App() const;
 };
 
 // Global accessor

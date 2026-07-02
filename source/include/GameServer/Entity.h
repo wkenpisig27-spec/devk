@@ -54,7 +54,7 @@ class CEventEntity;
 // Long-term: unify pools with explicit type tag (Phase 6 epic).
 //
 // Teardown: Entity::Free() returns the slot via m_pEntSpace (bound at pool
-// create). Falls back to g_pGameApp->m_pCEntSpace only if unbound.
+// create). Missing pool ownership is logged and ignored.
 // ---------------------------------------------------------------------------
 
 /**
