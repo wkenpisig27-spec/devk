@@ -1663,15 +1663,9 @@ void ToClient::CM_REGISTER(DataSocket* datasock, RPacket& recvbuf) {
 		Player* l_ply = (Player*)datasock->GetPointer();
 		if (l_ply) {
 			MutexArmor l_lockStat(l_ply->m_mtxstat);
+			// Pre-login flow: GroupServer TP_REGISTER reads credentials only (no player trailer).
 			WPacket l_wpk = WPacket(recvbuf).Duplicate();
 			l_wpk.WriteCmd(CMD_TP_REGISTER);
-			if (!l_ply->gp_addr || !g_gtsvr->AppendInGameGroupTrailer(l_wpk, l_ply, CMD_TP_REGISTER)) {
-				l_wpk = datasock->GetWPacket();
-				l_wpk.WriteCmd(CMD_MC_LOGIN);
-				l_wpk.WriteShort(ERR_MC_NETEXCP);
-				SendData(datasock, l_wpk);
-				Disconnect(datasock, 100, -25);
-			} else {
 			l_wpk = g_gtsvr->gp_conn->SyncCall(g_gtsvr->gp_conn->get_datasock(), l_wpk, l_ulMilliseconds);
 			if (l_wpk.HasData()) {
 				l_wpk.WriteCmd(CMD_PC_REGISTER);
@@ -1684,7 +1678,7 @@ void ToClient::CM_REGISTER(DataSocket* datasock, RPacket& recvbuf) {
 				SendData(datasock, l_wpk);
 				Disconnect(datasock, 100, -25);
 			}
-			}
+			l_lockStat.unlock();
 		}
 	} else {
 		WPacket l_wpk = datasock->GetWPacket();
