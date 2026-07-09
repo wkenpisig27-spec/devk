@@ -7144,33 +7144,78 @@ function CanLevelFairySkill(Player, Fairy, Item, SkillID, SkillLevel)
     return true
 end
 
-function CalculatePower(role)
-    local player = IsPlayer(role)
-    if player then
-        local attributes = {
-            -- Attribute weights for calculating battle points:
-            { GetChaAttr(role, ATTR_LV), 10.2 },   
-            { GetChaAttr(role, ATTR_MXHP), 2.8 },  
-            { GetChaAttr(role, ATTR_MXSP), 5.8 },  
-            { GetChaAttr(role, ATTR_MNATK), 2.0 }, 
-            { GetChaAttr(role, ATTR_MXATK), 2.0 }, 
-            { GetChaAttr(role, ATTR_ASPD), 1.5 },  
-            { GetChaAttr(role, ATTR_DEF), 1.5 },   
-            { GetChaAttr(role, ATTR_PDEF), 1.2 },  
-            { GetChaAttr(role, ATTR_HIT), 1.2 },   
-            { GetChaAttr(role, ATTR_FLEE), 1.2 },  
-            { GetChaAttr(role, ATTR_MSPD), 1.5 }   
+-- Stable stat: base (B*) + equipment (ITEMC/ITEMV) only; excludes temporary STATE buffs.
+local function StableCombatStat(role, bsFunc, iaFunc, ibFunc, minVal)
+    minVal = minVal or 0
+    return math.max((bsFunc(role) * iaFunc(role) + ibFunc(role)), minVal)
+end
+
+local function GetCombatPowerConfig()
+    local cfg = Server and Server.CombatPower
+    if not cfg then
+        return {
+            HitDivisor = 200,
+            DefFactor = 500,
+            PdefFactor = 400,
+            CrtDivisor = 500,
+            AspdScale = 100,
         }
-
-        -- Calculate battle points using the weighted sum
-        local battlepoints = 0
-        for _, attr in ipairs(attributes) do
-            battlepoints = battlepoints + attr[1] * attr[2]
-        end
-
-        -- Round down the result to the nearest integer
-        battlepoints = math.floor(battlepoints)
-
-        return battlepoints
     end
+    return cfg
+end
+
+-- Server-authoritative stable combat power (BP/CP) for map gates, scaling, and rankings.
+-- Uses permanent gear + base/job stats; ignores temporary potion/skill-state modifiers.
+function CalculateStablePower(role)
+    if not IsPlayer(role) then
+        return 0
+    end
+
+    if ChaIsBoat(role) == 1 then
+        role = GetMainCha(role)
+        if role == nil or role == 0 then
+            return 0
+        end
+    end
+
+    local cfg = GetCombatPowerConfig()
+
+    local mxhp = StableCombatStat(role, BSMxhp, MxhpIa, MxhpIb, 1)
+    local mnatk = StableCombatStat(role, BSMnatk, MnatkIa, MnatkIb, 1)
+    local mxatk = StableCombatStat(role, BSMxatk, MxatkIa, MxatkIb, 1)
+    local def = StableCombatStat(role, BSDef, DefIa, DefIb, 0)
+    local pdef = StableCombatStat(role, BSResist, ResistIa, ResistIb, 0)
+    local hit = StableCombatStat(role, BSHit, HitIa, HitIb, 1)
+    local crt = StableCombatStat(role, BSCrt, CrtIa, CrtIb, 0)
+
+    local aspdInterval = math.max((BSAspd(role) * AspdIa(role) + AspdIb(role)), 1)
+    local aspd = math.floor(100000 / aspdInterval)
+
+    local avgAtk = (mnatk + mxatk) / 2
+    local hitMod = hit / (hit + cfg.HitDivisor)
+    local critMod = 1 + (crt / cfg.CrtDivisor)
+    local dps = avgAtk * (aspd / cfg.AspdScale) * hitMod * critMod
+    local ehp = mxhp * (1 + (def / cfg.DefFactor) + (pdef / cfg.PdefFactor))
+
+    if dps <= 0 or ehp <= 0 then
+        return 0
+    end
+
+    return math.floor(math.sqrt(dps * ehp))
+end
+
+-- Backward-compatible alias; all callers should use stable combat power.
+function CalculatePower(role)
+    return CalculateStablePower(role)
+end
+
+-- Mission/map script helper: returns server-cached combat power when available.
+function GetChaCombatPower(role)
+    if role == nil or role == 0 then
+        return 0
+    end
+    if GetChaBattlePower then
+        return GetChaBattlePower(role)
+    end
+    return CalculateStablePower(role)
 end

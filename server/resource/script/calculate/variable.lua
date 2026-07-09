@@ -67,6 +67,18 @@ Server.Sys.Maps['Demonic World'].Active = true				-- If disabled, everything rel
 Server.Sys.Maps['PKmap'].Active = true						-- If disabled, everything related to it will not function.
 Server.Sys.Maps['secretgarden'].Active = false				-- If disabled, everything related to it will not function.
 -------------------------------------------------------------------------------------------------------------------------
+---------------------------------------- ** Combat Power (BP/CP) Configuration ** ---------------------------------------
+-------------------------------------------------------------------------------------------------------------------------
+-- Stable combat power uses base + equipment layers only (no temporary buff states).
+-- Tune these after sampling real builds; sqrt(dps * ehp) mirrors offense x survivability.
+Server.CombatPower = {
+	HitDivisor = 200,		-- Hit contribution divisor in hitMod = hit / (hit + HitDivisor)
+	DefFactor = 500,		-- DEF contribution to effective HP
+	PdefFactor = 400,		-- PDEF contribution to effective HP
+	CrtDivisor = 500,		-- CRT contribution: critMod = 1 + crt / CrtDivisor
+	AspdScale = 100,		-- ASPD normalization for DPS estimate
+}
+-------------------------------------------------------------------------------------------------------------------------
 -------------------------------------- ** Modify Apparel / Forge / Gem Variable ** --------------------------------------
 -------------------------------------------------------------------------------------------------------------------------
 Server.Equipment.Upgrade.Limit = 10							-- Maximum apparel upgrade level(10 = 100%, additional 1 = 2% increase).

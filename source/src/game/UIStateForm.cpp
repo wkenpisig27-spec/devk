@@ -356,10 +356,19 @@ void CStateMgr::RefreshStateFrm() {
 	}
 
 	if (labBattlepoints) {
-		CS_RequestBattlePoint();
-		sprintf(pszCha, "%ld", g_BattlePoints); // ����
-		labBattlepoints->SetCaption((const char*)pszCha);
+		CS_RequestBattlePoint(); // ����
+		UpdateBattlePointDisplay();
 	}
+}
+
+void CStateMgr::UpdateBattlePointDisplay() {
+	if (!labBattlepoints) {
+		return;
+	}
+
+	char pszCha[32];
+	sprintf(pszCha, "%ld", g_BattlePoints);
+	labBattlepoints->SetCaption((const char*)pszCha);
 }
 
 void CStateMgr::MainMouseDown(CGuiData* pSender, int x, int y, DWORD key) {

@@ -410,6 +410,7 @@ bool CTableCha::ReadAllData(CPlayer* pPlayer, DWORD cha_id) {
 		pCha->guildPermission = stoull(g_buf[nIndex++]); // Str2Int(g_buf[nIndex++]);
 		pCha->chatColour = Str2Int(g_buf[nIndex++]);
 		pCha->SetIMP(Str2Int(g_buf[nIndex++]));
+		pCha->SetBattlePower(Str2Int(g_buf[nIndex++]));
 		// End
 
 		// LG("enter_map", "?????????????.\n");
@@ -644,23 +645,23 @@ bool CTableCha::SaveAllData(CPlayer* pPlayer, char chSaveType) {
 	
 	// Use stored procedures for SaveAllData
 	if (bWithPos) {
-		sExec = stored_procedure("{CALL dbo.SaveAllData(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}",
-			"dbo", "SaveAllData", 43,
+		sExec = stored_procedure("{CALL dbo.SaveAllData(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}",
+			"dbo", "SaveAllData", 44,
 			&hp, &sp, str_exp, map, main_map, &map_x, &map_y, &radius, &angle, &pk_ctrl,
 			&degree, job, &gd, &ap, &tp, &str, &dex, &agi, &con, &sta, &luk, 
 			g_look, g_skillbag, g_shortcut, g_szMisInfo, g_szRecord, g_szTrigger, g_szMisCount,
 			szBirthName, szLoginCha, &sail_lv, &sail_exp, &sail_left_exp, &live_lv, &live_exp,
 			&live_tp, &nLocked, &dwCredit, &dwStoreItemID, g_skillstate, g_extendAttr, &chaIMP,
-			&cha_id);
+			&battlePower, &cha_id);
 	} else {
-		sExec = stored_procedure("{CALL dbo.SaveAllDataWithoutPos(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}",
-			"dbo", "SaveAllDataWithoutPos", 38,
+		sExec = stored_procedure("{CALL dbo.SaveAllDataWithoutPos(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}",
+			"dbo", "SaveAllDataWithoutPos", 39,
 			&hp, &sp, str_exp, &radius, &pk_ctrl,
 			&degree, job, &gd, &ap, &tp, &str, &dex, &agi, &con, &sta, &luk, 
 			g_look, g_skillbag, g_shortcut, g_szMisInfo, g_szRecord, g_szTrigger, g_szMisCount,
 			szBirthName, szLoginCha, &sail_lv, &sail_exp, &sail_left_exp, &live_lv, &live_exp,
 			&live_tp, &nLocked, &dwCredit, &dwStoreItemID, g_skillstate, g_extendAttr, &chaIMP,
-			&cha_id);
+			&battlePower, &cha_id);
 	}
 	if (!DBOK(sExec)) {
 		// LG("enter_map", "???%s\t???SQL????????!\n", pCha->GetLogName());

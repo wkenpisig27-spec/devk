@@ -5165,6 +5165,45 @@ inline int lua_ClearAllFightSkill(lua_State* L) {
 	return 1;
 }
 
+inline int lua_RecalculateChaBattlePower(lua_State* L) {
+	BOOL bValid = lua_gettop(L) == 1 && lua_isuserdata(L, 1);
+	if (!bValid) {
+		E_LUAPARAM;
+		return 0;
+	}
+
+	CCharacter* pChar = LB_GetCha(L, 1);
+	if (!pChar) {
+		E_LUANULL;
+		return 0;
+	}
+
+	CCharacter* pMain = pChar->GetPlyMainCha();
+	if (pMain && pMain->IsPlayerCha()) {
+		pMain->RecalculateBattlePower();
+	}
+	return 0;
+}
+
+inline int lua_GetChaBattlePower(lua_State* L) {
+	BOOL bValid = lua_gettop(L) == 1 && lua_isuserdata(L, 1);
+	if (!bValid) {
+		E_LUAPARAM;
+		lua_pushnumber(L, 0);
+		return 1;
+	}
+
+	CCharacter* pChar = LB_GetCha(L, 1);
+	if (!pChar) {
+		E_LUANULL;
+		lua_pushnumber(L, 0);
+		return 1;
+	}
+
+	lua_pushnumber(L, pChar->GetBattlePower());
+	return 1;
+}
+
 inline int lua_RefreshCha(lua_State* L) {
 	BOOL bValid = lua_gettop(L) == 1 && lua_isuserdata(L, 1);
 	if (!bValid) {
@@ -6003,6 +6042,8 @@ BOOL RegisterCharScript() {
 	lua_register(L, "ClearFightSkill", lua_ClearFightSkill);
 
 	lua_register(L, "RefreshCha", lua_RefreshCha);
+	lua_register(L, "RecalculateChaBattlePower", lua_RecalculateChaBattlePower);
+	lua_register(L, "GetChaBattlePower", lua_GetChaBattlePower);
 	lua_register(L, "IsChaStall", lua_IsChaStall);
 	lua_register(L, "ChangeJob", lua_ChangeJob);
 

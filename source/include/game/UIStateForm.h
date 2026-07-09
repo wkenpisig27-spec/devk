@@ -8,6 +8,7 @@ namespace GUI {
 class CStateMgr : public CUIInterface {
 public:
 	void RefreshStateFrm();
+	void UpdateBattlePointDisplay();
 	long BattlePoints();
 
 protected:

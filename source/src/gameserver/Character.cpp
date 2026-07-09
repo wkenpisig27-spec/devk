@@ -65,7 +65,9 @@ CCharacter::CCharacter()
 	  _dwStallTick(0),
 	  chatColour(0xFFFFFFFF),
 	  appCheck(),
-	  requestType(0) {
+	  requestType(0),
+	  m_nBattlePower(0),
+	  m_bBattlePowerDirty(true) {
 	T_B
 		m_sPoseState = enumPoseStand;
 
@@ -7275,11 +7277,73 @@ float CCharacter::GetExpRate() {
 }
 
 int CCharacter::GetBattlePower() {
-	int battlePoints = 0;
-
-	if (g_CParser.DoString("CalculatePower", enumSCRIPT_RETURN_NUMBER, 1, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, this, DOSTRING_PARAM_END)) {
-		battlePoints = g_CParser.GetReturnNumber(0);
+	CCharacter* pMain = GetPlyMainCha();
+	if (!pMain || !pMain->IsPlayerCha()) {
+		return 0;
 	}
 
-	return battlePoints;
+	if (pMain->m_bBattlePowerDirty) {
+		pMain->RecalculateBattlePower();
+	}
+	return pMain->m_nBattlePower;
+}
+
+void CCharacter::SetBattlePower(int power) {
+	CCharacter* pMain = GetPlyMainCha();
+	if (!pMain) {
+		return;
+	}
+
+	pMain->m_nBattlePower = power;
+	pMain->m_bBattlePowerDirty = true;
+}
+
+void CCharacter::InvalidateBattlePower() {
+	CCharacter* pMain = GetPlyMainCha();
+	if (!pMain) {
+		return;
+	}
+	pMain->m_bBattlePowerDirty = true;
+}
+
+void CCharacter::RecalculateBattlePower() {
+	if (!IsPlayerCha()) {
+		m_nBattlePower = 0;
+		m_bBattlePowerDirty = false;
+		return;
+	}
+
+	CCharacter* pMain = GetPlyMainCha();
+	if (!pMain) {
+		m_nBattlePower = 0;
+		m_bBattlePowerDirty = false;
+		return;
+	}
+
+	int newPower = 0;
+	if (g_CParser.DoString("CalculateStablePower", enumSCRIPT_RETURN_NUMBER, 1, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, pMain, DOSTRING_PARAM_END)) {
+		newPower = g_CParser.GetReturnNumber(0);
+		if (newPower < 0) {
+			newPower = 0;
+		}
+	}
+
+	const bool changed = (newPower != pMain->m_nBattlePower);
+	pMain->m_nBattlePower = newPower;
+	pMain->m_bBattlePowerDirty = false;
+
+	if (changed) {
+		pMain->SynBattlePower();
+	}
+}
+
+void CCharacter::SynBattlePower() {
+	if (!IsPlayerCha() || GetPlyMainCha() != this) {
+		return;
+	}
+
+	WPACKET pk = GETWPACKET();
+	WRITE_CMD(pk, CMD_MC_GET_PLAYER_BATTLE_POINT);
+	pk.WriteLong(m_nBattlePower);
+	ReflectINFof(this, pk);
 }

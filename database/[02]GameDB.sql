@@ -2151,7 +2151,7 @@ BEGIN
         sail_lv, sail_exp, sail_left_exp, live_lv, live_exp, live_tp, main_map, map_x, map_y, 
         birth, look, skillbag, shortcut, mission, misrecord, mistrigger, miscount, login_cha, 
         kitbag, kitbag_tmp, map_mask, skill_state, bank, kb_locked, credit, store_item, 
-        extend, guild_permission, chatColour, IMP
+        extend, guild_permission, chatColour, IMP, battle_power
     FROM character
     WHERE cha_id = @charID;
 END
@@ -2208,6 +2208,7 @@ CREATE PROCEDURE [dbo].[SaveAllData]
     @_SKILL_STATE VARCHAR(1024),
     @_EXTEND VARCHAR(MAX),
     @_IMP INT,
+    @_BATTLE_POWER INT,
     @_CHA_ID INT
 AS
 BEGIN
@@ -2225,7 +2226,7 @@ BEGIN
         sail_lv = @_SAIL_LV, sail_exp = @_SAIL_EXP, sail_left_exp = @_SAIL_LEFT_EXP, 
         live_lv = @_LIVE_LV, live_exp = @_LIVE_EXP, live_tp = @_LIVE_TP, 
         kb_locked = @_KB_LOCKED, credit = @_CREDIT, store_item = @_STORE_ITEM, 
-        skill_state = @_SKILL_STATE, extend = @_EXTEND, IMP = @_IMP
+        skill_state = @_SKILL_STATE, extend = @_EXTEND, IMP = @_IMP, battle_power = @_BATTLE_POWER
     WHERE cha_id = @_CHA_ID;
 END
 GO
@@ -2276,6 +2277,7 @@ CREATE PROCEDURE [dbo].[SaveAllDataWithoutPos]
     @_SKILL_STATE VARCHAR(1024),
     @_EXTEND VARCHAR(MAX),
     @_IMP INT,
+    @_BATTLE_POWER INT,
     @_CHA_ID INT
 AS
 BEGIN
@@ -2292,7 +2294,7 @@ BEGIN
         sail_lv = @_SAIL_LV, sail_exp = @_SAIL_EXP, sail_left_exp = @_SAIL_LEFT_EXP, 
         live_lv = @_LIVE_LV, live_exp = @_LIVE_EXP, live_tp = @_LIVE_TP, 
         kb_locked = @_KB_LOCKED, credit = @_CREDIT, store_item = @_STORE_ITEM, 
-        skill_state = @_SKILL_STATE, extend = @_EXTEND, IMP = @_IMP
+        skill_state = @_SKILL_STATE, extend = @_EXTEND, IMP = @_IMP, battle_power = @_BATTLE_POWER
     WHERE cha_id = @_CHA_ID;
 END
 GO

@@ -135,6 +135,10 @@ public:
 	float GetDropRate();
 	float GetExpRate();
 	int GetBattlePower();
+	void SetBattlePower(int power);
+	void InvalidateBattlePower();
+	void RecalculateBattlePower();
+	void SynBattlePower();
 
 	void ItemUnlockRequest(RPacket& rpk);
 
@@ -974,6 +978,8 @@ private:
 	STempChaPart m_STempChaPart;
 
 	int chaIMP;
+	int m_nBattlePower;
+	bool m_bBattlePowerDirty;
 	CCharacter* mountCha;
 	BOOL IsChaOnMount;
 

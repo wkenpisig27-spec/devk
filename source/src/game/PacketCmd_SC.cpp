@@ -28,6 +28,7 @@
 #include "UIBreakForm.h"
 #include "UIFoundForm.h"
 #include "UICookingForm.h"
+#include "uistateform.h"
 #include "UISpiritForm.h"
 #include "UIFindTeamForm.h"
 #include "UIBossTimerForm.h"
@@ -3253,10 +3254,7 @@ BOOL SC_RequestExpRate(LPRPACKET pk) {
 BOOL SC_RequestBattlePoint(LPRPACKET pk) {
 	int battlePoint = pk.ReadLong();
 	g_BattlePoints = battlePoint;
-
-	// Debugging: Print the value of g_BattlePoints
-	LG("Battle Points", "%d\n", g_BattlePoints);
-
+	g_stUIState.UpdateBattlePointDisplay();
 	return true;
 }
 
