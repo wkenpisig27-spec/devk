@@ -56,6 +56,18 @@ public:
 	ToClient(char const* fname, ThreadPool* proc, ThreadPool* comm);
 	~ToClient();
 
+	static bool OpcodeHandle_CpPing(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_CmSay(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_CmKitbagUnlock(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_CmStoreOpenAsk(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_CmItemUnlockAsk(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_CmGameRequestPin(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_CmEndAction(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_TransmitCall(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_CmOfflineMode(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_RouteCmToGame(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+	static bool OpcodeHandle_RouteCpToGroup(void* ctx, DataSocket* datasock, RPacket& recvbuf);
+
 	void post_mapcrash_msg(Player* ply);
 	std::string GetDisconnectErrText(int reason) const;
 	void SetMaxCon(uShort maxcon) { m_maxcon = maxcon; }
@@ -98,18 +110,6 @@ private:
 
 	void ReRouteToGameServer(DataSocket* datasock, RPacket& recvbuf);
 	void ReRouteToGroupServer(DataSocket* datasock, RPacket& recvbuf);
-
-	static bool OpcodeHandle_CpPing(void* ctx, DataSocket* datasock, RPacket& recvbuf);
-	static bool OpcodeHandle_CmSay(void* ctx, DataSocket* datasock, RPacket& recvbuf);
-	static bool OpcodeHandle_CmKitbagUnlock(void* ctx, DataSocket* datasock, RPacket& recvbuf);
-	static bool OpcodeHandle_CmStoreOpenAsk(void* ctx, DataSocket* datasock, RPacket& recvbuf);
-	static bool OpcodeHandle_CmItemUnlockAsk(void* ctx, DataSocket* datasock, RPacket& recvbuf);
-	static bool OpcodeHandle_CmGameRequestPin(void* ctx, DataSocket* datasock, RPacket& recvbuf);
-	static bool OpcodeHandle_CmEndAction(void* ctx, DataSocket* datasock, RPacket& recvbuf);
-	static bool OpcodeHandle_TransmitCall(void* ctx, DataSocket* datasock, RPacket& recvbuf);
-	static bool OpcodeHandle_CmOfflineMode(void* ctx, DataSocket* datasock, RPacket& recvbuf);
-	static bool OpcodeHandle_RouteCmToGame(void* ctx, DataSocket* datasock, RPacket& recvbuf);
-	static bool OpcodeHandle_RouteCpToGroup(void* ctx, DataSocket* datasock, RPacket& recvbuf);
 
 	static bool DecryptClientPassword2Md5(DataSocket* datasock, RPacket& recvbuf, std::string& outMd5);
 	bool ForwardPassword2ToGame(

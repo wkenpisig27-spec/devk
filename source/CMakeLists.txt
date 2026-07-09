@@ -51,6 +51,7 @@ add_compile_definitions(
 
 add_compile_options(
     -fexceptions
+    -fcoroutines
     -ffunction-sections
     -fdata-sections
     -fPIC
@@ -188,6 +189,7 @@ endif()
 # ============================================================================
 add_library(ServerSDK STATIC
     src/serversdk/AcceptConnect.cpp
+    src/serversdk/BackplaneAuth.cpp
     src/serversdk/Comm.cpp
     src/serversdk/CommRPC.cpp
     src/serversdk/DataSocket.cpp
@@ -266,6 +268,10 @@ add_library(Common STATIC
     src/common/LogFile.cpp
     src/common/MonRefRecord.cpp
     src/common/NpcRecord.cpp
+    src/common/OpcodeHandlerRegistry.cpp
+    src/common/OpcodeIngress.cpp
+    src/common/OpcodeMeta.cpp
+    src/common/SessionManager.cpp
     src/common/SailLvRecord.cpp
     src/common/ShipSet.cpp
     src/common/SkillRecord.cpp
@@ -478,6 +484,8 @@ add_executable(GameServer
     src/gameserver/Guild.cpp
     src/gameserver/HarmRec.cpp
     src/gameserver/Item.cpp
+    src/gameserver/ItemAudit.cpp
+    src/gameserver/lua_bridge.cpp
     src/gameserver/lua_gamectrl.cpp
     src/gameserver/MapEntry.cpp
     src/gameserver/MapRes.cpp

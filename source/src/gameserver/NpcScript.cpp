@@ -8,7 +8,7 @@
 #include "GameAppNet.h"
 #include <NpcRecord.h>
 #include <CharacterRecord.h>
-#include <assert.h>
+#include <cassert>
 #include "lua_gamectrl.h"
 //---------------------------------------------------------
 _DBC_USING

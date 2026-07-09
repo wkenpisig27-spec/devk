@@ -519,24 +519,28 @@ bool GroupServerApp::CheckRegisterRateLimit(const char* ip) {
 	constexpr auto BLOCK_DUR    = minutes(5);
 
 	std::lock_guard<std::mutex> lock(m_regRateMutex);
-	auto now = steady_clock::now();
+	const auto now = steady_clock::now();
+	const auto now_ns = now.time_since_epoch().count();
 
 	for (auto it = m_regRateMap.begin(); it != m_regRateMap.end(); ) {
-		if (now - it->second.windowStart > BLOCK_DUR + WINDOW)
+		const auto window_ns = it->second.windowStart.time_since_epoch().count();
+		if (now_ns - window_ns > (BLOCK_DUR + WINDOW).count())
 			it = m_regRateMap.erase(it);
 		else
 			++it;
 	}
 
 	auto& info = m_regRateMap[ip];
+	const auto blocked_ns = info.blockedUntil.time_since_epoch().count();
 
-	if (now < info.blockedUntil) {
+	if (blocked_ns != 0 && now_ns < blocked_ns) {
 		auto remaining = duration_cast<seconds>(info.blockedUntil - now).count();
 		LG("Security", "[Register] IP %s rate-limited, %lld s remaining\n", ip, (long long)remaining);
 		return false;
 	}
 
-	if (info.attempts == 0 || now - info.windowStart >= WINDOW) {
+	const auto window_ns = info.windowStart.time_since_epoch().count();
+	if (info.attempts == 0 || now_ns - window_ns >= WINDOW.count()) {
 		info.windowStart = now;
 		info.attempts    = 0;
 	}

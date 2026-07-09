@@ -9,7 +9,7 @@
 #if !defined(UTIL_H_)
 #define UTIL_H_
 
-#include <assert.h>
+#include <cassert>
 #include "./util2.h"
 #include "./TryUtil.h"
 #include "./log.h"

@@ -7,7 +7,7 @@
 #include "GameAppNet.h"
 #include <NpcRecord.h>
 #include <CharacterRecord.h>
-#include <assert.h>
+#include <cassert>
 #include "Script.h"
 #include "lua_gamectrl.h"
 //---------------------------------------------------------

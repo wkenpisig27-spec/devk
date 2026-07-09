@@ -4,8 +4,10 @@
 #include <iomanip>
 #include <math.h>
 #include <time.h>
-#include <assert.h>
 #include <sqlext.h>
+#include <cstdlib>
+// Use the system assert header by absolute path: Botan ships include/botan/assert.h
+// which otherwise shadows <assert.h> via -I source/include.
 
 using namespace std;
 
@@ -1488,7 +1490,9 @@ CSQLRecordset::CSQLRecordset(SQLHDBC a_hdbc)
 	  _rc(SQL_SUCCESS),
 	  _hdbc(a_hdbc),
 	  _hstmt(nullptr) {
-	assert(a_hdbc != nullptr);
+	if (a_hdbc == nullptr) {
+		std::abort();
+	}
 }
 
 CSQLRecordset::~CSQLRecordset() {

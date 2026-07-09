@@ -351,8 +351,8 @@ private:
 	// Registration flood protection
 	struct RegRateInfo {
 		int attempts = 0;
-		std::chrono::steady_clock::time_point windowStart;
-		std::chrono::steady_clock::time_point blockedUntil;
+		std::chrono::steady_clock::time_point windowStart{};
+		std::chrono::steady_clock::time_point blockedUntil{};
 	};
 	std::mutex                                   m_regRateMutex;
 	std::unordered_map<std::string, RegRateInfo> m_regRateMap;

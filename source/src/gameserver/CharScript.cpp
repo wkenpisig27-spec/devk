@@ -5,7 +5,7 @@
 #include "SubMap.h"
 #include "GameAppNet.h"
 #include "Character.h"
-#include <assert.h>
+#include <cassert>
 #include "lua_gamectrl.h"
 #include "Expand.h"
 #include "CharBoat.h"
