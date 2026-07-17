@@ -22,9 +22,17 @@ function HandleChat(role, message)
         local param = {n = 0}
         local r = string.find(msg, ' ')
         local t
-        if r == nil then     
-			t = string.lower(msg)
-        else                 
+        if r == nil then
+            local commaPos = string.find(msg, ',')
+            if commaPos then
+                t = string.lower(string.sub(msg, 1, commaPos - 1))
+                local arg = string.sub(msg, commaPos + 1)
+                param = explode(',', arg)
+                param.n = #param
+            else
+                t = string.lower(msg)
+            end
+        else
 			t = string.lower(string.sub(msg, 1, r - 1))
 			local arg = string.sub(msg, r + 1)
 			param = explode(',', arg)

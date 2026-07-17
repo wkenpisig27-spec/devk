@@ -1514,6 +1514,11 @@ void CGameApp::ProcessTeamMsg(GateServer* pGate, RPACKET pkt) {
 	CheckSeeWithTeamChange(CanSeenN, PlayerList, cMemberCnt);
 	RefreshTeamEyeshot(CanSeenO, CanSeenN, PlayerList, cMemberCnt, cTeamMsgType);
 
+	for (char i = 0; i < cMemberCnt; i++) {
+		if (PlayerList[i] && PlayerList[i]->GetCtrlCha())
+			DynamicPortal_RefreshVisibility(PlayerList[i]->GetCtrlCha());
+	}
+
 	// add by jilinlee 2007/07/11
 
 	for (char i = 0; i < cMemberCnt; i++) {

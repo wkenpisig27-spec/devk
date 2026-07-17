@@ -2,6 +2,8 @@
 
 #ifndef SUBMAP_H
 #define SUBMAP_H
+#include <map>
+#include <string>
 #include "GameAppNet.h"
 #include <tchar.h>
 #include <stdio.h>
@@ -137,6 +139,9 @@ public:
 	CItem* ItemSpawn(const SItemGrid* pItemInfo, dbc::Long lPosX, dbc::Long lPosY, dbc::Char chSpawnType,
 					 dbc::Long lFromEntityID = 0, dbc::Long lProtChaID = 0, dbc::Long lProtChaHandle = 0, dbc::Long lProtTime = 0, dbc::Long lOnTick = 0,
 					 CEvent* pCEvent = nullptr);
+	long CreateDynamicPortal(dbc::Long lPosX, dbc::Long lPosY, const char* szFunction, const char* szName, dbc::Long lLifeTime, dbc::Long lItemID = 193);
+	long CreateDynamicPortalCha(CCharacter* pOwner, dbc::Long lPosX, dbc::Long lPosY, const char* szFunction, const char* szName, dbc::Long lLifeTime, dbc::Long lItemID = 193);
+	bool DestroyDynamicPortal(long lPortalID);
 	CCharacter* ChaSpawn(dbc::Long lChaInfoID, dbc::Char chCtrlType, dbc::Short sAngle, Point* pSPos, bool bEyeshotAbility = false,
 						 dbc::cChar* cszChaName = 0, const int clSearchRadius = 120 * 100);
 
@@ -352,5 +357,23 @@ private:
 	//	dbc::Long	m_lActivePlayerNum;
 	dbc::Long m_lInfoParam[defMAPCOPY_INFO_PARAM_NUM];
 };
+
+struct SDynamicPortal {
+	long lPortalID;
+	long lOwnerChaID;
+	DWORD lOwnerTeamLeaderDBID;
+	DWORD dwCloseTick;
+	std::string strFunction;
+	std::string strName;
+	std::string strOwnerName;
+	CItem* pItem;
+	SubMap* pMap;
+};
+
+bool DynamicPortal_CanView(CCharacter* pViewer, const SDynamicPortal& portal);
+void DynamicPortal_RefreshVisibility(CCharacter* pCha);
+
+extern std::map<long, SDynamicPortal> g_DynamicPortalList;
+extern long g_lDynamicPortalID;
 
 #endif // SUBMAP_H

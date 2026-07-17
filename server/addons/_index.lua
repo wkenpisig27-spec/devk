@@ -14,6 +14,7 @@ addon.files			=
 	'relogpenalty.lua',
 	'reborn.lua',
 	'equips.lua',
+	'dynamicportals.lua',
 }
 
 print("--------------------------------------------------")

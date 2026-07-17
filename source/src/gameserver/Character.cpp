@@ -4555,6 +4555,24 @@ int CCharacter::ExecuteEvent(Entity* pCObj, dbc::uShort usEventID) {
 			strScript1 += pCEntry->GetTMapName();
 
 			g_CParser.DoString(strScript1.c_str(), enumSCRIPT_RETURN_NUMBER, 0, enumSCRIPT_PARAM_LIGHTUSERDATA, 2, this, pCCopyInfo, DOSTRING_PARAM_END);
+		} else if (usEventEType == enumEVENTE_DYNAMIC_PORTAL) {
+			CItem* pItem = (CItem*)pCObj;
+			for (std::map<long, SDynamicPortal>::iterator it = g_DynamicPortalList.begin(); it != g_DynamicPortalList.end(); ++it) {
+				if (it->second.pItem != pItem)
+					continue;
+
+				if (!DynamicPortal_CanView(this, it->second)) {
+					SystemNotice("You cannot use this portal.");
+					break;
+				}
+
+				if (!it->second.strFunction.empty() && g_CParser.StringIsFunction(it->second.strFunction.c_str())) {
+					g_CParser.DoString(it->second.strFunction.c_str(), enumSCRIPT_RETURN_NONE, 0, enumSCRIPT_PARAM_LIGHTUSERDATA, 2, this, GetSubMap(), DOSTRING_PARAM_END);
+				} else {
+					LG("dynamic_portal", "Lua function not found: %s\n", it->second.strFunction.c_str());
+				}
+				break;
+			}
 		}
 	} break;
 	default:

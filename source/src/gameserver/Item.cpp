@@ -57,6 +57,11 @@ void CItem::Finally() {
 
 void CItem::OnBeginSeen(CCharacter* pCMainCha) {
 	T_B
+		for (std::map<long, SDynamicPortal>::iterator it = g_DynamicPortalList.begin(); it != g_DynamicPortalList.end(); ++it) {
+			if (it->second.pItem == this && !DynamicPortal_CanView(pCMainCha, it->second))
+				return;
+		}
+
 		WPACKET pk = GETWPACKET();
 	WRITE_CMD(pk, CMD_MC_ITEMBEGINSEE);
 	// 基本数据

@@ -7,9 +7,70 @@
 #include "CommFunc.h"
 #include "Parser.h"
 #include "BossTimer.h"
+#include "Character.h"
+#include "Player.h"
+#include "Event.h"
+#include <vector>
 
 using namespace std;
 _DBC_USING
+
+std::map<long, SDynamicPortal> g_DynamicPortalList;
+long g_lDynamicPortalID = 1;
+
+bool DynamicPortal_CanView(CCharacter* pViewer, const SDynamicPortal& portal) {
+	if (!pViewer || !pViewer->IsPlayerCha())
+		return false;
+
+	if (portal.lOwnerChaID == 0)
+		return true;
+
+	if (pViewer->GetID() == (dbc::uLong)portal.lOwnerChaID)
+		return true;
+
+	CPlayer* pViewerPly = pViewer->GetPlayer();
+	if (!pViewerPly || portal.lOwnerTeamLeaderDBID == 0)
+		return false;
+
+	return pViewerPly->getTeamLeaderID() == portal.lOwnerTeamLeaderDBID;
+}
+
+static void BuildDynamicPortalDisplayName(char* szOut, size_t outSize, const char* szOwnerName, const char* szName) {
+	if (!szOut || outSize == 0)
+		return;
+
+	szOut[0] = '\0';
+	const char* ownerName = (szOwnerName && szOwnerName[0]) ? szOwnerName : "Unknown";
+	const char* portalName = (szName && szName[0]) ? szName : "Portal";
+
+	_snprintf_s(szOut, outSize, _TRUNCATE, "[%s] %s", ownerName, portalName);
+}
+
+void DynamicPortal_RefreshVisibility(CCharacter* pCha) {
+	if (!pCha || !pCha->IsPlayerFocusCha())
+		return;
+
+	SubMap* pMap = pCha->GetSubMap();
+	if (!pMap)
+		return;
+
+	Point chaPos = pCha->GetPos();
+	const Rect& eyeshot = pMap->GetEyeshot(chaPos);
+
+	for (std::map<long, SDynamicPortal>::iterator it = g_DynamicPortalList.begin(); it != g_DynamicPortalList.end(); ++it) {
+		if (it->second.lOwnerChaID == 0 || it->second.pMap != pMap || !it->second.pItem)
+			continue;
+
+		const Point& portalPos = it->second.pItem->GetPos();
+		if (portalPos.x < eyeshot.ltop.x || portalPos.x > eyeshot.rbtm.x || portalPos.y < eyeshot.ltop.y || portalPos.y > eyeshot.rbtm.y)
+			continue;
+
+		if (DynamicPortal_CanView(pCha, it->second))
+			pCha->BeginSee(it->second.pItem);
+		else
+			pCha->EndSee(it->second.pItem);
+	}
+}
 
 const char* GetResPath(const char* pszRes);
 
@@ -1689,6 +1750,21 @@ void SubMap::Run(DWORD dwCurTime) {
 		g_CParser.DoString(strScript.c_str(), enumSCRIPT_RETURN_NONE, 0, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, this, DOSTRING_PARAM_END);
 	}
 
+	// Dynamic portal auto-close (only on primary map copy to avoid duplicate checks)
+	if (m_sCopyNO == 0) {
+		std::vector<long> expiredPortals;
+		DWORD dwNow = GetTickCount();
+		for (std::map<long, SDynamicPortal>::iterator it = g_DynamicPortalList.begin(); it != g_DynamicPortalList.end(); ++it) {
+			if (it->second.dwCloseTick > 0 && dwNow >= it->second.dwCloseTick)
+				expiredPortals.push_back(it->first);
+		}
+		for (size_t i = 0; i < expiredPortals.size(); ++i) {
+			std::map<long, SDynamicPortal>::iterator it = g_DynamicPortalList.find(expiredPortals[i]);
+			if (it != g_DynamicPortalList.end() && it->second.pMap)
+				it->second.pMap->DestroyDynamicPortal(expiredPortals[i]);
+		}
+	}
+
 	T_E
 }
 
@@ -2024,4 +2100,102 @@ void COutMapCha::ExecTimeCha(SMgrUnit* pChaInfo) {
 		pChaInfo->chStep++;
 	}
 	T_E
+}
+
+long SubMap::CreateDynamicPortal(Long lPosX, Long lPosY, const char* szFunction, const char* szName, Long lLifeTime, Long lItemID) {
+	SItemGrid SItemCont;
+	SItemCont.sID = (short)lItemID;
+	SItemCont.sNum = 1;
+	SItemCont.SetDBParam(-1, 0);
+	SItemCont.chForgeLv = 0;
+	SItemCont.SetInstAttrInvalid();
+
+	CEvent CEvtCont;
+	CEvtCont.SetID(1);
+	CEvtCont.SetTouchType(enumEVENTT_RANGE);
+	CEvtCont.SetExecType(enumEVENTE_DYNAMIC_PORTAL);
+	CEvtCont.SetName(szName);
+
+	CItem* pItem = ItemSpawn(&SItemCont, lPosX, lPosY, enumITEM_APPE_NATURAL, 0, g_pCSystemCha->GetID(), g_pCSystemCha->GetHandle(), -1, -1, &CEvtCont);
+	if (!pItem)
+		return 0;
+
+	pItem->SetOnTick(0);
+
+	long lPortalID = g_lDynamicPortalID++;
+	SDynamicPortal PortalData;
+	PortalData.lPortalID = lPortalID;
+	PortalData.lOwnerChaID = 0;
+	PortalData.lOwnerTeamLeaderDBID = 0;
+	PortalData.strFunction = szFunction ? szFunction : "";
+	PortalData.strName = szName ? szName : "";
+	PortalData.dwCloseTick = (lLifeTime < 0) ? 0 : (GetTickCount() + (lLifeTime * 1000));
+	PortalData.pItem = pItem;
+	PortalData.pMap = this;
+
+	g_DynamicPortalList[lPortalID] = PortalData;
+	LG("portal", "ADD GLOBAL PORTAL ID: %d\n", lPortalID);
+	return lPortalID;
+}
+
+long SubMap::CreateDynamicPortalCha(CCharacter* pOwner, Long lPosX, Long lPosY, const char* szFunction, const char* szName, Long lLifeTime, Long lItemID) {
+	if (!pOwner)
+		return 0;
+
+	char szDisplayName[defMAX_EVENT_NAME_LEN];
+	const char* szOwnerName = pOwner->GetName();
+	BuildDynamicPortalDisplayName(szDisplayName, sizeof(szDisplayName), szOwnerName, szName);
+
+	SItemGrid SItemCont;
+	SItemCont.sID = (short)lItemID;
+	SItemCont.sNum = 1;
+	SItemCont.SetDBParam(-1, 0);
+	SItemCont.chForgeLv = 0;
+	SItemCont.SetInstAttrInvalid();
+
+	CEvent CEvtCont;
+	CEvtCont.SetID(1);
+	CEvtCont.SetTouchType(enumEVENTT_RANGE);
+	CEvtCont.SetExecType(enumEVENTE_DYNAMIC_PORTAL);
+	CEvtCont.SetName(szDisplayName);
+
+	CItem* pItem = ItemSpawn(&SItemCont, lPosX, lPosY, enumITEM_APPE_NATURAL, 0, g_pCSystemCha->GetID(), g_pCSystemCha->GetHandle(), -1, -1, &CEvtCont);
+	if (!pItem)
+		return 0;
+
+	pItem->SetOnTick(0);
+
+	long lPortalID = g_lDynamicPortalID++;
+	SDynamicPortal PortalData;
+	PortalData.lPortalID = lPortalID;
+	PortalData.lOwnerChaID = pOwner->GetID();
+	PortalData.lOwnerTeamLeaderDBID = pOwner->GetPlayer() ? pOwner->GetPlayer()->getTeamLeaderID() : 0;
+	PortalData.strFunction = szFunction ? szFunction : "";
+	PortalData.strName = szDisplayName;
+	PortalData.strOwnerName = szOwnerName ? szOwnerName : "";
+	PortalData.dwCloseTick = (lLifeTime < 0) ? 0 : (GetTickCount() + (lLifeTime * 1000));
+	PortalData.pItem = pItem;
+	PortalData.pMap = this;
+
+	g_DynamicPortalList[lPortalID] = PortalData;
+	LG("portal", "ADD PLAYER PORTAL ID: %d OWNER: %d NAME: %s\n", lPortalID, pOwner->GetID(), szDisplayName);
+	return lPortalID;
+}
+
+bool SubMap::DestroyDynamicPortal(long lPortalID) {
+	std::map<long, SDynamicPortal>::iterator it = g_DynamicPortalList.find(lPortalID);
+	if (it == g_DynamicPortalList.end())
+		return false;
+
+	CItem* pItem = it->second.pItem;
+	if (!pItem) {
+		g_DynamicPortalList.erase(it);
+		return false;
+	}
+
+	GoOut(pItem);
+	pItem->Free();
+	g_DynamicPortalList.erase(it);
+	LG("portal", "REMOVE PORTAL ID: %d\n", lPortalID);
+	return true;
 }

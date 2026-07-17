@@ -21,6 +21,7 @@ enum EEventTouchType {
 enum EEventExecType {
 	enumEVENTE_SMAP_ENTRY = 1, // 地图静态切换点
 	enumEVENTE_DMAP_ENTRY = 2, // 地图动态切换点
+	enumEVENTE_DYNAMIC_PORTAL = 3, // 脚本动态传送门
 };
 
 enum EEventType {
