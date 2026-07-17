@@ -1071,7 +1071,13 @@ bool CGameApp::OpcodeHandle_MmAddmoney(void* ctx, DataSocket* /*sock*/, RPacket&
 }
 
 bool CGameApp::OpcodeHandle_MmNotice(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
-	GameAppCtx(ctx)->app->LocalNotice(READ_STRING(recv));
+	// Packet layout: WRITE_LONG(0), WRITE_STRING(text)
+	READ_LONG(recv);
+	const char* text = READ_STRING(recv);
+	if (!text) {
+		return true;
+	}
+	GameAppCtx(ctx)->app->LocalNotice(text);
 	return true;
 }
 
@@ -1207,12 +1213,16 @@ bool CGameApp::OpcodeHandle_MmKickcha(void* ctx, DataSocket* /*sock*/, RPacket& 
 }
 
 bool CGameApp::OpcodeHandle_MmChaNotice(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
+	// Packet layout: WRITE_LONG(0), WRITE_STRING(notice), WRITE_STRING(chaName)
+	READ_LONG(recv);
 	const char* cszNotiCont = READ_STRING(recv);
 	const char* cszChaName = READ_STRING(recv);
-
-	if (!strcmp(cszChaName, ""))
+	if (!cszNotiCont) {
+		return true;
+	}
+	if (!cszChaName || !cszChaName[0]) {
 		GameAppCtx(ctx)->app->LocalNotice(cszNotiCont);
-	else {
+	} else {
 		CCharacter* pCCha = GameAppCtx(ctx)->app->FindPlayerChaByName(cszChaName);
 		if (!pCCha)
 			return true;
@@ -1226,15 +1236,27 @@ bool CGameApp::OpcodeHandle_MmChaNotice(void* ctx, DataSocket* /*sock*/, RPacket
 }
 
 bool CGameApp::OpcodeHandle_MmDoString(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
-	const auto str = READ_STRING(recv);
+	// Packet layout matches all writers: WRITE_LONG(chaId), WRITE_STRING(script)
+	READ_LONG(recv);
+	const char* str = READ_STRING(recv);
+	if (!str || !str[0]) {
+		LG("DO_STRING", "(null or empty script ignored)\n");
+		return true;
+	}
 
-	LG("DO_STRING", "%s", str);
+	LG("DO_STRING", "%s\n", str);
 	luaL_dostring(g_pLuaState, str);
 	return true;
 }
 
 bool CGameApp::OpcodeHandle_MmLogin(void* ctx, DataSocket* /*sock*/, RPacket& recv) {
-	GameAppCtx(ctx)->app->AfterPlayerLogin(READ_STRING(recv));
+	// Packet layout: WRITE_LONG(0), WRITE_STRING(name)
+	READ_LONG(recv);
+	const char* name = READ_STRING(recv);
+	if (!name) {
+		return true;
+	}
+	GameAppCtx(ctx)->app->AfterPlayerLogin(name);
 	return true;
 }
 

@@ -2548,16 +2548,17 @@ bool CTableAct::Init(void) {
 bool CTableAct::ReadAllData(CPlayer* pPlayer, DWORD act_id) {
 	T_B if (!pPlayer) return false;
 
-	string buf[3];
+	string buf[2];
 	char param[] = "gm, act_name";
 	char filter[80];
 	_snprintf_s(filter, sizeof(filter), _TRUNCATE, "act_id=%d", act_id);
-	int r = _get_row(buf, 3, param, filter);
+	int r = _get_row(buf, 2, param, filter);
 	int r1 = get_affected_rows();
 	if (DBOK(r) && r1 > 0) {
 		pPlayer->SetGMLev(Str2Int(buf[0]));
 		pPlayer->SetActName(buf[1].c_str());
-		pPlayer->SetIMP(Str2Int(buf[2].c_str()));
+		// Account table has no IMP column; character IMP is loaded via CCharacter::SetIMP.
+		// Never sync here — CMD_MM_DO_STRING during enter can SEGV if the script is null.
 		return true;
 	}
 

@@ -310,7 +310,14 @@ const char* CResourceBundleManage::LoadResString(const char* key) {
 
 UnicodeString CResourceBundleManage::LoadUResString(const char* key) {
 	UErrorCode status = U_ZERO_ERROR;
-	return m_pResourceBundle->getStringEx(key, status);
+	if (!m_pResourceBundle || !key) {
+		return {};
+	}
+	UnicodeString result = m_pResourceBundle->getStringEx(key, status);
+	if (U_FAILURE(status)) {
+		return {};
+	}
+	return result;
 }
 
 // 格式根据参数化一个字符串

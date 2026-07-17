@@ -67,7 +67,10 @@ do_build() {
     make -j"$JOBS" > "$LOG_FILE" 2>&1
     local EXIT_CODE=$?
 
-    local ERROR_COUNT=$(grep -c 'error:' "$LOG_FILE" 2>/dev/null || echo 0)
+    # grep -c exits 1 when count is 0; do not use `|| echo 0` (that yields "0\n0")
+    local ERROR_COUNT
+    ERROR_COUNT=$(grep -c 'error:' "$LOG_FILE" 2>/dev/null || true)
+    ERROR_COUNT=${ERROR_COUNT:-0}
 
     if [ $EXIT_CODE -eq 0 ] && [ "$ERROR_COUNT" -eq 0 ]; then
         echo -e "${GREEN}============================================${NC}"
