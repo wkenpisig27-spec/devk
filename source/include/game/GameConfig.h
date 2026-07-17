@@ -36,10 +36,11 @@ public:
 	int m_iFogB;
 	float m_fExp2;
 	BOOL m_bFogEnabled;
-	float m_fOutlineWidth;
+	float m_fOutlineWidth; // world-space extrusion (typical 0.012–0.025)
 	float m_fOutlineColorR;
 	float m_fOutlineColorG;
 	float m_fOutlineColorB;
+	float m_fOutlineRefDepth; // reserved (unused; kept for config/API compat)
 	BOOL m_bStaticCelEnabled;
 	BOOL m_bWaterEnhance;
 	BOOL m_bSRGBWrite;

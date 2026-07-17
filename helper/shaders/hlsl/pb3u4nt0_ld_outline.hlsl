@@ -1,6 +1,6 @@
 //==============================================================================
 // pb3u4nt0_ld_outline.hlsl - Outline pass, 4 bone influences
-// Inverted hull: extrude in clip space (constant pixel width), tinted color.
+// Inverted hull: world-space extrusion, tinted color.
 //==============================================================================
 #include "common.hlsli"
 

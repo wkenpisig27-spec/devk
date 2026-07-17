@@ -3,8 +3,9 @@
 //==============================================================================
 
 // Constant Registers (set by engine in lwxRenderCtrVS.cpp)
-// c0      = Base {1.0, outline_ndc, 0.0, 765.01}  - w is bone index multiplier
-//           Base.y is runtime outline width when > 0 (set during outline pass)
+// c0      = Base {1.0, outline_world, reserved, 765.01}
+//           Base.y = world-space outline width when >= 0.005 (outline pass)
+//           Base.w = bone index multiplier
 // c1-c4   = ViewProjection matrix (transposed)
 // c5      = Light direction (in object space)
 // c6      = Ambient color
@@ -152,21 +153,29 @@ float3 TransformNormalByBone(float3 nrm, int boneBase)
 //------------------------------------------------------------------------------
 // Outline pass helpers
 //------------------------------------------------------------------------------
-// Outline width as a fraction of NDC (clip-space xy is [-1,1], so this
-// translates to roughly OUTLINE_NDC * 0.5 * screen_width pixels).
-//   0.003  -> ~2 px at 1280, ~3 px at 1920
-//   0.0025 -> ~1.6 px at 1280, ~2.4 px at 1920 (default — modern toon look)
-#ifndef OUTLINE_NDC
-#define OUTLINE_NDC 0.0025
+// World-space inverted hull: extrude along the object-space normal by a fixed
+// world-unit width. Zoom in this client is mostly FOV (camera XY only moves
+// ~40→45), so clip-depth scaling barely changes — world extrusion keeps the
+// stroke a constant fraction of the character at every zoom.
+//
+// Base.y = world width when >= 0.005. Smaller values are treated as legacy NDC
+// leftovers (~0.0025) and fall back to OUTLINE_WORLD so old binaries still look
+// correct after a shader-only deploy.
+#ifndef OUTLINE_WORLD
+#define OUTLINE_WORLD 0.018
 #endif
 
 #ifndef OUTLINE_COLOR
 #define OUTLINE_COLOR float4(0.10, 0.06, 0.08, 1.0)
 #endif
 
-float GetOutlineNDC()
+float GetOutlineWorld()
 {
-    return (Base.y > 0.0) ? Base.y : OUTLINE_NDC;
+    float w = Base.y;
+    // Legacy NDC configs were ~0.002–0.004; world widths are ~0.01–0.04.
+    if (w < 0.005)
+        return OUTLINE_WORLD;
+    return w;
 }
 
 float4 GetOutlineColor()
@@ -177,22 +186,14 @@ float4 GetOutlineColor()
     return OUTLINE_COLOR;
 }
 
-// Distance-scaled outline extrusion: extrude in clip-space along the
-// screen-projected normal, scaled by w so the perspective divide leaves a
-// constant NDC offset → constant pixel width regardless of depth.
+// World-space outline extrusion (scales with FOV / character screen size).
 //
 // posOS - object-space position (post-bone for skinned meshes)
-// nrmOS - object-space normal (post-bone for skinned meshes)
+// nrmOS - object-space normal (post-bone for skinned meshes; should be normalized)
 float4 OutlineClipPos(float3 posOS, float3 nrmOS)
 {
-    float4 clipPos = mul(float4(posOS, 1.0), ViewProj);
-    float4 clipNrm = mul(float4(nrmOS, 0.0), ViewProj);
-
-    // Direction in screen space (clip-space xy projected to NDC).
-    float2 dir = normalize(clipNrm.xy);
-
-    clipPos.xy += dir * GetOutlineNDC() * clipPos.w;
-    return clipPos;
+    float3 extruded = posOS + nrmOS * GetOutlineWorld();
+    return mul(float4(extruded, 1.0), ViewProj);
 }
 
 // 2.5D toon shading pipeline:

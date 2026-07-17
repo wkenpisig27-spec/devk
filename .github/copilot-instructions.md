@@ -747,7 +747,7 @@ cd "C:\Users\Ken\Desktop\Github\devk\helper\shaders"
 ### Rendering Features (Ported from slimepirates)
 
 - **DXVK 2.x** — DirectX 9 → Vulkan translation; config in `client/system/dxvk.conf`
-- **Cel-shading outline pass** — extra draw pass in `lwItem.cpp` and `lwPhysique.cpp`
+- **Cel-shading outline pass** — inverted-hull draw in `lwItem.cpp` / `lwPhysique.cpp`; **world-space** extrusion in `OutlineClipPos` (`common.hlsli`) so strokes stay proportional under FOV zoom. Tune via `outlineWidth` (world units, ~0.012–0.025) in `user/system.ini` `[visual]`.
 - **3-band quantized lighting** — implemented in `helper/shaders/hlsl/common.hlsli` via `CalcLighting()`
 - **VS_CONST_REG_EYE_POS = c20** — camera eye position in object space (replaces old SPECULAR_PARAMS)
 - **LRU mesh cache** — in `MPResManger.cpp/.h`

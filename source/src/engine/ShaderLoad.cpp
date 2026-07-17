@@ -10,30 +10,33 @@
 
 // --- Outline pass globals ---------------------------------------------------
 bool g_lwOutlineEnabled = true;
-static float g_lwOutlineWidth = 0.0025f;
+static float g_lwOutlineWidth = 0.018f; // world-space extrusion
 static float g_lwOutlineColorR = 0.10f;
 static float g_lwOutlineColorG = 0.06f;
 static float g_lwOutlineColorB = 0.08f;
+static float g_lwOutlineRefDepth = 50.0f; // reserved (unused; kept for API compat)
 
 extern "C" MINDPOWER_API void lwSetOutlineEnabled(int enabled)
 {
     g_lwOutlineEnabled = (enabled != 0);
 }
 
-extern "C" MINDPOWER_API void lwSetOutlineParams(float ndcWidth, float r, float g, float b)
+extern "C" MINDPOWER_API void lwSetOutlineParams(float worldWidth, float r, float g, float b, float refDepth)
 {
-    if (ndcWidth > 0.0f)
-        g_lwOutlineWidth = ndcWidth;
+    if (worldWidth > 0.0f)
+        g_lwOutlineWidth = worldWidth;
     g_lwOutlineColorR = r;
     g_lwOutlineColorG = g;
     g_lwOutlineColorB = b;
+    if (refDepth > 0.0f)
+        g_lwOutlineRefDepth = refDepth;
 }
 
 void lwApplyOutlineVSConstants(lwIDeviceObject* dev_obj)
 {
     if (!dev_obj)
         return;
-    lwVector4 base(1.0f, g_lwOutlineWidth, 0.0f, 765.01f);
+    lwVector4 base(1.0f, g_lwOutlineWidth, g_lwOutlineRefDepth, 765.01f);
     lwVector4 outlineColor(g_lwOutlineColorR, g_lwOutlineColorG, g_lwOutlineColorB, 1.0f);
     dev_obj->SetVertexShaderConstantF(VS_CONST_REG_BASE, (float*)&base, 1);
     dev_obj->SetVertexShaderConstantF(VS_CONST_REG_LIGHT_DIF, (float*)&outlineColor, 1);

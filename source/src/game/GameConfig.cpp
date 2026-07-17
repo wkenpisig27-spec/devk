@@ -104,10 +104,11 @@ void CGameConfig::SetDefault() // Ĭ������
 	m_iFogB = 220;
 	m_fExp2 = 0.0008f;
 	m_bFogEnabled = FALSE;
-	m_fOutlineWidth = 0.0025f;
+	m_fOutlineWidth = 0.018f;
 	m_fOutlineColorR = 0.10f;
 	m_fOutlineColorG = 0.06f;
 	m_fOutlineColorB = 0.08f;
+	m_fOutlineRefDepth = 50.0f;
 	m_bStaticCelEnabled = TRUE;
 	m_bWaterEnhance = TRUE;
 	m_bSRGBWrite = FALSE;
@@ -128,14 +129,19 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 	GetPrivateProfileStringA("visual", "fogDensity", "0.0008", buf, sizeof(buf), pszIniFileName);
 	m_fExp2 = (float)atof(buf);
 
-	GetPrivateProfileStringA("visual", "outlineWidth", "0.0025", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "outlineWidth", "0.018", buf, sizeof(buf), pszIniFileName);
 	m_fOutlineWidth = (float)atof(buf);
+	// Migrate legacy NDC widths (~0.0025) to world-space default
+	if (m_fOutlineWidth > 0.0f && m_fOutlineWidth < 0.005f)
+		m_fOutlineWidth = 0.018f;
 	GetPrivateProfileStringA("visual", "outlineColorR", "0.10", buf, sizeof(buf), pszIniFileName);
 	m_fOutlineColorR = (float)atof(buf);
 	GetPrivateProfileStringA("visual", "outlineColorG", "0.06", buf, sizeof(buf), pszIniFileName);
 	m_fOutlineColorG = (float)atof(buf);
 	GetPrivateProfileStringA("visual", "outlineColorB", "0.08", buf, sizeof(buf), pszIniFileName);
 	m_fOutlineColorB = (float)atof(buf);
+	GetPrivateProfileStringA("visual", "outlineRefDepth", "50.0", buf, sizeof(buf), pszIniFileName);
+	m_fOutlineRefDepth = (float)atof(buf);
 
 	m_bStaticCelEnabled = GetPrivateProfileInt("visual", "staticCel", m_bStaticCelEnabled ? 1 : 0, pszIniFileName) != 0;
 	m_bWaterEnhance = GetPrivateProfileInt("visual", "waterEnhance", m_bWaterEnhance ? 1 : 0, pszIniFileName) != 0;
@@ -143,7 +149,7 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 }
 
 void CGameConfig::ApplyVisualSettingsToEngine() {
-	lwSetOutlineParams(m_fOutlineWidth, m_fOutlineColorR, m_fOutlineColorG, m_fOutlineColorB);
+	lwSetOutlineParams(m_fOutlineWidth, m_fOutlineColorR, m_fOutlineColorG, m_fOutlineColorB, m_fOutlineRefDepth);
 }
 
 void CGameConfig::Load(const char* pszFileName) //  ��kop.cfg
@@ -234,6 +240,8 @@ void CGameConfig::Load(const char* pszFileName) //  ��kop.cfg
 			m_bFogEnabled = Str2Int(strValue);
 		} else if (strKey == "outline_width") {
 			m_fOutlineWidth = Str2Float(strValue);
+			if (m_fOutlineWidth > 0.0f && m_fOutlineWidth < 0.005f)
+				m_fOutlineWidth = 0.018f;
 		} else if (strKey == "outline_color") {
 			string strColor[3];
 			if (Util_ResolveTextLine(strValue.c_str(), strColor, 3, ',') == 3) {
@@ -241,6 +249,8 @@ void CGameConfig::Load(const char* pszFileName) //  ��kop.cfg
 				m_fOutlineColorG = Str2Float(strColor[1]);
 				m_fOutlineColorB = Str2Float(strColor[2]);
 			}
+		} else if (strKey == "outline_ref_depth") {
+			m_fOutlineRefDepth = Str2Float(strValue);
 		} else if (strKey == "static_cel") {
 			m_bStaticCelEnabled = Str2Int(strValue);
 		} else if (strKey == "water_enhance") {
