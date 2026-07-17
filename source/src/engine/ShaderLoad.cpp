@@ -10,7 +10,7 @@
 
 // --- Outline pass globals ---------------------------------------------------
 bool g_lwOutlineEnabled = true;
-static float g_lwOutlineWidth = 0.018f; // world-space extrusion
+static float g_lwOutlineWidth = 0.014f; // world-space extrusion
 static float g_lwOutlineColorR = 0.10f;
 static float g_lwOutlineColorG = 0.06f;
 static float g_lwOutlineColorB = 0.08f;

@@ -104,7 +104,7 @@ void CGameConfig::SetDefault() // Ĭ������
 	m_iFogB = 220;
 	m_fExp2 = 0.0008f;
 	m_bFogEnabled = FALSE;
-	m_fOutlineWidth = 0.018f;
+	m_fOutlineWidth = 0.014f;
 	m_fOutlineColorR = 0.10f;
 	m_fOutlineColorG = 0.06f;
 	m_fOutlineColorB = 0.08f;
@@ -129,11 +129,11 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 	GetPrivateProfileStringA("visual", "fogDensity", "0.0008", buf, sizeof(buf), pszIniFileName);
 	m_fExp2 = (float)atof(buf);
 
-	GetPrivateProfileStringA("visual", "outlineWidth", "0.018", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "outlineWidth", "0.014", buf, sizeof(buf), pszIniFileName);
 	m_fOutlineWidth = (float)atof(buf);
 	// Migrate legacy NDC widths (~0.0025) to world-space default
 	if (m_fOutlineWidth > 0.0f && m_fOutlineWidth < 0.005f)
-		m_fOutlineWidth = 0.018f;
+		m_fOutlineWidth = 0.014f;
 	GetPrivateProfileStringA("visual", "outlineColorR", "0.10", buf, sizeof(buf), pszIniFileName);
 	m_fOutlineColorR = (float)atof(buf);
 	GetPrivateProfileStringA("visual", "outlineColorG", "0.06", buf, sizeof(buf), pszIniFileName);
@@ -241,7 +241,7 @@ void CGameConfig::Load(const char* pszFileName) //  ��kop.cfg
 		} else if (strKey == "outline_width") {
 			m_fOutlineWidth = Str2Float(strValue);
 			if (m_fOutlineWidth > 0.0f && m_fOutlineWidth < 0.005f)
-				m_fOutlineWidth = 0.018f;
+				m_fOutlineWidth = 0.014f;
 		} else if (strKey == "outline_color") {
 			string strColor[3];
 			if (Util_ResolveTextLine(strValue.c_str(), strColor, 3, ',') == 3) {

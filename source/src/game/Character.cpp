@@ -28,6 +28,7 @@
 #include "SkillStateRecord.h"
 #include "uistartform.h"
 #include "netprotocol.h"
+#include "ShaderLoad.h"
 #include "uiboatform.h"
 #include "steadyframe.h"
 #include "event.h"
@@ -617,7 +618,18 @@ void CCharacter::Render() {
 
 	CSceneNode::Render();
 
+	// Resource props (trees, mines, fish nodes, etc.) use the same physique
+	// path as characters. Inverted-hull outlines fill their dense foliage /
+	// ornament geometry with black blotches — skip outlines for them only.
+	extern bool g_lwOutlineEnabled;
+	const bool savedOutline = g_lwOutlineEnabled;
+	if (IsResource() && savedOutline)
+		lwSetOutlineEnabled(0);
+
 	CCharacterModel::Render();
+
+	if (IsResource() && savedOutline)
+		lwSetOutlineEnabled(1);
 }
 
 void CCharacter::RefreshLevel(int nMainLevel) {

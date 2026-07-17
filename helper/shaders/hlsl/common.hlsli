@@ -161,8 +161,16 @@ float3 TransformNormalByBone(float3 nrm, int boneBase)
 // Base.y = world width when >= 0.005. Smaller values are treated as legacy NDC
 // leftovers (~0.0025) and fall back to OUTLINE_WORLD so old binaries still look
 // correct after a shader-only deploy.
+//
+// OUTLINE_Z_PUSH shifts extruded verts away from the camera so the hull sits
+// slightly behind front faces — reduces black blotches in concave areas
+// (neck, armpits, fingers, muscle creases).
 #ifndef OUTLINE_WORLD
-#define OUTLINE_WORLD 0.018
+#define OUTLINE_WORLD 0.014
+#endif
+
+#ifndef OUTLINE_Z_PUSH
+#define OUTLINE_Z_PUSH 0.03
 #endif
 
 #ifndef OUTLINE_COLOR
@@ -192,7 +200,13 @@ float4 GetOutlineColor()
 // nrmOS - object-space normal (post-bone for skinned meshes; should be normalized)
 float4 OutlineClipPos(float3 posOS, float3 nrmOS)
 {
-    float3 extruded = posOS + nrmOS * GetOutlineWorld();
+    float3 toVert = posOS - EyePosOS.xyz;
+    float len = length(toVert);
+    float3 away = (len > 0.0001) ? (toVert / len) : float3(0, 0, 1);
+
+    float3 extruded = posOS
+                    + nrmOS * GetOutlineWorld()
+                    + away * OUTLINE_Z_PUSH;
     return mul(float4(extruded, 1.0), ViewProj);
 }
 
@@ -212,8 +226,8 @@ float4 OutlineClipPos(float3 posOS, float3 nrmOS)
 #endif
 #define CEL_BAND0    0.40   // shadow -> mid threshold
 #define CEL_BAND1    0.75   // mid    -> lit threshold
-#define CEL_LEVEL0   0.45   // shadow brightness
-#define CEL_LEVEL1   0.75   // mid brightness
+#define CEL_LEVEL0   0.55   // shadow brightness (raised to avoid pure-black bands)
+#define CEL_LEVEL1   0.78   // mid brightness
 #define CEL_LEVEL2   1.00   // lit brightness
 
 // --- Shadow tint (cool shadow / warm highlight) ----------------------------
