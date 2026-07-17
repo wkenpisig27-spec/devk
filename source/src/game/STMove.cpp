@@ -142,10 +142,10 @@ void CWaitMoveState::ChaRun() {
 	// Use smooth blending for better animation transitions
 	_pCha->PlayPose(_pCha->GetPose(POSE_RUN), PLAY_LOOP_SMOOTH);
 	
-	// FPS-aware walk animation velocity: base was moveSpeed/480 at 30 FPS.
-	// Scale proportionally so the animation plays at the same real-time speed at any FPS.
+	// FPS-aware walk animation velocity. Slightly snappier than stock (420 vs 480)
+	// so locomotion reads closer to RO sprite cadence.
 	const float fpsMultiplier = (float)CGameApp::GetFrameFPS() / 30.0f;
-	_pCha->SetPoseVelocity((float)_pCha->getMoveSpeed() / (480.0f * fpsMultiplier));
+	_pCha->SetPoseVelocity((float)_pCha->getMoveSpeed() / (420.0f * fpsMultiplier));
 	
 	_pCha->RefreshItem();
 }

@@ -182,7 +182,7 @@ int CSystemProperties::readFromFile(const char* szIniFileName) {
 	// video — use sensible defaults for any key that is missing from the file
 	m_videoProp.nTexture      = GetPrivateProfileInt("video", "texture",      0, szIniFileName);
 	m_videoProp.bAnimation    = int2bool(GetPrivateProfileInt("video", "animation",    1, szIniFileName));
-	m_videoProp.bCameraRotate = int2bool(GetPrivateProfileInt("video", "cameraRotate", 1, szIniFileName));
+	m_videoProp.bCameraRotate = int2bool(GetPrivateProfileInt("video", "cameraRotate", 0, szIniFileName));
 
 	// shadowMode: check new key first, fall back to legacy "groundMark"
 	iTemp = GetPrivateProfileInt("video", "shadowMode", DEFAULT_NUM, szIniFileName);
@@ -378,9 +378,9 @@ void CSystemMgr::LoadCustomProp() {
 			// ��ȡ�����ļ�ʧ��,��Ĭ��ֵ���
 			m_sysProp.m_videoProp.nTexture = 0;
 			m_sysProp.m_videoProp.bAnimation = true;
-			m_sysProp.m_videoProp.bCameraRotate = true;
+			m_sysProp.m_videoProp.bCameraRotate = false; // RO: locked isometric
 			// m_sysProp.m_videoProp.bViewFar=true;      //ȡ����ҰԶ��(Michael Chen 2005-04-22
-			m_sysProp.m_videoProp.nShadowMode = 1; // Default: On
+			m_sysProp.m_videoProp.nShadowMode = 1; // Soft blob foot-shadow On
 			m_sysProp.m_videoProp.bDepth32 = true;
 			m_sysProp.m_videoProp.nQuality = 0;
 			m_sysProp.m_videoProp.bFullScreen = false;

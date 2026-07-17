@@ -128,6 +128,16 @@ void CGameScene::_Render() {
 
 	rsm->BeginScene();
 
+	// Soft distance fog (RO: softens world without crushing character contrast).
+	// Disabled again before UI / path overlays further down in this function.
+	if (g_Config.m_bFogEnabled) {
+		SetupVertexFog(dev_obj, 0.0f, 0.0f,
+			D3DCOLOR_XRGB(g_Config.m_iFogR, g_Config.m_iFogG, g_Config.m_iFogB),
+			D3DFOG_EXP2, TRUE, g_Config.m_fExp2);
+	} else {
+		dev_obj->SetRenderState(D3DRS_FOGENABLE, FALSE);
+	}
+
 	if (g_Config.m_bEditor) {
 		if (_vMousePos.x > 0) {
 			if (g_Editor.IsEnable())

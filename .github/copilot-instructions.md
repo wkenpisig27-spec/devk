@@ -748,6 +748,7 @@ cd "C:\Users\Ken\Desktop\Github\devk\helper\shaders"
 
 - **DXVK 2.x** — DirectX 9 → Vulkan translation; config in `client/system/dxvk.conf`
 - **Cel-shading outline pass** — inverted-hull draw in `lwItem.cpp` / `lwPhysique.cpp`; **world-space** extrusion in `OutlineClipPos` (`common.hlsli`) so strokes stay proportional under FOV zoom. Tune via `outlineWidth` (world units, ~0.012–0.025) in `user/system.ini` `[visual]`.
+- **RO visual preset** — high character cel floor / no toon-spec / subtle rim (`common.hlsli`); brighter character ambient vs softer world (`RenderStateMgr.cpp`); soft blob shadows (shadow map off by default); soft EXP2 fog in `SceneRender::_Render`; isometric `cameraRotate=0`; snappier walk pose velocity in `STMove.cpp`.
 - **3-band quantized lighting** — implemented in `helper/shaders/hlsl/common.hlsli` via `CalcLighting()`
 - **VS_CONST_REG_EYE_POS = c20** — camera eye position in object space (replaces old SPECULAR_PARAMS)
 - **LRU mesh cache** — in `MPResManger.cpp/.h`

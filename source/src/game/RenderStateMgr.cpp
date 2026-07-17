@@ -44,9 +44,9 @@ HRESULT RenderStateMgr::Init(MPIDeviceObject* dev_obj) {
 
 		rs_id = 0;
 		_rsa_sceneobj->SetStateValue(rs_id++, D3DRS_ALPHABLENDENABLE, TRUE);
-		_rsa_sceneobj->SetStateValue(rs_id++, D3DRS_AMBIENT, 0xff9098b0);  // cool sky-ambient blue-grey
+		_rsa_sceneobj->SetStateValue(rs_id++, D3DRS_AMBIENT, 0xff8890a0);  // world: slightly cooler/dimmer than characters
 		_rsa_sceneobj->SetStateValue(rs_id++, D3DRS_LIGHTING, TRUE);
-		_rsa_sceneobj->SetStateValue(rs_id++, D3DRS_SPECULARENABLE, TRUE);
+		_rsa_sceneobj->SetStateValue(rs_id++, D3DRS_SPECULARENABLE, FALSE);
 
 		// init texture stage state
 		tss_id = 10;
@@ -74,9 +74,9 @@ HRESULT RenderStateMgr::Init(MPIDeviceObject* dev_obj) {
 		_scnobj_lgt.Direction.z = -0.5f;
 		D3DXVec3Normalize((D3DXVECTOR3*)&_scnobj_lgt.Direction, (D3DXVECTOR3*)&_scnobj_lgt.Direction);
 		_scnobj_lgt.Diffuse.a = 1.0f;
-		_scnobj_lgt.Diffuse.r = 1.00f;   // warm sunlight tint
-		_scnobj_lgt.Diffuse.g = 0.95f;
-		_scnobj_lgt.Diffuse.b = 0.82f;
+		_scnobj_lgt.Diffuse.r = 0.95f;   // softer world sun (less neon punch)
+		_scnobj_lgt.Diffuse.g = 0.92f;
+		_scnobj_lgt.Diffuse.b = 0.85f;
 	}
 	// end
 
@@ -87,8 +87,8 @@ HRESULT RenderStateMgr::Init(MPIDeviceObject* dev_obj) {
 
 		rs_id = 0;
 		_rsa_cha->SetStateValue(rs_id++, D3DRS_LIGHTING, TRUE);
-		_rsa_cha->SetStateValue(rs_id++, D3DRS_AMBIENT, 0xffb0b8c8);  // cool sky-ambient blue-grey
-		_rsa_cha->SetStateValue(rs_id++, D3DRS_SPECULARENABLE, TRUE);
+		_rsa_cha->SetStateValue(rs_id++, D3DRS_AMBIENT, 0xffd0d6e0);  // RO: bright character ambient (sprite read)
+		_rsa_cha->SetStateValue(rs_id++, D3DRS_SPECULARENABLE, FALSE);
 
 		tss_id = 10;
 		// check best filter supporting
@@ -112,9 +112,9 @@ HRESULT RenderStateMgr::Init(MPIDeviceObject* dev_obj) {
 		_cha_lgt.Direction.z = -1.0f;
 		D3DXVec3Normalize((D3DXVECTOR3*)&_cha_lgt.Direction, (D3DXVECTOR3*)&_cha_lgt.Direction);
 		_cha_lgt.Diffuse.a = 1.0f;
-		_cha_lgt.Diffuse.r = 1.00f;   // warm sunlight tint
-		_cha_lgt.Diffuse.g = 0.95f;
-		_cha_lgt.Diffuse.b = 0.82f;
+		_cha_lgt.Diffuse.r = 1.00f;   // warm but flat key light for characters
+		_cha_lgt.Diffuse.g = 0.98f;
+		_cha_lgt.Diffuse.b = 0.92f;
 	}
 	// end
 

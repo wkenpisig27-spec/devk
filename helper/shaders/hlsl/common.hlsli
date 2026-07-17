@@ -174,7 +174,7 @@ float3 TransformNormalByBone(float3 nrm, int boneBase)
 #endif
 
 #ifndef OUTLINE_COLOR
-#define OUTLINE_COLOR float4(0.10, 0.06, 0.08, 1.0)
+#define OUTLINE_COLOR float4(0.12, 0.08, 0.10, 1.0)
 #endif
 
 float GetOutlineWorld()
@@ -210,49 +210,49 @@ float4 OutlineClipPos(float3 posOS, float3 nrmOS)
     return mul(float4(extruded, 1.0), ViewProj);
 }
 
-// 2.5D toon shading pipeline:
-//   1. Cel-quantized diffuse (existing)
-//   2. Tinted shadow / warm highlight (hue shift across the band)
-//   3. Toon specular (hard highlight blob on lit side)
-//   4. Rim light (warm fresnel along silhouette)
+// 2.5D toon shading pipeline (Ragnarok Online–leaning preset):
+//   1. Cel-quantized diffuse — high shadow floor so characters stay "sprite bright"
+//   2. Soft cool/warm tint (muted)
+//   3. Specular OFF — RO sprites rarely have plastic highlight blobs
+//   4. Subtle rim only — silhouette lift without 3D glow
 //
 // Each of (CEL/TINT/SPEC/RIM) has its own enable flag — toggle independently.
 // All four output through output.Color, modulated against texture by the FF
 // MODULATE stage. No pixel shader required.
 
-// --- Cel bands -------------------------------------------------------------
+// --- Cel bands (characters) ------------------------------------------------
 #ifndef CEL_ENABLE
 #define CEL_ENABLE   1
 #endif
-#define CEL_BAND0    0.40   // shadow -> mid threshold
-#define CEL_BAND1    0.75   // mid    -> lit threshold
-#define CEL_LEVEL0   0.55   // shadow brightness (raised to avoid pure-black bands)
-#define CEL_LEVEL1   0.78   // mid brightness
+#define CEL_BAND0    0.35   // shadow -> mid (sooner mid so less crushed dark)
+#define CEL_BAND1    0.70   // mid    -> lit
+#define CEL_LEVEL0   0.62   // shadow floor — RO characters stay readable
+#define CEL_LEVEL1   0.84   // mid brightness
 #define CEL_LEVEL2   1.00   // lit brightness
 
 // --- Shadow tint (cool shadow / warm highlight) ----------------------------
 #ifndef TINT_ENABLE
 #define TINT_ENABLE  1
 #endif
-// Subtle hue shift; multiply the lit color so it survives ambient changes.
-#define SHADOW_TINT  float3(0.92, 0.96, 1.05)   // gentle cool
-#define LIGHT_TINT   float3(1.04, 1.00, 0.95)   // gentle warm
+// Muted tint — less "modern anime," closer to painted sprite light.
+#define SHADOW_TINT  float3(0.96, 0.97, 1.02)
+#define LIGHT_TINT   float3(1.02, 1.00, 0.97)
 
-// --- Toon specular (hard blob highlight) -----------------------------------
+// --- Toon specular (disabled for RO flat-sprite read) ----------------------
 #ifndef SPEC_ENABLE
-#define SPEC_ENABLE  1
+#define SPEC_ENABLE  0
 #endif
-#define SPEC_THRESH  0.93    // dot(N,H) above this = highlight (sharp blob)
-#define SPEC_GAIN    0.70    // additive intensity
+#define SPEC_THRESH  0.93
+#define SPEC_GAIN    0.25
 #define SPEC_COLOR   float3(1.00, 0.95, 0.85)
 
-// --- Rim light (warm fresnel) ----------------------------------------------
+// --- Rim light (subtle silhouette only) ------------------------------------
 #ifndef RIM_ENABLE
 #define RIM_ENABLE   1
 #endif
-#define RIM_THRESH   0.45    // 1 - dot(N,V) above this = rim
-#define RIM_GAIN     0.85    // additive intensity (raised so it survives saturation)
-#define RIM_COLOR    float3(1.00, 0.85, 0.65)   // warmer for stronger anime read
+#define RIM_THRESH   0.55
+#define RIM_GAIN     0.30
+#define RIM_COLOR    float3(1.00, 0.92, 0.82)
 
 // Compute base diffuse band (cel or half-Lambert), with optional tint.
 float4 _ApplyDiffuseBand(float NdotL)
@@ -315,15 +315,15 @@ float4 CalcLighting(float3 normal)
     return _ApplyDiffuseBand(NdotL);
 }
 
-// Softer 2-band cel for static environment geometry (trees, props).
-// Enable via ENV_CEL_ENABLE in the including shader.
+// Softer flatter cel for static environment (world stays richer than characters,
+// but without crushed blacks — RO separates "illustrated cha" from "3D world").
 #ifndef ENV_CEL_ENABLE
 #define ENV_CEL_ENABLE 0
 #endif
-#define ENV_CEL_BAND0    0.35
-#define ENV_CEL_BAND1    0.70
-#define ENV_CEL_LEVEL0   0.50
-#define ENV_CEL_LEVEL1   0.80
+#define ENV_CEL_BAND0    0.30
+#define ENV_CEL_BAND1    0.65
+#define ENV_CEL_LEVEL0   0.58
+#define ENV_CEL_LEVEL1   0.82
 #define ENV_CEL_LEVEL2   1.00
 
 float4 CalcLightingEnv(float3 normal)

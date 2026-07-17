@@ -94,20 +94,20 @@ void CGameConfig::SetDefault() // Ĭ������
 	m_nMovieH = -1;
 	// End
 
-	// Shadow mapping defaults
-	m_bEnableShadowMap = TRUE;
-	m_nShadowMapQuality = 1;  // 1 = Medium (1024)
+	// Shadow mapping defaults — RO look prefers soft blob foot-shadows, not SM
+	m_bEnableShadowMap = FALSE;
+	m_nShadowMapQuality = 1;  // 1 = Medium (1024) if user enables SM later
 
-	// Visual defaults (fog, outline, water, gamma)
-	m_iFogR = 180;
-	m_iFogG = 200;
+	// Visual defaults (RO-leaning fog, outline, water, gamma)
+	m_iFogR = 200;
+	m_iFogG = 210;
 	m_iFogB = 220;
-	m_fExp2 = 0.0008f;
-	m_bFogEnabled = FALSE;
+	m_fExp2 = 0.00045f;
+	m_bFogEnabled = TRUE;
 	m_fOutlineWidth = 0.014f;
-	m_fOutlineColorR = 0.10f;
-	m_fOutlineColorG = 0.06f;
-	m_fOutlineColorB = 0.08f;
+	m_fOutlineColorR = 0.12f;
+	m_fOutlineColorG = 0.08f;
+	m_fOutlineColorB = 0.10f;
 	m_fOutlineRefDepth = 50.0f;
 	m_bStaticCelEnabled = TRUE;
 	m_bWaterEnhance = TRUE;
@@ -126,7 +126,7 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 	m_iFogB = GetPrivateProfileInt("visual", "fogB", m_iFogB, pszIniFileName);
 
 	char buf[64];
-	GetPrivateProfileStringA("visual", "fogDensity", "0.0008", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "fogDensity", "0.00045", buf, sizeof(buf), pszIniFileName);
 	m_fExp2 = (float)atof(buf);
 
 	GetPrivateProfileStringA("visual", "outlineWidth", "0.014", buf, sizeof(buf), pszIniFileName);
@@ -134,11 +134,11 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 	// Migrate legacy NDC widths (~0.0025) to world-space default
 	if (m_fOutlineWidth > 0.0f && m_fOutlineWidth < 0.005f)
 		m_fOutlineWidth = 0.014f;
-	GetPrivateProfileStringA("visual", "outlineColorR", "0.10", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "outlineColorR", "0.12", buf, sizeof(buf), pszIniFileName);
 	m_fOutlineColorR = (float)atof(buf);
-	GetPrivateProfileStringA("visual", "outlineColorG", "0.06", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "outlineColorG", "0.08", buf, sizeof(buf), pszIniFileName);
 	m_fOutlineColorG = (float)atof(buf);
-	GetPrivateProfileStringA("visual", "outlineColorB", "0.08", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "outlineColorB", "0.10", buf, sizeof(buf), pszIniFileName);
 	m_fOutlineColorB = (float)atof(buf);
 	GetPrivateProfileStringA("visual", "outlineRefDepth", "50.0", buf, sizeof(buf), pszIniFileName);
 	m_fOutlineRefDepth = (float)atof(buf);
@@ -150,6 +150,8 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 
 void CGameConfig::ApplyVisualSettingsToEngine() {
 	lwSetOutlineParams(m_fOutlineWidth, m_fOutlineColorR, m_fOutlineColorG, m_fOutlineColorB, m_fOutlineRefDepth);
+	// Fog is applied per-frame in CGameScene::_Render from these fields.
+	// Shadow map stays off by default so soft blob foot-shadows remain (RO look).
 }
 
 void CGameConfig::Load(const char* pszFileName) //  ��kop.cfg
