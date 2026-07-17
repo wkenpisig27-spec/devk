@@ -398,9 +398,20 @@ bool SubMap::IsMoveAble(Entity* pCEnt, Long lPosX, Long lPosY) {
 BOOL SubMap::LoadEventEntity() {
 	T_B
 		g_pScriptMap = this;
+	// On-disk names vary: heilongentity.lua vs garnerEntity.lua. Try both casings on Linux.
+	static const char* kEntitySuffixes[] = {"entity.lua", "Entity.lua"};
 	char szMapEntity[256];
-	_snprintf_s(szMapEntity, sizeof(szMapEntity), _TRUNCATE, "%s/%s%s", GetName(), GetName(), "entity.lua");
-	ReloadEntity(GetResPath(szMapEntity));
+	for (const char* suffix : kEntitySuffixes) {
+		_snprintf_s(szMapEntity, sizeof(szMapEntity), _TRUNCATE, "%s/%s%s", GetName(), GetName(), suffix);
+		const char* path = GetResPath(szMapEntity);
+		FILE* fp = nullptr;
+		if (fopen_s(&fp, path, "rb") == 0 && fp) {
+			fclose(fp);
+			ReloadEntity(path);
+			return TRUE;
+		}
+	}
+	LG("initmap", "map entity script not found for %s (tried entity.lua / Entity.lua)\n", GetName());
 	return TRUE;
 	T_E
 }

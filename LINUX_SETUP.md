@@ -293,26 +293,13 @@ The deploy script copies:
 - `.cfg` files from `server/` (skips if already exist to preserve local edits)
 - `resource/` directory from `server/`
 - `.txt` data files from `server/`
+- `addons/` and `license.lic`
+- `en_US.res` + `Locale.loc` (from `server/` or `helper/translation/server/`, or generates a default `Locale.loc`)
+- Linux case-sensitivity fixups (symlinks for alternate table/entity casings)
 
-### Copy files NOT handled by the deploy script
+### Locale note
 
-The deploy script doesn't copy addons, `.lic`, `.res`, or `cmd.cfg`. Copy them manually:
-
-```bash
-cd ~/pkodev
-
-# Addons (Lua server scripts)
-cp -r server/addons ~/pkodev-server/
-
-# License, language, and config files
-cp server/license.lic ~/pkodev-server/
-cp server/en_US.res ~/pkodev-server/
-cp server/cmd.cfg ~/pkodev-server/
-
-# Create LOG and data directories
-mkdir -p ~/pkodev-server/LOG/{AccountServer,GameServer,GateServer,GroupServer}
-mkdir -p ~/pkodev-server/PlayerData
-```
+`*.res` / `*.loc` are gitignored. Keep a local `server/en_US.res` (build with `genrb` from `helper/translation/server/en_US.txt`) so deploy can copy it. A template is at `server/Locale.loc.example`.
 
 ### Verify deploy directory
 
@@ -599,11 +586,14 @@ apt install -y libunixodbc-dev libssl-dev libicu-dev libluajit-5.1-dev libbotan-
 ### GameServer: "Load map jump point info error!"
 This means a map's `SwhMap.txt` file was not found. Check:
 ```bash
-# Verify the map resource files exist
-ls ~/pkodev-server/resource/map/garner/
-# Should contain: garnerSwhMap.txt, garnerNPC.txt, etc.
+# Maps live directly under resource/<mapname>/ (no extra map/ segment)
+ls ~/pkodev-server/resource/garner/
+# Should contain: garnerSwhMap.txt, garnerNPC.txt, garner.blk, etc.
 ```
 If maps are listed in `GameServer.cfg` but have no resource directory, comment them out.
+
+### GameServer: skillinfo / Hairs table failed to load
+Linux filenames are case-sensitive. Current code loads `SkillInfo` and `hairs`. Re-run `deploy-linux.sh` (creates safety-net symlinks) or ensure those files exist under `resource/`.
 
 ### Permission denied on binaries
 ```bash

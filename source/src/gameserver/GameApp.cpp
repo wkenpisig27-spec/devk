@@ -65,7 +65,8 @@ extern volatile BOOL g_bGameEnd;
 extern std::string g_strLogName;
 
 char szChaInfoName[256] = "CharacterInfo";
-char szSkillInfoName[256] = "skillinfo";
+// Match on-disk casing so Linux (case-sensitive) loads the same tables as Windows.
+char szSkillInfoName[256] = "SkillInfo";
 char szSkillStateInfoName[256] = "skilleff";
 char szChaLvUpName[256] = "character_lvup";
 char szChaSailLvUpName[256] = "saillvup";
@@ -74,7 +75,7 @@ char szItemInfoName[256] = "ItemInfo";
 char szInitChaItName[256] = "Int_Cha_Item";
 char g_szForgeTable[256] = "forgeitem";
 char szIslandInfoName[256] = "AreaSet";
-char szHairInfoName[64] = "Hairs"; // 可更换的发型记录表
+char szHairInfoName[64] = "hairs"; // 可更换的发型记录表
 
 CAreaSet* CAreaSet::_Instance = nullptr;
 
@@ -478,9 +479,15 @@ BOOL CGameApp::Init() {
 	int nItemRecordNum = CItemRecord::enumItemMax;
 
 	m_CChaRecordSet = new CChaRecordSet(0, defMAX_CHARINFO_NO);
-	LoadTable(m_CChaRecordSet, szChaInfoName);
+	if (!LoadTable(m_CChaRecordSet, szChaInfoName)) {
+		LG("init", "FATAL: failed to load CharacterInfo table\n");
+		return FALSE;
+	}
 	m_CSkillRecordSet = new CSkillRecordSet(0, defMAX_SKILL_NO);
-	LoadTable(m_CSkillRecordSet, szSkillInfoName);
+	if (!LoadTable(m_CSkillRecordSet, szSkillInfoName)) {
+		LG("init", "FATAL: failed to load SkillInfo table\n");
+		return FALSE;
+	}
 	m_CLevelRecordSet = new CLevelRecordSet(0, 600);
 	LoadTable(m_CLevelRecordSet, szChaLvUpName);
 	m_CSailLvRecord = new CSailLvRecordSet(0, 600);
@@ -488,7 +495,10 @@ BOOL CGameApp::Init() {
 	m_CLifeLvRecord = new CLifeLvRecordSet(0, 600);
 	LoadTable(m_CLifeLvRecord, szChaLifeLvUpName);
 	m_CHairRecord = new CHairRecordSet(0, 300);
-	LoadTable(m_CHairRecord, szHairInfoName);
+	if (!LoadTable(m_CHairRecord, szHairInfoName)) {
+		LG("init", "FATAL: failed to load hairs table\n");
+		return FALSE;
+	}
 	// Modify by lark.li 20080822 begin
 	// m_CSkillStateRecordSet	= new CSkillStateRecordSet(0, SKILL_STATE_MAXID);		LoadTable(m_CSkillStateRecordSet,szSkillStateInfoName);
 	m_CSkillStateRecordSet = new CSkillStateRecordSet(0, 300);
@@ -496,7 +506,10 @@ BOOL CGameApp::Init() {
 	// End
 
 	m_CItemRecordSet = new CItemRecordSet(0, nItemRecordNum);
-	LoadTable(m_CItemRecordSet, szItemInfoName);
+	if (!LoadTable(m_CItemRecordSet, szItemInfoName)) {
+		LG("init", "FATAL: failed to load ItemInfo table\n");
+		return FALSE;
+	}
 
 	m_PicSet = new CPicSet();
 	if(!m_PicSet->init())
