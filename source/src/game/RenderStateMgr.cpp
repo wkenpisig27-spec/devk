@@ -44,7 +44,7 @@ HRESULT RenderStateMgr::Init(MPIDeviceObject* dev_obj) {
 
 		rs_id = 0;
 		_rsa_sceneobj->SetStateValue(rs_id++, D3DRS_ALPHABLENDENABLE, TRUE);
-		_rsa_sceneobj->SetStateValue(rs_id++, D3DRS_AMBIENT, 0xff8890a0);  // world: slightly cooler/dimmer than characters
+		_rsa_sceneobj->SetStateValue(rs_id++, D3DRS_AMBIENT, 0xff5a6270);  // darker scenery ambient (less washout)
 		_rsa_sceneobj->SetStateValue(rs_id++, D3DRS_LIGHTING, TRUE);
 		_rsa_sceneobj->SetStateValue(rs_id++, D3DRS_SPECULARENABLE, FALSE);
 
@@ -74,9 +74,9 @@ HRESULT RenderStateMgr::Init(MPIDeviceObject* dev_obj) {
 		_scnobj_lgt.Direction.z = -0.5f;
 		D3DXVec3Normalize((D3DXVECTOR3*)&_scnobj_lgt.Direction, (D3DXVECTOR3*)&_scnobj_lgt.Direction);
 		_scnobj_lgt.Diffuse.a = 1.0f;
-		_scnobj_lgt.Diffuse.r = 0.95f;   // softer world sun (less neon punch)
-		_scnobj_lgt.Diffuse.g = 0.92f;
-		_scnobj_lgt.Diffuse.b = 0.85f;
+		_scnobj_lgt.Diffuse.r = 1.00f;   // keep key light punch so textures stay vivid
+		_scnobj_lgt.Diffuse.g = 0.96f;
+		_scnobj_lgt.Diffuse.b = 0.88f;
 	}
 	// end
 
@@ -87,7 +87,7 @@ HRESULT RenderStateMgr::Init(MPIDeviceObject* dev_obj) {
 
 		rs_id = 0;
 		_rsa_cha->SetStateValue(rs_id++, D3DRS_LIGHTING, TRUE);
-		_rsa_cha->SetStateValue(rs_id++, D3DRS_AMBIENT, 0xffd0d6e0);  // RO: bright character ambient (sprite read)
+		_rsa_cha->SetStateValue(rs_id++, D3DRS_AMBIENT, 0xffb4bcc8);  // bright vs world, but not washed-out white
 		_rsa_cha->SetStateValue(rs_id++, D3DRS_SPECULARENABLE, FALSE);
 
 		tss_id = 10;

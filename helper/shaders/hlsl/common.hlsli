@@ -254,6 +254,17 @@ float4 OutlineClipPos(float3 posOS, float3 nrmOS)
 #define RIM_GAIN     0.30
 #define RIM_COLOR    float3(1.00, 0.92, 0.82)
 
+// Code-side vibrance (no texture edits). 1.0 = unchanged, >1 = more saturated.
+#ifndef COLOR_VIVID
+#define COLOR_VIVID  1.18
+#endif
+
+float3 BoostVividness(float3 c)
+{
+    float luma = dot(c, float3(0.299, 0.587, 0.114));
+    return saturate(lerp(float3(luma, luma, luma), c, COLOR_VIVID));
+}
+
 // Compute base diffuse band (cel or half-Lambert), with optional tint.
 float4 _ApplyDiffuseBand(float NdotL)
 {
@@ -273,6 +284,7 @@ float4 _ApplyDiffuseBand(float NdotL)
     lit *= lerp(SHADOW_TINT, LIGHT_TINT, band);
 #endif
 
+    lit = BoostVividness(lit);
     return float4(lit, Ambient.a);
 }
 
@@ -322,8 +334,8 @@ float4 CalcLighting(float3 normal)
 #endif
 #define ENV_CEL_BAND0    0.30
 #define ENV_CEL_BAND1    0.65
-#define ENV_CEL_LEVEL0   0.58
-#define ENV_CEL_LEVEL1   0.82
+#define ENV_CEL_LEVEL0   0.48
+#define ENV_CEL_LEVEL1   0.78
 #define ENV_CEL_LEVEL2   1.00
 
 float4 CalcLightingEnv(float3 normal)
@@ -337,6 +349,7 @@ float4 CalcLightingEnv(float3 normal)
 #if TINT_ENABLE
     lit *= lerp(SHADOW_TINT, LIGHT_TINT, band);
 #endif
+    lit = BoostVividness(lit);
     return float4(lit, Ambient.a);
 #else
     return CalcLighting(normal);

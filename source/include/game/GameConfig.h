@@ -44,6 +44,7 @@ public:
 	BOOL m_bStaticCelEnabled;
 	BOOL m_bWaterEnhance;
 	BOOL m_bSRGBWrite;
+	float m_fSceneAmbientScale; // multiplies map env ambient (1.0 = stock, <1 darker scenery)
 
 	int m_nMaxChaType;
 	int m_nMaxSceneObjType;

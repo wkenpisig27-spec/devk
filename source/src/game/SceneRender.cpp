@@ -295,7 +295,13 @@ void CGameScene::_Render() {
 	DWORD rs_amb;
 	g_Render.GetRenderState(D3DRS_AMBIENT, &rs_amb);
 
-	amb = D3DCOLOR_XRGB((BYTE)(m_dwEnvColor.r * 255), (BYTE)(m_dwEnvColor.g * 255), (BYTE)(m_dwEnvColor.b * 255));
+	{
+		const float s = g_Config.m_fSceneAmbientScale;
+		amb = D3DCOLOR_XRGB(
+			(BYTE)(m_dwEnvColor.r * 255.0f * s),
+			(BYTE)(m_dwEnvColor.g * 255.0f * s),
+			(BYTE)(m_dwEnvColor.b * 255.0f * s));
+	}
 	g_Render.SetRenderState(D3DRS_AMBIENT, amb);
 #endif
 
@@ -1003,7 +1009,13 @@ void CGameScene::RenderSMallMap() {
 	DWORD rs_amb;
 	g_Render.GetRenderState(D3DRS_AMBIENT, &rs_amb);
 
-	amb = D3DCOLOR_XRGB((BYTE)(m_dwEnvColor.r * 255), (BYTE)(m_dwEnvColor.g * 255), (BYTE)(m_dwEnvColor.b * 255));
+	{
+		const float s = g_Config.m_fSceneAmbientScale;
+		amb = D3DCOLOR_XRGB(
+			(BYTE)(m_dwEnvColor.r * 255.0f * s),
+			(BYTE)(m_dwEnvColor.g * 255.0f * s),
+			(BYTE)(m_dwEnvColor.b * 255.0f * s));
+	}
 	g_Render.SetRenderState(D3DRS_AMBIENT, amb);
 #endif
 

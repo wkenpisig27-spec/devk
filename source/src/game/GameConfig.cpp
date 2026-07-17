@@ -99,10 +99,10 @@ void CGameConfig::SetDefault() // Ĭ������
 	m_nShadowMapQuality = 1;  // 1 = Medium (1024) if user enables SM later
 
 	// Visual defaults (RO-leaning fog, outline, water, gamma)
-	m_iFogR = 200;
-	m_iFogG = 210;
-	m_iFogB = 220;
-	m_fExp2 = 0.00045f;
+	m_iFogR = 185;
+	m_iFogG = 195;
+	m_iFogB = 208;
+	m_fExp2 = 0.00035f;
 	m_bFogEnabled = TRUE;
 	m_fOutlineWidth = 0.014f;
 	m_fOutlineColorR = 0.12f;
@@ -112,6 +112,7 @@ void CGameConfig::SetDefault() // Ĭ������
 	m_bStaticCelEnabled = TRUE;
 	m_bWaterEnhance = TRUE;
 	m_bSRGBWrite = FALSE;
+	m_fSceneAmbientScale = 0.72f;
 }
 
 void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
@@ -126,7 +127,7 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 	m_iFogB = GetPrivateProfileInt("visual", "fogB", m_iFogB, pszIniFileName);
 
 	char buf[64];
-	GetPrivateProfileStringA("visual", "fogDensity", "0.00045", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "fogDensity", "0.00035", buf, sizeof(buf), pszIniFileName);
 	m_fExp2 = (float)atof(buf);
 
 	GetPrivateProfileStringA("visual", "outlineWidth", "0.014", buf, sizeof(buf), pszIniFileName);
@@ -146,6 +147,12 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 	m_bStaticCelEnabled = GetPrivateProfileInt("visual", "staticCel", m_bStaticCelEnabled ? 1 : 0, pszIniFileName) != 0;
 	m_bWaterEnhance = GetPrivateProfileInt("visual", "waterEnhance", m_bWaterEnhance ? 1 : 0, pszIniFileName) != 0;
 	m_bSRGBWrite = GetPrivateProfileInt("visual", "srgbWrite", m_bSRGBWrite ? 1 : 0, pszIniFileName) != 0;
+	GetPrivateProfileStringA("visual", "sceneAmbientScale", "0.72", buf, sizeof(buf), pszIniFileName);
+	m_fSceneAmbientScale = (float)atof(buf);
+	if (m_fSceneAmbientScale < 0.2f)
+		m_fSceneAmbientScale = 0.2f;
+	if (m_fSceneAmbientScale > 1.5f)
+		m_fSceneAmbientScale = 1.5f;
 }
 
 void CGameConfig::ApplyVisualSettingsToEngine() {
