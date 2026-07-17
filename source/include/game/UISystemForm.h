@@ -22,6 +22,7 @@ public:
 		int nQuality;
 		bool bFullScreen;
 		int bResolution;
+		int nMsaa; // 0 / 2 / 4 / 8 — preferred swap-chain MSAA (default 4)
 
 		SVideo();
 

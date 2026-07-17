@@ -232,7 +232,7 @@ protected:
 	BOOL						_bShowCenterPoint{ FALSE };	// ��?��???��??1��?o��?1��??��?��Section
 
 	int _nWaterLoopFrame{ 0 };
-	BOOL _bUseVB{ FALSE };
+	BOOL _bUseVB{ TRUE };
 	BOOL _bUseLandVB{ TRUE };
 	BOOL _bClip{ TRUE };
 	BOOL _bWireFrame{ FALSE };

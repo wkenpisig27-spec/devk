@@ -51,7 +51,8 @@ extern bool g_IsCameraMode;
  */
 
 CSystemProperties::SVideo::SVideo() : bFullScreen(false), bResolution(0), nTexture(0), nQuality(0),
-								  bAnimation(false), bCameraRotate(false), nShadowMode(1), bDepth32(false) {
+								  bAnimation(false), bCameraRotate(false), nShadowMode(1), bDepth32(false),
+								  nMsaa(4) {
 }
 
 int CSystemProperties::ApplyVideo() {
@@ -70,6 +71,9 @@ int CSystemProperties::ApplyVideo() {
 	}
 
 	GetRender().SetIsChangeResolution(true);
+
+	// Apply preferred MSAA before (re)creating the swap chain.
+	MPRender::SetPreferredMSAA(m_videoProp.nMsaa);
 
 	// ��δʹ��
 	// bAnimation
@@ -195,6 +199,17 @@ int CSystemProperties::readFromFile(const char* szIniFileName) {
 	m_videoProp.bFullScreen = int2bool(GetPrivateProfileInt("video", "fullScreen", 0, szIniFileName));
 	m_videoProp.bResolution = GetPrivateProfileInt("video", "resolution", 0, szIniFileName);
 
+	// video.msaa: 0/2/4/8 — missing key defaults to 4 (current sweet spot).
+	iTemp = GetPrivateProfileInt("video", "msaa", 4, szIniFileName);
+	if (iTemp >= 8)
+		m_videoProp.nMsaa = 8;
+	else if (iTemp >= 4)
+		m_videoProp.nMsaa = 4;
+	else if (iTemp >= 2)
+		m_videoProp.nMsaa = 2;
+	else
+		m_videoProp.nMsaa = 0;
+
 	// audio
 	m_audioProp.nMusicSound  = GetPrivateProfileInt("audio", "musicSound",  5, szIniFileName);
 	m_audioProp.nMusicEffect = GetPrivateProfileInt("audio", "musicEffect", 5, szIniFileName);
@@ -284,6 +299,8 @@ int CSystemProperties::writeToFile(const char* szIniFileName) {
 	if (!WriteInteger("video", "fullScreen", bool2int(m_videoProp.bFullScreen), szIniFileName))
 		return OTHER_ERROR;
 	if (!WriteInteger("video", "resolution", m_videoProp.bResolution, szIniFileName))
+		return OTHER_ERROR;
+	if (!WriteInteger("video", "msaa", m_videoProp.nMsaa, szIniFileName))
 		return OTHER_ERROR;
 
 	// audio
@@ -385,6 +402,7 @@ void CSystemMgr::LoadCustomProp() {
 			m_sysProp.m_videoProp.nQuality = 0;
 			m_sysProp.m_videoProp.bFullScreen = false;
 			m_sysProp.m_videoProp.bResolution = 0;
+			m_sysProp.m_videoProp.nMsaa = 4;
 
 			m_sysProp.m_audioProp.nMusicSound = static_cast<int>(10.0f * g_pGameApp->GetMusicSize());
 			m_sysProp.m_audioProp.nMusicEffect = static_cast<int>(10.0f * g_pGameApp->GetCurScene()->GetSoundSize());
@@ -436,6 +454,7 @@ void CSystemMgr::LoadCustomProp() {
 	// Apply 60 FPS animation scaling toggle (engine-side default-pose / TexUV velocity).
 	lwSetAnimVelocity(1.0f / CSteadyFrame::GetAnimMultiplier());
 
+	MPRender::SetPreferredMSAA(m_sysProp.m_videoProp.nMsaa);
 	MPRender::SetVsyncEnabled(m_sysProp.m_gameOption.bVsync);
 }
 bool CSystemMgr::Init() {

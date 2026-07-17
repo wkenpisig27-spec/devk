@@ -15,6 +15,7 @@ MINDPOWER_API DWORD g_dwCurFrameTick = 0;
 MINDPOWER_API float g_fFrameRate = 1.0f;  // Initialize to 1.0 (60 FPS baseline)
 static DWORD g_dwLastFrameMoveTick = 0;
 bool MPRender::_bVsync = false;
+int  MPRender::_nPreferredMSAA = 4;
 
 // High-resolution timing for smooth animation
 static LARGE_INTEGER g_qpcFrequency = {0};
@@ -58,6 +59,56 @@ void MPRender::SetVsyncEnabled(bool enabled) {
     _bVsync = enabled;
 }
 
+void MPRender::SetPreferredMSAA(int samples) {
+	// Normalize to supported discrete levels (0 / 2 / 4 / 8).
+	if (samples >= 8)      _nPreferredMSAA = 8;
+	else if (samples >= 4) _nPreferredMSAA = 4;
+	else if (samples >= 2) _nPreferredMSAA = 2;
+	else                   _nPreferredMSAA = 0;
+}
+
+int MPRender::GetPreferredMSAA() {
+	return _nPreferredMSAA;
+}
+
+D3DMULTISAMPLE_TYPE MPRender::SelectBestMSAA(IDirect3DX* d3d, D3DFORMAT backFmt,
+	D3DFORMAT depthFmt, BOOL windowed, int preferredSamples)
+{
+	static const D3DMULTISAMPLE_TYPE try_levels[] = {
+		D3DMULTISAMPLE_8_SAMPLES,
+		D3DMULTISAMPLE_4_SAMPLES,
+		D3DMULTISAMPLE_2_SAMPLES,
+		D3DMULTISAMPLE_NONE,
+	};
+
+	D3DMULTISAMPLE_TYPE preferred =
+		(preferredSamples >= 8) ? D3DMULTISAMPLE_8_SAMPLES :
+		(preferredSamples >= 4) ? D3DMULTISAMPLE_4_SAMPLES :
+		(preferredSamples >= 2) ? D3DMULTISAMPLE_2_SAMPLES :
+		D3DMULTISAMPLE_NONE;
+
+	if (!d3d || preferred == D3DMULTISAMPLE_NONE)
+		return D3DMULTISAMPLE_NONE;
+
+	for (int i = 0; i < (int)(sizeof(try_levels) / sizeof(try_levels[0])); ++i) {
+		D3DMULTISAMPLE_TYPE level = try_levels[i];
+		if (level == D3DMULTISAMPLE_NONE)
+			return D3DMULTISAMPLE_NONE;
+		if ((DWORD)level > (DWORD)preferred)
+			continue;
+
+		DWORD q_color = 0, q_depth = 0;
+		HRESULT hr_c = d3d->CheckDeviceMultiSampleType(
+			D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, backFmt, windowed, level, &q_color);
+		HRESULT hr_d = d3d->CheckDeviceMultiSampleType(
+			D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, depthFmt, windowed, level, &q_depth);
+
+		if (SUCCEEDED(hr_c) && SUCCEEDED(hr_d))
+			return level;
+	}
+	return D3DMULTISAMPLE_NONE;
+}
+
 MPRender::MPRender()
     : _hWnd(0),
       _pD3D(NULL),
@@ -87,6 +138,8 @@ MPRender::~MPRender() {
 }
 
 void MPRender::End() {
+	SAFE_RELEASE(_pDynUPVB);
+	_dwDynUPVBBytes = 0;
 	SAFE_RELEASE(_p2DSprite);
 
 	SAFE_DELETE(_pFont);
@@ -102,6 +155,62 @@ void MPRender::End() {
 	// by lsh has been released in mesh lib
 	// SAFE_RELEASE(_pD3DDevice);
 	// SAFE_RELEASE(_pD3D);
+}
+
+HRESULT MPRender::DrawPrimitiveUP_Dynamic(D3DPRIMITIVETYPE type, UINT primCount, const void* data, UINT stride)
+{
+	if (!_pD3DDevice || !data || stride == 0 || primCount == 0)
+		return E_FAIL;
+
+	UINT nVerts = 0;
+	switch (type) {
+	case D3DPT_POINTLIST:     nVerts = primCount; break;
+	case D3DPT_LINELIST:      nVerts = primCount * 2; break;
+	case D3DPT_LINESTRIP:     nVerts = primCount + 1; break;
+	case D3DPT_TRIANGLELIST:  nVerts = primCount * 3; break;
+	case D3DPT_TRIANGLESTRIP:
+	case D3DPT_TRIANGLEFAN:   nVerts = primCount + 2; break;
+	default:
+		return _pD3DDevice->DrawPrimitiveUP(type, primCount, data, stride);
+	}
+
+	const UINT bytes = nVerts * stride;
+	if (bytes == 0)
+		return S_OK;
+
+	if (!_pDynUPVB || _dwDynUPVBBytes < bytes) {
+		SAFE_RELEASE(_pDynUPVB);
+		_dwDynUPVBBytes = (bytes > 65536u) ? bytes : 65536u;
+		HRESULT hrCreate = _pD3DDevice->CreateVertexBuffer(
+			_dwDynUPVBBytes,
+			D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY,
+			0,
+			D3DPOOL_DEFAULT,
+			&_pDynUPVB,
+			NULL);
+		if (FAILED(hrCreate) || !_pDynUPVB) {
+			_pDynUPVB = NULL;
+			_dwDynUPVBBytes = 0;
+			return _pD3DDevice->DrawPrimitiveUP(type, primCount, data, stride);
+		}
+	}
+
+	void* pLocked = NULL;
+	HRESULT hr = _pDynUPVB->Lock(0, bytes, &pLocked, D3DLOCK_DISCARD);
+	if (FAILED(hr) || !pLocked) {
+		SAFE_RELEASE(_pDynUPVB);
+		_dwDynUPVBBytes = 0;
+		return _pD3DDevice->DrawPrimitiveUP(type, primCount, data, stride);
+	}
+
+	memcpy(pLocked, data, bytes);
+	_pDynUPVB->Unlock();
+
+	hr = _pD3DDevice->SetStreamSource(0, _pDynUPVB, 0, stride);
+	if (FAILED(hr))
+		return _pD3DDevice->DrawPrimitiveUP(type, primCount, data, stride);
+
+	return _pD3DDevice->DrawPrimitive(type, 0, primCount);
 }
 
 BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOOL bFullScreen) {
@@ -149,46 +258,18 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 
 	// === MSAA on the swap chain ============================================
 	// DXVK 2.x dropped the d3d9.forceSwapchainMSAA conf option, so MSAA must
-	// be requested at device creation. Probe descending sample counts and use
-	// the highest level supported by BOTH the back-buffer color format AND
-	// the depth-stencil format. MSAA requires SwapEffect = DISCARD (already
-	// the case here) and is incompatible with the SOFTWARE_VERTEXPROCESSING
-	// fallback set later for ancient hardware — skipped if that path is hit.
+	// be requested at device creation. Probe descending sample counts (8→4→2→0)
+	// capped by the user preference (video.msaa, default 4). MSAA requires
+	// SwapEffect = DISCARD and is incompatible with SOFTWARE_VERTEXPROCESSING.
 	{
-		static const D3DMULTISAMPLE_TYPE try_levels[] = {
-			D3DMULTISAMPLE_4_SAMPLES,    // sweet spot — clean edges, modest cost
-			D3DMULTISAMPLE_2_SAMPLES,
-			D3DMULTISAMPLE_NONE,
-		};
-
-		D3DMULTISAMPLE_TYPE chosen = D3DMULTISAMPLE_NONE;
-		const BOOL windowed = !bFullScreen;
-
-		for (int i = 0; i < (int)(sizeof(try_levels) / sizeof(try_levels[0])); ++i) {
-			D3DMULTISAMPLE_TYPE level = try_levels[i];
-			if (level == D3DMULTISAMPLE_NONE) {
-				chosen = level;
-				break;
-			}
-
-			DWORD q_color = 0, q_depth = 0;
-			HRESULT hr_c = d3d->CheckDeviceMultiSampleType(
-				D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
-				d3dcp.present_param.BackBufferFormat,
-				windowed, level, &q_color);
-			HRESULT hr_d = d3d->CheckDeviceMultiSampleType(
-				D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
-				d3dcp.present_param.AutoDepthStencilFormat,
-				windowed, level, &q_depth);
-
-			if (SUCCEEDED(hr_c) && SUCCEEDED(hr_d)) {
-				chosen = level;
-				break;
-			}
-		}
-
-		d3dcp.present_param.MultiSampleType    = chosen;
-		d3dcp.present_param.MultiSampleQuality = 0;  // standard MSAA, not CSAA/EQAA
+		d3dcp.present_param.MultiSampleType = SelectBestMSAA(
+			d3d,
+			d3dcp.present_param.BackBufferFormat,
+			d3dcp.present_param.AutoDepthStencilFormat,
+			!bFullScreen,
+			_nPreferredMSAA);
+		d3dcp.present_param.MultiSampleQuality = 0;
+		_d3dCPAdjustInfo.multi_sample_type = d3dcp.present_param.MultiSampleType;
 	}
 
 	d3dcp.present_param.PresentationInterval =
@@ -201,6 +282,7 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 		// SW-VP + COPY swap rules out MSAA — drop it for this fallback path.
 		d3dcp.present_param.MultiSampleType    = D3DMULTISAMPLE_NONE;
 		d3dcp.present_param.MultiSampleQuality = 0;
+		_d3dCPAdjustInfo.multi_sample_type = D3DMULTISAMPLE_NONE;
 	}
 
 	//	add by	jze	begin!
@@ -355,6 +437,14 @@ int MPRender::ToggleFullScreen(int width, int height, D3DFORMAT depth_fmt, BOOL 
 	d3dcp.present_param.BackBufferHeight = height;
 	d3dcp.present_param.AutoDepthStencilFormat = depth_fmt;
 
+	d3dcp.present_param.MultiSampleType = SelectBestMSAA(
+		dev,
+		d3dcp.present_param.BackBufferFormat,
+		d3dcp.present_param.AutoDepthStencilFormat,
+		be_windowed,
+		_nPreferredMSAA);
+	d3dcp.present_param.MultiSampleQuality = 0;
+	_d3dCPAdjustInfo.multi_sample_type = d3dcp.present_param.MultiSampleType;
 
 	if (LW_FAILED(lwAdjustD3DCreateParam(dev, &d3dcp, &_d3dCPAdjustInfo))) {
 		LG("error", "msgToggleFullScreen error");
@@ -370,6 +460,8 @@ int MPRender::ToggleFullScreen(int width, int height, D3DFORMAT depth_fmt, BOOL 
 }
 int MPRender::ToggleFullScreen(D3DPRESENT_PARAMETERS* d3dpp, lwWndInfo* wnd_info) {
 	SAFE_RELEASE(_p2DSprite);
+	SAFE_RELEASE(_pDynUPVB);
+	_dwDynUPVBBytes = 0;
 	if (LW_FAILED(_IMgr.sys_graphics->ToggleFullScreen(d3dpp, wnd_info)))
 		return 0;
 

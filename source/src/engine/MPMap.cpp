@@ -68,7 +68,7 @@ MPMap::MPMap()
  _bSeaVisible(TRUE),
  _bShowCenterPoint(FALSE),
  _fp(NULL),
- _bUseVB(FALSE),
+ _bUseVB(TRUE),
  _bClip(TRUE),
  _bWireFrame(FALSE),
  _pfnProc(NULL),
@@ -209,8 +209,9 @@ void MPMap::Render()
 
 	        if(FAILED(hr)) 
 	        {
-                LG("error", "msg MPMap::Render() ����Sea Vertex Bufferʧ��!\n");
+                LG("error", "msg MPMap::Render() Sea Vertex Buffer create failed — falling back to DrawPrimitiveUP\n");
                 _pVB = NULL;
+                _bUseVB = FALSE;
             }
         }
 #endif
@@ -664,7 +665,7 @@ void MPMap::RenderSea()
 	MPSeaTileVertex   *pCurVertex = NULL;
 	
 	int x, y;
-	if(_bUseVB)
+	if(_bUseVB && _pVB)
 	{
 //#if(defined DRAW_SEA_USE_DYNAMIC_BUFFER)
 //        DWORD num = 0;

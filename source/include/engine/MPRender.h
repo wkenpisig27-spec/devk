@@ -178,6 +178,9 @@ public:
     HRESULT DrawPrimitive( D3DPRIMITIVETYPE pt_type, UINT start_vertex, UINT count );
     HRESULT DrawIndexedPrimitive( D3DPRIMITIVETYPE pt_type, INT base_vert_index, UINT min_index, UINT vert_num, UINT start_index, UINT count );
 
+	// Upload to a DISCARD-locked dynamic VB then DrawPrimitive — cheaper under DXVK than DrawPrimitiveUP.
+	HRESULT DrawPrimitiveUP_Dynamic(D3DPRIMITIVETYPE type, UINT primCount, const void* data, UINT stride);
+
     // Text Info Print
     void        Print(int nInfoType, int x, int y, const char *szFormat, ...);
 	void		EnablePrint(int nInfoType, BOOL bEnable);
@@ -190,6 +193,13 @@ public:
     void        SetRealFPS(BOOL bRealFPS)   { _bRealFPS = bRealFPS;     }
 
 	static void SetVsyncEnabled(bool enabled);
+
+	// Preferred swap-chain MSAA sample count: 0, 2, 4, or 8 (default 4).
+	// Actual level is the highest supported at or below this preference.
+	static void SetPreferredMSAA(int samples);
+	static int  GetPreferredMSAA();
+	static D3DMULTISAMPLE_TYPE SelectBestMSAA(IDirect3DX* d3d, D3DFORMAT backFmt,
+		D3DFORMAT depthFmt, BOOL windowed, int preferredSamples);
 
     // Render States
     void        EnableMipmap(BOOL bEnable);
@@ -274,6 +284,8 @@ protected:
 	CMPFont*				_pFont;
 	//@}
 	IDirect3DDeviceX*		_pD3DDevice;
+	IDirect3DVertexBufferX*	_pDynUPVB{ nullptr };
+	UINT					_dwDynUPVBBytes{ 0 };
     D3DVIEWPORTX            _view;
     int                     _nScrWidth;         // ��Ļ����
     int                     _nScrHeight;        // ��Ļ�߶�
@@ -336,6 +348,7 @@ protected:
 	FLOAT                           m_fCamTranslation;
 	FLOAT                           m_fCamFixPoint;
 	static bool                     _bVsync;
+	static int                      _nPreferredMSAA;
 };
 
 inline void MPRender::SetTransformView(const D3DXMATRIX* mat)

@@ -2245,7 +2245,7 @@ void	CEffectModel::RenderTob(ModelParam* last, ModelParam* next, float lerp)
 	m_pDev->SetVertexShader(NULL);
 	m_pDev->SetFVF(EFFECT_VER_FVF);
 
-	m_pDev->GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, _dwFaceCount, m_vEffVer, sizeof(SEFFECT_VERTEX));
+	m_pDev->DrawPrimitiveUP_Dynamic(D3DPT_TRIANGLESTRIP, _dwFaceCount, m_vEffVer, sizeof(SEFFECT_VERTEX));
 
 }
 
@@ -2947,7 +2947,7 @@ void	CEffectFont::RenderEffectFontBack(D3DXMATRIX* pmat)
 #ifdef USE_RENDER
 	m_pDev->SetTransformWorld(pmat);
 
-	if(FAILED(m_pDev->GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN,2,&t_SEffVer,sizeof(SEFFECT_VERTEX))))
+	if(FAILED(m_pDev->DrawPrimitiveUP_Dynamic(D3DPT_TRIANGLEFAN,2,&t_SEffVer,sizeof(SEFFECT_VERTEX))))
 		LG("error","msgCEffectFont draw");
 #else
 	m_pDev->SetTransform(D3DTS_WORLDMATRIX(0), pmat);
@@ -2989,7 +2989,7 @@ void	CEffectFont::RenderEffectFont(D3DXMATRIX* pmat)
 	{
 		//m_pDev->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, n * 4, 2);
 #ifdef USE_RENDER
-		if(FAILED(m_pDev->GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN,2,&m_vEffVer[n * 4],sizeof(SEFFECT_VERTEX))))
+		if(FAILED(m_pDev->DrawPrimitiveUP_Dynamic(D3DPT_TRIANGLEFAN,2,&m_vEffVer[n * 4],sizeof(SEFFECT_VERTEX))))
 			LG("error","msgCEffectFont draw2");
 #else
 		m_pDev->DrawPrimitiveUP(D3DPT_TRIANGLEFAN,2,&m_vEffVer[n * 4],sizeof(SEFFECT_VERTEX));

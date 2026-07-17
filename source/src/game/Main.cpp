@@ -405,8 +405,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	nDepth = g_stUISystem.m_sysProp.m_videoProp.bDepth32 ? 32 : 16;
 	LG("init", "Resolution: %dx%d depth=%d fullscreen=%d\n", nWidth, nHeight, nDepth, g_Config.m_bFullScreen);
 
+	MPRender::SetPreferredMSAA(g_stUISystem.m_sysProp.m_videoProp.nMsaa);
+	MPRender::SetVsyncEnabled(g_stUISystem.m_sysProp.m_gameOption.bVsync);
+
 	MPD3DCreateParamAdjustInfo cpai;
-	cpai.multi_sample_type = (D3DMULTISAMPLE_TYPE)g_Config.m_dwFullScreenAntialias;
+	cpai.multi_sample_type = (D3DMULTISAMPLE_TYPE)g_stUISystem.m_sysProp.m_videoProp.nMsaa;
 
 	g_Render.SetD3DCreateParamAdjustInfo(&cpai);
 
