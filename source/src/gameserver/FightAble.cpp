@@ -2437,7 +2437,7 @@ CTimeSkillMgr::~CTimeSkillMgr() {
 		delete pSCarrier;
 		pSCarrier = m_pSFreeQueue;
 	}
-	T_E
+	T_FINAL
 }
 
 void CTimeSkillMgr::Add(SFireUnit* pSFireSrc, uLong ulLeftTick, SubMap* pCMap, Point* pStarget, Long* plRangeBParam) {

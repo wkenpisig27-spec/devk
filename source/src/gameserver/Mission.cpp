@@ -55,7 +55,7 @@ CCharMission::CCharMission(){T_B
 
 CCharMission::~CCharMission() { T_B
 
-									T_E }
+									T_FINAL }
 
 void CCharMission::Initially() {
 	T_B
