@@ -4445,7 +4445,6 @@ bool CTableGuild::Leizhu(CCharacter* pCha, BYTE byLevel, long long dwMoney) {
 		return false;
 	}
 
-	char sql[SQL_MAXLEN];
 	char szGuild[64];
 	memset(szGuild, 0, 64);
 	DWORD dwGuildID = 0;
@@ -4554,7 +4553,6 @@ bool CTableGuild::Challenge(CCharacter* pCha, BYTE byLevel, long long dwMoney) {
 		return false;
 	}
 
-	char sql[SQL_MAXLEN];
 	char szGuild[64];
 	memset(szGuild, 0, 64);
 	DWORD dwGuildID = 0;
@@ -4903,8 +4901,6 @@ bool CTableGuild::ChallWin(BOOL bUpdate, BYTE byLevel, DWORD dwWinGuildID, DWORD
 		return false;
 	}
 
-	// ?????�????????
-	char sql[SQL_MAXLEN];
 	SQLRETURN l_sqlret;
 	if (!bUpdate) {
 		// _snprintf_s(sql, sizeof(sql), _TRUNCATE, "update guild set challid = 0, challstart = 0, challmoney = 0, challlevel = 0 where guild_id =%d",

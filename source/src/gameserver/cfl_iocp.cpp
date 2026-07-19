@@ -341,7 +341,7 @@ int cfl_iocpclt::on_disconn(PER_SOCKET_CONTEXT* sk_ctx) { return 0; }
 bool cfl_iocpclt::update_iocp(PER_SOCKET_CONTEXT* sk_ctx, IO_OPERATION client_io) {
 	sk_ctx->io_ctx->io_op = client_io;
 
-	_hIOCP = CreateIoCompletionPort((HANDLE)sk_ctx->sk, _hIOCP, DWORD(sk_ctx), 0);
+	_hIOCP = CreateIoCompletionPort((HANDLE)sk_ctx->sk, _hIOCP, reinterpret_cast<ULONG_PTR>(sk_ctx), 0);
 	if (nullptr == _hIOCP) {
 		cfl_printf("CreateIocompletionPort: %d\n", GetLastError());
 		return false;

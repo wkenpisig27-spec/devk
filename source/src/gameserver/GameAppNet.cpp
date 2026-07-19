@@ -439,21 +439,17 @@ void CGameApp::ProcessPacket(GateServer* pGate, RPACKET pkt) {
 		}
 	}
 
-	switch (cmd) {
-	default:
-		if (cmd / 500 == CMD_MM_BASE / 500) {
-			ProcessInterGameMsg(cmd, pGate, pkt);
-		} else {
-			// CM/TM/PM — all valid non-MM bands use session trailer (Track A).
-			l_player = static_cast<CPlayer*>(g_gmsvr->ResolvePlayerFromGateTrailer(pGate, pkt, cmd));
-			if (!l_player) {
-				if (cmd / 500 == CMD_PM_BASE / 500) {
-					ProcessGroupBroadcast(cmd, pGate, pkt);
-				}
-				break;
+	if (cmd / 500 == CMD_MM_BASE / 500) {
+		ProcessInterGameMsg(cmd, pGate, pkt);
+	} else {
+		// CM/TM/PM — all valid non-MM bands use session trailer (Track A).
+		l_player = static_cast<CPlayer*>(g_gmsvr->ResolvePlayerFromGateTrailer(pGate, pkt, cmd));
+		if (!l_player) {
+			if (cmd / 500 == CMD_PM_BASE / 500) {
+				ProcessGroupBroadcast(cmd, pGate, pkt);
 			}
+		} else {
 			DeliverPacketToPlayer(l_player, cmd, pkt);
-			break;
 		}
 	}
 	T_E
