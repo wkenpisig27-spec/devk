@@ -48,7 +48,7 @@ using namespace dbc;
 typedef unsigned long long uLong64;
 
 // ?? Client ????==========
-class Player;
+struct Player;
 class ToClient : public TcpServerApp, public RPCMGR {
 	friend class TransmitCall;
 
