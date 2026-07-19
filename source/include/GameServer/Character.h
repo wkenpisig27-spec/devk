@@ -524,7 +524,7 @@ public:
 	bool IsInPK(void) { return m_chPKCtrl[0]; }
 	bool IsInGymkhana(void) { return m_chPKCtrl[1]; }
 	void SetPKCtrl(dbc::Char chCtrl) { m_chPKCtrl = chCtrl; }
-	dbc::Char GetPKCtrl(void) { return m_chPKCtrl.to_ulong(); }
+	dbc::Char GetPKCtrl(void) { return static_cast<dbc::Char>(m_chPKCtrl.to_ulong()); }
 	bool CanPK(void) { return IsInPK() || IsInGymkhana(); }
 	bool IsInArea(dbc::Short sAreaMask) { return GetAreaAttr() & sAreaMask ? true : false; }
 	void SetRelive(Char chType = enumEPLAYER_RELIVE_ORIGIN, Char chLv = 0, cChar* szInfo = 0);

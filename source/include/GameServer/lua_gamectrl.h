@@ -504,7 +504,7 @@ inline int lua_QueryChaAttr(lua_State* L) {
 	CCharacter* pCha = LB_GetCha(L, 1);
 	if (pCha) {
 		int nAttr = (int)lua_tonumber(L, 2);
-		lua_pushnumber(L, (LONG64)pCha->getAttr(nAttr));
+		lua_pushnumber(L, static_cast<lua_Number>(pCha->getAttr(nAttr)));
 	} else
 		lua_pushnumber(L, 0);
 
@@ -1931,8 +1931,8 @@ inline int lua_SetMonsterAttr(lua_State* L) {
 	}
 
 	CCharacter* pCha = static_cast<CCharacter*>(lua_touserdata(L, 1));
-	int AttrType = lua_tonumber(L, 2);
-	int AttrVal = lua_tonumber(L, 3);
+	int AttrType = static_cast<int>(lua_tonumber(L, 2));
+	int AttrVal = static_cast<int>(lua_tonumber(L, 3));
 	int bRet = pCha->setAttr(AttrType, AttrVal);
 	if (bRet) {
 		// g_CParser.DoString("ALLExAttrSet", enumSCRIPT_RETURN_NONE, 0, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, pCha, DOSTRING_PARAM_END);

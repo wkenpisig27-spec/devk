@@ -572,7 +572,7 @@ inline int lua_SafeBuy(lua_State* L) {
 	__int64 dwMoney;
 	BOOL bRet = pChar->SafeBuy(wItemID, sCount, byIndex, dwMoney);
 	lua_pushnumber(L, (bRet) ? LUA_TRUE : LUA_FALSE);
-	lua_pushnumber(L, dwMoney);
+	lua_pushnumber(L, static_cast<lua_Number>(dwMoney));
 
 	return 2;
 	T_E
@@ -623,7 +623,7 @@ inline int lua_SafeSale(lua_State* L) {
 	BOOL bRet = pChar->SafeSale(byIndex, byCount, wItemID, dwMoney);
 	lua_pushnumber(L, (bRet) ? LUA_TRUE : LUA_FALSE);
 	lua_pushnumber(L, wItemID);
-	lua_pushnumber(L, dwMoney);
+	lua_pushnumber(L, static_cast<lua_Number>(dwMoney));
 
 	return 3;
 	T_E
@@ -652,7 +652,7 @@ inline int lua_SafeSaleGoods(lua_State* L) {
 
 	lua_pushnumber(L, (bRet) ? LUA_TRUE : LUA_FALSE);
 	lua_pushnumber(L, wItemID);
-	lua_pushnumber(L, dwMoney);
+	lua_pushnumber(L, static_cast<lua_Number>(dwMoney));
 
 	return 3;
 }
@@ -681,7 +681,7 @@ inline int lua_SafeBuyGoods(lua_State* L) {
 	BOOL bRet = pChar->SafeBuyGoods(dwBoatID, wItemID, sCount, byIndex, dwMoney);
 
 	lua_pushnumber(L, (bRet) ? LUA_TRUE : LUA_FALSE);
-	lua_pushnumber(L, dwMoney);
+	lua_pushnumber(L, static_cast<lua_Number>(dwMoney));
 
 	return 2;
 }

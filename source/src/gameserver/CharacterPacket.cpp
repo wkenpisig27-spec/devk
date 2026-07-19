@@ -114,7 +114,7 @@ void CCharacter::WriteBaseInfo(WPACKET& pkret, Char chLookType) {
 }
 
 void CCharacter::WritePKCtrl(WPACKET& pkret) {
-	WRITE_CHAR(pkret, m_chPKCtrl.to_ulong());
+	WRITE_CHAR(pkret, static_cast<uChar>(m_chPKCtrl.to_ulong()));
 }
 
 void CCharacter::WriteSideInfo(WPACKET& pkret) {

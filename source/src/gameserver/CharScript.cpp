@@ -1101,7 +1101,7 @@ inline int lua_MakeItem(lua_State* L) {
 		isTradable = static_cast<BOOL>(lua_tonumber(L, 5));
 	}
 	if (lua_gettop(L) >= 6 && lua_isnumber(L, 6)) {
-		expiration = std::time(0) + static_cast<LONG>(lua_tonumber(L, 6));
+		expiration = static_cast<LONG>(std::time(0) + static_cast<LONG>(lua_tonumber(L, 6)));
 	}
 
 	USHORT sItemPos = 0;
@@ -1147,7 +1147,7 @@ inline int lua_GiveItem(lua_State* L) {
 		isTradable = static_cast<BOOL>(lua_tonumber(L, 6));
 	}
 	if (lua_gettop(L) == 7 && lua_isnumber(L, 7)) {
-		expiration = std::time(0) + static_cast<LONG>(lua_tonumber(L, 7));
+		expiration = static_cast<LONG>(std::time(0) + static_cast<LONG>(lua_tonumber(L, 7)));
 	}
 
 	BOOL bRet = pChar->GetPlyMainCha()->AddItem(sItemID, sCount, szNpc, byType, '\a', isTradable, expiration);
@@ -1227,7 +1227,7 @@ inline int lua_GiveItemY(lua_State* L)
 		isTradable = static_cast<BOOL>(lua_tonumber(L, 6));
 	}
 	if (lua_gettop(L) == 7 && lua_isnumber(L, 7)) {
-		expiration = std::time(0) + static_cast<LONG>(lua_tonumber(L, 7));
+		expiration = static_cast<LONG>(std::time(0) + static_cast<LONG>(lua_tonumber(L, 7)));
 	}
 	short posID = defKITBAG_DEFPUSH_POS;
 	BOOL bRet = (pChar->GetPlyMainCha()->AddItem(sItemID, sCount, szNpc, byType, '\a', isTradable, expiration, &posID));
@@ -4783,7 +4783,7 @@ inline int lua_GetEquipItemP(lua_State* L) {
 		return 0;
 	}
 
-	SItemGrid* pItem = pCha->GetEquipItem(sPosID);
+	SItemGrid* pItem = pCha->GetEquipItem(static_cast<Char>(sPosID));
 	if (!pItem) {
 		return 0;
 	}
@@ -5423,7 +5423,7 @@ inline int lua_RequestClientPin(lua_State* L) {
 		return 0;
 	}
 	CCharacter* pCha = LB_GetCha(L, 1);
-	char action = lua_tonumber(L, 2);
+	char action = static_cast<char>(lua_tonumber(L, 2));
 	if (pCha) {
 		pCha->requestType = action;
 		pCha->requestPos.centre.x = pCha->GetShape().centre.x;
@@ -5444,7 +5444,7 @@ inline int lua_DealAllInGuild(lua_State* L) {
 		PARAM_ERROR
 		return 0;
 	}
-	int guildID = lua_tonumber(L, 1);
+	int guildID = static_cast<int>(lua_tonumber(L, 1));
 	const char* luaFunc = lua_tostring(L, 2);
 
 	if (lua_isstring(L, 3)) {
@@ -5711,8 +5711,8 @@ inline int lua_SetGlobalRates(lua_State* L) {
 	if (lua_gettop(L) != 2 || !lua_isnumber(L, 1) || !lua_isnumber(L, 2)) {
 		return 0;
 	}
-	float droprate = lua_tonumber(L, 1);
-	float exprate = lua_tonumber(L, 2);
+	float droprate = static_cast<float>(lua_tonumber(L, 1));
+	float exprate = static_cast<float>(lua_tonumber(L, 2));
 	if (droprate && exprate) {
 		AppFromNoticeChar()->SetGlobalRates(droprate, exprate);
 		return 1;

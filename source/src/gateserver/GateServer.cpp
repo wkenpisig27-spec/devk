@@ -322,7 +322,9 @@ bool Player::InitReference(dbc::DataSocket* datasock) {
 }
 
 void Player::Initially() {
-	m_worldid = m_actid = m_dbid = gm_addr = gp_addr = m_status = 0;
+	m_worldid = m_actid = m_dbid = 0;
+	gm_addr = gp_addr = 0;
+	m_status = 0;
 	m_password[0] = 0;
 	m_acctname[0] = 0;
 	m_connectTime = GetTickCount();
@@ -378,7 +380,9 @@ void Player::Finally() {
 		g_gtsvr->UnregisterPlayer(this);
 	}
 	
-	m_worldid = m_actid = m_dbid = gm_addr = gp_addr = m_status = 0;
+	m_worldid = m_actid = m_dbid = 0;
+	gm_addr = gp_addr = 0;
+	m_status = 0;
 	game = nullptr;
 	enc = false;
 	if (m_datasock != nullptr) {

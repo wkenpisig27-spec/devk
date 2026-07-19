@@ -33,7 +33,7 @@ inline int lua_SynLook(lua_State* pLS) {
 
 inline int lua_IsAttributeEditable(lua_State* pLS) {
 	SItemGrid* item = (SItemGrid*)lua_touserdata(pLS, 1);
-	int attribute = lua_tonumber(pLS, 3);
+	int attribute = static_cast<int>(lua_tonumber(pLS, 3));
 	for (int i = 0; i < 5; i++) {
 		if (item->sInstAttr[i][0] == attribute) {
 			lua_pushnumber(pLS, i);
@@ -46,9 +46,9 @@ inline int lua_IsAttributeEditable(lua_State* pLS) {
 
 inline int lua_SetAttributeEditable(lua_State* pLS) {
 	SItemGrid* item = (SItemGrid*)lua_touserdata(pLS, 1);
-	int slot = lua_tonumber(pLS, 2);
+	int slot = static_cast<int>(lua_tonumber(pLS, 2));
 	if (slot >= 0 && slot < 5) {
-		int attribute = lua_tonumber(pLS, 3);
+		int attribute = static_cast<int>(lua_tonumber(pLS, 3));
 		item->sInstAttr[slot][0] = attribute;
 		item->sInstAttr[slot][1] = g_pCItemAttr[item->sID].GetAttr(attribute, false);
 	}
@@ -59,7 +59,7 @@ inline int lua_SetAttributeEditable(lua_State* pLS) {
 inline int lua_EquipItem(lua_State* pLS) {
 	// todo - check if valid equip?
 	CCharacter* pCha = LB_GetCha(pLS, 1);
-	int chEquipPos = lua_tonumber(pLS, 2);
+	int chEquipPos = static_cast<int>(lua_tonumber(pLS, 2));
 	SItemGrid* equip = (SItemGrid*)lua_touserdata(pLS, 3);
 
 	memcpy(pCha->m_SChaPart.SLink + chEquipPos, equip, sizeof(SItemGrid));
@@ -143,7 +143,7 @@ inline int lua_SetIMP(lua_State* pLS) {
 
 	if ((lua_gettop(pLS) == 2 || lua_gettop(pLS) == 3) && lua_isuserdata(pLS, 1) && lua_isnumber(pLS, 2)) {
 		CCharacter* pCCha = LB_GetCha(pLS, 1);
-		int IMP = lua_tonumber(pLS, 2);
+		int IMP = static_cast<int>(lua_tonumber(pLS, 2));
 		if (lua_gettop(pLS) == 3) {
 			pCCha->SetIMP(IMP, false);
 		} else {
@@ -166,7 +166,7 @@ inline int lua_GetChaAttr(lua_State* pLS) {
 	}
 	{
 		CCharacter* pCCha = LB_GetCha(pLS, 1);
-		sAttrIndex = (unsigned __int64)lua_tonumber(pLS, 2);
+		sAttrIndex = static_cast<short>(lua_tonumber(pLS, 2));
 		if (!pCCha) {
 			bSuccess = false;
 			goto End;
@@ -2778,7 +2778,7 @@ inline int lua_SetItemForgeParam(lua_State* pLS) {
 			if (lType == 0) {
 				pSItem->SetForgeLv((char)lua_tonumber(pLS, 3));
 			} else {
-				pSItem->SetDBParam(enumITEMDBP_FORGE, (unsigned __int64)lua_tonumber(pLS, 3));
+				pSItem->SetDBParam(enumITEMDBP_FORGE, static_cast<int>(lua_tonumber(pLS, 3)));
 			}
 		}
 	}
@@ -7030,7 +7030,7 @@ inline int lua_SetExpiration(lua_State* L) {
 		if (expiration == -1 || expiration == 0) {
 			pSItem->expiration = 0;
 		} else {
-			pSItem->expiration = std::time(0) + expiration;
+			pSItem->expiration = static_cast<int>(std::time(0) + expiration);
 		}
 	}
 End:

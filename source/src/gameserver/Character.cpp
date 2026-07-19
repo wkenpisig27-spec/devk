@@ -5841,7 +5841,7 @@ BOOL CCharacter::BoatSelected(BYTE byType, BYTE byIndex) {
 
 		lua_pushlightuserdata(g_pLuaState, (void*)this);
 		lua_pushlightuserdata(g_pLuaState, (void*)pBoat);
-		lua_pushnumber(g_pLuaState, pBoat->getAttr(ATTR_LV) + 1);
+		lua_pushnumber(g_pLuaState, static_cast<lua_Number>(pBoat->getAttr(ATTR_LV) + 1));
 		int nStatus = lua_pcall(g_pLuaState, 3, 1, 0);
 		if (nStatus) {
 			// SystemNotice( "角色[%s]的脚本船只升级处理函数[BoatLevelUp]调用失败!", m_name );
@@ -7035,7 +7035,7 @@ bool Strin2SStateData(CCharacter* pCCha, std::string& strData) {
 				if (seconds >= lOnTick)
 					break;
 
-				lOnTick = lOnTick - seconds;
+				lOnTick = static_cast<Long>(lOnTick - seconds);
 
 				// printf("ontick time = %d  s% \n", lOnTick, seconds);
 			}
@@ -7110,7 +7110,7 @@ float CCharacter::GetDropRate() {
 	}
 
 	if (cPly && cPly->HasTeam()) {
-		partyBonus += 0.025 * (cPly->GetTeamMemberCnt() - 1);
+		partyBonus += static_cast<float>(0.025 * (cPly->GetTeamMemberCnt() - 1));
 	}
 
 	// Fortune Lot, Charmed Berry, Amplifier of Luck, Loveless Tear
@@ -7143,14 +7143,14 @@ float CCharacter::GetDropRate() {
 		// Angela Jr
 		switch (fairy->sID) {
 		case 231:
-			fairyBonus += fairyLv * 0.025;
+			fairyBonus += static_cast<float>(fairyLv * 0.025);
 			break;
 		case 681:
 		case 145:
 		case 146:
 		case 147:
 		case 148:
-			fairyBonus += fairyLv * 0.02;
+			fairyBonus += static_cast<float>(fairyLv * 0.02);
 			break;
 			// case 7126:
 			//	fairyBonus += 1.5;
@@ -7238,7 +7238,7 @@ float CCharacter::GetExpRate() {
 				}
 			}
 		}
-		ampBonus *= isTooFar == true ? 1.0 : 1.5;
+		ampBonus *= isTooFar == true ? 1.0f : 1.5f;
 	}
 
 	SItemGrid* fairy = GetEquipItem(enumEQUIP_FAIRY);
@@ -7251,14 +7251,14 @@ float CCharacter::GetExpRate() {
 		// Angela Jr
 		switch (fairy->sID) {
 		case 237:
-			fairyBonus += fairyLv * 0.025;
+			fairyBonus += static_cast<float>(fairyLv * 0.025);
 			break;
 		case 681:
 		case 145:
 		case 146:
 		case 147:
 		case 148:
-			fairyBonus += fairyLv * 0.02;
+			fairyBonus += static_cast<float>(fairyLv * 0.02);
 			break;
 			// case 7126:
 			//	fairyBonus += 1.5;
@@ -7280,17 +7280,17 @@ float CCharacter::GetExpRate() {
 	}
 	switch (shareCnt) {
 	case 0:
-		return ampBonus * fairyBonus * globalRate * 1.0;
+		return static_cast<float>(ampBonus * fairyBonus * globalRate * 1.0);
 	case 1:
-		return ampBonus * fairyBonus * globalRate * 0.9;
+		return static_cast<float>(ampBonus * fairyBonus * globalRate * 0.9);
 	case 2:
-		return ampBonus * fairyBonus * globalRate * 0.85;
+		return static_cast<float>(ampBonus * fairyBonus * globalRate * 0.85);
 	case 3:
-		return ampBonus * fairyBonus * globalRate * 0.80;
+		return static_cast<float>(ampBonus * fairyBonus * globalRate * 0.80);
 	case 4:
-		return ampBonus * fairyBonus * globalRate * 0.75;
+		return static_cast<float>(ampBonus * fairyBonus * globalRate * 0.75);
 	default:
-		return ampBonus * fairyBonus * globalRate * 0.70;
+		return static_cast<float>(ampBonus * fairyBonus * globalRate * 0.70);
 	}
 }
 

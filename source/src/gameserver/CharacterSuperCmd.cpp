@@ -799,7 +799,7 @@ BOOL CCharacter::DoGMCommand(const char* pszCmd, const char* pszParam) {
 			expirationt = 0;
 		else
 			expirationt = std::time(0) + minutes;
-		pSItem->expiration = expirationt;
+		pSItem->expiration = static_cast<int>(expirationt);
 		pSItem->SetChange(true);
 		char buf[32];
 

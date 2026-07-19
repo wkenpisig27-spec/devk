@@ -306,7 +306,7 @@ void GroupServerApp::PC_MASTER_INIT(Player* ply) {
 				// l_toSelf1.WriteString("ѧͽ");
 				l_toSelf1.WriteString(RES_STRING(GP_GROUPSERVERAPPMASTER_CPP_00017));
 				l_toSelf1.WriteShort(uShort(l_farray1[i].memaddr));
-				ply->m_CurrPrenticeNum += l_farray1[i].memaddr;
+				ply->m_CurrPrenticeNum += static_cast<LONG>(l_farray1[i].memaddr);
 			}
 		} else if ((l_ply11 = (Player*)MakePointer(l_farray1[i].memaddr)) && g_gpsvr->IsPlayerRegistered(l_ply11) && ((l_currcha1 = l_ply11->m_currcha) >= 0) && (l_ply11->m_chaid[l_currcha1] == l_farray1[i].cha_id)) {
 			// Pointer is registered and validated - safe to use
@@ -361,7 +361,7 @@ void GroupServerApp::PC_MASTER_INIT(Player* ply) {
 			} else {
 				l_toSelf2.WriteString(RES_STRING(GP_GROUPSERVERAPPMASTER_CPP_00018));
 				l_toSelf2.WriteShort(uShort(l_farray2[i].memaddr));
-				ply->m_CurrMasterNum += l_farray2[i].memaddr;
+				ply->m_CurrMasterNum += static_cast<LONG>(l_farray2[i].memaddr);
 			}
 		} else if ((l_ply12 = (Player*)MakePointer(l_farray2[i].memaddr)) && g_gpsvr->IsPlayerRegistered(l_ply12) && ((l_currcha2 = l_ply12->m_currcha) >= 0) && (l_ply12->m_chaid[l_currcha2] == l_farray2[i].cha_id)) {
 			// Pointer is registered and validated - safe to use
