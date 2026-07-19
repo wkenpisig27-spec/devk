@@ -422,7 +422,7 @@ void CPlayer::NoticeTeamMemberData() {
 	WRITE_LONG(wpk, (int)pCha->getAttr(ATTR_SP));
 	WRITE_LONG(wpk, (int)pCha->getAttr(ATTR_MXSP));
 
-	WRITE_LONG(wpk, pMainCha->getAttr(ATTR_LV)); // 写入人的级别信息
+	WRITE_LONG(wpk, static_cast<uLong>(pMainCha->getAttr(ATTR_LV))); // 写入人的级别信息
 	pMainCha->WriteLookData(wpk, LOOK_TEAM);	 // 写入人的外观信息, 最终应该处理为显示船的外观和级别
 
 	SENDTOCLIENT2(wpk, nTMemberCnt, _Team);

@@ -956,7 +956,7 @@ bool TBLGuilds::InitGuildMember(Player* ply, uLong chaid, uLong gldid, int mode)
 					l_toGuild.WriteString((cChar*)_buf[4]);		  // job
 					l_toGuild.WriteShort(atoi((cChar*)_buf[5]));  // degree
 					l_toGuild.WriteShort(atoi((cChar*)_buf[6]));  // icon
-					l_toGuild.WriteLong(stoull((cChar*)_buf[7])); // permission
+					l_toGuild.WriteLong(static_cast<uLong>(stoull((cChar*)_buf[7]))); // permission
 				}
 				if (ply) {
 					l_toSelf.WriteChar(l_memaddr ? 1 : 0);		 // online
@@ -966,7 +966,7 @@ bool TBLGuilds::InitGuildMember(Player* ply, uLong chaid, uLong gldid, int mode)
 					l_toSelf.WriteString((cChar*)_buf[4]);		 // job
 					l_toSelf.WriteShort(atoi((cChar*)_buf[5]));	 // degree
 					l_toSelf.WriteShort(atoi((cChar*)_buf[6]));	 // icon
-					l_toSelf.WriteLong(stoull((cChar*)_buf[7])); // permission
+					l_toSelf.WriteLong(static_cast<uLong>(stoull((cChar*)_buf[7]))); // permission
 				}
 				if (ply && !(f_row % 20)) {
 					l_toSelf.WriteLong(lPacketNum);

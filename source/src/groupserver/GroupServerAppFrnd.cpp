@@ -291,7 +291,7 @@ void GroupServerApp::PC_FRND_INIT(Player* ply) {
 			} else {
 				l_toSelf.WriteString(l_farray[i].relation.c_str());
 				l_toSelf.WriteShort(uShort(l_farray[i].memaddr));
-				ply->m_CurrFriendNum += l_farray[i].memaddr;
+				ply->m_CurrFriendNum += static_cast<LONG>(l_farray[i].memaddr);
 			}
 	} else if ((l_ply1 = (Player*)MakePointer(l_farray[i].memaddr)) && g_gpsvr->IsPlayerRegistered(l_ply1) && ((l_currcha = l_ply1->m_currcha) >= 0) && (l_ply1->m_chaid[l_currcha] == l_farray[i].cha_id)) {
 		// Pointer is registered and validated - safe to use

@@ -256,7 +256,7 @@ void CStallSystem::StartStall(CCharacter& staller, RPACKET& packet) {
 			__int64 num = price / 100000;
 			__int64 ID = price - (num * 100000);
 
-			CItemRecord* pInfo = GetItemRecordInfo(ID);
+			CItemRecord* pInfo = GetItemRecordInfo(static_cast<int>(ID));
 
 			if (!pInfo || pInfo->sType == 43 || !pInfo->chIsTrade) {
 				// if is invalid, just dont show item rather thanclosing the stall.
@@ -573,8 +573,8 @@ void CStallSystem::BuyGoods(CCharacter& character, RPACKET& packet) {
 
 	if (pData->m_Goods[byIndex].llMoney > 100000000000LL) {
 		__int64 price = pData->m_Goods[byIndex].llMoney - 100000000000LL;
-		int quantity = price / 100000;
-		int itemID = price - (quantity * 100000);
+		int quantity = static_cast<int>(price / 100000);
+		int itemID = static_cast<int>(price - (quantity * 100000));
 		// consider changing this to check a given slot?
 		CItemRecord* pInfo = GetItemRecordInfo(itemID);
 		if (pInfo) {
@@ -610,7 +610,7 @@ void CStallSystem::BuyGoods(CCharacter& character, RPACKET& packet) {
 						Short sPushPos = defKITBAG_DEFPUSH_POS;
 						CKitbag buyerBagBackup = character.m_CKitbag;
 						CKitbag sellerBagBackup = pStaller->m_CKitbag;
-						BYTE byStallGoodsCountBackup = pData->m_Goods[byIndex].byCount;
+						BYTE byStallGoodsCountBackup = static_cast<BYTE>(pData->m_Goods[byIndex].byCount);
 						// give seller item
 						SItemGrid Grid;
 						Grid.sNum = quantity;
@@ -748,7 +748,7 @@ void CStallSystem::BuyGoods(CCharacter& character, RPACKET& packet) {
 		CKitbag sellerBagBackup = pStaller->m_CKitbag;
 		__int64 llBuyerGoldBackup = character.getAttr(ATTR_GD);
 		__int64 llSellerGoldBackup = pStaller->getAttr(ATTR_GD);
-		BYTE byStallGoodsCountBackup = pData->m_Goods[byIndex].byCount;
+		BYTE byStallGoodsCountBackup = static_cast<BYTE>(pData->m_Goods[byIndex].byCount);
 
 		pStaller->m_CChaAttr.ResetChangeFlag();
 		pStaller->SetBoatAttrChangeFlag(false);
@@ -850,7 +850,7 @@ void CStallSystem::BuyGoods(CCharacter& character, RPACKET& packet) {
                 param.setLong(1, byCount);
                 param.setString(2, pItem->szName);
                 param.setLong(3, (int)actualGain);
-                param.setLong(4, pData->m_Goods[byIndex].llMoney);
+                param.setLong(4, static_cast<int32_t>(pData->m_Goods[byIndex].llMoney));
                 param.setLong(5, (int)pStaller->getAttr(ATTR_GD));
 
                 RES_FORMAT_STRING(GM_CHARSTALL_CPP_00052, param, szNotice);
@@ -872,7 +872,7 @@ void CStallSystem::BuyGoods(CCharacter& character, RPACKET& packet) {
 		pStaller->SynAttr(enumATTRSYN_TRADE);
 		pStaller->SyncBoatAttr(enumATTRSYN_TRADE);
 		pStaller->SynKitbagNew(enumSYN_KITBAG_TRADE);
-		DelGoods(*pStaller, pData->m_Goods[byIndex].byGrid, byCount);
+		DelGoods(*pStaller, pData->m_Goods[byIndex].byGrid, static_cast<BYTE>(byCount));
 
 		// 刷新任务道具计数
 		pStaller->RefreshNeedItem(Grid.sID);
@@ -947,7 +947,7 @@ void CStallSystem::SyncData(CCharacter& character, CCharacter& staller) {
 	for (BYTE i = 0; i < pData->m_byNum; ++i) {
 		WRITE_CHAR(packet, pData->m_Goods[i].byGrid);
 		WRITE_SHORT(packet, pData->m_Goods[i].sItemID);
-		WRITE_CHAR(packet, pData->m_Goods[i].byCount);  // Must be CHAR to match client
+		WRITE_CHAR(packet, static_cast<uChar>(pData->m_Goods[i].byCount));  // Must be CHAR to match client
 		WRITE_LONGLONG(packet, pData->m_Goods[i].llMoney);
 
 		CItemRecord* pItem = (CItemRecord*)GetItemRecordInfo(Bag.GetID(pData->m_Goods[i].byIndex));

@@ -1903,7 +1903,7 @@ BOOL CTradeSystem::ValidateTrade(BYTE byType, CCharacter& character, DWORD dwCha
 			// pAccept->SystemNotice( "ä½ ä»Ž(%s)å¤„å¾—åˆ°äº†%dé‡‘é’±ï¼", pRequest->GetName(), pTradeData->ReqTradeData.llMoney );
 			CFormatParameter param(2);
 			param.setString(0, pRequest->GetName());
-			param.setLong(1, pTradeData->ReqTradeData.llMoney);
+			param.setLong(1, static_cast<int32_t>(pTradeData->ReqTradeData.llMoney));
 
 			RES_FORMAT_STRING(GM_CHARTRADE_CPP_00076, param, szNotice);
 
@@ -1913,7 +1913,7 @@ BOOL CTradeSystem::ValidateTrade(BYTE byType, CCharacter& character, DWORD dwCha
 		if (pTradeData->AcpTradeData.llMoney) {
 			CFormatParameter param(2);
 			param.setString(0, pAccept->GetName());
-			param.setLong(1, pTradeData->AcpTradeData.llMoney);
+			param.setLong(1, static_cast<int32_t>(pTradeData->AcpTradeData.llMoney));
 
 			RES_FORMAT_STRING(GM_CHARTRADE_CPP_00076, param, szNotice);
 
@@ -3110,7 +3110,7 @@ BOOL CStoreSystem::RequestGMSend(CCharacter* pCha, cChar* szTitle, cChar* szCont
 	pMi->chaID = pCha->GetPlayer()->GetDBChaId();
 	strcpy(pMi->actName, pCha->GetPlayer()->GetActName());
 	strcpy(pMi->chaName, pCha->GetName());
-	pMi->sendTime = time(0);
+	pMi->sendTime = static_cast<int32_t>(time(0));
 
 	BuildNetMessage(pNm, INFO_SND_GM_MAIL, 0, 0, 0, (unsigned char*)pMi, sizeof(MailInfo));
 	if (HasOrder(pNm->msgHead.msgOrder)) {

@@ -73,7 +73,7 @@ int CParser::DoString(const char* csString, char chRetType, int nRetNum, ...) {
 			nNum = va_arg(list, int);
 			nParamNum += nNum;
 			while (nNum-- > 0)
-				lua_pushnumber(m_pSLua, va_arg(list, LONG64));
+				lua_pushnumber(m_pSLua, static_cast<lua_Number>(va_arg(list, LONG64)));
 			break;
 		case enumSCRIPT_PARAM_LIGHTUSERDATA: {
 			nNum = va_arg(list, int);

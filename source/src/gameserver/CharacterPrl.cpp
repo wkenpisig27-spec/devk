@@ -3438,7 +3438,7 @@ void CCharacter::BeginAction(RPACKET pk) {
 			return;
 		}
 		Short sGridID = static_cast<Short>(sGridIDRaw);
-		Short sRet = Cmd_LockItem(sGridID);
+		Short sRet = Cmd_LockItem(static_cast<Char>(sGridID));
 		if (sRet != enumITEMOPT_SUCCESS)
 			ItemOprateFailed(sRet);
 	} break;
@@ -3452,7 +3452,7 @@ void CCharacter::BeginAction(RPACKET pk) {
 		if (!reader.String(szPwd)) {
 			return;
 		}
-		Short sRet = Cmd_UnlockItem(sGridID, szPwd);
+		Short sRet = Cmd_UnlockItem(static_cast<Char>(sGridID), szPwd);
 		if (sRet != enumITEMOPT_SUCCESS)
 			ItemOprateFailed(sRet);
 	} break;

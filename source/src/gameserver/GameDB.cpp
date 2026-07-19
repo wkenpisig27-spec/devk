@@ -407,7 +407,7 @@ bool CTableCha::ReadAllData(CPlayer* pPlayer, DWORD cha_id) {
 		// Add by lark.li 20080723 begin
 		Strin2ChaExtendAttr(pCha, g_buf[nIndex++]);
 
-		pCha->guildPermission = stoull(g_buf[nIndex++]); // Str2Int(g_buf[nIndex++]);
+		pCha->guildPermission = static_cast<unsigned int>(stoull(g_buf[nIndex++])); // Str2Int(g_buf[nIndex++]);
 		pCha->chatColour = Str2Int(g_buf[nIndex++]);
 		pCha->SetIMP(Str2Int(g_buf[nIndex++]));
 		pCha->SetBattlePower(Str2Int(g_buf[nIndex++]));
