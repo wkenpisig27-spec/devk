@@ -1103,9 +1103,9 @@ bool TBLParam::InitParam(void) {
 					return false;
 				}
 				memcpy(m_nOrder[n].strname, _buf[0], buf_len[0]);
-				m_nOrder[n].strname[buf_len[0]] = '\\0';
+				m_nOrder[n].strname[buf_len[0]] = '\0';
 				memcpy(m_nOrder[n].strjob, _buf[1], buf_len[1]);
-				m_nOrder[n].strjob[buf_len[1]] = '\\0';
+				m_nOrder[n].strjob[buf_len[1]] = '\0';
 				m_nOrder[n].nlev = nlev;
 			}
 			SQLFreeStmt(hstmt, SQL_CLOSE);
