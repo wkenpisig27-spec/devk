@@ -62,7 +62,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <AdditionalIncludeDirectories>..\..\include\gateserver;..\..\src\gateserver;$(ProjectDir)..\src;$(ProjectDir)..\..\include\gateserver;$(ProjectDir)..\..\include\serversdk;$(ProjectDir)..\..\include\common;$(ProjectDir)..\..\include\util;$(ProjectDir)..\..\include\Status;$(ProjectDir)..\..\include\ICUHelper;$(ProjectDir)..\..\include;$(ProjectDir)..\..\include\botan\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>BOTAN_DLL=;NOCRYPT;NOMINMAX;WIN32;_WIN64;NDEBUG;_CONSOLE;NARROW;BOTAN_FUTURE_INTERNAL_HEADER_OK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BOTAN_DLL=;NOCRYPT;NOMINMAX;WIN32;_WIN64;NDEBUG;_CONSOLE;NARROW;BOTAN_FUTURE_INTERNAL_HEADER_OK;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>true</BufferSecurityCheck>
@@ -70,7 +70,7 @@
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <DisableSpecificWarnings>4566</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4566;4250;4073</DisableSpecificWarnings>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
@@ -96,7 +96,7 @@
       <AdditionalOptions>/EHa %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\include\gateserver;..\..\src\gateserver;$(ProjectDir)..\src;$(ProjectDir)..\..\include\gateserver;$(ProjectDir)..\..\include\serversdk;$(ProjectDir)..\..\include\common;$(ProjectDir)..\..\include\util;$(ProjectDir)..\..\include\Status;$(ProjectDir)..\..\include\ICUHelper;$(ProjectDir)..\..\include;$(ProjectDir)..\..\include\botan\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>BOTAN_DLL=;NOCRYPT;WIN32;_WIN64;_DEBUG;_CONSOLE;NARROW;NOMINMAX;BOTAN_FUTURE_INTERNAL_HEADER_OK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BOTAN_DLL=;NOCRYPT;WIN32;_WIN64;_DEBUG;_CONSOLE;NARROW;NOMINMAX;BOTAN_FUTURE_INTERNAL_HEADER_OK;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -104,7 +104,7 @@
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <DisableSpecificWarnings>4566</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4566;4250;4073</DisableSpecificWarnings>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
