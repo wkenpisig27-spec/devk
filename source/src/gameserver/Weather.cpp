@@ -33,7 +33,7 @@ void CWeather::RandLocation(SubMap* pMap) {
 
 	CSkillStateRecord* pEff = GetCSkillStateRecordInfo(_btType);
 	if (pEff) {
-		if ((dwCurTick - g_dwLastWeatherTick[_btType]) > 1000 * g_Config.m_lWeather) // 每种天气, 每2分钟一次天气预报
+		if ((dwCurTick - g_dwLastWeatherTick[_btType]) > static_cast<DWORD>(1000 * g_Config.m_lWeather)) // 每种天气, 每2分钟一次天气预报
 		{
 			g_dwLastWeatherTick[_btType] = dwCurTick;
 			char szText[128];

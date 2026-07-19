@@ -948,8 +948,10 @@ BOOL CTradeSystem::AddItem(BYTE byType, CCharacter& character, DWORD dwCharID, B
 			byCount = 1;
 		}
 
-		if (byCount > ROLE_MAXNUM_ITEMTRADE) {
-			byCount = ROLE_MAXNUM_ITEMTRADE;
+		// byCount is BYTE-sized; ROLE_MAXNUM_ITEMTRADE (999) cannot fit — clamp to BYTE max.
+		constexpr BYTE kMaxTradeItemCount = 255;
+		if (byCount > kMaxTradeItemCount) {
+			byCount = kMaxTradeItemCount;
 		}
 
 		if (byCount > Bag.GetNum(byItemIndex)) {
@@ -1200,14 +1202,14 @@ BOOL CTradeSystem::ValidateTrade(BYTE byType, CCharacter& character, DWORD dwCha
 		int dwReqIMP = pRequest->GetPlayer() ? pRequest->GetIMP() : 0;
 		int dwAcpIMP = pAccept->GetPlayer() ? pAccept->GetIMP() : 0;
 
-		if (pTradeData->ReqTradeData.dwIMP > dwReqIMP) {
+		if (pTradeData->ReqTradeData.dwIMP > static_cast<DWORD>(dwReqIMP)) {
 			pAccept->SystemNotice("Character (%s] IMP in trading mode is incorrect, trading cannot be continued!", pRequest->GetName());
 			pRequest->SystemNotice("Character (%s] IMP in trading mode is incorrect, trading cannot be continued!", pRequest->GetName());
 			pTradeData->UnlockExecution();
 			return FALSE;
 		}
 
-		if (pTradeData->AcpTradeData.dwIMP > dwAcpIMP) {
+		if (pTradeData->AcpTradeData.dwIMP > static_cast<DWORD>(dwAcpIMP)) {
 			pAccept->SystemNotice("Character (%s] IMP in trading mode is incorrect, trading cannot be continued!", pAccept->GetName());
 			pRequest->SystemNotice("Character (%s] IMP in trading mode is incorrect, trading cannot be continued!", pAccept->GetName());
 			pTradeData->UnlockExecution();
