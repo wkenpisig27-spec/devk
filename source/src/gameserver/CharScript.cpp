@@ -5151,9 +5151,7 @@ inline int lua_ClearAllFightSkill(lua_State* L) {
 			}
 
 			const auto skillLv = skill->chLv;
-			if (pChar->m_CSkillBag.Del(skill->sID))
-				;
-			{
+			if (pChar->m_CSkillBag.Del(skill->sID)) {
 				nSkillPoint += skillLv;
 			}
 		}
