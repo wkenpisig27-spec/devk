@@ -81,14 +81,14 @@
       <AdditionalOptions>/EHa %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\include\gameserver;..\..\src\gameserver;$(ProjectDir)..\src;$(ProjectDir)..\..\include\serversdk;$(ProjectDir)..\..\include\common;$(ProjectDir)..\..\include\util;$(ProjectDir)..\..\include\luajit;$(ProjectDir)..\..\include\icuhelper;$(ProjectDir)..\..\include;$(ProjectDir)..\..\include\infonet;$(ProjectDir)..\..\include\luabridge;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NOMINMAX;WIN32;_WIN64;_DEBUG;_CONSOLE;__INFO_NET__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;WIN32;_WIN64;_DEBUG;_CONSOLE;__INFO_NET__;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <StructMemberAlignment>Default</StructMemberAlignment>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <DisableSpecificWarnings>4566</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4566;4250;4073</DisableSpecificWarnings>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
@@ -118,13 +118,13 @@
       <AdditionalOptions>/EHa %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\include\gameserver;..\..\src\gameserver;$(ProjectDir)..\src;$(ProjectDir)..\..\include\gameserver;$(ProjectDir)..\..\include\serversdk;$(ProjectDir)..\..\include\common;$(ProjectDir)..\..\include\util;$(ProjectDir)..\..\include\infonet;$(ProjectDir)..\..\include\luajit;$(ProjectDir)..\..\include\icuhelper;$(ProjectDir)..\..\include;$(ProjectDir)..\..\include\Botan;$(ProjectDir)..\..\include\luabridge;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WIN64;NDEBUG;WINDOWS_IGNORE_PACKING_MISMATCH;BOTAN_DLL=;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN64;NDEBUG;WINDOWS_IGNORE_PACKING_MISMATCH;BOTAN_DLL=;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <StructMemberAlignment>Default</StructMemberAlignment>
       <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <DisableSpecificWarnings>4566</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4566;4250;4073</DisableSpecificWarnings>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
