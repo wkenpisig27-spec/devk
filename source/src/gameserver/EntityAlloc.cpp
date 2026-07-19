@@ -147,7 +147,7 @@ CEntityAlloc::~CEntityAlloc() {
 	m_ItemAlloc.clear();
 	m_BerthAlloc.clear();
 	m_ResourceAlloc.clear();
-	T_E
+	T_FINAL
 }
 
 CCharacter* CEntityAlloc::GetNewCha() {

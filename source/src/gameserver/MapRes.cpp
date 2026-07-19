@@ -54,7 +54,7 @@ CMapRes::~CMapRes() {
 		fclose(m_pfEntryFile);
 		m_pfEntryFile = 0;
 	}
-	T_E
+	T_FINAL
 }
 
 bool CMapRes::Init() {

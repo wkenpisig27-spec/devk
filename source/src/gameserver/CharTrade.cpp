@@ -32,7 +32,7 @@ CTradeData::CTradeData(dbc::uLong lSize)
 
 	  CTradeData::~CTradeData(){T_B
 
-									T_E}
+									T_FINAL}
 
 	  //----------------------------------------------------
 	  // CTradeSystem implemented
@@ -43,7 +43,7 @@ CTradeData::CTradeData(dbc::uLong lSize)
 
 	  CTradeSystem::~CTradeSystem(){T_B
 
-										T_E}
+										T_FINAL}
 
 	  // äº¤æ˜“æ“ä½œ
 	  BOOL CTradeSystem::Request(BYTE byType, CCharacter & character, DWORD dwAcceptID) {
@@ -2066,7 +2066,7 @@ CStoreSystem::CStoreSystem() : m_bValid(false){T_B
 
 							   CStoreSystem::~CStoreSystem(){T_B
 
-																 T_E}
+																 T_FINAL}
 
 							   BOOL CStoreSystem::PushOrder(CCharacter * pCha, long long lOrderID, int lComID, int lNum) {
 	T_B

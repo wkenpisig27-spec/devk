@@ -377,7 +377,7 @@ CGameApp::~CGameApp() {
 	m_vecVolunteerList.clear();
 	_PlayerIdx.clear();
 	_PlayerIdxGen.clear();
-	T_E
+	T_FINAL
 }
 
 const char* GetResPath(const char* pszRes) {

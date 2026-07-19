@@ -27,7 +27,7 @@ CNpc::CNpc()
 
 CNpc::~CNpc() { T_B
 
-					T_E }
+					T_FINAL }
 
 void CNpc::Clear() {
 	T_B
@@ -82,7 +82,7 @@ CTalkNpc::CTalkNpc()
 
 CTalkNpc::~CTalkNpc() { T_B
 
-							T_E }
+							T_FINAL }
 
 void CTalkNpc::Clear() {
 	T_B
@@ -487,7 +487,7 @@ CTradeNpc::CTradeNpc()
 
 CTradeNpc::~CTradeNpc(){T_B
 
-							T_E}
+							T_FINAL}
 
 BOOL CTradeNpc::Sale(CCharacter& character, RPACKET& packet) {
 	T_B return TRUE;
@@ -511,6 +511,6 @@ CRoleNpc::CRoleNpc()
 
 CRoleNpc::~CRoleNpc() { T_B
 
-							T_E }
+							T_FINAL }
 
 } // namespace mission

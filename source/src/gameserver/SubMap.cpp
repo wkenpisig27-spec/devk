@@ -1931,7 +1931,7 @@ COutMapCha::~COutMapCha() {
 
 		*/
 		spawnQueue.clear();
-	T_E
+	T_FINAL
 }
 
 void COutMapCha::Add(CCharacter* pCObj, dbc::uLong ulChaID, SSwitchMapInfo* pSwitchInfo, Char chAction, Long lLeftTick1, Long lLeftTick2) {

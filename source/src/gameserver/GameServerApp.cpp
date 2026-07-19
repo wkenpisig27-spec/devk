@@ -211,7 +211,7 @@ GameServerApp::~GameServerApp() {
 	}
 
 	ShutDown(2 * 1000);
-	T_E
+	T_FINAL
 }
 
 // 返回值:true-允许连接,false-不允许连接

@@ -25,7 +25,7 @@ CCharBoat::CCharBoat() {
 CCharBoat::~CCharBoat() {
 	T_B
 	Clear();
-	T_E
+	T_FINAL
 }
 
 void CCharBoat::Clear() {
