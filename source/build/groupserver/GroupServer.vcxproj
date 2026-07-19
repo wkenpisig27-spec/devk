@@ -74,7 +74,8 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <WarningLevel>Level2</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
+      <DisableSpecificWarnings>4566</DisableSpecificWarnings>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
@@ -103,7 +104,8 @@
       <ExceptionHandling />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <WarningLevel>Level2</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
+      <DisableSpecificWarnings>4566</DisableSpecificWarnings>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
       <LanguageStandard>stdcpplatest</LanguageStandard>

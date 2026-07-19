@@ -87,7 +87,7 @@
       <StructMemberAlignment>Default</StructMemberAlignment>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level2</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <DisableSpecificWarnings>4566</DisableSpecificWarnings>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -123,7 +123,7 @@
       <StructMemberAlignment>Default</StructMemberAlignment>
       <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <WarningLevel>Level2</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <DisableSpecificWarnings>4566</DisableSpecificWarnings>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <LanguageStandard>stdcpplatest</LanguageStandard>

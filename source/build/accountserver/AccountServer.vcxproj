@@ -69,7 +69,8 @@
       <BufferSecurityCheck>true</BufferSecurityCheck>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <BrowseInformation>true</BrowseInformation>
-      <WarningLevel>Level2</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
+      <DisableSpecificWarnings>4566</DisableSpecificWarnings>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
@@ -99,7 +100,8 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level2</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
+      <DisableSpecificWarnings>4566</DisableSpecificWarnings>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
