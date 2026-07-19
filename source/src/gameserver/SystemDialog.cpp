@@ -402,7 +402,7 @@ void SystemReport(DWORD dwTimeParam) {
 
 	HWND hRunFlag = GetDlgItem(g_ReportView, IDC_RUNFLAG);
 	char szInfo[64];
-	sprintf(szInfo, "%d", ActiveGameApp()->m_dwRunStep);
+	sprintf(szInfo, "%ld", static_cast<LONG>(ActiveGameApp()->m_dwRunStep));
 	if (hRunFlag)
 		SetWindowText(hRunFlag, szInfo);
 
@@ -463,7 +463,7 @@ void SystemReport(DWORD dwTimeParam) {
 	sprintf(szFPS, "%d", ActiveGameApp()->m_dwActiveMgrUnit);
 	if (hActiveUnit)
 		SetWindowText(hActiveUnit, szFPS);
-	sprintf(szFPS, "%d", ActiveGameApp()->m_dwRunStep);
+	sprintf(szFPS, "%ld", static_cast<LONG>(ActiveGameApp()->m_dwRunStep));
 	if (hRunFlag)
 		SetWindowText(hRunFlag, szFPS);
 	sprintf(szFPS, "%d", ActiveGameApp()->GetLogLeft());

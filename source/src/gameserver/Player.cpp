@@ -1014,7 +1014,7 @@ char* CPlayer::BankDBIDData2String(char* szSStateBuf, int nLen) {
 		nBufLen += nDataLen;
 
 		if (i < m_chBankNum - 1) {
-			sprintf(szData, ",", m_lBankDBID[i]);
+			sprintf(szData, ",");
 			nDataLen = (int)strlen(szData);
 			if (nBufLen + nDataLen >= nLen)
 				return nullptr;

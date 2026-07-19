@@ -1513,7 +1513,7 @@ bool CTableAmphitheaterTeam::IsLogin(int pActorID) {
 	char filter[80];
 	int PActorIDNum = 0;
 
-	_snprintf_s(filter, sizeof(filter), _TRUNCATE, "captain = %d or member like '%d,%' or member like '%,%d'", pActorID, pActorID, pActorID);
+	_snprintf_s(filter, sizeof(filter), _TRUNCATE, "captain = %d or member like '%d,%%' or member like '%%,%d'", pActorID, pActorID, pActorID);
 
 	int r = _get_row(buf, 1, param, filter);
 	int r1 = get_affected_rows();
