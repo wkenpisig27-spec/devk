@@ -1106,7 +1106,11 @@ void StackWalker::OnSymInit(LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUser
 	OSVERSIONINFOEXA ver;
 	ZeroMemory(&ver, sizeof(OSVERSIONINFOEXA));
 	ver.dwOSVersionInfoSize = sizeof(ver);
-	if (GetVersionExA((OSVERSIONINFOA*)&ver) != FALSE) {
+#pragma warning(push)
+#pragma warning(disable : 4996) // GetVersionExA deprecated; StackWalker diagnostic only
+	const BOOL gotVersion = GetVersionExA((OSVERSIONINFOA*)&ver);
+#pragma warning(pop)
+	if (gotVersion != FALSE) {
 		_snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "OS-Version: %d.%d.%d (%s) 0x%x-0x%x\n",
 					ver.dwMajorVersion, ver.dwMinorVersion, ver.dwBuildNumber,
 					ver.szCSDVersion, ver.wSuiteMask, ver.wProductType);
