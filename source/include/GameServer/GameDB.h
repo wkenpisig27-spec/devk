@@ -404,7 +404,7 @@ public:
 		SAFE_DELETE(_tab_mmask);
 		
 		_connect.disconn();
-		T_E
+		T_FINAL
 	}
 
 	BOOL Init();

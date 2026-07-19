@@ -37,7 +37,7 @@ public:
 		T_B
 		SAFE_DELETE(_tab_log);
 		_connect.disconn();
-		T_E
+		T_FINAL
 	}
 
 		  BOOL Init();
