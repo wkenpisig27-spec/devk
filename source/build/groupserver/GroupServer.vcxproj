@@ -67,7 +67,7 @@
       <AdditionalOptions>/EHa %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\include\groupserver;..\..\src\groupserver;$(ProjectDir)..\src;$(ProjectDir)..\..\include\groupserver;$(ProjectDir)..\..\include\util;$(ProjectDir)..\..\include\serversdk;$(ProjectDir)..\..\include\common;$(ProjectDir)..\..\include\LuaJIT;$(ProjectDir)..\..\include\icuhelper;$(ProjectDir)..\..\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WIN64;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN64;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS;_SILENCE_CXX17_STRSTREAM_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>
       </ExceptionHandling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -100,7 +100,7 @@
     <ClCompile>
       <AdditionalOptions>/EHa %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>..\..\include\groupserver;..\..\src\groupserver;$(ProjectDir)..\src;$(ProjectDir)..\..\include\groupserver;$(ProjectDir)..\..\include\util;$(ProjectDir)..\..\include\serversdk;$(ProjectDir)..\..\include\common;$(ProjectDir)..\..\include\LuaJIT;$(ProjectDir)..\..\include\icuhelper;$(ProjectDir)..\..\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WIN64;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN64;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS;_SILENCE_CXX17_STRSTREAM_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
