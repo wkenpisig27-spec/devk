@@ -280,8 +280,8 @@ void GroupServerApp::SendToAllClients(const WPacket& wpk) {
 			break;
 		}
 
-		g_gpsvr->SendToClient(players.data(), size, wpk);
-		n += size;
+		g_gpsvr->SendToClient(players.data(), static_cast<short>(size), wpk);
+		n += static_cast<int>(size);
 	}
 }
 

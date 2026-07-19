@@ -159,7 +159,7 @@ void Player::EndPlay(DataSocket* datasock) {
 					}
 				}
 				l.unlock();
-				g_gpsvr->SendToClient(l_plylst.data(), l_plynum, l_toGuild);
+				g_gpsvr->SendToClient(l_plylst.data(), static_cast<short>(l_plynum), l_toGuild);
 			}
 
 			LeaveGuild();
@@ -203,7 +203,7 @@ void Player::EndPlay(DataSocket* datasock) {
 						++l_plynum;
 					}
 				}
-				g_gpsvr->SendToClient(l_plylst.data(), l_plynum, l_toFrnd);
+				g_gpsvr->SendToClient(l_plylst.data(), static_cast<short>(l_plynum), l_toFrnd);
 			}
 
 			{
@@ -228,7 +228,7 @@ void Player::EndPlay(DataSocket* datasock) {
 						++l_plynum;
 					}
 				}
-				g_gpsvr->SendToClient(l_plylst.data(), l_plynum, l_toFrnd);
+				g_gpsvr->SendToClient(l_plylst.data(), static_cast<short>(l_plynum), l_toFrnd);
 				m_CurrMasterNum = 0;
 			}
 
@@ -254,7 +254,7 @@ void Player::EndPlay(DataSocket* datasock) {
 						l_plynum++;
 					}
 				}
-				g_gpsvr->SendToClient(l_plylst.data(), l_plynum, l_toFrnd);
+				g_gpsvr->SendToClient(l_plylst.data(), static_cast<short>(l_plynum), l_toFrnd);
 				m_CurrPrenticeNum = 0;
 			}
 		}
@@ -510,7 +510,7 @@ void Player::CountEstopTime() {
 }
 
 void Player::DelEstopPlayer(cChar* plyname) {
-	if (!IsValidName(plyname, strlen(plyname))) {
+	if (!IsValidName(plyname, static_cast<unsigned short>(strlen(plyname)))) {
 		return;
 	}
 	Player* ply = g_gpsvr->FindPlayerByChaName(plyname);
@@ -550,7 +550,7 @@ void Player::DelEstopPlayer(cChar* plyname) {
 }
 
 void Player::EstopPlayer(cChar* plyname, uLong lTimes) {
-	if (!IsValidName(plyname, strlen(plyname))) {
+	if (!IsValidName(plyname, static_cast<unsigned short>(strlen(plyname)))) {
 		return;
 	}
 

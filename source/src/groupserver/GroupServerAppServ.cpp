@@ -496,7 +496,7 @@ WPacket GroupServerApp::TP_CHANGEPASS(Player* l_ply, DataSocket* datasock, RPack
 	}
 	if (strcmp(l_ply->m_password.c_str(), PIN) != 0) {
 		l_wpk.WriteString("Incorrect PIN.");
-	} else if (strlen(newPass) != 32 || !isAlphaNumeric(newPass, strlen(newPass))) {
+	} else if (strlen(newPass) != 32 || !isAlphaNumeric(newPass, static_cast<unsigned short>(strlen(newPass)))) {
 		l_wpk.WriteString("Invalid Password.");
 	} else {
 		WPacket l_wpk_acc = GetWPacket();
@@ -572,9 +572,9 @@ WPacket GroupServerApp::TP_REGISTER(DataSocket* datasock, RPacket& pk) {
 		return ret_pk;
 	}
 
-	int len = strlen(userName);
-	int passlen = strlen(password);
-	int emaillen = strlen(email);
+	int len = static_cast<int>(strlen(userName));
+	int passlen = static_cast<int>(strlen(password));
+	int emaillen = static_cast<int>(strlen(email));
 
 	if (!CheckRegisterRateLimit(datasock->GetPeerIP())) {
 		ret_pk.WriteChar(0);
@@ -736,7 +736,7 @@ void GroupServerApp::OnProcessData(DataSocket* datasock, RPacket& recvbuf) {
 			gbm.msg = l_wpk;
 			gbm.playerChaID = l_ply->m_chaid[l_ply->m_currcha];  // Store for validation
 
-			const int queueSize = guildBankMsgQueue[guildID].size();
+			const int queueSize = static_cast<int>(guildBankMsgQueue[guildID].size());
 
 			if (queueSize >= 10) {
 				WPacket l_wpk = GetWPacket();
