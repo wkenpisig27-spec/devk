@@ -164,7 +164,7 @@ inline bool operator==(const dstring& str1, const dstring& str2) {
 //==��Ԫ���Ӳ�����+=����============================================================
 inline dstring& operator+=(dstring& str1, cChar* str2) {
 	str1.SetOverwrite(false);
-	str1.SetSize(str1.length() + strlen(str2) + 1);
+	str1.SetSize(str1.length() + uLong(strlen(str2)) + 1);
 	strcat(str1.m_buf->getbuf(), str2);
 	return str1;
 }

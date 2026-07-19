@@ -3723,7 +3723,7 @@ void CCharacter::BeginAction(RPACKET pk) {
 		WRITE_LONG(WtPk, m_ID);
 		WRITE_LONG(WtPk, ulPacketId);
 		WRITE_CHAR(WtPk, enumACTION_UPDATEGUILDLOGS);
-		WRITE_SHORT(WtPk, logs.size());
+		WRITE_SHORT(WtPk, static_cast<uShort>(logs.size()));
 		// WRITE_SHORT(WtPk, oldsize);
 		//  User is clicking the tab, fetch only the latest 13 operations
 		for (int i = 1; i <= 13; i++) {

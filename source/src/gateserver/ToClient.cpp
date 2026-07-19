@@ -664,8 +664,8 @@ void ToClient::CM_RSA_HANDSHAKE1(DataSocket* datasock, RPacket& recvbuf) {
 				std::vector<uint8_t> iv_encrypted = enc.encrypt((uint8_t*)l_ply->m_IV, AES_IV_LENGTH, rng);
 				dbc::WPacket l_wpk = GetWPacket();
 				l_wpk.WriteCmd(CMD_MC_RSA_HANDSHAKE_2);
-				l_wpk.WriteSequence((cChar*)aes_encrypted.data(), aes_encrypted.size());
-				l_wpk.WriteSequence((cChar*)iv_encrypted.data(), iv_encrypted.size());
+				l_wpk.WriteSequence((cChar*)aes_encrypted.data(), static_cast<uShort>(aes_encrypted.size()));
+				l_wpk.WriteSequence((cChar*)iv_encrypted.data(), static_cast<uShort>(iv_encrypted.size()));
 				l_wpk.WriteChar((uChar)_comm_enc); // Tell client if encryption is enabled
 				SendData(datasock, l_wpk);
 
@@ -1235,7 +1235,7 @@ void ToClient::CM_LOGIN(DataSocket* datasock, RPacket& recvbuf) {
 		auto plaintext = ReadPacketSequenceEncrypted(recvbuf, l_ply->m_AESKey);
 		WPacket l_wpk = WPacket(recvbuf).Duplicate();
 		l_wpk.WriteCmd(CMD_TP_USER_LOGIN);
-		l_wpk.WriteSequence((cChar*)plaintext.data(), plaintext.size());
+		l_wpk.WriteSequence((cChar*)plaintext.data(), static_cast<uShort>(plaintext.size()));
 		l_wpk.WriteLong(inet_addr(datasock->GetPeerIP()));
 		l_wpk.WriteLongLong(MakeULong(l_ply)); // Gate player address for GroupServer
 		if (!g_gtsvr->AppendTpLoginRequestTrailer(l_wpk, l_ply)) {
@@ -1780,7 +1780,7 @@ void ToClient::CM_DELCHA(DataSocket* datasock, RPacket& recvbuf) {
 				auto l_wpk = datasock->GetWPacket();
 				l_wpk.WriteCmd(CMD_TP_DELCHA);
 				l_wpk.WriteSequence(cha_name, cha_name_len);
-				l_wpk.WriteSequence((cChar*)password.data(), password.size());
+				l_wpk.WriteSequence((cChar*)password.data(), static_cast<uShort>(password.size()));
 				if (!l_ply->gp_addr || !g_gtsvr->AppendInGameGroupTrailer(l_wpk, l_ply, CMD_TP_DELCHA)) {
 					l_wpk = datasock->GetWPacket();
 					l_wpk.WriteCmd(CMD_MC_DELCHA);
@@ -1835,7 +1835,7 @@ void ToClient::CM_CREATE_PASSWORD2(DataSocket* datasock, RPacket& recvbuf) {
 				auto password = ReadPacketSequenceEncrypted(recvbuf, l_ply->m_AESKey);
 				auto l_wpk = datasock->GetWPacket();
 				l_wpk.WriteCmd(CMD_TP_CREATE_PASSWORD2);
-				l_wpk.WriteSequence((cChar*)password.data(), password.size());
+				l_wpk.WriteSequence((cChar*)password.data(), static_cast<uShort>(password.size()));
 				if (!l_ply->gp_addr || !g_gtsvr->AppendInGameGroupTrailer(l_wpk, l_ply, CMD_TP_CREATE_PASSWORD2)) {
 					l_wpk = datasock->GetWPacket();
 					l_wpk.WriteCmd(CMD_MC_CREATE_PASSWORD2);
@@ -1892,8 +1892,8 @@ void ToClient::CM_UPDATE_PASSWORD2(DataSocket* datasock, RPacket& recvbuf) {
 				const auto new_password = ReadPacketSequenceEncrypted(recvbuf, l_ply->m_AESKey);
 				auto l_wpk = datasock->GetWPacket();
 				l_wpk.WriteCmd(CMD_TP_UPDATE_PASSWORD2);
-				l_wpk.WriteSequence((cChar*)old_password.data(), old_password.size());
-				l_wpk.WriteSequence((cChar*)new_password.data(), new_password.size());
+				l_wpk.WriteSequence((cChar*)old_password.data(), static_cast<uShort>(old_password.size()));
+				l_wpk.WriteSequence((cChar*)new_password.data(), static_cast<uShort>(new_password.size()));
 				if (!l_ply->gp_addr || !g_gtsvr->AppendInGameGroupTrailer(l_wpk, l_ply, CMD_TP_UPDATE_PASSWORD2)) {
 					l_wpk = datasock->GetWPacket();
 					l_wpk.WriteCmd(CMD_MC_UPDATE_PASSWORD2);
