@@ -112,8 +112,6 @@ public:
 
 	virtual void LoadingCall(); // 在装载loading后,刷新
 
-	CForm* frmRoleInfo; // 定义角色初步介绍界面  该界面仅在进入创建角色界面时显示
-
 protected:
 	// 场景相关函数
 	virtual void _FrameMove(DWORD dwTimeParam);
@@ -267,25 +265,4 @@ private:
 	bool m_bFirstShow;
 	bool m_bSameNameError;
 
-	void ShowAllRoleInfo(int nRoleInfo);
-
-	static const int ROLE_ALL_INFO_COUNT = 24;
-
-	CImage* imgChaView[ROLE_ALL_INFO_COUNT];
-
-	CForm* frmLanchInfo;   // 定义蓝琦转职路线介绍界面    该界面仅在进入创建角色界面后选择蓝琦后显示
-	CForm* frmAimiInfo;	   // 定义艾米转职路线介绍界面    该界面仅在进入创建角色界面后选择艾米后显示
-	CForm* frmFelierInfo;  // 定义菲利而转职路线介绍界面    该界面仅在进入创建角色界面后选择菲利而后显示
-	CForm* frmCaxiusInfo;  // 定义卡西斯转职路线介绍界面    该界面仅在进入创建角色界面后选择卡西斯后显示
-	CForm* frmRoleAllInfo; // 定义角色详细介绍界面    该界面仅在进入各角色转职路线介绍界面后点击任意一个角色后显示
-
-	CMemo* memChaDescribeUp;
-	CMemo* memChaDescribeDown;
-
-	static void _evtRoleInfoFormMouseEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
-	static void _evtLanchInfoFormMouseEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
-	static void _evtAimiInfoFormMouseEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
-	static void _evtFelierInfoFormMouseEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
-	static void _evtCaxiusInfoFormMouseEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
-	static void _evtRoleAllInfoFormMouseEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
 };

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 
 #include "createchascene.h"
 
@@ -559,12 +559,6 @@ int LoginScene_CreateCha::OnLButtonDown(int flag, int x, int y) {
 	if (_model_type != 1)
 		return -1;
 
-	CCreateChaScene* pCreateChaScene = dynamic_cast<CCreateChaScene*>(g_pGameApp->GetCurScene());
-	if (pCreateChaScene) {
-		if (pCreateChaScene->frmRoleInfo->GetIsShow())
-			return -1;
-	}
-
 	lwINodePrimitive* pri;
 	lwIDeviceObject* dev_obj = _res_mgr->GetDeviceObject();
 
@@ -914,30 +908,6 @@ bool CCreateChaScene::_MouseButtonDown(int nButton) {
 	else
 		m_nSelChaIndex = nIndex;
 
-	if (frmLanchInfo && frmAimiInfo && frmFelierInfo && frmCaxiusInfo && frmRoleAllInfo) {
-		DarkScene();
-
-		switch (m_nSelChaIndex) {
-		case 0: // ????
-			frmLanchInfo->ShowModal();
-			break;
-
-		case 1: // ?????
-			frmCaxiusInfo->ShowModal();
-			break;
-
-		case 2: // ?????
-			frmFelierInfo->ShowModal();
-			break;
-
-		case 3: // ????
-			frmAimiInfo->ShowModal();
-			break;
-		}
-
-		return true;
-	}
-
 	ShowChaFoundForm();
 
 	return true;
@@ -1100,79 +1070,6 @@ bool CCreateChaScene::_InitUI() {
 		frmQuit->Show();
 	}
 
-	// ???????????
-	{
-		frmRoleInfo = CFormMgr::s_Mgr.Find("frmRoleInfo");
-		if (!frmRoleInfo) {
-			LG("xXx", "msgInit frmRoleInfo UI error\n");
-			return false;
-		}
-		frmRoleInfo->evtEntrustMouseEvent = _evtRoleInfoFormMouseEvent;
-		frmRoleInfo->SetIsShow(true);
-		DarkScene(true);
-
-		frmLanchInfo = CFormMgr::s_Mgr.Find("frmLanchInfo");
-		if (!frmLanchInfo) {
-			LG("xXx", "msgInit frmLanchInfo UI error\n");
-			return false;
-		}
-		frmLanchInfo->evtEntrustMouseEvent = _evtLanchInfoFormMouseEvent;
-
-		frmAimiInfo = CFormMgr::s_Mgr.Find("frmAimiInfo");
-		if (!frmAimiInfo) {
-			LG("xXx", "msgInit frmAimiInfo UI error\n");
-			return false;
-		}
-		frmAimiInfo->evtEntrustMouseEvent = _evtAimiInfoFormMouseEvent;
-
-		frmFelierInfo = CFormMgr::s_Mgr.Find("frmFelierInfo");
-		if (!frmFelierInfo) {
-			LG("xXx", "msgInit frmFelierInfo UI error\n");
-			return false;
-		}
-		frmFelierInfo->evtEntrustMouseEvent = _evtFelierInfoFormMouseEvent;
-
-		frmCaxiusInfo = CFormMgr::s_Mgr.Find("frmCaxiusInfo");
-		if (!frmCaxiusInfo) {
-			LG("xXx", "msgInit frmCaxiusInfo UI error\n");
-			return false;
-		}
-		frmCaxiusInfo->evtEntrustMouseEvent = _evtCaxiusInfoFormMouseEvent;
-
-		frmRoleAllInfo = CFormMgr::s_Mgr.Find("frmRoleAllInfo");
-		if (!frmRoleAllInfo) {
-			LG("xXx", "msgInit frmRoleAllInfo UI error\n");
-			return false;
-		}
-		frmRoleAllInfo->evtEntrustMouseEvent = _evtRoleAllInfoFormMouseEvent;
-
-		// ??????? MEMO
-		memChaDescribeUp = dynamic_cast<CMemo*>(frmRoleAllInfo->Find("memChaDescribeUp"));
-		if (!memChaDescribeUp) {
-			LG("xXx", "msgInit memChaDescribeUp UI error\n");
-			return false;
-		}
-		memChaDescribeDown = dynamic_cast<CMemo*>(frmRoleAllInfo->Find("memChaDescribeDown"));
-		if (!memChaDescribeDown) {
-			LG("xXx", "msgInit memChaDescribeDown UI error\n");
-			return false;
-		}
-
-		char szChaView[64] = {0};
-		memset(imgChaView, 0, sizeof(CImage*) * ROLE_ALL_INFO_COUNT);
-
-		// ??????????
-		for (int i = 0; i < ROLE_ALL_INFO_COUNT; ++i) {
-			sprintf(szChaView, "imgChaView%d", i + 1);
-			imgChaView[i] = dynamic_cast<CImage*>(frmRoleAllInfo->Find(szChaView));
-
-			if (!imgChaView[i]) {
-				LG("xXx", "msgInit %s UI error\n", szChaView);
-				return false;
-			}
-		}
-	}
-
 	return true;
 }
 
@@ -1202,9 +1099,9 @@ void CCreateChaScene::_ChaFoundFrmMouseEvent(CCompent* pSender, int nMsgType,
 	if (strName == "btnYes") {
 		CCreateChaScene& rkScene = GetCurrScene();
 
-		// ?????t?�?
+		// ?????t?ï¿½?
 
-		// ????�???
+		// ????ï¿½???
 		if (!rkScene.IsValidCheckChaName(edtName->GetCaption()))
 			return;
 
@@ -1221,9 +1118,9 @@ void CCreateChaScene::_ChaFoundFrmMouseEvent(CCompent* pSender, int nMsgType,
 			frmChaCity->ShowModal();  // ?????h??????
 		}
 	} else if (strName == "btnNo") {
-		// ?????t?�?
+		// ?????t?ï¿½?
 
-		// ???�???,???????
+		// ???ï¿½???,???????
 		frmChaFound->Close();
 
 		// ????????
@@ -1282,8 +1179,8 @@ void CCreateChaScene::_QuitFrmMouseEvent(CCompent* pSender, int nMsgType,
 	}
 
 	if (strName == "btnNo") {
-		// ?????t?�?
-		// g_pGameApp->MsgBox("?????t?�?");
+		// ?????t?ï¿½?
+		// g_pGameApp->MsgBox("?????t?ï¿½?");
 		GetCurrScene().GotoSelChaScene();
 	}
 }
@@ -1362,7 +1259,7 @@ void CCreateChaScene::ChangeFace(eDirectType enumDirect) {
 	if (nullptr == m_pChaForUI[m_nSelChaIndex])
 		return;
 
-	// ??�?j??????????'???
+	// ??ï¿½?j??????????'???
 	const long nBeginIndex = nFaceTestCnt[m_nSelChaIndex];
 
 	// ????z?
@@ -1390,7 +1287,7 @@ void CCreateChaScene::ChangeHair(eDirectType enumDirect) {
 	if (nullptr == m_pChaForUI[m_nSelChaIndex])
 		return;
 
-	// ??�?j??????????'???
+	// ??ï¿½?j??????????'???
 	const long nBeginIndex = nHairTestCnt[m_nSelChaIndex];
 
 	// ????z?
@@ -1637,7 +1534,7 @@ void CCreateChaScene::CreateNewCha() {
 
 	m_bSameNameError = false;
 
-	// ???�???
+	// ???ï¿½???
 	frmChaFound->Close();
 	frmChaCity->Close();
 
@@ -1739,12 +1636,6 @@ void CCreateChaScene::ShowCityZone(int index) {
 void CCreateChaScene::LoadingCall() {
 	CGameScene::LoadingCall();
 
-	// Hide the role info page
-	/*if(frmRoleInfo)
-	{
-		DarkScene();
-		frmRoleInfo->ShowModal();
-	}*/
 }
 
 void CCreateChaScene::ShowChaFoundForm() {
@@ -1760,279 +1651,4 @@ void CCreateChaScene::ShowChaFoundForm() {
 
 	// ???????
 	frmChaFound->ShowModal();
-}
-
-void CCreateChaScene::ShowAllRoleInfo(int nRoleInfo) {
-	if (0 < nRoleInfo && nRoleInfo <= ROLE_ALL_INFO_COUNT) {
-		for (int i = 0; i < ROLE_ALL_INFO_COUNT; ++i) {
-			if (imgChaView[i] && (i + 1) == nRoleInfo && memChaDescribeUp && memChaDescribeDown) {
-				imgChaView[i]->SetIsShow(true);
-
-				switch (nRoleInfo) {
-				case 2: // ???
-				case 9:
-					memChaDescribeUp->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_803));
-					memChaDescribeDown->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_804));
-					break;
-
-				case 5: // ????
-					memChaDescribeUp->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_806));
-					memChaDescribeDown->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_807));
-					break;
-
-				case 10: // ????
-					memChaDescribeUp->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_808));
-					memChaDescribeDown->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_809));
-					break;
-
-				case 13: // ??
-				case 20:
-					memChaDescribeUp->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_810));
-					memChaDescribeDown->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_811));
-					break;
-
-				case 16: // ????
-				case 22:
-					memChaDescribeUp->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_812));
-					memChaDescribeDown->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_813));
-					break;
-
-				case 17: // ????
-				case 23:
-					memChaDescribeUp->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_814));
-					memChaDescribeDown->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_815));
-					break;
-
-				case 4: // �????
-				case 14:
-				case 21:
-					memChaDescribeUp->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_816));
-					memChaDescribeDown->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_817));
-					break;
-
-				case 7: // ?????
-				case 18:
-				case 24:
-					memChaDescribeUp->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_818));
-					memChaDescribeDown->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_819));
-					break;
-
-				case 3: // ????
-				case 12:
-					memChaDescribeUp->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_820));
-					memChaDescribeDown->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_821));
-					break;
-
-				case 6: // ?????
-				case 15:
-					memChaDescribeUp->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_822));
-					memChaDescribeDown->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_823));
-					break;
-
-				case 1: // ????
-					memChaDescribeUp->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_35));
-					memChaDescribeDown->SetCaption("");
-					break;
-
-				case 8: // ?????
-					memChaDescribeUp->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_36));
-					memChaDescribeDown->SetCaption("");
-					break;
-
-				case 11: // ??????
-					memChaDescribeUp->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_37));
-					memChaDescribeDown->SetCaption("");
-					break;
-
-				case 19: // ????
-					memChaDescribeUp->SetCaption(RES_STRING(CL_LANGUAGE_MATCH_38));
-					memChaDescribeDown->SetCaption("");
-					break;
-
-				default:
-					memChaDescribeUp->SetCaption("");
-					memChaDescribeDown->SetCaption("");
-					break;
-				}
-
-				memChaDescribeUp->ProcessCaption();
-				memChaDescribeDown->ProcessCaption();
-			} else {
-				imgChaView[i]->SetIsShow(false);
-			}
-		}
-
-		frmRoleAllInfo->ShowModal();
-	}
-}
-
-void CCreateChaScene::_evtRoleInfoFormMouseEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
-	string strName = pSender->GetName();
-
-	CCreateChaScene* pCreateChaScene = dynamic_cast<CCreateChaScene*>(g_pGameApp->GetCurScene());
-	if (pCreateChaScene) {
-		lwVector3 OffsetPos4[4];
-		OffsetPos4[0].x = 0.676f;
-		OffsetPos4[0].y = 28.696f;
-		OffsetPos4[0].z = 2.f;
-
-		OffsetPos4[1].x = -7.013f;
-		OffsetPos4[1].y = 21.072f;
-		OffsetPos4[1].z = 2.5f;
-
-		OffsetPos4[2].x = -20.663f;
-		OffsetPos4[2].y = 30.951f;
-		OffsetPos4[2].z = 2.f;
-
-		OffsetPos4[3].x = 2.f;
-		OffsetPos4[3].y = 0.5f;
-		OffsetPos4[3].z = 0.1f;
-
-		// pCreateChaScene->m_LoginSceneCreateCha.LoadArrowMark( "hand.lgo", OffsetPos4 );
-
-		pCreateChaScene->DarkScene(false);
-
-		pCreateChaScene->frmRoleInfo->Close();
-	}
-}
-
-// ??????? ??1 ~ 7??
-void CCreateChaScene::_evtLanchInfoFormMouseEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
-	string strName = pSender->GetName();
-	CCreateChaScene* pCreateChaScene = dynamic_cast<CCreateChaScene*>(g_pGameApp->GetCurScene());
-
-	if (pCreateChaScene) {
-		pCreateChaScene->frmLanchInfo->Close();
-
-		if (strName == "btnNextStep") {
-			pCreateChaScene->ShowChaFoundForm();
-		} else if (strName == "btnClose") {
-			pCreateChaScene->DarkScene(false);
-		} else if (strName == "btnViewPlayer_1") {
-			pCreateChaScene->ShowAllRoleInfo(1); // ?????'
-		} else if (strName == "btnViewPlayer_2") {
-			pCreateChaScene->ShowAllRoleInfo(2); // ???
-		} else if (strName == "btnViewPlayer_3") {
-			pCreateChaScene->ShowAllRoleInfo(3); // ????
-		} else if (strName == "btnViewPlayer_4") {
-			pCreateChaScene->ShowAllRoleInfo(4); // �????
-		} else if (strName == "btnViewPlayer_5") {
-			pCreateChaScene->ShowAllRoleInfo(5); // ????
-		} else if (strName == "btnViewPlayer_6") {
-			pCreateChaScene->ShowAllRoleInfo(6); // ?????
-		} else if (strName == "btnViewPlayer_7") {
-			pCreateChaScene->ShowAllRoleInfo(7); // ?????
-		}
-	}
-}
-
-// ??????? ??19 ~ 24??
-void CCreateChaScene::_evtAimiInfoFormMouseEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
-	string strName = pSender->GetName();
-	CCreateChaScene* pCreateChaScene = dynamic_cast<CCreateChaScene*>(g_pGameApp->GetCurScene());
-
-	if (pCreateChaScene) {
-		pCreateChaScene->frmAimiInfo->Close();
-
-		if (strName == "btnNextStep") {
-			pCreateChaScene->ShowChaFoundForm();
-		} else if (strName == "btnClose") {
-			pCreateChaScene->DarkScene(false);
-		} else if (strName == "btnViewPlayer_19") {
-			pCreateChaScene->ShowAllRoleInfo(19); // ?????'
-		} else if (strName == "btnViewPlayer_20") {
-			pCreateChaScene->ShowAllRoleInfo(20); // ??
-		} else if (strName == "btnViewPlayer_21") {
-			pCreateChaScene->ShowAllRoleInfo(21); // �????
-		} else if (strName == "btnViewPlayer_22") {
-			pCreateChaScene->ShowAllRoleInfo(22); // ????
-		} else if (strName == "btnViewPlayer_23") {
-			pCreateChaScene->ShowAllRoleInfo(23); // ????
-		} else if (strName == "btnViewPlayer_24") {
-			pCreateChaScene->ShowAllRoleInfo(24); // ?????
-		}
-	}
-}
-
-// ?????????? ??11 ~ 18??
-void CCreateChaScene::_evtFelierInfoFormMouseEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
-	string strName = pSender->GetName();
-	CCreateChaScene* pCreateChaScene = dynamic_cast<CCreateChaScene*>(g_pGameApp->GetCurScene());
-
-	if (pCreateChaScene) {
-		pCreateChaScene->frmFelierInfo->Close();
-
-		if (strName == "btnNextStep") {
-			pCreateChaScene->ShowChaFoundForm();
-		} else if (strName == "btnClose") {
-			pCreateChaScene->DarkScene(false);
-		} else if (strName == "btnViewPlayer_11") {
-			pCreateChaScene->ShowAllRoleInfo(11); // ????????'
-		} else if (strName == "btnViewPlayer_12") {
-			pCreateChaScene->ShowAllRoleInfo(12); // ????
-		} else if (strName == "btnViewPlayer_13") {
-			pCreateChaScene->ShowAllRoleInfo(13); // ??
-		} else if (strName == "btnViewPlayer_14") {
-			pCreateChaScene->ShowAllRoleInfo(14); // �????
-		} else if (strName == "btnViewPlayer_15") {
-			pCreateChaScene->ShowAllRoleInfo(15); // ?????
-		} else if (strName == "btnViewPlayer_16") {
-			pCreateChaScene->ShowAllRoleInfo(16); // ????
-		} else if (strName == "btnViewPlayer_17") {
-			pCreateChaScene->ShowAllRoleInfo(17); // ????
-		} else if (strName == "btnViewPlayer_18") {
-			pCreateChaScene->ShowAllRoleInfo(18); // ?????
-		}
-	}
-}
-
-// ????????? ??8 ~ 10??
-void CCreateChaScene::_evtCaxiusInfoFormMouseEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
-	string strName = pSender->GetName();
-	CCreateChaScene* pCreateChaScene = dynamic_cast<CCreateChaScene*>(g_pGameApp->GetCurScene());
-
-	if (pCreateChaScene) {
-		pCreateChaScene->frmCaxiusInfo->Close();
-
-		if (strName == "btnNextStep") {
-			pCreateChaScene->ShowChaFoundForm();
-		} else if (strName == "btnClose") {
-			pCreateChaScene->DarkScene(false);
-		} else if (strName == "btnViewPlayer_8") {
-			pCreateChaScene->ShowAllRoleInfo(8); // ???????'
-		} else if (strName == "btnViewPlayer_9") {
-			pCreateChaScene->ShowAllRoleInfo(9); // ???
-		} else if (strName == "btnViewPlayer_10") {
-			pCreateChaScene->ShowAllRoleInfo(10); // ????
-		}
-	}
-}
-
-void CCreateChaScene::_evtRoleAllInfoFormMouseEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
-	string strName = pSender->GetName();
-	CCreateChaScene* pCreateChaScene = dynamic_cast<CCreateChaScene*>(g_pGameApp->GetCurScene());
-
-	if (strName == "btnPrevStep") {
-		if (pCreateChaScene) {
-			pCreateChaScene->frmRoleAllInfo->Close();
-
-			switch (pCreateChaScene->m_nSelChaIndex) {
-			case 0: // ????
-				pCreateChaScene->frmLanchInfo->ShowModal();
-				break;
-
-			case 1: // ?????
-				pCreateChaScene->frmCaxiusInfo->ShowModal();
-				break;
-
-			case 2: // ??????
-				pCreateChaScene->frmFelierInfo->ShowModal();
-				break;
-
-			case 3: // ????
-				pCreateChaScene->frmAimiInfo->ShowModal();
-				break;
-			}
-		}
-	}
 }

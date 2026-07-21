@@ -84,9 +84,6 @@ protected:
 	static void _evtWelcomeNoticeEvent(CCompent* pSender, int nMsgType,
 									   int x, int y, DWORD dwKey); // 欢迎界面 事件处理
 
-	static void _evtCreateOKNoticeEvent(CCompent* pSender, int nMsgType,
-										int x, int y, DWORD dwKey); // 首次创建角色成功提示界面 事件处理
-
 	static void _evtChaNameAlterMouseEvent(CCompent* pSender, int nMsgType,
 										   int x, int y, DWORD dwKey); // 首次创建角色成功提示界面 事件处理
 
@@ -143,9 +140,6 @@ private:
 	//
 	bool m_isInit;
 
-	bool m_isCreateCha;
-
 	CForm* frmWelcomeNotice;  // 定义欢迎界面  该界面仅在当前帐号内无角色时出现
-	CForm* frmCreateOKNotice; // 定义首次创建角色成功提示界面  该界面仅在该帐号走完第一个角色的创建流程后显示
 	CForm* frmChaNameAlter;	  // 定义改名界面  该界面仅对台湾版本有效，请做好备份工作
 };

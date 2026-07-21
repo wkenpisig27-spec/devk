@@ -76,7 +76,7 @@ bool canAutoLoginChar = false;
 */
 //~ Constructors ==============================================================
 CSelectChaScene::CSelectChaScene(stSceneInitParam& param)
-	: CGameScene(param), m_nCurChaIndex(-1), m_isInit(false), m_isCreateCha(false),
+	: CGameScene(param), m_nCurChaIndex(-1), m_isInit(false),
 	  frmSelectCha(nullptr), btnDel(nullptr), btnYes(nullptr), btnCreate(nullptr), btnExit(nullptr), btnChangePassConf(nullptr) {
 	LG("scene memory", "CSelectChaScene Create\n");
 
@@ -540,13 +540,6 @@ void CSelectChaScene::LoadingCall() // ?????loading??,???
 	} else if (GetChaCount() == 0 && frmWelcomeNotice) {
 		// ??j????????????????
 		frmWelcomeNotice->ShowModal();
-	} else if (m_isCreateCha) {
-		m_isCreateCha = false;
-
-		if (GetChaCount() == 1 && frmCreateOKNotice) {
-			// ???????h?????
-			frmCreateOKNotice->ShowModal();
-		}
 	}
 
 	if (g_dwCurMusicID != 1)
@@ -629,11 +622,6 @@ bool CSelectChaScene::_InitUI() {
 	frmWelcomeNotice = CFormMgr::s_Mgr.Find("frmWelcomeNotice");
 	if (frmWelcomeNotice)
 		frmWelcomeNotice->evtEntrustMouseEvent = _evtWelcomeNoticeEvent;
-
-	// ??????d????????????????   ?�????????"??????h??????J???????????
-	frmCreateOKNotice = CFormMgr::s_Mgr.Find("frmCreateOKNotice");
-	if (frmCreateOKNotice)
-		frmCreateOKNotice->evtEntrustMouseEvent = _evtCreateOKNoticeEvent;
 
 	// ??????t????????
 	UpdateButton();
@@ -838,8 +826,6 @@ bool CSelectChaScene::CreateCha(const string& sName, int nChaIndex, stNetChangeC
 	m_CharactorPtrs[m_nCurChaIndex]->iFontX = -1;
 	m_CharactorPtrs[m_nCurChaIndex]->iFontY = -1;
 
-	m_isCreateCha = true;
-
 	UpdateButton();
 	return true;
 }
@@ -980,18 +966,6 @@ void CSelectChaScene::_evtWelcomeNoticeEvent(CCompent* pSender, int nMsgType, in
 	if (pSelectChaScene && pSelectChaScene->frmWelcomeNotice) {
 		if (strName == "btnYes") {
 			pSelectChaScene->frmWelcomeNotice->Close();
-		}
-	}
-}
-
-// ??d???????????????? ?�?????
-void CSelectChaScene::_evtCreateOKNoticeEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
-	string strName = pSender->GetName();
-	CSelectChaScene* pSelectChaScene = dynamic_cast<CSelectChaScene*>(g_pGameApp->GetCurScene());
-
-	if (pSelectChaScene && pSelectChaScene->frmCreateOKNotice) {
-		if (strName == "btnYes") {
-			pSelectChaScene->frmCreateOKNotice->Close();
 		}
 	}
 }
