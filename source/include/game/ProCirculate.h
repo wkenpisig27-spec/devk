@@ -24,7 +24,7 @@ public:
 	void BeginPlay(const char* cha);
 	void EndPlay();
 	void NewCha(const char* chaname, const char* birth, LOOK& look);
-	void NewCha2(const char* chaname, const char* birth, int type, int hair, int face);
+	void NewCha2(const char* chaname, const char* birth, int type, int hair, int face, int job);
 
 	void DelCha(const char* cha, const char szPassword2[]);
 

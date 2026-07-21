@@ -85,12 +85,20 @@ UI_SetCaption( labFaceShow, "Nightmare" )
 UI_SetTextColor( labFaceShow, COLOR_BLACK )
 UI_SetLabelExFont( labFaceShow, DEFAULT_FONT, TRUE, COLOR_WHITE )
 
+labClassShow = UI_CreateCompent( frmFound, LABELEX_TYPE, "labClassShow", 65, 12, 341, 240 )
+UI_SetCaption( labClassShow, "Swordsman" )
+UI_SetTextColor( labClassShow, COLOR_BLACK )
+UI_SetLabelExFont( labClassShow, DEFAULT_FONT, TRUE, COLOR_WHITE )
+
 
 btnLeftHair = UI_CreateCompent( frmFound, BUTTON_TYPE, "btnLeftHair", 20, 17, 286, 275 )
 UI_LoadButtonImage( btnLeftHair, "texture/GG_UI/SystemBotton3.png", 20, 17, 285, 116, TRUE )
 
 btnLeftFace = UI_CreateCompent( frmFound, BUTTON_TYPE, "btnLeftFace", 20, 17, 286, 308 )
 UI_LoadButtonImage( btnLeftFace, "texture/GG_UI/SystemBotton3.png", 20, 17, 285, 116, TRUE )
+
+btnLeftClass = UI_CreateCompent( frmFound, BUTTON_TYPE, "btnLeftClass", 20, 17, 286, 241 )
+UI_LoadButtonImage( btnLeftClass, "texture/GG_UI/SystemBotton3.png", 20, 17, 285, 116, TRUE )
 
 btnLeft3d = UI_CreateCompent( frmFound, BUTTON_TYPE, "btnLeft3d", 32, 38, 28, 291 )
 UI_LoadButtonImage( btnLeft3d, "texture/ui/select4.tga", 32, 38, 0, 38, TRUE )
@@ -104,6 +112,9 @@ UI_LoadButtonImage( btnRightHair, "texture/GG_UI/SystemBotton3.png", 20, 17, 285
 
 btnRightFace = UI_CreateCompent( frmFound, BUTTON_TYPE, "btnRightFace", 20, 17, 412, 308 )
 UI_LoadButtonImage( btnRightFace, "texture/GG_UI/SystemBotton3.png", 20, 17, 285, 133, TRUE )
+
+btnRightClass = UI_CreateCompent( frmFound, BUTTON_TYPE, "btnRightClass", 20, 17, 412, 241 )
+UI_LoadButtonImage( btnRightClass, "texture/GG_UI/SystemBotton3.png", 20, 17, 285, 133, TRUE )
 
 btnRight3d = UI_CreateCompent( frmFound, BUTTON_TYPE, "btnRight3d", 32, 38, 204, 291 )
 UI_LoadButtonImage( btnRight3d, "texture/ui/select4.tga",  32, 38, 0, 0, TRUE )

@@ -793,7 +793,7 @@ void CSelectChaScene::DelCurrentSelCha() {
 }
 
 //-----------------------------------------------------------------------
-bool CSelectChaScene::CreateCha(const string& sName, int nChaIndex, stNetChangeChaPart* part) {
+bool CSelectChaScene::CreateCha(const string& sName, int nChaIndex, stNetChangeChaPart* part, short jobId) {
 	if (m_nCurChaIndex >= 0 && m_nCurChaIndex <= 2)
 		SetChaDark(m_CharactorPtrs[m_nCurChaIndex]->pCha);
 
@@ -821,7 +821,7 @@ bool CSelectChaScene::CreateCha(const string& sName, int nChaIndex, stNetChangeC
 
 	m_CharactorPtrs[m_nCurChaIndex]->pCha = pCha;
 	m_CharactorPtrs[m_nCurChaIndex]->iLevel = 1;
-	m_CharactorPtrs[m_nCurChaIndex]->sProfession = RES_STRING(CL_LANGUAGE_MATCH_385);
+	m_CharactorPtrs[m_nCurChaIndex]->sProfession = g_GetJobName(jobId);
 	m_CharactorPtrs[m_nCurChaIndex]->iPos = m_nCurChaIndex;
 	m_CharactorPtrs[m_nCurChaIndex]->iFontX = -1;
 	m_CharactorPtrs[m_nCurChaIndex]->iFontY = -1;

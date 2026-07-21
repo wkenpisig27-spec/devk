@@ -153,9 +153,9 @@ bool TBLCharacters::SetAddr(int cha_id, unsigned long long addr) {
 	const auto ret = stored_procedure("{CALL dbo.CharacterSetAddr(?, ?)}", "dbo", "CharacterSetAddr", 2, &addr, &cha_id);
 	return DBOK(ret);
 }
-bool TBLCharacters::InsertRow(const char* cha_name, int act_id, const char* birth, const char* map, const char* look) {
+bool TBLCharacters::InsertRow(const char* cha_name, int act_id, const char* birth, const char* map, const char* look, const char* job) {
 	// Use stored procedure to insert new character
-	const auto ret = stored_procedure("{CALL dbo.CharacterInsert(?, ?, ?, ?, ?)}", "dbo", "CharacterInsert", 5, cha_name, &act_id, birth, map, look);
+	const auto ret = stored_procedure("{CALL dbo.CharacterInsert(?, ?, ?, ?, ?, ?)}", "dbo", "CharacterInsert", 6, cha_name, &act_id, birth, map, look, job);
 	return DBOK(ret);
 }
 bool TBLCharacters::UpdateInfo(unsigned int cha_id, unsigned short icon, const char* motto) {

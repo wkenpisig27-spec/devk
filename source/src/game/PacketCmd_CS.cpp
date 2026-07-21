@@ -106,10 +106,10 @@ void CS_NewCha(const char* chaname, const char* birth, LOOK& look) {
 		g_NetIF->m_pCProCir->NewCha(chaname, birth, look);
 }
 
-void CS_NewCha2(const char* chaname, const char* birth, int type, int hair, int face) {
+void CS_NewCha2(const char* chaname, const char* birth, int type, int hair, int face, int job) {
 	MutexArmor lock(g_NetIF->m_mutProCir);
 	if (g_NetIF->m_pCProCir)
-		g_NetIF->m_pCProCir->NewCha2(chaname, birth, type, hair, face);
+		g_NetIF->m_pCProCir->NewCha2(chaname, birth, type, hair, face, job);
 }
 
 //------------------------

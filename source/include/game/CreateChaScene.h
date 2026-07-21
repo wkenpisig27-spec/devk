@@ -140,12 +140,16 @@ protected:
 									  int x, int y, DWORD key);
 	static void __gui_event_left_hair(CGuiData* sender,
 									  int x, int y, DWORD key);
+	static void __gui_event_left_class(CGuiData* sender,
+									   int x, int y, DWORD key);
 	static void __gui_event_left_city(CGuiData* sender,
 									  int x, int y, DWORD key);
 	static void __gui_event_right_face(CGuiData* sender,
 									   int x, int y, DWORD key);
 	static void __gui_event_right_hair(CGuiData* sender,
 									   int x, int y, DWORD key);
+	static void __gui_event_right_class(CGuiData* sender,
+										int x, int y, DWORD key);
 	static void __gui_event_right_city(CGuiData* sender,
 									   int x, int y, DWORD key);
 	static void __gui_event_left_rotate(CGuiData* sender,
@@ -167,6 +171,10 @@ protected:
 	// 逻辑函数
 	void ChangeFace(eDirectType enumDirect = LEFT);
 	void ChangeHair(eDirectType enumDirect = LEFT);
+	void ChangeClass(eDirectType enumDirect = LEFT);
+	void RefreshClassSelection();
+	bool IsValidSelectedClass() const;
+	short GetSelectedJobId() const;
 	void ChangeCity(eDirectType enumDirect = LEFT);
 	void RotateChar(eDirectType enumDirect = LEFT);
 	bool IsValidCheckChaName(const char* name);
@@ -219,6 +227,9 @@ private:
 	static CMemo* memChaDescribe;
 	static CLabel* labHair;
 	static CLabel* labFace;
+	static CLabel* labClass;
+	static CTextButton* btnLeftClass;
+	static CTextButton* btnRightClass;
 
 	// 角色城市选择界面
 	static CForm* frmChaCity;
@@ -248,6 +259,7 @@ private:
 	std::string m_sName; // 角色名
 	int m_nCurHairIndex; // 当前的发型编号
 	int m_nCurFaceIndex; // 当前的脸型编号
+	int m_nCurClassIndex; // 当前职业在允许列表中的索引
 	int m_nChaRotate;	 // 上次人物的偏移角度(-180~+180)
 
 	CSelectChaScene* m_pkLastScene; // 上一个场景

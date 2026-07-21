@@ -40,7 +40,7 @@ public:
 	// 显示现有角色
 	bool SelectCharacters(NetChaBehave* chabehave, int num);
 	// 新增角色
-	bool CreateCha(const std::string& sName, int nChaIndex, stNetChangeChaPart* part);
+	bool CreateCha(const std::string& sName, int nChaIndex, stNetChangeChaPart* part, short jobId);
 
 	void SelectChaError(int error_no, const char* error_info);
 

@@ -68,7 +68,7 @@ extern void CS_EndPlay();
 
 // Э��C->S : �����½���ɫ����
 extern void CS_NewCha(const char* chaname, const char* birth, LOOK& look);
-extern void CS_NewCha2(const char* chaname, const char* birth, int type, int hair, int face);
+extern void CS_NewCha2(const char* chaname, const char* birth, int type, int hair, int face, int job);
 // Э��C->S : ����ɾ����ɫ����
 extern void CS_DelCha(const char* cha, const char szPassword2[]);
 

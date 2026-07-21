@@ -50,7 +50,7 @@ public:
 	TBLCharacters(cfl_db* db) : cfl_rs(db, "character", CHA_MAXCOL) {}
 	bool ZeroAddr();
 	bool SetAddr(int cha_id, unsigned long long addr);
-	bool InsertRow(const char* cha_name, int act_id, const char* birth, const char* map, const char* look);
+	bool InsertRow(const char* cha_name, int act_id, const char* birth, const char* map, const char* look, const char* job);
 	bool UpdateInfo(unsigned int cha_id, unsigned short icon, const char* motto);
 	// For创建角色
 	int FetchRowByChaName(const char* cha_name);

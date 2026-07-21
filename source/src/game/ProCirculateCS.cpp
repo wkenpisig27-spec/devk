@@ -457,7 +457,7 @@ void CProCirculate::NewCha(const char* chaname, const char* birth, LOOK& look) {
 	pCNetIf->SendPacketMessage(pk);
 }
 
-void CProCirculate::NewCha2(const char* chaname, const char* birth, int type, int hair, int face) {
+void CProCirculate::NewCha2(const char* chaname, const char* birth, int type, int hair, int face, int job) {
 	WPacket pk = pCNetIf->GetWPacket();
 	pk.WriteCmd(CMD_CM_NEWCHA);
 	pk.WriteString(chaname);
@@ -465,6 +465,7 @@ void CProCirculate::NewCha2(const char* chaname, const char* birth, int type, in
 	pk.WriteLong(type);
 	pk.WriteLong(hair);
 	pk.WriteLong(face);
+	pk.WriteLong(job);
 	pCNetIf->SendPacketMessage(pk);
 }
 

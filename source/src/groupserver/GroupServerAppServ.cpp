@@ -6,6 +6,7 @@
 #include "log.h"
 #include "GameCommon.h"
 #include "CommFunc.h"
+#include "CreateChaClassRules.h"
 #include "DBConnect.h"
 #include "Team.h"
 #include "GuildBankMsg.h"
@@ -1898,6 +1899,7 @@ WPacket GroupServerApp::TP_NEWCHA(Player* ply, DataSocket* datasock, RPacket& pk
 	int typeID = pk.ReadLong();
 	int hairID = pk.ReadLong();
 	int faceID = pk.ReadLong();
+	int jobID = pk.ReadLong();
 
 	// cout << typeID << "\n" << hairID << "\n" << faceID << "\n";
 
@@ -1927,6 +1929,14 @@ WPacket GroupServerApp::TP_NEWCHA(Player* ply, DataSocket* datasock, RPacket& pk
 		return l_retpk;
 	}
 
+	if (!create_cha::IsValidClassForCharacter(index, static_cast<short>(jobID))) {
+		LG("security", "[NewCha] Invalid jobID %d for typeID %d from account %s\n",
+			jobID, typeID, ply->m_acctname.c_str());
+		l_retpk.WriteShort(ERR_PT_INVALIDDAT);
+		return l_retpk;
+	}
+
+	const char* jobName = g_GetJobName(static_cast<short>(jobID));
 	stNetChangeChaPart part;
 	// Fix: Zero-initialize the entire structure to prevent garbage values in checksum calculation
 	memset(&part, 0, sizeof(part));
@@ -1958,7 +1968,7 @@ WPacket GroupServerApp::TP_NEWCHA(Player* ply, DataSocket* datasock, RPacket& pk
 		l_retpk.WriteShort(ERR_PT_SERVERBUSY);
 		return l_retpk;
 	}
-	if (!db->tblcharaters->InsertRow(l_chaname, ply->m_acctid, l_birth, l_map, l_look)) // ?????
+	if (!db->tblcharaters->InsertRow(l_chaname, ply->m_acctid, l_birth, l_map, l_look, jobName)) // ?????
 	{
 		LG("GroupServer", "account[%s]new char[%s]the same name exception\n", ply->m_acctname.c_str(), l_chaname);
 		l_retpk.WriteShort(ERR_PT_SAMECHANAME);

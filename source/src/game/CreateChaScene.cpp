@@ -67,6 +67,8 @@
 #include "SelectChaScene.h"
 #include "commfunc.h"
 #include "uiTextButton.h"
+#include "CreateChaClassRules.h"
+#include "CommFunc.h"
 
 using namespace std;
 
@@ -604,6 +606,9 @@ CEdit* CCreateChaScene::edtName = 0;
 CMemo* CCreateChaScene::memChaDescribe = 0;
 CLabel* CCreateChaScene::labHair = 0;
 CLabel* CCreateChaScene::labFace = 0;
+CLabel* CCreateChaScene::labClass = 0;
+CTextButton* CCreateChaScene::btnLeftClass = 0;
+CTextButton* CCreateChaScene::btnRightClass = 0;
 
 CForm* CCreateChaScene::frmChaCity = 0;
 CMemo* CCreateChaScene::memChaDescribe2 = 0;
@@ -703,7 +708,7 @@ int CCreateChaScene::nSelFaceNum[MAX_CHA_NUM] = {
 //~ Constructors ==============================================================
 CCreateChaScene::CCreateChaScene(stSceneInitParam& param)
 	: CGameScene(param), m_bInitOnce(false), m_bSameNameError(false),
-	  m_nSelChaIndex(0), m_nCurHairIndex(0), m_nCurFaceIndex(0), m_nChaRotate(0),
+	  m_nSelChaIndex(0), m_nCurHairIndex(0), m_nCurFaceIndex(0), m_nCurClassIndex(0), m_nChaRotate(0),
 	  m_pkLastScene(nullptr), m_oldTexFlag(0), m_oldMeshFlag(0),
 	  m_iFirstMourseX(0), m_iFirstMourseY(0), m_bFirstShow(false) {
 	LG("scene memory", "CCreateChaScene Create\n");
@@ -951,11 +956,29 @@ bool CCreateChaScene::_InitUI() {
 		}
 		btnRightFace->evtMouseClick = __gui_event_right_face;
 
+		btnLeftClass = (CTextButton*)frmChaFound->Find("btnLeftClass");
+		if (!btnLeftClass) {
+			Error(RES_STRING(CL_LANGUAGE_MATCH_45),
+				  frmChaFound->GetName(), "btnLeftClass");
+			return false;
+		}
+		btnLeftClass->evtMouseClick = __gui_event_left_class;
+
+		btnRightClass = (CTextButton*)frmChaFound->Find("btnRightClass");
+		if (!btnRightClass) {
+			Error(RES_STRING(CL_LANGUAGE_MATCH_45),
+				  frmChaFound->GetName(), "btnRightClass");
+			return false;
+		}
+		btnRightClass->evtMouseClick = __gui_event_right_class;
+
 		// ????????? ?????t???
 		btnLeftHair->SetFlashCycle();
 		btnRightHair->SetFlashCycle();
 		btnLeftFace->SetFlashCycle();
 		btnRightFace->SetFlashCycle();
+		btnLeftClass->SetFlashCycle();
+		btnRightClass->SetFlashCycle();
 
 		CTextButton* btnLeft3d = (CTextButton*)frmChaFound->Find("btnLeft3d");
 		if (!btnLeft3d) {
@@ -986,6 +1009,13 @@ bool CCreateChaScene::_InitUI() {
 		if (!labFace) {
 			Error(RES_STRING(CL_LANGUAGE_MATCH_45),
 				  frmChaFound->GetName(), "labFaceShow");
+			return false;
+		}
+
+		labClass = (CLabel*)frmChaFound->Find("labClassShow");
+		if (!labClass) {
+			Error(RES_STRING(CL_LANGUAGE_MATCH_45),
+				  frmChaFound->GetName(), "labClassShow");
 			return false;
 		}
 
@@ -1105,6 +1135,9 @@ void CCreateChaScene::_ChaFoundFrmMouseEvent(CCompent* pSender, int nMsgType,
 		if (!rkScene.IsValidCheckChaName(edtName->GetCaption()))
 			return;
 
+		if (!rkScene.IsValidSelectedClass())
+			return;
+
 		if (rkScene.m_bSameNameError) {
 			// ????????????
 
@@ -1210,6 +1243,18 @@ void CCreateChaScene::__gui_event_right_hair(CGuiData* sender,
 }
 
 //-----------------------------------------------------------------------
+void CCreateChaScene::__gui_event_left_class(CGuiData* sender,
+											 int x, int y, DWORD key) {
+	GetCurrScene().ChangeClass(LEFT);
+}
+
+//-----------------------------------------------------------------------
+void CCreateChaScene::__gui_event_right_class(CGuiData* sender,
+											  int x, int y, DWORD key) {
+	GetCurrScene().ChangeClass(RIGHT);
+}
+
+//-----------------------------------------------------------------------
 void CCreateChaScene::__gui_event_left_city(CGuiData* sender,
 											int x, int y, DWORD key) {
 	GetCurrScene().ChangeCity(LEFT);
@@ -1309,6 +1354,86 @@ void CCreateChaScene::ChangeHair(eDirectType enumDirect) {
 }
 
 //-----------------------------------------------------------------------
+void CCreateChaScene::ChangeClass(eDirectType enumDirect) {
+	if (m_nSelChaIndex < 0 || m_nSelChaIndex > 3)
+		return;
+
+	const int classCount = create_cha::GetAllowedClassCount(m_nSelChaIndex);
+	if (classCount <= 0)
+		return;
+
+	if (classCount == 1) {
+		m_nCurClassIndex = 0;
+	} else {
+		m_nCurClassIndex += static_cast<int>(enumDirect);
+		m_nCurClassIndex = (m_nCurClassIndex + classCount) % classCount;
+	}
+
+	RefreshClassSelection();
+}
+
+//-----------------------------------------------------------------------
+void CCreateChaScene::RefreshClassSelection() {
+	if (!labClass)
+		return;
+
+	if (m_nSelChaIndex < 0 || m_nSelChaIndex > 3) {
+		labClass->SetCaption("");
+		return;
+	}
+
+	const int classCount = create_cha::GetAllowedClassCount(m_nSelChaIndex);
+	if (classCount <= 0) {
+		labClass->SetCaption("");
+		if (btnLeftClass)
+			btnLeftClass->SetIsEnabled(false);
+		if (btnRightClass)
+			btnRightClass->SetIsEnabled(false);
+		return;
+	}
+
+	if (m_nCurClassIndex < 0 || m_nCurClassIndex >= classCount)
+		m_nCurClassIndex = 0;
+
+	const short jobId = create_cha::GetAllowedClassJobId(m_nSelChaIndex, m_nCurClassIndex);
+	if (jobId >= 0)
+		labClass->SetCaption(g_GetJobName(jobId));
+
+	const bool canCycle = classCount > 1;
+	if (btnLeftClass)
+		btnLeftClass->SetIsEnabled(canCycle);
+	if (btnRightClass)
+		btnRightClass->SetIsEnabled(canCycle);
+}
+
+//-----------------------------------------------------------------------
+bool CCreateChaScene::IsValidSelectedClass() const {
+	if (m_nSelChaIndex < 0 || m_nSelChaIndex > 3)
+		return false;
+
+	const short jobId = GetSelectedJobId();
+	if (jobId < 0) {
+		g_pGameApp->MsgBox("Please select a class.");
+		return false;
+	}
+
+	if (!create_cha::IsValidClassForCharacter(m_nSelChaIndex, jobId)) {
+		g_pGameApp->MsgBox("%s is not available for this character.", g_GetJobName(jobId));
+		return false;
+	}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------
+short CCreateChaScene::GetSelectedJobId() const {
+	if (m_nSelChaIndex < 0 || m_nSelChaIndex > 3)
+		return create_cha::CREATE_CHA_CLASS_NONE;
+
+	return create_cha::GetAllowedClassJobId(m_nSelChaIndex, m_nCurClassIndex);
+}
+
+//-----------------------------------------------------------------------
 void CCreateChaScene::ChangeCity(eDirectType enumDirect) {
 	if (m_nSelChaIndex < 0 || m_nSelChaIndex > 3)
 		return;
@@ -1400,6 +1525,8 @@ void CCreateChaScene::InitChaFoundFrm() {
 	} else {
 		LG("error", RES_STRING(CL_LANGUAGE_MATCH_48), m_nCurHairIndex);
 	}
+
+	RefreshClassSelection();
 }
 
 //-----------------------------------------------------------------------
@@ -1427,6 +1554,7 @@ void CCreateChaScene::InitChaData() {
 	m_sName = "";									// ?????
 	m_nCurHairIndex = nHairTestCnt[m_nSelChaIndex]; // ??j?k?????
 	m_nCurFaceIndex = nFaceTestCnt[m_nSelChaIndex]; // ??j????????
+	m_nCurClassIndex = 0;
 
 	// ??????????????????
 	int i = rand();
@@ -1525,7 +1653,8 @@ void CCreateChaScene::SendChaToServ() {
 	int sTypeID = (short)m_pChaForUI[m_nSelChaIndex]->getTypeID();
 	int sHairID = (short)m_pChaForUI[m_nSelChaIndex]->GetPartID(0);
 	int faceID = (short)m_pChaForUI[m_nSelChaIndex]->GetPartID(1);
-	CS_NewCha2(edtName->GetCaption(), szCityNames(m_nCurCityIndex), sTypeID, sHairID, faceID);
+	int jobID = GetSelectedJobId();
+	CS_NewCha2(edtName->GetCaption(), szCityNames(m_nCurCityIndex), sTypeID, sHairID, faceID, jobID);
 }
 
 //-----------------------------------------------------------------------
@@ -1554,7 +1683,7 @@ void CCreateChaScene::CreateNewCha() {
 	GotoSelChaScene();
 
 	CSelectChaScene& rkScene = CSelectChaScene::GetCurrScene();
-	rkScene.CreateCha(sName, nChaIndex, &part);
+	rkScene.CreateCha(sName, nChaIndex, &part, GetSelectedJobId());
 }
 
 //-----------------------------------------------------------------------

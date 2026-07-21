@@ -176,6 +176,7 @@
     <ClCompile Include="..\..\src\common\TableObfuscation.cpp" />
     <ClCompile Include="..\..\src\common\ChaMask.cpp" />
     <ClCompile Include="..\..\src\common\CharacterRecord.cpp" />
+    <ClCompile Include="..\..\src\common\CreateChaClassRules.cpp" />
     <ClCompile Include="..\..\src\common\CommFunc.cpp" />
     <ClCompile Include="..\..\src\common\EventRecord.cpp" />
     <ClCompile Include="..\..\src\common\ForgeRecord.cpp" />
@@ -210,6 +211,7 @@
     <ClInclude Include="..\include\ChaAttrType.h" />
     <ClInclude Include="..\include\ChaMask.h" />
     <ClInclude Include="..\include\CharacterRecord.h" />
+    <ClInclude Include="..\..\include\common\CreateChaClassRules.h" />
     <ClInclude Include="..\include\CommFunc.h" />
     <ClInclude Include="..\include\CompCommand.h" />
     <ClInclude Include="conformity.h" />

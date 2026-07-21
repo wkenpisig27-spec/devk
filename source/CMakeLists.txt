@@ -255,6 +255,7 @@ add_library(Common STATIC
     src/common/ChaMask.cpp
     src/common/CharacterRecord.cpp
     src/common/CommFunc.cpp
+    src/common/CreateChaClassRules.cpp
     src/common/EventRecord.cpp
     src/common/ForgeRecord.cpp
     src/common/HairRecord.cpp

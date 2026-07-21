@@ -4782,13 +4782,14 @@ CREATE PROCEDURE [dbo].[CharacterInsert]
     @act_id INT,
     @birth VARCHAR(20),
     @map VARCHAR(50),
-    @look VARCHAR(2000)
+    @look VARCHAR(2000),
+    @job VARCHAR(50) = 'Newbie'
 AS
 BEGIN
     SET NOCOUNT ON;
     
-    INSERT INTO character (cha_name, act_id, birth, map, look) 
-    VALUES (@cha_name, @act_id, @birth, @map, @look);
+    INSERT INTO character (cha_name, act_id, birth, map, look, job) 
+    VALUES (@cha_name, @act_id, @birth, @map, @look, @job);
     
     RETURN @@ROWCOUNT;
 END
