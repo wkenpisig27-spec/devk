@@ -10,6 +10,9 @@
 
 LW_BEGIN
 
+// While enabled, fixed-function item draws ignore lighting/diffuse and show
+// texture color only. Used for system UI markers (move target, quest !).
+LW_FRONT_API void lwEnableFullbrightFixedFunction(BOOL enable);
 
 class LW_FRONT_API MPSceneItem : public lwMatrixCtrl
 {

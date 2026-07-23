@@ -44,7 +44,10 @@ HRESULT RenderStateMgr::Init(MPIDeviceObject* dev_obj) {
 
 		rs_id = 0;
 		_rsa_sceneobj->SetStateValue(rs_id++, D3DRS_ALPHABLENDENABLE, TRUE);
-		_rsa_sceneobj->SetStateValue(rs_id++, D3DRS_AMBIENT, 0xff5a6270);  // darker scenery ambient (less washout)
+		// Match slimepirates: markers (target.lgo / sighyellow) are additive
+		// transparent and pick up this ambient when lit. 0xff5a6270 crushed
+		// sky-blue / yellow UI markers into flat dark silhouettes.
+		_rsa_sceneobj->SetStateValue(rs_id++, D3DRS_AMBIENT, 0xffa0a0a0);
 		_rsa_sceneobj->SetStateValue(rs_id++, D3DRS_LIGHTING, TRUE);
 		_rsa_sceneobj->SetStateValue(rs_id++, D3DRS_SPECULARENABLE, FALSE);
 
@@ -74,9 +77,9 @@ HRESULT RenderStateMgr::Init(MPIDeviceObject* dev_obj) {
 		_scnobj_lgt.Direction.z = -0.5f;
 		D3DXVec3Normalize((D3DXVECTOR3*)&_scnobj_lgt.Direction, (D3DXVECTOR3*)&_scnobj_lgt.Direction);
 		_scnobj_lgt.Diffuse.a = 1.0f;
-		_scnobj_lgt.Diffuse.r = 1.00f;   // keep key light punch so textures stay vivid
-		_scnobj_lgt.Diffuse.g = 0.96f;
-		_scnobj_lgt.Diffuse.b = 0.88f;
+		_scnobj_lgt.Diffuse.r = 1.0f;
+		_scnobj_lgt.Diffuse.g = 1.0f;
+		_scnobj_lgt.Diffuse.b = 1.0f;
 	}
 	// end
 
@@ -87,7 +90,7 @@ HRESULT RenderStateMgr::Init(MPIDeviceObject* dev_obj) {
 
 		rs_id = 0;
 		_rsa_cha->SetStateValue(rs_id++, D3DRS_LIGHTING, TRUE);
-		_rsa_cha->SetStateValue(rs_id++, D3DRS_AMBIENT, 0xffb4bcc8);  // bright vs world, but not washed-out white
+		_rsa_cha->SetStateValue(rs_id++, D3DRS_AMBIENT, 0xffc0c0c0);
 		_rsa_cha->SetStateValue(rs_id++, D3DRS_SPECULARENABLE, FALSE);
 
 		tss_id = 10;
@@ -112,9 +115,9 @@ HRESULT RenderStateMgr::Init(MPIDeviceObject* dev_obj) {
 		_cha_lgt.Direction.z = -1.0f;
 		D3DXVec3Normalize((D3DXVECTOR3*)&_cha_lgt.Direction, (D3DXVECTOR3*)&_cha_lgt.Direction);
 		_cha_lgt.Diffuse.a = 1.0f;
-		_cha_lgt.Diffuse.r = 1.00f;   // warm but flat key light for characters
-		_cha_lgt.Diffuse.g = 0.98f;
-		_cha_lgt.Diffuse.b = 0.92f;
+		_cha_lgt.Diffuse.r = 1.0f;
+		_cha_lgt.Diffuse.g = 1.0f;
+		_cha_lgt.Diffuse.b = 1.0f;
 	}
 	// end
 

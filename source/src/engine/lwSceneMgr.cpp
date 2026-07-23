@@ -4,6 +4,9 @@
 
 LW_BEGIN
 
+// Declared in MPSceneItem.h / implemented in lwRenderCtrlEmb.cpp
+void lwEnableFullbrightFixedFunction(BOOL enable);
+
 static int __qsort_transparent_primitive(const void *e1, const void *e2)
 {
     return ((lwSortPriInfo*)e1)->d < ((lwSortPriInfo*)e2)->d;
@@ -85,9 +88,14 @@ LW_RESULT lwSceneMgr::RenderTransparentPrimitive()
         }
         else
         {
+            // Item markers (target.lgo, sighyellow, etc.) are additive-transparent
+            // and land here with proc==null. Force texture-only color so leftover
+            // lit-VS constants / dark ambient cannot crush sky-blue / yellow.
+            lwEnableFullbrightFixedFunction(TRUE);
             if(LW_FAILED(spi->obj->Render()))
             {
             }
+            lwEnableFullbrightFixedFunction(FALSE);
         }
     }
 

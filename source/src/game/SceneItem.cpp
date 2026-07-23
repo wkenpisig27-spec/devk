@@ -237,6 +237,22 @@ __ret:
 	return ret;
 }
 
+void CSceneItem::setIsSystem(bool v) {
+	_IsSystem = v;
+	if (!v)
+		return;
+
+	// UI overlays (move diamond, quest ! / GM marks, shop boards): keep
+	// albedo fullbright so scenery ambient / leftover lighting cannot crush
+	// sky-blue / yellow textures into flat dark silhouettes.
+	D3DMATERIALX mtl;
+	memset(&mtl, 0, sizeof(mtl));
+	mtl.Diffuse.r = mtl.Diffuse.g = mtl.Diffuse.b = mtl.Diffuse.a = 1.0f;
+	mtl.Ambient.r = mtl.Ambient.g = mtl.Ambient.b = mtl.Ambient.a = 1.0f;
+	mtl.Emissive.r = mtl.Emissive.g = mtl.Emissive.b = mtl.Emissive.a = 1.0f;
+	SetMaterial(&mtl);
+}
+
 void CSceneItem::Render() {
 	// PKO FIX: Null-check GetScene() and GetTerrain() for visibility culling
 	if (GetScene() && GetScene()->GetTerrain()) {
@@ -254,7 +270,15 @@ void CSceneItem::Render() {
 
 	// g_Render.EnableMipmap(FALSE);
 
+	if (!_IsSystem) {
+		MPSceneItem::Render();
+		return;
+	}
+
+	// Fullbright path for system overlays (move diamond, quest/GM marks).
+	lwEnableFullbrightFixedFunction(TRUE);
 	MPSceneItem::Render();
+	lwEnableFullbrightFixedFunction(FALSE);
 }
 
 void CSceneItem::PlayArcAni(D3DXVECTOR3 vStart, D3DXVECTOR3 vEnd, float fVel, float fHei, DWORD dwDurationMs) {

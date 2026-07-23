@@ -24,6 +24,20 @@
 #include "MPShadowMap.h"
 #include "ui3dcompent.h"
 
+// Effects / weapon-glow / shade maps can leave exotic forced texture-stage
+// state on the device. Slimepirates resets stage 0/1 at item + transparent
+// boundaries so additive markers (target.lgo / sighyellow) keep true color.
+static void ResetWeaponGlowStageState() {
+	g_Render.SetTextureStageStateForced(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	g_Render.SetTextureStageStateForced(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	g_Render.SetTextureStageStateForced(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+	g_Render.SetTextureStageStateForced(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+	g_Render.SetTextureStageStateForced(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+	g_Render.SetTextureStageStateForced(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+	g_Render.SetTextureStageStateForced(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+	g_Render.SetTextureStageStateForced(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+}
+
 namespace {
 bool ContainsNoCase(const char* text, const char* needle) {
 	if (!text || !needle || !*needle)
@@ -101,6 +115,7 @@ LW_RESULT __SceneTranspObjRenderProc(MPIPrimitive* obj, void* param) {
 	}
 
 	obj->Render();
+	ResetWeaponGlowStageState();
 
 	if (old_lgt != desc->rs_lgt) {
 		g_Render.SetRenderState(D3DRS_LIGHTING, old_lgt);
@@ -296,11 +311,9 @@ void CGameScene::_Render() {
 	g_Render.GetRenderState(D3DRS_AMBIENT, &rs_amb);
 
 	{
-		const float s = g_Config.m_fSceneAmbientScale;
-		amb = D3DCOLOR_XRGB(
-			(BYTE)(m_dwEnvColor.r * 255.0f * s),
-			(BYTE)(m_dwEnvColor.g * 255.0f * s),
-			(BYTE)(m_dwEnvColor.b * 255.0f * s));
+		// Full env ambient (slimepirates). Do not apply sceneAmbientScale —
+		// additive transparent UI markers (move diamond, quest !) darken with it.
+		amb = D3DCOLOR_XRGB((BYTE)(m_dwEnvColor.r * 255), (BYTE)(m_dwEnvColor.g * 255), (BYTE)(m_dwEnvColor.b * 255));
 	}
 	g_Render.SetRenderState(D3DRS_AMBIENT, amb);
 #endif
@@ -640,6 +653,7 @@ void CGameScene::_Render() {
 
 				if (pCha) {
 					pCha->Render();
+					ResetWeaponGlowStageState();
 				}
 
 				rsm->EndSceneObject();
@@ -650,6 +664,7 @@ void CGameScene::_Render() {
 
 				rsm->BeginTranspObject();
 				lwUpdateSceneTransparentObject();
+				ResetWeaponGlowStageState();
 				rsm->EndTranspObject();
 				rsm->EndScene();
 
@@ -815,15 +830,28 @@ void CGameScene::_Render() {
 	g_Render.SetRenderState(D3DRS_LIGHTING, 0);
 	g_Render.SetRenderState(D3DRS_TEXTUREFACTOR, 0xffffffff);
 	g_Render.SetRenderStateForced(D3DRS_TEXTUREFACTOR, 0xffffffff);
+	ResetWeaponGlowStageState();
 
 	if (_bShowSceneItem) {
+		// System indicators (target.lgo move diamond, targeta.lgo attack ring,
+		// shop/NPC markers) are UI overlays, not world-lit props. Items draw
+		// with LIGHTING off, so VS Color0 is ambient-only — and after
+		// sceneAmbientScale + BoostVividness that ambient crushes sky-blue
+		// textures into flat dark blue. Force fullbright ambient for them.
+		DWORD dwItemAmb = 0;
+		g_Render.GetRenderState(D3DRS_AMBIENT, &dwItemAmb);
 		for (i = 0; i < _nSceneItemCnt; i++) {
 			CSceneItem* pObj = &_pSceneItemArray[i];
 			if (pObj->IsValid() && pObj->IsHide() == FALSE) {
+				if (pObj->IsSystem())
+					g_Render.SetRenderState(D3DRS_AMBIENT, 0xffffffff);
+				else
+					g_Render.SetRenderState(D3DRS_AMBIENT, dwItemAmb);
 				// pObj->SetMaterial(&material);
 				pObj->Render();
 			}
 		}
+		g_Render.SetRenderState(D3DRS_AMBIENT, dwItemAmb);
 	}
 
 	dev_obj->EndBenchMark();
@@ -836,6 +864,14 @@ void CGameScene::_Render() {
 
 	g_Render.EnableZBuffer(TRUE);
 
+	// Soft glow / death / particle billboards are alpha-blended quads. With
+	// swapchain MSAA, D3DRS_MULTISAMPLEANTIALIAS left ON fills coverage across
+	// the whole quad → washed white "square lines". Disable MSAA for effect
+	// passes only; geometry keeps swapchain MSAA edges.
+	DWORD dwMsaaAA = TRUE;
+	g_Render.GetRenderState(D3DRS_MULTISAMPLEANTIALIAS, &dwMsaaAA);
+	g_Render.SetRenderStateForced(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+
 	// ��Ⱦ��Ч���ĺ���
 	// g_CEffBox.Render();
 	MPTimer mpt;
@@ -844,6 +880,9 @@ void CGameScene::_Render() {
 		mpt.Begin();
 
 		// g_Render.SetRenderState( D3DRS_LIGHTING, TRUE );
+
+		// Guarantee effects start from clean texture-stage state (slimepirates).
+		ResetWeaponGlowStageState();
 
 		try {
 			RenderEffectMap();
@@ -868,12 +907,11 @@ void CGameScene::_Render() {
 	{
 		mpt.Begin();
 
-		g_Render.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-		g_Render.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-		g_Render.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+		ResetWeaponGlowStageState();
 
 		rsm->BeginTranspObject();
 		lwUpdateSceneTransparentObject();
+		ResetWeaponGlowStageState();
 		rsm->EndTranspObject();
 
 		g_pGameApp->m_dwTranspObjTime = mpt.End();
@@ -881,6 +919,9 @@ void CGameScene::_Render() {
 
 	{
 		mpt.Begin();
+
+		// Particles (monster death ghost.par, etc.) — keep MSAA AA off.
+		g_Render.SetRenderStateForced(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
 
 		ResMgr.Render();
 
@@ -897,6 +938,9 @@ void CGameScene::_Render() {
 
 		g_pGameApp->m_dwRenderEffectTime += mpt.End();
 	}
+
+	g_Render.SetRenderStateForced(D3DRS_MULTISAMPLEANTIALIAS, dwMsaaAA);
+
 	dev_obj->SetRenderState(D3DRS_FOGENABLE, FALSE);
 
 	_RenderUpSeaShade();
@@ -1010,11 +1054,9 @@ void CGameScene::RenderSMallMap() {
 	g_Render.GetRenderState(D3DRS_AMBIENT, &rs_amb);
 
 	{
-		const float s = g_Config.m_fSceneAmbientScale;
-		amb = D3DCOLOR_XRGB(
-			(BYTE)(m_dwEnvColor.r * 255.0f * s),
-			(BYTE)(m_dwEnvColor.g * 255.0f * s),
-			(BYTE)(m_dwEnvColor.b * 255.0f * s));
+		// Full env ambient (slimepirates). Do not apply sceneAmbientScale —
+		// additive transparent UI markers (move diamond, quest !) darken with it.
+		amb = D3DCOLOR_XRGB((BYTE)(m_dwEnvColor.r * 255), (BYTE)(m_dwEnvColor.g * 255), (BYTE)(m_dwEnvColor.b * 255));
 	}
 	g_Render.SetRenderState(D3DRS_AMBIENT, amb);
 #endif
@@ -1207,6 +1249,7 @@ void CGameScene::RenderSMallMap() {
 
 	rsm->BeginTranspObject();
 	lwUpdateSceneTransparentObject();
+	ResetWeaponGlowStageState();
 	rsm->EndTranspObject();
 
 	rsm->EndScene();

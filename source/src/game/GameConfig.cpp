@@ -112,7 +112,7 @@ void CGameConfig::SetDefault() // Ĭ������
 	m_bStaticCelEnabled = TRUE;
 	m_bWaterEnhance = TRUE;
 	m_bSRGBWrite = FALSE;
-	m_fSceneAmbientScale = 0.72f;
+	m_fSceneAmbientScale = 1.0f;
 }
 
 void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
@@ -147,7 +147,7 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 	m_bStaticCelEnabled = GetPrivateProfileInt("visual", "staticCel", m_bStaticCelEnabled ? 1 : 0, pszIniFileName) != 0;
 	m_bWaterEnhance = GetPrivateProfileInt("visual", "waterEnhance", m_bWaterEnhance ? 1 : 0, pszIniFileName) != 0;
 	m_bSRGBWrite = GetPrivateProfileInt("visual", "srgbWrite", m_bSRGBWrite ? 1 : 0, pszIniFileName) != 0;
-	GetPrivateProfileStringA("visual", "sceneAmbientScale", "0.72", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "sceneAmbientScale", "1.0", buf, sizeof(buf), pszIniFileName);
 	m_fSceneAmbientScale = (float)atof(buf);
 	if (m_fSceneAmbientScale < 0.2f)
 		m_fSceneAmbientScale = 0.2f;

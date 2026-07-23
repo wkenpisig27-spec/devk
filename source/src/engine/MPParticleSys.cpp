@@ -1352,6 +1352,11 @@ void	CMPPartSys::RenderSoft()
 		_pCModel->Begin();
 #endif
 
+		// Soft billboards (death ghost, etc.): MSAA coverage on alpha quads
+		// paints the whole rect white under DXVK. Keep AA off for this pass.
+		_pCModel->GetDev()->SetRenderStateForced(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+		_pCModel->GetDev()->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, TRUE);
+
 		_pCEffectFile->SetTechnique(_iRenderIdx);
 		if (!_bUseZ)
 		{

@@ -38,7 +38,8 @@ public:
 	void SetForgeEffect(DWORD value, int nCharID = 1); // 设置精炼效果表现,本函数在创建道具成功后调用
 
 public:
-	void setIsSystem(bool v) { _IsSystem = v; }
+	void setIsSystem(bool v);
+	bool IsSystem() const { return _IsSystem; }
 	bool IsHitText(int x, int y);
 	void SetHide(BOOL bHide);
 

@@ -16,8 +16,12 @@ void CRCursor::Init(CGameScene* p) {
 	_pCursorEff->SetScene(p);
 	_pCursorEff->Create("sel1.tga", 1.0f, true, 4, 1);
 	_pCursorEff->SetValid(TRUE);
+	// sel1.tga is already sky-blue on black. INVSRCCOLOR makes black
+	// see-through and keeps the soft glow. A pure-blue tint (0xff0000ff)
+	// multiplies away R/G and turns the marker into a flat dark diamond
+	// when the glow blend path fails under DXVK.
 	_pCursorEff->SetAlphaType(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCCOLOR);
-	_pCursorEff->setColor(0xff0000ff);
+	_pCursorEff->setColor(0xffffffff);
 	_pCursorEff->setFrameTime(0.03f);
 	_pCursorEff->setTexFrameTime(0.03f);
 }

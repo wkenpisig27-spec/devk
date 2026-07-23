@@ -6,6 +6,13 @@
 
 LW_BEGIN
 
+static BOOL g_ff_fullbright = FALSE;
+
+void lwEnableFullbrightFixedFunction(BOOL enable)
+{
+	g_ff_fullbright = enable ? TRUE : FALSE;
+}
+
 lwIRenderCtrlVS* __RenderCtrlVSProcFixedFuntion()
 {
     return LW_NEW(lwRenderCtrlVSFixedFunction);
@@ -39,6 +46,15 @@ LW_RESULT lwRenderCtrlVSFixedFunction::BeginSet(lwIRenderCtrlAgent* agent)
 {
     lwIResourceMgr* res_mgr = agent->GetResourceMgr();
     lwIDeviceObject* dev_obj = res_mgr->GetDeviceObject();
+    // Items are fixed-function. Characters/scene props leave a VS bound;
+    // if we don't clear it, FF items inherit that shader + its lighting
+    // constants (including the darkened scene ambient) and wash out
+    // UI markers like target.lgo / sighyellow.lgo.
+#if defined(LW_USE_DX9)
+    dev_obj->SetVertexShader((IDirect3DVertexShaderX*)NULL);
+#else
+    dev_obj->SetVertexShader((IDirect3DVertexShaderX)NULL);
+#endif
     dev_obj->SetTransformWorld(agent->GetGlobalMatrix());
     
     return LW_RET_OK;
@@ -51,6 +67,20 @@ LW_RESULT lwRenderCtrlVSFixedFunction::BeginSetSubset(DWORD subset, lwIRenderCtr
 {
     lwIResourceMgr* res_mgr = agent->GetResourceMgr();
     lwIDeviceObject* dev_obj = res_mgr->GetDeviceObject();
+
+	// Re-assert AFTER mtl/tex RSA so system markers keep true texture color.
+	if (g_ff_fullbright)
+	{
+		dev_obj->SetRenderStateForced(D3DRS_LIGHTING, FALSE);
+		dev_obj->SetRenderStateForced(D3DRS_FOGENABLE, FALSE);
+		dev_obj->SetRenderStateForced(D3DRS_AMBIENT, 0xffffffff);
+		dev_obj->SetRenderStateForced(D3DRS_TEXTUREFACTOR, 0xffffffff);
+		dev_obj->SetTextureStageStateForced(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+		dev_obj->SetTextureStageStateForced(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+		dev_obj->SetTextureStageStateForced(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+		dev_obj->SetTextureStageStateForced(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+		dev_obj->SetTextureStageStateForced(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+	}
 
     lwIAnimCtrlAgent* anim_agent = agent->GetAnimCtrlAgent();
 

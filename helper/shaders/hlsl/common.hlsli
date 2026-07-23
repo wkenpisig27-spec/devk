@@ -320,11 +320,13 @@ float4 CalcLightingFull(float3 posOS, float3 normal)
 }
 
 // Backward-compatible normal-only entry point (no rim / no spec).
-// Use when caller has no convenient object-space position.
+// Match slimepirates: Ambient + Diffuse * NdotL. Do not route through
+// half-Lambert / tint / BoostVividness — those crush additive UI markers
+// (target.lgo / sighyellow) when a leftover lit VS stays bound.
 float4 CalcLighting(float3 normal)
 {
     float NdotL = max(0, dot(normal, LightDir.xyz));
-    return _ApplyDiffuseBand(NdotL);
+    return Ambient + Diffuse * NdotL;
 }
 
 // Softer flatter cel for static environment (world stays richer than characters,

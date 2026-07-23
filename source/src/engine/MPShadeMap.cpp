@@ -456,7 +456,6 @@ void CMPShadeMap::RenderVS()
 	}
 	else
 	{
-		_pCEffectFile->End();
 		return;
 	}
 
@@ -464,17 +463,28 @@ void CMPShadeMap::RenderVS()
 
 	if (!_pCEffectFile->SetTechnique(_iIdxTech))
 	{
+		_pModel->End();
 		return;
 	}
 
-	_pCEffectFile->Begin(D3DXFX_DONOTSAVESHADERSTATE);//D3DXFX_DONOTSAVESTATE
+	// DONOTSAVESTATE: End must not restore prior SRC/DEST blend onto the
+	// raw D3D device (that desyncs lwDeviceObject's Forced cache and can
+	// leave the next shade draw on INVSRCALPHA — flat dark sel1 diamond).
+	_pCEffectFile->Begin(D3DXFX_DONOTSAVESTATE);
 	_pCEffectFile->Pass(0);
+
+	// Soft shade/glow quads: MSAA + alpha → white box under DXVK.
+	// INVSRCCOLOR glow (click cursor, etc.) also needs blend forced after
+	// Pass — effect tech t2 does not set Src/Dest blend.
+	_pModel->m_pDev->SetRenderStateForced(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+	_pModel->m_pDev->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, TRUE);
+	_pModel->m_pDev->SetRenderStateForced(D3DRS_SEPARATEALPHABLENDENABLE, FALSE);
+	_pModel->m_pDev->SetRenderStateForced(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+	_pModel->m_pDev->SetRenderStateForced(D3DRS_SRCBLEND, _eSrcBlend);
+	_pModel->m_pDev->SetRenderStateForced(D3DRS_DESTBLEND, _eDestBlend);
 	//to fix overlay of models
 	_pCEffectFile->m_pDev->SetRenderState(D3DRS_ZENABLE, FALSE);
 	_pModel->m_pDev->SetRenderState(D3DRS_ZENABLE, TRUE);
-
-	_pModel->m_pDev->SetRenderStateForced(D3DRS_SRCBLEND, _eSrcBlend);
-	_pModel->m_pDev->SetRenderStateForced(D3DRS_DESTBLEND, _eDestBlend);
 
 	_pModel->m_pDev->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 	_pModel->m_pDev->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
@@ -501,6 +511,11 @@ void CMPShadeMap::RenderVS()
 		tv.w = 1;
 		_pModel->m_pDev->SetVertexShaderConstantF(nIndex++, tv, 1);
 	}
+
+	// Re-assert glow blend immediately before draw (Pass/CommitChanges can
+	// race with other Forced state on some DXVK paths).
+	_pModel->m_pDev->SetRenderStateForced(D3DRS_SRCBLEND, _eSrcBlend);
+	_pModel->m_pDev->SetRenderStateForced(D3DRS_DESTBLEND, _eDestBlend);
 
 	_pModel->RenderModel();
 	_pModel->End();
@@ -549,17 +564,23 @@ void CMPShadeMap::RenderSoft() {
 
 
 	_pModel->Begin();
-	//for fontand circle shadow onflict 
+	//for fontand circle shadow onflict
+	_pCEffectFile->m_pDev->SetRenderStateForced(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
 	_pCEffectFile->m_pDev->SetRenderState(D3DRS_TEXTUREFACTOR, _dwColor);
 	_pCEffectFile->m_pDev->SetTextureStageStateForced(0, D3DTSS_COLORARG2, D3DTA_TFACTOR);
 	_pCEffectFile->m_pDev->SetTextureStageStateForced(0, D3DTSS_ALPHAARG2, D3DTA_TFACTOR);
 	_pCEffectFile->m_pDev->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, TRUE);
+	_pCEffectFile->m_pDev->SetRenderStateForced(D3DRS_SEPARATEALPHABLENDENABLE, FALSE);
+	_pCEffectFile->m_pDev->SetRenderStateForced(D3DRS_BLENDOP, D3DBLENDOP_ADD);
 	_pCEffectFile->m_pDev->SetRenderStateForced(D3DRS_ZWRITEENABLE, FALSE);
 	_pCEffectFile->m_pDev->SetRenderStateForced(D3DRS_CULLMODE, D3DCULL_CCW);
 	if (_iIdxTech != 4)
 	{
 		if (!_pCEffectFile->SetTechnique(_iIdxTech))
+		{
+			_pModel->End();
 			return;
+		}
 		_pCEffectFile->Begin(D3DXFX_DONOTSAVESTATE);
 		_pCEffectFile->Pass(0);
 	}
@@ -577,6 +598,7 @@ void CMPShadeMap::RenderSoft() {
 		{
 			_pCEffectFile->End();
 		}
+		_pModel->End();
 		return;
 	}
 	//to fix models get front of each other when render wings/pets
@@ -585,10 +607,15 @@ void CMPShadeMap::RenderSoft() {
 		_pModel->GetDev()->SetTransformWorld(&t_mat);
 	}
 
+	// Re-assert glow blend immediately before draw.
+	_pModel->GetDev()->SetRenderStateForced(D3DRS_SRCBLEND, _eSrcBlend);
+	_pModel->GetDev()->SetRenderStateForced(D3DRS_DESTBLEND, _eDestBlend);
+
 	_pModel->RenderModel();
 	_pModel->End();
 	_pCEffectFile->GetDev()->SetRenderState(D3DRS_TEXTUREFACTOR, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
-	_pCEffectFile->GetDev()->SetTextureStageStateForced(0, D3DTSS_COLORARG2, D3DTA_TEXTURE);
+	// Restore default modulate args (Texture * Diffuse), not Texture*Texture.
+	_pCEffectFile->GetDev()->SetTextureStageStateForced(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 	_pCEffectFile->GetDev()->SetTextureStageStateForced(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
 	_pModel->m_pDev->SetVertexShader(nullptr);
 	_pModel->m_pDev->SetFVF(EFFECT_SHADE_FVF);
@@ -1033,7 +1060,9 @@ void	CMPShadeCtrl::setColor(D3DXCOLOR SColor)
 	if(_pShadeMap->m_iType == SHADE_SINGLE)
 		_pShadeMap->SetColor(SColor);
 	else
-		((CMPShadeEX*)_pShadeMap)->SetColor(SColor);
+		// CMPShadeEX::setColor fills _vecFrameColor; SetColor only touches
+		// _dwColor and is overwritten by FrameMove's frame lerp.
+		((CMPShadeEX*)_pShadeMap)->setColor(SColor);
 }
 	
 int     CMPShadeCtrl::getFrameCount()
