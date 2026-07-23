@@ -297,7 +297,8 @@ string CCharMsg::GetChannelName(eChannel channel) {
 }
 
 string CCharMsg::GetChannelShowName(eChannel channel) {
-	return "[" + m_sChannelInfo[GetChannelIndex(channel)].strChannelName + "]";
+	// Trailing space matches classic clients: "[System] message" / "[Local] Name: text"
+	return "[" + m_sChannelInfo[GetChannelIndex(channel)].strChannelName + "] ";
 }
 
 CCharMsg::eChannel CCharMsg::GetChannelByIndex(WORD wChannelIndex) {
@@ -320,14 +321,14 @@ void CCharMsg::AddMsg(eChannel channel, string strWho, string strText, bool bSen
 	sTextInfo sText;
 	if (channel == CHANNEL_PRIVATE) {
 		if (bSendTo) {
-			sText.strShowText = GetChannelShowName(channel) + "<To " + strWho + ">:";
+			sText.strShowText = GetChannelShowName(channel) + "<To " + strWho + ">: ";
 		} else {
-			sText.strShowText = GetChannelShowName(channel) + "<From " + strWho + ">:";
+			sText.strShowText = GetChannelShowName(channel) + "<From " + strWho + ">: ";
 		}
 	} else {
 		sText.strShowText = GetChannelShowName(channel) + strWho;
 		if (!strWho.empty()) {
-			sText.strShowText += ":";
+			sText.strShowText += ": ";
 		}
 	}
 	sText.strShowText += strText;
@@ -1271,11 +1272,15 @@ void CCozeForm::UpdatePages() {
 				if (nPos != std::string::npos) {
 					pItem->AddHighlightText(0, nPos + 1, 0xFFFFFF00); // b0e0eb 0xFFFFFF00	mothannakh
 					if (msg.strWho != "" && nameEnd != std::string::npos) {
-						if ((int)strShowText.find("[GM]") == nPos + 1) {
-							pItem->AddHighlightText(nPos + 1, 4, 0xFFa89525); // 1ac8f0 0xFFa89525
+						size_t nameStart = nPos + 1;
+						if (nameStart < strShowText.size() && strShowText[nameStart] == ' ')
+							nameStart++;
+
+						if (strShowText.compare(nameStart, 4, "[GM]") == 0) {
+							pItem->AddHighlightText((int)nameStart, 4, 0xFFa89525); // 1ac8f0 0xFFa89525
 						}
 
-						pItem->AddHighlightText(nPos + 1, nameEnd - nPos, msg.dwColour);
+						pItem->AddHighlightText((int)nameStart, (int)(nameEnd - nameStart), msg.dwColour);
 					}
 				}
 			}
@@ -1331,7 +1336,7 @@ void CCozeForm::UpdatePages() {
 		
 		// Calculate indent based on [System] prefix width
 		string indentStr = "";
-		int prefixWidth = CGuiFont::s_Font.GetWidth("[System]");
+		int prefixWidth = CGuiFont::s_Font.GetWidth("[System] ");
 		int spaceWidth = CGuiFont::s_Font.GetWidth(" ");
 		if (spaceWidth > 0) {
 			int numSpaces = (prefixWidth / spaceWidth) + 1;
@@ -1475,7 +1480,7 @@ void CCozeForm::ResetPages() {
 		
 		// Calculate indent based on [System] prefix width
 		string indentStr = "";
-		int prefixWidth = CGuiFont::s_Font.GetWidth("[System]");
+		int prefixWidth = CGuiFont::s_Font.GetWidth("[System] ");
 		int spaceWidth = CGuiFont::s_Font.GetWidth(" ");
 		if (spaceWidth > 0) {
 			int numSpaces = (prefixWidth / spaceWidth) + 1;
