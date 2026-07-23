@@ -49,10 +49,9 @@ void CTextHint::Render() {
 
 	hints::iterator it = _hint.begin();
 	if (_IsHeadShadow) {
+		// Head line uses pre-baked outline fonts (e.g. FONT12/nameoutline) — single Render pass
 		if (!(*it)->shadow) {
-			DWORD color = (*it)->color;
-			color = (0xff000000 & color) | ~color;
-			CGuiFont::s_Font.ORender((*it)->font, (*it)->hint.c_str(), _nStartX + (*it)->offx, yy, (*it)->color, color);
+			CGuiFont::s_Font.Render((*it)->font, (*it)->hint.c_str(), _nStartX + (*it)->offx, yy, (*it)->color);
 			yy += (*it)->height;
 			++it;
 		} else {
@@ -62,7 +61,7 @@ void CTextHint::Render() {
 			else
 				sh = (sh & 0xFF000000) | ~sh;
 
-			CGuiFont::s_Font.ORender((*it)->font, (*it)->hint.c_str(), _nStartX + (*it)->offx, yy, (*it)->color, sh);
+			CGuiFont::s_Font.BRender((*it)->font, (*it)->hint.c_str(), _nStartX + (*it)->offx, yy, (*it)->color, sh);
 		}
 	}
 	for (; it != _hint.end(); ++it) {
@@ -112,9 +111,8 @@ void CTextHint::Render() {
 		hints::iterator it = _hint_related[i].begin();
 
 		if (_IsHeadShadow) {
-			DWORD color = (*it)->color;
-			color = (0xff000000 & color) | ~color;
-			CGuiFont::s_Font.ORender((*it)->font, (*it)->hint.c_str(), nStartX + (*it)->offx, yy, (*it)->color, color);
+			// Pre-baked outline font — single Render pass
+			CGuiFont::s_Font.Render((*it)->font, (*it)->hint.c_str(), nStartX + (*it)->offx, yy, (*it)->color);
 			yy += (*it)->height;
 			++it;
 		}

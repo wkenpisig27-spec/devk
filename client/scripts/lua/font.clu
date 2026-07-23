@@ -39,11 +39,12 @@ end
 -- ============================================================================
 
 -- Small fonts (dialogs, system messages, hints, chat)
-DEFAULT_FONT = UI_CreateFont( "gamedefaultsm", 12, 12, 0 )
+-- Semibold for heavier System/chat weight closer to classic PKO clients
+DEFAULT_FONT = UI_CreateFont( "gamedefaultsmsemibold", 12, 12, 0 )
 
--- Item name font (14pt Black weight - used by hint tooltips for item names)
+-- Item name font (14pt Bold with pre-baked black outline - PushHint(..., 1))
 -- Index 1 is used by PushHint(..., 1) calls in UIItemCommand.cpp
-FONT12 = UI_CreateFont( "gamedefaultmidblack", 14, 14, 0 )
+FONT12 = UI_CreateFont( "nameoutline", 14, 14, 0 )
 
 -- Medium fonts (labels, buttons, menus)
 FONT14 = UI_CreateFont( "gamedefaultmid", 14, 14, 0 )
@@ -57,10 +58,10 @@ BIGFONT = UI_CreateFont( "gamedefaultbig", 20, 20, 0 )
 FONT28 = UI_CreateFont( "gamedefaulthuge", 28, 28, 0 )
 HUGEFONT = UI_CreateFont( "gamedefaulthuge", 28, 28, 0 )
 
--- Title font (40pt Black weight - for map banners, level up text)
-TITLEFONT = UI_CreateFont( "titleblack", 40, 40, 0 )
+-- Title font (28pt Black with pre-baked outline - map banners / CTitle)
+TITLEFONT = UI_CreateFont( "titleoutline", 28, 28, 0 )
 
--- SemiBold fonts (Metropolis SemiBold - between Regular and Black)
+-- SemiBold fonts (Open Sans SemiBold)
 FONT12_SEMIBOLD = UI_CreateFont( "gamedefaultsmsemibold", 12, 12, 0 )
 FONT14_SEMIBOLD = UI_CreateFont( "gamedefaultmidsemibold", 14, 14, 0 )
 
@@ -102,13 +103,13 @@ SPLASH_OUTLINE_FONT = UI_CreateFont( "splashoutline", 40, 40, 0 )
 --   C++ will use ORender() (draws text 9 times)
 --
 -- Available name fonts:
---   nameoutline        = 14pt Black with pre-baked outline (FAST)
---   namesmoutline      = 12pt Black with pre-baked outline (smaller, FAST)
---   gamedefaultmidblack= 14pt Black, no outline (use with ORender)
---   gamedefaultsmblack = 12pt Black, no outline (use with ORender)
+--   nameoutline        = 14pt Bold with pre-baked BLACK outline (FAST)
+--   namesmoutline      = 12pt Bold with pre-baked BLACK outline (smaller, FAST)
+--   gamedefaultmidblack= 14pt Bold (use with ORender if no bake)
+--   gamedefaultsmblack = 12pt Bold (use with ORender if no bake)
 -- ============================================================================
-NAME_FONT = "gamedefaultsmblack"
-NAME_FONT_HAS_OUTLINE = false  -- Use runtime outline (ORender draws 9 passes)
+NAME_FONT = "nameoutline"
+NAME_FONT_HAS_OUTLINE = true  -- Pre-baked black outline (single Render pass)
 
 -- ============================================================================
 -- WEIGHT-BASED FONTS (for future use)

@@ -45,10 +45,9 @@ void CTitle::Render() {
 		_pImage->FrameRender(enumLeft, _posx[enumLeft], _posy);
 		_pImage->FrameRender(enumRight, _posx[enumRight], _posy);
 
-		// Render text with outline effect for better visibility
+		// Outline is pre-baked into titleoutline / similar fonts (single pass)
 		DWORD textColor = (_alpha << 24) | (_dwColor & 0x00FFFFFF);
-		DWORD outlineColor = (_alpha << 24) | 0x00000000;  // Black outline with same alpha
-		CGuiFont::s_Font.ORender(_nFontIndex, (char*)_strCaption.c_str(), _posx[enumCenter], _posfonty, textColor, outlineColor);
+		CGuiFont::s_Font.Render(_nFontIndex, (char*)_strCaption.c_str(), _posx[enumCenter], _posfonty, textColor);
 	}
 }
 
