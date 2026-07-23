@@ -888,72 +888,97 @@ LW_RESULT lwPhysique::Render()
             }
         }
 
-        // ── Inverted-hull outline pass ──────────────────────────────────────
+        // ── Character-only inverted-hull outline (physique skins) ───────────
         // Some character meshes have D3DRS_CULLMODE=NONE in their render-state
         // atoms (_rsa_0) which is applied inside BeginSet().  Calling p->Render()
         // lets that atom override our D3DCULL_CW setting, causing BOTH front and
         // back faces to be drawn black (solid-black silhouette).
         //
-        // Fix: use BeginSet/DrawSubset/EndSet directly, then force-reassert all
-        // critical states AFTER BeginSet (which may have applied the mesh RSA).
-        // This bypasses the material-state (BeginSetSubset) path entirely so no
-        // texture blending or alpha states are set by the material either.
+        // Use BeginSet/DrawSubset/EndSet directly, force-reassert after BeginSet,
+        // then restore the pre-pass render states so later draws are unaffected.
         if (g_lwOutlineEnabled)
         {
             lwIDeviceObject* dev_obj = _res_mgr->GetDeviceObject();
-
-            for (DWORD i = 0; i < LW_MAX_SUBSKIN_NUM; i++)
+            if (dev_obj)
             {
-                lwIPrimitive* p;
-                if ((p = _obj_seq[i]) == 0)
-                    continue;
+                DWORD rs_cull = D3DCULL_CCW;
+                DWORD rs_zwrite = TRUE;
+                DWORD rs_alphablend = FALSE;
+                DWORD rs_alphatest = FALSE;
+                DWORD rs_alpharef = 0;
+                DWORD rs_alphafunc = D3DCMP_ALWAYS;
+                dev_obj->GetRenderState(D3DRS_CULLMODE, &rs_cull);
+                dev_obj->GetRenderState(D3DRS_ZWRITEENABLE, &rs_zwrite);
+                dev_obj->GetRenderState(D3DRS_ALPHABLENDENABLE, &rs_alphablend);
+                dev_obj->GetRenderState(D3DRS_ALPHATESTENABLE, &rs_alphatest);
+                dev_obj->GetRenderState(D3DRS_ALPHAREF, &rs_alpharef);
+                dev_obj->GetRenderState(D3DRS_ALPHAFUNC, &rs_alphafunc);
 
-                const bool isTransparent = _scene_mgr && p->GetState(STATE_TRANSPARENT);
-
-                // Map normal VS → outline VS variant
-                DWORD cur_vs = p->GetRenderCtrlAgent()->GetVertexShader();
-                DWORD outline_vs = LW_INVALID_INDEX;
-                switch (cur_vs)
+                for (DWORD i = 0; i < LW_MAX_SUBSKIN_NUM; i++)
                 {
-                case VST_PU4NT0_LD:   outline_vs = VSTU_PU4NT0_OUTLINE;   break;
-                case VST_PB1U4NT0_LD: outline_vs = VSTU_PB1U4NT0_OUTLINE; break;
-                case VST_PB2U4NT0_LD: outline_vs = VSTU_PB2U4NT0_OUTLINE; break;
-                case VST_PB3U4NT0_LD: outline_vs = VSTU_PB3U4NT0_OUTLINE; break;
-                default: break;
+                    lwIPrimitive* p;
+                    if ((p = _obj_seq[i]) == 0)
+                        continue;
+
+                    lwIRenderCtrlAgent* agent = p->GetRenderCtrlAgent();
+                    if (!agent)
+                        continue;
+
+                    const bool isTransparent = _scene_mgr && p->GetState(STATE_TRANSPARENT);
+
+                    // Map normal VS → outline VS variant
+                    DWORD cur_vs = agent->GetVertexShader();
+                    DWORD outline_vs = LW_INVALID_INDEX;
+                    switch (cur_vs)
+                    {
+                    case VST_PU4NT0_LD:   outline_vs = VSTU_PU4NT0_OUTLINE;   break;
+                    case VST_PB1U4NT0_LD: outline_vs = VSTU_PB1U4NT0_OUTLINE; break;
+                    case VST_PB2U4NT0_LD: outline_vs = VSTU_PB2U4NT0_OUTLINE; break;
+                    case VST_PB3U4NT0_LD: outline_vs = VSTU_PB3U4NT0_OUTLINE; break;
+                    default: break;
+                    }
+                    if (outline_vs == LW_INVALID_INDEX)
+                        continue;
+
+                    agent->SetVertexShader(outline_vs);
+                    agent->BeginSet();
+                    lwApplyOutlineVSConstants(dev_obj);
+
+                    // Re-assert after BeginSet: mesh RSA may have overridden CULLMODE
+                    dev_obj->SetRenderStateForced(D3DRS_CULLMODE,         D3DCULL_CW);
+                    dev_obj->SetRenderStateForced(D3DRS_ZWRITEENABLE,     FALSE);
+                    dev_obj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, FALSE);
+                    if (isTransparent) {
+                        dev_obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE, TRUE);
+                        dev_obj->SetRenderStateForced(D3DRS_ALPHAREF, 0x00000080);
+                        dev_obj->SetRenderStateForced(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
+                    } else {
+                        dev_obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE, FALSE);
+                    }
+
+                    DWORD snum = 0;
+                    p->GetSubsetNum(&snum);
+                    for (DWORD s = 0; s < snum; s++)
+                        agent->DrawSubset(s);
+
+                    agent->EndSet();
+                    agent->SetVertexShader(cur_vs);
                 }
-                if (outline_vs == LW_INVALID_INDEX)
-                    continue;
 
-                p->GetRenderCtrlAgent()->SetVertexShader(outline_vs);
-                p->GetRenderCtrlAgent()->BeginSet();
-                lwApplyOutlineVSConstants(dev_obj);
-
-                // Re-assert after BeginSet: mesh RSA may have overridden CULLMODE
-                dev_obj->SetRenderStateForced(D3DRS_CULLMODE,         D3DCULL_CW);
-                dev_obj->SetRenderStateForced(D3DRS_ZWRITEENABLE,     FALSE);
-                dev_obj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, FALSE);
-                if (isTransparent) {
-                    dev_obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE, TRUE);
-                    dev_obj->SetRenderStateForced(D3DRS_ALPHAREF, 0x00000080);
-                    dev_obj->SetRenderStateForced(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
-                } else {
-                    dev_obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE, FALSE);
-                }
-
-                DWORD snum = 0;
-                p->GetSubsetNum(&snum);
-                for (DWORD s = 0; s < snum; s++)
-                    p->GetRenderCtrlAgent()->DrawSubset(s);
-
-                p->GetRenderCtrlAgent()->EndSet();
-                p->GetRenderCtrlAgent()->SetVertexShader(cur_vs);
+                // Restore pre-pass states (Forced keeps device cache in sync).
+                // Also clear any leftover outline VS so FF / next draws are safe.
+#if defined(LW_USE_DX9)
+                dev_obj->SetVertexShader((IDirect3DVertexShaderX*)NULL);
+#else
+                dev_obj->SetVertexShader((IDirect3DVertexShaderX)NULL);
+#endif
+                dev_obj->SetRenderStateForced(D3DRS_CULLMODE,         rs_cull);
+                dev_obj->SetRenderStateForced(D3DRS_ZWRITEENABLE,     rs_zwrite);
+                dev_obj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, rs_alphablend);
+                dev_obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE,  rs_alphatest);
+                dev_obj->SetRenderStateForced(D3DRS_ALPHAREF,         rs_alpharef);
+                dev_obj->SetRenderStateForced(D3DRS_ALPHAFUNC,        rs_alphafunc);
             }
-
-            // Restore render states; use Forced to guarantee cache+device are in sync
-            dev_obj->SetRenderStateForced(D3DRS_CULLMODE,         D3DCULL_CCW);
-            dev_obj->SetRenderStateForced(D3DRS_ZWRITEENABLE,     TRUE);
-            dev_obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE,  FALSE);
-            dev_obj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, FALSE);
         }
         // ───────────────────────────────────────────────────────────────────
     }

@@ -44,12 +44,11 @@ enum UserShaderType
 
 	VSTU_MINIMAP_E6,
 
-    // Inverted-hull outline shaders (skinning + normal extrusion, black output)
+    // Character-physique inverted-hull outline (skinned only)
     VSTU_PU4NT0_OUTLINE,    // 1-bone
     VSTU_PB1U4NT0_OUTLINE,  // 2-bone
     VSTU_PB2U4NT0_OUTLINE,  // 3-bone
     VSTU_PB3U4NT0_OUTLINE,  // 4-bone
-    VSTU_STATIC_OUTLINE,    // static mesh (PNT / PNDT)
 };
 
 #include "MindPowerAPI.h"
@@ -57,7 +56,7 @@ enum UserShaderType
 LW_RESULT MINDPOWER_API LoadShader0(lwISysGraphics* sys_graphics);
 LW_RESULT MINDPOWER_API LoadShader1(lwISysGraphics* sys_graphics);
 
-// Outline pass runtime tuning (set from game via lwSetOutlineParams)
+// Character-physique outline only (lwPhysique). Items / markers never outline.
 // worldWidth: object-space extrusion distance (typical 0.012–0.025)
 // refDepth: reserved / unused (API compat)
 extern "C" MINDPOWER_API void lwSetOutlineEnabled(int enabled);

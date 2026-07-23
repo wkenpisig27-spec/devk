@@ -8,7 +8,7 @@
 
 #define USER_SHADER_NUM             8
 
-// --- Outline pass globals ---------------------------------------------------
+// --- Character-physique outline globals (lwPhysique only; items never outline)
 bool g_lwOutlineEnabled = true;
 static float g_lwOutlineWidth = 0.014f; // world-space extrusion
 static float g_lwOutlineColorR = 0.12f;
@@ -372,23 +372,21 @@ LW_RESULT LoadShader1(lwISysGraphics* sys_graphics)
             goto __ret;
     }
 
-    // ---- Inverted-hull outline shaders ----
+    // ---- Character-physique inverted-hull outline shaders (skinned only) ----
     {
         static const DWORD outline_shader_type[] = {
             VSTU_PU4NT0_OUTLINE,
             VSTU_PB1U4NT0_OUTLINE,
             VSTU_PB2U4NT0_OUTLINE,
             VSTU_PB3U4NT0_OUTLINE,
-            VSTU_STATIC_OUTLINE,
         };
         static const char* outline_shader_file[] = {
             "skinmesh8_1_outline.vsh",
             "skinmesh8_2_outline.vsh",
             "skinmesh8_3_outline.vsh",
             "skinmesh8_4_outline.vsh",
-            "vs_static_outline.vsh",
         };
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 4; i++)
         {
             sprintf(path, "%s%s", path_info->GetPath(PATH_TYPE_SHADER), outline_shader_file[i]);
             if (LW_FAILED(shader_mgr->RegisterVertexShader(outline_shader_type[i], path, VS_FILE_ASM)))
