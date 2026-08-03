@@ -47,6 +47,7 @@ Jobs for `/givesetjob`: `champion`, `crusader`, `sharpshooter`, `cleric`, `seal`
 
 Give a full T40 Guardian set, equip, confirm 2/4/6 set bonuses after `AttrRecheck`.
 
-## Client
+## Client tooltips
 
-Rebuild/sync client `iteminfo` from server `ItemInfo.txt` so icons/names appear.
+Family gear (`10000+`) shows rarity-colored titles, family taglines, live set progress (2/4/6), and a rolled-affix section that encourages chasing Mythic (5/5) rolls.
+Rebuild the **client** after pulling `UIItemCommand` changes.

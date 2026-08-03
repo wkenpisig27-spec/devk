@@ -158,6 +158,17 @@ protected:
 	void _PushItemAttr(int attr, SItemHint& item, DWORD color = COLOR_WHITE);
 	void _PushValue(const char* szFormat, int attr, SItemHint& item, DWORD color = COLOR_WHITE);
 
+	bool _IsEquipmentV2() const;
+	int _GetEquipmentV2FamilyID() const;
+	int _GetEquipmentV2RollCount() const;
+	DWORD _GetEquipmentV2RarityColor(int rollCount) const;
+	const char* _GetEquipmentV2RarityName(int rollCount) const;
+	const char* _GetEquipmentV2FamilyName(int familyId) const;
+	const char* _GetEquipmentV2FamilyTagline(int familyId) const;
+	void _PushEquipmentV2Title(int familyId, int rollCount);
+	void _PushEquipmentV2SetProgress(int familyId);
+	void _PushEquipmentV2AffixHeader(int rollCount);
+
 	int _GetCooldownGroup() const;    // Returns grouping key for cooldown map
 	int _GetCooldownDuration() const; // Returns cooldown duration in milliseconds
 

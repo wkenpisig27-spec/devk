@@ -46,6 +46,16 @@ const DWORD GENERIC_COLOR = COLOR_WHITE;
 const DWORD ADVANCED_COLOR = 0xFF9CCFFF;
 const DWORD GLOD_COLOR = 0xFFFFFF00;
 
+// Family gear rarity / accent colors (ARGB)
+const DWORD FAMILY_COLOR_COMMON = 0xffC1C1C1;
+const DWORD FAMILY_COLOR_UNCOMMON = 0xffA2E13E;
+const DWORD FAMILY_COLOR_RARE = 0xff5BA3FF;
+const DWORD FAMILY_COLOR_EPIC = 0xffd68aff;
+const DWORD FAMILY_COLOR_LEGENDARY = 0xffff6440;
+const DWORD FAMILY_COLOR_MYTHIC = 0xffffcc12;
+const DWORD FAMILY_COLOR_MUTED = 0xff888888;
+const DWORD FAMILY_COLOR_ACCENT = 0xffffd36a;
+
 const unsigned int ITEM_HEIGHT = 32;
 const unsigned int ITEM_WIDTH = 32;
 
@@ -504,13 +514,20 @@ void CItemCommand::AddHint(int x, int y) {
 	bool isDefenceType = (_pItem->sType == 22 || _pItem->sType == 11 || _pItem->sType == 27);
 	bool isJewelery = (_pItem->sType == 25 || _pItem->sType == 26 || _pItem->sType == 81 || _pItem->sType == 82 || _pItem->sType == 83);
 	bool isEquip = (_pItem->sType == 20 || _pItem->sType == 23 || _pItem->sType == 24 || _pItem->sType == 88 || _pItem->sType == 84);
+	const bool isFamilyV2 = _IsEquipmentV2();
+	const int familyId = isFamilyV2 ? _GetEquipmentV2FamilyID() : 0;
+	const int rollCount = isFamilyV2 ? _GetEquipmentV2RollCount() : 0;
 	if (isWeapon || isDefenceType || isJewelery || isEquip) {
-		if (_ItemData.GetItemLevel() > 0) {
+		if (isFamilyV2) {
+			_PushEquipmentV2Title(familyId, rollCount);
+			PushHint(_GetEquipmentV2FamilyTagline(familyId), FAMILY_COLOR_ACCENT, 5, 0);
+		} else if (_ItemData.GetItemLevel() > 0) {
 			sprintf(buf, "Lv%d %s", _ItemData.GetItemLevel(), GetName());
+			PushHint(buf, COLOR_WHITE, 5, 1);
 		} else {
 			sprintf(buf, "%s", GetName());
+			PushHint(buf, COLOR_WHITE, 5, 1);
 		}
-		PushHint(buf, COLOR_WHITE, 5, 1); // 0xFF000000
 		// PushHint( buf, (DWORD)(COLOR_WHITE ^ 0xFF000000), 5, 1, -1, true, -16777216);
 
 		if (_pItem->lID == 1034) {
@@ -561,6 +578,11 @@ void CItemCommand::AddHint(int x, int y) {
 
 		_ShowBody();
 		_ShowWork(_pItem, pAttr);
+
+		if (isFamilyV2) {
+			AddHintHeight();
+			_PushEquipmentV2SetProgress(familyId);
+		}
 
 	} else if (_pItem->sType == 67 || _pItem->sType == 59) { // Fairy/Elf tooltip
 		// Fairy/Elf level = sum of all stats
@@ -1405,16 +1427,55 @@ void CItemCommand::AddHint(int x, int y) {
 
 	if (_pItem->sType != 75) //
 	{
-		// ???,??????
+		const bool familyV2Hint = _IsEquipmentV2();
+		const int familyRolls = familyV2Hint ? _GetEquipmentV2RollCount() : 0;
+		const DWORD affixColor = familyV2Hint ? _GetEquipmentV2RarityColor(familyRolls) : ADVANCED_COLOR;
+
 		AddHintHeight();
-		for (int i = 0; i < ITEMATTR_CLIENT_MAX; i++) {
-			if (item.sInstAttr[i] != 0) {
-				_PushItemAttr(i, item, ADVANCED_COLOR);
+		if (familyV2Hint) {
+			_PushEquipmentV2AffixHeader(familyRolls);
+
+			bool hasAffixLine = false;
+			for (int i = 0; i < defITEM_INSTANCE_ATTR_NUM; i++) {
+				const int attrId = _ItemData.sInstAttr[i][0];
+				const int attrVal = _ItemData.sInstAttr[i][1];
+				if (attrId <= 0 || attrId >= ITEMATTR_CLIENT_MAX || attrVal == 0)
+					continue;
+
+				if (attrId <= ITEMATTR_COE_PDEF) {
+					if (!(attrVal % 10)) {
+						sprintf(buf, "%s:%+d%%", g_GetItemAttrExplain(attrId), attrVal / 10);
+					} else {
+						float f = (float)attrVal / 10.0f;
+						sprintf(buf, "%s:%+.1f%%", g_GetItemAttrExplain(attrId), f);
+					}
+				} else {
+					sprintf(buf, "%s:%+d", g_GetItemAttrExplain(attrId), attrVal);
+				}
+				PushHint(buf, affixColor, 5, 1);
+				item.sInstAttr[attrId] = 0;
+				hasAffixLine = true;
+			}
+
+			if (!hasAffixLine) {
+				PushHint("No bonus rolls yet — hunt elites & chests!", FAMILY_COLOR_MUTED, 5, 0);
+				PushHint("Higher rarity = more & stronger affixes", FAMILY_COLOR_ACCENT, 5, 0);
+			} else if (familyRolls > 0 && familyRolls < 5) {
+				sprintf(buf, "Need %d more roll%s for Mythic perfection!", 5 - familyRolls, (5 - familyRolls) == 1 ? "" : "s");
+				PushHint(buf, FAMILY_COLOR_ACCENT, 5, 0);
+			} else if (familyRolls >= 5) {
+				PushHint("MYTHIC ROLL — every affix slot filled!", FAMILY_COLOR_MYTHIC, 5, 1);
+			}
+		} else {
+			for (int i = 0; i < ITEMATTR_CLIENT_MAX; i++) {
+				if (item.sInstAttr[i] != 0) {
+					_PushItemAttr(i, item, ADVANCED_COLOR);
+				}
 			}
 		}
 	}
 
-	if (_hints.GetCount() > 0 && (_pItem->sType <= 27 || _pItem->sType == 44) && _pItem->sType != 18 && _pItem->sType != 19 && _pItem->sType != 21) {
+	if (_hints.GetCount() > 0 && (_pItem->sType <= 27 || _pItem->sType == 44) && _pItem->sType != 18 && _pItem->sType != 19 && _pItem->sType != 21 && !_IsEquipmentV2()) {
 		// ?????????I?????????,???????�???????j?
 		char szBuf[16] = {0};
 		sprintf(szBuf, "%09d", _ItemData.sEnergy[1] / 10); // ????????????????????4???,???????????
@@ -1671,6 +1732,238 @@ void CItemCommand::_PushItemAttr(int attr, SItemHint& item, DWORD color) {
 	PushHint(buf, color);
 
 	item.sInstAttr[attr] = 0;
+}
+
+bool CItemCommand::_IsEquipmentV2() const {
+	return _pItem && _pItem->lID >= 10000 && _pItem->lID <= 10671;
+}
+
+int CItemCommand::_GetEquipmentV2FamilyID() const {
+	if (!_IsEquipmentV2())
+		return 0;
+	if (_pItem->sSetID >= 1 && _pItem->sSetID <= 6)
+		return _pItem->sSetID;
+	const int within = (_pItem->lID - 10000) % 100;
+	return (within / 12) + 1;
+}
+
+int CItemCommand::_GetEquipmentV2RollCount() const {
+	int count = 0;
+	for (int i = 0; i < defITEM_INSTANCE_ATTR_NUM; i++) {
+		if (_ItemData.sInstAttr[i][0] > 0)
+			++count;
+	}
+	return count;
+}
+
+DWORD CItemCommand::_GetEquipmentV2RarityColor(int rollCount) const {
+	switch (rollCount) {
+	case 0:
+		return FAMILY_COLOR_COMMON;
+	case 1:
+		return FAMILY_COLOR_UNCOMMON;
+	case 2:
+		return FAMILY_COLOR_RARE;
+	case 3:
+		return FAMILY_COLOR_EPIC;
+	case 4:
+		return FAMILY_COLOR_LEGENDARY;
+	default:
+		return FAMILY_COLOR_MYTHIC;
+	}
+}
+
+const char* CItemCommand::_GetEquipmentV2RarityName(int rollCount) const {
+	switch (rollCount) {
+	case 0:
+		return "Common";
+	case 1:
+		return "Uncommon";
+	case 2:
+		return "Rare";
+	case 3:
+		return "Epic";
+	case 4:
+		return "Legendary";
+	default:
+		return "Mythic";
+	}
+}
+
+const char* CItemCommand::_GetEquipmentV2FamilyName(int familyId) const {
+	switch (familyId) {
+	case 1:
+		return "Guardian";
+	case 2:
+		return "Royal";
+	case 3:
+		return "Wind";
+	case 4:
+		return "Hunter";
+	case 5:
+		return "Shadow";
+	case 6:
+		return "Sanctum";
+	default:
+		return "Unknown";
+	}
+}
+
+const char* CItemCommand::_GetEquipmentV2FamilyTagline(int familyId) const {
+	switch (familyId) {
+	case 1:
+		return "\"Hold the line. Endure the storm.\"";
+	case 2:
+		return "\"Strike once. End the fight.\"";
+	case 3:
+		return "\"Faster than fate.\"";
+	case 4:
+		return "\"One shot. One legend.\"";
+	case 5:
+		return "\"Win the duel before it starts.\"";
+	case 6:
+		return "\"Power that never runs dry.\"";
+	default:
+		return "";
+	}
+}
+
+void CItemCommand::_PushEquipmentV2Title(int familyId, int rollCount) {
+	const DWORD color = _GetEquipmentV2RarityColor(rollCount);
+	const char* rarity = _GetEquipmentV2RarityName(rollCount);
+	const char* family = _GetEquipmentV2FamilyName(familyId);
+
+	char stars[8] = {0};
+	for (int i = 0; i < rollCount && i < 5; i++)
+		stars[i] = '*';
+	if (rollCount <= 0)
+		strcpy(stars, "-");
+
+	if (_ItemData.GetItemLevel() > 0) {
+		sprintf(buf, "[%s] Lv%d %s", rarity, _ItemData.GetItemLevel(), GetName());
+	} else {
+		sprintf(buf, "[%s] %s", rarity, GetName());
+	}
+	PushHint(buf, color, 5, 1);
+
+	sprintf(buf, "%s Family  ·  Affix Power %s (%d/5)", family, stars, rollCount);
+	PushHint(buf, color, 5, 0);
+}
+
+void CItemCommand::_PushEquipmentV2SetProgress(int familyId) {
+	static const int kSetSlots[] = {
+		enumEQUIP_HEAD, enumEQUIP_BODY, enumEQUIP_GLOVE, enumEQUIP_SHOES,
+		enumEQUIP_NECK, enumEQUIP_LHAND, enumEQUIP_HAND1, enumEQUIP_HAND2, enumEQUIP_RHAND};
+
+	int equipped = 0;
+	for (int i = 0; i < (int)(sizeof(kSetSlots) / sizeof(kSetSlots[0])); i++) {
+		CItemCommand* pEquip = g_stUIEquip.GetEquipItem(kSetSlots[i]);
+		if (!pEquip || !pEquip->GetItemInfo())
+			continue;
+		const int id = pEquip->GetItemInfo()->lID;
+		if (id < 10000 || id > 10671)
+			continue;
+		int fam = pEquip->GetItemInfo()->sSetID;
+		if (fam < 1 || fam > 6)
+			fam = ((id - 10000) % 100) / 12 + 1;
+		if (fam == familyId)
+			++equipped;
+	}
+
+	const char* family = _GetEquipmentV2FamilyName(familyId);
+	sprintf(buf, "== %s Set  %d/6 ==", family, equipped);
+	PushHint(buf, FAMILY_COLOR_ACCENT, 5, 1);
+
+	struct SetLine {
+		int need;
+		const char* text;
+	};
+	const SetLine* lines = nullptr;
+	int lineCount = 0;
+	switch (familyId) {
+	case 1: {
+		static const SetLine L[] = {
+			{2, "2-Set: +200 Max HP"},
+			{4, "4-Set: +30 Defense"},
+			{6, "6-Set: +4 Phys Resist, +8 HP Rec"},
+		};
+		lines = L;
+		lineCount = 3;
+		break;
+	}
+	case 2: {
+		static const SetLine L[] = {
+			{2, "2-Set: +25 Max ATK / +20 Min ATK"},
+			{4, "4-Set: +20 Hit"},
+			{6, "6-Set: +40 Max ATK / +30 Min ATK"},
+		};
+		lines = L;
+		lineCount = 3;
+		break;
+	}
+	case 3: {
+		static const SetLine L[] = {
+			{2, "2-Set: +20 Flee"},
+			{4, "4-Set: +25 Move Speed"},
+			{6, "6-Set: +30 Flee, +15 Hit"},
+		};
+		lines = L;
+		lineCount = 3;
+		break;
+	}
+	case 4: {
+		static const SetLine L[] = {
+			{2, "2-Set: +25 Hit"},
+			{4, "4-Set: +10 Critical"},
+			{6, "6-Set: +15 Critical, +20 Max ATK"},
+		};
+		lines = L;
+		lineCount = 3;
+		break;
+	}
+	case 5: {
+		static const SetLine L[] = {
+			{2, "2-Set: +15 Flee / +15 Hit"},
+			{4, "4-Set: +20 Max ATK, +15 Flee"},
+			{6, "6-Set: +25 Hit, +8 Critical"},
+		};
+		lines = L;
+		lineCount = 3;
+		break;
+	}
+	case 6: {
+		static const SetLine L[] = {
+			{2, "2-Set: +200 Max SP"},
+			{4, "4-Set: +10 SP Rec, +100 Max HP"},
+			{6, "6-Set: +300 Max SP, +8 HP Rec"},
+		};
+		lines = L;
+		lineCount = 3;
+		break;
+	}
+	default:
+		return;
+	}
+
+	for (int i = 0; i < lineCount; i++) {
+		const bool unlocked = equipped >= lines[i].need;
+		sprintf(buf, "%s %s", unlocked ? "[ON]" : "[  ]", lines[i].text);
+		PushHint(buf, unlocked ? FAMILY_COLOR_UNCOMMON : FAMILY_COLOR_MUTED, 5, 0);
+	}
+
+	if (equipped < 6) {
+		sprintf(buf, "Equip %d more for the next bonus!", (equipped < 2) ? (2 - equipped) : (equipped < 4) ? (4 - equipped)
+																											: (6 - equipped));
+		PushHint(buf, FAMILY_COLOR_ACCENT, 5, 0);
+	} else {
+		PushHint("Full set active — build complete!", FAMILY_COLOR_MYTHIC, 5, 1);
+	}
+}
+
+void CItemCommand::_PushEquipmentV2AffixHeader(int rollCount) {
+	const DWORD color = _GetEquipmentV2RarityColor(rollCount);
+	sprintf(buf, "-- Rolled Affixes [%s] %d/5 --", _GetEquipmentV2RarityName(rollCount), rollCount);
+	PushHint(buf, color, 5, 1);
 }
 
 bool CItemCommand::IsDragFast() {
