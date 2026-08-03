@@ -97,6 +97,28 @@ cmd.list['make'] = {
 	func 	= function(role, param) GiveItem(role, 0, param[1], param[2], 4, param[3], param[4]) end
 } cmd.list['give'] = cmd.list['make']
 
+-- /giveset Guardian,40
+-- /familyset Royal,70
+cmd.list['giveset'] = {
+	gm = 99,
+	param = {'string', 'number'},
+	func = function(role, param)
+		GiveEquipmentFamilySet(role, param[1], param[2], 'all', 7)
+	end
+}
+cmd.list['familyset'] = cmd.list['giveset']
+
+-- /givesetjob Guardian,40,crusader
+-- Jobs: champion, crusader, sharpshooter, cleric, seal, voyager, all
+cmd.list['givesetjob'] = {
+	gm = 99,
+	param = {'string', 'number', 'string'},
+	func = function(role, param)
+		GiveEquipmentFamilySet(role, param[1], param[2], param[3], 7)
+	end
+}
+cmd.list['familysetjob'] = cmd.list['givesetjob']
+
 cmd.list['shout'] = {
 	gm 		= 99,
 	param 	= {'string'},

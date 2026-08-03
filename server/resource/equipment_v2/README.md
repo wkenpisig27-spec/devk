@@ -37,7 +37,15 @@ python server/resource/equipment_v2/generate_equipment.py
 
 ## Test (GM)
 
-Give a full T40 Guardian set, e.g. `10300`–`10311`, equip, confirm 2/4/6 set bonuses after `AttrRecheck`.
+```
+/giveset Guardian,40
+/familyset Royal,70
+/givesetjob Wind,40,crusader
+```
+
+Jobs for `/givesetjob`: `champion`, `crusader`, `sharpshooter`, `cleric`, `seal`, `voyager`, `all`
+
+Give a full T40 Guardian set, equip, confirm 2/4/6 set bonuses after `AttrRecheck`.
 
 ## Client
 

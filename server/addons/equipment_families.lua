@@ -177,4 +177,115 @@ function ApplyFamilySetBonuses(Player)
 	end
 end
 
+EQUIPMENT_FAMILY_NAME_TO_ID = {
+	guardian = 1,
+	royal = 2,
+	wind = 3,
+	hunter = 4,
+	shadow = 5,
+	sanctum = 6,
+}
+
+-- Which weapon slot indices (0-5) to include for a class filter. nil = all weapons.
+EQUIPMENT_FAMILY_JOB_WEAPONS = {
+	champion = { [0] = true },
+	champ = { [0] = true },
+	["8"] = { [0] = true },
+	crusader = { [1] = true },
+	cru = { [1] = true },
+	["9"] = { [1] = true },
+	sharpshooter = { [2] = true, [3] = true },
+	ss = { [2] = true, [3] = true },
+	["12"] = { [2] = true, [3] = true },
+	cleric = { [4] = true },
+	["13"] = { [4] = true },
+	seal = { [4] = true },
+	sealmaster = { [4] = true },
+	["14"] = { [4] = true },
+	voyager = { [5] = true },
+	["16"] = { [5] = true },
+	all = nil,
+}
+
+function ResolveEquipmentFamilyID(nameOrId)
+	if nameOrId == nil then
+		return 0
+	end
+	local asNum = tonumber(nameOrId)
+	if asNum ~= nil and EQUIPMENT_FAMILY[asNum] ~= nil then
+		return asNum
+	end
+	local key = string.lower(tostring(nameOrId))
+	return EQUIPMENT_FAMILY_NAME_TO_ID[key] or 0
+end
+
+function GetEquipmentFamilySetItemIDs(familyId, tier, jobFilter)
+	local tierIndex = -1
+	local tiers = { 10, 20, 30, 40, 50, 60, 70 }
+	for i = 1, table.getn(tiers) do
+		if tiers[i] == tier then
+			tierIndex = i - 1
+			break
+		end
+	end
+	if familyId < 1 or familyId > 6 or tierIndex < 0 then
+		return nil
+	end
+
+	local weaponFilter = nil
+	if jobFilter ~= nil and tostring(jobFilter) ~= "" then
+		local key = string.lower(tostring(jobFilter))
+		if EQUIPMENT_FAMILY_JOB_WEAPONS[key] ~= nil then
+			weaponFilter = EQUIPMENT_FAMILY_JOB_WEAPONS[key]
+		elseif key ~= "all" then
+			return nil -- unknown job filter
+		end
+	end
+
+	local ids = {}
+	for slot = 0, 11 do
+		local include = true
+		if slot <= 5 and weaponFilter ~= nil then
+			include = weaponFilter[slot] == true
+		end
+		if include then
+			ids[table.getn(ids) + 1] = EQUIPMENT_V2_ID_MIN + tierIndex * 100 + (familyId - 1) * 12 + slot
+		end
+	end
+	return ids
+end
+
+-- giveEvent: ItemInstance event id (default QUEST_AWARD_5 = 7 for solid affix rolls)
+function GiveEquipmentFamilySet(role, familyName, tier, jobFilter, giveEvent)
+	local familyId = ResolveEquipmentFamilyID(familyName)
+	if familyId == 0 then
+		BickerNotice(role, "Unknown family. Use: Guardian, Royal, Wind, Hunter, Shadow, Sanctum")
+		return false
+	end
+	tier = tonumber(tier)
+	local ids = GetEquipmentFamilySetItemIDs(familyId, tier, jobFilter)
+	if ids == nil then
+		BickerNotice(role, "Invalid tier/job. Tiers: 10,20,30,40,50,60,70. Jobs: champion,crusader,sharpshooter,cleric,seal,voyager,all")
+		return false
+	end
+
+	local eventId = tonumber(giveEvent) or 7
+	local given = 0
+	for i = 1, table.getn(ids) do
+		local ok = GiveItem(role, 0, ids[i], 1, eventId)
+		if ok ~= nil and ok ~= 0 and ok ~= LUA_FALSE then
+			given = given + 1
+		end
+	end
+
+	local famName = EQUIPMENT_FAMILY[familyId].Name
+	local jobNote = ""
+	if jobFilter ~= nil and tostring(jobFilter) ~= "" and string.lower(tostring(jobFilter)) ~= "all" then
+		jobNote = " (" .. tostring(jobFilter) .. " weapons)"
+	end
+	BickerNotice(role, "Gave " .. given .. "/" .. table.getn(ids) .. " " .. famName .. " T" .. tier .. " pieces" .. jobNote)
+	SystemNotice(role, "[FamilySet] " .. famName .. " T" .. tier .. " -> " .. given .. " items")
+	return given > 0
+end
+
 print("-- [Loading] equipment_families.lua")
