@@ -13,6 +13,7 @@ addon.files			=
 	'guild.lua',
 	'relogpenalty.lua',
 	'reborn.lua',
+	'equipment_families.lua',
 	'equips.lua',
 	'dynamicportals.lua',
 }

@@ -274,8 +274,8 @@ BOOL CItemRecordSet::_ReadRawDataInfo(CRawDataInfo* pRawDataInfo, vector<string>
 
 	// 获得前缀几率
 	strLine = Str2Int(ParamList[m++]);
-	// 套装编号
-	strLine = Str2Int(ParamList[m++]);
+	// 套装编号 (family / set)
+	pInfo->sSetID = Str2Int(ParamList[m++]);
 	// 精炼等级
 	pInfo->chForgeLv = Str2Int(ParamList[m++]);
 	// 安定值

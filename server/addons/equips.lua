@@ -354,14 +354,35 @@ ITEMCOLOUR = {
 }
 
 function Creat_Item(item, item_type, item_lv, item_event)
-    if item_lv >= EQUIPMENT_LV and ITEMSTAT[item_type] and ITEMRATE[item_event] then
+    local itemID = GetItemID(item)
+    local family = 0
+    if GetEquipmentFamilyID then
+        family = GetEquipmentFamilyID(itemID)
+    end
+
+    local pool = nil
+    if family > 0 and FAMILY_AFFIX and FAMILY_AFFIX[family] then
+        pool = FAMILY_AFFIX[family]
+    elseif ITEMSTAT[item_type] then
+        pool = ITEMSTAT[item_type]
+    end
+
+    -- Family gear always rolls; legacy gear keeps previous level gate.
+    local canRoll = pool and ITEMRATE[item_event] and (family > 0 or item_lv >= EQUIPMENT_LV)
+    if canRoll then
         Reset_item_add()
-        local attr, title = CalculateExtraStats(item_lv, ITEMSTAT[item_type], ITEMRATE[item_event])
+        local attr, title = CalculateExtraStats(item_lv, pool, ITEMRATE[item_event])
         for i, v in pairs(attr) do
             SetAttributeEditable(item, i - 1, v.ID)
             SetItemAttr(item, v.ID, GetItemAttr(item, v.ID) + v.Num)
         end
         local colour = ITEMCOLOUR[title] or 0
+        if family > 0 and EQUIPMENT_FAMILY and EQUIPMENT_FAMILY[family] then
+            -- Prefer family tint when common; still escalate with rarity colour when rolled.
+            if title == 0 then
+                colour = EQUIPMENT_FAMILY[family].Colour or colour
+            end
+        end
         local prefix = (35 + title) * 10 + (colour * 1000)
         SetItemAttr(item, ITEMATTR_MAXENERGY, prefix)
     end

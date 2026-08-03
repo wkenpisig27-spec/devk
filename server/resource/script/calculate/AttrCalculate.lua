@@ -1577,6 +1577,9 @@ function AttrRecheck(Player)
     BsAttrSet(Player)
     ExAttrCheck(Player)
     ExAttrSet(Player)
+    if ApplyFamilySetBonuses then
+        ApplyFamilySetBonuses(Player)
+    end
     if RecalculateChaBattlePower then
         RecalculateChaBattlePower(Player)
     end

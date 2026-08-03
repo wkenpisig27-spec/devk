@@ -5493,7 +5493,20 @@ End:
 	}
 
 	lua_pushnumber(pLS, sItemType);
+	return 1;
+}
 
+// Get ItemInfo set / family ID by item definition ID
+inline int lua_GetItemSetID(lua_State* pLS) {
+	short sSetID = 0;
+	if (lua_gettop(pLS) == 1) {
+		short sItemID = (short)lua_tonumber(pLS, 1);
+		CItemRecord* pCItemRec = GetItemRecordInfo(sItemID);
+		if (pCItemRec) {
+			sSetID = pCItemRec->sSetID;
+		}
+	}
+	lua_pushnumber(pLS, sSetID);
 	return 1;
 }
 
@@ -7164,6 +7177,7 @@ inline void RegisterLuaGameLogic(lua_State* L) {
 	REGFN(FinishSetMapEntryCopy);
 	REGFN(GetItemType);
 	REGFN(GetItemType2);
+	REGFN(GetItemSetID);
 	REGFN(GetItemLv);
 	REGFN(GetItemOriginalLv);
 	REGFN(SetItemLv);

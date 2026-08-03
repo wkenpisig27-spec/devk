@@ -110,6 +110,7 @@ public:
 	short sShipFlag;										 // 船标志
 	short sShipType;										 // 船体型号
 	short sType;											 // 类型
+	short sSetID;											 // equipment family / set id (ItemInfo set ID column)
 
 	char chForgeLv;			   // 精炼等级
 	char chForgeSteady;		   // 安定值（精炼物品的稳定值，超过这个值，每精炼一次就递减一定成功率）
