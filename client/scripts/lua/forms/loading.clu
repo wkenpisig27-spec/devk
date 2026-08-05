@@ -33,8 +33,8 @@ UI_FormSetIsEscClose(frmConnect, FALSE)
 
 labConnect = UI_CreateCompent(frmConnect, LABELEX_TYPE, "labConnect", 52, 13, 70, 24)
 UI_SetCaption(labConnect, "Please wait")
-UI_SetTextColor(labConnect, COLOR_BLACK)
-UI_SetLabelExFont(labConnect, DEFAULT_FONT, TRUE, COLOR_WHITE)
+UI_SetTextColor(labConnect, COLOR_WHITE)
+UI_SetLabelExFont(labConnect, DEFAULT_FONT, TRUE, COLOR_BLACK)
 
 imgLoading = UI_CreateCompent(frmConnect, IMAGE_FLASH_TYPE, "imgLoading", 135, 8, 20, 51)
 UI_LoadScaleImage(imgLoading, "texture/ui/SysBotton2.dds", 0, 26, 8, 20, 185, 1.0, 1.0)

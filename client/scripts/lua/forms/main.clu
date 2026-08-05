@@ -30,35 +30,35 @@ UI_FormSetIsEscClose( frmDetail, FALSE )
 
 
 imgBackDropPlayer = UI_CreateCompent( frmDetail, IMAGE_TYPE, "imgBackDropPlayer", 55, 44, 5, 5 )
-UI_LoadImage( imgBackDropPlayer, "texture/ui/Corsairs/npcBackDrop/0.tga", NORMAL, 55, 44, 0, 0 )
+UI_LoadImage( imgBackDropPlayer, "texture/GG_UI/npcBackDrop/0.tga", NORMAL, 55, 44, 0, 0 )
 
-imgMain5 = UI_CreateCompent( frmDetail, IMAGE_TYPE, "imgMain5", 189, 51, 0, 0 )
-UI_LoadImage( imgMain5, "texture/ui/corsairs/new3.tga", NORMAL, 189, 51, 0, 0 )
+imgMain5 = UI_CreateCompent( frmDetail, IMAGE_TYPE, "imgMain5", 190, 51, 0, 0 )
+UI_LoadImage( imgMain5, "texture/GG_UI/new3.png", NORMAL, 190, 51, 0, 0 )
 
-proMainHP1 = UI_CreateCompent( frmDetail, PROGRESS_TYPE, "proMainHP1", 111, 8, 70, 22 )
-UI_LoadScaleImage( proMainHP1, "texture/ui/corsairs/new3.tga", PROGRESS_PROGRESS, 111, 8, 0, 129, 1.0, 1.0 )
+proMainHP1 = UI_CreateCompent( frmDetail, PROGRESS_TYPE, "proMainHP1", 109, 8, 72, 22 )
+UI_LoadScaleImage( proMainHP1, "texture/GG_UI/new3.png", PROGRESS_PROGRESS, 109, 8, 0, 131, 1.0, 1.0 )
 UI_SetHint( proMainHP1, "hp" )
 UI_SetProgressHintStyle( proMainHP1, PROGRESS_HINT_NUM )
 
-proMainSP = UI_CreateCompent( frmDetail, PROGRESS_TYPE, "proMainSP", 111, 8, 70, 31 )
-UI_LoadScaleImage( proMainSP, "texture/ui/corsairs/new3.tga", PROGRESS_PROGRESS, 111, 8, 0, 138, 1.0, 1.0 )
+proMainSP = UI_CreateCompent( frmDetail, PROGRESS_TYPE, "proMainSP", 109, 8, 72, 31 )
+UI_LoadScaleImage( proMainSP, "texture/GG_UI/new3.png", PROGRESS_PROGRESS, 109, 8, 0, 139, 1.0, 1.0 )
 UI_SetHint( proMainSP, "sp" )
 UI_SetProgressHintStyle( proMainSP, PROGRESS_HINT_NUM )
 
-btnHPSP = UI_CreateCompent( frmDetail, BUTTON_TYPE, "btnHPSP", 111, 8, 102, 22 )
+btnHPSP = UI_CreateCompent( frmDetail, BUTTON_TYPE, "btnHPSP", 109, 8, 102, 22 )
 
-proMainEXP = UI_CreateCompent( frmDetail, PROGRESS_TYPE, "proMainEXP", 111, 8, 70, 40 )
-UI_LoadScaleImage( proMainEXP, "texture/ui/corsairs/new3.tga", PROGRESS_PROGRESS, 111, 8, 0, 147, 1.0, 1.0 )
+proMainEXP = UI_CreateCompent( frmDetail, PROGRESS_TYPE, "proMainEXP", 109, 8, 72, 40 )
+UI_LoadScaleImage( proMainEXP, "texture/GG_UI/new3.png", PROGRESS_PROGRESS, 109, 8, 0, 147, 1.0, 1.0 )
 UI_SetHint( proMainEXP, "EXP" )
 
 labMainID = UI_CreateCompent( frmDetail, LABELEX_TYPE, "labMainID", 95, 11, 77, 7 )
-UI_SetTextColor( labMainID, COLOR_WHITE )
-UI_SetLabelExFont( labMainID, DEFAULT_FONT, TRUE, COLOR_BLACK )
+UI_SetTextColor( labMainID, COLOR_BLACK )
+UI_SetLabelExFont( labMainID, DEFAULT_FONT, TRUE, COLOR_WHITE )
 --UI_SetCaption( labMainID, "就就就就就就就就" )
 
 labMainLv = UI_CreateCompent( frmDetail, LABELEX_TYPE, "labMainLv", 14, 9, 51, 7 )
-UI_SetTextColor( labMainLv, COLOR_WHITE )
-UI_SetLabelExFont( labMainLv, DEFAULT_FONT, TRUE, COLOR_BLACK )
+UI_SetTextColor( labMainLv, COLOR_BLACK )
+UI_SetLabelExFont( labMainLv, DEFAULT_FONT, TRUE, COLOR_WHITE )
 UI_SetCaption( labMainLv, "99" )
 
 
@@ -98,98 +98,79 @@ UI_SetTitleFont( tlField, TITLEFONT, COLOR_WHITE, 15 )
 -- Chat interface --
 --------------------
 
-imgMain1 = UI_CreateCompent( frmMain800, IMAGE_TYPE, "imgMain1", 256, 30, 0, 0 )
-UI_LoadImage( imgMain1, "texture/ui/new.tga", NORMAL, 256, 30, 0, 0 )
-imgMain2 = UI_CreateCompent( frmMain800, IMAGE_TYPE, "imgMain2", 32, 30, 256, 0 )
-UI_LoadImage( imgMain2, "texture/ui/new4.tga", NORMAL, 32, 30, 0, 0 )
+imgMain1 = UI_CreateCompent( frmMain800, IMAGE_TYPE, "imgMain1", 289, 31, 0, 0 )
+UI_LoadImage( imgMain1, "texture/GG_UI/chat.png", NORMAL, 289, 31, 0, 0 )
 
-
--- 聊天输入
+-- Chat Textbox
 edtSay = UI_CreateCompent( frmMain800, EDIT_TYPE, "edtSay", 150, 20, 64, 9 )
 UI_SetTextColor( edtSay, COLOR_BLACK )
 UI_SetEditMaxNum( edtSay, 64)
 UI_SetEditMaxNumVisible( edtSay, 24)
 UI_SetEditCursorColor( edtSay, COLOR_BLACK )
 
--- 聊天显示区
 lstOnSay = UI_CreateCompent( frmMain800, LIST_TYPE, "lstOnSay", 288, 100, 0, -98 )
 UI_LoadImage( lstOnSay, "texture/ui/Nbotton.tga", COMPENT_BACK, 1, 1, 100, 171 )
 UI_SetImageAlpha( lstOnSay, 153 )
 UI_SetMargin( lstOnSay, 5, 3, 0, 0 )
 
-
--- 设置拖动条 
 drpTitle = UI_CreateCompent( frmMain800, DRAG_TITLE_TYPE, "drpTitle", 43, 7, 0, -100 )
-UI_LoadImage( drpTitle, "texture/ui/SysBotton4.tga", NORMAL, 43, 7, 158, 100 )
+UI_LoadImage( drpTitle, "texture/GG_UI/SystemBotton3.png", NORMAL, 43, 7, 286, 168 )
 
 --获得滚动条
 scrollid = UI_GetScroll( lstOnSay)
 UI_SetSize( scrollid, 18, 18 )
 --UI_LoadImage( scrollid, "texture/ui/PublicC.tga", COMPENT_BACK, 18, 18, 194, 13 )
 
---加载向上按钮
 id = UI_GetScrollObj( scrollid, SCROLL_UP )
-UI_LoadButtonImage( id, "texture/ui/Nbotton.tga", 18, 18, 138, 4, TRUE )
+UI_LoadButtonImage( id, "texture/GG_UI/SystemBotton3.png", 18, 18, 201, 219, TRUE )
 UI_SetSize( id, 18, 18 )
 
---加载滚动条
 id = UI_GetScrollObj( scrollid, SCROLL_SCROLL )
-UI_LoadImage( id, "texture/ui/Nbotton.tga", COMPENT_BACK, 18, 27, 195, 10 )
+UI_LoadImage( id, "texture/GG_UI/SystemBotton3.png", COMPENT_BACK, 18, 27, 264, 221 )
 UI_SetSize( id, 18, 27 )
 
---加载向下按钮
 id = UI_GetScrollObj( scrollid, SCROLL_DOWN )
-UI_LoadButtonImage( id, "texture/ui/Nbotton.tga", 18, 18, 138, 25, TRUE )
+UI_LoadButtonImage( id, "texture/GG_UI/SystemBotton3.png", 18, 18, 201, 241, TRUE )
 UI_SetSize( id, 18, 18 )
 
--- 聊天显示区（系统频道）
 lstOnSaySystem = UI_CreateCompent( frmMain800, LIST_TYPE, "lstOnSaySystem", 288, 60, 0, -158 )
-UI_LoadImage( lstOnSaySystem, "texture/ui/Nbotton.tga", COMPENT_BACK, 1, 1, 100, 171 )
+UI_LoadImage( lstOnSaySystem, "texture/GG_UI/Nbotton.tga", COMPENT_BACK, 1, 1, 100, 171 )
 UI_SetImageAlpha( lstOnSaySystem, 153 )
 UI_SetMargin( lstOnSaySystem, 5, 3, 0, 0 )
 
 
--- 设置拖动条 
 drpTitleSystem = UI_CreateCompent( frmMain800, DRAG_TITLE_TYPE, "drpTitleSystem", 43, 7, 0, -160 )
-UI_LoadImage( drpTitleSystem, "texture/ui/SysBotton4.tga", NORMAL, 43, 7, 158, 100 )
+UI_LoadImage( drpTitleSystem, "texture/GG_UI/SystemBotton3.png", NORMAL, 43, 7, 286, 168 )
 
---获得滚动条
 scrollid = UI_GetScroll( lstOnSaySystem )
 UI_SetSize( scrollid, 18, 18 )
 --UI_LoadImage( scrollid, "texture/ui/PublicC.tga", COMPENT_BACK, 18, 18, 194, 13 )
 
---加载向上按钮
 id = UI_GetScrollObj( scrollid, SCROLL_UP )
-UI_LoadButtonImage( id, "texture/ui/Nbotton.tga", 18, 18, 138, 4, TRUE )
+UI_LoadButtonImage( id, "texture/GG_UI/SystemBotton3.png", 18, 18, 201, 219, TRUE )
 UI_SetSize( id, 18, 18 )
 
---加载滚动条
 id = UI_GetScrollObj( scrollid, SCROLL_SCROLL )
-UI_LoadImage( id, "texture/ui/Nbotton.tga", COMPENT_BACK, 18, 27, 195, 10 )
+UI_LoadImage( id, "texture/GG_UI/SystemBotton3.png", COMPENT_BACK, 18, 27, 264, 221 )
 UI_SetSize( id, 18, 27 )
 
---加载向下按钮
 id = UI_GetScrollObj( scrollid, SCROLL_DOWN )
-UI_LoadButtonImage( id, "texture/ui/Nbotton.tga", 18, 18, 138, 25, TRUE )
+UI_LoadButtonImage( id, "texture/GG_UI/SystemBotton3.png", 18, 18, 201, 241, TRUE )
 UI_SetSize( id, 18, 18 )
 
-----------创建密语     开   关
 chkChatOn = UI_CreateCompent( frmMain800, CHECK_TYPE, "chkChatOn", 21, 20, 35, 5 )
-UI_LoadImage( chkChatOn, "texture/ui/forge3.tga", UNCHECKED, 21, 20, 121, 133 )
-UI_LoadImage( chkChatOn, "texture/ui/forge3.tga", CHECKED, 21, 20, 142, 133 )
+UI_LoadImage( chkChatOn, "texture/GG_UI/SystemBotton3.png", UNCHECKED, 21, 20, 186, 301 )
+UI_LoadImage( chkChatOn, "texture/GG_UI/SystemBotton3.png", CHECKED, 21, 20, 207, 301 )
 UI_SetHint( chkChatOn , "Channel Display Button" )
 
-----------名片按钮
 btnCard = UI_CreateCompent( frmMain800, BUTTON_TYPE, "btnCard", 6, 22, 56, 4 )
-UI_LoadButtonImage( btnCard, "texture/ui/main800.tga", 6,22,135,139, TRUE )
---UI_LoadImage( btnCard, "texture/ui/chat/card.bmp", UNCHECKED, 7, 21, 0, 0 )
+UI_LoadButtonImage( btnCard, "texture/GG_UI/SystemBotton3.png", 6,22,294,226, TRUE )
 UI_SetHint( btnCard , "Whisper list" )
 
-----------名片列表
 lstCard = UI_CreateCompent( frmMain800, LIST_TYPE, "lstCard", 100, 80, 56, -79 )
 UI_SetListRowHeight( lstCard, 14 )
 UI_SetListFontColor( lstCard, COLOR_BLACK, COLOR_BLACK )
-UI_LoadImage( lstCard, "texture/ui/QQ.dds", COMPENT_BACK, 35, 100, 212, 57 )
+UI_LoadImage( lstCard, "texture/GG_UI/QQ.png", COMPENT_BACK, 35, 100, 212, 57 )
 UI_SetListIsMouseFollow( lstCard, TRUE)
 UI_ListLoadSelectImage( lstCard, "texture/ui/SystemBotton3.tga", 79, 14, 0, 227  )
 UI_SetMargin( lstCard, 8,6,5,1 )
@@ -211,19 +192,17 @@ id = UI_GetScrollObj( scrollid, SCROLL_DOWN )
 UI_LoadButtonImage( id, "texture/ui/PublicC.tga", 11, 9, 166, 0, TRUE )
 UI_SetSize( id, 11, 9 )
 
-
---创建频道选择
-cboChannel  = UI_CreateCompent( frmMain800, COMBO_TYPE, "cboChannel", 45, 26, 2, 5 )
+cboChannel  = UI_CreateCompent( frmMain800, COMBO_TYPE, "cboChannel", 45, 26, -1, 5 )
 UI_ComboSetStyle( cboChannel, FALSE )
 UI_LoadComboImage( cboChannel, "", 33, 26, 0, 0, "texture/ui/Quest1.tga", 1, 1, 30, 195, TRUE )
 UI_ComboSetTextColor( cboChannel, COLOR_BLACK )
 lstChannel = UI_GetList( cboChannel )
 UI_SetListRowHeight( lstChannel, 14 )
-UI_SetListFontColor( lstChannel, COLOR_BLACK, COLOR_BLACK )
+UI_SetListFontColor( lstChannel, COLOR_WHITE, COLOR_BLACK )
 UI_SetSize( lstChannel, 35, 120 )
 UI_SetMargin( lstChannel, 5,8,5,4 )
 UI_SetListRowHeight( lstChannel, 18 )
-UI_LoadImage( lstChannel, "texture/ui/QQ.dds", COMPENT_BACK, 35, 100, 212, 57 )
+UI_LoadImage( lstChannel, "texture/GG_UI/QQ.png", COMPENT_WHITE, 35, 100, 212, 57 )
 UI_AddListText( lstChannel, "Local" )
 UI_AddListText( lstChannel, "Party" )
 UI_AddListText( lstChannel, "Guild" )
@@ -231,23 +210,13 @@ UI_AddListText( lstChannel, "Trade" )
 UI_AddListText( lstChannel, "World" )
 UI_AddListText( lstChannel, "Camp" )
 UI_SetListIsMouseFollow( lstChannel, TRUE)
-UI_ListLoadSelectImage( lstChannel, "texture/ui/SystemBotton3.tga", 79, 18, 0, 227  )
+UI_ListLoadSelectImage( lstChannel, "texture/GG_UI/SystemBotton3.png", 79, 18, 186, 0  )
 UI_ComboSetTextColor( lstChannel, COLOR_WHITE )
 
--- 频道列表
 lstChannel = UI_CreateCompent( frmMain800, LIST_TYPE, "lstChannel", 75, 84, 0, -200 )
 listid = UI_GetList( lstChannel )
 UI_SetListRowHeight( listid, 15 )
---UI_LoadImage( listid, "texture/ui/selectcha.dds", NORMAL, 75, 85, 944, 1    )
 UI_SetMargin( lstChannel, 12, 5, 6, 2 )
---scrollid = UI_GetScroll( listid )
---UI_SetSize( scrollid, 13, 13 )
---UI_LoadImage( scrollid, "texture/ui/chat/chat.dds", COMPENT_BACK, 9, 9, 0, 51 )
---scrollid = UI_GetScrollObj( scrollid, SCROLL_SCROLL )
---UI_LoadImage( scrollid, "texture/ui/item.dds", COMPENT_BACK, 13, 17, 13, 374 )
---UI_SetSize( scrollid, 13, 17 )
---UI_SetAlpha( lstChannel, 100 )
---UI_SetIsKeyFocus( lstChannel, FALSE )
 UI_SetIsShow( lstChannel, FALSE )
 UI_SetListIsMouseFollow( lstChannel, TRUE )
 
@@ -261,24 +230,23 @@ UI_AddListText( lstChannel, "World" )
 UI_AddListText( lstChannel, "Camp" )
 
 
--- 聊天表情按钮
+-- Emoticon
 btnChatFace = UI_CreateCompent( frmMain800, BUTTON_TYPE, "btnChatFace", 23, 23, 217, 3 )
-UI_LoadButtonImage( btnChatFace, "texture/ui/Nbotton.tga", 23, 23, 0, 48, TRUE )
+UI_LoadButtonImage( btnChatFace, "texture/GG_UI/Nbotton.tga", 23, 23, 0, 48, TRUE )
 UI_SetHint( btnChatFace , "Emoticon" )
 
--- 创建动作按钮
+-- Action
 btnAction = UI_CreateCompent( frmMain800, BUTTON_TYPE, "btnAction", 23, 23, 240, 3 )
-UI_LoadButtonImage( btnAction, "texture/ui/Nbotton.tga", 23, 23, 0, 23, TRUE )
+UI_LoadButtonImage( btnAction, "texture/GG_UI/Nbotton.tga", 23, 23, 0, 23, TRUE )
 UI_SetHint( btnAction, "Action" )
 
--- 创建心情按钮
+-- Mood
 btnBrow = UI_CreateCompent( frmMain800, BUTTON_TYPE, "btnBrow", 23, 23, 263, 3 )
-UI_LoadButtonImage( btnBrow, "texture/ui/Nbotton.tga", 23, 23, 0, 73, TRUE )
+UI_LoadButtonImage( btnBrow, "texture/GG_UI/Nbotton.tga", 23, 23, 0, 73, TRUE )
 UI_SetHint( btnBrow, "Mood" )
 
--- 表情表格
 grdFace = UI_CreateCompent( frmMain800, GRID_TYPE, "grdFace", 142, 170, 243, -168 ) 
-UI_LoadImage( grdFace,  "texture/ui/QQ.dds", NORMAL, 142, 170, 0, 0 )
+UI_LoadImage( grdFace,  "texture/GG_UI/QQ.png", NORMAL, 142, 170, 0, 0 )
 UI_SetGridUnitSize( grdFace, 20, 20 )
 UI_SetIsShow( grdFace, FALSE )
 UI_SetMargin( grdFace, 11, 5, 5, 5 )
@@ -298,7 +266,7 @@ UI_GridLoadSelectImage( grdFace, "texture/ui/StartF.dds", 32, 32, 123, 99 )
 
 -- 动作表格
 grdAction = UI_CreateCompent( frmMain800, GRID_TYPE, "grdAction", 142, 170, 263, -168 ) 
-UI_LoadImage( grdAction,  "texture/ui/QQ.dds", NORMAL, 142, 170, 0, 0 )
+UI_LoadImage( grdAction,  "texture/GG_UI/QQ.png", NORMAL, 142, 170, 0, 0 )
 UI_SetGridUnitSize( grdAction, 32, 32 )
 UI_SetIsShow( grdAction, FALSE )
 UI_SetMargin( grdAction, 5, 4, 0, 0 )
@@ -324,7 +292,7 @@ UI_GridLoadSelectImage( grdAction, "texture/ui/StartF.dds", 32, 32, 157, 99 )
 
 -- 心情表格
 grdHeart = UI_CreateCompent( frmMain800, GRID_TYPE, "grdHeart", 142, 170, 283, -168 ) 
-UI_LoadImage( grdHeart,  "texture/ui/QQ.dds", NORMAL, 142, 170, 0, 0 )
+UI_LoadImage( grdHeart,  "texture/GG_UI/QQ.png", NORMAL, 142, 170, 0, 0 )
 UI_SetGridUnitSize( grdHeart, 32, 32 )
 UI_SetIsShow( grdHeart, FALSE )
 UI_SetMargin( grdHeart, 5, 4, 0, 0 )
@@ -428,53 +396,50 @@ fscMainF223 = UI_CreateCompent( frmFast2, FAST_COMMANG_TYPE, "fscMainF223", 32, 
 ---------------
 -- Quickslot --
 ---------------
-frmMainFun = UI_CreateForm( "frmMainFun", FALSE, 215,  30, 585, 570, TRUE, FALSE )
+frmMainFun = UI_CreateForm( "frmMainFun", FALSE, 216,  31, 585, 570, TRUE, FALSE )
 --UI_FormSetHotKey( frmMainFun, ALT_KEY, HOTKEY_D ) 
 UI_ShowForm( frmMainFun, TRUE )
 UI_AddFormToTemplete( frmMainFun, FORM_MAIN )
 UI_FormSetIsEscClose( frmMainFun, FALSE )
 UI_SetFormStyle( frmMainFun, 11 )---右下
 
-imgMainFun1 = UI_CreateCompent( frmMainFun, IMAGE_TYPE, "imgMainFun1", 183, 30, 0, 0 )
-UI_LoadImage( imgMainFun1, "texture/ui/new.tga", NORMAL, 183, 30, 73, 92 )
-
-imgMainFun2 = UI_CreateCompent( frmMainFun, IMAGE_TYPE, "imgMainFun2", 32, 30, 183, 0 )
-UI_LoadImage( imgMainFun2, "texture/ui/new.tga", NORMAL, 32, 30, 0, 132 )
+imgMainFun1 = UI_CreateCompent( frmMainFun, IMAGE_TYPE, "imgMainFun1", 216, 31, 0, 0 )
+UI_LoadImage( imgMainFun1, "texture/GG_UI/new.png", NORMAL, 216, 31, 0, 0 )
 
 btnState = UI_CreateCompent( frmMainFun, BUTTON_TYPE, "btnState", 23, 22, 7, 4 )
-UI_LoadButtonImage( btnState, "texture/ui/new6.tga", 23, 22, 0, 0,TRUE )
+UI_LoadButtonImage( btnState, "texture/GG_UI/new6.png", 23, 22, 0, 0,TRUE )
 UI_SetHint( btnState , "Stats (Alt+A)" )
 
 btnOpenBag = UI_CreateCompent( frmMainFun, BUTTON_TYPE, "btnOpenBag", 23, 22, 31, 4 )
-UI_LoadButtonImage( btnOpenBag, "texture/ui/new6.tga", 23, 22, 0, 22,TRUE )
+UI_LoadButtonImage( btnOpenBag, "texture/GG_UI/new6.png", 23, 22, 0, 22,TRUE )
 UI_SetHint( btnOpenBag , "Item" )
 
 btnSkill = UI_CreateCompent( frmMainFun, BUTTON_TYPE, "btnSkill", 23, 22, 55, 4  )
-UI_LoadButtonImage( btnSkill, "texture/ui/new6.tga", 23, 22, 0, 44,TRUE )
+UI_LoadButtonImage( btnSkill, "texture/GG_UI/new6.png", 23, 22, 0, 44,TRUE )
 UI_SetHint( btnSkill , "Skill(Alt+S)" )
 
 btnMission = UI_CreateCompent( frmMainFun, BUTTON_TYPE, "btnMission", 23, 22, 79, 4  )
-UI_LoadButtonImage( btnMission, "texture/ui/new6.tga", 23, 22, 0, 66,TRUE )
+UI_LoadButtonImage( btnMission, "texture/GG_UI/new6.png", 23, 22, 0, 66,TRUE )
 UI_SetHint( btnMission , "Quest(Alt+Q)" )
 
 btnGuild = UI_CreateCompent( frmMainFun, BUTTON_TYPE, "btnGuild", 23, 22, 103, 4  )
-UI_LoadButtonImage( btnGuild, "texture/ui/new6.tga", 23, 22, 0, 88,TRUE )
+UI_LoadButtonImage( btnGuild, "texture/GG_UI/new6.png", 23, 22, 0, 88,TRUE )
 UI_SetHint( btnGuild , "Guild(Alt+C)" )
 
 btnOpenSociliaty = UI_CreateCompent( frmMainFun, BUTTON_TYPE, "btnOpenSociliaty", 23, 22, 103, 4  )
-UI_LoadButtonImage( btnOpenSociliaty, "texture/ui/new6.tga", 23, 22, 69, 0, TRUE )
+UI_LoadButtonImage( btnOpenSociliaty, "texture/GG_UI/new6.png", 23, 22, 69, 0, TRUE )
 UI_SetHint( btnOpenSociliaty , "Social Skill" )
 
 btnShip = UI_CreateCompent( frmMainFun, BUTTON_TYPE, "btnShip", 23, 22, 127, 4  )
-UI_LoadButtonImage( btnShip, "texture/ui/new6.tga",  23, 22, 0, 110,TRUE )
+UI_LoadButtonImage( btnShip, "texture/GG_UI/new6.png",  23, 22, 0, 110,TRUE )
 UI_SetHint( btnShip , "Help(Alt+H)" )
 
 btnSystem = UI_CreateCompent( frmMainFun, BUTTON_TYPE, "btnSystem", 23, 22, 151, 4  )
-UI_LoadButtonImage( btnSystem, "texture/ui/new6.tga",  23, 22, 0, 132, TRUE )
+UI_LoadButtonImage( btnSystem, "texture/GG_UI/new6.png",  23, 22, 0, 132, TRUE )
 UI_SetHint( btnSystem , "Setting(Alt+O)" )
 
 btnQQ = UI_CreateCompent( frmMainFun, BUTTON_TYPE, "btnQQ", 37, 22, 175, 4 )
-UI_LoadButtonImage( btnQQ, "texture/ui/new6.tga", 37, 22, 0, 154, TRUE )
+UI_LoadButtonImage( btnQQ, "texture/GG_UI/new6.png", 37, 22, 0, 154, TRUE )
 UI_SetHint( btnQQ , "Friend (Alt+F)" )
 
 btnLevelUpHelp = UI_CreateCompent( frmMainFun, BUTTON_TYPE, "btnLevelUpHelp", 48, 48 , 160, -110 )
@@ -721,23 +686,23 @@ UI_AddFormToTemplete( frmMainPet, FORM_MAIN )
 UI_FormSetIsEscClose( frmMainPet, FALSE )
 --UI_FormSetHotKey( frmMainPet, ALT_KEY, HOTKEY_V )
 
-imgMainPet = UI_CreateCompent( frmMainPet, IMAGE_TYPE, "imgMainPet", 171, 31, 0, 0 )
-UI_LoadImage( imgMainPet, "texture/ui/corsairs/new3.tga", NORMAL, 171, 31, 0, 52 )
+imgMainPet = UI_CreateCompent( frmMainPet, IMAGE_TYPE, "imgMainPet", 148, 34, 25, 0 )
+UI_LoadImage( imgMainPet, "texture/GG_UI/new3.png", NORMAL, 148, 34, 24, 51 )
 
-imgPetHead = UI_CreateCompent( frmMainPet, IMAGE_TYPE, "imgPetHead", 23, 23, 33, 4 )
+imgPetHead = UI_CreateCompent( frmMainPet, IMAGE_TYPE, "imgPetHead", 23, 23, 33, 5 )
 
 labPetLv = UI_CreateCompent( frmMainPet, LABELEX_TYPE, "labPetLv", 14, 9, 64, 5 )
-UI_SetTextColor( labPetLv, COLOR_WHITE )
-UI_SetLabelExFont( labPetLv, DEFAULT_FONT, TRUE, COLOR_BLACK )
+UI_SetTextColor( labPetLv, COLOR_BLACK )
+UI_SetLabelExFont( labPetLv, DEFAULT_FONT, TRUE, COLOR_WHITE )
 UI_SetCaption( labPetLv, "99" )
 
-proPetHP = UI_CreateCompent( frmMainPet, PROGRESS_TYPE, "proPetHP", 64, 8, 102, 2 )
-UI_LoadScaleImage( proPetHP, "texture/ui/corsairs/new3.tga", PROGRESS_PROGRESS, 64, 8, 0, 120, 1.0, 1.0 )
+proPetHP = UI_CreateCompent( frmMainPet, PROGRESS_TYPE, "proPetHP", 65, 8, 102, 3 )
+UI_LoadScaleImage( proPetHP, "texture/GG_UI/new3.png", PROGRESS_PROGRESS, 65, 8, 0, 120, 1.0, 1.0 )
 UI_SetHint( proPetHP, "Stamina" )
 UI_SetProgressHintStyle( proPetHP, PROGRESS_HINT_NUM )
 
-proPetSP = UI_CreateCompent( frmMainPet, PROGRESS_TYPE, "proPetSP", 64, 8, 102, 12 )
-UI_LoadScaleImage( proPetSP, "texture/ui/corsairs/new3.tga", PROGRESS_PROGRESS, 64, 8, 66, 120, 1.0, 1.0 )
+proPetSP = UI_CreateCompent( frmMainPet, PROGRESS_TYPE, "proPetSP", 65, 8, 102, 12 )
+UI_LoadScaleImage( proPetSP, "texture/GG_UI/new3.png", PROGRESS_PROGRESS, 65, 8, 65, 120, 1.0, 1.0 )
 UI_SetHint( proPetSP, "Growth" )
 UI_SetProgressHintStyle( proPetSP, PROGRESS_HINT_NUM )
 
