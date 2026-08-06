@@ -784,7 +784,7 @@ int UI_SetLabelExFont(int id, int nFontIndex, int IsShadow, DWORD dwShadowColor)
 	return R_OK;
 }
 
-int UI_SetTitleFont(int id, int nFontIndex, int color, int h) {
+int UI_SetTitleFont(int id, int nFontIndex, DWORD color, int h) {  // NOTE: DWORD required for color values (0xffffffff)
 	CTitle* g = dynamic_cast<CTitle*>(CGuiData::GetGui(id));
 	if (!g)
 		return R_FAIL;
@@ -1904,7 +1904,7 @@ void MPInitLua_Gui() {
 
 	CLU_RegisterFunction("UI_SetHeadSayBkgColor", "int", "uint", CLU_CDECL, CLU_CAST(UI_SetHeadSayBkgColor));
 
-	CLU_RegisterFunction("UI_SetTitleFont", "int", "int, int, int, int", CLU_CDECL, CLU_CAST(UI_SetTitleFont));
+	CLU_RegisterFunction("UI_SetTitleFont", "int", "int, int, uint, int", CLU_CDECL, CLU_CAST(UI_SetTitleFont));
 
 	CLU_RegisterFunction("UI_LoadSkillActiveImage", "int", "char*, int, int, int, int, int", CLU_CDECL, CLU_CAST(UI_LoadSkillActiveImage));
 	CLU_RegisterFunction("UI_LoadChargeImage", "int", "int, char*, int, int, int, int, int", CLU_CDECL, CLU_CAST(UI_LoadChargeImage));

@@ -205,7 +205,7 @@ extern int UI_MenuAddText(int id, const char* text);  // const char* in UIScript
 extern int UI_AddFilterTextToNameTable(const char* text);  // const char* in UIScript.cpp
 extern int UI_AddFilterTextToDialogTable(const char* text);  // const char* in UIScript.cpp
 
-extern int UI_SetTitleFont(int id, int font, int color, int height);
+extern int UI_SetTitleFont(int id, int font, DWORD color, int height);
 
 extern int UI_LoadSkillListButtonImage(int id, char* file, int w, int h, int sx, int sy, int item_w, int item_h);  // char*
 extern int UI_LoadSkillActiveImage(char* file, int maxframe, int w, int h, int sx, int sy);  // char*
@@ -903,7 +903,7 @@ LUA_FUNC(UI_SetHeadSayBkgColor) {
 }
 
 LUA_FUNC(UI_SetTitleFont) {
-	UI_SetTitleFont(GET_INT(1), GET_INT(2), GET_INT(3), GET_INT(4));
+	UI_SetTitleFont(GET_INT(1), GET_INT(2), GET_UINT(3), GET_INT(4));
 	return 0;
 }
 

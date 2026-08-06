@@ -82,15 +82,15 @@ UI_FormSetIsEscClose( frmMain800, FALSE )
 --UI_SetAlpha( frmMinimap, 200 )
 
 tlCity = UI_CreateCompent( frmMain800, TITLE_TYPE, "tlCity", 256, 45, 0, 0 )
-UI_LoadImage( tlCity, "texture/ui/City.tga", 0, 166, 105, 0, 0 )
-UI_LoadImage( tlCity, "texture/ui/City.tga", 1, 1, 69, 86, 105 )
-UI_LoadImage( tlCity, "texture/ui/City.tga", 2, 166, 105, 90, 105 )
+UI_LoadImage( tlCity, "texture/GG_UI/City.png", 0, 166, 105, 0, 0 )
+UI_LoadImage( tlCity, "texture/GG_UI/City.png", 1, 1, 69, 86, 105 )
+UI_LoadImage( tlCity, "texture/GG_UI/City.png", 2, 166, 105, 90, 105 )
 UI_SetTitleFont( tlCity, TITLEFONT, COLOR_WHITE, 10 )
 
 tlField = UI_CreateCompent( frmMain800, TITLE_TYPE, "tlField", 256, 45, 0, 0 )
-UI_LoadImage( tlField, "texture/ui/Field.tga", 0, 124, 115, 0, 0 )
-UI_LoadImage( tlField, "texture/ui/Field.tga", 1, 1, 72, 127, 0 )
-UI_LoadImage( tlField, "texture/ui/Field.tga", 2, 124, 115, 132, 0 )
+UI_LoadImage( tlField, "texture/GG_UI/Field.png", 0, 124, 115, 0, 0 )
+UI_LoadImage( tlField, "texture/GG_UI/Field.png", 1, 1, 72, 127, 0 )
+UI_LoadImage( tlField, "texture/GG_UI/Field.png", 2, 124, 115, 132, 0 )
 UI_SetTitleFont( tlField, TITLEFONT, COLOR_WHITE, 15 )
 
 
