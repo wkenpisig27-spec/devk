@@ -1,18 +1,20 @@
 # RmlUi (DirectX 9 overlay)
 
-Parallel RmlUi overlay on top of the existing `CFormMgr` UI.
+Parallel RmlUi overlay on top of the existing `CFormMgr` UI. The account login window is served from RML/RCSS instead of `frmAccount`.
 
 ## Layout
 
 | Path | Purpose |
 |------|---------|
-| `third_party/RmlUi` | RmlUi sources |
+| `third_party/RmlUi` | Trimmed RmlUi sources (Core + Debugger + Win32 platform) |
 | `third_party/freetype` | FreeType (font engine) |
 | `source/include/game/rmlui/` | Integration headers |
-| `source/src/game/rmlui/` | DX9 renderer + manager |
-| `client/ui/rml/` | RML/RCSS documents |
+| `source/src/game/rmlui/` | DX9 renderer + manager + account form |
+| `client/ui/rml/` | RML/RCSS documents (`account.rml`) |
 | `source/lib/Release/rmlui*.lib` | Prebuilt Release static libs |
 | `source/lib/Debug/rmlui_debugger.lib`, `freetyped.lib` | Smaller Debug libs (main `rmlui.lib` is built locally) |
+
+Samples, Tests, unused backends (GL/VK/DX12/SDL/…), and optional Lua/Lottie/SVG plugins are **not** vendored.
 
 ## Rebuild libraries
 
@@ -24,9 +26,10 @@ From the repo root (requires VS 2022/18 CMake tools):
 ```
 
 Note: `source/lib/Debug/rmlui.lib` is not committed (over GitHub's 100MB limit). Run the script above after clone.
+
 ## Runtime
 
-- Hello document: `client/ui/rml/hello.rml`
+- Account document: `client/ui/rml/account.rml`
 - Font: loads `C:/Windows/Fonts/segoeui.ttf` (or arial) if no local TTF is present
 - **F8** toggles the RmlUi debugger
 - Working directory should be the `client/` folder (same as the game normally)

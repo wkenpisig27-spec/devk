@@ -170,19 +170,6 @@ bool CRmlUiManager::Init(HWND hwnd) {
 	return true;
 }
 
-bool CRmlUiManager::LoadHelloDocument() {
-	// Kept for optional debug overlays; not shown by default anymore.
-	if (!g_context)
-		return false;
-
-	Rml::ElementDocument* document = g_context->LoadDocument("hello.rml");
-	if (!document)
-		return false;
-
-	document->Hide();
-	return true;
-}
-
 void CRmlUiManager::Shutdown() {
 	m_ready = false;
 

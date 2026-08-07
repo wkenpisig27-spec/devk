@@ -136,7 +136,10 @@ if(RMLUI_SHELL)
 	add_subdirectory("Backends")
 endif()
 
-add_subdirectory("Samples")
+# Samples/Tests omitted from this vendored tree (game uses a custom DX9 backend).
+if(RMLUI_SAMPLES)
+	add_subdirectory("Samples")
+endif()
 
 if(RMLUI_TESTS)
 	add_subdirectory("Tests")

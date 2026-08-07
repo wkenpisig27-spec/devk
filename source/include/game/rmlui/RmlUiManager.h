@@ -35,7 +35,6 @@ private:
 	CRmlUiManager(const CRmlUiManager&) = delete;
 	CRmlUiManager& operator=(const CRmlUiManager&) = delete;
 
-	bool LoadHelloDocument();
 	void SyncViewport();
 
 	bool m_ready = false;
