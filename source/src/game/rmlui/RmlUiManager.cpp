@@ -309,6 +309,16 @@ bool CRmlUiManager::ProcessTextInput(char character) {
 	if (!m_ready || !m_enabled || !g_context)
 		return false;
 
+	// Match RmlUi's Win32 backend: only printable characters (plus newline).
+	// Control chars like Backspace (\b) / Delete must not be inserted as text —
+	// those are handled by ProcessKeyDown (KI_BACK / KI_DELETE). Feeding \b here
+	// cancels the delete (delete one char, then insert \b).
+	const auto c = static_cast<unsigned char>(character);
+	if ((c < 32 && character != '\n') || c == 127) {
+		// Still consume when RmlUi has focus so the legacy form stack ignores it.
+		return g_context->GetFocusElement() != nullptr;
+	}
+
 	return !g_context->ProcessTextInput(character);
 }
 
