@@ -50,6 +50,14 @@ public:
 	// 更新按钮状态
 	void UpdateButton();
 
+	// Notice RmlUi bottom-bar actions (also used by legacy frmSelect handler)
+	void OnCreateCha();
+	void OnEnterGame();
+	void OnDeleteCha();
+	void OnExitSelect();
+	void OnAlterPwd();
+	void OnChangePass();
+
 	// 获得角色个数
 	int GetChaCount();
 

@@ -55,6 +55,7 @@
 #include "CreateChaScene.h"
 #include "loginscene.h"
 #include "rmlui/RmlUiManager.h"
+#include "rmlui/RmlUiSelectChaForm.h"
 #include "UIItemCommand.h"
 #include "GuildData.h"
 #include "UIChat.h"
@@ -276,6 +277,8 @@ bool CSelectChaScene::_Init() {
 
 //-----------------------------------------------------------------------
 bool CSelectChaScene::_Clear() {
+	CRmlUiManager::Instance().HideSelectChaForm();
+
 	if (frmSelectCha)
 		frmSelectCha->SetIsShow(false);
 
@@ -621,13 +624,21 @@ bool CSelectChaScene::_InitUI() {
 
 	btnCreate->SetFlashCycle();
 
+	// Prefer Notice RmlUi dock; keep legacy frmSelect hidden as fallback.
+	frmSelectCha->evtEntrustMouseEvent = _SelChaFrmMouseEvent;
 	frmSelectCha->SetPos(
 		(g_pGameApp->GetWindowWidth() - frmSelectCha->GetWidth()) / 2,
 		g_pGameApp->GetWindowHeight() - frmSelectCha->GetHeight() - 20);
 	frmSelectCha->Refresh();
-	frmSelectCha->Show();
 
-	frmSelectCha->evtEntrustMouseEvent = _SelChaFrmMouseEvent;
+	if (CRmlUiManager::Instance().IsReady()) {
+		frmSelectCha->SetIsShow(false);
+		CRmlUiSelectChaForm::Instance().Show();
+		if (!CRmlUiSelectChaForm::Instance().IsVisible())
+			frmSelectCha->Show();
+	} else {
+		frmSelectCha->Show();
+	}
 
 	// ???????????   ?�???????j?"????????????
 	frmWelcomeNotice = CFormMgr::s_Mgr.Find("frmWelcomeNotice");
@@ -680,6 +691,98 @@ void CSelectChaScene::_OnClickUpdatePass(CGuiData* pSender, int x, int y, DWORD 
 }
 
 //-----------------------------------------------------------------------
+void CSelectChaScene::OnCreateCha() {
+	stSceneInitParam param;
+	param.nTypeID = enumCreateChaScene;
+	param.strName = "";
+	param.strMapFile = "";
+	param.nUITemplete = enumCreateChaForm;
+	param.nMaxCha = 20;
+	param.nMaxObj = 20;
+	param.nMaxItem = 20;
+	param.nMaxEff = 20;
+
+	CCreateChaScene* pkScene =
+		dynamic_cast<CCreateChaScene*>(g_pGameApp->CreateScene(&param));
+	if (!pkScene)
+		return;
+	CSelectChaScene& rkSelectChaScene = CSelectChaScene::GetCurrScene();
+
+	CRmlUiManager::Instance().HideSelectChaForm();
+	g_pGameApp->GotoScene(pkScene, false);
+	pkScene->setLastScene(&rkSelectChaScene);
+}
+
+void CSelectChaScene::OnEnterGame() {
+	SendBeginPlayToServer();
+	CGameApp::Waiting();
+}
+
+void CSelectChaScene::OnDeleteCha() {
+	if (g_Config.m_IsDoublePwd) {
+		g_stUIDoublePwd.SetType(CDoublePwdMgr::DELETE_CHARACTOR);
+		g_stUIDoublePwd.ShowDoublePwdForm();
+	}
+}
+
+void CSelectChaScene::OnExitSelect() {
+	if (g_TomServer.bEnable) {
+		g_pGameApp->SetIsRun(false);
+		return;
+	}
+
+	CRmlUiManager::Instance().HideSelectChaForm();
+	CS_Logout();
+	CS_Disconnect(DS_DISCONN);
+	g_pGameApp->LoadScriptScene(enumLoginScene);
+}
+
+void CSelectChaScene::OnAlterPwd() {
+	g_stUIDoublePwd.ShowAlterForm();
+}
+
+void CSelectChaScene::OnChangePass() {
+	CForm* frmUpdPas = CFormMgr::s_Mgr.Find("frmUpdPas");
+	if (frmUpdPas)
+		frmUpdPas->Show();
+}
+
+void RmlSelectCha_OnCreate() {
+	CSelectChaScene* scene = dynamic_cast<CSelectChaScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->OnCreateCha();
+}
+
+void RmlSelectCha_OnEnter() {
+	CSelectChaScene* scene = dynamic_cast<CSelectChaScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->OnEnterGame();
+}
+
+void RmlSelectCha_OnDelete() {
+	CSelectChaScene* scene = dynamic_cast<CSelectChaScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->OnDeleteCha();
+}
+
+void RmlSelectCha_OnExit() {
+	CSelectChaScene* scene = dynamic_cast<CSelectChaScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->OnExitSelect();
+}
+
+void RmlSelectCha_OnAlter() {
+	CSelectChaScene* scene = dynamic_cast<CSelectChaScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->OnAlterPwd();
+}
+
+void RmlSelectCha_OnChangePass() {
+	CSelectChaScene* scene = dynamic_cast<CSelectChaScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->OnChangePass();
+}
+
 void CSelectChaScene::_SelChaFrmMouseEvent(CCompent* pSender, int nMsgType,
 										   int x, int y, DWORD dwKey) {
 	string strName = pSender->GetName();
@@ -688,71 +791,20 @@ void CSelectChaScene::_SelChaFrmMouseEvent(CCompent* pSender, int nMsgType,
 		return;
 	}
 
+	CSelectChaScene& scene = GetCurrScene();
 	if (strName == "btnCreate") {
-		// ?????????
-		stSceneInitParam param;
-		param.nTypeID = enumCreateChaScene;
-		param.strName = "";
-		param.strMapFile = "";
-		param.nUITemplete = enumCreateChaForm;
-		param.nMaxCha = 20;
-		param.nMaxObj = 20;
-		param.nMaxItem = 20;
-		param.nMaxEff = 20;
-
-		CCreateChaScene* pkScene =
-			dynamic_cast<CCreateChaScene*>(g_pGameApp->CreateScene(&param));
-		if (!pkScene)
-			return;
-		CSelectChaScene& rkSelectChaScene = CSelectChaScene::GetCurrScene();
-
-		g_pGameApp->GotoScene(pkScene, false);
-		pkScene->setLastScene(&rkSelectChaScene);
+		scene.OnCreateCha();
 	} else if (strName == "btnYes") {
-		// ????
-		// ?????????????
-		GetCurrScene().SendBeginPlayToServer();
-		CGameApp::Waiting();
+		scene.OnEnterGame();
 	} else if (strName == "btnDel") {
-		if (g_Config.m_IsDoublePwd) {
-			// ??????????  modify by Philip.Wu  2006-07-19
-			g_stUIDoublePwd.SetType(CDoublePwdMgr::DELETE_CHARACTOR);
-			g_stUIDoublePwd.ShowDoublePwdForm();
-		} else {
-			// ????
-			// CBoxMgr::ShowSelectBox(_CheckFrmMouseEvent, RES_STRING(CL_LANGUAGE_MATCH_384), true);
-		}
+		scene.OnDeleteCha();
 	} else if (strName == "btnNo") {
-		if (g_TomServer.bEnable) {
-			g_pGameApp->SetIsRun(false);
-			return;
-		}
-
-		// ??????
-		CS_Logout();
-		CS_Disconnect(DS_DISCONN);
-		g_pGameApp->LoadScriptScene(enumLoginScene);
+		scene.OnExitSelect();
 	} else if (strName == "btnAlter") {
-		g_stUIDoublePwd.ShowAlterForm();
+		scene.OnAlterPwd();
 	} else if (strName == "btnChangePass") {
-		CForm* frmUpdPas = CFormMgr::s_Mgr.Find("frmUpdPas");
-		if (frmUpdPas) {
-			frmUpdPas->Show();
-		}
+		scene.OnChangePass();
 	}
-	// else if(strName == "btnChangePassConf")
-	//{
-	//	//send packet etc
-	// }
-	// else if(strName == "btnCancel")
-	//{
-	//	CForm* frmUpdPas = CFormMgr::s_Mgr.Find( "frmUpdPas");
-	//	if(frmUpdPas){
-	//		frmUpdPas->Hide();
-	//	}
-	// }
-
-	return;
 }
 
 //-----------------------------------------------------------------------
@@ -932,31 +984,38 @@ void CSelectChaScene::SetChaDark(CCharacter* pCha) {
 }
 
 void CSelectChaScene::UpdateButton() {
+	bool canCreate = false;
 	int i(0);
 	for (; i < 3; i++) {
 		if (m_CharactorPtrs[i]->pCha == nullptr) {
-			btnCreate->SetIsEnabled(true);
+			canCreate = true;
 			break;
 		}
 	}
 	if (i == 3)
-		btnCreate->SetIsEnabled(false);
+		canCreate = false;
 
-	if (m_nCurChaIndex < 0 || m_nCurChaIndex > 2) {
-		btnDel->SetIsEnabled(false);
-		btnYes->SetIsEnabled(false);
-	} else {
-		btnDel->SetIsEnabled(true);
-		btnYes->SetIsEnabled(true);
-	}
+	const bool hasSelection = (m_nCurChaIndex >= 0 && m_nCurChaIndex <= 2);
+	bool canAlter = g_Config.m_IsDoublePwd;
+	if (!g_Config.m_IsDoublePwd)
+		canCreate = false;
 
-	if (!g_Config.m_IsDoublePwd) {
-		btnCreate->SetIsEnabled(false);
-		if (btnAlter)
-			btnAlter->SetIsEnabled(false);
-	} else if (btnAlter) {
-		btnAlter->SetIsEnabled(true);
-	}
+	if (btnCreate)
+		btnCreate->SetIsEnabled(canCreate);
+	if (btnDel)
+		btnDel->SetIsEnabled(hasSelection);
+	if (btnYes)
+		btnYes->SetIsEnabled(hasSelection);
+	if (btnAlter)
+		btnAlter->SetIsEnabled(canAlter);
+
+	CRmlUiSelectChaForm& rml = CRmlUiSelectChaForm::Instance();
+	rml.SetButtonEnabled("btnCreate", canCreate);
+	rml.SetButtonEnabled("btnDel", hasSelection);
+	rml.SetButtonEnabled("btnYes", hasSelection);
+	rml.SetButtonEnabled("btnNo", true);
+	rml.SetButtonEnabled("btnAlter", canAlter);
+	rml.SetButtonEnabled("btnChangePass", true);
 }
 
 int CSelectChaScene::GetChaCount() {

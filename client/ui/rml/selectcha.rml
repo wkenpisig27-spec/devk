@@ -1,0 +1,19 @@
+<rml>
+	<head>
+		<title>Character Select</title>
+		<link type="text/rcss" href="notice.rcss"/>
+		<link type="text/rcss" href="selectcha.rcss"/>
+	</head>
+	<body class="selectcha-body">
+		<div id="selectcha-panel" class="selectcha-bar">
+			<div class="selectcha-actions">
+				<button class="notice-btn notice-btn-blue selectcha-btn" id="btnCreate" type="button">Create</button>
+				<button class="notice-btn notice-btn-blue selectcha-btn" id="btnDel" type="button">Delete</button>
+				<button class="notice-btn notice-btn-gold selectcha-btn" id="btnYes" type="button">Enter</button>
+				<button class="notice-btn notice-btn-blue selectcha-btn" id="btnNo" type="button">Exit</button>
+				<button class="notice-btn notice-btn-blue selectcha-btn" id="btnAlter" type="button">Edit</button>
+				<button class="notice-btn notice-btn-blue selectcha-btn selectcha-btn-last" id="btnChangePass" type="button">Change PW</button>
+			</div>
+		</div>
+	</body>
+</rml>

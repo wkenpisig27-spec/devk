@@ -4,6 +4,7 @@
 #include "rmlui/RmlUiAccountForm.h"
 #include "rmlui/RmlUiRegionForm.h"
 #include "rmlui/RmlUiServerForm.h"
+#include "rmlui/RmlUiSelectChaForm.h"
 
 #include "MPRender.h"
 
@@ -206,6 +207,9 @@ bool CRmlUiManager::Init(HWND hwnd) {
 	if (!CRmlUiServerForm::Instance().Load(g_context)) {
 		OutputDebugStringA("RmlUi: warning - server.rml failed to load\n");
 	}
+	if (!CRmlUiSelectChaForm::Instance().Load(g_context)) {
+		OutputDebugStringA("RmlUi: warning - selectcha.rml failed to load\n");
+	}
 
 	m_ready = true;
 	OutputDebugStringA("RmlUi: initialized OK\n");
@@ -218,12 +222,17 @@ void CRmlUiManager::HideLoginForms() {
 	CRmlUiServerForm::Instance().Hide();
 }
 
+void CRmlUiManager::HideSelectChaForm() {
+	CRmlUiSelectChaForm::Instance().Hide();
+}
+
 void CRmlUiManager::Shutdown() {
 	m_ready = false;
 
 	CRmlUiAccountForm::Instance().Unload();
 	CRmlUiRegionForm::Instance().Unload();
 	CRmlUiServerForm::Instance().Unload();
+	CRmlUiSelectChaForm::Instance().Unload();
 
 	if (g_context) {
 		g_context->UnloadAllDocuments();

@@ -1,0 +1,70 @@
+/* Slim action strip — input-shell chrome (no panel header band), matches old bar scale. */
+
+body.selectcha-body {
+	justify-content: flex-end;
+	align-items: center;
+	padding-bottom: 0dp;
+}
+
+.selectcha-bar {
+	display: block;
+	position: absolute;
+	left: 50%;
+	bottom: 32dp;
+	/* RmlUi has no transform; approximate center via left + negative margin */
+	margin-left: -215dp;
+	box-sizing: border-box;
+	width: 430dp;
+	padding: 0dp;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/input_tl.tga,
+		ui/rml/frames/notice/input_t.tga,
+		ui/rml/frames/notice/input_tr.tga,
+		ui/rml/frames/notice/input_l.tga,
+		ui/rml/frames/notice/input_c.tga,
+		ui/rml/frames/notice/input_r.tga,
+		ui/rml/frames/notice/input_bl.tga,
+		ui/rml/frames/notice/input_b.tga,
+		ui/rml/frames/notice/input_br.tga
+	);
+	pointer-events: auto;
+}
+
+.selectcha-actions {
+	display: flex;
+	flex-direction: row;
+	box-sizing: border-box;
+	padding: 6dp 8dp;
+	background-color: transparent;
+}
+
+.selectcha-btn,
+button.selectcha-btn {
+	flex: 1;
+	height: 28dp;
+	line-height: 28dp;
+	font-size: 11dp;
+	margin-right: 4dp;
+}
+
+.selectcha-btn-last,
+button.selectcha-btn-last {
+	margin-right: 0dp;
+}
+
+button#btnYes.selectcha-btn {
+	margin-right: 4dp;
+}
+
+.notice-btn.notice-btn-disabled,
+button.notice-btn.notice-btn-disabled,
+.notice-btn.notice-btn-disabled:hover,
+button.notice-btn.notice-btn-disabled:hover {
+	opacity: 0.38;
+}

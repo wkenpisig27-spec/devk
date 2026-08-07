@@ -4,7 +4,7 @@ Two RmlUi visual languages share fonts/renderer constraints:
 
 | Theme | Use for | Reference |
 |-------|---------|-----------|
-| **Notice** (primary for dialogs) | Login, register, confirm, modal forms | `account.rml` / `account.rcss` |
+| **Notice** (primary for dialogs) | Login, register, confirm, modal forms, select-cha dock | `account.rml` / `selectcha.rml` + `notice.rcss` |
 | **Aether** (dark HUD) | In-game windows, inventory, HUD chrome | `system/aether.rcss` |
 
 **Hard rule for forms/dialogs:** match the **Notice** look. Do not restyle login-class screens as dark Aether glass.
@@ -47,6 +47,7 @@ client/ui/rml/
   notice.rcss                  ← shared Notice chrome + list styles
   account.rml / account.rcss   ← login
   region.rml / server.rml      ← region + server pick
+  selectcha.rml / selectcha.rcss ← character-select bottom dock (no scrim)
   frames/notice/               ← soft-AA TGA
   fonts/LatoLatin-*.ttf
   system/aether.rcss           ← dark HUD (separate)
