@@ -1,0 +1,42 @@
+---
+description: Notice light UI theme for RmlUi dialogs/forms (login, register, confirm, etc.)
+globs: client/ui/rml/**/*
+alwaysApply: false
+---
+
+# Notice UI theme (dialogs / forms)
+
+Target look: soft mobile-MMO / RO Origin **Notice** dialogs — light panel, blue header, gold+blue actions.
+
+## Canonical reference
+
+- Structure/styles: `client/ui/rml/account.rml` + `account.rcss`
+- Soft-AA skins: `client/ui/rml/frames/notice/*.tga`
+- Generator: `python tools/gen-notice-skin.py`
+- Docs: `docs/UI_DESIGN_SYSTEM.md` → Notice section
+
+## Visual recipe
+
+- Off-white body `#f5f9ff`, blue header gradient `#7eb4f0` → `#5a96dc`
+- Header title: white bold ~20dp, centered
+- Labels/muted text: `#5a7ab0`
+- Inputs: white fill, soft rounded shell via `input_*.tga` 9-slice
+- Actions: gold Register / confirm secondary; blue Login / primary
+- Exit/cancel: quiet text link, not a third pill
+- Font: `LatoLatin` from `client/ui/rml/fonts/`
+
+## DX9 hard constraints
+
+- Never `box-shadow` / filters (broken/white panels)
+- No large CSS `border-radius` on shells/buttons — soft curves come from TGA 9-slice / tiled-horizontal only
+- Bake header blue into **panel top tiles** (`panel_tl/t/tr`) — do not stack a second soft header layer (transparent corners punch through)
+- Keep AA feather tight (~0.85px in gen script) so edges stay sharp, not blurry
+- Center control text with `line-height` == control `height`
+- Decorator paths from client cwd: `ui/rml/frames/notice/...`
+
+## New form checklist
+
+1. Copy `account.rml` shell (`notice` / `notice-header` / `notice-body` / `notice-footer`)
+2. Reuse `account.rcss` classes or extract shared `system/notice.rcss` later
+3. Keep C++ element IDs stable when binding
+4. Regen skins only via `tools/gen-notice-skin.py` if chrome changes

@@ -1,0 +1,18 @@
+<!-- Reusable window shell. Copy into screens; keep class names. -->
+<div class="ui-window ui-window-md">
+	<div class="ui-ornament ui-ornament-tl"></div>
+	<div class="ui-ornament ui-ornament-tr"></div>
+	<div class="ui-ornament ui-ornament-bl"></div>
+	<div class="ui-ornament ui-ornament-br"></div>
+
+	<div class="ui-window-metal">
+		<div class="ui-window-glass">
+			<div class="ui-titlebar">
+				<div class="ui-titlebar-label">Window Title</div>
+			</div>
+			<div class="ui-window-content">
+				<!-- screen body -->
+			</div>
+		</div>
+	</div>
+</div>

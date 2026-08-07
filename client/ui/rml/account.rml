@@ -4,27 +4,42 @@
 		<link type="text/rcss" href="account.rcss"/>
 	</head>
 	<body>
-		<div id="account-panel">
-			<div id="account-title">Account Login</div>
-			<form id="account-form">
-				<div class="row">
-					<label for="edtID">Account</label>
-					<input type="text" id="edtID" name="account" maxlength="64"/>
+		<div id="notice-scrim"></div>
+
+		<form id="account-form" class="notice">
+			<div class="notice-header">
+				<div class="notice-title">Account Login</div>
+			</div>
+
+			<div class="notice-body">
+				<div class="notice-field">
+					<label class="notice-label" for="edtID">Account</label>
+					<div class="notice-input-shell">
+						<input class="notice-input" type="text" id="edtID" name="account" maxlength="64"/>
+					</div>
 				</div>
-				<div class="row">
-					<label for="edtPassword">Password</label>
-					<input type="password" id="edtPassword" name="password" maxlength="64"/>
+
+				<div class="notice-field">
+					<label class="notice-label" for="edtPassword">Password</label>
+					<div class="notice-input-shell">
+						<input class="notice-input" type="password" id="edtPassword" name="password" maxlength="64"/>
+					</div>
 				</div>
-				<div class="row remember">
-					<input type="checkbox" id="chkID" name="remember" checked/>
+
+				<div class="notice-check-row">
+					<input class="notice-check" type="checkbox" id="chkID" name="remember" checked/>
 					<label for="chkID">Remember account</label>
 				</div>
-				<div class="buttons">
-					<button id="btnRegister" type="button">Register</button>
-					<button id="btnLogin" type="submit">Login</button>
-					<button id="btnExit" type="button">Exit</button>
-				</div>
-			</form>
-		</div>
+			</div>
+
+			<div class="notice-footer">
+				<button class="notice-btn notice-btn-gold" id="btnRegister" type="button">Register</button>
+				<button class="notice-btn notice-btn-blue" id="btnLogin" type="submit">Login</button>
+			</div>
+
+			<div class="notice-exit-row">
+				<button class="notice-exit" id="btnExit" type="button">Exit</button>
+			</div>
+		</form>
 	</body>
 </rml>

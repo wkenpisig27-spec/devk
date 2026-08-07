@@ -1,0 +1,80 @@
+/* =============================================================================
+   Aether UI — Design Tokens
+   Fantasy MMORPG system shared by every RmlUi window.
+   Renderer constraint: no box-shadow / filter layers (DX9 path). Depth = nested
+   frame layers + borders + corner ornaments.
+   ============================================================================= */
+
+body {
+	/* Color — surfaces */
+	--ui-bg-void: #05080c;
+	--ui-bg-panel: #0b141c;
+	--ui-bg-panel-raised: #121e28;
+	--ui-bg-panel-sunken: #070d12;
+	--ui-bg-glass: #0c1620d9;
+	--ui-bg-header: #0f1a24;
+	--ui-bg-input: #060b10;
+	--ui-bg-input-focus: #0c1822;
+	--ui-bg-slot: #0a1016;
+	--ui-bg-slot-hover: #12202c;
+	--ui-bg-disabled: #151a1e;
+
+	/* Color — chrome / metal */
+	--ui-metal-hi: #9eb4c2;
+	--ui-metal: #6a8292;
+	--ui-metal-lo: #3a4e5a;
+	--ui-frame: #2a4450;
+	--ui-frame-hi: #4a7382;
+
+	/* Color — accent (cyan magic) */
+	--ui-accent: #3ec9d8;
+	--ui-accent-hi: #7aebf5;
+	--ui-accent-lo: #1a7f8c;
+	--ui-accent-dim: #1e4a54;
+	--ui-accent-text: #b6f4fc;
+
+	/* Color — semantic */
+	--ui-text: #e6f0f5;
+	--ui-text-muted: #8da3b0;
+	--ui-text-dim: #5f7380;
+	--ui-danger: #d45a5a;
+	--ui-danger-hi: #f07a7a;
+	--ui-danger-bg: #3a1818;
+	--ui-warn: #d4a84a;
+	--ui-success: #4ecf8a;
+	--ui-epic: #b07aef;
+	--ui-rare: #4a8dff;
+	--ui-legend: #efb04a;
+
+	/* Space (4dp grid) */
+	--ui-space-1: 4dp;
+	--ui-space-2: 8dp;
+	--ui-space-3: 12dp;
+	--ui-space-4: 16dp;
+	--ui-space-5: 20dp;
+	--ui-space-6: 24dp;
+	--ui-space-8: 32dp;
+
+	/* Radius */
+	--ui-radius-sm: 6dp;
+	--ui-radius-md: 8dp;
+	--ui-radius-lg: 10dp;
+	--ui-radius-xl: 12dp;
+
+	/* Type */
+	--ui-font: LatoLatin;
+	--ui-fs-xs: 11dp;
+	--ui-fs-sm: 12dp;
+	--ui-fs-md: 14dp;
+	--ui-fs-lg: 16dp;
+	--ui-fs-xl: 20dp;
+	--ui-fs-title: 22dp;
+
+	/* Motion */
+	--ui-fast: 0.12s;
+	--ui-med: 0.18s;
+
+	font-family: LatoLatin;
+	font-size: 14dp;
+	color: #e6f0f5;
+}

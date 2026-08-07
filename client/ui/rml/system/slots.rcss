@@ -1,0 +1,90 @@
+/* Inventory / equipment / skill slots */
+
+.ui-slot-grid {
+	display: block;
+	width: 100%;
+}
+
+.ui-slot {
+	display: inline-block;
+	vertical-align: top;
+	width: 48dp;
+	height: 48dp;
+	margin: 0dp 6dp 6dp 0dp;
+	padding: 3dp;
+	background-color: #0a1016;
+	border-width: 1dp;
+	border-color: #2a4450;
+	transition: border-color 0.12s, background-color 0.12s;
+}
+
+.ui-slot:hover {
+	background-color: #12202c;
+	border-color: #3ec9d8;
+}
+
+.ui-slot-empty {
+	border-color: #1e333c;
+}
+
+.ui-slot-selected {
+	border-color: #7aebf5;
+	background-color: #12282e;
+}
+
+.ui-slot-icon {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.ui-slot-qty {
+	position: absolute;
+	right: 2dp;
+	bottom: 1dp;
+	font-size: 10dp;
+	color: #f3fbff;
+}
+
+/* Rarity frames */
+.ui-slot-common { border-color: #6a8292; }
+.ui-slot-uncommon { border-color: #4ecf8a; }
+.ui-slot-rare { border-color: #4a8dff; }
+.ui-slot-epic { border-color: #b07aef; }
+.ui-slot-legend { border-color: #efb04a; }
+
+/* Equipment paper-doll slot (larger) */
+.ui-equip-slot {
+	display: block;
+	width: 56dp;
+	height: 56dp;
+	padding: 4dp;
+	background-color: #070d12;
+	border-width: 2dp;
+	border-color: #3a5a66;
+}
+
+.ui-equip-slot:hover {
+	border-color: #3ec9d8;
+}
+
+/* Skill icon */
+.ui-skill {
+	display: inline-block;
+	width: 44dp;
+	height: 44dp;
+	margin: 0dp 6dp 6dp 0dp;
+	padding: 2dp;
+	background-color: #0a1016;
+	border-width: 1dp;
+	border-color: #2a5f6a;
+}
+
+.ui-skill:hover {
+	border-color: #7aebf5;
+}
+
+.ui-skill-locked {
+	opacity: 0.45;
+	border-color: #2a3338;
+}

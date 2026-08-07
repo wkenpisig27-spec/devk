@@ -1,0 +1,82 @@
+/* Tooltips, toasts, confirm dialogs */
+
+.ui-tooltip {
+	display: block;
+	max-width: 280dp;
+	padding: 10dp 12dp;
+	background-color: #0a141cf5;
+	border-width: 1dp;
+	border-color: #3ec9d8;
+	font-size: 12dp;
+	color: #e6f0f5;
+	z-index: 100;
+}
+
+.ui-tooltip-title {
+	display: block;
+	font-size: 13dp;
+	font-weight: bold;
+	color: #7aebf5;
+	margin-bottom: 4dp;
+}
+
+.ui-tooltip-rare { border-color: #4a8dff; }
+.ui-tooltip-rare .ui-tooltip-title { color: #4a8dff; }
+.ui-tooltip-epic { border-color: #b07aef; }
+.ui-tooltip-epic .ui-tooltip-title { color: #b07aef; }
+.ui-tooltip-legend { border-color: #efb04a; }
+.ui-tooltip-legend .ui-tooltip-title { color: #efb04a; }
+
+.ui-toast {
+	display: block;
+	width: 320dp;
+	padding: 12dp 14dp;
+	margin-bottom: 8dp;
+	background-color: #0f1a24f0;
+	border-width: 1dp;
+	border-color: #3a5a66;
+	border-left-width: 3dp;
+	border-left-color: #3ec9d8;
+}
+
+.ui-toast-title {
+	display: block;
+	font-weight: bold;
+	font-size: 13dp;
+	color: #f3fbff;
+	margin-bottom: 2dp;
+}
+
+.ui-toast-body {
+	display: block;
+	font-size: 12dp;
+	color: #8da3b0;
+}
+
+.ui-toast-success { border-left-color: #4ecf8a; }
+.ui-toast-warn { border-left-color: #d4a84a; }
+.ui-toast-danger { border-left-color: #d45a5a; }
+
+/* Confirm dialog body (place inside .ui-window) */
+.ui-dialog-message {
+	display: block;
+	font-size: 14dp;
+	color: #c5d6df;
+	text-align: center;
+	margin: 8dp 0dp 20dp 0dp;
+	line-height: 1.4;
+}
+
+.ui-dialog-actions {
+	display: block;
+	width: 100%;
+	height: 38dp;
+	text-align: center;
+}
+
+.ui-dialog-actions .ui-btn {
+	display: inline-block;
+	vertical-align: top;
+	min-width: 110dp;
+	margin: 0dp 6dp;
+}

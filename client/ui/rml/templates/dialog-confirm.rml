@@ -1,0 +1,21 @@
+<!-- Confirm dialog pattern -->
+<div class="ui-window ui-window-sm">
+	<div class="ui-ornament ui-ornament-tl"></div>
+	<div class="ui-ornament ui-ornament-tr"></div>
+	<div class="ui-ornament ui-ornament-bl"></div>
+	<div class="ui-ornament ui-ornament-br"></div>
+	<div class="ui-window-metal">
+		<div class="ui-window-glass">
+			<div class="ui-titlebar">
+				<div class="ui-titlebar-label">Confirm</div>
+			</div>
+			<div class="ui-window-content">
+				<div class="ui-dialog-message">Are you sure?</div>
+				<div class="ui-dialog-actions">
+					<button class="ui-btn ui-btn-primary" type="button">Confirm</button>
+					<button class="ui-btn ui-btn-ghost" type="button">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

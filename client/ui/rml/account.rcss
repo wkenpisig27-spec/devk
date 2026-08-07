@@ -1,95 +1,274 @@
+/* Soft-AA Notice login — curves from TGA skins only (no CSS border-radius on chrome). */
+
 body {
-	font-family: rmlui-debugger-font;
-	font-size: 15dp;
-	color: #f0f0f0;
-	width: 340dp;
-	height: 230dp;
-	margin: auto;
-	padding: 18dp 20dp 16dp 20dp;
-	background-color: #1a1a1af0;
-	border: 1dp #5a5a5a;
+	position: relative;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	pointer-events: none;
+	font-family: LatoLatin;
+	color: #3a63a5;
+}
+
+#notice-scrim {
+	position: absolute;
+	top: 0dp;
+	left: 0dp;
+	width: 100%;
+	height: 100%;
+	z-index: 0;
+	background-color: #000000a0;
+	pointer-events: none;
+}
+
+.notice {
+	position: relative;
+	z-index: 1;
+	display: block;
+	box-sizing: border-box;
+	width: 420dp;
+	margin: 0dp;
+	/* No padding — header blue is baked into panel top 9-slice tiles */
+	padding: 0dp;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/panel_tl.tga,
+		ui/rml/frames/notice/panel_t.tga,
+		ui/rml/frames/notice/panel_tr.tga,
+		ui/rml/frames/notice/panel_l.tga,
+		ui/rml/frames/notice/panel_c.tga,
+		ui/rml/frames/notice/panel_r.tga,
+		ui/rml/frames/notice/panel_bl.tga,
+		ui/rml/frames/notice/panel_b.tga,
+		ui/rml/frames/notice/panel_br.tga
+	);
 	pointer-events: auto;
 }
 
-#account-panel {
-	width: 100%;
+/* Layout-only — chrome/rings come from panel top tiles (no second soft layer) */
+.notice-header {
+	display: block;
+	position: relative;
+	box-sizing: border-box;
+	/* Matches baked panel top-tile height (~border + header band) */
+	height: 56dp;
+	padding: 0dp 28dp;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
 }
 
-#account-title {
-	font-size: 18dp;
+.notice-title {
+	display: block;
+	padding-top: 16dp;
+	font-size: 20dp;
 	font-weight: bold;
 	color: #ffffff;
-	margin-bottom: 14dp;
 	text-align: center;
 }
 
-.row {
-	margin-bottom: 10dp;
+.notice-body {
+	display: block;
+	box-sizing: border-box;
+	padding: 16dp 28dp 4dp 28dp;
+	background-color: transparent;
 }
 
-.row label {
-	display: inline-block;
-	width: 80dp;
-	color: #dddddd;
+.notice-field {
+	display: block;
+	margin-bottom: 12dp;
 }
 
-.row input {
-	display: inline-block;
-	width: 210dp;
-	height: 24dp;
-	padding: 2dp 6dp;
-	background-color: #101010;
-	border: 1dp #666666;
-	color: #ffffff;
-	font-family: rmlui-debugger-font;
+.notice-label {
+	display: block;
+	margin-bottom: 5dp;
+	font-size: 13dp;
+	color: #5a7ab0;
+}
+
+/* Soft-AA input shell */
+.notice-input-shell {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	height: 40dp;
+	padding: 2dp;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/input_tl.tga,
+		ui/rml/frames/notice/input_t.tga,
+		ui/rml/frames/notice/input_tr.tga,
+		ui/rml/frames/notice/input_l.tga,
+		ui/rml/frames/notice/input_c.tga,
+		ui/rml/frames/notice/input_r.tga,
+		ui/rml/frames/notice/input_bl.tga,
+		ui/rml/frames/notice/input_b.tga,
+		ui/rml/frames/notice/input_br.tga
+	);
+}
+
+.notice-input,
+input.notice-input {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	height: 36dp;
+	/* Match height so single-line text is vertically centered */
+	line-height: 36dp;
+	padding: 0dp 12dp;
+	font-family: LatoLatin;
 	font-size: 14dp;
+	color: #2a4a80;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
 }
 
-.row input:focus {
-	border-color: #8ec7ff;
+.notice-check-row {
+	display: block;
+	height: 22dp;
+	margin: 4dp 0dp 6dp 0dp;
 }
 
-.remember {
-	margin-top: 4dp;
-	margin-bottom: 14dp;
-}
-
-.remember input {
+.notice-check,
+input.notice-check {
+	display: inline-block;
+	vertical-align: middle;
 	width: 16dp;
 	height: 16dp;
-	margin-right: 8dp;
+	margin: 0dp 8dp 0dp 0dp;
+	padding: 0dp;
+	background-color: #ffffff;
+	border-top-width: 1dp;
+	border-right-width: 1dp;
+	border-bottom-width: 1dp;
+	border-left-width: 1dp;
+	border-top-color: #8aabd8;
+	border-right-color: #8aabd8;
+	border-bottom-color: #8aabd8;
+	border-left-color: #8aabd8;
 }
 
-.remember label {
-	width: auto;
+.notice-check:checked,
+input.notice-check:checked {
+	background-color: #5a96dc;
+	border-top-color: #3a78c0;
+	border-right-color: #3a78c0;
+	border-bottom-color: #3a78c0;
+	border-left-color: #3a78c0;
 }
 
-.buttons {
-	text-align: center;
-}
-
-.buttons button {
+.notice-check-row > label {
 	display: inline-block;
-	min-width: 88dp;
-	margin: 0dp 4dp;
-	padding: 6dp 12dp;
-	background-color: #3a3a3a;
-	border: 1dp #777777;
+	vertical-align: middle;
+	font-size: 13dp;
+	color: #5a7ab0;
+}
+
+.notice-footer {
+	display: flex;
+	flex-direction: row;
+	box-sizing: border-box;
+	padding: 10dp 28dp 4dp 28dp;
+	background-color: transparent;
+}
+
+.notice-btn,
+button.notice-btn {
+	display: block;
+	box-sizing: border-box;
+	flex: 1;
+	width: auto;
+	height: 46dp;
+	/* Match height so label sits on the vertical center */
+	line-height: 46dp;
+	padding: 0dp;
+	font-family: LatoLatin;
+	font-size: 15dp;
+	font-weight: bold;
+	text-align: center;
 	color: #ffffff;
-	font-family: rmlui-debugger-font;
-	font-size: 14dp;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	transition: opacity 0.12s;
+}
+
+.notice-btn:hover,
+button.notice-btn:hover {
+	opacity: 0.94;
+}
+
+.notice-btn:active,
+button.notice-btn:active {
+	opacity: 0.82;
+}
+
+.notice-btn-gold,
+button.notice-btn-gold {
+	margin-right: 12dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_gold_l.tga,
+		ui/rml/frames/notice/btn_gold_c.tga,
+		ui/rml/frames/notice/btn_gold_r.tga
+	);
+}
+
+.notice-btn-blue,
+button.notice-btn-blue {
+	margin-right: 0dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_blue_l.tga,
+		ui/rml/frames/notice/btn_blue_c.tga,
+		ui/rml/frames/notice/btn_blue_r.tga
+	);
+}
+
+.notice-exit-row {
+	display: block;
+	padding: 0dp 28dp 14dp 28dp;
+	background-color: transparent;
 	text-align: center;
 }
 
-.buttons button:hover {
-	background-color: #4f4f4f;
+.notice-exit,
+button.notice-exit {
+	display: inline-block;
+	height: 28dp;
+	padding: 4dp 16dp;
+	font-family: LatoLatin;
+	font-size: 13dp;
+	color: #7a96c0;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
 }
 
-#btnLogin {
-	background-color: #2f5f9a;
-	border-color: #6aa0d8;
-}
-
-#btnLogin:hover {
-	background-color: #3a73b8;
+.notice-exit:hover,
+button.notice-exit:hover {
+	color: #3a63a5;
 }

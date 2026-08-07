@@ -1,0 +1,49 @@
+/* Tabs */
+
+.ui-tabs {
+	display: block;
+	width: 100%;
+}
+
+.ui-tabbar {
+	display: block;
+	width: 100%;
+	height: 36dp;
+	border-bottom-width: 1dp;
+	border-bottom-color: #2a4450;
+	margin-bottom: 14dp;
+}
+
+.ui-tab {
+	display: inline-block;
+	vertical-align: top;
+	height: 34dp;
+	padding: 8dp 16dp 0dp 16dp;
+	margin-right: 4dp;
+	font-size: 13dp;
+	font-weight: bold;
+	color: #8da3b0;
+	background-color: #0a1016;
+	border-width: 1dp;
+	border-color: #2a4450;
+	border-bottom-width: 0dp;
+	transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+}
+
+.ui-tab:hover {
+	color: #e6f0f5;
+	background-color: #121e28;
+}
+
+.ui-tab-active,
+.ui-tab.ui-tab-active {
+	color: #b6f4fc;
+	background-color: #0b141c;
+	border-color: #3ec9d8;
+	border-bottom-color: #0b141c;
+}
+
+.ui-tab-panel {
+	display: block;
+	width: 100%;
+}

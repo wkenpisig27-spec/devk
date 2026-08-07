@@ -10,7 +10,7 @@ Parallel RmlUi overlay on top of the existing `CFormMgr` UI. The account login w
 | `third_party/freetype` | FreeType (font engine) |
 | `source/include/game/rmlui/` | Integration headers |
 | `source/src/game/rmlui/` | DX9 renderer + manager + account form |
-| `client/ui/rml/` | RML/RCSS documents (`account.rml`) |
+| `client/ui/rml/` | RML/RCSS documents (`account.rml`) + shipped `fonts/` |
 | `source/lib/Release/rmlui*.lib` | Prebuilt Release static libs |
 | `source/lib/Debug/rmlui_debugger.lib`, `freetyped.lib` | Smaller Debug libs (main `rmlui.lib` is built locally) |
 
@@ -29,9 +29,10 @@ Note: `source/lib/Debug/rmlui.lib` is not committed (over GitHub's 100MB limit).
 
 ## Runtime
 
-- Account document: `client/ui/rml/account.rml`
-- Font: loads `C:/Windows/Fonts/segoeui.ttf` (or arial) if no local TTF is present
-- **F8** toggles the RmlUi debugger
+- Account document: `client/ui/rml/account.rml` (**Notice** light dialog theme — see `docs/UI_DESIGN_SYSTEM.md`)
+- Design system: Notice skins in `frames/notice/`; dark HUD classes in `system/aether.rcss`
+- Font: shipped `client/ui/rml/fonts/LatoLatin-*.ttf` registered as family `LatoLatin` (Windows Arial/Segoe only as fallback if those files are missing)
+- **F8** toggles the RmlUi debugger (optional; UI text no longer depends on it)
 - Working directory should be the `client/` folder (same as the game normally)
 
 ## Code hooks

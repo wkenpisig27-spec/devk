@@ -1,0 +1,103 @@
+/* Window frame — layered chrome (glow → metal → glass body). No box-shadow. */
+
+.ui-window {
+	display: block;
+	position: relative;
+	margin: auto;
+	padding: 3dp;
+	background-color: #1a7f8c;
+	border-width: 1dp;
+	border-color: #7aebf5;
+	pointer-events: auto;
+}
+
+.ui-window-metal {
+	display: block;
+	width: 100%;
+	padding: 2dp;
+	background-color: #2a4450;
+	border-width: 1dp;
+	border-color: #6a8292;
+}
+
+.ui-window-glass {
+	display: block;
+	width: 100%;
+	background-color: #0b141cf0;
+	border-width: 1dp;
+	border-color: #1e4a54;
+	padding: 0dp;
+}
+
+.ui-window-content {
+	display: block;
+	width: 100%;
+	padding: 20dp 22dp 18dp 22dp;
+}
+
+/* Corner ornaments (TGA) — absolute overlays */
+.ui-ornament {
+	position: absolute;
+	width: 22dp;
+	height: 22dp;
+	z-index: 5;
+	pointer-events: none;
+	background-color: transparent;
+}
+
+.ui-ornament-tl {
+	top: 6dp;
+	left: 6dp;
+	border-top-width: 2dp;
+	border-top-color: #8ec9d2;
+	border-left-width: 2dp;
+	border-left-color: #c9b28a;
+}
+
+.ui-ornament-tr {
+	top: 6dp;
+	right: 6dp;
+	border-top-width: 2dp;
+	border-top-color: #8ec9d2;
+	border-right-width: 2dp;
+	border-right-color: #c9b28a;
+}
+
+.ui-ornament-bl {
+	bottom: 6dp;
+	left: 6dp;
+	border-bottom-width: 2dp;
+	border-bottom-color: #8ec9d2;
+	border-left-width: 2dp;
+	border-left-color: #c9b28a;
+}
+
+.ui-ornament-br {
+	bottom: 6dp;
+	right: 6dp;
+	border-bottom-width: 2dp;
+	border-bottom-color: #8ec9d2;
+	border-right-width: 2dp;
+	border-right-color: #c9b28a;
+}
+
+/* Modal sizes */
+.ui-window-sm { width: 360dp; }
+.ui-window-md { width: 480dp; }
+.ui-window-lg { width: 640dp; }
+.ui-window-xl { width: 820dp; }
+
+/* Compact panel (no outer glow) for nested sections */
+.ui-panel {
+	display: block;
+	width: 100%;
+	padding: 14dp 16dp;
+	background-color: #121e28;
+	border-width: 1dp;
+	border-color: #2a4450;
+}
+
+.ui-panel-sunken {
+	background-color: #070d12;
+	border-color: #1e4a54;
+}

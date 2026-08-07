@@ -1,0 +1,67 @@
+/* Lists & tables */
+
+.ui-list {
+	display: block;
+	width: 100%;
+	background-color: #070d12;
+	border-width: 1dp;
+	border-color: #1e4a54;
+}
+
+.ui-list-item {
+	display: block;
+	width: 100%;
+	padding: 10dp 12dp;
+	border-bottom-width: 1dp;
+	border-bottom-color: #152028;
+	color: #e6f0f5;
+	font-size: 13dp;
+	transition: background-color 0.12s;
+}
+
+.ui-list-item:hover {
+	background-color: #12202c;
+}
+
+.ui-list-item-active {
+	background-color: #12282e;
+	border-left-width: 2dp;
+	border-left-color: #3ec9d8;
+	color: #b6f4fc;
+}
+
+.ui-table {
+	display: block;
+	width: 100%;
+	border-width: 1dp;
+	border-color: #2a4450;
+}
+
+.ui-table-header {
+	display: block;
+	width: 100%;
+	padding: 8dp 12dp;
+	background-color: #0f1a24;
+	font-size: 11dp;
+	font-weight: bold;
+	color: #5ec4d0;
+	border-bottom-width: 1dp;
+	border-bottom-color: #2a5f6a;
+}
+
+.ui-table-row {
+	display: block;
+	width: 100%;
+	padding: 8dp 12dp;
+	font-size: 13dp;
+	border-bottom-width: 1dp;
+	border-bottom-color: #152028;
+}
+
+.ui-table-row:hover {
+	background-color: #12202c;
+}
+
+.ui-table-row-alt {
+	background-color: #0a1016;
+}

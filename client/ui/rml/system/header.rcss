@@ -1,0 +1,65 @@
+/* Headers / title bars / section titles */
+
+.ui-titlebar {
+	display: block;
+	width: 100%;
+	height: 44dp;
+	padding: 0dp 18dp;
+	background-color: #0f1a24;
+	border-bottom-width: 1dp;
+	border-bottom-color: #2a5f6a;
+}
+
+.ui-titlebar-label {
+	display: block;
+	padding-top: 11dp;
+	font-family: LatoLatin;
+	font-size: 18dp;
+	font-weight: bold;
+	color: #f3fbff;
+	text-align: center;
+}
+
+.ui-titlebar-kicker {
+	display: block;
+	width: 100%;
+	font-size: 11dp;
+	color: #5ec4d0;
+	text-align: center;
+	padding-top: 8dp;
+	margin-bottom: -2dp;
+}
+
+.ui-title-accent {
+	display: block;
+	width: 72dp;
+	height: 2dp;
+	margin: 8dp auto 0dp auto;
+	background-color: #2a8f9a;
+}
+
+.ui-section {
+	display: block;
+	width: 100%;
+	margin: 16dp 0dp 10dp 0dp;
+}
+
+.ui-section-title {
+	display: block;
+	width: 100%;
+	font-size: 13dp;
+	font-weight: bold;
+	color: #7aebf5;
+	padding-bottom: 6dp;
+	margin-bottom: 10dp;
+	border-bottom-width: 1dp;
+	border-bottom-color: #1e4a54;
+}
+
+.ui-subtitle {
+	display: block;
+	font-size: 12dp;
+	color: #8da3b0;
+	margin-bottom: 12dp;
+	text-align: center;
+}

@@ -42,10 +42,24 @@ public:
 			"ui/rml/",
 			"./ui/rml/",
 			"../ui/rml/",
+			"ui/rml/system/",
+			"./ui/rml/system/",
 		};
 
 		for (const char* prefix : prefixes) {
 			std::string full = std::string(prefix) + path.c_str();
+			fp = nullptr;
+			if (fopen_s(&fp, full.c_str(), "rb") == 0 && fp)
+				return reinterpret_cast<Rml::FileHandle>(fp);
+		}
+
+		// Stylesheets under system/ may resolve assets as "system/../frames/..." or "frames/...".
+		// Also try stripping a leading "system/" and looking under ui/rml/.
+		Rml::String normalized = path;
+		const char* sys = "system/";
+		if (normalized.size() > 7 && normalized.substr(0, 7) == sys) {
+			normalized = normalized.substr(7);
+			std::string full = std::string("ui/rml/") + normalized.c_str();
 			fp = nullptr;
 			if (fopen_s(&fp, full.c_str(), "rb") == 0 && fp)
 				return reinterpret_cast<Rml::FileHandle>(fp);
@@ -126,34 +140,54 @@ bool CRmlUiManager::Init(HWND hwnd) {
 		return false;
 	}
 
-	// Load fonts before documents. Prefer Windows fonts; also install the debugger's
-	// embedded face early so we always have a known-good English font.
+	// Load UI fonts before documents. Prefer the shipped LatoLatin faces so RCSS
+	// does not depend on the debugger's embedded family.
 	bool font_ok = false;
 
-	auto try_load = [&](const char* path, const char* tag) {
-		if (Rml::LoadFontFace(path, true)) {
+	auto try_load_family = [&](const char* path, const char* family, Rml::Style::FontStyle style,
+							   Rml::Style::FontWeight weight, bool fallback) {
+		if (Rml::LoadFontFace(path, family, style, weight, fallback)) {
 			font_ok = true;
 			char buf[256];
-			sprintf_s(buf, "RmlUi: loaded font via %s (%s)\n", tag, path);
+			sprintf_s(buf, "RmlUi: loaded font %s as '%s'\n", path, family);
 			OutputDebugStringA(buf);
 			return true;
 		}
 		char buf[256];
-		sprintf_s(buf, "RmlUi: FAILED font %s (%s)\n", tag, path);
+		sprintf_s(buf, "RmlUi: FAILED font %s as '%s'\n", path, family);
 		OutputDebugStringA(buf);
 		return false;
 	};
 
-	try_load("C:\\Windows\\Fonts\\arial.ttf", "arial");
-	try_load("C:\\Windows\\Fonts\\segoeui.ttf", "segoeui");
-	try_load("C:/Windows/Fonts/arial.ttf", "arial-fwd");
-	try_load("ui/rml/fonts/LatoLatin-Regular.ttf", "lato");
+	auto try_load_fallback = [&](const char* path) {
+		if (Rml::LoadFontFace(path, true)) {
+			font_ok = true;
+			char buf[256];
+			sprintf_s(buf, "RmlUi: loaded fallback font %s\n", path);
+			OutputDebugStringA(buf);
+			return true;
+		}
+		return false;
+	};
 
-	// Install debugger (loads embedded "rmlui-debugger-font") but keep the menu hidden.
+	const bool lato_regular = try_load_family(
+		"ui/rml/fonts/LatoLatin-Regular.ttf", "LatoLatin",
+		Rml::Style::FontStyle::Normal, Rml::Style::FontWeight::Normal, true);
+	try_load_family(
+		"ui/rml/fonts/LatoLatin-Bold.ttf", "LatoLatin",
+		Rml::Style::FontStyle::Normal, Rml::Style::FontWeight::Bold, false);
+
+	if (!lato_regular) {
+		// Fallback if the shipped TTFs are missing from the client folder.
+		try_load_fallback("C:\\Windows\\Fonts\\segoeui.ttf");
+		try_load_fallback("C:\\Windows\\Fonts\\arial.ttf");
+		try_load_fallback("C:/Windows/Fonts/arial.ttf");
+	}
+
+	// Debugger is optional (F8). Keep it hidden; do not rely on its font for UI.
 	if (Rml::Debugger::Initialise(g_context)) {
 		Rml::Debugger::SetVisible(false);
-		font_ok = true;
-		OutputDebugStringA("RmlUi: debugger font installed (menu hidden)\n");
+		OutputDebugStringA("RmlUi: debugger installed (menu hidden)\n");
 	}
 
 	if (!font_ok) {
