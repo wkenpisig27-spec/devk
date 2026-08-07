@@ -4,8 +4,8 @@ Two RmlUi visual languages share fonts/renderer constraints:
 
 | Theme | Use for | Reference |
 |-------|---------|-----------|
-| **Notice** (primary for dialogs) | Login, register, confirm, modal forms, select-cha dock | `account.rml` / `selectcha.rml` + `notice.rcss` |
-| **Aether** (dark HUD) | In-game windows, inventory, HUD chrome | `system/aether.rcss` |
+| **Notice** (primary for dialogs) | Login, register, confirm, modal forms, select-cha dock, **inventory** | `account.rml` / `selectcha.rml` / `inventory.rml` + `notice.rcss` |
+| **Aether** (dark HUD) | Other in-game windows (not inventory) | `system/aether.rcss` |
 
 **Hard rule for forms/dialogs:** match the **Notice** look. Do not restyle login-class screens as dark Aether glass.
 
@@ -55,6 +55,7 @@ client/ui/rml/
   account.rml / account.rcss   ← login
   region.rml / server.rml      ← region + server pick
   selectcha.rml / selectcha.rcss ← character-select bottom dock (no scrim)
+  inventory.rml / inventory.rcss ← in-game inventory (Character + Backpack + tabs)
   frames/notice/               ← soft-AA TGA
   fonts/LatoLatin-*.ttf
   system/aether.rcss           ← dark HUD (separate)
@@ -154,3 +155,4 @@ python tools/gen-ui-frames.py     # Aether corner ornaments
 
 - Modal: `account.rml` (canonical Notice dialog)
 - Bottom strip: `selectcha.rml` (compact dock without panel header)
+- Inventory: `inventory.rml` (Notice-inspired in-game Character + Backpack)

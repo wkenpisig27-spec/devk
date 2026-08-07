@@ -32,6 +32,7 @@ Note: `source/lib/Debug/rmlui.lib` is not committed (over GitHub's 100MB limit).
 - Account document: `client/ui/rml/account.rml` (**Notice** light dialog theme — see `docs/UI_DESIGN_SYSTEM.md`)
 - Region / server: `region.rml`, `server.rml` (same Notice chrome via `notice.rcss`)
 - Character select: `selectcha.rml` bottom dock (no scrim; replaces `frmSelect`)
+- Inventory: `inventory.rml` Notice-inspired Character + Backpack (replaces `frmInv` chrome)
 - Design system: Notice skins in `frames/notice/`; dark HUD classes in `system/aether.rcss`
 - Font: shipped `client/ui/rml/fonts/LatoLatin-*.ttf` registered as family `LatoLatin` (Windows Arial/Segoe only as fallback if those files are missing)
 - **F8** toggles the RmlUi debugger (optional; UI text no longer depends on it)

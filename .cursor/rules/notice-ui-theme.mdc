@@ -15,6 +15,7 @@ Full tokens/docs: `docs/UI_DESIGN_SYSTEM.md` (Notice section). Skins: `client/ui
 |------|--------|--------|
 | Centered modal | `account.rml` / `region.rml` / `server.rml` | Scrim + `.notice` panel + header/body/footer |
 | Slim bottom strip | `selectcha.rml` | No scrim; `.selectcha-bar` with `input_*.tga`; float via `position: absolute; bottom: …` |
+| In-game inventory | `inventory.rml` | Notice-inspired light HUD (Character + Backpack + tabs); not Aether |
 
 Do **not** wrap a slim bar in `.notice` panel (baked blue header wastes height).
 
@@ -37,7 +38,7 @@ Do **not** wrap a slim bar in `.notice` panel (baked blue header wastes height).
 ## New screen checklist
 
 1. Add `*.rml` + thin `*.rcss`; `<link>` `notice.rcss`
-2. Mirror `CRmlUiAccountForm` / `CRmlUiSelectChaForm` in `source/**/rmlui/`; load in `CRmlUiManager`
+2. Mirror `CRmlUiAccountForm` / `CRmlUiSelectChaForm` / `CRmlUiInventoryForm` in `source/**/rmlui/`; load in `CRmlUiManager`
 3. Stable element IDs for C++ bindings; `extern` callbacks into the scene
-4. Hide legacy `CForm`; hide Rml docs on scene leave (`HideLoginForms` / `HideSelectChaForm`)
-5. In-game HUD windows only → Aether (`system/aether.rcss`), not Notice
+4. Hide legacy `CForm`; hide Rml docs on scene leave (`HideLoginForms` / `HideSelectChaForm` / `HideInventoryForm`)
+5. Other in-game HUD windows → Aether (`system/aether.rcss`); **inventory uses Notice-inspired light chrome** (`inventory.rml`)

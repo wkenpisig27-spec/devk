@@ -2022,6 +2022,9 @@ void NetChangeKitbag(DWORD dwChaID, stNetKitbag& SKitbag) {
 	default:
 		g_pGameApp->PlaySound(22);
 	}
+
+	if (grd == g_stUIEquip.GetGoodsGrid())
+		g_stUIEquip.RefreshRmlInventory();
 }
 
 void NetKitbagCapacity(unsigned int nID, short sKbCap) {
@@ -2520,9 +2523,7 @@ void NetBeginRepairItem(void) {
 	CRepairState* pState = new CRepairState(pCha->GetActor());
 	pCha->GetActor()->SwitchState(pState);
 
-	if (g_stUIEquip.GetItemForm()) {
-		g_stUIEquip.GetItemForm()->Show();
-	}
+	g_stUIEquip.ShowInventoryUi();
 }
 
 void NetItemUseSuccess(unsigned int nID, short sItemID) {

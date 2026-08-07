@@ -32,6 +32,7 @@ public:
 	// Hide account/region/server overlays (they persist across scene switches).
 	void HideLoginForms();
 	void HideSelectChaForm();
+	void HideInventoryForm();
 
 private:
 	CRmlUiManager() = default;

@@ -1029,7 +1029,7 @@ void CStartMgr::_evtStartFormMouseEvent(CCompent* pSender, int nMsgType, int x, 
 		g_stUIStart.ShowHelpSystem(!bShow);
 	} else if (name == "btnOpenBag") // ????????t????
 	{
-		g_stUIEquip.GetItemForm()->SetIsShow(!g_stUIEquip.GetItemForm()->GetIsShow());
+		g_stUIEquip.ToggleInventoryUi();
 		// g_stUIStart.ShowBagButtonForm(! g_stUIStart.frmBag->GetIsShow());
 		// g_stUIStart.ShowSociliatyButtonForm(false);
 

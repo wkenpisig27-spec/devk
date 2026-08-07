@@ -1,0 +1,75 @@
+<rml>
+	<head>
+		<title>Inventory</title>
+		<link type="text/rcss" href="notice.rcss"/>
+		<link type="text/rcss" href="inventory.rcss"/>
+	</head>
+	<body class="inv-body">
+		<div id="inv-root" class="inv-root">
+			<!-- Character panel -->
+			<div id="inv-character" class="inv-panel inv-character">
+				<div class="inv-panel-header">
+					<handle class="inv-drag-handle" move_target="inv-root">
+						<div class="inv-panel-title">Character</div>
+					</handle>
+					<div class="inv-mode-tabs">
+						<button class="inv-mode inv-mode-active" id="btnModeEquip" type="button">Equipment</button>
+						<button class="inv-mode" id="btnModeApparel" type="button">Apparel</button>
+					</div>
+				</div>
+				<div class="inv-character-body">
+					<div id="equip-left" class="inv-equip-col"></div>
+					<div class="inv-preview-well">
+						<div class="inv-preview-label">Preview</div>
+					</div>
+					<div id="equip-right" class="inv-equip-col"></div>
+				</div>
+				<div id="equip-bottom" class="inv-equip-row"></div>
+				<div class="inv-currency-row">
+					<div class="inv-currency">
+						<div class="inv-currency-label">Gold</div>
+						<div id="labGold" class="inv-currency-value">0</div>
+					</div>
+					<div class="inv-currency">
+						<div class="inv-currency-label">IMP</div>
+						<div id="labIMP" class="inv-currency-value">0</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Backpack panel -->
+			<div id="inv-backpack" class="inv-panel inv-backpack">
+				<div class="inv-panel-header">
+					<handle class="inv-drag-handle" move_target="inv-root">
+						<div class="inv-panel-title">Backpack</div>
+					</handle>
+					<button class="inv-close" id="btnClose" type="button">X</button>
+				</div>
+				<div class="inv-backpack-body">
+					<div id="bag-grid" class="inv-bag-grid"></div>
+				</div>
+				<div class="inv-backpack-footer">
+					<div id="labCapacity" class="inv-capacity">Capacity: 0/0</div>
+					<button class="notice-btn notice-btn-blue inv-footer-icon" id="btnLock" type="button" title="Lock">
+						<img id="imgLock" class="inv-footer-icon-img" src="ui/rml/frames/notice/ico_lock.tga"/>
+					</button>
+					<button class="notice-btn notice-btn-gold inv-footer-icon" id="btnExpand" type="button" title="Expand">
+						<img class="inv-footer-icon-img" src="ui/rml/frames/notice/ico_expand.tga"/>
+					</button>
+					<button class="notice-btn notice-btn-blue inv-footer-icon inv-footer-icon-last" id="btnTempBag" type="button" title="Temp bag">
+						<img class="inv-footer-icon-img" src="ui/rml/frames/notice/ico_temp.tga"/>
+					</button>
+				</div>
+			</div>
+
+			<!-- Category tabs -->
+			<div id="inv-tabs" class="inv-tabs">
+				<button class="inv-tab inv-tab-active" id="tabItems" type="button" data-filter="all">Items</button>
+				<button class="inv-tab" id="tabEquipment" type="button" data-filter="equipment">Equipment</button>
+				<button class="inv-tab" id="tabConsumable" type="button" data-filter="consumable">Consumable</button>
+				<button class="inv-tab" id="tabMaterial" type="button" data-filter="material">Material</button>
+				<button class="inv-tab" id="tabOther" type="button" data-filter="other">Other</button>
+			</div>
+		</div>
+	</body>
+</rml>

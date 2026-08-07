@@ -325,9 +325,14 @@ void CWorldScene::_FrameMove(DWORD dwTimeParam) {
 		if (!CGameApp::IsMouseInScene())
 			break;
 
-	case GUI::enumMA_None:
+	case GUI::enumMA_None: {
+		static bool IsMouseWalk = false;
+		// RmlUi / GUI hover must block world walk (IsMouseInScene is cleared in _PreMouseRun).
+		if (!CGameApp::IsMouseInScene()) {
+			IsMouseWalk = false;
+			break;
+		}
 		if (GetUseLevel().IsTrue(LEVEL_CHA_RUN)) {
-			static bool IsMouseWalk = false;
 			DWORD key = g_pGameApp->GetMouseKey();
 			if (IsMouseWalk) {
 				if (key & M_Down) {
@@ -440,6 +445,7 @@ void CWorldScene::_FrameMove(DWORD dwTimeParam) {
 			CCursor::I()->Restore();
 		}
 		break;
+	}
 	}
 	_cMouseDown.FrameMove();
 

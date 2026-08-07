@@ -136,7 +136,8 @@ void CNpcTradeMgr::ShowTradePage(const NET_TRADEINFO& TradeInfo, BYTE byCmd, DWO
 		frmNPCtrade->Show();
 	}
 
-	if (g_stUIEquip.GetItemForm()) {
+	g_stUIEquip.ShowInventoryUi();
+	if (!g_stUIEquip.IsInventoryUiVisible() && g_stUIEquip.GetItemForm()) {
 		g_stUIEquip.GetItemForm()->SetPos(frmNPCtrade->GetX2(), frmNPCtrade->GetY());
 		g_stUIEquip.GetItemForm()->Refresh();
 		g_stUIEquip.GetItemForm()->Show();
@@ -517,7 +518,9 @@ void CNpcTradeMgr::CloseForm() {
 	_IsShow = false;
 
 	if (g_stUIEquip.GetItemForm()->GetIsShow()) {
-		g_stUIEquip.GetItemForm()->Close();
+		g_stUIEquip.HideInventoryUi();
+		if (g_stUIEquip.GetItemForm())
+			g_stUIEquip.GetItemForm()->Close();
 	}
 
 	if (frmNPCtrade->GetIsShow()) {

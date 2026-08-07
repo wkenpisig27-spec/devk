@@ -117,14 +117,15 @@ void CGuildBankMgr::ShowBank() // ????
 	frmBank->Show();
 
 	// ????????
-	if (!g_stUIEquip.GetItemForm()->GetIsShow()) {
-		int nLeft, nTop;
-		nLeft = frmBank->GetX2();
-		nTop = frmBank->GetY();
-
-		g_stUIEquip.GetItemForm()->SetPos(nLeft, nTop); // ??????
-		g_stUIEquip.GetItemForm()->Refresh();			// ?????
-		g_stUIEquip.GetItemForm()->Show();				// ??????
+	if (!g_stUIEquip.IsInventoryUiVisible()) {
+		g_stUIEquip.ShowInventoryUi();
+		if (!g_stUIEquip.IsInventoryUiVisible() && g_stUIEquip.GetItemForm()) {
+			int nLeft = frmBank->GetX2();
+			int nTop = frmBank->GetY();
+			g_stUIEquip.GetItemForm()->SetPos(nLeft, nTop);
+			g_stUIEquip.GetItemForm()->Refresh();
+			g_stUIEquip.GetItemForm()->Show();
+		}
 	}
 
 	CFormMgr::s_Mgr.SetEnableHotKey(HOTKEY_BANK, false); // ??????
@@ -248,7 +249,9 @@ void CGuildBankMgr::CloseForm() // ???????
 {
 	if (frmBank->GetIsShow()) {
 		frmBank->Close();
-		g_stUIEquip.GetItemForm()->Close();
+		g_stUIEquip.HideInventoryUi();
+		if (g_stUIEquip.GetItemForm())
+			g_stUIEquip.GetItemForm()->Close();
 	}
 }
 

@@ -219,6 +219,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\rmlui\RmlUiInventoryForm.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\src\game\rmlui\RmlUi_Renderer_DX9.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -609,6 +613,7 @@
     <ClInclude Include="..\..\include\game\rmlui\RmlUiRegionForm.h" />
     <ClInclude Include="..\..\include\game\rmlui\RmlUiServerForm.h" />
     <ClInclude Include="..\..\include\game\rmlui\RmlUiSelectChaForm.h" />
+    <ClInclude Include="..\..\include\game\rmlui\RmlUiInventoryForm.h" />
     <ClInclude Include="..\..\include\game\rmlui\RmlUi_Renderer_DX9.h" />
     <ClInclude Include="..\..\src\game\UIRender.h" />
     <ClInclude Include="..\..\src\game\UIRichEdit.h" />

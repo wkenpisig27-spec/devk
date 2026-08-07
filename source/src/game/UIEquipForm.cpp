@@ -36,6 +36,9 @@
 #include <algorithm>
 #include <string>
 
+#include "rmlui/RmlUiInventoryForm.h"
+#include "rmlui/RmlUiManager.h"
+
 using namespace std;
 
 using namespace GUI;
@@ -885,6 +888,7 @@ void CEquipMgr::UpdataEquip(const stNetChangeChaPart& SPart, CCharacter* pCha) {
 	for (int i = 0; i < enumEQUIP_NUM; i++) {
 		_UpdataEquip(stEquip.SLink[i], i);
 	}
+	RefreshRmlInventory();
 }
 
 void CEquipMgr::UpdataEquipSpy(const stNetChangeChaPart& SPart, CCharacter* pCha) {
@@ -950,6 +954,7 @@ void CEquipMgr::SwitchMap() {
 	refreshChaModel = true;
 	refreshSpyModel = true;
 	HideChestPreview();
+	CRmlUiManager::Instance().HideInventoryForm();
 }
 
 void CEquipMgr::RenderModel(int x, int y, CCharacter* original, CCharacter* model, int rotation, bool refresh) {
@@ -1600,6 +1605,7 @@ void CEquipMgr::UpdateIMP(int IMP) {
 	char szBuf[16];
 	sprintf(szBuf, "%s", StringSplitNum(IMP));
 	lblIMP->SetCaption(szBuf);
+	RefreshRmlInventory();
 }
 
 void CEquipMgr::FrameMove(DWORD dwTime) {
@@ -1631,9 +1637,16 @@ void CEquipMgr::FrameMove(DWORD dwTime) {
 			for (vskill::iterator it = _cancels.begin(); it != _cancels.end(); it++)
 				(*it)->SetIsActive(pState->HasSkillState((*it)->nStateID));
 
-			if (frmInv->GetIsShow()) {
+			if (frmInv->GetIsShow() || CRmlUiInventoryForm::Instance().IsVisible()) {
 				sprintf(szBuf, "%s", StringSplitNum(pGameAttr->get(ATTR_GD)));
-				lblGold->SetCaption(szBuf);
+				if (frmInv->GetIsShow() && lblGold)
+					lblGold->SetCaption(szBuf);
+
+				if (CRmlUiInventoryForm::Instance().IsVisible()) {
+					char impBuf[32];
+					sprintf(impBuf, "%s", StringSplitNum(GetIMP()));
+					CRmlUiInventoryForm::Instance().SetCurrency(szBuf, impBuf);
+				}
 
 				for (int i = 0; i < enumEQUIP_NUM; i++)
 					_imgCharges[i].Next();
@@ -2096,15 +2109,381 @@ void CEquipMgr::ShowRepairMsg(const char* pItemName, long lMoney) {
 }
 
 void CEquipMgr::CloseAllForm() {
-	if (frmInv && frmInv->GetIsShow()) {
-		frmInv->SetIsShow(false);
-	}
+	HideInventoryUi();
 
 	if (frmSkill && frmSkill->GetIsShow()) {
 		frmSkill->SetIsShow(false);
 	}
 
 	HideChestPreview();
+}
+
+void CEquipMgr::ShowInventoryUi() {
+	if (frmInv)
+		frmInv->SetIsShow(false);
+
+	if (!CRmlUiManager::Instance().IsReady()) {
+		if (frmInv)
+			frmInv->SetIsShow(true);
+		return;
+	}
+
+	CRmlUiInventoryForm& rml = CRmlUiInventoryForm::Instance();
+	rml.Show();
+	RefreshRmlInventory();
+}
+
+void CEquipMgr::HideInventoryUi() {
+	CRmlUiInventoryForm::Instance().Hide();
+	if (frmInv && frmInv->GetIsShow())
+		frmInv->SetIsShow(false);
+}
+
+bool CEquipMgr::IsInventoryUiVisible() const {
+	if (CRmlUiInventoryForm::Instance().IsVisible())
+		return true;
+	return frmInv && frmInv->GetIsShow();
+}
+
+void CEquipMgr::ToggleInventoryUi() {
+	if (IsInventoryUiVisible()) {
+		HideInventoryUi();
+		return;
+	}
+	ShowInventoryUi();
+}
+
+void CEquipMgr::ShowBagContextMenu(int bagIndex) {
+	CGoodsGrid* bag = GetGoodsGrid();
+	if (!bag || bagIndex < 0 || !rightClickItemMenu)
+		return;
+	CItemCommand* cmd = dynamic_cast<CItemCommand*>(bag->GetItem(bagIndex));
+	if (!cmd)
+		return;
+	_evtRMouseGridEvent(bag, cmd, bagIndex);
+}
+
+void CEquipMgr::RequestTogglePackageLock() {
+	if (GetIsLock()) {
+		g_stUIDoublePwd.SetType(CDoublePwdMgr::PACKAGE_UNLOCK);
+		g_stUIDoublePwd.ShowDoublePwdForm();
+	} else {
+		CBoxMgr::ShowSelectBox(_CheckLockMouseEvent, RES_STRING(CL_LANGUAGE_MATCH_824), true);
+	}
+}
+
+void CEquipMgr::RequestExpandBag() {
+	_evtExpandBagClick();
+}
+
+void CEquipMgr::RequestTempBag() {
+	g_stUIStore.ShowTempKitbag();
+}
+
+void CEquipMgr::RefreshRmlInventory() {
+	CRmlUiInventoryForm& rml = CRmlUiInventoryForm::Instance();
+	if (!rml.IsVisible())
+		return;
+
+	static const int kLeft[] = {enumEQUIP_HEAD, enumEQUIP_BODY, enumEQUIP_GLOVE, enumEQUIP_SHOES, enumEQUIP_NECK};
+	static const int kRight[] = {enumEQUIP_RHAND, enumEQUIP_LHAND, enumEQUIP_HAND1, enumEQUIP_HAND2, enumEQUIP_WING};
+	static const int kBottom[] = {
+		enumEQUIP_Jewelry1, enumEQUIP_Jewelry2, enumEQUIP_Jewelry3, enumEQUIP_Jewelry4,
+		enumEQUIP_CLOAK, enumEQUIP_FAIRY, enumEQUIP_REAR, enumEQUIP_MOUNT};
+
+	static const int kAppLeft[] = {enumEQUIP_HEADAPP, enumEQUIP_FACEAPP, enumEQUIP_BODYAPP, enumEQUIP_GLOVEAPP, enumEQUIP_SHOESAPP};
+	static const int kAppRight[] = {enumEQUIP_FAIRYAPP, enumEQUIP_GLOWAPP, enumEQUIP_DAGGERAPP, enumEQUIP_GUNAPP, enumEQUIP_SWORD1APP};
+	static const int kAppBottom[] = {
+		enumEQUIP_GREATSWORDAPP, enumEQUIP_STAFFAPP, enumEQUIP_BOWAPP, enumEQUIP_SWORD2APP, enumEQUIP_SHIELDAPP};
+
+	const bool apparel = rml.IsEquipModeApparel();
+	const int* leftLinks = apparel ? kAppLeft : kLeft;
+	const int* rightLinks = apparel ? kAppRight : kRight;
+	const int* bottomLinks = apparel ? kAppBottom : kBottom;
+	const int leftCount = apparel ? (int)(sizeof(kAppLeft) / sizeof(kAppLeft[0])) : (int)(sizeof(kLeft) / sizeof(kLeft[0]));
+	const int rightCount = apparel ? (int)(sizeof(kAppRight) / sizeof(kAppRight[0])) : (int)(sizeof(kRight) / sizeof(kRight[0]));
+	const int bottomCount = apparel ? (int)(sizeof(kAppBottom) / sizeof(kAppBottom[0])) : (int)(sizeof(kBottom) / sizeof(kBottom[0]));
+
+	auto placeholderFor = [](int link) -> const char* {
+		switch (link) {
+		case enumEQUIP_HEAD:
+		case enumEQUIP_HEADAPP:
+			return "ui/rml/frames/notice/slots/helm.tga";
+		case enumEQUIP_FACE:
+		case enumEQUIP_FACEAPP:
+			return "ui/rml/frames/notice/slots/face.tga";
+		case enumEQUIP_BODY:
+		case enumEQUIP_BODYAPP:
+			return "ui/rml/frames/notice/slots/body.tga";
+		case enumEQUIP_GLOVE:
+		case enumEQUIP_GLOVEAPP:
+			return "ui/rml/frames/notice/slots/glove.tga";
+		case enumEQUIP_SHOES:
+		case enumEQUIP_SHOESAPP:
+			return "ui/rml/frames/notice/slots/shoes.tga";
+		case enumEQUIP_NECK:
+			return "ui/rml/frames/notice/slots/neck.tga";
+		case enumEQUIP_RHAND:
+		case enumEQUIP_SWORD1APP:
+		case enumEQUIP_SWORD2APP:
+			return "ui/rml/frames/notice/slots/sword.tga";
+		case enumEQUIP_LHAND:
+		case enumEQUIP_SHIELDAPP:
+			return "ui/rml/frames/notice/slots/shield.tga";
+		case enumEQUIP_HAND1:
+		case enumEQUIP_HAND2:
+		case enumEQUIP_Jewelry1:
+		case enumEQUIP_Jewelry2:
+		case enumEQUIP_Jewelry3:
+		case enumEQUIP_Jewelry4:
+			return "ui/rml/frames/notice/slots/ring.tga";
+		case enumEQUIP_WING:
+			return "ui/rml/frames/notice/slots/wing.tga";
+		case enumEQUIP_CLOAK:
+			return "ui/rml/frames/notice/slots/cloak.tga";
+		case enumEQUIP_FAIRY:
+		case enumEQUIP_FAIRYAPP:
+			return "ui/rml/frames/notice/slots/fairy.tga";
+		case enumEQUIP_REAR:
+			return "ui/rml/frames/notice/slots/rear.tga";
+		case enumEQUIP_MOUNT:
+			return "ui/rml/frames/notice/slots/mount.tga";
+		case enumEQUIP_GLOWAPP:
+			return "ui/rml/frames/notice/slots/glow.tga";
+		case enumEQUIP_DAGGERAPP:
+			return "ui/rml/frames/notice/slots/dagger.tga";
+		case enumEQUIP_GUNAPP:
+			return "ui/rml/frames/notice/slots/gun.tga";
+		case enumEQUIP_GREATSWORDAPP:
+			return "ui/rml/frames/notice/slots/greatsword.tga";
+		case enumEQUIP_STAFFAPP:
+			return "ui/rml/frames/notice/slots/staff.tga";
+		case enumEQUIP_BOWAPP:
+			return "ui/rml/frames/notice/slots/bow.tga";
+		default:
+			return nullptr;
+		}
+	};
+
+	auto fillEquip = [&](const int* links, int count, std::vector<RmlInvSlotView>& out) {
+		out.clear();
+		out.reserve(count);
+		for (int i = 0; i < count; ++i) {
+			RmlInvSlotView view;
+			view.id = links[i];
+			if (const char* ph = placeholderFor(links[i]))
+				view.placeholderPath = ph;
+			if (CItemCommand* item = GetEquipItem((unsigned int)links[i])) {
+				if (CItemRecord* info = item->GetItemInfo())
+					view.iconPath = info->GetIconFile();
+			}
+			out.push_back(view);
+		}
+	};
+
+	std::vector<RmlInvSlotView> left, right, bottom;
+	fillEquip(leftLinks, leftCount, left);
+	fillEquip(rightLinks, rightCount, right);
+	fillEquip(bottomLinks, bottomCount, bottom);
+	rml.SetEquipSlots(left, right, bottom);
+	rml.SetPackageLocked(GetIsLock());
+
+	CGoodsGrid* bag = GetGoodsGrid();
+	std::vector<RmlInvSlotView> bagSlots;
+	int used = 0;
+	int unlocked = 0;
+	int cols = 6;
+	const char* filter = rml.GetFilter();
+
+	auto passes = [&](CItemRecord* info) -> bool {
+		if (!info || !filter || strcmp(filter, "all") == 0)
+			return true;
+		const bool equipment = info->IsWeapon() || info->IsArmor() || info->sType < 31;
+		const bool consumable = info->IsConsumable() || info->sType == 36 || info->sType == 71;
+		const bool material = info->sType == enumItemTypeGeneral;
+		if (strcmp(filter, "equipment") == 0)
+			return equipment;
+		if (strcmp(filter, "consumable") == 0)
+			return consumable;
+		if (strcmp(filter, "material") == 0)
+			return material;
+		if (strcmp(filter, "other") == 0)
+			return !equipment && !consumable && !material;
+		return true;
+	};
+
+	if (bag) {
+		cols = bag->GetCol() > 0 ? bag->GetCol() : 6;
+		const int maxNum = bag->GetMaxNum();
+		bagSlots.reserve(maxNum);
+		for (int i = 0; i < maxNum; ++i) {
+			CItemCommand* cmd = dynamic_cast<CItemCommand*>(bag->GetItem(i));
+			if (!cmd) {
+				unlocked++;
+				// Always keep empty slots visible so drag-drop targets remain available.
+				RmlInvSlotView view;
+				view.id = i;
+				bagSlots.push_back(view);
+				continue;
+			}
+			CItemRecord* info = cmd->GetItemInfo();
+			if (info && info->lID == 32767) {
+				RmlInvSlotView view;
+				view.id = i;
+				view.locked = true;
+				bagSlots.push_back(view);
+				continue;
+			}
+			unlocked++;
+			used++;
+			if (!passes(info))
+				continue;
+			RmlInvSlotView view;
+			view.id = i;
+			if (info)
+				view.iconPath = info->GetIconFile();
+			view.qty = cmd->GetTotalNum();
+			bagSlots.push_back(view);
+		}
+	}
+
+	rml.SetBagSlots(bagSlots, cols);
+	rml.SetCapacity(used, unlocked > 0 ? unlocked : (int)bagSlots.size());
+
+	char goldBuf[32] = "0";
+	char impBuf[32] = "0";
+	if (CCharacter* pCha = g_stUIBoat.GetHuman()) {
+		if (SGameAttr* attr = pCha->getGameAttr())
+			sprintf(goldBuf, "%s", StringSplitNum(attr->get(ATTR_GD)));
+	}
+	sprintf(impBuf, "%s", StringSplitNum(GetIMP()));
+	rml.SetCurrency(goldBuf, impBuf);
+}
+
+void CEquipMgr::UseBagItem(int bagIndex) {
+	CGoodsGrid* bag = GetGoodsGrid();
+	if (!bag || bagIndex < 0)
+		return;
+	CItemCommand* cmd = dynamic_cast<CItemCommand*>(bag->GetItem(bagIndex));
+	if (!cmd || !cmd->GetIsValid())
+		return;
+	if (cmd->GetItemInfo() && cmd->GetItemInfo()->lID == 32767)
+		return;
+	cmd->Exec();
+}
+
+void CEquipMgr::MoveBagItem(int srcBagIndex, int dstBagIndex, short srcNum) {
+	if (srcBagIndex < 0 || dstBagIndex < 0 || srcBagIndex == dstBagIndex)
+		return;
+
+	CGoodsGrid* bag = GetGoodsGrid();
+	if (!bag)
+		return;
+
+	CCharacter* pSelf = g_stUIBoat.FindCha(bag);
+	if (!pSelf)
+		pSelf = g_stUIBoat.GetHuman();
+	if (!pSelf)
+		return;
+
+	if (pSelf->IsBoat() && pSelf != CGameScene::GetMainCha()) {
+		g_pGameApp->SysInfo(RES_STRING(CL_LANGUAGE_MATCH_557));
+		return;
+	}
+
+	CItemCommand* pItem = dynamic_cast<CItemCommand*>(bag->GetItem(srcBagIndex));
+	CItemCommand* pTarget = dynamic_cast<CItemCommand*>(bag->GetItem(dstBagIndex));
+	if (pItem && !pItem->GetIsValid())
+		return;
+	if (pTarget && !pTarget->GetIsValid())
+		return;
+	if (!pItem)
+		return;
+	if (pItem->GetItemInfo() && pItem->GetItemInfo()->lID == 32767)
+		return;
+	if (pTarget && pTarget->GetItemInfo() && pTarget->GetItemInfo()->lID == 32767)
+		return;
+
+	if (srcNum <= 0 && g_pGameApp->IsShiftPress() && pItem->GetTotalNum() > 1) {
+		if (!pTarget || (pTarget->GetItemInfo() && pItem->GetItemInfo() &&
+						 pTarget->GetItemInfo()->lID == pItem->GetItemInfo()->lID)) {
+			SSplit.nFirst = dstBagIndex;
+			SSplit.nSecond = srcBagIndex;
+			SSplit.pSelf = pSelf;
+			CBoxMgr::ShowNumberBox(SSplitItem::_evtSplitItemEvent, pItem->GetTotalNum());
+			return;
+		}
+	}
+
+	stNetItemPos info;
+	info.sSrcGridID = (short)srcBagIndex;
+	info.sSrcNum = srcNum > 0 ? srcNum : 0;
+	info.sTarGridID = (short)dstBagIndex;
+	CS_BeginAction(pSelf, enumACTION_ITEM_POS, (void*)&info);
+}
+
+void CEquipMgr::UnequipLink(int link, int bagIndex) {
+	if (link < 0 || link >= enumEQUIP_NUM)
+		return;
+	CItemCommand* eq = GetEquipItem((unsigned int)link);
+	if (!eq)
+		return;
+	UnfixToGrid(eq, bagIndex, link);
+}
+
+void RmlInv_OnClose() {
+	g_stUIEquip.HideInventoryUi();
+}
+
+void RmlInv_OnFilterChanged() {
+	g_stUIEquip.RefreshRmlInventory();
+}
+
+void RmlInv_OnToggleApparel(bool apparel) {
+	CRmlUiInventoryForm::Instance().SetEquipModeApparel(apparel);
+	g_stUIEquip.RefreshRmlInventory();
+}
+
+void RmlInv_OnToggleLock() {
+	g_stUIEquip.RequestTogglePackageLock();
+}
+
+void RmlInv_OnExpandBag() {
+	g_stUIEquip.RequestExpandBag();
+}
+
+void RmlInv_OnTempBag() {
+	g_stUIEquip.RequestTempBag();
+}
+
+void RmlInv_OnBagDblClick(int index) {
+	g_stUIEquip.UseBagItem(index);
+	g_stUIEquip.RefreshRmlInventory();
+}
+
+void RmlInv_OnBagRightClick(int index) {
+	g_stUIEquip.ShowBagContextMenu(index);
+	g_stUIEquip.RefreshRmlInventory();
+}
+
+void RmlInv_OnEquipDblClick(int link) {
+	g_stUIEquip.UnequipLink(link, -1);
+	g_stUIEquip.RefreshRmlInventory();
+}
+
+void RmlInv_OnDrop(int srcBag, int srcEquip, int dstBag, int dstEquip) {
+	if (srcBag >= 0 && dstBag >= 0) {
+		g_stUIEquip.MoveBagItem(srcBag, dstBag);
+	} else if (srcBag >= 0 && dstEquip >= 0) {
+		g_stUIEquip.UseBagItem(srcBag);
+	} else if (srcEquip >= 0 && dstBag >= 0) {
+		g_stUIEquip.UnequipLink(srcEquip, dstBag);
+	}
+	// UI rebuild is deferred to RmlInv_OnItemDragEnd so the drag source isn't destroyed mid-drop.
+}
+
+void RmlInv_OnItemDragEnd() {
+	g_stUIEquip.RefreshRmlInventory();
 }
 
 // ??�??????j????????????
@@ -2141,6 +2520,8 @@ void CEquipMgr::_evtItemFormMouseEvent(CCompent* pSender, int nMsgType, int x, i
 void CEquipMgr::SetIsLock(bool bLock) {
 	imgLock->SetIsShow(bLock);
 	imgUnLock->SetIsShow(!bLock);
+	if (CRmlUiInventoryForm::Instance().IsVisible())
+		CRmlUiInventoryForm::Instance().SetPackageLocked(bLock);
 }
 
 bool CEquipMgr::GetIsLock() {

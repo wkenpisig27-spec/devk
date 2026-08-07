@@ -5,6 +5,7 @@
 #include "rmlui/RmlUiRegionForm.h"
 #include "rmlui/RmlUiServerForm.h"
 #include "rmlui/RmlUiSelectChaForm.h"
+#include "rmlui/RmlUiInventoryForm.h"
 
 #include "MPRender.h"
 
@@ -47,6 +48,10 @@ public:
 			"../ui/rml/",
 			"ui/rml/system/",
 			"./ui/rml/system/",
+			// Game assets (item icons, etc.) when cwd is client/system
+			"../",
+			"./../",
+			"",
 		};
 
 		for (const char* prefix : prefixes) {
@@ -210,6 +215,9 @@ bool CRmlUiManager::Init(HWND hwnd) {
 	if (!CRmlUiSelectChaForm::Instance().Load(g_context)) {
 		OutputDebugStringA("RmlUi: warning - selectcha.rml failed to load\n");
 	}
+	if (!CRmlUiInventoryForm::Instance().Load(g_context)) {
+		OutputDebugStringA("RmlUi: warning - inventory.rml failed to load\n");
+	}
 
 	m_ready = true;
 	OutputDebugStringA("RmlUi: initialized OK\n");
@@ -226,6 +234,10 @@ void CRmlUiManager::HideSelectChaForm() {
 	CRmlUiSelectChaForm::Instance().Hide();
 }
 
+void CRmlUiManager::HideInventoryForm() {
+	CRmlUiInventoryForm::Instance().Hide();
+}
+
 void CRmlUiManager::Shutdown() {
 	m_ready = false;
 
@@ -233,6 +245,7 @@ void CRmlUiManager::Shutdown() {
 	CRmlUiRegionForm::Instance().Unload();
 	CRmlUiServerForm::Instance().Unload();
 	CRmlUiSelectChaForm::Instance().Unload();
+	CRmlUiInventoryForm::Instance().Unload();
 
 	if (g_context) {
 		g_context->UnloadAllDocuments();

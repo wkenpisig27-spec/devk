@@ -38,6 +38,22 @@ public:
 	CGoodsGrid* GetGoodsGrid() { return grdItem; } // 操作道具栏表格
 	CForm* GetItemForm() { return frmInv; }		   // 操作道具表单
 
+	// Notice RmlUi inventory overlay (replaces frmInv chrome for player use)
+	void ToggleInventoryUi();
+	void ShowInventoryUi();
+	void HideInventoryUi();
+	bool IsInventoryUiVisible() const;
+	void RefreshRmlInventory();
+	void ShowBagContextMenu(int bagIndex);
+	void RequestTogglePackageLock();
+	void RequestExpandBag();
+	void RequestTempBag();
+
+	// RmlUi item actions (CDrag-free wrappers around legacy bag/equip logic)
+	void UseBagItem(int bagIndex);
+	void MoveBagItem(int srcBagIndex, int dstBagIndex, short srcNum = 0);
+	void UnequipLink(int link, int bagIndex = -1);
+
 	CForm* stateDrags;
 
 	// 从装备栏卸载道具到道具栏

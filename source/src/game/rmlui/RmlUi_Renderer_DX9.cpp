@@ -224,16 +224,59 @@ Rml::TextureHandle RenderInterface_DX9::LoadTexture(Rml::Vector2i& texture_dimen
 	size_t buffer_size = file_interface->Tell(file_handle);
 	file_interface->Seek(file_handle, 0, SEEK_SET);
 
-	if (buffer_size <= sizeof(TGAHeader)) {
-		Rml::Log::Message(Rml::Log::LT_ERROR, "Texture file size is smaller than TGAHeader, file is not a valid TGA image.");
-		file_interface->Close(file_handle);
-		return 0;
-	}
-
 	using Rml::byte;
 	std::unique_ptr<byte[]> buffer(new byte[buffer_size]);
 	file_interface->Read(buffer.get(), buffer_size, file_handle);
 	file_interface->Close(file_handle);
+
+	auto endsWith = [&](const char* ext) -> bool {
+		const size_t n = source.size();
+		const size_t e = strlen(ext);
+		if (n < e)
+			return false;
+		for (size_t i = 0; i < e; ++i) {
+			char c = source[n - e + i];
+			if (c >= 'A' && c <= 'Z')
+				c = char(c - 'A' + 'a');
+			if (c != ext[i])
+				return false;
+		}
+		return true;
+	};
+
+	// Item icons are PNG; Notice skins are TGA. Prefer D3DX for non-TGA.
+	if (!endsWith(".tga") && m_device) {
+		IDirect3DTexture9* texture = nullptr;
+		D3DXIMAGE_INFO info{};
+		HRESULT hr = D3DXCreateTextureFromFileInMemoryEx(
+			m_device,
+			buffer.get(),
+			(UINT)buffer_size,
+			D3DX_DEFAULT,
+			D3DX_DEFAULT,
+			1,
+			0,
+			D3DFMT_A8R8G8B8,
+			D3DPOOL_MANAGED,
+			D3DX_FILTER_NONE,
+			D3DX_FILTER_NONE,
+			0,
+			&info,
+			nullptr,
+			&texture);
+		if (SUCCEEDED(hr) && texture) {
+			texture_dimensions.x = (int)info.Width;
+			texture_dimensions.y = (int)info.Height;
+			return reinterpret_cast<Rml::TextureHandle>(texture);
+		}
+		Rml::Log::Message(Rml::Log::LT_ERROR, "D3DX failed to load texture '%s'.", source.c_str());
+		return 0;
+	}
+
+	if (buffer_size <= sizeof(TGAHeader)) {
+		Rml::Log::Message(Rml::Log::LT_ERROR, "Texture file size is smaller than TGAHeader, file is not a valid TGA image.");
+		return 0;
+	}
 
 	TGAHeader header;
 	memcpy(&header, buffer.get(), sizeof(TGAHeader));
