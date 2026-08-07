@@ -1,45 +1,43 @@
 ---
-description: Notice light UI theme for RmlUi dialogs/forms (login, register, confirm, etc.)
-globs: client/ui/rml/**/*
-alwaysApply: false
+description: Notice light UI theme — default for RmlUi dialogs, forms, and login/select overlays
+alwaysApply: true
 ---
 
-# Notice UI theme (dialogs / forms)
+# Notice UI theme (default for new UI)
 
-Target look: soft mobile-MMO / RO Origin **Notice** dialogs — light panel, blue header, gold+blue actions.
+When creating or restyling **dialogs, forms, confirmations, login/select overlays**, use **Notice** — not Aether dark HUD.
 
-## Canonical reference
+Full tokens/docs: `docs/UI_DESIGN_SYSTEM.md` (Notice section). Skins: `client/ui/rml/frames/notice/`. Shared CSS: `client/ui/rml/notice.rcss`. Font: `LatoLatin`.
 
-- Structure/styles: `client/ui/rml/account.rml`, `region.rml`, `server.rml`, `selectcha.rml` + shared `notice.rcss`
-- Soft-AA skins: `client/ui/rml/frames/notice/*.tga`
-- Generator: `python tools/gen-notice-skin.py`
-- Docs: `docs/UI_DESIGN_SYSTEM.md` → Notice section
+## Pick a layout
+
+| Kind | Clone | Notes |
+|------|--------|--------|
+| Centered modal | `account.rml` / `region.rml` / `server.rml` | Scrim + `.notice` panel + header/body/footer |
+| Slim bottom strip | `selectcha.rml` | No scrim; `.selectcha-bar` with `input_*.tga`; float via `position: absolute; bottom: …` |
+
+Do **not** wrap a slim bar in `.notice` panel (baked blue header wastes height).
 
 ## Visual recipe
 
-- Off-white body `#f5f9ff`, blue header gradient `#7eb4f0` → `#5a96dc`
-- Header title: white bold ~20dp, centered
-- Labels/muted text: `#5a7ab0`
-- Inputs: white fill, soft rounded shell via `input_*.tga` 9-slice
-- Lists: `notice-list-shell` + `notice-list-item` / `notice-list-item-active`
-- Actions: gold Register / confirm secondary; blue Login / primary
-- Exit/Back: smaller blue pill (`notice-exit`), same soft-AA skin as Login
-- Bottom docks (character select): `notice-dock` / `selectcha.rml` — no scrim, body `pointer-events: none`
-- Font: `LatoLatin` from `client/ui/rml/fonts/`
+- Panel: off-white + blue header (header baked into `panel_t*` tiles)
+- Labels muted `#5a7ab0`; primary text `#2a4a80`
+- Gold = secondary/confirm; blue = primary; Exit/Back = `.notice-exit` or compact blue pill
+- Disabled: `.notice-btn-disabled` + `disabled` attribute
+- Body `pointer-events: none`; interactive shell `pointer-events: auto`
 
 ## DX9 hard constraints
 
-- Never `box-shadow` / filters (broken/white panels)
-- No large CSS `border-radius` on shells/buttons — soft curves come from TGA 9-slice / tiled-horizontal only
-- Bake header blue into **panel top tiles** (`panel_tl/t/tr`) — do not stack a second soft header layer (transparent corners punch through)
-- Keep AA feather tight (~0.85px in gen script) so edges stay sharp, not blurry
-- Center control text with `line-height` == control `height`
-- Decorator paths from client cwd: `ui/rml/frames/notice/...`
+- No `box-shadow` / filters
+- No large CSS `border-radius` on shells — TGA 9-slice / `tiled-horizontal` only
+- `line-height` == control `height`
+- Decorator paths: `ui/rml/frames/notice/...` (client cwd)
+- Regen skins only: `python tools/gen-notice-skin.py`
 
-## New form checklist
+## New screen checklist
 
-1. Clone `region.rml` / `account.rml` shell (`notice` / `notice-header` / `notice-body`)
-2. Link `notice.rcss` (+ thin screen RCSS if needed)
-3. Keep C++ element IDs stable when binding; mirror `CRmlUiRegionForm` / `CRmlUiAccountForm`
-4. Regen skins only via `tools/gen-notice-skin.py` if chrome changes
-5. Suppress legacy `CForm` with Hide / SetIsShow(false); drive Show* APIs through RmlUi
+1. Add `*.rml` + thin `*.rcss`; `<link>` `notice.rcss`
+2. Mirror `CRmlUiAccountForm` / `CRmlUiSelectChaForm` in `source/**/rmlui/`; load in `CRmlUiManager`
+3. Stable element IDs for C++ bindings; `extern` callbacks into the scene
+4. Hide legacy `CForm`; hide Rml docs on scene leave (`HideLoginForms` / `HideSelectChaForm`)
+5. In-game HUD windows only → Aether (`system/aether.rcss`), not Notice

@@ -21,14 +21,21 @@ Soft mobile-MMO / RO Origin style: pale panel, blue header, gold + blue pills.
 - Label / muted `#5a7ab0` · Input text `#2a4a80`
 - Gold action `#f5d782` → `#e0b040` · Blue action `#7eb4f0` → `#4a8ad0`
 
-### Structure (`account.rml`)
+### Structure (`account.rml` — modal)
 ```
 scrim → form.notice
   .notice-header → .notice-title
   .notice-body → fields / checks
   .notice-footer → gold btn + blue btn
-  .notice-exit-row → text Exit
+  .notice-exit-row → Exit pill
 ```
+
+### Structure (`selectcha.rml` — slim bottom strip)
+```
+body (no scrim) → .selectcha-bar (input_*.tga shell, absolute bottom)
+  .selectcha-actions → compact Notice pills
+```
+Do not use `.notice` panel chrome for slim bars (baked header band is too tall).
 
 ### Soft-AA skins (required on DX9)
 - Panel 9-slice with **header baked into top tiles**: `frames/notice/panel_*.tga`
@@ -115,7 +122,7 @@ For player-facing confirm/login-style modals, prefer **Notice** chrome instead o
 ## Building a new screen
 
 ### Notice dialog / form
-1. Clone `account.rml` structure and classes.
+1. Modal: clone `account.rml` / `region.rml`. Slim bottom bar: clone `selectcha.rml`.
 2. Keep element IDs stable for C++ bindings.
 3. Reuse `frames/notice/*` skins; regen only via `tools/gen-notice-skin.py`.
 
@@ -145,4 +152,5 @@ python tools/gen-ui-frames.py     # Aether corner ornaments
 
 ## Reference implementation
 
-`account.rml` is the canonical **Notice** dialog screen.
+- Modal: `account.rml` (canonical Notice dialog)
+- Bottom strip: `selectcha.rml` (compact dock without panel header)
