@@ -54,6 +54,35 @@
 # Allow x64 libraries to be tracked
 !**/source/lib/x64/**/*.lib
 !**/source/bin/x64/**/*.dll
+
+# RmlUi / FreeType: allow source trees and client static libs under 100MB.
+# Debug rmlui.lib is ~100MB+ and exceeds GitHub's file limit — build it locally:
+#   .\tools\build-rmlui.ps1 -Config Debug
+# (**/Debug/ above would otherwise block source/lib/Debug entirely)
+!**/source/lib/Debug/
+!**/source/lib/Debug/rmlui_debugger.lib
+!**/source/lib/Debug/freetyped.lib
+!**/source/lib/Release/rmlui.lib
+!**/source/lib/Release/rmlui_debugger.lib
+!**/source/lib/Release/freetype.lib
+
+# Allow third-party RmlUi + FreeType sources (keep their CMake build dirs ignored)
+!**/third_party/RmlUi/
+!**/third_party/RmlUi/**
+!**/third_party/freetype/
+!**/third_party/freetype/**
+**/third_party/freetype/build/
+**/third_party/RmlUi/build/
+# Re-allow common file types ignored globally when under these trees
+!**/third_party/RmlUi/**/*.json
+!**/third_party/RmlUi/**/*.htm
+!**/third_party/RmlUi/**/*.html
+!**/third_party/RmlUi/**/*.cfg
+!**/third_party/freetype/**/*.json
+!**/third_party/freetype/**/*.htm
+!**/third_party/freetype/**/*.html
+!**/third_party/freetype/**/*.cfg
+
 # Allow source-libs (third-party library sources)
 !**/source-libs/
 

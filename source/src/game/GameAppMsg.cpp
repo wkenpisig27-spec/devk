@@ -6,6 +6,7 @@
 #include "GameApp.h"
 #include "GameConfig.h"
 #include "UIFormMgr.h"
+#include "rmlui/RmlUiManager.h"
 #include "GameAppMsg.h"
 #include "GlobalVar.h"
 #include "PacketCmd.h"
@@ -48,12 +49,12 @@ short GetMaskType(short sValue) {
 	return sValue & 49152;
 }
 
-// ?????????????, ??????õ?????, ????????????
+// ?????????????, ??????ï¿½?????, ????????????
 long CALLBACK TerrainNotice(int nFlag, int nSectionX, int nSectionY, DWORD_PTR dwParam, MPTerrain* pThis) {
 	long nSectionObjCnt = 0;
 	SSceneObjInfo infoex[MAX_MAP_SECTION_OBJ];
 
-	// ???????????ô?.obj??.ifl?l??????
+	// ???????????ï¿½?.obj??.ifl?l??????
 	const long clSectionWidth = 8;
 	const long clSectionHeight = 8;
 	const long clTileWidth = 2;
@@ -290,8 +291,8 @@ void CGameApp::HandleKeyDown(DWORD dwKey) {
 	//	if(CGameScene::_pLargerMap)
 	//		CGameScene::_pLargerMap->Show( TRUE );
 	// }
-	//  ???????????I???????????????????????'?õ?
-	//  ?????????'?û???????????, ???????HandleSuperKey()??????
+	//  ???????????I???????????????????????'?ï¿½?
+	//  ?????????'?ï¿½???????????, ???????HandleSuperKey()??????
 	if (IsKeyDown(DIK_F1) && IsCtrlPress()) // ????|???SuperKeyg?
 	{
 		if (g_Config.IsPower() || (CGameScene::GetMainCha() && CGameScene::GetMainCha()->getGMLv())) {
@@ -406,8 +407,8 @@ void CGameApp::ChangeVideoStyle(int width, int height, D3DFORMAT format, bool bW
 	// wnd_info.height = wnd_rc.bottom - wnd_rc.top;
 	// wnd_info.windowed_style = style;
 
-	//// ????????????????????g?????I????d3dpp?????????????????ã?
-	//// ?????????????ý??????????g_Render.ToggleFullScreen();??
+	//// ????????????????????g?????I????d3dpp?????????????????ï¿½?
+	//// ?????????????ï¿½??????????g_Render.ToggleFullScreen();??
 	// LG("video", "?????ToggleFullScreen wnd_info w = %d h = %d\n", wnd_info.width, wnd_info.height);
 	// if(g_Render.ToggleFullScreen(&d3dpp, &wnd_info) == 0)
 	//{
@@ -459,12 +460,12 @@ void CGameApp::MouseButtonDown(int nButton) {
 			return;
 
 		if (g_Editor.IsEnable()) {
-			if (CFormMgr::IsMouseInGui())
+			if (CFormMgr::IsMouseInGui() || CRmlUiManager::Instance().IsMouseInteracting())
 				return;
 
 			g_Editor.MouseButtonDown(nButton);
 		} else {
-			if (CFormMgr::IsMouseInGui())
+			if (CFormMgr::IsMouseInGui() || CRmlUiManager::Instance().IsMouseInteracting())
 				return;
 
 			g_stUIStart.CheckMouseDown(GetMouseX(), GetMouseY());
@@ -487,7 +488,7 @@ void CGameApp::MouseButtonUp(int nButton) {
 	_dwMouseDownTime[nButton] = 0;
 
 	if (_IsSceneOk()) {
-		if (CFormMgr::IsMouseInGui())
+		if (CFormMgr::IsMouseInGui() || CRmlUiManager::Instance().IsMouseInteracting())
 			return;
 
 		if (g_Editor.IsEnable()) {
@@ -604,6 +605,10 @@ void CGameApp::MouseScroll(int nScroll) {
 #endif
 		if (_IsSceneOk()) {
 			ihei += nScroll > 0 ? 1 : -1;
+			if (CRmlUiManager::Instance().IsMouseInteracting()) {
+				CRmlUiManager::Instance().ProcessMouseWheel(nScroll);
+				return;
+			}
 			if (CFormMgr::IsMouseInGui()) {
 				CFormMgr::s_Mgr.MouseScroll(nScroll);
 				return;
@@ -837,6 +842,9 @@ bool CGameApp::HandleWindowMsg(DWORD dwMsg, WPARAM wParam, LPARAM lParam) {
 		// g_InputBox.HandleWindowMsg(dwMsg, wParam, lParam);
 		LG("key", "keydown:%llu, %llu\n", (unsigned long long)wParam, (unsigned long long)lParam);
 
+		if (CRmlUiManager::Instance().ProcessKeyDown((int)wParam))
+			return false;
+
 		CFormMgr::s_Mgr.OnKeyDown((int)wParam);
 
 		GetCurScene()->_KeyDownEvent((int)wParam);
@@ -844,6 +852,7 @@ bool CGameApp::HandleWindowMsg(DWORD dwMsg, WPARAM wParam, LPARAM lParam) {
 	}
 	case WM_KEYUP: {
 		// g_InputBox.HandleWindowMsg(dwMsg, wParam, lParam);
+		CRmlUiManager::Instance().ProcessKeyUp((int)wParam);
 		break;
 	}
 	case WM_CHAR: {
@@ -856,6 +865,9 @@ bool CGameApp::HandleWindowMsg(DWORD dwMsg, WPARAM wParam, LPARAM lParam) {
 		}
 		// g_InputBox.HandleWindowMsg(dwMsg, wParam, lParam);
 		LG("key", "keychar:%llu, %llu\n", (unsigned long long)wParam, (unsigned long long)lParam);
+
+		if (CRmlUiManager::Instance().ProcessTextInput((char)wParam))
+			return false;
 
 		if (CFormMgr::s_Mgr.OnKeyChar((char)wParam))
 			return false;
@@ -969,7 +981,7 @@ const char* HandleMonsterCommand(string& strCmd, string& p1, string& p2) {
 		}
 		in.close();
 		return RES_STRING(CL_LANGUAGE_MATCH_114);
-	} else if (strCmd == "save") // ????Z??¼
+	} else if (strCmd == "save") // ????Z??ï¿½
 	{
 		if (p1 == "")
 			return RES_STRING(CL_LANGUAGE_MATCH_110);
@@ -1094,7 +1106,7 @@ const char* ConsoleCallback(const char* pszCmd) {
 			//"???        ????     ???",
 			//"loadmap     ?????   ??????????j??",
 			//"savemap     ?????   ????????????????l?",
-			//"brushheight ????   ???ø?????????????"
+			//"brushheight ????   ???ï¿½?????????????"
 			"brushheight   0.6",
 			""};
 	static bool UI_DEBUG_FLAG_ARCOL = false;
@@ -1326,7 +1338,7 @@ const char* ConsoleCallback(const char* pszCmd) {
 					if (!pEffect)
 						continue;
 
-					// '?õ???????dummy
+					// '?ï¿½???????dummy
 					if (!pEffect->Create(nEffectID)) {
 						LG("ERROR", "msgcreate cha`s effect fail,ID %d", nEffectID);
 						return strRes.c_str();
@@ -1649,7 +1661,7 @@ const char* ConsoleCallback(const char* pszCmd) {
 			return strRes.c_str();
 		;
 
-		// '?õ???????dummy
+		// '?ï¿½???????dummy
 		if (!pEffect->Create(nEffectID)) {
 			LG("ERROR", "msgcreate cha`s effect fail,ID %d", nEffectID);
 			return strRes.c_str();
@@ -1721,7 +1733,7 @@ const char* ConsoleCallback(const char* pszCmd) {
 								if (!pEffect)
 									continue;
 
-								// '?õ???????dummy
+								// '?ï¿½???????dummy
 								if (!pEffect->Create(nEffectID)) {
 									LG("ERROR", "msgcreate cha`s effect fail,ID %d", nEffectID);
 									return strRes.c_str();
@@ -1772,7 +1784,7 @@ const char* ConsoleCallback(const char* pszCmd) {
 								if (!pEffect)
 									continue;
 
-								// '?õ???????dummy
+								// '?ï¿½???????dummy
 								if (!pEffect->Create(nEffectID)) {
 									LG("ERROR", "msgcreate cha`s effect fail,ID %d", nEffectID);
 									return strRes.c_str();

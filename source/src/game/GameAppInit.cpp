@@ -15,6 +15,7 @@
 #include "MPFont.h"
 #include "SmallMap.h"
 #include "UIFormMgr.h"
+#include "rmlui/RmlUiManager.h"
 #include "script.h"
 #include "GlobalVar.h"
 #include "DrawPointList.h"
@@ -370,6 +371,13 @@ BOOL CGameApp::_Init() {
 	GetRender().Init();
 	OutputDebugStringA("PKO: _Init() - GetRender().Init() done\n");
 
+	OutputDebugStringA("PKO: _Init() - CRmlUiManager::Init()...\n");
+	if (!CRmlUiManager::Instance().Init(GetHWND())) {
+		OutputDebugStringA("PKO: _Init() - CRmlUiManager::Init() failed (continuing without RmlUi)\n");
+	} else {
+		OutputDebugStringA("PKO: _Init() - CRmlUiManager::Init() done\n");
+	}
+
 #ifdef FLOAT_INVALID
 	int i = _controlfp(0, 0);
 	i &= ~(EM_ZERODIVIDE | EM_OVERFLOW | EM_INVALID);
@@ -469,6 +477,7 @@ void CGameApp::_End() {
 	SAFE_DELETE(g_NetIF);
 	LG("end", "NetIF release end\n");
 
+	CRmlUiManager::Instance().Shutdown();
 	CFormMgr::s_Mgr.Clear();
 
 	UnloadResourceSet();

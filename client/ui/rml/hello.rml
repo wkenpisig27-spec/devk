@@ -1,0 +1,14 @@
+<rml>
+	<head>
+		<title>RmlUi Hello</title>
+		<link type="text/rcss" href="hello.rcss"/>
+	</head>
+	<body>
+		<div id="panel">
+			<h1>RmlUi Ready</h1>
+			<p>This blue box is the new RmlUi overlay.</p>
+			<p>All of this text is English.</p>
+			<p class="hint">Tip: press F8 to show/hide the debugger bar at the top.</p>
+		</div>
+	</body>
+</rml>

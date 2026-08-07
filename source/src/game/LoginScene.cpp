@@ -2,6 +2,7 @@
 #include "LoginScene.h"
 
 #include "GlobalVar.h"
+#include "rmlui/RmlUiAccountForm.h"
 
 #include "GameApp.h"
 #include "Character.h"
@@ -313,6 +314,7 @@ bool CLoginScene::_Init() {
 	if (useModelMode) {
 		CForm* frmModel = CFormMgr::s_Mgr.Find("frmModel");
 		frmAccount->Hide();
+		CRmlUiAccountForm::Instance().Hide();
 		frmModel->Show();
 		C3DCompent* ui3dCha;
 		if (!modelMode) {
@@ -412,23 +414,95 @@ bool CLoginScene::_Clear() {
 }
 
 void CLoginScene::ShowLoginForm() {
-	// imgBigLogo->GetImage()->LoadImage("texture/ui/forsaken/logo1.png", 500, 600, 0, 0, 1.0, 1.0);
+	// Prefer RmlUi account form; keep legacy frmAccount hidden.
+	if (frmAccount)
+		frmAccount->Hide();
 
-	chkID->SetIsChecked(m_bSaveAccount);
-	edtID->SetCaption(m_sSaveAccount.c_str());
-	edtPassword->SetCaption("");
-	frmAccount->Show();
+	if (frmKeyboard)
+		frmKeyboard->SetIsShow(false);
+	if (imgLogo1)
+		imgLogo1->SetIsShow(true);
+	if (imgLogo2)
+		imgLogo2->SetIsShow(true);
 
-	// add by Philip.Wu  2006-07-03  ????????????????????
-	frmKeyboard->SetIsShow(false);
-	imgLogo1->SetIsShow(true);
-	imgLogo2->SetIsShow(true);
+	CRmlUiAccountForm::Instance().Show(m_sSaveAccount, m_bSaveAccount);
 
-	if (m_sSaveAccount == "") {
-		edtID->SetActive(edtID);
-	} else {
-		edtPassword->SetActive(edtPassword);
-	}
+	// Keep legacy edits in sync for leftover validation code paths.
+	if (chkID)
+		chkID->SetIsChecked(m_bSaveAccount);
+	if (edtID)
+		edtID->SetCaption(m_sSaveAccount.c_str());
+	if (edtPassword)
+		edtPassword->SetCaption("");
+}
+
+void CLoginScene::ApplyRmlAccountInput(const std::string& account, const std::string& password, bool remember) {
+	if (edtID)
+		edtID->SetCaption(account.c_str());
+	if (edtPassword)
+		edtPassword->SetCaption(password.c_str());
+	if (chkID)
+		chkID->SetIsChecked(remember);
+}
+
+void CLoginScene::ToggleRegisterForm() {
+	if (!frmRegister)
+		return;
+
+	const bool show = !frmRegister->GetIsShow();
+	frmRegister->SetIsShow(show);
+	if (!show)
+		return;
+
+	CEdit* edtRegID = dynamic_cast<CEdit*>(frmRegister->Find("edtRegID"));
+	CEdit* edtRegPassword = dynamic_cast<CEdit*>(frmRegister->Find("edtRegPassword"));
+	CEdit* edtRegPassword2 = dynamic_cast<CEdit*>(frmRegister->Find("edtRegPassword2"));
+	CEdit* edtRegEmail = dynamic_cast<CEdit*>(frmRegister->Find("edtRegEmail"));
+	CEdit* edtCaptcha = dynamic_cast<CEdit*>(frmRegister->Find("edtCaptcha"));
+	if (edtRegID)
+		edtRegID->SetCaption("");
+	if (edtRegPassword)
+		edtRegPassword->SetCaption("");
+	if (edtRegPassword2)
+		edtRegPassword2->SetCaption("");
+	if (edtRegEmail)
+		edtRegEmail->SetCaption("");
+	if (edtCaptcha)
+		edtCaptcha->SetCaption("");
+	GenerateCaptcha();
+	UpdateCaptchaDisplay(frmRegister);
+}
+
+void CLoginScene::BackToRegionFromAccount() {
+	CRmlUiAccountForm::Instance().Hide();
+	if (frmAccount)
+		frmAccount->Hide();
+	if (frmKeyboard)
+		ShowKeyboard(false);
+	if (frmRegion)
+		frmRegion->SetIsShow(true);
+}
+
+// C-linkage style callbacks used by RmlUiAccountForm.cpp (keeps RmlUi headers out of LoginScene TU).
+void RmlAccount_OnLogin(const char* account, const char* password, bool remember) {
+	CLoginScene* scene = dynamic_cast<CLoginScene*>(CGameApp::GetCurScene());
+	if (!scene)
+		return;
+	scene->ApplyRmlAccountInput(account ? account : "", password ? password : "", remember);
+	registerLogin = false;
+	scene->LoginFlow();
+}
+
+void RmlAccount_OnExit() {
+	CLoginScene* scene = dynamic_cast<CLoginScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->BackToRegionFromAccount();
+}
+
+void RmlAccount_OnRegister() {
+	CLoginScene* scene = dynamic_cast<CLoginScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->ToggleRegisterForm();
 }
 
 void CLoginScene::_FrameMove(DWORD dwTimeParam) {
@@ -1248,6 +1322,7 @@ void CLoginScene::ReSetNewCha() {
 }
 
 void CLoginScene::ShowChaList() {
+	CRmlUiAccountForm::Instance().Hide();
 	if (frmAccount) {
 		frmAccount->Hide();
 	}
@@ -1265,6 +1340,7 @@ void CLoginScene::ShowServerList() {
 	if (frmKeyboard) // add by Philip.Wu  2006-07-21
 		ShowKeyboard(false);
 
+	CRmlUiAccountForm::Instance().Hide();
 	if (frmAccount) {
 		frmAccount->Hide();
 	}
@@ -1282,6 +1358,7 @@ void CLoginScene::ShowRegionList() {
 	if (frmKeyboard) // add by Philip.Wu  2006-06-05
 		ShowKeyboard(false);
 
+	CRmlUiAccountForm::Instance().Hide();
 	if (frmAccount)
 		frmAccount->SetIsShow(false);
 

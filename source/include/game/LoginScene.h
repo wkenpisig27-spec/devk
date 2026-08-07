@@ -105,6 +105,11 @@ public:
 	void InitRegionList();
 	void InitServerList(int nRegionNo);
 
+	// RmlUi account form bridge
+	void ApplyRmlAccountInput(const std::string& account, const std::string& password, bool remember);
+	void ToggleRegisterForm();
+	void BackToRegionFromAccount();
+
 	static CForm* frmRegion;
 	static CCharacter* modelCha;
 
