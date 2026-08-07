@@ -1,6 +1,7 @@
 <rml>
 	<head>
 		<title>Account Login</title>
+		<link type="text/rcss" href="notice.rcss"/>
 		<link type="text/rcss" href="account.rcss"/>
 	</head>
 	<body>

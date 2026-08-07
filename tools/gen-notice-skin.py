@@ -76,11 +76,9 @@ def sample_notice_panel(px: float, py: float, w: float, h: float,
     if a < 0.001:
         return (0, 0, 0, 0)
 
-    # Content coords relative to inner rect
     ix = px - inset
     iy = py - inset
 
-    # Header vs body fill
     header_top = (126, 180, 240)
     header_bot = (90, 150, 220)
     body = (245, 249, 255)
@@ -90,7 +88,6 @@ def sample_notice_panel(px: float, py: float, w: float, h: float,
     if in_header:
         t = max(0.0, min(1.0, iy / max(1.0, header_h - 1)))
         fill = mix_rgb(header_top, header_bot, t)
-        # Soft rings near top corners (clipped by alpha naturally)
         fl = flourish_boost(ix, iy, 8.0, header_h * 0.35)
         fr = flourish_boost(ix, iy, iw - 8.0, header_h * 0.35)
         boost = max(fl, fr)
@@ -99,13 +96,11 @@ def sample_notice_panel(px: float, py: float, w: float, h: float,
             min(255.0, fill[1] + boost * 45),
             min(255.0, fill[2] + boost * 35),
         )
-        # Hairline under header
         if abs(iy - (header_h - 0.5)) < 0.9:
             fill = mix_rgb((70, 120, 190), fill, 0.35)
     else:
         fill = body
 
-    # Keep header outer rim the same blue family (no pale halo line on top)
     if in_header:
         border_c = mix_rgb((110, 160, 220), (70, 120, 190), max(0.0, min(1.0, iy / max(1.0, header_h - 1))))
     else:
@@ -178,25 +173,21 @@ def crop(rgba: list[tuple[int, int, int, int]], src_w: int, x0: int, y0: int, cw
 
 
 def gen_panel() -> None:
-    """
-    9-slice where top corners/edge are TALL = full header height.
-    Soft outer AA is only on the panel silhouette — no separate header layer.
-    """
+    """9-slice with header baked into top tiles. Tighter corner radius."""
     size_w = 128
     size_h = 200
-    radius = 18.0
+    radius = 10.0
     border = 2.0
-    header_h = 52.0  # inner content header band
+    header_h = 52.0
 
     master = render(
         size_w, size_h,
         lambda px, py: sample_notice_panel(px, py, float(size_w), float(size_h), radius, border, header_h),
     )
 
-    # Top slice height must cover rounded corner + header band
-    top_h = int(border + header_h) + 2  # ~56
-    side = 24
-    bot = 24
+    top_h = int(border + header_h) + 2
+    side = 18
+    bot = 18
     edge = 8
 
     write_tga(OUT / "panel_tl.tga", side, top_h, crop(master, size_w, 0, 0, side, top_h))
@@ -205,7 +196,6 @@ def gen_panel() -> None:
     write_tga(OUT / "panel_br.tga", side, bot, crop(master, size_w, size_w - side, size_h - bot, side, bot))
 
     mx = size_w // 2 - edge // 2
-    # Mid Y for side edges: below header
     my = int(border + header_h) + (size_h - int(border + header_h) - bot) // 2 - edge // 2
 
     write_tga(OUT / "panel_t.tga", edge, top_h, crop(master, size_w, mx, 0, edge, top_h))
@@ -217,13 +207,13 @@ def gen_panel() -> None:
 
 def gen_input() -> None:
     size = 64
-    radius = 10.0
+    radius = 6.0
     border = 1.5
     fill = (255, 255, 255)
     border_rgb = (160, 188, 224)
     master = render(size, size, lambda px, py: sample_framed(
         px, py, float(size), float(size), radius, border, fill, border_rgb))
-    c = 16
+    c = 12
     e = 8
     write_tga(OUT / "input_tl.tga", c, c, crop(master, size, 0, 0, c, c))
     write_tga(OUT / "input_tr.tga", c, c, crop(master, size, size - c, 0, c, c))
@@ -240,17 +230,84 @@ def gen_input() -> None:
 
 def gen_pill(name: str, top: tuple[int, int, int], bot: tuple[int, int, int],
              bhi: tuple[int, int, int], blo: tuple[int, int, int]) -> None:
-    # Match on-screen button height (~46dp) so edges aren't blurred by downscale
+    # Modest corner radius — not a full capsule
     h = 46
-    cap = h
+    radius = 10.0
+    cap = 18
     mid = 12
     w = cap * 2 + mid
-    radius = h * 0.5
     master = render(w, h, lambda px, py: sample_gradient_framed(
         px, py, float(w), float(h), radius, 1.35, top, bot, bhi, blo))
     write_tga(OUT / f"{name}_l.tga", cap, h, crop(master, w, 0, 0, cap, h))
     write_tga(OUT / f"{name}_c.tga", mid, h, crop(master, w, cap, 0, mid, h))
     write_tga(OUT / f"{name}_r.tga", cap, h, crop(master, w, cap + mid, 0, cap, h))
+
+
+def dist_segment(px: float, py: float, ax: float, ay: float, bx: float, by: float) -> float:
+    dx, dy = bx - ax, by - ay
+    len2 = dx * dx + dy * dy
+    if len2 < 1e-8:
+        return math.hypot(px - ax, py - ay)
+    t = max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / len2))
+    return math.hypot(px - (ax + t * dx), py - (ay + t * dy))
+
+
+def sample_checkbox(px: float, py: float, size: float, checked: bool) -> tuple[int, int, int, int]:
+    """White rounded box; checked adds thick blue tick (can spill slightly past box)."""
+    pad = 2.0
+    box = size - pad * 2
+    bx, by = pad, pad
+    radius = 4.0
+    d_box = sd_round_box(px - bx, py - by, box, box, radius)
+    box_a = coverage(d_box)
+
+    border = 1.4
+    d_inner = sd_round_box(
+        px - bx - border, py - by - border,
+        box - 2 * border, box - 2 * border,
+        max(0.0, radius - border),
+    )
+    inner_a = coverage(d_inner) if box_a > 0 else 0.0
+    border_a = box_a * (1.0 - inner_a)
+    fill_a = box_a * inner_a
+
+    br, bg, bb = 170, 195, 230
+    fr, fg, fb = 255, 255, 255
+    a = border_a + fill_a
+    r = g = b = 0.0
+    if a > 0.001:
+        r = (br * border_a + fr * fill_a) / a
+        g = (bg * border_a + fg * fill_a) / a
+        b = (bb * border_a + fb * fill_a) / a
+
+    if checked:
+        x0, y0 = size * 0.22, size * 0.52
+        x1, y1 = size * 0.42, size * 0.72
+        x2, y2 = size * 0.82, size * 0.28
+        stroke = 2.35
+        d_tick = min(
+            dist_segment(px, py, x0, y0, x1, y1),
+            dist_segment(px, py, x1, y1, x2, y2),
+        ) - stroke
+        tick_a = coverage(d_tick, feather=1.1)
+        if tick_a > 0.001:
+            tr, tg, tb = 90, 150, 230
+            r = r * (1.0 - tick_a) + tr * tick_a
+            g = g * (1.0 - tick_a) + tg * tick_a
+            b = b * (1.0 - tick_a) + tb * tick_a
+            a = max(a, tick_a)
+
+    if a < 0.001:
+        return (0, 0, 0, 0)
+    return (clamp(r), clamp(g), clamp(b), clamp(a * 255))
+
+
+def gen_checkbox() -> None:
+    size = 32
+    off = render(size, size, lambda px, py: sample_checkbox(px, py, float(size), False))
+    on = render(size, size, lambda px, py: sample_checkbox(px, py, float(size), True))
+    write_tga(OUT / "check_off.tga", size, size, off)
+    write_tga(OUT / "check_on.tga", size, size, on)
 
 
 def main() -> None:
@@ -259,7 +316,7 @@ def main() -> None:
     gen_input()
     gen_pill("btn_blue", (126, 180, 240), (74, 138, 208), (170, 205, 250), (58, 120, 192))
     gen_pill("btn_gold", (245, 215, 130), (224, 176, 64), (255, 235, 170), (200, 152, 48))
-    # Remove obsolete separate header tiles if present
+    gen_checkbox()
     for name in ("header_l.tga", "header_c.tga", "header_r.tga"):
         p = OUT / name
         if p.exists():

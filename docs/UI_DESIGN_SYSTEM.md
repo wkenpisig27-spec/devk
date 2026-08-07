@@ -44,7 +44,9 @@ Set `line-height` equal to control `height` on inputs and buttons.
 ### File map
 ```
 client/ui/rml/
-  account.rml / account.rcss   ← canonical Notice screen
+  notice.rcss                  ← shared Notice chrome + list styles
+  account.rml / account.rcss   ← login
+  region.rml / server.rml      ← region + server pick
   frames/notice/               ← soft-AA TGA
   fonts/LatoLatin-*.ttf
   system/aether.rcss           ← dark HUD (separate)

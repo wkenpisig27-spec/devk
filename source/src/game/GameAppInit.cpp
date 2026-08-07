@@ -360,23 +360,24 @@ BOOL CGameApp::_Init() {
 	OutputDebugStringA("PKO: _Init() - NetIF created\n");
 	g_Editor.Init(1);
 
-	// װ�س�ʼ����
-	OutputDebugStringA("PKO: _Init() - LoadScriptScene()...\n");
-	LoadScriptScene((eSceneType)g_Config.m_nCreateScene);
-	OutputDebugStringA("PKO: _Init() - LoadScriptScene() done\n");
-
 	// LoadRes4();
 
 	OutputDebugStringA("PKO: _Init() - GetRender().Init()...\n");
 	GetRender().Init();
 	OutputDebugStringA("PKO: _Init() - GetRender().Init() done\n");
 
+	// RmlUi must be ready before LoadScriptScene creates the login scene
+	// (login _InitUI shows the Notice region dialog immediately).
 	OutputDebugStringA("PKO: _Init() - CRmlUiManager::Init()...\n");
 	if (!CRmlUiManager::Instance().Init(GetHWND())) {
 		OutputDebugStringA("PKO: _Init() - CRmlUiManager::Init() failed (continuing without RmlUi)\n");
 	} else {
 		OutputDebugStringA("PKO: _Init() - CRmlUiManager::Init() done\n");
 	}
+
+	OutputDebugStringA("PKO: _Init() - LoadScriptScene()...\n");
+	LoadScriptScene((eSceneType)g_Config.m_nCreateScene);
+	OutputDebugStringA("PKO: _Init() - LoadScriptScene() done\n");
 
 #ifdef FLOAT_INVALID
 	int i = _controlfp(0, 0);

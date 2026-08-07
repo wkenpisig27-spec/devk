@@ -1,0 +1,26 @@
+<rml>
+	<head>
+		<title>Region</title>
+		<link type="text/rcss" href="notice.rcss"/>
+	</head>
+	<body>
+		<div id="notice-scrim"></div>
+
+		<div id="region-panel" class="notice">
+			<div class="notice-header">
+				<div class="notice-title">Region</div>
+			</div>
+
+			<div class="notice-body">
+				<div class="notice-label">Select a region</div>
+				<div class="notice-list-shell">
+					<div id="region-list" class="notice-list"></div>
+				</div>
+			</div>
+
+			<div class="notice-exit-row">
+				<button class="notice-exit" id="btnExit" type="button">Exit</button>
+			</div>
+		</div>
+	</body>
+</rml>

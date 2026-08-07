@@ -2,6 +2,8 @@
 #include "rmlui/RmlUiManager.h"
 #include "rmlui/RmlUi_Renderer_DX9.h"
 #include "rmlui/RmlUiAccountForm.h"
+#include "rmlui/RmlUiRegionForm.h"
+#include "rmlui/RmlUiServerForm.h"
 
 #include "MPRender.h"
 
@@ -194,9 +196,15 @@ bool CRmlUiManager::Init(HWND hwnd) {
 		OutputDebugStringA("RmlUi: ERROR - no font loaded; text will be blank\n");
 	}
 
-	// Load the account login replacement (shown by CLoginScene::ShowLoginForm).
+	// Load Notice dialogs (shown by CLoginScene).
 	if (!CRmlUiAccountForm::Instance().Load(g_context)) {
 		OutputDebugStringA("RmlUi: warning - account.rml failed to load\n");
+	}
+	if (!CRmlUiRegionForm::Instance().Load(g_context)) {
+		OutputDebugStringA("RmlUi: warning - region.rml failed to load\n");
+	}
+	if (!CRmlUiServerForm::Instance().Load(g_context)) {
+		OutputDebugStringA("RmlUi: warning - server.rml failed to load\n");
 	}
 
 	m_ready = true;
@@ -208,6 +216,8 @@ void CRmlUiManager::Shutdown() {
 	m_ready = false;
 
 	CRmlUiAccountForm::Instance().Unload();
+	CRmlUiRegionForm::Instance().Unload();
+	CRmlUiServerForm::Instance().Unload();
 
 	if (g_context) {
 		g_context->UnloadAllDocuments();

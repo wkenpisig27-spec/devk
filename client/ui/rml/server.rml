@@ -1,0 +1,26 @@
+<rml>
+	<head>
+		<title>Server List</title>
+		<link type="text/rcss" href="notice.rcss"/>
+	</head>
+	<body>
+		<div id="notice-scrim"></div>
+
+		<div id="server-panel" class="notice notice-wide">
+			<div class="notice-header">
+				<div class="notice-title">Server List</div>
+			</div>
+
+			<div class="notice-body">
+				<div class="notice-label">Select a server</div>
+				<div class="notice-list-shell">
+					<div id="server-list" class="notice-list"></div>
+				</div>
+			</div>
+
+			<div class="notice-exit-row">
+				<button class="notice-exit" id="btnBack" type="button">Back</button>
+			</div>
+		</div>
+	</body>
+</rml>

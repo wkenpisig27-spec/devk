@@ -10,7 +10,7 @@ Target look: soft mobile-MMO / RO Origin **Notice** dialogs — light panel, blu
 
 ## Canonical reference
 
-- Structure/styles: `client/ui/rml/account.rml` + `account.rcss`
+- Structure/styles: `client/ui/rml/account.rml`, `region.rml`, `server.rml` + shared `notice.rcss`
 - Soft-AA skins: `client/ui/rml/frames/notice/*.tga`
 - Generator: `python tools/gen-notice-skin.py`
 - Docs: `docs/UI_DESIGN_SYSTEM.md` → Notice section
@@ -21,8 +21,9 @@ Target look: soft mobile-MMO / RO Origin **Notice** dialogs — light panel, blu
 - Header title: white bold ~20dp, centered
 - Labels/muted text: `#5a7ab0`
 - Inputs: white fill, soft rounded shell via `input_*.tga` 9-slice
+- Lists: `notice-list-shell` + `notice-list-item` / `notice-list-item-active`
 - Actions: gold Register / confirm secondary; blue Login / primary
-- Exit/cancel: quiet text link, not a third pill
+- Exit/Back: smaller blue pill (`notice-exit`), same soft-AA skin as Login
 - Font: `LatoLatin` from `client/ui/rml/fonts/`
 
 ## DX9 hard constraints
@@ -36,7 +37,8 @@ Target look: soft mobile-MMO / RO Origin **Notice** dialogs — light panel, blu
 
 ## New form checklist
 
-1. Copy `account.rml` shell (`notice` / `notice-header` / `notice-body` / `notice-footer`)
-2. Reuse `account.rcss` classes or extract shared `system/notice.rcss` later
-3. Keep C++ element IDs stable when binding
+1. Clone `region.rml` / `account.rml` shell (`notice` / `notice-header` / `notice-body`)
+2. Link `notice.rcss` (+ thin screen RCSS if needed)
+3. Keep C++ element IDs stable when binding; mirror `CRmlUiRegionForm` / `CRmlUiAccountForm`
 4. Regen skins only via `tools/gen-notice-skin.py` if chrome changes
+5. Suppress legacy `CForm` with Hide / SetIsShow(false); drive Show* APIs through RmlUi

@@ -3,6 +3,9 @@
 
 #include "GlobalVar.h"
 #include "rmlui/RmlUiAccountForm.h"
+#include "rmlui/RmlUiRegionForm.h"
+#include "rmlui/RmlUiServerForm.h"
+#include "rmlui/RmlUiManager.h"
 
 #include "GameApp.h"
 #include "Character.h"
@@ -418,6 +421,13 @@ void CLoginScene::ShowLoginForm() {
 	if (frmAccount)
 		frmAccount->Hide();
 
+	CRmlUiRegionForm::Instance().Hide();
+	CRmlUiServerForm::Instance().Hide();
+	if (frmRegion)
+		frmRegion->SetIsShow(false);
+	if (frmServer)
+		frmServer->Hide();
+
 	if (frmKeyboard)
 		frmKeyboard->SetIsShow(false);
 	if (imgLogo1)
@@ -475,15 +485,19 @@ void CLoginScene::ToggleRegisterForm() {
 
 void CLoginScene::BackToRegionFromAccount() {
 	CRmlUiAccountForm::Instance().Hide();
+	CRmlUiServerForm::Instance().Hide();
 	if (frmAccount)
 		frmAccount->Hide();
+	if (frmServer)
+		frmServer->Hide();
 	if (frmKeyboard)
 		ShowKeyboard(false);
 	if (frmRegion)
-		frmRegion->SetIsShow(true);
+		frmRegion->SetIsShow(false);
+	ShowRegionList();
 }
 
-// C-linkage style callbacks used by RmlUiAccountForm.cpp (keeps RmlUi headers out of LoginScene TU).
+// C-linkage style callbacks used by RmlUi*Form.cpp (keeps RmlUi headers out of LoginScene TU).
 void RmlAccount_OnLogin(const char* account, const char* password, bool remember) {
 	CLoginScene* scene = dynamic_cast<CLoginScene*>(CGameApp::GetCurScene());
 	if (!scene)
@@ -503,6 +517,37 @@ void RmlAccount_OnRegister() {
 	CLoginScene* scene = dynamic_cast<CLoginScene*>(CGameApp::GetCurScene());
 	if (scene)
 		scene->ToggleRegisterForm();
+}
+
+void RmlRegion_OnSelect(int index) {
+	CLoginScene* scene = dynamic_cast<CLoginScene*>(CGameApp::GetCurScene());
+	if (!scene)
+		return;
+	scene->SetCurSelRegionIndex(index);
+	CRmlUiRegionForm::Instance().Hide();
+	scene->InitServerList(index);
+	scene->ShowServerList();
+}
+
+void RmlRegion_OnExit() {
+	if (g_pGameApp)
+		g_pGameApp->SetIsRun(false);
+}
+
+void RmlServer_OnSelect(int index) {
+	CLoginScene* scene = dynamic_cast<CLoginScene*>(CGameApp::GetCurScene());
+	if (!scene)
+		return;
+	scene->SetCurSelServerIndex(index);
+	CRmlUiServerForm::Instance().Hide();
+	scene->ShowLoginForm();
+}
+
+void RmlServer_OnBack() {
+	CLoginScene* scene = dynamic_cast<CLoginScene*>(CGameApp::GetCurScene());
+	if (!scene)
+		return;
+	scene->ShowRegionList();
 }
 
 void CLoginScene::_FrameMove(DWORD dwTimeParam) {
@@ -951,8 +996,11 @@ BOOL CLoginScene::_InitUI() {
 	lstRegion[1]->evtListMouseDown = _evtRegionLDBDown;
 
 	InitRegionList();
-	if (!g_TomServer.bEnable)
-		frmRegion->SetIsShow(true);
+	if (!g_TomServer.bEnable) {
+		if (frmRegion)
+			frmRegion->SetIsShow(false);
+		ShowRegionList();
+	}
 
 	frmPathLogo = CFormMgr::s_Mgr.Find("frmPathLogo");
 	if (!frmPathLogo)
@@ -1323,6 +1371,8 @@ void CLoginScene::ReSetNewCha() {
 
 void CLoginScene::ShowChaList() {
 	CRmlUiAccountForm::Instance().Hide();
+	CRmlUiRegionForm::Instance().Hide();
+	CRmlUiServerForm::Instance().Hide();
 	if (frmAccount) {
 		frmAccount->Hide();
 	}
@@ -1332,23 +1382,8 @@ void CLoginScene::ShowChaList() {
 	if (frmServer) {
 		frmServer->Hide();
 	}
-}
-
-void CLoginScene::ShowServerList() {
-	CS_Disconnect(DS_DISCONN);
-
-	if (frmKeyboard) // add by Philip.Wu  2006-07-21
-		ShowKeyboard(false);
-
-	CRmlUiAccountForm::Instance().Hide();
-	if (frmAccount) {
-		frmAccount->Hide();
-	}
-	if (frmAnnounce) {
-		frmAnnounce->Hide();
-	}
-	if (frmServer) {
-		frmServer->Show();
+	if (frmRegion) {
+		frmRegion->SetIsShow(false);
 	}
 }
 
@@ -1359,6 +1394,7 @@ void CLoginScene::ShowRegionList() {
 		ShowKeyboard(false);
 
 	CRmlUiAccountForm::Instance().Hide();
+	CRmlUiServerForm::Instance().Hide();
 	if (frmAccount)
 		frmAccount->SetIsShow(false);
 
@@ -1370,8 +1406,69 @@ void CLoginScene::ShowRegionList() {
 
 	InitRegionList();
 
+	std::vector<std::string> names;
+	CServerSet* server_set = CServerSet::I();
+	const int count = server_set ? server_set->m_nRegionCnt : 0;
+	names.reserve(count > 0 ? count : 0);
+	for (int i = 0; i < count; ++i) {
+		const char* name = GetCurRegionName(i);
+		names.emplace_back(name ? name : "");
+	}
+
+	// Prefer Notice RmlUi; fall back to legacy frmArea if Rml isn't ready.
+	if (CRmlUiManager::Instance().IsReady()) {
+		if (frmRegion)
+			frmRegion->SetIsShow(false);
+		CRmlUiRegionForm::Instance().SetItems(names, GetCurSelRegionIndex());
+		CRmlUiRegionForm::Instance().Show();
+		if (CRmlUiRegionForm::Instance().IsVisible())
+			return;
+	}
+
 	if (frmRegion)
 		frmRegion->SetIsShow(true);
+}
+
+void CLoginScene::ShowServerList() {
+	CS_Disconnect(DS_DISCONN);
+
+	if (frmKeyboard) // add by Philip.Wu  2006-07-21
+		ShowKeyboard(false);
+
+	CRmlUiAccountForm::Instance().Hide();
+	CRmlUiRegionForm::Instance().Hide();
+	if (frmAccount) {
+		frmAccount->Hide();
+	}
+	if (frmAnnounce) {
+		frmAnnounce->Hide();
+	}
+	if (frmRegion) {
+		frmRegion->SetIsShow(false);
+	}
+
+	const int regionIndex = GetCurSelRegionIndex();
+	InitServerList(regionIndex);
+
+	std::vector<std::string> names;
+	const int count = GetCurServerGroupCnt(regionIndex);
+	names.reserve(count > 0 ? count : 0);
+	for (int i = 0; i < count; ++i) {
+		const char* name = GetCurServerGroupName(regionIndex, i);
+		names.emplace_back(name ? name : "");
+	}
+
+	if (CRmlUiManager::Instance().IsReady()) {
+		if (frmServer)
+			frmServer->Hide();
+		CRmlUiServerForm::Instance().SetItems(names, GetCurSelServerIndex());
+		CRmlUiServerForm::Instance().Show();
+		if (CRmlUiServerForm::Instance().IsVisible())
+			return;
+	}
+
+	if (frmServer)
+		frmServer->Show();
 }
 
 int CLoginScene::GetServIconIndex(int iNum) {
