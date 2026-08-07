@@ -4,6 +4,7 @@
 #include "Scene.h"
 #include "FindPath.h"
 #include "UIFormMgr.h"
+#include "rmlui/RmlUiManager.h"
 #include "GlobalVar.h"
 #include "DrawPointList.h"
 #include "SmallMap.h"
@@ -118,6 +119,7 @@ void CGameApp::_Render() {
 
 	CFormMgr::s_Mgr.Render();
 	CFormMgr::s_Mgr.RenderHint(GetMouseX(), GetMouseY());
+	CRmlUiManager::Instance().Render();
 	CCursor::I()->Render();
 
 	if (_dwNotifyTime > GetCurTick()) {

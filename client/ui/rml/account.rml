@@ -1,0 +1,30 @@
+<rml>
+	<head>
+		<title>Account Login</title>
+		<link type="text/rcss" href="account.rcss"/>
+	</head>
+	<body>
+		<div id="account-panel">
+			<div id="account-title">Account Login</div>
+			<form id="account-form">
+				<div class="row">
+					<label for="edtID">Account</label>
+					<input type="text" id="edtID" name="account" maxlength="64"/>
+				</div>
+				<div class="row">
+					<label for="edtPassword">Password</label>
+					<input type="password" id="edtPassword" name="password" maxlength="64"/>
+				</div>
+				<div class="row remember">
+					<input type="checkbox" id="chkID" name="remember" checked/>
+					<label for="chkID">Remember account</label>
+				</div>
+				<div class="buttons">
+					<button id="btnRegister" type="button">Register</button>
+					<button id="btnLogin" type="submit">Login</button>
+					<button id="btnExit" type="button">Exit</button>
+				</div>
+			</form>
+		</div>
+	</body>
+</rml>

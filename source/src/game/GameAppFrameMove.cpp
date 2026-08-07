@@ -13,6 +13,8 @@
 #include "SmallMap.h"
 #include "GlobalVar.h"
 #include "UIGlobalVar.h"
+#include "UIFormMgr.h"
+#include "rmlui/RmlUiManager.h"
 #include "GameConfig.h"
 
 #ifndef USE_DSOUND
@@ -262,8 +264,13 @@ void CGameApp::_PreMouseRun(DWORD dwMouseKey) {
 		::SetFocus(GetHWND());
 	}
 
+	CRmlUiManager::Instance().ProcessMouse(GetMouseX(), GetMouseY(), dwMouseKey);
 	CFormMgr::s_Mgr.FrameMove(GetMouseX(), GetMouseY(), dwMouseKey, GetCurTick());
+	CRmlUiManager::Instance().Update();
 
+	if (CRmlUiManager::Instance().IsMouseInteracting()) {
+		_MouseInScene = false;
+	} else
 	switch (CFormMgr::GetMouseAction()) {
 	case enumMA_None:
 		_MouseInScene = true;

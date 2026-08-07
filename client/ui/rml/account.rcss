@@ -1,0 +1,95 @@
+body {
+	font-family: rmlui-debugger-font;
+	font-size: 15dp;
+	color: #f0f0f0;
+	width: 340dp;
+	height: 230dp;
+	margin: auto;
+	padding: 18dp 20dp 16dp 20dp;
+	background-color: #1a1a1af0;
+	border: 1dp #5a5a5a;
+	pointer-events: auto;
+}
+
+#account-panel {
+	width: 100%;
+}
+
+#account-title {
+	font-size: 18dp;
+	font-weight: bold;
+	color: #ffffff;
+	margin-bottom: 14dp;
+	text-align: center;
+}
+
+.row {
+	margin-bottom: 10dp;
+}
+
+.row label {
+	display: inline-block;
+	width: 80dp;
+	color: #dddddd;
+}
+
+.row input {
+	display: inline-block;
+	width: 210dp;
+	height: 24dp;
+	padding: 2dp 6dp;
+	background-color: #101010;
+	border: 1dp #666666;
+	color: #ffffff;
+	font-family: rmlui-debugger-font;
+	font-size: 14dp;
+}
+
+.row input:focus {
+	border-color: #8ec7ff;
+}
+
+.remember {
+	margin-top: 4dp;
+	margin-bottom: 14dp;
+}
+
+.remember input {
+	width: 16dp;
+	height: 16dp;
+	margin-right: 8dp;
+}
+
+.remember label {
+	width: auto;
+}
+
+.buttons {
+	text-align: center;
+}
+
+.buttons button {
+	display: inline-block;
+	min-width: 88dp;
+	margin: 0dp 4dp;
+	padding: 6dp 12dp;
+	background-color: #3a3a3a;
+	border: 1dp #777777;
+	color: #ffffff;
+	font-family: rmlui-debugger-font;
+	font-size: 14dp;
+	text-align: center;
+}
+
+.buttons button:hover {
+	background-color: #4f4f4f;
+}
+
+#btnLogin {
+	background-color: #2f5f9a;
+	border-color: #6aa0d8;
+}
+
+#btnLogin:hover {
+	background-color: #3a73b8;
+}
