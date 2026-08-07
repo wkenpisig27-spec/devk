@@ -29,6 +29,9 @@ public:
 	void SetEnabled(bool enabled) { m_enabled = enabled; }
 	bool IsEnabled() const { return m_enabled; }
 
+	// Hide account/region/server overlays (they persist across scene switches).
+	void HideLoginForms();
+
 private:
 	CRmlUiManager() = default;
 	~CRmlUiManager() = default;

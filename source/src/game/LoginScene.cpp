@@ -402,6 +402,9 @@ bool CLoginScene::_Clear() {
 		return false;
 	}
 
+	// RmlUi login overlays outlive this scene — hide before SelectCha / World.
+	CRmlUiManager::Instance().HideLoginForms();
+
 	//    g_Render.SetRenderState(D3DRS_FOGENABLE, 0);
 	{ // reset loading res mt flag
 		if (_loadtex_flag != 9 && _loadmesh_flag != 9) {
@@ -1370,9 +1373,7 @@ void CLoginScene::ReSetNewCha() {
 }
 
 void CLoginScene::ShowChaList() {
-	CRmlUiAccountForm::Instance().Hide();
-	CRmlUiRegionForm::Instance().Hide();
-	CRmlUiServerForm::Instance().Hide();
+	CRmlUiManager::Instance().HideLoginForms();
 	if (frmAccount) {
 		frmAccount->Hide();
 	}

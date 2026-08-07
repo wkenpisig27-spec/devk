@@ -54,6 +54,7 @@
 #include "uiboxform.h"
 #include "CreateChaScene.h"
 #include "loginscene.h"
+#include "rmlui/RmlUiManager.h"
 #include "UIItemCommand.h"
 #include "GuildData.h"
 #include "UIChat.h"
@@ -127,6 +128,9 @@ bool CSelectChaScene::_Init() {
 	if (!CGameScene::_Init()) {
 		return false;
 	}
+
+	// Login RmlUi overlays are global; ensure they are gone on char select.
+	CRmlUiManager::Instance().HideLoginForms();
 
 	{ // save loading res mt flag, and resume these flags in _Clear() before this scene destoried.
 		lwIByteSet* res_bs = g_Render.GetInterfaceMgr()->res_mgr->GetByteSet();

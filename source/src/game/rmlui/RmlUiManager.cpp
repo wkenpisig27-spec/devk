@@ -212,6 +212,12 @@ bool CRmlUiManager::Init(HWND hwnd) {
 	return true;
 }
 
+void CRmlUiManager::HideLoginForms() {
+	CRmlUiAccountForm::Instance().Hide();
+	CRmlUiRegionForm::Instance().Hide();
+	CRmlUiServerForm::Instance().Hide();
+}
+
 void CRmlUiManager::Shutdown() {
 	m_ready = false;
 
