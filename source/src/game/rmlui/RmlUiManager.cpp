@@ -280,6 +280,9 @@ void CRmlUiManager::Update() {
 
 	SyncViewport();
 	g_context->Update();
+	// FormMgr::FrameMove clears hint items every frame — rebuild after that.
+	if (m_lastX >= 0 && m_lastY >= 0)
+		CRmlUiInventoryForm::Instance().UpdateItemHint(m_lastX, m_lastY);
 }
 
 void CRmlUiManager::Render() {
@@ -290,6 +293,9 @@ void CRmlUiManager::Render() {
 	g_renderer->BeginFrame();
 	g_context->Render();
 	g_renderer->EndFrame();
+	// 3D preview + item hint above the Rml chrome (FormMgr draws underneath).
+	CRmlUiInventoryForm::Instance().RenderChaPreview();
+	CRmlUiInventoryForm::Instance().RenderItemHint();
 }
 
 void CRmlUiManager::ProcessMouse(int x, int y, DWORD mouseKey) {

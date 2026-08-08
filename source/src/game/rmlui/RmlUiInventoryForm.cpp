@@ -24,6 +24,11 @@ extern void RmlInv_OnToggleApparel(bool apparel);
 extern void RmlInv_OnToggleLock();
 extern void RmlInv_OnExpandBag();
 extern void RmlInv_OnTempBag();
+extern void RmlInv_ApplyItemHint(int bagIndex, int equipLink, int mouseX, int mouseY);
+extern void RmlInv_RenderItemHint();
+extern void RmlInv_RenderChaPreview(int centerX, int centerY);
+extern void RmlInv_RotatePreviewLeft();
+extern void RmlInv_RotatePreviewRight();
 
 namespace {
 
@@ -86,6 +91,8 @@ struct CRmlUiInventoryForm::Impl : public Rml::EventListener {
 	int lastLockState = -1;
 	bool hasPlacedRoot = false;
 	bool itemDragging = false;
+	int hoverBag = -1;
+	int hoverEquip = -1;
 
 	void ProcessEvent(Rml::Event& event) override;
 	void BindStaticControls();
@@ -174,6 +181,7 @@ void CRmlUiInventoryForm::Impl::BindStaticControls() {
 	const char* clickIds[] = {
 		"btnClose", "btnLock", "btnExpand", "btnTempBag",
 		"btnModeEquip", "btnModeApparel",
+		"btnPreviewLeft", "btnPreviewRight",
 		"tabItems", "tabEquipment", "tabConsumable", "tabMaterial", "tabOther"};
 	for (const char* id : clickIds) {
 		if (Rml::Element* el = document->GetElementById(id))
@@ -200,8 +208,46 @@ void CRmlUiInventoryForm::Show() {
 }
 
 void CRmlUiInventoryForm::Hide() {
-	if (m_impl && m_impl->document)
+	if (!m_impl)
+		return;
+	m_impl->hoverBag = -1;
+	m_impl->hoverEquip = -1;
+	if (m_impl->document)
 		m_impl->document->Hide();
+}
+
+void CRmlUiInventoryForm::UpdateItemHint(int mouseX, int mouseY) {
+	if (!m_impl || !IsVisible() || m_impl->itemDragging)
+		return;
+	if (m_impl->hoverBag < 0 && m_impl->hoverEquip < 0)
+		return;
+	RmlInv_ApplyItemHint(m_impl->hoverBag, m_impl->hoverEquip, mouseX, mouseY);
+}
+
+void CRmlUiInventoryForm::RenderItemHint() {
+	if (!m_impl || !IsVisible() || m_impl->itemDragging)
+		return;
+	if (m_impl->hoverBag < 0 && m_impl->hoverEquip < 0)
+		return;
+	RmlInv_RenderItemHint();
+}
+
+void CRmlUiInventoryForm::RenderChaPreview() {
+	if (!m_impl || !IsVisible() || !m_impl->document)
+		return;
+	Rml::Element* well = m_impl->Get("inv-preview");
+	if (!well)
+		return;
+
+	const Rml::Vector2f off = well->GetAbsoluteOffset(Rml::BoxArea::Content);
+	const Rml::Vector2f size = well->GetBox().GetSize(Rml::BoxArea::Content);
+	if (size.x < 1.f || size.y < 1.f)
+		return;
+
+	const int cx = (int)(off.x + size.x * 0.5f);
+	// Bias downward so the model sits in the taller preview well.
+	const int cy = (int)(off.y + size.y * 0.78f);
+	RmlInv_RenderChaPreview(cx, cy);
 }
 
 bool CRmlUiInventoryForm::IsVisible() const {
@@ -307,6 +353,8 @@ Rml::ElementPtr CRmlUiInventoryForm::Impl::MakeSlot(const char* id, const RmlInv
 	slot->SetAttribute(dataKey, view.id);
 	slot->AddEventListener(Rml::EventId::Dblclick, this);
 	slot->AddEventListener(Rml::EventId::Mouseup, this);
+	slot->AddEventListener(Rml::EventId::Mouseover, this);
+	slot->AddEventListener(Rml::EventId::Mouseout, this);
 	slot->AddEventListener(Rml::EventId::Dragstart, this);
 	slot->AddEventListener(Rml::EventId::Dragend, this);
 	slot->AddEventListener(Rml::EventId::Dragdrop, this);
@@ -513,13 +561,36 @@ void CRmlUiInventoryForm::Impl::ProcessEvent(Rml::Event& event) {
 	const bool isDragDrop = (event == Rml::EventId::Dragdrop);
 	const bool isDragStart = (event == Rml::EventId::Dragstart);
 	const bool isDragEnd = (event == Rml::EventId::Dragend);
-	if (!isClick && !isRightUp && !isDblClick && !isDragDrop && !isDragStart && !isDragEnd)
+	const bool isMouseOver = (event == Rml::EventId::Mouseover);
+	const bool isMouseOut = (event == Rml::EventId::Mouseout);
+	if (!isClick && !isRightUp && !isDblClick && !isDragDrop && !isDragStart && !isDragEnd && !isMouseOver && !isMouseOut)
 		return;
+
+	if (isMouseOver) {
+		int bag = -1, equip = -1;
+		if (ResolveInvSlot(target, document, bag, equip)) {
+			hoverBag = bag;
+			hoverEquip = equip;
+		}
+		return;
+	}
+	if (isMouseOut) {
+		int bag = -1, equip = -1;
+		if (ResolveInvSlot(target, document, bag, equip)) {
+			if (hoverBag == bag && hoverEquip == equip) {
+				hoverBag = -1;
+				hoverEquip = -1;
+			}
+		}
+		return;
+	}
 
 	if (isDragStart) {
 		int bag = -1, equip = -1;
 		if (ResolveInvSlot(target, document, bag, equip))
 			itemDragging = true;
+		hoverBag = -1;
+		hoverEquip = -1;
 		return;
 	}
 	if (isDragEnd) {
@@ -564,6 +635,14 @@ void CRmlUiInventoryForm::Impl::ProcessEvent(Rml::Event& event) {
 			}
 			if (id == "btnTempBag") {
 				RmlInv_OnTempBag();
+				return;
+			}
+			if (id == "btnPreviewLeft") {
+				RmlInv_RotatePreviewLeft();
+				return;
+			}
+			if (id == "btnPreviewRight") {
+				RmlInv_RotatePreviewRight();
 				return;
 			}
 			if (id == "btnModeEquip") {

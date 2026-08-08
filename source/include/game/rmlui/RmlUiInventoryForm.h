@@ -29,6 +29,11 @@ public:
 	bool IsVisible() const;
 	bool IsItemDragging() const;
 
+	// Rebuild legacy CTextHint after FormMgr clears it; render after RmlUi.
+	void UpdateItemHint(int mouseX, int mouseY);
+	void RenderItemHint();
+	void RenderChaPreview();
+
 	void SetCurrency(const char* gold, const char* imp);
 	void SetCapacity(int used, int unlocked);
 	void SetBagSlots(const std::vector<RmlInvSlotView>& slots, int columns);

@@ -41,30 +41,40 @@ enum EItemType {
 	enumItemTypeCosh = 9,		// 短棒
 	enumItemTypeSinker = 10,	// 锤子
 	enumItemTypeShield = 11,	// 盾
-	enumItemTypeArrow = 12,		// 箭
-	enumItemTypeAmmo = 13,		// 弹药
-	enumItemTypeHeadpiece = 19, // 头盔
-	enumItemTypeHair = 20,		// 头发
-	enumItemTypeFace = 21,		// 脸型
+	enumItemTypeArrow = 12,		 // 箭
+	enumItemTypeAmmo = 13,		 // 弹药
+	enumItemTypeRepairTool = 17, // Repair Hammer
+	enumItemTypeAxe = 18,
+	enumItemTypePickaxe = 19, // Note: historical enumItemTypeHeadpiece also used 19
+	enumItemTypeHeadpiece = 19, // legacy alias (ItemInfo uses 20 for helms/caps)
+	// ItemInfo uses type 20 for helmets/caps (name kept for compatibility).
+	enumItemTypeHair = 20,
+	enumItemTypeFace = 21, // 脸型
 	enumItemTypeClothing = 22,	// 衣服
 	enumItemTypeGlove = 23,		// 手套
 	enumItemTypeBoot = 24,		// 靴子
 	enumItemTypeNecklace = 25,
 	enumItemTypeRing = 26,
 	enumItemTypeTattoo = 27,
+	enumItemTypeHairdo = 28,			// Hair apparel styles
 	enumItemTypeConch = 29,				// 贝壳
-	enumItemTypeMedicine = 31,			// 药品
+	enumItemTypeMedicine = 31,			// 药品 / chests / use items
 	enumItemTypeOvum = 32,				// 海卵
 	enumItemTypeUnknownConsumable = 33, // TODO: Proper naming
-	enumItemTypeScroll = 36,			// 回城卷轴
-	enumItemTypeGeneral = 41,			// 一般物品
+	enumItemTypeFairySkill = 34,		// Fairy possession / self-destruct skills
+	enumItemTypeLifeSkill = 35,			// Fishing / salvage / stall / repair books
+	enumItemTypeScroll = 36,			// 回城卷轴 / travel tickets
+	enumItemTypeGeneral = 41,			// 一般物品 (materials / resources)
 	enumItemTypeMission = 42,			// 任务道具
 	enumItemTypeBoat = 43,				// 船长证明
 	enumItemTypeWing = 44,				// 翅膀，客户端用于显示特效用
 	enumItemTypeTrade = 45,				// 贸易证明
 	enumItemTypeBravery = 46,			// 勇者之证
-	enumItemTypeHull = 51,				// 船身
-	enumItemTypeEmbolon = 52,			// 撞角
+	enumItemTypeGemScroll = 47,			// Gem composition scroll
+	enumItemTypeGem = 49,				// Forging gems
+	enumItemTypeRefineGem = 50,			// Refining gem / stone
+	enumItemTypeHull = 51,				// 船身 / equipment stabilizer (data mixed)
+	enumItemTypeEmbolon = 52,			// 撞角 / equipment catalyst (data mixed)
 	enumItemTypeEngine = 53,			// 发动机
 	enumItemTypeArtillery = 54,			// 火炮
 	enumItemTypeAirscrew = 55,			// 螺旋浆
@@ -72,14 +82,43 @@ enum EItemType {
 	enumItemTypePetFodder = 57,			// 宠物饲料
 	enumItemTypePetSock = 58,			// 能量零食
 	enumItemTypePet = 59,				// 守护精灵
+	enumItemTypeFusionScroll = 60,
+	enumItemTypeFusionCatalyst = 61,
+	enumItemTypeStrengthenScroll = 62,
+	enumItemTypeStrengthenCrystal = 63,
+	enumItemTypeCannonLogo = 64,
+	enumItemTypeSpecialCard = 65, // letters / altars / operation cards
+	enumItemTypePower = 66,			  // Power of Flame / Wind / ...
+	enumItemTypeStatEgg = 67,		  // Egg of Luck / Strength / ...
+	enumItemTypeManual = 68,
+	enumItemTypeBlueprint = 69,
+	enumItemTypeCrystal = 70,
+	enumItemTypeThrowSkill = 71, // Grenade / flash bomb / ...
+	enumItemTypeLifeThread = 75,
+	enumItemTypeLottery = 76,
+	enumItemTypeSpirit = 77,
+	enumItemTypeIncubate = 78,
+	enumItemTypeResetStone = 80,
+	enumItemTypeBracelet = 81,
+	enumItemTypeBelt = 82,
+	enumItemTypeHandguard = 83,
 
 	enumItemCloak = 88,
 	enumItemMount = 90,
-	enumItemTypeMountFodder = 91,	// Mount food/fodder
+	enumItemTypeMountFodder = 91, // Mount food/fodder
 
 	// Add by lark.li 20080514 begin
 	enumItemTypeNo = 99, // 彩票小球
 						 // End
+};
+
+// Inventory backpack filter tabs (Items / Equipment / Consumable / Material / Other).
+enum EItemInvTab {
+	enumInvTabAll = 0,
+	enumInvTabEquipment,
+	enumInvTabConsumable,
+	enumInvTabMaterial,
+	enumInvTabOther,
 };
 
 enum EItemPickTo {
@@ -221,6 +260,11 @@ public:
 	bool IsConsumable() const;
 	bool IsMission() const;
 	bool IsLockable() const;
+
+	// Inventory tab classification driven by ItemInfo Type column.
+	EItemInvTab GetInvTab() const;
+	bool MatchesInvTab(EItemInvTab tab) const;
+	static EItemInvTab InvTabFromFilter(const char* filter);
 
 public:
 	short sEffNum; // 武器捆绑特效数量

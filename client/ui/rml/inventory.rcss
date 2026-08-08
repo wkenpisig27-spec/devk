@@ -46,12 +46,16 @@ body.inv-body {
 }
 
 .inv-character {
+	display: flex;
+	flex-direction: column;
 	flex: none;
 	width: 340dp;
 	min-width: 340dp;
 }
 
 .inv-backpack {
+	display: flex;
+	flex-direction: column;
 	position: relative;
 	flex: none;
 	width: 360dp;
@@ -167,8 +171,10 @@ button.inv-close {
 .inv-character-body {
 	display: flex;
 	flex-direction: row;
+	flex: 1;
 	box-sizing: border-box;
-	height: 280dp;
+	/* Was 280 — claim leftover panel height so bottom slots/currency sit lower. */
+	height: 330dp;
 	padding: 4dp 12dp 0dp 12dp;
 	overflow: hidden;
 	clip: always;
@@ -187,6 +193,7 @@ button.inv-close {
 
 .inv-preview-well {
 	display: block;
+	position: relative;
 	flex: 1;
 	margin: 8dp 8dp 0dp 8dp;
 	box-sizing: border-box;
@@ -207,25 +214,55 @@ button.inv-close {
 		ui/rml/frames/notice/input_b.tga,
 		ui/rml/frames/notice/input_br.tga
 	);
+	drag: block;
 }
 
-.inv-preview-label {
+.inv-preview-rot,
+button.inv-preview-rot {
 	display: block;
-	padding-top: 120dp;
-	font-size: 13dp;
-	color: #5a7ab0;
+	position: absolute;
+	z-index: 2;
+	left: 6dp;
+	bottom: 6dp;
+	width: 28dp;
+	height: 28dp;
+	line-height: 28dp;
+	padding: 0dp;
+	font-family: LatoLatin;
+	font-size: 14dp;
+	font-weight: bold;
 	text-align: center;
+	color: #ffffff;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	drag: block;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_blue_l.tga,
+		ui/rml/frames/notice/btn_blue_c.tga,
+		ui/rml/frames/notice/btn_blue_r.tga
+	);
+}
+
+.inv-preview-rot-right,
+button.inv-preview-rot-right {
+	left: auto;
+	right: 6dp;
 }
 
 .inv-equip-row {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
+	flex: none;
 	justify-content: center;
 	align-content: flex-start;
 	box-sizing: border-box;
 	height: 112dp;
-	padding: 6dp 12dp 0dp 12dp;
+	padding: 8dp 12dp 0dp 12dp;
 	overflow: hidden;
 	clip: always;
 	drag: block;
@@ -309,8 +346,10 @@ button.inv-close {
 .inv-currency-row {
 	display: flex;
 	flex-direction: row;
+	flex: none;
 	box-sizing: border-box;
-	padding: 4dp 14dp 12dp 14dp;
+	/* Sit against the panel bottom instead of floating mid-panel. */
+	padding: 6dp 14dp 10dp 14dp;
 }
 
 .inv-currency {
@@ -347,10 +386,11 @@ button.inv-close {
 
 .inv-backpack-body {
 	display: block;
+	flex: 1;
 	box-sizing: border-box;
 	width: 336dp;
-	/* 8 rows * 48dp + 7 gaps * 4dp + top pad */
-	height: 420dp;
+	/* 8 rows * 48dp + 7 gaps * 4dp + top pad — leave footer tight to panel bottom. */
+	height: 432dp;
 	margin-top: 8dp;
 	margin-left: 12dp;
 	margin-right: 12dp;
@@ -393,9 +433,10 @@ button.inv-close {
 .inv-backpack-footer {
 	display: flex;
 	flex-direction: row;
+	flex: none;
 	align-items: center;
 	box-sizing: border-box;
-	padding: 6dp 12dp 14dp 12dp;
+	padding: 6dp 12dp 10dp 12dp;
 }
 
 .inv-capacity {

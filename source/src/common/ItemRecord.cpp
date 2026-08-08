@@ -6,6 +6,7 @@
 //=============================================================================
 
 #include "ItemRecord.h"
+#include <cstring>
 using namespace std;
 //---------------------------------------------------------------------------
 // class CItemRecord
@@ -235,6 +236,103 @@ bool CItemRecord::IsLockable() const {
 		   sType == EItemType::enumItemTypeConch ||
 		   sType == EItemType::enumItemTypePet ||
 		   sType == EItemType::enumItemMount;
+}
+
+EItemInvTab CItemRecord::InvTabFromFilter(const char* filter) {
+	if (!filter || !filter[0] || strcmp(filter, "all") == 0)
+		return enumInvTabAll;
+	if (strcmp(filter, "equipment") == 0)
+		return enumInvTabEquipment;
+	if (strcmp(filter, "consumable") == 0)
+		return enumInvTabConsumable;
+	if (strcmp(filter, "material") == 0)
+		return enumInvTabMaterial;
+	if (strcmp(filter, "other") == 0)
+		return enumInvTabOther;
+	return enumInvTabAll;
+}
+
+EItemInvTab CItemRecord::GetInvTab() const {
+	using E = EItemType;
+	switch (sType) {
+	// Weapons / shield / ammo
+	case E::enumItemTypeSword:
+	case E::enumItemTypeGlave:
+	case E::enumItemTypeBow:
+	case E::enumItemTypeHarquebus:
+	case E::enumItemTypeFalchion:
+	case E::enumItemTypeMitten:
+	case E::enumItemTypeStylet:
+	case E::enumItemTypeMoneybag:
+	case E::enumItemTypeCosh:
+	case E::enumItemTypeSinker:
+	case E::enumItemTypeShield:
+	case E::enumItemTypeArrow:
+	case E::enumItemTypeAmmo:
+	// Wearables (ItemInfo: 20=helm/cap, 28=hairdo)
+	case E::enumItemTypeHair: // 20 — helms in this ItemInfo
+	case E::enumItemTypeFace:
+	case E::enumItemTypeClothing:
+	case E::enumItemTypeGlove:
+	case E::enumItemTypeBoot:
+	case E::enumItemTypeNecklace:
+	case E::enumItemTypeRing:
+	case E::enumItemTypeTattoo:
+	case E::enumItemTypeHairdo:
+	case E::enumItemTypeConch:
+	case E::enumItemTypeWing:
+	case E::enumItemTypePet:
+	case E::enumItemTypeBracelet:
+	case E::enumItemTypeBelt:
+	case E::enumItemTypeHandguard:
+	case E::enumItemCloak:
+	case E::enumItemMount:
+	case E::enumItemTypeEngine:
+	case E::enumItemTypeArtillery:
+	case E::enumItemTypeAirscrew:
+	case E::enumItemTypeBoatSign:
+		return enumInvTabEquipment;
+
+	// Use-from-bag
+	case E::enumItemTypeMedicine:
+	case E::enumItemTypeOvum:
+	case E::enumItemTypeUnknownConsumable:
+	case E::enumItemTypeFairySkill:
+	case E::enumItemTypeScroll:
+	case E::enumItemTypePetFodder:
+	case E::enumItemTypePetSock:
+	case E::enumItemTypeMountFodder:
+	case E::enumItemTypePower:
+	case E::enumItemTypeStatEgg:
+	case E::enumItemTypeThrowSkill:
+	case E::enumItemTypeSpirit:
+	case E::enumItemTypeIncubate:
+		return enumInvTabConsumable;
+
+	// Crafting / forge / resources
+	case E::enumItemTypeGeneral:
+	case E::enumItemTypeGemScroll:
+	case E::enumItemTypeGem:
+	case E::enumItemTypeRefineGem:
+	case E::enumItemTypeFusionScroll:
+	case E::enumItemTypeFusionCatalyst:
+	case E::enumItemTypeStrengthenScroll:
+	case E::enumItemTypeStrengthenCrystal:
+	case E::enumItemTypeBlueprint:
+	case E::enumItemTypeCrystal:
+	case E::enumItemTypeLifeThread:
+	case E::enumItemTypeResetStone:
+		return enumInvTabMaterial;
+
+	default:
+		return enumInvTabOther;
+	}
+}
+
+bool CItemRecord::MatchesInvTab(EItemInvTab tab) const {
+	if (tab == enumInvTabAll)
+		return true;
+	return GetInvTab() == tab;
 }
 
 //---------------------------------------------------------------------------

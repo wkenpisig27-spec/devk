@@ -10,6 +10,7 @@
 #include "LitLoad.h"
 #include "RenderStateMgr.h"
 #include "GameApp.h"
+#include "ShaderLoad.h"
 
 enum {
 	S_MELEE = 0,  // ���ֽ�ս ���֣�ȭ�ף�Ǯ��
@@ -960,6 +961,11 @@ void CCharacterModel::RenderForUI(int x, int y, bool bShowLingItem /*= true*/) {
 	g_Render.GetRenderState(D3DRS_LIGHTING, &rs_light);
 	g_Render.SetRenderState(D3DRS_LIGHTING, 0);
 
+	// World-map inverted-hull outline is for scene characters only.
+	extern bool g_lwOutlineEnabled;
+	const bool savedOutline = g_lwOutlineEnabled;
+	if (savedOutline)
+		lwSetOutlineEnabled(0);
 
 	// g_Render.SetRenderState(D3DRS_ZBIAS, 16 );
 
@@ -1010,6 +1016,9 @@ void CCharacterModel::RenderForUI(int x, int y, bool bShowLingItem /*= true*/) {
 	rsm->BeginTranspObject();
 	lwUpdateSceneTransparentObject();
 	rsm->EndTranspObject();
+
+	if (savedOutline)
+		lwSetOutlineEnabled(1);
 
 	g_Render.SetRenderState(D3DRS_AMBIENT, rs_amb);
 	g_Render.SetRenderState(D3DRS_LIGHTING, rs_light);

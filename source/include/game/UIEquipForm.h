@@ -54,6 +54,14 @@ public:
 	void MoveBagItem(int srcBagIndex, int dstBagIndex, short srcNum = 0);
 	void UnequipLink(int link, int bagIndex = -1);
 
+	// 3D character preview for Rml inventory (same path as legacy ui3dCha)
+	void EnsureChaPreviewModel();
+	void ReleaseChaPreviewModel();
+	void RenderChaPreview(int centerX, int centerY);
+	void RotateChaPreviewLeft();
+	void RotateChaPreviewRight();
+	void MarkChaPreviewDirty();
+
 	CForm* stateDrags;
 
 	// 从装备栏卸载道具到道具栏
@@ -100,8 +108,8 @@ private:
 	void RefreshUpgrade();
 	void RefreshSkillJob(int nJob);
 	void RenderSpy(int x, int y);
-	void RenderCha(int x, int y);
-	void RenderModel(int x, int y, CCharacter* original, CCharacter* model, int rotation, bool refresh = false);
+	void RenderCha(int x, int y, float scaleBias = 1.0f);
+	void RenderModel(int x, int y, CCharacter* original, CCharacter* model, int rotation, bool refresh = false, float scaleBias = 1.0f);
 
 	bool _GetThrowPos(int& x, int& y);
 	static void ThrowSelectedItems(CGoodsGrid* grid);

@@ -19,8 +19,9 @@
 				</div>
 				<div class="inv-character-body">
 					<div id="equip-left" class="inv-equip-col"></div>
-					<div class="inv-preview-well">
-						<div class="inv-preview-label">Preview</div>
+					<div id="inv-preview" class="inv-preview-well">
+						<button class="inv-preview-rot" id="btnPreviewLeft" type="button" title="Rotate left">&lt;</button>
+						<button class="inv-preview-rot inv-preview-rot-right" id="btnPreviewRight" type="button" title="Rotate right">&gt;</button>
 					</div>
 					<div id="equip-right" class="inv-equip-col"></div>
 				</div>

@@ -1629,7 +1629,8 @@ bool CCharacter::UpdataItem(int nItem, DWORD nLink) {
 	case enumEQUIP_REAR:
 	case enumEQUIP_WING:
 	case enumEQUIP_FAIRY: {
-		if (IsHide()) {
+		// World-hidden UI preview clones still need fairy/glow/wing effects.
+		if (IsHide() && !GetIsForUI()) {
 			if (_pHandItemEff[nLink]) {
 				_pHandItemEff[nLink]->SetValid(FALSE);
 				_pHandItemEff[nLink] = nullptr;
@@ -1637,7 +1638,7 @@ bool CCharacter::UpdataItem(int nItem, DWORD nLink) {
 			return false;
 		}
 
-		if (!GetIsForUI() && _ShowEffects) { //! GetIsForUI() && _ShowEffects
+		if (_ShowEffects) {
 			int prevID = 0;
 			if (_pHandItemEff[nLink]) {
 				prevID = _pHandItemEff[nLink]->getIdxID();
@@ -1685,6 +1686,8 @@ bool CCharacter::UpdataItem(int nItem, DWORD nLink) {
 							}
 						}
 					}
+					if (GetIsForUI() && _pHandItemEff[nLink])
+						_pHandItemEff[nLink]->SetHide(false);
 					break;
 				}
 			}

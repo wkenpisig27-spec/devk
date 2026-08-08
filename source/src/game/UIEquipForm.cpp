@@ -888,6 +888,8 @@ void CEquipMgr::UpdataEquip(const stNetChangeChaPart& SPart, CCharacter* pCha) {
 	for (int i = 0; i < enumEQUIP_NUM; i++) {
 		_UpdataEquip(stEquip.SLink[i], i);
 	}
+	if (IsInventoryUiVisible())
+		MarkChaPreviewDirty();
 	RefreshRmlInventory();
 }
 
@@ -957,23 +959,29 @@ void CEquipMgr::SwitchMap() {
 	CRmlUiManager::Instance().HideInventoryForm();
 }
 
-void CEquipMgr::RenderModel(int x, int y, CCharacter* original, CCharacter* model, int rotation, bool refresh) {
+void CEquipMgr::RenderModel(int x, int y, CCharacter* original, CCharacter* model, int rotation, bool refresh, float scaleBias) {
 	g_Render.LookAt(D3DXVECTOR3(11.0f, 36.0f, 10.0f), D3DXVECTOR3(8.70f, 12.0f, 8.0f), MPRender::VIEW_3DUI);
 
 	MPMatrix44 matrix = *model->GetMatrix();
 
 	model->SetUIYaw(180 + rotation);
 
+	// SetUIScaleDis is a divisor — lower bias = larger on-screen model.
+	if (scaleBias < 0.05f)
+		scaleBias = 0.05f;
+	const float resScale = (float)g_Render.GetScrWidth() / (float)TINY_RES_X;
 	int typeID = model->getTypeID();
+	float baseDis = 13.5f;
 	if (typeID == 3) {
-		model->SetUIScaleDis(13.0f * g_Render.GetScrWidth() / TINY_RES_X);
+		baseDis = 13.0f;
 	} else if (typeID == 1) {
-		model->SetUIScaleDis(13.5f * g_Render.GetScrWidth() / TINY_RES_X);
+		baseDis = 13.5f;
 	} else if (typeID == 4) {
-		model->SetUIScaleDis(12.0f * g_Render.GetScrWidth() / TINY_RES_X);
+		baseDis = 12.0f;
 	} else if (typeID == 2) {
-		model->SetUIScaleDis(14.5f * g_Render.GetScrWidth() / TINY_RES_X);
+		baseDis = 14.5f;
 	}
+	model->SetUIScaleDis(baseDis * resScale * scaleBias);
 
 	if (refresh) {
 		model->UpdataFace(original->GetPart());
@@ -1013,13 +1021,32 @@ void CEquipMgr::RenderModel(int x, int y, CCharacter* original, CCharacter* mode
 	model->PlayPose(pose, PLAY_LOOP_SMOOTH);
 }
 
-void CEquipMgr::RenderCha(int x, int y) {
+void CEquipMgr::RenderCha(int x, int y, float scaleBias) {
 	if (!chaModel) {
 		refreshChaModel = false;
 		return;
 	}
-	RenderModel(x, y, g_pGameApp->GetCurScene()->GetMainCha(), chaModel, chaModelRotate, refreshChaModel);
+	CCharacter* original = g_stUIBoat.GetHuman();
+	if (!original)
+		original = g_pGameApp->GetCurScene() ? g_pGameApp->GetCurScene()->GetMainCha() : nullptr;
+	if (!original) {
+		refreshChaModel = false;
+		return;
+	}
+	RenderModel(x, y, original, chaModel, chaModelRotate, refreshChaModel, scaleBias);
 	refreshChaModel = false;
+
+	// Fairy / glow / wing / cloak effects are scene objects — draw them in the UI view
+	// after the body is placed by RenderForUI.
+	g_Render.SetCurrentView(MPRender::VIEW_3DUI);
+	for (int i = 0; i < enumEQUIP_NUM; ++i) {
+		if (CEffectObj* eff = chaModel->GetHandEff(i)) {
+			eff->SetHide(false);
+			eff->FrameMove(0);
+			eff->Render();
+		}
+	}
+	g_Render.SetCurrentView(MPRender::VIEW_WORLD);
 }
 
 void CEquipMgr::RotateCha(eDirectType enumDirect) {
@@ -1027,6 +1054,67 @@ void CEquipMgr::RotateCha(eDirectType enumDirect) {
 	chaModelRotate += -((int)(enumDirect)) * 15;
 	chaModelRotate = (chaModelRotate + 360) % 360;
 	chaModelRotate -= 180;
+}
+
+void CEquipMgr::EnsureChaPreviewModel() {
+	CCharacter* pCha = g_stUIBoat.GetHuman();
+	if (!pCha || !CGameApp::GetCurScene())
+		return;
+
+	if (chaModel && chaModel->IsValid() && chaModel->getTypeID() == pCha->getTypeID()) {
+		refreshChaModel = true;
+		return;
+	}
+
+	if (chaModel) {
+		chaModel->SetValid(false);
+		chaModel = nullptr;
+	}
+
+	chaModel = CGameApp::GetCurScene()->AddCharacter(pCha->getTypeID());
+	if (!chaModel)
+		return;
+
+	lwIByteSet* res_bs = g_Render.GetInterfaceMgr()->res_mgr->GetByteSet();
+	BYTE loadtex_flag = res_bs->GetValue(OPT_RESMGR_LOADTEXTURE_MT);
+	BYTE loadmesh_flag = res_bs->GetValue(OPT_RESMGR_LOADMESH_MT);
+	res_bs->SetValue(OPT_RESMGR_LOADTEXTURE_MT, 0);
+	res_bs->SetValue(OPT_RESMGR_LOADMESH_MT, 0);
+	res_bs->SetValue(OPT_RESMGR_LOADTEXTURE_MT, loadtex_flag);
+	res_bs->SetValue(OPT_RESMGR_LOADMESH_MT, loadmesh_flag);
+
+	chaModel->SetIsForUI(true);
+	chaModel->EnableAI(false);
+	chaModel->SetHide(true);
+	chaModel->GetActor()->SetSleep();
+	refreshChaModel = true;
+}
+
+void CEquipMgr::ReleaseChaPreviewModel() {
+	if (chaModel) {
+		chaModel->SetValid(false);
+		chaModel = nullptr;
+	}
+	refreshChaModel = true;
+}
+
+void CEquipMgr::RenderChaPreview(int centerX, int centerY) {
+	if (!chaModel || !chaModel->IsValid())
+		EnsureChaPreviewModel();
+	// Tall Notice preview well — fill height without overflowing the header.
+	RenderCha(centerX, centerY, 0.42f);
+}
+
+void CEquipMgr::RotateChaPreviewLeft() {
+	RotateCha(LEFT);
+}
+
+void CEquipMgr::RotateChaPreviewRight() {
+	RotateCha(RIGHT);
+}
+
+void CEquipMgr::MarkChaPreviewDirty() {
+	refreshChaModel = true;
 }
 
 void CEquipMgr::_RotateChaLeft(CGuiData* sender, int x, int y, DWORD key) {
@@ -1725,10 +1813,9 @@ void CEquipMgr::_evtEquipFormClose(CForm* pForm, bool& IsClose) {
 	if (g_stUITrade.IsTrading()) {
 		IsClose = false;
 	}
-	if (g_stUIEquip.chaModel) {
-		g_stUIEquip.chaModel->SetValid(false);
-		g_stUIEquip.refreshChaModel = true;
-	}
+	// Keep preview alive if Rml inventory is still open.
+	if (!CRmlUiInventoryForm::Instance().IsVisible())
+		g_stUIEquip.ReleaseChaPreviewModel();
 
 	g_stUIEquip.GetGoodsGrid()->ResetItemSelections();
 	g_stUIEquip.HideChestPreview();
@@ -1771,25 +1858,7 @@ void CEquipMgr::_evtSpyFormShow(CGuiData* pSender) {
 }
 
 void CEquipMgr::_evtEquipFormShow(CGuiData* pSender) {
-	CCharacter* pCha = g_stUIBoat.GetHuman();
-	int typeID = pCha->getTypeID();
-	g_stUIEquip.chaModel = CGameApp::GetCurScene()->AddCharacter(typeID);
-
-	lwIByteSet* res_bs = g_Render.GetInterfaceMgr()->res_mgr->GetByteSet();
-	BYTE loadtex_flag = res_bs->GetValue(OPT_RESMGR_LOADTEXTURE_MT);
-	BYTE loadmesh_flag = res_bs->GetValue(OPT_RESMGR_LOADMESH_MT);
-	res_bs->SetValue(OPT_RESMGR_LOADTEXTURE_MT, 0);
-	res_bs->SetValue(OPT_RESMGR_LOADMESH_MT, 0);
-	res_bs->SetValue(OPT_RESMGR_LOADTEXTURE_MT, loadtex_flag);
-	res_bs->SetValue(OPT_RESMGR_LOADMESH_MT, loadmesh_flag);
-	if (!g_stUIEquip.chaModel) {
-		return;
-	}
-	g_stUIEquip.chaModel->SetIsForUI(true);
-	g_stUIEquip.chaModel->EnableAI(false);
-	g_stUIEquip.chaModel->SetHide(true);
-	g_stUIEquip.chaModel->GetActor()->SetSleep();
-	g_stUIEquip.refreshChaModel = true;
+	g_stUIEquip.EnsureChaPreviewModel();
 }
 
 /*
@@ -2128,6 +2197,7 @@ void CEquipMgr::ShowInventoryUi() {
 		return;
 	}
 
+	EnsureChaPreviewModel();
 	CRmlUiInventoryForm& rml = CRmlUiInventoryForm::Instance();
 	rml.Show();
 	RefreshRmlInventory();
@@ -2135,6 +2205,7 @@ void CEquipMgr::ShowInventoryUi() {
 
 void CEquipMgr::HideInventoryUi() {
 	CRmlUiInventoryForm::Instance().Hide();
+	ReleaseChaPreviewModel();
 	if (frmInv && frmInv->GetIsShow())
 		frmInv->SetIsShow(false);
 }
@@ -2295,22 +2366,8 @@ void CEquipMgr::RefreshRmlInventory() {
 	int cols = 6;
 	const char* filter = rml.GetFilter();
 
-	auto passes = [&](CItemRecord* info) -> bool {
-		if (!info || !filter || strcmp(filter, "all") == 0)
-			return true;
-		const bool equipment = info->IsWeapon() || info->IsArmor() || info->sType < 31;
-		const bool consumable = info->IsConsumable() || info->sType == 36 || info->sType == 71;
-		const bool material = info->sType == enumItemTypeGeneral;
-		if (strcmp(filter, "equipment") == 0)
-			return equipment;
-		if (strcmp(filter, "consumable") == 0)
-			return consumable;
-		if (strcmp(filter, "material") == 0)
-			return material;
-		if (strcmp(filter, "other") == 0)
-			return !equipment && !consumable && !material;
-		return true;
-	};
+	const EItemInvTab invTab = CItemRecord::InvTabFromFilter(filter);
+	const bool showAllSlots = (invTab == enumInvTabAll);
 
 	if (bag) {
 		cols = bag->GetCol() > 0 ? bag->GetCol() : 6;
@@ -2320,23 +2377,27 @@ void CEquipMgr::RefreshRmlInventory() {
 			CItemCommand* cmd = dynamic_cast<CItemCommand*>(bag->GetItem(i));
 			if (!cmd) {
 				unlocked++;
-				// Always keep empty slots visible so drag-drop targets remain available.
-				RmlInvSlotView view;
-				view.id = i;
-				bagSlots.push_back(view);
+				// Keep empty drop targets on the full Items view only.
+				if (showAllSlots) {
+					RmlInvSlotView view;
+					view.id = i;
+					bagSlots.push_back(view);
+				}
 				continue;
 			}
 			CItemRecord* info = cmd->GetItemInfo();
 			if (info && info->lID == 32767) {
-				RmlInvSlotView view;
-				view.id = i;
-				view.locked = true;
-				bagSlots.push_back(view);
+				if (showAllSlots) {
+					RmlInvSlotView view;
+					view.id = i;
+					view.locked = true;
+					bagSlots.push_back(view);
+				}
 				continue;
 			}
 			unlocked++;
 			used++;
-			if (!passes(info))
+			if (info && !info->MatchesInvTab(invTab))
 				continue;
 			RmlInvSlotView view;
 			view.id = i;
@@ -2458,6 +2519,7 @@ void RmlInv_OnTempBag() {
 
 void RmlInv_OnBagDblClick(int index) {
 	g_stUIEquip.UseBagItem(index);
+	g_stUIEquip.MarkChaPreviewDirty();
 	g_stUIEquip.RefreshRmlInventory();
 }
 
@@ -2468,6 +2530,7 @@ void RmlInv_OnBagRightClick(int index) {
 
 void RmlInv_OnEquipDblClick(int link) {
 	g_stUIEquip.UnequipLink(link, -1);
+	g_stUIEquip.MarkChaPreviewDirty();
 	g_stUIEquip.RefreshRmlInventory();
 }
 
@@ -2476,14 +2539,49 @@ void RmlInv_OnDrop(int srcBag, int srcEquip, int dstBag, int dstEquip) {
 		g_stUIEquip.MoveBagItem(srcBag, dstBag);
 	} else if (srcBag >= 0 && dstEquip >= 0) {
 		g_stUIEquip.UseBagItem(srcBag);
+		g_stUIEquip.MarkChaPreviewDirty();
 	} else if (srcEquip >= 0 && dstBag >= 0) {
 		g_stUIEquip.UnequipLink(srcEquip, dstBag);
+		g_stUIEquip.MarkChaPreviewDirty();
 	}
 	// UI rebuild is deferred to RmlInv_OnItemDragEnd so the drag source isn't destroyed mid-drop.
 }
 
 void RmlInv_OnItemDragEnd() {
 	g_stUIEquip.RefreshRmlInventory();
+}
+
+void RmlInv_ApplyItemHint(int bagIndex, int equipLink, int mouseX, int mouseY) {
+	CItemCommand* cmd = nullptr;
+	if (bagIndex >= 0) {
+		CGoodsGrid* bag = g_stUIEquip.GetGoodsGrid();
+		if (bag)
+			cmd = dynamic_cast<CItemCommand*>(bag->GetItem(bagIndex));
+	} else if (equipLink >= 0) {
+		cmd = g_stUIEquip.GetEquipItem((unsigned int)equipLink);
+	}
+	if (!cmd)
+		return;
+
+	CGuiData::SetHintItem(cmd);
+	cmd->ReadyForHint(mouseX, mouseY, nullptr);
+}
+
+void RmlInv_RenderItemHint() {
+	if (CItemObj* item = CGuiData::GetHintItem())
+		item->RenderHint(0, 0);
+}
+
+void RmlInv_RenderChaPreview(int centerX, int centerY) {
+	g_stUIEquip.RenderChaPreview(centerX, centerY);
+}
+
+void RmlInv_RotatePreviewLeft() {
+	g_stUIEquip.RotateChaPreviewLeft();
+}
+
+void RmlInv_RotatePreviewRight() {
+	g_stUIEquip.RotateChaPreviewRight();
 }
 
 // ??�??????j????????????
