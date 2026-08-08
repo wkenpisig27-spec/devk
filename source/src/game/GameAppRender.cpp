@@ -4,7 +4,9 @@
 #include "Scene.h"
 #include "FindPath.h"
 #include "UIFormMgr.h"
+#include "UIMenu.h"
 #include "rmlui/RmlUiManager.h"
+#include "rmlui/RmlUiInventoryForm.h"
 #include "GlobalVar.h"
 #include "DrawPointList.h"
 #include "SmallMap.h"
@@ -120,6 +122,9 @@ void CGameApp::_Render() {
 	CFormMgr::s_Mgr.Render();
 	CFormMgr::s_Mgr.RenderHint(GetMouseX(), GetMouseY());
 	CRmlUiManager::Instance().Render();
+	// Legacy pop menus sit under RmlUi if drawn only in FormMgr; redraw above inventory.
+	if (CRmlUiInventoryForm::Instance().IsVisible())
+		GUI::CMenu::RenderAllVisible();
 	CCursor::I()->Render();
 
 	if (_dwNotifyTime > GetCurTick()) {

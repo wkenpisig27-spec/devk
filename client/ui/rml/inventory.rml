@@ -31,7 +31,7 @@
 						<div class="inv-currency-label">Gold</div>
 						<div id="labGold" class="inv-currency-value">0</div>
 					</div>
-					<div class="inv-currency">
+					<div class="inv-currency inv-currency-last">
 						<div class="inv-currency-label">IMP</div>
 						<div id="labIMP" class="inv-currency-value">0</div>
 					</div>
@@ -47,15 +47,28 @@
 					<button class="inv-close" id="btnClose" type="button">X</button>
 				</div>
 				<div class="inv-backpack-body">
+					<!-- overflow:hidden + custom bar: native overflow:auto breaks drag/dblclick via scroll-into-view -->
 					<div id="bag-grid" class="inv-bag-grid"></div>
+					<div id="bag-scrollbar" class="inv-bag-scrollbar">
+						<div id="bag-scroll-thumb" class="inv-bag-scroll-thumb"></div>
+					</div>
 				</div>
 				<div class="inv-backpack-footer">
-					<div id="labCapacity" class="inv-capacity">Capacity: 0/0</div>
+					<div class="inv-capacity-wrap">
+						<div class="inv-capacity-label">Capacity</div>
+						<div class="inv-capacity-group">
+							<div class="inv-capacity-pill">
+								<div id="labCapacityUsed" class="inv-capacity-used">0</div>
+								<div class="inv-capacity-sep">/</div>
+								<div id="labCapacityMax" class="inv-capacity-max">0</div>
+							</div>
+							<button class="inv-capacity-add" id="btnExpand" type="button" title="Add slots">
+								<img class="inv-capacity-add-icon" src="ui/rml/frames/notice/ico_plus.tga"/>
+							</button>
+						</div>
+					</div>
 					<button class="notice-btn notice-btn-blue inv-footer-icon" id="btnLock" type="button" title="Lock">
 						<img id="imgLock" class="inv-footer-icon-img" src="ui/rml/frames/notice/ico_lock.tga"/>
-					</button>
-					<button class="notice-btn notice-btn-gold inv-footer-icon" id="btnExpand" type="button" title="Expand">
-						<img class="inv-footer-icon-img" src="ui/rml/frames/notice/ico_expand.tga"/>
 					</button>
 					<button class="notice-btn notice-btn-blue inv-footer-icon inv-footer-icon-last" id="btnTempBag" type="button" title="Temp bag">
 						<img class="inv-footer-icon-img" src="ui/rml/frames/notice/ico_temp.tga"/>
@@ -70,6 +83,83 @@
 				<button class="inv-tab" id="tabConsumable" type="button" data-filter="consumable">Consumable</button>
 				<button class="inv-tab" id="tabMaterial" type="button" data-filter="material">Material</button>
 				<button class="inv-tab" id="tabOther" type="button" data-filter="other">Other</button>
+			</div>
+		</div>
+
+		<!-- Notice item context menu (right-click) -->
+		<div id="inv-ctx" class="inv-ctx-root">
+			<div class="inv-ctx-scrim" id="inv-ctx-scrim"></div>
+			<div class="inv-ctx-panel" id="inv-ctx-panel">
+				<button class="inv-ctx-item" id="ctx-throw" type="button" data-ctx="throw">Throw Item</button>
+				<button class="inv-ctx-item" id="ctx-delete" type="button" data-ctx="delete">Delete Item</button>
+				<button class="inv-ctx-item" id="ctx-lock" type="button" data-ctx="lock">Lock Item</button>
+				<button class="inv-ctx-item" id="ctx-unlock" type="button" data-ctx="unlock">Unlock Item</button>
+				<button class="inv-ctx-item" id="ctx-sell" type="button" data-ctx="sell">Sell Item</button>
+				<button class="inv-ctx-item" id="ctx-boxrates" type="button" data-ctx="boxrates">Box Rates</button>
+				<button class="inv-ctx-item inv-ctx-item-last" id="ctx-chat" type="button" data-ctx="chat">Send to Chat</button>
+			</div>
+		</div>
+
+		<!-- Lock inventory confirm modal -->
+		<div id="inv-lock-modal" class="inv-modal">
+			<div class="inv-modal-scrim" id="inv-lock-scrim"></div>
+			<div class="notice inv-modal-panel">
+				<div class="notice-header">
+					<div class="notice-title">Lock Inventory</div>
+				</div>
+				<div class="notice-body">
+					<div id="inv-lock-msg" class="inv-modal-msg">Confirm to bind inventory?</div>
+					<div class="inv-modal-hint">While locked, items cannot be traded, thrown, or deleted until you unlock with your secondary password.</div>
+				</div>
+				<div class="notice-footer">
+					<button class="notice-btn notice-btn-gold" id="btnLockConfirm" type="button">Confirm</button>
+					<button class="notice-btn notice-btn-blue" id="btnLockCancel" type="button">Cancel</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Generic item action confirm (throw / delete / lock / sell) -->
+		<div id="inv-confirm-modal" class="inv-modal">
+			<div class="inv-modal-scrim" id="inv-confirm-scrim"></div>
+			<div class="notice inv-modal-panel">
+				<div class="notice-header">
+					<div class="notice-title" id="inv-confirm-title">Confirm</div>
+				</div>
+				<div class="notice-body">
+					<div id="inv-confirm-msg" class="inv-modal-msg"></div>
+					<div id="inv-confirm-hint" class="inv-modal-hint"></div>
+				</div>
+				<div class="notice-footer">
+					<button class="notice-btn notice-btn-gold" id="btnConfirmYes" type="button">Confirm</button>
+					<button class="notice-btn notice-btn-blue" id="btnConfirmNo" type="button">Cancel</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Expand bag slots modal -->
+		<div id="inv-expand-modal" class="inv-modal">
+			<div class="inv-modal-scrim" id="inv-expand-scrim"></div>
+			<div class="notice inv-modal-panel inv-modal-panel-expand">
+				<div class="notice-header">
+					<div class="notice-title">Bag Slots</div>
+				</div>
+				<div class="notice-body">
+					<div id="inv-expand-cap" class="inv-modal-msg">Capacity: 36 → 42</div>
+					<div class="inv-modal-hint">Unlock 6 extra backpack slots.</div>
+					<div id="inv-expand-slots" class="inv-expand-slots">
+						<div class="inv-expand-slot"></div>
+						<div class="inv-expand-slot"></div>
+						<div class="inv-expand-slot"></div>
+						<div class="inv-expand-slot"></div>
+						<div class="inv-expand-slot"></div>
+						<div class="inv-expand-slot"></div>
+					</div>
+					<div id="inv-expand-cost" class="inv-expand-cost">Cost: 100 IMP</div>
+				</div>
+				<div class="notice-footer">
+					<button class="notice-btn notice-btn-gold" id="btnExpandConfirm" type="button">Confirm</button>
+					<button class="notice-btn notice-btn-blue" id="btnExpandCancel" type="button">Cancel</button>
+				</div>
 			</div>
 		</div>
 	</body>

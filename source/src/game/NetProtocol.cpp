@@ -2066,6 +2066,9 @@ void NetKitbagLockedSpaces(short slots, CGoodsGrid* grd) {
 		pObj->SetCanDrag(false);
 		grd->SetItem(index, pObj);
 	}
+
+	// Keep Notice backpack in sync when capacity expands/contracts while UI is open.
+	g_stUIEquip.RefreshRmlInventory();
 }
 
 void NetEspeItem(unsigned int nID, stNetEspeItem& SEspeItem) {

@@ -72,6 +72,8 @@ public:
 	int GetSelectedItemCount() const;
 
 	void ResetItemSelections();
+	void ToggleItemSelected(int index);
+	void SelectItemOnly(int index);
 
 	const std::vector<int>& GetSelectionOrder() const { return selectionOrderList; }
 

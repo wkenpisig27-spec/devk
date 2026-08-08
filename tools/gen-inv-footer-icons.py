@@ -9,7 +9,7 @@ from pathlib import Path
 
 OUT = Path(__file__).resolve().parents[1] / "client" / "ui" / "rml" / "frames" / "notice"
 SIZE = 24
-FEATHER = 0.85
+FEATHER = 0.35
 RGB = (255, 255, 255)
 ALPHA = 0.95
 

@@ -7,6 +7,7 @@
 #include "rmlui/RmlUiSelectChaForm.h"
 #include "rmlui/RmlUiInventoryForm.h"
 
+#include "UIMenu.h"
 #include "MPRender.h"
 
 #include <RmlUi/Core.h>
@@ -308,6 +309,17 @@ void CRmlUiManager::ProcessMouse(int x, int y, DWORD mouseKey) {
 		g_context->ProcessMouseMove(x, y, mods);
 		m_lastX = x;
 		m_lastY = y;
+	}
+
+	// While a legacy CMenu is open above the inventory, let FormMgr own clicks.
+	if (GUI::CMenu::IsAnyShowing()) {
+		if ((mouseKey & M_LUp) && m_leftDown)
+			m_leftDown = false;
+		if ((mouseKey & M_RUp) && m_rightDown)
+			m_rightDown = false;
+		if ((mouseKey & M_MUp) && m_middleDown)
+			m_middleDown = false;
+		return;
 	}
 
 	if ((mouseKey & M_LDown) && !m_leftDown) {

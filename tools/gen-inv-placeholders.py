@@ -9,7 +9,7 @@ from pathlib import Path
 
 OUT = Path(__file__).resolve().parents[1] / "client" / "ui" / "rml" / "frames" / "notice" / "slots"
 SIZE = 40
-FEATHER = 0.9
+FEATHER = 0.4
 # Muted Notice blue-violet (matches legacy "ghost" readability on light panels)
 RGB = (150, 170, 210)
 ALPHA = 0.42

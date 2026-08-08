@@ -1,5 +1,6 @@
-# Soft anti-aliased Notice UI skin for DX9 RmlUi.
+# Crisp Notice UI skin for DX9 RmlUi (tight AA — no milky inner-shadow halos).
 # Panel top tiles include the blue header band so corners never punch through.
+# Also writes inventory chrome: capacity pill, scroll bar, add-slot button, plus icon.
 # Usage: python tools/gen-notice-skin.py
 
 from __future__ import annotations
@@ -10,8 +11,8 @@ from pathlib import Path
 
 OUT = Path(__file__).resolve().parents[1] / "client" / "ui" / "rml" / "frames" / "notice"
 SS = 5
-# ~1px coverage ramp — enough to kill DX9 stair-steps, not a blur halo
-FEATHER = 0.85
+# Match inventory slots — enough AA to kill DX9 stairs, not a blur band.
+FEATHER = 0.35
 
 
 def clamp(v: float) -> int:
@@ -173,11 +174,11 @@ def crop(rgba: list[tuple[int, int, int, int]], src_w: int, x0: int, y0: int, cw
 
 
 def gen_panel() -> None:
-    """9-slice with header baked into top tiles. Tighter corner radius."""
+    """9-slice with header baked into top tiles."""
     size_w = 128
     size_h = 200
     radius = 10.0
-    border = 2.0
+    border = 1.25
     header_h = 52.0
 
     master = render(
@@ -185,7 +186,8 @@ def gen_panel() -> None:
         lambda px, py: sample_notice_panel(px, py, float(size_w), float(size_h), radius, border, header_h),
     )
 
-    top_h = int(border + header_h) + 2
+    # Keep 56px top tiles — .notice-header / .inv-panel-header are 56dp.
+    top_h = 56
     side = 18
     bot = 18
     edge = 8
@@ -208,7 +210,7 @@ def gen_panel() -> None:
 def gen_input() -> None:
     size = 64
     radius = 6.0
-    border = 1.5
+    border = 1.0
     fill = (255, 255, 255)
     border_rgb = (160, 188, 224)
     master = render(size, size, lambda px, py: sample_framed(
@@ -230,14 +232,14 @@ def gen_input() -> None:
 
 def gen_pill(name: str, top: tuple[int, int, int], bot: tuple[int, int, int],
              bhi: tuple[int, int, int], blo: tuple[int, int, int]) -> None:
-    # Modest corner radius — not a full capsule
     h = 46
-    radius = 10.0
+    radius = 8.0
+    border = 1.0
     cap = 18
     mid = 12
     w = cap * 2 + mid
     master = render(w, h, lambda px, py: sample_gradient_framed(
-        px, py, float(w), float(h), radius, 1.35, top, bot, bhi, blo))
+        px, py, float(w), float(h), radius, border, top, bot, bhi, blo))
     write_tga(OUT / f"{name}_l.tga", cap, h, crop(master, w, 0, 0, cap, h))
     write_tga(OUT / f"{name}_c.tga", mid, h, crop(master, w, cap, 0, mid, h))
     write_tga(OUT / f"{name}_r.tga", cap, h, crop(master, w, cap + mid, 0, cap, h))
@@ -253,7 +255,7 @@ def dist_segment(px: float, py: float, ax: float, ay: float, bx: float, by: floa
 
 
 def sample_checkbox(px: float, py: float, size: float, checked: bool) -> tuple[int, int, int, int]:
-    """White rounded box; checked adds thick blue tick (can spill slightly past box)."""
+    """White rounded box; checked adds a crisp blue tick."""
     pad = 2.0
     box = size - pad * 2
     bx, by = pad, pad
@@ -261,7 +263,7 @@ def sample_checkbox(px: float, py: float, size: float, checked: bool) -> tuple[i
     d_box = sd_round_box(px - bx, py - by, box, box, radius)
     box_a = coverage(d_box)
 
-    border = 1.4
+    border = 1.0
     d_inner = sd_round_box(
         px - bx - border, py - by - border,
         box - 2 * border, box - 2 * border,
@@ -271,7 +273,7 @@ def sample_checkbox(px: float, py: float, size: float, checked: bool) -> tuple[i
     border_a = box_a * (1.0 - inner_a)
     fill_a = box_a * inner_a
 
-    br, bg, bb = 170, 195, 230
+    br, bg, bb = 160, 188, 224
     fr, fg, fb = 255, 255, 255
     a = border_a + fill_a
     r = g = b = 0.0
@@ -284,12 +286,12 @@ def sample_checkbox(px: float, py: float, size: float, checked: bool) -> tuple[i
         x0, y0 = size * 0.22, size * 0.52
         x1, y1 = size * 0.42, size * 0.72
         x2, y2 = size * 0.82, size * 0.28
-        stroke = 2.35
+        stroke = 2.2
         d_tick = min(
             dist_segment(px, py, x0, y0, x1, y1),
             dist_segment(px, py, x1, y1, x2, y2),
         ) - stroke
-        tick_a = coverage(d_tick, feather=1.1)
+        tick_a = coverage(d_tick, feather=0.4)
         if tick_a > 0.001:
             tr, tg, tb = 90, 150, 230
             r = r * (1.0 - tick_a) + tr * tick_a
@@ -310,6 +312,103 @@ def gen_checkbox() -> None:
     write_tga(OUT / "check_on.tga", size, size, on)
 
 
+def gen_cap_pill() -> None:
+    """Capacity pill (tiled-horizontal) — flat face, 1px stroke."""
+    h = 34
+    cap = 17
+    mid = 8
+    w = cap * 2 + mid
+    radius = 8.0
+    border = 1.0
+    fill = (236, 242, 250)
+    border_rgb = (176, 198, 228)
+    master = render(w, h, lambda px, py: sample_framed(
+        px, py, float(w), float(h), radius, border, fill, border_rgb))
+    write_tga(OUT / "cap_pill_l.tga", cap, h, crop(master, w, 0, 0, cap, h))
+    write_tga(OUT / "cap_pill_c.tga", mid, h, crop(master, w, cap, 0, mid, h))
+    write_tga(OUT / "cap_pill_r.tga", cap, h, crop(master, w, cap + mid, 0, cap, h))
+
+
+def _flat_vstrip(w: int, h: int, fill: tuple[int, int, int], edge: tuple[int, int, int]) -> list[tuple[int, int, int, int]]:
+    """1px left/right stroke, flat fill — no rounded soft bevel."""
+    out: list[tuple[int, int, int, int]] = []
+    for _y in range(h):
+        for x in range(w):
+            if x == 0 or x == w - 1:
+                out.append((edge[0], edge[1], edge[2], 255))
+            else:
+                out.append((fill[0], fill[1], fill[2], 255))
+    return out
+
+
+def gen_scroll() -> None:
+    """Scrollbar track/thumb 3-slices + legacy single-piece thumbs."""
+    track_w, tile_h = 10, 8
+    track_fill = (226, 236, 248)
+    track_edge = (158, 184, 220)
+    strip = _flat_vstrip(track_w, tile_h, track_fill, track_edge)
+    for name in ("scroll_track_t", "scroll_track_c", "scroll_track_b"):
+        write_tga(OUT / f"{name}.tga", track_w, tile_h, strip)
+
+    thumb_w = 8
+    thumb_fill = (106, 168, 232)
+    thumb_edge = (74, 132, 200)
+    tstrip = _flat_vstrip(thumb_w, tile_h, thumb_fill, thumb_edge)
+    for name in ("scroll_thumb_t", "scroll_thumb_c", "scroll_thumb_b"):
+        write_tga(OUT / f"{name}.tga", thumb_w, tile_h, tstrip)
+
+    # Legacy single-piece rounded bars (kept for any leftover CSS).
+    tw, th = 16, 64
+    write_tga(
+        OUT / "scroll_track.tga", tw, th,
+        render(tw, th, lambda px, py: sample_framed(
+            px, py, float(tw), float(th), 4.0, 1.0, (208, 224, 244), (158, 184, 232))),
+    )
+    for name, fill, bord in (
+        ("scroll_thumb", (126, 180, 240), (74, 138, 208)),
+        ("scroll_thumb_hi", (90, 150, 220), (58, 120, 190)),
+    ):
+        ww, hh = 14, 48
+        write_tga(
+            OUT / f"{name}.tga", ww, hh,
+            render(ww, hh, lambda px, py: sample_framed(
+                px, py, float(ww), float(hh), 4.0, 1.0, fill, bord)),
+        )
+
+
+def gen_btn_add_slot() -> None:
+    """Square + button chrome under the capacity add control."""
+    size = 40
+    write_tga(
+        OUT / "btn_add_slot.tga", size, size,
+        render(size, size, lambda px, py: sample_gradient_framed(
+            px, py, float(size), float(size), 6.0, 1.0,
+            (110, 170, 236), (74, 138, 208),
+            (150, 195, 245), (58, 120, 192),
+        )),
+    )
+
+
+def gen_ico_plus() -> None:
+    """White plus glyph for capacity add (transparent bg)."""
+    size = 22
+    arm = 1.7
+    half_len = size * 0.32
+    cx = cy = size * 0.5
+
+    def sample(px: float, py: float) -> tuple[int, int, int, int]:
+        dx = abs(px - cx)
+        dy = abs(py - cy)
+        d_h = max(dy - arm, dx - half_len)
+        d_v = max(dx - arm, dy - half_len)
+        a = coverage(min(d_h, d_v))
+        if a < 0.004:
+            return (0, 0, 0, 0)
+        return (255, 255, 255, clamp(a * 250))
+
+    write_tga(OUT / "ico_plus.tga", size, size, render(size, size, sample))
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     gen_panel()
@@ -317,6 +416,10 @@ def main() -> None:
     gen_pill("btn_blue", (126, 180, 240), (74, 138, 208), (170, 205, 250), (58, 120, 192))
     gen_pill("btn_gold", (245, 215, 130), (224, 176, 64), (255, 235, 170), (200, 152, 48))
     gen_checkbox()
+    gen_cap_pill()
+    gen_scroll()
+    gen_btn_add_slot()
+    gen_ico_plus()
     for name in ("header_l.tga", "header_c.tga", "header_r.tga"):
         p = OUT / name
         if p.exists():

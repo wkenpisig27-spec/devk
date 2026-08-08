@@ -2144,8 +2144,11 @@ bool CItemCommand::UseCommand(bool isRightClick) {
 	}*/
 	dwTime = CGameApp::GetCurTick() + 1000;
 
+	// Exhausted fairies (low URE) are marked invalid so they grant no bonuses,
+	// but the player must still be able to equip them (effects stay inert until fed).
 	if (!GetIsValid()) {
-		return false;
+		if (!_pItem || _pItem->sType != enumItemTypePet)
+			return false;
 	}
 
 	CCharacter* pCha = CGameScene::GetMainCha();

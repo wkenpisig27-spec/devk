@@ -703,19 +703,49 @@ int CGoodsGrid::GetUsedGridCount() {
 }
 
 void CGoodsGrid::ResetItemSelections() {
+	if (!selectedItemIndicies)
+		return;
 	for (auto& b : std::span(selectedItemIndicies.get(), _nMaxNum)) {
 		b = false;
 	}
 	selectionOrderList.clear();
 }
 
+void CGoodsGrid::ToggleItemSelected(int index) {
+	if (!selectedItemIndicies || index < 0 || index >= _nMaxNum)
+		return;
+	if (!_pItems || !_pItems[index])
+		return;
+
+	selectedItemIndicies[index] = !selectedItemIndicies[index];
+	if (selectedItemIndicies[index]) {
+		selectionOrderList.push_back(index);
+	} else {
+		auto it = std::find(selectionOrderList.begin(), selectionOrderList.end(), index);
+		if (it != selectionOrderList.end())
+			selectionOrderList.erase(it);
+	}
+}
+
+void CGoodsGrid::SelectItemOnly(int index) {
+	ResetItemSelections();
+	if (!selectedItemIndicies || index < 0 || index >= _nMaxNum)
+		return;
+	if (!_pItems || !_pItems[index])
+		return;
+	selectedItemIndicies[index] = true;
+	selectionOrderList.push_back(index);
+}
+
 bool GUI::CGoodsGrid::IsItemSelected(int index) const {
-	if (index > _nMaxNum || index < 0)
+	if (!selectedItemIndicies || index >= _nMaxNum || index < 0)
 		return false;
 
 	return selectedItemIndicies[index];
 }
 
 int GUI::CGoodsGrid::GetSelectedItemCount() const {
+	if (!selectedItemIndicies)
+		return 0;
 	return std::count(selectedItemIndicies.get(), selectedItemIndicies.get() + _nMaxNum, true);
 }

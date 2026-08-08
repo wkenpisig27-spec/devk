@@ -138,17 +138,21 @@ Working directory = `client/` so `frames/` and `fonts/` resolve.
 
 DX9 RmlUi backend does **not** implement layer/filter/box-shadow paths.  
 Do **not** use `box-shadow`, filter blur, or advanced shaders — they produce white/broken panels.  
-Depth = nested frames + **soft-AA TGA skins** + border color hierarchy.
+Depth = nested frames + **tight soft-AA TGA skins** + border color hierarchy.
 
 **Rounded corners:** do not rely on CSS `border-radius` for large shells — use Notice TGA 9-slices / tiled-horizontal.
+
+**Crisp edges (Notice standard):** faces stay flat; strokes ≈ 1px; AA feather ≈ `0.35`. Avoid wide feathered borders that read as a blurry inner shadow. Inventory grids lock to `44dp` slots / `4dp` gutters.
 
 Decorator paths: `ui/rml/frames/notice/...` from the client working directory.
 
 ## Regenerating ornaments
 
 ```powershell
-python tools/gen-notice-skin.py   # Notice dialog skins
-python tools/gen-ui-frames.py     # Aether corner ornaments
+python tools/gen-notice-skin.py      # Notice dialog + inv chrome (panels, btns, scroll, pills)
+python tools/gen-inv-slots.py        # Rounded inventory slots
+python tools/gen-inv-footer-icons.py # Lock / temp / expand glyphs
+python tools/gen-ui-frames.py        # Aether corner ornaments
 ```
 
 ## Reference implementation

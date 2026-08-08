@@ -74,6 +74,9 @@ public:
 
 	static CMenu* FindMenu(const char* name);
 	static int CloseAll();
+	static bool IsAnyShowing();
+	// Draw all open menus again (e.g. above RmlUi, which renders after FormMgr).
+	static void RenderAllVisible();
 
 	void SetAllEnabled(bool isEnabled);
 	bool IsAllDisabled();

@@ -10,3 +10,5 @@ Player-facing **dialogs / forms / login / character-select overlays** use the **
 - Templates: `client/ui/rml/account.rml` (modal), `client/ui/rml/selectcha.rml` (bottom strip), `client/ui/rml/inventory.rml` (in-game inventory), shared `notice.rcss`
 
 **Inventory** uses Notice-inspired light chrome (`inventory.rml`). Other in-game HUD chrome uses **Aether** (`client/ui/rml/system/aether.rcss`) — do not mix themes on the same screen.
+
+**Crisp edges:** Notice TGAs use flat fills + ~1px strokes with tight AA (no milky inner-shadow halos). Regen via `tools/gen-notice-skin.py` / `tools/gen-inv-slots.py`.

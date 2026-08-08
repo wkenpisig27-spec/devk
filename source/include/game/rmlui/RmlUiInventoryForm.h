@@ -13,6 +13,8 @@ struct RmlInvSlotView {
 	std::string placeholderPath; // greyed silhouette when empty (equip only)
 	int qty = 0;
 	bool locked = false; // capacity lock placeholder
+	bool iconDimmed = false; // exhausted fairy / unusable tint via image-color
+	bool selected = false;	 // multi-select highlight (Ctrl-click)
 };
 
 // Notice-inspired inventory overlay (Character + Backpack + category tabs).
@@ -41,9 +43,33 @@ public:
 					   const std::vector<RmlInvSlotView>& right,
 					   const std::vector<RmlInvSlotView>& bottom);
 
+	// In-place multi-select chrome (no slot rebuild — safe during mousedown/drag).
+	void ApplyBagSelection(const std::vector<char>& selectedByIndex);
+
 	void SetPackageLocked(bool locked);
 	void SetEquipModeApparel(bool apparel);
 	bool IsEquipModeApparel() const;
+
+	// Notice confirm overlays (lock inventory / expand bag slots / item actions).
+	void ShowLockConfirmModal();
+	void ShowExpandBagModal(int currentCapacity, int addSlots, int costImp);
+	void ShowConfirmModal(const char* title, const char* message, const char* hint = "");
+	void HideModals();
+	bool IsModalOpen() const;
+
+	// Notice right-click context menu (replaces legacy CMenu while inventory is open).
+	struct CtxMenuFlags {
+		bool throwItem = false;
+		bool deleteItem = false;
+		bool lockItem = false;
+		bool unlockItem = false;
+		bool sellItem = false;
+		bool boxRates = false;
+		bool sendToChat = false;
+	};
+	void ShowContextMenu(int screenX, int screenY, const CtxMenuFlags& flags);
+	void HideContextMenu();
+	bool IsContextMenuOpen() const;
 
 	// Current category filter requested by UI (all/equipment/consumable/material/other).
 	const char* GetFilter() const;

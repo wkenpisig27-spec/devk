@@ -239,3 +239,18 @@ int CMenu::CloseAll() {
 	}
 	return i;
 }
+
+bool CMenu::IsAnyShowing() {
+	for (allmenus::iterator it = _allmenus.begin(); it != _allmenus.end(); it++) {
+		if ((*it)->GetIsShow())
+			return true;
+	}
+	return false;
+}
+
+void CMenu::RenderAllVisible() {
+	for (allmenus::iterator it = _allmenus.begin(); it != _allmenus.end(); it++) {
+		if ((*it)->GetIsShow())
+			(*it)->Render();
+	}
+}

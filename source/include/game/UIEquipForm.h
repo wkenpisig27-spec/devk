@@ -45,6 +45,7 @@ public:
 	bool IsInventoryUiVisible() const;
 	void RefreshRmlInventory();
 	void ShowBagContextMenu(int bagIndex);
+	void ExecuteBagContextAction(const char* action);
 	void RequestTogglePackageLock();
 	void RequestExpandBag();
 	void RequestTempBag();
@@ -53,6 +54,8 @@ public:
 	void UseBagItem(int bagIndex);
 	void MoveBagItem(int srcBagIndex, int dstBagIndex, short srcNum = 0);
 	void UnequipLink(int link, int bagIndex = -1);
+	void OnRmlItemConfirmYes();
+	void OnRmlItemConfirmNo();
 
 	// 3D character preview for Rml inventory (same path as legacy ui3dCha)
 	void EnsureChaPreviewModel();

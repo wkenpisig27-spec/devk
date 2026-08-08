@@ -31,6 +31,7 @@
 #include "EffectObj.h"
 #include "UIMenu.h"
 #include "UINpcTradeForm.h"
+#include "UIFormMgr.h"
 #include "WorldScene.h"
 #include "UICozeForm.h"
 #include <algorithm>
@@ -42,6 +43,30 @@
 using namespace std;
 
 using namespace GUI;
+
+namespace {
+
+enum class RmlInvPendingConfirm {
+	None,
+	DeleteSelected,
+	ThrowSelected,
+	LockSelected,
+	SellSelected,
+	ThrowSingle,
+};
+
+RmlInvPendingConfirm g_rmlInvPendingConfirm = RmlInvPendingConfirm::None;
+int g_rmlInvPendingThrowNum = 1;
+
+bool ShowRmlItemConfirm(const char* title, const char* message, const char* hint, RmlInvPendingConfirm action) {
+	if (!CRmlUiInventoryForm::Instance().IsVisible())
+		return false;
+	g_rmlInvPendingConfirm = action;
+	CRmlUiInventoryForm::Instance().ShowConfirmModal(title, message, hint);
+	return true;
+}
+
+} // namespace
 
 namespace {
 
@@ -467,156 +492,17 @@ bool CEquipMgr::Init() {
 		rightClickItemMenu->evtListMouseDown = [](CGuiData* pSender, int x, int y, DWORD key) {
 			auto menu = static_cast<CMenu*>(pSender);
 			menu->SetIsShow(false);
+			if (!menu->GetSelectMenu())
+				return;
 
 			constexpr std::string_view menu_string[] = {"Delete Item", "Throw Item", "Lock Item", "Unlock Item", "Sell Item", "Box Rates", "Send to Chat"};
-
+			constexpr const char* actions[] = {"delete", "throw", "lock", "unlock", "sell", "boxrates", "chat"};
 			const std::string_view selected = menu->GetSelectMenu()->GetString();
-			if (selected == menu_string[0]) {
-
-				auto deleteConfirm = [](CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
-					if (nMsgType != CForm::mrYes) {
-						return;
-					}
-
-					auto pSelect = static_cast<stSelectBox*>(pSender->GetForm()->GetPointer());
-					if (pSelect && pSelect->pointer) {
-						auto grid = static_cast<CGoodsGrid*>(pSelect->pointer);
-						g_stUIEquip.DeleteSelectedItems(grid);
-					}
-				};
-
-				auto pSelectBox = g_stUIBox.ShowSelectBox(deleteConfirm, RES_STRING(CL_LANGUAGE_MATCH_556), true);
-				pSelectBox->pointer = reinterpret_cast<void*>(g_stUIEquip.GetGoodsGrid());
-				return;
-			}
-			if (selected == menu_string[1]) {
-				if (CWorldScene::_IsThrowItemHint) {
-					auto throwConfirm = [](CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
-						if (nMsgType != CForm::mrYes) {
-							return;
-						}
-
-						auto pSelect = static_cast<stSelectBox*>(pSender->GetForm()->GetPointer());
-						if (pSelect && pSelect->pointer) {
-							auto grid = static_cast<CGoodsGrid*>(pSelect->pointer);
-							g_stUIEquip.ThrowSelectedItems(grid);
-						}
-					};
-
-					if (g_stUIEquip.GetGoodsGrid()->GetSelectedItemCount() == 1) {
-						// NOTE: bool is never set through parameter reference in evtThrowItemEvent...
-						bool does_absolutely_nothing = false;
-						evtThrowItemEvent(g_stUIEquip.GetGoodsGrid(), g_stUIEquip.rightClickItemIndex, does_absolutely_nothing);
-						return;
-					}
-
-					auto pSelectBox = g_stUIBox.ShowSelectBox(throwConfirm, RES_STRING(CL_UIEQUIPFORM_CPP_00001), true);
-					pSelectBox->pointer = reinterpret_cast<void*>(g_stUIEquip.GetGoodsGrid());
+			for (size_t i = 0; i < 7; ++i) {
+				if (selected == menu_string[i]) {
+					g_stUIEquip.ExecuteBagContextAction(actions[i]);
 					return;
 				}
-
-				ThrowSelectedItems(g_stUIEquip.GetGoodsGrid());
-				return;
-			}
-			if (selected == menu_string[2]) {
-				auto lockItemsConfirm = [](CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
-					if (nMsgType != CForm::mrYes) {
-						return;
-					}
-
-					auto pSelect = static_cast<stSelectBox*>(pSender->GetForm()->GetPointer());
-					if (pSelect && pSelect->pointer) {
-						auto grid = static_cast<CGoodsGrid*>(pSelect->pointer);
-						LockSelectedItems(grid);
-					}
-				};
-
-				auto pSelectBox = g_stUIBox.ShowSelectBox(lockItemsConfirm, "Do you wish to lock the item?", true);
-				pSelectBox->pointer = reinterpret_cast<void*>(g_stUIEquip.GetGoodsGrid());
-				return;
-			}
-			if (selected == menu_string[3]) {
-				// Right-click unlock uses rightClickItemIndex; allow 0 or 1 selected slots.
-				if (g_stUIEquip.GetGoodsGrid()->GetSelectedItemCount() <= 1) {
-					g_stUIDoublePwd.SetLockGridID(g_stUIEquip.rightClickItemIndex);
-					g_stUIDoublePwd.SetType(CDoublePwdMgr::ITEM_UNLOCK);
-					g_stUIDoublePwd.ShowDoublePwdForm();
-					return;
-				}
-
-				g_stUIDoublePwd.SetType(CDoublePwdMgr::MULTI_ITEM_UNLOCK);
-				g_stUIDoublePwd.ShowDoublePwdForm();
-				return;
-			}
-			if (selected == menu_string[4]) {
-				auto sellConfirm = [](CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
-					if (nMsgType != CForm::mrYes) {
-						return;
-					}
-
-					g_stUINpcTrade.SellSelectedItems(g_stUIEquip.GetGoodsGrid());
-				};
-
-				if (g_stUIEquip.GetGoodsGrid()->GetSelectedItemCount() == 1) {
-					g_stUIEquip.ShowSellPrompt();
-					return;
-				}
-
-				auto pSelectBox = g_stUIBox.ShowSelectBox(sellConfirm, "Sell all selected items?", true);
-				pSelectBox->pointer = reinterpret_cast<void*>(g_stUIEquip.GetGoodsGrid());
-				return;
-			}
-
-			if (selected == menu_string[5]) {
-				auto* item = dynamic_cast<CItemCommand*>(g_stUIEquip.GetGoodsGrid()->GetItem(g_stUIEquip.rightClickItemIndex));
-				if (item) {
-					g_stUIEquip.RequestChestPreview(item->GetItemInfo()->lID);
-				}
-				return;
-			}
-
-			if (selected == menu_string[6]) {
-				auto* chat = CCozeForm::GetInstance();
-				auto* grid = g_stUIEquip.GetGoodsGrid();
-				if (!chat || !grid) return;
-
-				auto buildRawLink = [](CItemCommand* item) -> std::string {
-					const SItemGrid& d = item->GetData();
-					std::string t = "[";
-					t += item->GetItemInfo()->szName;
-					t += "|";
-					t += std::to_string(item->GetItemInfo()->lID);
-					t += "|";
-					t += std::to_string(static_cast<int>(d.chForgeLv));
-					t += "|";
-					t += std::to_string(d.lDBParam[enumITEMDBP_FORGE]);
-					t += "]";
-					return t;
-				};
-
-				constexpr int kMaxLinks = 5;
-				int linked = 0;
-				bool hasSelection = false;
-				for (auto i = 0, n = grid->GetMaxNum(); i < n; ++i) {
-					if (grid->IsItemSelected(i)) { hasSelection = true; break; }
-				}
-
-				chat->ActivateChatBox();
-				if (hasSelection) {
-					for (int slotIdx : grid->GetSelectionOrder()) {
-						if (linked >= kMaxLinks) break;
-						auto* item = dynamic_cast<CItemCommand*>(grid->GetItem(slotIdx));
-						if (!item || !item->GetItemInfo()) continue;
-						chat->AddItemLinkToEdit(item->GetItemInfo()->szName, buildRawLink(item));
-						++linked;
-					}
-				} else {
-					auto* item = dynamic_cast<CItemCommand*>(grid->GetItem(g_stUIEquip.rightClickItemIndex));
-					if (item && item->GetItemInfo()) {
-						chat->AddItemLinkToEdit(item->GetItemInfo()->szName, buildRawLink(item));
-					}
-				}
-				return;
 			}
 		};
 	}
@@ -1500,12 +1386,13 @@ void CEquipMgr::evtSwapItemEvent(CGuiData* pSender, int nFirst, int nSecond, boo
 
 	CItemCommand* pItem = dynamic_cast<CItemCommand*>(pGood->GetItem(nSecond));
 	CItemCommand* pTarget = dynamic_cast<CItemCommand*>(pGood->GetItem(nFirst));
-	if (pItem && !pItem->GetIsValid()) {
+	// Low-URE fairies/gear are GetIsValid()==false but should still swap in-bag.
+	if (!pItem)
 		return;
-	}
-	if (pTarget && !pTarget->GetIsValid()) {
+	if (pItem->GetItemInfo() && pItem->GetItemInfo()->lID == 32767)
 		return;
-	}
+	if (pTarget && pTarget->GetItemInfo() && pTarget->GetItemInfo()->lID == 32767)
+		return;
 
 	if (g_pGameApp->IsShiftPress()) {
 		if (pItem && pItem->GetTotalNum() > 1) {
@@ -1667,10 +1554,20 @@ void CEquipMgr::_SendThrowData(const stThrow& sthrow, int nThrowNum) {
 	};
 
 	if (CWorldScene::_IsThrowItemHint) {
+		// Keep throw target on EquipMgr's persistent _sThrow for the confirm callback.
+		g_stUIEquip._sThrow = sthrow;
+		g_rmlInvPendingThrowNum = nThrowNum;
+		if (ShowRmlItemConfirm("Throw Item",
+							   RES_STRING(CL_UIEQUIPFORM_CPP_00001),
+							   "",
+							   RmlInvPendingConfirm::ThrowSingle)) {
+			return;
+		}
+
 		stSelectBox* pSelectBox = g_stUIBox.ShowSelectBox(throwDeleteConfirm, RES_STRING(CL_UIEQUIPFORM_CPP_00001), true);
 
 		pSelectBox->dwTag = nThrowNum;
-		pSelectBox->pointer = (void*)&sthrow;
+		pSelectBox->pointer = (void*)&g_stUIEquip._sThrow;
 	} else {
 		stNetItemThrow item;
 		item.lNum = nThrowNum;
@@ -2014,9 +1911,19 @@ void CEquipMgr::_evtRMouseGridEvent(CGuiData* pSender, CCommandObj* pItem, int n
 			}
 		};
 
-		g_stUIEquip.rightClickItemIndex = pItemCommand->GetIndex();
+		g_stUIEquip.rightClickItemIndex = nGridID >= 0 ? nGridID : pItemCommand->GetIndex();
 		ShowOnlyRelevevantMenuItems(pItemCommand, g_stUIEquip.rightClickItemMenu);
-		g_stUIEquip.GetItemForm()->PopMenu(g_stUIEquip.rightClickItemMenu, CForm::GetMouseX(), CForm::GetMouseY());
+
+		// frmInv is hidden while Notice Rml inventory is open — PopMenu on a visible host
+		// so FormMgr can render/hit-test the menu (drawn again above Rml in GameAppRender).
+		CForm* host = g_stUIEquip.GetItemForm();
+		if (!host || !host->GetIsShow()) {
+			host = CForm::GetActive();
+			if (!host || !host->GetIsShow() || !host->IsNormal())
+				host = CFormMgr::s_Mgr.Find("frmMain800");
+		}
+		if (host)
+			host->PopMenu(g_stUIEquip.rightClickItemMenu, CForm::GetMouseX(), CForm::GetMouseY());
 	}
 	// TODO: Possible collision with new right click menu method with boat information
 	stNetItemInfo info;
@@ -2204,6 +2111,8 @@ void CEquipMgr::ShowInventoryUi() {
 }
 
 void CEquipMgr::HideInventoryUi() {
+	if (CGoodsGrid* bag = GetGoodsGrid())
+		bag->ResetItemSelections();
 	CRmlUiInventoryForm::Instance().Hide();
 	ReleaseChaPreviewModel();
 	if (frmInv && frmInv->GetIsShow())
@@ -2226,29 +2135,272 @@ void CEquipMgr::ToggleInventoryUi() {
 
 void CEquipMgr::ShowBagContextMenu(int bagIndex) {
 	CGoodsGrid* bag = GetGoodsGrid();
-	if (!bag || bagIndex < 0 || !rightClickItemMenu)
+	if (!bag || bagIndex < 0)
 		return;
 	CItemCommand* cmd = dynamic_cast<CItemCommand*>(bag->GetItem(bagIndex));
 	if (!cmd)
 		return;
-	_evtRMouseGridEvent(bag, cmd, bagIndex);
+	if (cmd->GetItemInfo() && cmd->GetItemInfo()->lID == 32767)
+		return;
+
+	// Plain RMB on an unselected slot → single select. RMB on an already-selected slot
+	// (or Ctrl+RMB) keeps multi-select so batch Throw/Lock/Delete/Sell work.
+	if (!bag->IsItemSelected(bagIndex)) {
+		if (g_pGameApp->IsCtrlPress())
+			return;
+		bag->SelectItemOnly(bagIndex);
+	}
+
+	rightClickItemIndex = bagIndex;
+
+	// Refresh selection chrome after menu path may have changed it.
+	std::vector<char> selFlags((size_t)bag->GetMaxNum(), 0);
+	for (int i = 0; i < bag->GetMaxNum(); ++i)
+		selFlags[(size_t)i] = bag->IsItemSelected(i) ? 1 : 0;
+	CRmlUiInventoryForm::Instance().ApplyBagSelection(selFlags);
+
+	// Match legacy: refresh server item-info for the clicked grid.
+	stNetItemInfo info;
+	info.chType = mission::VIEW_CHAR_BAG;
+	info.sGridID = (short)bagIndex;
+	CS_BeginAction(g_stUIBoat.GetHuman(), enumACTION_ITEM_INFO, &info);
+
+	CRmlUiInventoryForm& rml = CRmlUiInventoryForm::Instance();
+	if (rml.IsVisible()) {
+		if (g_pGameApp->IsShiftPress()) {
+			cmd->ExecRightClick();
+			return;
+		}
+
+		CRmlUiInventoryForm::CtxMenuFlags flags;
+		if (cmd->IsLocked()) {
+			flags.unlockItem = true;
+		} else {
+			CItemRecord* rec = cmd->GetItemInfo();
+			const bool allowThrow = rec && rec->chIsThrow;
+			const bool allowTrade = rec && rec->chIsTrade;
+			const bool allowDelete = rec && rec->chIsDel;
+			if ((allowThrow || allowTrade || allowDelete) && rec && rec->IsLockable())
+				flags.lockItem = true;
+			flags.throwItem = allowThrow;
+			flags.deleteItem = allowDelete;
+			if (g_stUINpcTrade.GetIsShow() && allowTrade)
+				flags.sellItem = true;
+			if (rec && IsChestPreviewSupported(rec->lID))
+				flags.boxRates = true;
+			flags.sendToChat = true;
+		}
+		rml.ShowContextMenu(CForm::GetMouseX(), CForm::GetMouseY(), flags);
+		return;
+	}
+
+	if (rightClickItemMenu)
+		_evtRMouseGridEvent(bag, cmd, bagIndex);
+}
+
+void CEquipMgr::ExecuteBagContextAction(const char* action) {
+	if (!action || !action[0])
+		return;
+
+	if (strcmp(action, "delete") == 0) {
+		if (ShowRmlItemConfirm("Delete Item",
+							   "Item will vanish if you delete it.",
+							   "Do you wish to delete the selected item(s)?",
+							   RmlInvPendingConfirm::DeleteSelected)) {
+			return;
+		}
+		auto deleteConfirm = [](CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
+			if (nMsgType != CForm::mrYes)
+				return;
+			auto pSelect = static_cast<stSelectBox*>(pSender->GetForm()->GetPointer());
+			if (pSelect && pSelect->pointer)
+				g_stUIEquip.DeleteSelectedItems(static_cast<CGoodsGrid*>(pSelect->pointer));
+		};
+		auto pSelectBox = g_stUIBox.ShowSelectBox(deleteConfirm, RES_STRING(CL_LANGUAGE_MATCH_556), true);
+		pSelectBox->pointer = reinterpret_cast<void*>(GetGoodsGrid());
+		return;
+	}
+
+	if (strcmp(action, "throw") == 0) {
+		if (CWorldScene::_IsThrowItemHint) {
+			if (GetGoodsGrid() && GetGoodsGrid()->GetSelectedItemCount() == 1) {
+				bool unused = false;
+				evtThrowItemEvent(GetGoodsGrid(), rightClickItemIndex, unused);
+				return;
+			}
+			if (ShowRmlItemConfirm("Throw Item",
+								   RES_STRING(CL_UIEQUIPFORM_CPP_00001),
+								   "Selected items will be dropped on the ground.",
+								   RmlInvPendingConfirm::ThrowSelected)) {
+				return;
+			}
+			auto throwConfirm = [](CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
+				if (nMsgType != CForm::mrYes)
+					return;
+				auto pSelect = static_cast<stSelectBox*>(pSender->GetForm()->GetPointer());
+				if (pSelect && pSelect->pointer)
+					g_stUIEquip.ThrowSelectedItems(static_cast<CGoodsGrid*>(pSelect->pointer));
+			};
+			auto pSelectBox = g_stUIBox.ShowSelectBox(throwConfirm, RES_STRING(CL_UIEQUIPFORM_CPP_00001), true);
+			pSelectBox->pointer = reinterpret_cast<void*>(GetGoodsGrid());
+			return;
+		}
+		ThrowSelectedItems(GetGoodsGrid());
+		return;
+	}
+
+	if (strcmp(action, "lock") == 0) {
+		if (ShowRmlItemConfirm("Lock Item",
+							   "Do you wish to lock the item?",
+							   "Locked items cannot be traded, thrown, or deleted until unlocked.",
+							   RmlInvPendingConfirm::LockSelected)) {
+			return;
+		}
+		auto lockItemsConfirm = [](CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
+			if (nMsgType != CForm::mrYes)
+				return;
+			auto pSelect = static_cast<stSelectBox*>(pSender->GetForm()->GetPointer());
+			if (pSelect && pSelect->pointer)
+				LockSelectedItems(static_cast<CGoodsGrid*>(pSelect->pointer));
+		};
+		auto pSelectBox = g_stUIBox.ShowSelectBox(lockItemsConfirm, "Do you wish to lock the item?", true);
+		pSelectBox->pointer = reinterpret_cast<void*>(GetGoodsGrid());
+		return;
+	}
+
+	if (strcmp(action, "unlock") == 0) {
+		if (GetGoodsGrid() && GetGoodsGrid()->GetSelectedItemCount() <= 1) {
+			g_stUIDoublePwd.SetLockGridID(rightClickItemIndex);
+			g_stUIDoublePwd.SetType(CDoublePwdMgr::ITEM_UNLOCK);
+			g_stUIDoublePwd.ShowDoublePwdForm();
+			return;
+		}
+		g_stUIDoublePwd.SetType(CDoublePwdMgr::MULTI_ITEM_UNLOCK);
+		g_stUIDoublePwd.ShowDoublePwdForm();
+		return;
+	}
+
+	if (strcmp(action, "sell") == 0) {
+		if (GetGoodsGrid() && GetGoodsGrid()->GetSelectedItemCount() == 1) {
+			ShowSellPrompt();
+			return;
+		}
+		if (ShowRmlItemConfirm("Sell Item", "Sell all selected items?", "", RmlInvPendingConfirm::SellSelected))
+			return;
+		auto sellConfirm = [](CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
+			if (nMsgType != CForm::mrYes)
+				return;
+			g_stUINpcTrade.SellSelectedItems(g_stUIEquip.GetGoodsGrid());
+		};
+		auto pSelectBox = g_stUIBox.ShowSelectBox(sellConfirm, "Sell all selected items?", true);
+		pSelectBox->pointer = reinterpret_cast<void*>(GetGoodsGrid());
+		return;
+	}
+
+	if (strcmp(action, "boxrates") == 0) {
+		auto* item = dynamic_cast<CItemCommand*>(GetGoodsGrid() ? GetGoodsGrid()->GetItem(rightClickItemIndex) : nullptr);
+		if (item && item->GetItemInfo())
+			RequestChestPreview(item->GetItemInfo()->lID);
+		return;
+	}
+
+	if (strcmp(action, "chat") == 0) {
+		auto* chat = CCozeForm::GetInstance();
+		auto* grid = GetGoodsGrid();
+		if (!chat || !grid)
+			return;
+
+		auto buildRawLink = [](CItemCommand* item) -> std::string {
+			const SItemGrid& d = item->GetData();
+			std::string t = "[";
+			t += item->GetItemInfo()->szName;
+			t += "|";
+			t += std::to_string(item->GetItemInfo()->lID);
+			t += "|";
+			t += std::to_string(static_cast<int>(d.chForgeLv));
+			t += "|";
+			t += std::to_string(d.lDBParam[enumITEMDBP_FORGE]);
+			t += "]";
+			return t;
+		};
+
+		constexpr int kMaxLinks = 5;
+		int linked = 0;
+		bool hasSelection = false;
+		for (auto i = 0, n = grid->GetMaxNum(); i < n; ++i) {
+			if (grid->IsItemSelected(i)) {
+				hasSelection = true;
+				break;
+			}
+		}
+
+		chat->ActivateChatBox();
+		if (hasSelection) {
+			for (int slotIdx : grid->GetSelectionOrder()) {
+				if (linked >= kMaxLinks)
+					break;
+				auto* item = dynamic_cast<CItemCommand*>(grid->GetItem(slotIdx));
+				if (!item || !item->GetItemInfo())
+					continue;
+				chat->AddItemLinkToEdit(item->GetItemInfo()->szName, buildRawLink(item));
+				++linked;
+			}
+		} else {
+			auto* item = dynamic_cast<CItemCommand*>(grid->GetItem(rightClickItemIndex));
+			if (item && item->GetItemInfo())
+				chat->AddItemLinkToEdit(item->GetItemInfo()->szName, buildRawLink(item));
+		}
+	}
 }
 
 void CEquipMgr::RequestTogglePackageLock() {
 	if (GetIsLock()) {
 		g_stUIDoublePwd.SetType(CDoublePwdMgr::PACKAGE_UNLOCK);
 		g_stUIDoublePwd.ShowDoublePwdForm();
-	} else {
-		CBoxMgr::ShowSelectBox(_CheckLockMouseEvent, RES_STRING(CL_LANGUAGE_MATCH_824), true);
+		return;
 	}
+	if (CRmlUiInventoryForm::Instance().IsVisible()) {
+		CRmlUiInventoryForm::Instance().ShowLockConfirmModal();
+		return;
+	}
+	CBoxMgr::ShowSelectBox(_CheckLockMouseEvent, RES_STRING(CL_LANGUAGE_MATCH_824), true);
 }
 
 void CEquipMgr::RequestExpandBag() {
+	if (CRmlUiInventoryForm::Instance().IsVisible()) {
+		int unlocked = 0;
+		if (CGoodsGrid* bag = GetGoodsGrid()) {
+			const int maxNum = bag->GetMaxNum();
+			for (int i = 0; i < maxNum; ++i) {
+				CItemCommand* cmd = dynamic_cast<CItemCommand*>(bag->GetItem(i));
+				if (!cmd) {
+					unlocked++;
+					continue;
+				}
+				CItemRecord* info = cmd->GetItemInfo();
+				if (info && info->lID == 32767)
+					continue;
+				unlocked++;
+			}
+		}
+		CRmlUiInventoryForm::Instance().ShowExpandBagModal(unlocked, 6, 100);
+		return;
+	}
 	_evtExpandBagClick();
 }
 
 void CEquipMgr::RequestTempBag() {
 	g_stUIStore.ShowTempKitbag();
+}
+
+static bool IsFairyStaminaEmpty(CItemCommand* cmd) {
+	if (!cmd)
+		return false;
+	CItemRecord* info = cmd->GetItemInfo();
+	if (!info || info->sType != enumItemTypePet)
+		return false;
+	// Constitution shown as sEndure/50; 0..49 raw URE displays as empty.
+	return cmd->GetData().sEndure[0] <= 49;
 }
 
 void CEquipMgr::RefreshRmlInventory() {
@@ -2347,6 +2499,7 @@ void CEquipMgr::RefreshRmlInventory() {
 			if (CItemCommand* item = GetEquipItem((unsigned int)links[i])) {
 				if (CItemRecord* info = item->GetItemInfo())
 					view.iconPath = info->GetIconFile();
+				view.iconDimmed = IsFairyStaminaEmpty(item);
 			}
 			out.push_back(view);
 		}
@@ -2404,6 +2557,8 @@ void CEquipMgr::RefreshRmlInventory() {
 			if (info)
 				view.iconPath = info->GetIconFile();
 			view.qty = cmd->GetTotalNum();
+			view.iconDimmed = IsFairyStaminaEmpty(cmd);
+			view.selected = bag->IsItemSelected(i);
 			bagSlots.push_back(view);
 		}
 	}
@@ -2426,10 +2581,16 @@ void CEquipMgr::UseBagItem(int bagIndex) {
 	if (!bag || bagIndex < 0)
 		return;
 	CItemCommand* cmd = dynamic_cast<CItemCommand*>(bag->GetItem(bagIndex));
-	if (!cmd || !cmd->GetIsValid())
+	if (!cmd)
 		return;
 	if (cmd->GetItemInfo() && cmd->GetItemInfo()->lID == 32767)
 		return;
+	// Allow equipping exhausted fairies; other invalid items stay blocked.
+	if (!cmd->GetIsValid()) {
+		CItemRecord* info = cmd->GetItemInfo();
+		if (!info || info->sType != enumItemTypePet)
+			return;
+	}
 	cmd->Exec();
 }
 
@@ -2454,10 +2615,8 @@ void CEquipMgr::MoveBagItem(int srcBagIndex, int dstBagIndex, short srcNum) {
 
 	CItemCommand* pItem = dynamic_cast<CItemCommand*>(bag->GetItem(srcBagIndex));
 	CItemCommand* pTarget = dynamic_cast<CItemCommand*>(bag->GetItem(dstBagIndex));
-	if (pItem && !pItem->GetIsValid())
-		return;
-	if (pTarget && !pTarget->GetIsValid())
-		return;
+	// Do not block on GetIsValid(): fairies/gear with low URE are marked invalid
+	// (can't use/equip) but must still be rearrangeable in the bag.
 	if (!pItem)
 		return;
 	if (pItem->GetItemInfo() && pItem->GetItemInfo()->lID == 32767)
@@ -2517,15 +2676,109 @@ void RmlInv_OnTempBag() {
 	g_stUIEquip.RequestTempBag();
 }
 
+void RmlInv_OnLockConfirm() {
+	CS_LockKitbag();
+}
+
+void CEquipMgr::OnRmlItemConfirmYes() {
+	const RmlInvPendingConfirm action = g_rmlInvPendingConfirm;
+	g_rmlInvPendingConfirm = RmlInvPendingConfirm::None;
+
+	switch (action) {
+	case RmlInvPendingConfirm::DeleteSelected:
+		DeleteSelectedItems(GetGoodsGrid());
+		break;
+	case RmlInvPendingConfirm::ThrowSelected:
+		ThrowSelectedItems(GetGoodsGrid());
+		break;
+	case RmlInvPendingConfirm::LockSelected:
+		LockSelectedItems(GetGoodsGrid());
+		break;
+	case RmlInvPendingConfirm::SellSelected:
+		g_stUINpcTrade.SellSelectedItems(GetGoodsGrid());
+		break;
+	case RmlInvPendingConfirm::ThrowSingle: {
+		if (!_sThrow.pSelf)
+			break;
+		stNetItemThrow item;
+		item.lNum = g_rmlInvPendingThrowNum;
+		item.sGridID = _sThrow.nGridID;
+		item.lPosX = _sThrow.nX;
+		item.lPosY = _sThrow.nY;
+		CS_BeginAction(_sThrow.pSelf, enumACTION_ITEM_THROW, (void*)&item);
+		break;
+	}
+	default:
+		break;
+	}
+	RefreshRmlInventory();
+}
+
+void CEquipMgr::OnRmlItemConfirmNo() {
+	g_rmlInvPendingConfirm = RmlInvPendingConfirm::None;
+}
+
+void RmlInv_OnItemConfirmYes() {
+	g_stUIEquip.OnRmlItemConfirmYes();
+}
+
+void RmlInv_OnItemConfirmNo() {
+	g_stUIEquip.OnRmlItemConfirmNo();
+}
+
+void RmlInv_OnContextAction(const char* action) {
+	g_stUIEquip.ExecuteBagContextAction(action);
+}
+
+void RmlInv_OnExpandConfirm() {
+	if (g_stUIEquip.GetIMP() < 100) {
+		g_pGameApp->SysInfo("Not enough IMP (need 100).");
+		return;
+	}
+	CS_KitbagExpand();
+}
+
 void RmlInv_OnBagDblClick(int index) {
 	g_stUIEquip.UseBagItem(index);
 	g_stUIEquip.MarkChaPreviewDirty();
 	g_stUIEquip.RefreshRmlInventory();
 }
 
+bool RmlInv_OnBagMouseDown(int index, bool ctrl) {
+	CGoodsGrid* bag = g_stUIEquip.GetGoodsGrid();
+	if (!bag || index < 0)
+		return false;
+
+	CItemCommand* cmd = dynamic_cast<CItemCommand*>(bag->GetItem(index));
+	if (!cmd)
+		return false;
+	if (cmd->GetItemInfo() && cmd->GetItemInfo()->lID == 32767)
+		return false;
+	if (!cmd->GetCanDrag())
+		return false;
+
+	auto syncSelection = [bag]() {
+		std::vector<char> flags((size_t)bag->GetMaxNum(), 0);
+		for (int i = 0; i < bag->GetMaxNum(); ++i)
+			flags[(size_t)i] = bag->IsItemSelected(i) ? 1 : 0;
+		CRmlUiInventoryForm::Instance().ApplyBagSelection(flags);
+	};
+
+	if (ctrl) {
+		bag->ToggleItemSelected(index);
+		syncSelection();
+		return true; // suppress drag
+	}
+
+	if (bag->GetSelectedItemCount() > 0) {
+		bag->ResetItemSelections();
+		syncSelection();
+	}
+	return false;
+}
+
 void RmlInv_OnBagRightClick(int index) {
 	g_stUIEquip.ShowBagContextMenu(index);
-	g_stUIEquip.RefreshRmlInventory();
 }
 
 void RmlInv_OnEquipDblClick(int link) {

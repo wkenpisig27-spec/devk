@@ -1,18 +1,29 @@
 /* Notice-inspired in-game inventory — split Character + Backpack + right tabs. */
 
 body.inv-body {
+	position: relative;
+	width: 100%;
+	height: 100%;
 	justify-content: flex-start;
 	align-items: flex-start;
 	padding: 0dp;
+	/* Inventory chrome captures clicks; modals cover the full document. */
+	pointer-events: none;
+}
+
+body.inv-body .inv-root,
+body.inv-body .inv-modal-open {
+	pointer-events: auto;
 }
 
 .inv-root {
 	position: absolute;
 	display: flex;
 	flex-direction: row;
+	align-items: stretch;
 	box-sizing: border-box;
-	/* Tall enough for 8 bag rows without scrolling (scroll was shifting the grid on hover/click). */
-	height: 556dp;
+	/* Tall enough for 8 bag rows (44 slot + 4 gap) without scroll jitter. */
+	height: 560dp;
 	/* Capture clicks in gaps between panels so they don't reach the world. */
 	pointer-events: auto;
 }
@@ -21,7 +32,8 @@ body.inv-body {
 	display: block;
 	box-sizing: border-box;
 	height: 100%;
-	margin-right: 10dp;
+	/* Equal air between Character | Backpack | tabs */
+	margin-right: 8dp;
 	padding: 0dp;
 	overflow: hidden;
 	clip: always;
@@ -49,8 +61,9 @@ body.inv-body {
 	display: flex;
 	flex-direction: column;
 	flex: none;
-	width: 340dp;
-	min-width: 340dp;
+	/* Match backpack outer width for parallel panel edges. */
+	width: 332dp;
+	min-width: 332dp;
 }
 
 .inv-backpack {
@@ -58,8 +71,9 @@ body.inv-body {
 	flex-direction: column;
 	position: relative;
 	flex: none;
-	width: 360dp;
-	min-width: 360dp;
+	/* 12 pad + 284 grid + 6 gap + 10 scroll + 12 pad = 324; +8 chrome = 332 */
+	width: 332dp;
+	min-width: 332dp;
 	margin-right: 8dp;
 }
 
@@ -173,9 +187,9 @@ button.inv-close {
 	flex-direction: row;
 	flex: 1;
 	box-sizing: border-box;
-	/* Was 280 — claim leftover panel height so bottom slots/currency sit lower. */
-	height: 330dp;
-	padding: 4dp 12dp 0dp 12dp;
+	height: 336dp;
+	/* Same 12dp side inset as backpack body */
+	padding: 8dp 12dp 0dp 12dp;
 	overflow: hidden;
 	clip: always;
 	drag: block;
@@ -184,9 +198,10 @@ button.inv-close {
 .inv-equip-col {
 	display: block;
 	flex: none;
-	width: 52dp;
+	/* 44 slot + 0 side pad — vertical stack uses 4dp gaps */
+	width: 44dp;
 	height: 100%;
-	padding-top: 8dp;
+	padding-top: 0dp;
 	overflow: hidden;
 	clip: always;
 }
@@ -195,7 +210,8 @@ button.inv-close {
 	display: block;
 	position: relative;
 	flex: 1;
-	margin: 8dp 8dp 0dp 8dp;
+	/* 4dp gutters match slot gap so columns + preview share one rhythm */
+	margin: 0dp 8dp 0dp 8dp;
 	box-sizing: border-box;
 	background-color: transparent;
 	border-top-width: 0dp;
@@ -261,7 +277,8 @@ button.inv-preview-rot-right {
 	justify-content: center;
 	align-content: flex-start;
 	box-sizing: border-box;
-	height: 112dp;
+	/* 2 rows of 44 + one 4dp gap + pads */
+	height: 108dp;
 	padding: 8dp 12dp 0dp 12dp;
 	overflow: hidden;
 	clip: always;
@@ -279,22 +296,122 @@ button.inv-preview-rot-right {
 	min-height: 44dp;
 	max-width: 44dp;
 	max-height: 44dp;
+	/* Uniform 4dp grid gutters (last cell clears right margin in code). */
 	margin: 0dp 4dp 4dp 0dp;
-	padding: 2dp;
+	padding: 4dp;
 	overflow: hidden;
-	/* Same fill for empty + filled — avoids white/grey mismatch */
-	background-color: #e0ecf8;
-	border-top-width: 1dp;
-	border-right-width: 1dp;
-	border-bottom-width: 1dp;
-	border-left-width: 1dp;
-	border-color: #9eb8e8;
+	/* Soft-AA rounded slot @ 1:1 with TGA (DX9 — no CSS border-radius). */
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
 	border-radius: 0dp;
+	decorator: image(ui/rml/frames/notice/slot_rounded.tga);
+	/* Slots manage their own drag via inline property; never inherit block. */
+	drag: none;
+	focus: none;
+	pointer-events: auto;
+}
+
+/* Multi-select / active — gold rim baked into TGA. */
+.inv-slot-selected {
+	decorator: image(ui/rml/frames/notice/slot_rounded_sel.tga);
+}
+
+/* Notice context menu (replaces legacy CMenu popup) */
+.inv-ctx-root {
+	display: none;
+	position: absolute;
+	top: 0dp;
+	left: 0dp;
+	width: 100%;
+	height: 100%;
+	z-index: 40;
+	pointer-events: none;
+}
+
+.inv-ctx-open {
+	display: block;
+	pointer-events: auto;
+}
+
+.inv-ctx-scrim {
+	display: block;
+	position: absolute;
+	top: 0dp;
+	left: 0dp;
+	width: 100%;
+	height: 100%;
+	background-color: #00000000;
+	pointer-events: auto;
+}
+
+.inv-ctx-panel {
+	display: block;
+	position: absolute;
+	box-sizing: border-box;
+	min-width: 168dp;
+	padding: 8dp 6dp;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/input_tl.tga,
+		ui/rml/frames/notice/input_t.tga,
+		ui/rml/frames/notice/input_tr.tga,
+		ui/rml/frames/notice/input_l.tga,
+		ui/rml/frames/notice/input_c.tga,
+		ui/rml/frames/notice/input_r.tga,
+		ui/rml/frames/notice/input_bl.tga,
+		ui/rml/frames/notice/input_b.tga,
+		ui/rml/frames/notice/input_br.tga
+	);
+	pointer-events: auto;
+	z-index: 41;
+}
+
+.inv-ctx-item {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	height: 28dp;
+	margin: 0dp 0dp 2dp 0dp;
+	padding: 0dp 14dp;
+	font-family: LatoLatin;
+	font-size: 13dp;
+	font-weight: bold;
+	line-height: 28dp;
+	color: #2a4a80;
+	text-align: left;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	cursor: pointer;
+}
+
+.inv-ctx-item:hover {
+	color: #ffffff;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_blue_l.tga,
+		ui/rml/frames/notice/btn_blue_c.tga,
+		ui/rml/frames/notice/btn_blue_r.tga
+	);
+}
+
+.inv-ctx-item-last {
+	margin-bottom: 0dp;
 }
 
 .inv-equip-col .inv-slot {
 	display: block;
-	margin: 0dp 0dp 6dp 0dp;
+	margin: 0dp 0dp 4dp 0dp;
 }
 
 .inv-equip-row .inv-slot {
@@ -304,16 +421,21 @@ button.inv-preview-rot-right {
 
 .inv-slot-icon {
 	display: block;
-	width: 38dp;
-	height: 38dp;
+	width: 36dp;
+	height: 36dp;
 	background-color: transparent;
 	pointer-events: none;
 }
 
+/* Exhausted fairy (Constitution 0): modulate icon — avoid opacity on soft-AA art. */
+.inv-slot-icon-dim {
+	image-color: #8a96a8;
+}
+
 .inv-slot-placeholder {
 	display: block;
-	width: 38dp;
-	height: 38dp;
+	width: 36dp;
+	height: 36dp;
 	background-color: transparent;
 	pointer-events: none;
 }
@@ -336,27 +458,29 @@ button.inv-preview-rot-right {
 }
 
 .inv-slot-empty {
-	background-color: #e0ecf8;
+	decorator: image(ui/rml/frames/notice/slot_rounded.tga);
 }
 
 .inv-slot-locked {
-	background-color: #c8d4e4;
+	decorator: image(ui/rml/frames/notice/slot_rounded_locked.tga);
 }
 
 .inv-currency-row {
 	display: flex;
 	flex-direction: row;
 	flex: none;
+	align-items: stretch;
 	box-sizing: border-box;
-	/* Sit against the panel bottom instead of floating mid-panel. */
-	padding: 6dp 14dp 10dp 14dp;
+	/* Match backpack footer vertical rhythm (8 / 10). */
+	height: 50dp;
+	padding: 8dp 12dp 10dp 12dp;
 }
 
 .inv-currency {
 	display: block;
 	flex: 1;
 	margin-right: 8dp;
-	padding: 4dp 8dp;
+	padding: 2dp 8dp;
 	box-sizing: border-box;
 	decorator: tiled-box(
 		ui/rml/frames/notice/input_tl.tga,
@@ -371,44 +495,108 @@ button.inv-preview-rot-right {
 	);
 }
 
+.inv-currency-last {
+	margin-right: 0dp;
+}
+
 .inv-currency-label {
 	display: block;
 	font-size: 10dp;
+	line-height: 12dp;
 	color: #5a7ab0;
 }
 
 .inv-currency-value {
 	display: block;
 	font-size: 13dp;
+	line-height: 16dp;
 	font-weight: bold;
 	color: #2a4a80;
 }
 
 .inv-backpack-body {
-	display: block;
+	display: flex;
+	flex-direction: row;
 	flex: 1;
 	box-sizing: border-box;
-	width: 336dp;
-	/* 8 rows * 48dp + 7 gaps * 4dp + top pad — leave footer tight to panel bottom. */
-	height: 432dp;
+	/* 284 grid + 6 + 10 scroll track */
+	width: 300dp;
+	/* Visible window: 8 rows * 44 + 7 gutters * 4 = 380 */
+	height: 380dp;
 	margin-top: 8dp;
 	margin-left: 12dp;
 	margin-right: 12dp;
 	overflow: hidden;
 	clip: always;
-	drag: block;
+	/* none (not block): drag:block on ancestors breaks RmlUi item drag:clone on slots. */
+	drag: none;
 }
 
 .inv-bag-grid {
 	display: block;
+	flex: none;
 	box-sizing: border-box;
-	width: 100%;
+	/* 6*44 + 5*4 = 284 */
+	width: 284dp;
 	height: 100%;
-	padding: 4dp 0dp 0dp 0dp;
-	/* No scroll — scrolling made the grid jump when hovering/clicking top/bottom. */
+	padding: 0dp;
+	/* Hidden (not auto): keeps item drag/dblclick stable; wheel + custom bar scroll instead. */
 	overflow: hidden;
 	clip: always;
+	drag: none;
+}
+
+.inv-bag-scrollbar {
+	display: none;
+	position: relative;
+	flex: none;
+	width: 10dp;
+	height: 100%;
+	margin-left: 6dp;
+	box-sizing: border-box;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	/* Flat continuous track — no rounded end-cap tiles. */
+	decorator: tiled-vertical(
+		ui/rml/frames/notice/scroll_track_t.tga,
+		ui/rml/frames/notice/scroll_track_c.tga,
+		ui/rml/frames/notice/scroll_track_b.tga
+	);
 	drag: block;
+}
+
+.inv-bag-scrollbar-visible {
+	display: block;
+}
+
+.inv-bag-scroll-thumb {
+	display: block;
+	position: absolute;
+	left: 1dp;
+	top: 0dp;
+	width: 8dp;
+	height: 56dp;
+	box-sizing: border-box;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-vertical(
+		ui/rml/frames/notice/scroll_thumb_t.tga,
+		ui/rml/frames/notice/scroll_thumb_c.tga,
+		ui/rml/frames/notice/scroll_thumb_b.tga
+	);
+	drag: block;
+}
+
+.inv-bag-scroll-thumb:hover {
+	image-color: #c8e4ff;
 }
 
 .inv-bag-row {
@@ -416,9 +604,11 @@ button.inv-preview-rot-right {
 	flex-direction: row;
 	flex-wrap: nowrap;
 	align-items: flex-start;
+	justify-content: flex-start;
 	box-sizing: border-box;
-	width: 324dp;
-	height: 48dp;
+	/* Exact: 6*44 + 5*4 */
+	width: 284dp;
+	height: 44dp;
 	margin-bottom: 4dp;
 }
 
@@ -427,7 +617,8 @@ button.inv-preview-rot-right {
 	flex: none;
 	width: 44dp;
 	height: 44dp;
-	margin: 0dp 6dp 0dp 0dp;
+	/* Code clears margin on the last column for a flush right edge. */
+	margin: 0dp 4dp 0dp 0dp;
 }
 
 .inv-backpack-footer {
@@ -436,14 +627,123 @@ button.inv-preview-rot-right {
 	flex: none;
 	align-items: center;
 	box-sizing: border-box;
-	padding: 6dp 12dp 10dp 12dp;
+	height: 50dp;
+	padding: 8dp 12dp 10dp 12dp;
 }
 
-.inv-capacity {
-	display: block;
+.inv-capacity-wrap {
+	display: flex;
+	flex-direction: row;
 	flex: 1;
-	font-size: 12dp;
+	align-items: center;
+	margin-right: 8dp;
+}
+
+.inv-capacity-label {
+	display: block;
+	flex: none;
+	margin-right: 8dp;
+	font-size: 13dp;
+	font-weight: bold;
 	color: #5a7ab0;
+}
+
+.inv-capacity-group {
+	display: flex;
+	flex-direction: row;
+	flex: none;
+	align-items: center;
+}
+
+.inv-capacity-pill {
+	display: flex;
+	flex-direction: row;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	min-width: 96dp;
+	height: 32dp;
+	padding: 0dp 16dp 0dp 14dp;
+	/* Tuck under the add button so they read as one control. */
+	margin-right: -8dp;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/cap_pill_l.tga,
+		ui/rml/frames/notice/cap_pill_c.tga,
+		ui/rml/frames/notice/cap_pill_r.tga
+	);
+}
+
+.inv-capacity-used {
+	display: block;
+	flex: none;
+	font-size: 14dp;
+	font-weight: bold;
+	color: #4a9af0;
+	line-height: 32dp;
+}
+
+.inv-capacity-sep {
+	display: block;
+	flex: none;
+	margin: 0dp 2dp;
+	font-size: 14dp;
+	font-weight: bold;
+	color: #5a7ab0;
+	line-height: 32dp;
+}
+
+.inv-capacity-max {
+	display: block;
+	flex: none;
+	font-size: 14dp;
+	font-weight: bold;
+	color: #5a7ab0;
+	line-height: 32dp;
+}
+
+.inv-capacity-add,
+button.inv-capacity-add {
+	display: block;
+	position: relative;
+	z-index: 2;
+	flex: none;
+	width: 36dp;
+	height: 36dp;
+	line-height: 36dp;
+	margin: 0dp;
+	padding: 0dp;
+	font-size: 1dp;
+	color: #ffffff00;
+	text-align: center;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: image(ui/rml/frames/notice/btn_add_slot.tga);
+	drag: block;
+}
+
+.inv-capacity-add:hover,
+button.inv-capacity-add:hover {
+	image-color: #d8ecff;
+}
+
+.inv-capacity-add-icon {
+	display: block;
+	width: 18dp;
+	height: 18dp;
+	margin: 9dp auto 0dp auto;
+	background-color: transparent;
+	pointer-events: none;
 }
 
 .inv-footer-icon,
@@ -525,4 +825,110 @@ button.inv-tab-active:hover {
 button.inv-tab:hover {
 	color: #ffffff;
 	image-color: #d0e2f8;
+}
+
+/* Full-screen Notice confirm overlays (lock / bag slots). */
+.inv-modal {
+	display: none;
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	width: 100%;
+	height: 100%;
+	z-index: 40;
+	pointer-events: none;
+}
+
+.inv-modal-open {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	pointer-events: auto;
+}
+
+.inv-modal-scrim {
+	display: block;
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	width: 100%;
+	height: 100%;
+	z-index: 0;
+	background-color: #000000a0;
+	pointer-events: auto;
+}
+
+.inv-modal-panel {
+	position: relative;
+	z-index: 1;
+	width: 380dp;
+	margin: 0dp;
+	pointer-events: auto;
+}
+
+.inv-modal-panel-expand {
+	width: 400dp;
+}
+
+.inv-modal-msg {
+	display: block;
+	margin-bottom: 8dp;
+	font-size: 15dp;
+	font-weight: bold;
+	color: #2a4a80;
+	text-align: center;
+}
+
+.inv-modal-hint {
+	display: block;
+	margin-bottom: 12dp;
+	font-size: 12dp;
+	color: #5a7ab0;
+	text-align: center;
+}
+
+.inv-expand-slots {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	box-sizing: border-box;
+	margin: 4dp 0dp 10dp 0dp;
+	padding: 8dp 6dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/input_tl.tga,
+		ui/rml/frames/notice/input_t.tga,
+		ui/rml/frames/notice/input_tr.tga,
+		ui/rml/frames/notice/input_l.tga,
+		ui/rml/frames/notice/input_c.tga,
+		ui/rml/frames/notice/input_r.tga,
+		ui/rml/frames/notice/input_bl.tga,
+		ui/rml/frames/notice/input_b.tga,
+		ui/rml/frames/notice/input_br.tga
+	);
+}
+
+.inv-expand-slot {
+	display: block;
+	flex: none;
+	width: 40dp;
+	height: 40dp;
+	margin: 0dp 4dp;
+	box-sizing: border-box;
+	background-color: #e0ecf8;
+	border-top-width: 1dp;
+	border-right-width: 1dp;
+	border-bottom-width: 1dp;
+	border-left-width: 1dp;
+	border-color: #9eb8e8;
+	border-radius: 0dp;
+}
+
+.inv-expand-cost {
+	display: block;
+	margin-bottom: 4dp;
+	font-size: 13dp;
+	font-weight: bold;
+	color: #2a4a80;
+	text-align: center;
 }
