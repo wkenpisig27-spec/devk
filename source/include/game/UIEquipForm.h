@@ -35,14 +35,20 @@ public:
 	// 用于道具在道具栏交换时
 	int RefreshServerShortCut();
 
-	CGoodsGrid* GetGoodsGrid() { return grdItem; } // 操作道具栏表格
-	CForm* GetItemForm() { return frmInv; }		   // 操作道具表单
+	CGoodsGrid* GetGoodsGrid() { return grdItem; } // bag data grid (lives on inventory data host)
 
-	// Notice RmlUi inventory overlay (replaces frmInv chrome for player use)
+	// Deprecated for UI: frmInv is a hidden data host, not player chrome.
+	// Prefer GetGoodsGrid() / equip accessors / ShowInventoryUi / IsInventoryUiVisible.
+	// Keep only where a CForm* host is truly required (rare menu fallbacks).
+	CForm* GetItemForm() { return frmInv; }
+
+	// Notice RmlUi inventory overlay (player-facing). frmInv stays loaded as data host only.
 	void ToggleInventoryUi();
 	void ShowInventoryUi();
 	void HideInventoryUi();
 	bool IsInventoryUiVisible() const;
+	// Alt+E hotkey — registered with CFormMgr::AddHotKeyEvent
+	static bool _OnInventoryHotKey(char& key, int& control);
 	void RefreshRmlInventory();
 	void ShowBagContextMenu(int bagIndex);
 	void ExecuteBagContextAction(const char* action);
@@ -54,6 +60,9 @@ public:
 	void UseBagItem(int bagIndex);
 	void MoveBagItem(int srcBagIndex, int dstBagIndex, short srcNum = 0);
 	void UnequipLink(int link, int bagIndex = -1);
+	// Index-based bank transfer (no CDrag; works while frmInv is hidden)
+	bool MoveBagToBank(int bagIndex, int bankSlot = -1);
+	bool MoveBankToBag(int bankIndex, int bagSlot = -1);
 	void OnRmlItemConfirmYes();
 	void OnRmlItemConfirmNo();
 
@@ -285,12 +294,15 @@ private:
 
 public: // 修理道具相关
 	void ShowRepairMsg(const char* pItemName, long lMoney);
+	// Routes to Show/HideInventoryUi (legacy frmInv chrome is retired).
 	void SetIsShow(bool bShow);
 
 private:
 	static void _evtRepairEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
 
 public:
+	// Inventory data host only — never shown. Owns grdItem / cnmEquip for net sync.
+	// Player chrome is CRmlUiInventoryForm (ShowInventoryUi).
 	CForm* frmInv;
 };
 

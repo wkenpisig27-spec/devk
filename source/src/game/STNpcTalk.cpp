@@ -135,16 +135,16 @@ CRepairState::CRepairState(CActor* p)
 }
 
 bool CRepairState::_Start() {
-	_IsBeforeShow = g_stUIEquip.GetItemForm()->GetIsShow();
+	_IsBeforeShow = g_stUIEquip.IsInventoryUiVisible();
 	if (!_IsBeforeShow)
-		g_stUIEquip.GetItemForm()->Show();
+		g_stUIEquip.ShowInventoryUi();
 	CCursor::I()->SetCursor(CCursor::stRepair);
 	return true;
 }
 
 void CRepairState::End() {
 	if (!_IsBeforeShow)
-		g_stUIEquip.GetItemForm()->Hide();
+		g_stUIEquip.HideInventoryUi();
 	CCursor::I()->SetCursor(CCursor::stNormal);
 }
 
@@ -156,16 +156,16 @@ CFeedState::CFeedState(CActor* p)
 }
 
 bool CFeedState::_Start() {
-	_IsBeforeShow = g_stUIEquip.GetItemForm()->GetIsShow();
+	_IsBeforeShow = g_stUIEquip.IsInventoryUiVisible();
 	if (!_IsBeforeShow)
-		g_stUIEquip.GetItemForm()->Show();
+		g_stUIEquip.ShowInventoryUi();
 	CCursor::I()->SetCursor(CCursor::stFeed);
 	return true;
 }
 
 void CFeedState::End() {
 	if (!_IsBeforeShow)
-		g_stUIEquip.GetItemForm()->Hide();
+		g_stUIEquip.HideInventoryUi();
 	CCursor::I()->SetCursor(CCursor::stNormal);
 }
 
@@ -177,15 +177,15 @@ CFeteState::CFeteState(CActor* p)
 }
 
 bool CFeteState::_Start() {
-	_IsBeforeShow = g_stUIEquip.GetItemForm()->GetIsShow();
+	_IsBeforeShow = g_stUIEquip.IsInventoryUiVisible();
 	if (!_IsBeforeShow)
-		g_stUIEquip.GetItemForm()->Show();
+		g_stUIEquip.ShowInventoryUi();
 	CCursor::I()->SetCursor(CCursor::stRepair); // 图标待修改
 	return true;
 }
 
 void CFeteState::End() {
 	if (!_IsBeforeShow)
-		g_stUIEquip.GetItemForm()->Hide();
+		g_stUIEquip.HideInventoryUi();
 	CCursor::I()->SetCursor(CCursor::stNormal);
 }

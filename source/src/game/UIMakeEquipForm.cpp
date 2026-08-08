@@ -246,18 +246,12 @@ void CMakeEquipMgr::ShowMakeEquipForm(bool bShow) {
 		frmMakeEquip->Refresh();
 		frmMakeEquip->Show();
 
-		// ??????????
-		int x = frmMakeEquip->GetX() + frmMakeEquip->GetWidth();
-		int y = frmMakeEquip->GetY();
-		g_stUIEquip.GetItemForm()->SetPos(x, y);
-		g_stUIEquip.GetItemForm()->Refresh();
-
-		if (!(m_isOldEquipFormShow = g_stUIEquip.GetItemForm()->GetIsShow())) {
-			g_stUIEquip.GetItemForm()->Show();
+		if (!(m_isOldEquipFormShow = g_stUIEquip.IsInventoryUiVisible())) {
+			g_stUIEquip.ShowInventoryUi();
 		}
 	} else {
 		frmMakeEquip->Close();
-		g_stUIEquip.GetItemForm()->SetIsShow(m_isOldEquipFormShow);
+		g_stUIEquip.SetIsShow(m_isOldEquipFormShow);
 	}
 
 	return;

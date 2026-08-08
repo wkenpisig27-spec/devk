@@ -425,18 +425,14 @@ void CStoreMgr::ShowTempKitbag(bool bShow) {
 			frmTempBag->SetIsDrag(false);
 			frmTempBag->Refresh();
 			frmTempBag->SetIsShow(true);
-		} else //	Modify by alfred.shi 20080902	begin
-		{
-			CForm* frmEquip = g_stUIEquip.GetItemForm();
-			frmEquip->SetPos(100, 100);
-			frmEquip->Refresh();
-			frmEquip->SetIsShow(!frmTempBag->GetIsShow());
-
-			frmTempBag->SetPos(frmEquip->GetX2(), frmEquip->GetY());
+		} else {
+			// Companion bag is Notice Rml inventory (frmInv is data host only).
+			const bool show = !frmTempBag->GetIsShow();
+			g_stUIEquip.SetIsShow(show);
+			frmTempBag->SetPos(100 + 340, 100);
 			frmTempBag->Refresh();
-			frmTempBag->SetIsShow(!frmTempBag->GetIsShow());
-
-		} //	End
+			frmTempBag->SetIsShow(show);
+		}
 	} else {
 		frmTempBag->SetIsShow(false);
 	}
@@ -1488,7 +1484,7 @@ void CStoreMgr::_evtStoreFormClose(CForm* pForm, bool& IsClose) {
 
 	// ??????????
 
-	if (!g_stUIEquip.GetItemForm()->GetIsShow()) {
+	if (!g_stUIEquip.IsInventoryUiVisible()) {
 		g_stUIStore.ShowTempKitbag(false);
 	}
 

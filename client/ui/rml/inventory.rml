@@ -95,6 +95,7 @@
 				<button class="inv-ctx-item" id="ctx-lock" type="button" data-ctx="lock">Lock Item</button>
 				<button class="inv-ctx-item" id="ctx-unlock" type="button" data-ctx="unlock">Unlock Item</button>
 				<button class="inv-ctx-item" id="ctx-sell" type="button" data-ctx="sell">Sell Item</button>
+				<button class="inv-ctx-item" id="ctx-deposit" type="button" data-ctx="deposit">Deposit</button>
 				<button class="inv-ctx-item" id="ctx-boxrates" type="button" data-ctx="boxrates">Box Rates</button>
 				<button class="inv-ctx-item inv-ctx-item-last" id="ctx-chat" type="button" data-ctx="chat">Send to Chat</button>
 			</div>

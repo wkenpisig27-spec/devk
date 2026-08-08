@@ -64,6 +64,7 @@ public:
 		bool lockItem = false;
 		bool unlockItem = false;
 		bool sellItem = false;
+		bool depositItem = false; // personal bank open
 		bool boxRates = false;
 		bool sendToChat = false;
 	};

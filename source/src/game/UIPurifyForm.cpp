@@ -112,9 +112,7 @@ void CPurifyMgr::ShowForm(int nType) {
 			nLeft = frmEquipPurify->GetX2();
 			nTop = frmEquipPurify->GetY();
 
-			g_stUIEquip.GetItemForm()->SetPos(nLeft, nTop);
-			g_stUIEquip.GetItemForm()->Refresh();
-			g_stUIEquip.GetItemForm()->Show();
+			g_stUIEquip.ShowInventoryUi();
 		} else {
 			frmEquipPurify->SetIsShow(false);
 		}

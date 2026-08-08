@@ -135,14 +135,8 @@ void CForgeMgr::ShowForge(bool bShow, bool isMilling) {
 		frmNPCforge->Refresh();
 		frmNPCforge->Show();
 
-		// 同时打开玩家的装备栏
-		int x = frmNPCforge->GetX() + frmNPCforge->GetWidth();
-		int y = frmNPCforge->GetY();
-		g_stUIEquip.GetItemForm()->SetPos(x, y);
-		g_stUIEquip.GetItemForm()->Refresh();
-
-		if (!(m_isOldEquipFormShow = g_stUIEquip.GetItemForm()->GetIsShow())) {
-			g_stUIEquip.GetItemForm()->Show();
+		if (!(m_isOldEquipFormShow = g_stUIEquip.IsInventoryUiVisible())) {
+			g_stUIEquip.ShowInventoryUi();
 		}
 
 		// 更新界面（打磨或精炼）
@@ -163,7 +157,7 @@ void CForgeMgr::ShowForge(bool bShow, bool isMilling) {
 		}
 	} else {
 		frmNPCforge->Close();
-		g_stUIEquip.GetItemForm()->SetIsShow(m_isOldEquipFormShow);
+		g_stUIEquip.SetIsShow(m_isOldEquipFormShow);
 	}
 
 	return;

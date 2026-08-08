@@ -242,8 +242,9 @@ void CTradeMgr::ShowCharTrade(BYTE byType, DWORD dwAcceptID, DWORD dwRequestID) 
 
 	if (mission::TRADE_CHAR == byType) // ?????????
 	{
-		frmRequest = g_stUIEquip.GetItemForm();
-		grdRequest = g_stUIEquip.GetGoodsGrid(); // ????Grid??
+		// Bag chrome is Rml; keep grid as item source only (frmInv is data host).
+		frmRequest = nullptr;
+		grdRequest = g_stUIEquip.GetGoodsGrid();
 
 		pRequestCha = pScene->SearchByHumanID(dwRequestID);
 		pAcceptCha = pScene->SearchByHumanID(dwAcceptID);
@@ -292,7 +293,9 @@ void CTradeMgr::ShowCharTrade(BYTE byType, DWORD dwAcceptID, DWORD dwRequestID) 
 		// frmRequest = pBoat->GetForm();
 	} // end of if
 
-	if (!frmRequest)
+	if (!grdRequest)
+		return;
+	if (mission::TRADE_BOAT == byType && !frmRequest)
 		return;
 	if (!pRequestCha || !pAcceptCha)
 		return;
@@ -302,13 +305,16 @@ void CTradeMgr::ShowCharTrade(BYTE byType, DWORD dwAcceptID, DWORD dwRequestID) 
 	else
 		m_dwMainID = dwAcceptID;
 
-	// ??????????,???????????
-	frmRequest->SetParent(nullptr);
-	frmRequest->SetPos(0, 100);
-	frmRequest->Refresh();
-	frmRequest->Show();
-
-	frmPlayertrade->SetPos(frmRequest->GetWidth(), 100);
+	if (frmRequest) {
+		frmRequest->SetParent(nullptr);
+		frmRequest->SetPos(0, 100);
+		frmRequest->Refresh();
+		frmRequest->Show();
+		frmPlayertrade->SetPos(frmRequest->GetWidth(), 100);
+	} else {
+		g_stUIEquip.ShowInventoryUi();
+		frmPlayertrade->SetPos(400, 100);
+	}
 	frmPlayertrade->Refresh();
 	frmPlayertrade->Show();
 
@@ -535,23 +541,26 @@ void CTradeMgr::ShowTradeFailed() {
 }
 
 void CTradeMgr::Clear() {
+	const BYTE tradeType = m_bTradeType;
+
 	CCommandObj* pItem(nullptr);
-	for (int i = 0; i < grdRequest->GetMaxNum(); i++) {
-		pItem = grdRequest->GetItem(i);
-		if (pItem && !pItem->GetIsValid()) {
-			pItem->SetIsValid(true);
+	if (grdRequest) {
+		for (int i = 0; i < grdRequest->GetMaxNum(); i++) {
+			pItem = grdRequest->GetItem(i);
+			if (pItem && !pItem->GetIsValid()) {
+				pItem->SetIsValid(true);
+			}
 		}
 	}
 
-	// ??????
 	if (frmRequest)
 		frmRequest->Close();
+	else if (tradeType == mission::TRADE_CHAR)
+		g_stUIEquip.HideInventoryUi();
 
-	// ??????
 	if (frmPlayertrade)
 		frmPlayertrade->Close();
 
-	// ??
 	frmRequest = nullptr;
 	grdRequest = nullptr;
 
@@ -629,5 +638,7 @@ void CTradeMgr::CloseAllForm() {
 
 	if (frmRequest && frmRequest->GetIsShow()) {
 		frmRequest->SetIsShow(false);
+	} else if (m_bTradeType == mission::TRADE_CHAR && g_stUIEquip.IsInventoryUiVisible()) {
+		g_stUIEquip.HideInventoryUi();
 	}
 }

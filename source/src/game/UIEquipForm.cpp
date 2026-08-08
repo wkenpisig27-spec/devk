@@ -34,6 +34,7 @@
 #include "UIFormMgr.h"
 #include "WorldScene.h"
 #include "UICozeForm.h"
+#include "UIBankForm.h"
 #include <algorithm>
 #include <string>
 
@@ -253,6 +254,11 @@ bool CEquipMgr::Init() {
 	frmInv->evtShow = _evtEquipFormShow;
 	frmInv->evtClose = _evtEquipFormClose;
 	frmInv->evtEntrustMouseEvent = _evtItemFormMouseEvent;
+	// Data host only — bag/equip widgets live here; player chrome is Rml inventory.
+	frmInv->SetHotKey(0);
+	frmInv->SetIsEscClose(false);
+	frmInv->SetIsShow(false);
+	CFormMgr::s_Mgr.AddHotKeyEvent(_OnInventoryHotKey);
 
 	frmChestPreview = _FindForm("frmChestPreview");
 	if (frmChestPreview) {
@@ -1755,7 +1761,13 @@ void CEquipMgr::_evtSpyFormShow(CGuiData* pSender) {
 }
 
 void CEquipMgr::_evtEquipFormShow(CGuiData* pSender) {
-	g_stUIEquip.EnsureChaPreviewModel();
+	// Anything that still calls frmInv->Show() is redirected to Notice inventory.
+	// Hide without going through Close handlers that clear bag selection mid-open.
+	if (g_stUIEquip.frmInv && g_stUIEquip.frmInv->GetIsShow()) {
+		g_stUIEquip.frmInv->SetIsShow(false);
+	}
+	if (!CRmlUiInventoryForm::Instance().IsVisible())
+		g_stUIEquip.ShowInventoryUi();
 }
 
 /*
@@ -2095,14 +2107,12 @@ void CEquipMgr::CloseAllForm() {
 }
 
 void CEquipMgr::ShowInventoryUi() {
-	if (frmInv)
+	// Never paint legacy frmInv — Rml owns the player-facing inventory.
+	if (frmInv && frmInv->GetIsShow())
 		frmInv->SetIsShow(false);
 
-	if (!CRmlUiManager::Instance().IsReady()) {
-		if (frmInv)
-			frmInv->SetIsShow(true);
+	if (!CRmlUiManager::Instance().IsReady())
 		return;
-	}
 
 	EnsureChaPreviewModel();
 	CRmlUiInventoryForm& rml = CRmlUiInventoryForm::Instance();
@@ -2120,9 +2130,7 @@ void CEquipMgr::HideInventoryUi() {
 }
 
 bool CEquipMgr::IsInventoryUiVisible() const {
-	if (CRmlUiInventoryForm::Instance().IsVisible())
-		return true;
-	return frmInv && frmInv->GetIsShow();
+	return CRmlUiInventoryForm::Instance().IsVisible();
 }
 
 void CEquipMgr::ToggleInventoryUi() {
@@ -2131,6 +2139,25 @@ void CEquipMgr::ToggleInventoryUi() {
 		return;
 	}
 	ShowInventoryUi();
+}
+
+void CEquipMgr::SetIsShow(bool bShow) {
+	if (bShow)
+		ShowInventoryUi();
+	else
+		HideInventoryUi();
+}
+
+bool CEquipMgr::_OnInventoryHotKey(char& key, int& control) {
+	(void)control;
+	if (key != 'E' && key != 'e')
+		return false;
+	if (!CFormMgr::s_Mgr.GetEnableHotKey())
+		return false;
+	if (!dynamic_cast<CWorldScene*>(CGameApp::GetCurScene()))
+		return false;
+	g_stUIEquip.ToggleInventoryUi();
+	return true; // swallow Alt+E so lua-assigned frmInv hotkey cannot reopen legacy chrome
 }
 
 void CEquipMgr::ShowBagContextMenu(int bagIndex) {
@@ -2186,6 +2213,8 @@ void CEquipMgr::ShowBagContextMenu(int bagIndex) {
 			flags.deleteItem = allowDelete;
 			if (g_stUINpcTrade.GetIsShow() && allowTrade)
 				flags.sellItem = true;
+			if (g_stUIBank.IsBankOpen())
+				flags.depositItem = true;
 			if (rec && IsChestPreviewSupported(rec->lID))
 				flags.boxRates = true;
 			flags.sendToChat = true;
@@ -2294,6 +2323,13 @@ void CEquipMgr::ExecuteBagContextAction(const char* action) {
 		};
 		auto pSelectBox = g_stUIBox.ShowSelectBox(sellConfirm, "Sell all selected items?", true);
 		pSelectBox->pointer = reinterpret_cast<void*>(GetGoodsGrid());
+		return;
+	}
+
+	if (strcmp(action, "deposit") == 0) {
+		if (rightClickItemIndex >= 0)
+			MoveBagToBank(rightClickItemIndex, -1);
+		RefreshRmlInventory();
 		return;
 	}
 
@@ -2594,6 +2630,14 @@ void CEquipMgr::UseBagItem(int bagIndex) {
 	cmd->Exec();
 }
 
+bool CEquipMgr::MoveBagToBank(int bagIndex, int bankSlot) {
+	return g_stUIBank.MoveBagToBank(bagIndex, bankSlot);
+}
+
+bool CEquipMgr::MoveBankToBag(int bankIndex, int bagSlot) {
+	return g_stUIBank.MoveBankToBag(bankIndex, bagSlot);
+}
+
 void CEquipMgr::MoveBagItem(int srcBagIndex, int dstBagIndex, short srcNum) {
 	if (srcBagIndex < 0 || dstBagIndex < 0 || srcBagIndex == dstBagIndex)
 		return;
@@ -2739,8 +2783,13 @@ void RmlInv_OnExpandConfirm() {
 }
 
 void RmlInv_OnBagDblClick(int index) {
-	g_stUIEquip.UseBagItem(index);
-	g_stUIEquip.MarkChaPreviewDirty();
+	// With personal bank open, dblclick deposits (legacy bag→bank drag replacement).
+	if (g_stUIBank.IsBankOpen()) {
+		g_stUIEquip.MoveBagToBank(index, -1);
+	} else {
+		g_stUIEquip.UseBagItem(index);
+		g_stUIEquip.MarkChaPreviewDirty();
+	}
 	g_stUIEquip.RefreshRmlInventory();
 }
 
@@ -2800,7 +2849,15 @@ void RmlInv_OnDrop(int srcBag, int srcEquip, int dstBag, int dstEquip) {
 	// UI rebuild is deferred to RmlInv_OnItemDragEnd so the drag source isn't destroyed mid-drop.
 }
 
-void RmlInv_OnItemDragEnd() {
+void RmlInv_OnItemDragEnd(int srcBag, int srcEquip, int mouseX, int mouseY) {
+	(void)srcEquip;
+	// Drop bag item onto visible personal bank form → deposit (no CDrag).
+	if (srcBag >= 0 && g_stUIBank.IsBankOpen()) {
+		if (CForm* bankForm = g_stUIBank.GetBankForm()) {
+			if (bankForm->InRect(mouseX, mouseY))
+				g_stUIEquip.MoveBagToBank(srcBag, -1);
+		}
+	}
 	g_stUIEquip.RefreshRmlInventory();
 }
 

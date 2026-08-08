@@ -387,7 +387,7 @@ void CBoothMgr::SetupBoothSuccess() {
 
 	SetSetupedBooth(true);
 
-	g_stUIEquip.GetItemForm()->SetIsShow(m_isOldEquipFormShow);
+	g_stUIEquip.SetIsShow(m_isOldEquipFormShow);
 
 	// ???U??????
 }
@@ -419,20 +419,14 @@ void CBoothMgr::OpenBoothUI() {
 	frmBooth->Refresh();
 	frmBooth->Show();
 
-	// ?????????????
-	int x = frmBooth->GetX() + frmBooth->GetWidth();
-	int y = frmBooth->GetY();
-	g_stUIEquip.GetItemForm()->SetPos(x, y);
-	g_stUIEquip.GetItemForm()->Refresh();
-
-	if (!(m_isOldEquipFormShow = g_stUIEquip.GetItemForm()->GetIsShow())) {
-		g_stUIEquip.GetItemForm()->Show();
+	if (!(m_isOldEquipFormShow = g_stUIEquip.IsInventoryUiVisible())) {
+		g_stUIEquip.ShowInventoryUi();
 	}
 }
 
 void CBoothMgr::CloseBoothUI() {
 	frmBooth->Close();
-	g_stUIEquip.GetItemForm()->SetIsShow(m_isOldEquipFormShow);
+	g_stUIEquip.SetIsShow(m_isOldEquipFormShow);
 
 	if (m_NumBox)
 		m_NumBox->frmDialog->Close();
@@ -530,7 +524,7 @@ void CBoothMgr::_MainBoothOnCloseEvent(CForm* pForm, bool& IsClose) {
 
 	g_stUIBooth.ClearBoothItems();
 
-	g_stUIEquip.GetItemForm()->SetIsShow(g_stUIBooth.m_isOldEquipFormShow);
+	g_stUIEquip.SetIsShow(g_stUIBooth.m_isOldEquipFormShow);
 }
 
 //~ ------------------------------------------------------------------

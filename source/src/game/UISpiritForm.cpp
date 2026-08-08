@@ -193,9 +193,7 @@ void CSpiritMgr::ShowMarryForm(bool bShow) {
 			nLeft = frmSpiritMarry->GetX2();
 			nTop = frmSpiritMarry->GetY();
 
-			g_stUIEquip.GetItemForm()->SetPos(nLeft, nTop);
-			g_stUIEquip.GetItemForm()->Refresh();
-			g_stUIEquip.GetItemForm()->Show();
+			g_stUIEquip.ShowInventoryUi();
 		} else {
 			frmSpiritMarry->SetIsShow(false);
 		}

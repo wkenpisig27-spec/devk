@@ -38,6 +38,7 @@ bool CBankMgr::Init() // ?????????
 					 frmBank->GetName(), "grdNPCstorage");
 	grdBank->evtBeforeAccept = CUIInterface::_evtDragToGoodsEvent; // ????? ????????? CUIInterface::_evtDragToGoodsEvent
 	grdBank->evtSwapItem = _evtBankToBank;
+	grdBank->evtUseCommand = _evtBankUseCommand; // dblclick → withdraw to bag (no CDrag)
 	labCharName = dynamic_cast<CLabel*>(frmBank->Find("labOwnerName"));
 	if (!grdBank)
 		return Error(RES_STRING(CL_LANGUAGE_MATCH_439),
@@ -67,20 +68,67 @@ void CBankMgr::ShowBank() // ????
 
 	frmBank->Show();
 
-	// ????????
-	// Prefer Rml inventory; keep legacy frmInv as drag source for bank until Rml drag lands.
-	if (!g_stUIEquip.IsInventoryUiVisible()) {
+	// Rml inventory is the bag UI; bank transfers use index-based Move* wrappers.
+	if (!g_stUIEquip.IsInventoryUiVisible())
 		g_stUIEquip.ShowInventoryUi();
-		if (!g_stUIEquip.IsInventoryUiVisible() && g_stUIEquip.GetItemForm()) {
-			int nLeft = frmBank->GetX2();
-			int nTop = frmBank->GetY();
-			g_stUIEquip.GetItemForm()->SetPos(nLeft, nTop);
-			g_stUIEquip.GetItemForm()->Refresh();
-			g_stUIEquip.GetItemForm()->Show();
-		}
-	}
 
 	CFormMgr::s_Mgr.SetEnableHotKey(HOTKEY_BANK, false); // ??????
+}
+
+//-------------------------------------------------------------------------
+bool CBankMgr::MoveBagToBank(int bagIndex, int bankSlot) {
+	CGoodsGrid* bag = g_stUIEquip.GetGoodsGrid();
+	if (!bag || !grdBank || bagIndex < 0)
+		return false;
+
+	CCommandObj* item = bag->GetItem(bagIndex);
+	if (!item)
+		return false;
+
+	if (bankSlot < 0)
+		bankSlot = grdBank->GetFreeIndex();
+	if (bankSlot < 0)
+		return false;
+
+	bag->SetDragIndex(bagIndex);
+	return PushToBank(*bag, *grdBank, bankSlot, *item);
+}
+
+//-------------------------------------------------------------------------
+bool CBankMgr::MoveBankToBag(int bankIndex, int bagSlot) {
+	CGoodsGrid* bag = g_stUIEquip.GetGoodsGrid();
+	if (!bag || !grdBank || bankIndex < 0)
+		return false;
+
+	CCommandObj* item = grdBank->GetItem(bankIndex);
+	if (!item)
+		return false;
+
+	if (bagSlot < 0)
+		bagSlot = bag->GetFreeIndex();
+	if (bagSlot < 0)
+		return false;
+
+	grdBank->SetDragIndex(bankIndex);
+	return PopFromBank(*grdBank, *bag, bagSlot, *item);
+}
+
+//-------------------------------------------------------------------------
+void CBankMgr::_evtBankUseCommand(CCommandObj* pSender, bool& isUse) {
+	isUse = false;
+	if (!g_stUIBank.IsBankOpen())
+		return;
+
+	CItemCommand* item = dynamic_cast<CItemCommand*>(pSender);
+	if (!item)
+		return;
+
+	const int bankIndex = item->GetIndex();
+	if (bankIndex < 0)
+		return;
+
+	g_stUIBank.MoveBankToBag(bankIndex, -1);
+	g_stUIEquip.RefreshRmlInventory();
 }
 
 //-------------------------------------------------------------------------
@@ -198,8 +246,6 @@ void CBankMgr::CloseForm() // ???????
 	if (frmBank->GetIsShow()) {
 		frmBank->Close();
 		g_stUIEquip.HideInventoryUi();
-		if (g_stUIEquip.GetItemForm())
-			g_stUIEquip.GetItemForm()->Close();
 	}
 }
 

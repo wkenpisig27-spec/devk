@@ -23,7 +23,7 @@ extern void RmlInv_OnBagRightClick(int index);
 extern bool RmlInv_OnBagMouseDown(int index, bool ctrl);
 extern void RmlInv_OnEquipDblClick(int link);
 extern void RmlInv_OnDrop(int srcBag, int srcEquip, int dstBag, int dstEquip);
-extern void RmlInv_OnItemDragEnd();
+extern void RmlInv_OnItemDragEnd(int srcBag, int srcEquip, int mouseX, int mouseY);
 extern void RmlInv_OnFilterChanged();
 extern void RmlInv_OnToggleApparel(bool apparel);
 extern void RmlInv_OnToggleLock();
@@ -239,7 +239,7 @@ void CRmlUiInventoryForm::Impl::BindStaticControls() {
 		"btnExpandConfirm", "btnExpandCancel", "inv-expand-scrim",
 		"btnConfirmYes", "btnConfirmNo", "inv-confirm-scrim",
 		"inv-ctx-scrim",
-		"ctx-throw", "ctx-delete", "ctx-lock", "ctx-unlock", "ctx-sell", "ctx-boxrates", "ctx-chat",
+		"ctx-throw", "ctx-delete", "ctx-lock", "ctx-unlock", "ctx-sell", "ctx-deposit", "ctx-boxrates", "ctx-chat",
 		"tabItems", "tabEquipment", "tabConsumable", "tabMaterial", "tabOther"};
 	for (const char* id : clickIds) {
 		if (Rml::Element* el = document->GetElementById(id))
@@ -866,6 +866,7 @@ void CRmlUiInventoryForm::ShowContextMenu(int screenX, int screenY, const CtxMen
 	setItem("ctx-lock", flags.lockItem);
 	setItem("ctx-unlock", flags.unlockItem);
 	setItem("ctx-sell", flags.sellItem);
+	setItem("ctx-deposit", flags.depositItem);
 	setItem("ctx-boxrates", flags.boxRates);
 	setItem("ctx-chat", flags.sendToChat);
 
@@ -1074,9 +1075,13 @@ void CRmlUiInventoryForm::Impl::ProcessEvent(Rml::Event& event) {
 	}
 	if (isDragEnd) {
 		itemDragging = false;
+		int bag = -1, equip = -1;
+		ResolveInvSlot(target, document, bag, equip);
+		const int mx = (int)event.GetParameter<float>("mouse_x", 0.f);
+		const int my = (int)event.GetParameter<float>("mouse_y", 0.f);
 		bagFingerprint.clear();
 		equipFingerprint.clear();
-		RmlInv_OnItemDragEnd();
+		RmlInv_OnItemDragEnd(bag, equip, mx, my);
 		return;
 	}
 

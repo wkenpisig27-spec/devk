@@ -53,6 +53,7 @@
 #include "UINumAnswer.h"
 #include "UIChurchChallenge.h"
 #include "UIKnowledgeBase.h"
+#include "rmlui/RmlUiInventoryForm.h"
 
 using namespace std;
 
@@ -391,6 +392,16 @@ bool CUIInterface::_evtESCKey(char& key) {
 
 		if (g_stUITrade.IsTrading())
 			return false;
+
+		// Notice inventory is not a CForm — Esc closes modals first, then the panel.
+		if (CRmlUiInventoryForm::Instance().IsVisible()) {
+			if (CRmlUiInventoryForm::Instance().IsModalOpen()) {
+				CRmlUiInventoryForm::Instance().HideModals();
+				return true;
+			}
+			g_stUIEquip.HideInventoryUi();
+			return true;
+		}
 
 		CForm* frm = CFormMgr::s_Mgr.FindESCForm();
 		if (frm) {
