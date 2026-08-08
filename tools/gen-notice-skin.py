@@ -13,6 +13,10 @@ OUT = Path(__file__).resolve().parents[1] / "client" / "ui" / "rml" / "frames" /
 SS = 5
 # Match inventory slots — enough AA to kill DX9 stairs, not a blur band.
 FEATHER = 0.35
+# Keep AA fringe inside the bitmap so L/R/T/B corners stay equal under clip/tile.
+EDGE_INSET = 0.5
+# Shared stroke — wider borders read as soft inner bevels once AA'd.
+BORDER = 1.0
 
 
 def clamp(v: float) -> int:
@@ -150,22 +154,38 @@ def sample_gradient_framed(px: float, py: float, w: float, h: float, radius: flo
                          (int(bord[0]), int(bord[1]), int(bord[2])))
 
 
+def with_edge_inset(px: float, py: float, w: float, h: float) -> tuple[float, float, float, float]:
+    """Map bitmap coords into an inset round-rect so every corner has equal AA air."""
+    return px - EDGE_INSET, py - EDGE_INSET, w - 2.0 * EDGE_INSET, h - 2.0 * EDGE_INSET
+
+
 def render(w: int, h: int, fn) -> list[tuple[int, int, int, int]]:
+    """Supersample with premultiplied alpha so fringe RGB isn't dirtied by (0,0,0,0)."""
     out: list[tuple[int, int, int, int]] = []
     for y in range(h):
         for x in range(w):
-            ar = ag = ab = aa = 0.0
+            pr = pg = pb = pa = 0.0
             for sy in range(SS):
                 for sx in range(SS):
                     px = x + (sx + 0.5) / SS
                     py = y + (sy + 0.5) / SS
                     r, g, b, a = fn(px, py)
-                    ar += r
-                    ag += g
-                    ab += b
-                    aa += a
+                    af = a / 255.0
+                    pr += r * af
+                    pg += g * af
+                    pb += b * af
+                    pa += af
             n = float(SS * SS)
-            out.append((clamp(ar / n), clamp(ag / n), clamp(ab / n), clamp(aa / n)))
+            pa /= n
+            if pa < 0.004:
+                out.append((0, 0, 0, 0))
+            else:
+                out.append((
+                    clamp(pr / n / pa),
+                    clamp(pg / n / pa),
+                    clamp(pb / n / pa),
+                    clamp(pa * 255),
+                ))
     return out
 
 
@@ -178,13 +198,13 @@ def gen_panel() -> None:
     size_w = 128
     size_h = 200
     radius = 10.0
-    border = 1.25
     header_h = 52.0
 
-    master = render(
-        size_w, size_h,
-        lambda px, py: sample_notice_panel(px, py, float(size_w), float(size_h), radius, border, header_h),
-    )
+    def sample(px: float, py: float) -> tuple[int, int, int, int]:
+        ix, iy, iw, ih = with_edge_inset(px, py, float(size_w), float(size_h))
+        return sample_notice_panel(ix, iy, iw, ih, radius, BORDER, header_h)
+
+    master = render(size_w, size_h, sample)
 
     # Keep 56px top tiles — .notice-header / .inv-panel-header are 56dp.
     top_h = 56
@@ -198,7 +218,7 @@ def gen_panel() -> None:
     write_tga(OUT / "panel_br.tga", side, bot, crop(master, size_w, size_w - side, size_h - bot, side, bot))
 
     mx = size_w // 2 - edge // 2
-    my = int(border + header_h) + (size_h - int(border + header_h) - bot) // 2 - edge // 2
+    my = int(BORDER + header_h) + (size_h - int(BORDER + header_h) - bot) // 2 - edge // 2
 
     write_tga(OUT / "panel_t.tga", edge, top_h, crop(master, size_w, mx, 0, edge, top_h))
     write_tga(OUT / "panel_b.tga", edge, bot, crop(master, size_w, mx, size_h - bot, edge, bot))
@@ -210,11 +230,14 @@ def gen_panel() -> None:
 def gen_input() -> None:
     size = 64
     radius = 6.0
-    border = 1.0
     fill = (255, 255, 255)
     border_rgb = (160, 188, 224)
-    master = render(size, size, lambda px, py: sample_framed(
-        px, py, float(size), float(size), radius, border, fill, border_rgb))
+
+    def sample(px: float, py: float) -> tuple[int, int, int, int]:
+        ix, iy, iw, ih = with_edge_inset(px, py, float(size), float(size))
+        return sample_framed(ix, iy, iw, ih, radius, BORDER, fill, border_rgb)
+
+    master = render(size, size, sample)
     c = 12
     e = 8
     write_tga(OUT / "input_tl.tga", c, c, crop(master, size, 0, 0, c, c))
@@ -234,12 +257,15 @@ def gen_pill(name: str, top: tuple[int, int, int], bot: tuple[int, int, int],
              bhi: tuple[int, int, int], blo: tuple[int, int, int]) -> None:
     h = 46
     radius = 8.0
-    border = 1.0
     cap = 18
     mid = 12
     w = cap * 2 + mid
-    master = render(w, h, lambda px, py: sample_gradient_framed(
-        px, py, float(w), float(h), radius, border, top, bot, bhi, blo))
+
+    def sample(px: float, py: float) -> tuple[int, int, int, int]:
+        ix, iy, iw, ih = with_edge_inset(px, py, float(w), float(h))
+        return sample_gradient_framed(ix, iy, iw, ih, radius, BORDER, top, bot, bhi, blo)
+
+    master = render(w, h, sample)
     write_tga(OUT / f"{name}_l.tga", cap, h, crop(master, w, 0, 0, cap, h))
     write_tga(OUT / f"{name}_c.tga", mid, h, crop(master, w, cap, 0, mid, h))
     write_tga(OUT / f"{name}_r.tga", cap, h, crop(master, w, cap + mid, 0, cap, h))
@@ -256,14 +282,14 @@ def dist_segment(px: float, py: float, ax: float, ay: float, bx: float, by: floa
 
 def sample_checkbox(px: float, py: float, size: float, checked: bool) -> tuple[int, int, int, int]:
     """White rounded box; checked adds a crisp blue tick."""
-    pad = 2.0
+    pad = 1.5 + EDGE_INSET
     box = size - pad * 2
     bx, by = pad, pad
     radius = 4.0
     d_box = sd_round_box(px - bx, py - by, box, box, radius)
     box_a = coverage(d_box)
 
-    border = 1.0
+    border = BORDER
     d_inner = sd_round_box(
         px - bx - border, py - by - border,
         box - 2 * border, box - 2 * border,
@@ -319,11 +345,14 @@ def gen_cap_pill() -> None:
     mid = 8
     w = cap * 2 + mid
     radius = 8.0
-    border = 1.0
     fill = (236, 242, 250)
     border_rgb = (176, 198, 228)
-    master = render(w, h, lambda px, py: sample_framed(
-        px, py, float(w), float(h), radius, border, fill, border_rgb))
+
+    def sample(px: float, py: float) -> tuple[int, int, int, int]:
+        ix, iy, iw, ih = with_edge_inset(px, py, float(w), float(h))
+        return sample_framed(ix, iy, iw, ih, radius, BORDER, fill, border_rgb)
+
+    master = render(w, h, sample)
     write_tga(OUT / "cap_pill_l.tga", cap, h, crop(master, w, 0, 0, cap, h))
     write_tga(OUT / "cap_pill_c.tga", mid, h, crop(master, w, cap, 0, mid, h))
     write_tga(OUT / "cap_pill_r.tga", cap, h, crop(master, w, cap + mid, 0, cap, h))
@@ -359,34 +388,38 @@ def gen_scroll() -> None:
 
     # Legacy single-piece rounded bars (kept for any leftover CSS).
     tw, th = 16, 64
-    write_tga(
-        OUT / "scroll_track.tga", tw, th,
-        render(tw, th, lambda px, py: sample_framed(
-            px, py, float(tw), float(th), 4.0, 1.0, (208, 224, 244), (158, 184, 232))),
-    )
+
+    def sample_track(px: float, py: float) -> tuple[int, int, int, int]:
+        ix, iy, iw, ih = with_edge_inset(px, py, float(tw), float(th))
+        return sample_framed(ix, iy, iw, ih, 4.0, BORDER, (208, 224, 244), (158, 184, 232))
+
+    write_tga(OUT / "scroll_track.tga", tw, th, render(tw, th, sample_track))
     for name, fill, bord in (
         ("scroll_thumb", (126, 180, 240), (74, 138, 208)),
         ("scroll_thumb_hi", (90, 150, 220), (58, 120, 190)),
     ):
         ww, hh = 14, 48
-        write_tga(
-            OUT / f"{name}.tga", ww, hh,
-            render(ww, hh, lambda px, py: sample_framed(
-                px, py, float(ww), float(hh), 4.0, 1.0, fill, bord)),
-        )
+
+        def sample_thumb(px: float, py: float, f=fill, b=bord) -> tuple[int, int, int, int]:
+            ix, iy, iw, ih = with_edge_inset(px, py, float(ww), float(hh))
+            return sample_framed(ix, iy, iw, ih, 4.0, BORDER, f, b)
+
+        write_tga(OUT / f"{name}.tga", ww, hh, render(ww, hh, sample_thumb))
 
 
 def gen_btn_add_slot() -> None:
     """Square + button chrome under the capacity add control."""
     size = 40
-    write_tga(
-        OUT / "btn_add_slot.tga", size, size,
-        render(size, size, lambda px, py: sample_gradient_framed(
-            px, py, float(size), float(size), 6.0, 1.0,
+
+    def sample(px: float, py: float) -> tuple[int, int, int, int]:
+        ix, iy, iw, ih = with_edge_inset(px, py, float(size), float(size))
+        return sample_gradient_framed(
+            ix, iy, iw, ih, 6.0, BORDER,
             (110, 170, 236), (74, 138, 208),
             (150, 195, 245), (58, 120, 192),
-        )),
-    )
+        )
+
+    write_tga(OUT / "btn_add_slot.tga", size, size, render(size, size, sample))
 
 
 def gen_ico_plus() -> None:

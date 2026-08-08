@@ -26,7 +26,7 @@ Do **not** wrap a slim bar in `.notice` panel (baked blue header wastes height).
 - Gold = secondary/confirm; blue = primary; Exit/Back = `.notice-exit` or compact blue pill
 - Disabled: `.notice-btn-disabled` + `disabled` attribute
 - Body `pointer-events: none`; interactive shell `pointer-events: auto`
-- **Crisp edges:** no soft “inner shadow” / milky halos on panels, inputs, buttons, slots, pills. Flat faces + ~1px strokes; AA feather ≈ `0.35` (see `tools/gen-notice-skin.py` / `tools/gen-inv-slots.py`). Prefer pixel-locked gutters (`44` slot / `4` gap) when laying out grids.
+- **Crisp equal corners:** no soft “inner shadow” / milky halos. Flat faces + ~1px strokes; AA feather ≈ `0.35`; premultiplied SS + `EDGE_INSET` so L/R/T/B curves match (see `tools/gen-notice-skin.py` / `tools/gen-inv-slots.py`). Prefer pixel-locked gutters (`44` slot / `4` gap). Shells use `overflow: visible` — don’t clip soft-AA. Prefer `image-color` over `opacity` on Notice TGA buttons.
 
 ## DX9 hard constraints
 

@@ -632,13 +632,13 @@ Rml::ElementPtr CRmlUiInventoryForm::Impl::MakeSlot(const char* id, const RmlInv
 	slot->SetProperty("max-width", "44dp");
 	slot->SetProperty("max-height", "44dp");
 	slot->SetProperty("padding", "4dp");
-	slot->SetProperty("overflow", "hidden");
+	// visible so soft-AA corners aren't clipped unevenly on flush grid edges
+	slot->SetProperty("overflow", "visible");
 	slot->SetProperty("background-color", "transparent");
 	slot->SetProperty("border-top-width", "0dp");
 	slot->SetProperty("border-right-width", "0dp");
 	slot->SetProperty("border-bottom-width", "0dp");
 	slot->SetProperty("border-left-width", "0dp");
-	// Soft-AA rounded slot skins (CSS class sets decorator; keep inline clear of square fill).
 	if (view.locked)
 		slot->SetProperty("decorator", "image(ui/rml/frames/notice/slot_rounded_locked.tga)");
 	else if (view.selected)

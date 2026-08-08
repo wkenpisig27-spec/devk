@@ -35,8 +35,8 @@ body.inv-body .inv-modal-open {
 	/* Equal air between Character | Backpack | tabs */
 	margin-right: 8dp;
 	padding: 0dp;
-	overflow: hidden;
-	clip: always;
+	/* visible: clipping the shell shaves soft-AA corners unevenly (L≠R). */
+	overflow: visible;
 	background-color: transparent;
 	border-top-width: 0dp;
 	border-right-width: 0dp;
@@ -299,7 +299,8 @@ button.inv-preview-rot-right {
 	/* Uniform 4dp grid gutters (last cell clears right margin in code). */
 	margin: 0dp 4dp 4dp 0dp;
 	padding: 4dp;
-	overflow: hidden;
+	/* visible: overflow:hidden clipped soft-AA corners unevenly on flush edges. */
+	overflow: visible;
 	/* Soft-AA rounded slot @ 1:1 with TGA (DX9 — no CSS border-radius). */
 	background-color: transparent;
 	border-top-width: 0dp;
@@ -423,6 +424,8 @@ button.inv-preview-rot-right {
 	display: block;
 	width: 36dp;
 	height: 36dp;
+	/* Keep square icons inside the curve without clipping the slot TGA. */
+	overflow: hidden;
 	background-color: transparent;
 	pointer-events: none;
 }

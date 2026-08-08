@@ -1,4 +1,5 @@
-/* Shared Notice dialog chrome — soft-AA TGA skins only (no CSS border-radius on shells). */
+/* Shared Notice dialog chrome — crisp soft-AA TGA skins only (no CSS border-radius on shells).
+   overflow:visible keeps equal corner AA; never clip Notice shells. */
 
 body {
 	position: relative;
@@ -32,6 +33,7 @@ body {
 	width: 420dp;
 	margin: 0dp;
 	padding: 0dp;
+	overflow: visible;
 	background-color: transparent;
 	border-top-width: 0dp;
 	border-right-width: 0dp;
@@ -99,6 +101,7 @@ body {
 	width: 100%;
 	height: 220dp;
 	padding: 6dp;
+	overflow: visible;
 	background-color: transparent;
 	border-top-width: 0dp;
 	border-right-width: 0dp;
@@ -182,6 +185,7 @@ button.notice-btn {
 	height: 46dp;
 	line-height: 46dp;
 	padding: 0dp;
+	overflow: visible;
 	font-family: LatoLatin;
 	font-size: 15dp;
 	font-weight: bold;
@@ -193,17 +197,18 @@ button.notice-btn {
 	border-bottom-width: 0dp;
 	border-left-width: 0dp;
 	border-radius: 0dp;
-	transition: opacity 0.12s;
+	/* Prefer image-color over opacity — opacity dirties soft-AA corner fringes. */
+	image-color: #ffffff;
 }
 
 .notice-btn:hover,
 button.notice-btn:hover {
-	opacity: 0.94;
+	image-color: #f0f4fa;
 }
 
 .notice-btn:active,
 button.notice-btn:active {
-	opacity: 0.82;
+	image-color: #d8e4f4;
 }
 
 .notice-btn-gold,
@@ -252,6 +257,7 @@ button.notice-exit {
 	height: 40dp;
 	line-height: 40dp;
 	padding: 0dp;
+	overflow: visible;
 	font-family: LatoLatin;
 	font-size: 14dp;
 	font-weight: bold;
@@ -263,21 +269,21 @@ button.notice-exit {
 	border-bottom-width: 0dp;
 	border-left-width: 0dp;
 	border-radius: 0dp;
+	image-color: #ffffff;
 	decorator: tiled-horizontal(
 		ui/rml/frames/notice/btn_blue_l.tga,
 		ui/rml/frames/notice/btn_blue_c.tga,
 		ui/rml/frames/notice/btn_blue_r.tga
 	);
-	transition: opacity 0.12s;
 }
 
 .notice-exit:hover,
 button.notice-exit:hover {
-	opacity: 0.94;
+	image-color: #f0f4fa;
 	color: #ffffff;
 }
 
 .notice-exit:active,
 button.notice-exit:active {
-	opacity: 0.82;
+	image-color: #d8e4f4;
 }

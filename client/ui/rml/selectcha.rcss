@@ -16,6 +16,7 @@ body.selectcha-body {
 	box-sizing: border-box;
 	width: 430dp;
 	padding: 0dp;
+	overflow: visible;
 	background-color: transparent;
 	border-top-width: 0dp;
 	border-right-width: 0dp;
@@ -66,5 +67,7 @@ button#btnYes.selectcha-btn {
 button.notice-btn.notice-btn-disabled,
 .notice-btn.notice-btn-disabled:hover,
 button.notice-btn.notice-btn-disabled:hover {
-	opacity: 0.38;
+	/* image-color (not opacity) keeps soft-AA button corners clean when disabled. */
+	image-color: #6a90c0;
+	color: #c8d8ec;
 }

@@ -114,21 +114,36 @@ def sample_slot(
 
 def render_slot(fill, border_rgb, outer_ring=None, ring=0.0):
     out: list[tuple[int, int, int, int]] = []
-    w = h = float(SIZE)
+    # Inset so AA fringe isn't flush against the bitmap edge (clipping made
+    # left/top corners look flatter than right/bottom against the panel).
+    inset = 0.5
+    w = h = float(SIZE) - inset * 2.0
     for y in range(SIZE):
         for x in range(SIZE):
-            ar = ag = ab = aa = 0.0
+            # Premultiplied SS — averaging straight RGB with (0,0,0,0) darkens
+            # fringes and makes corners look unequal on light vs edge backgrounds.
+            pr = pg = pb = pa = 0.0
             for sy in range(SS):
                 for sx in range(SS):
-                    px = x + (sx + 0.5) / SS
-                    py = y + (sy + 0.5) / SS
+                    px = (x + (sx + 0.5) / SS) - inset
+                    py = (y + (sy + 0.5) / SS) - inset
                     r, g, b, a = sample_slot(px, py, w, h, RADIUS, BORDER, fill, border_rgb, outer_ring, ring)
-                    ar += r
-                    ag += g
-                    ab += b
-                    aa += a
+                    af = a / 255.0
+                    pr += r * af
+                    pg += g * af
+                    pb += b * af
+                    pa += af
             n = float(SS * SS)
-            out.append((clamp(ar / n), clamp(ag / n), clamp(ab / n), clamp(aa / n)))
+            pa /= n
+            if pa < 0.004:
+                out.append((0, 0, 0, 0))
+            else:
+                out.append((
+                    clamp(pr / n / pa),
+                    clamp(pg / n / pa),
+                    clamp(pb / n / pa),
+                    clamp(pa * 255),
+                ))
     return out
 
 

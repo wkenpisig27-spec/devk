@@ -142,7 +142,7 @@ Depth = nested frames + **tight soft-AA TGA skins** + border color hierarchy.
 
 **Rounded corners:** do not rely on CSS `border-radius` for large shells — use Notice TGA 9-slices / tiled-horizontal.
 
-**Crisp edges (Notice standard):** faces stay flat; strokes ≈ 1px; AA feather ≈ `0.35`. Avoid wide feathered borders that read as a blurry inner shadow. Inventory grids lock to `44dp` slots / `4dp` gutters.
+**Crisp equal corners (Notice standard):** faces stay flat; strokes ≈ 1px; AA feather ≈ `0.35`; premultiplied supersampling + edge inset so L/R/T/B curves match. Avoid `overflow: hidden` / `opacity` on Notice shells and TGA buttons (use `image-color` instead). Inventory grids lock to `44dp` slots / `4dp` gutters.
 
 Decorator paths: `ui/rml/frames/notice/...` from the client working directory.
 
