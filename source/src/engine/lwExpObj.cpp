@@ -13,6 +13,39 @@ LW_BEGIN
 // Helper function to read lwTexInfo from x86 binary files
 // The 'data' field is 4 bytes in x86 files but void* is 8 bytes on x64
 // So we read member-by-member to handle the size difference
+static void lwMtlTexInfo_LoadRenderStateSetMtl2(lwMtlTexInfo* info, FILE* fp)
+{
+    lwRenderStateSetMtl2 rsm;
+    fread(&rsm, sizeof(rsm), 1, fp);
+
+    lwRenderStateAtom_Construct_A(info->rs_set, LW_MTL_RS_NUM);
+
+    lwRenderStateValue* rsv;
+    for(DWORD i = 0; i < rsm.SEQUENCE_SIZE; i++)
+    {
+        rsv = &rsm.rsv_seq[0][i];
+        if(rsv->state == LW_INVALID_INDEX)
+            break;
+
+        DWORD v;
+        switch(rsv->state)
+        {
+        case D3DRS_ALPHAFUNC:
+            v = D3DCMP_GREATER;
+            break;
+        case D3DRS_ALPHAREF:
+            v = 129;
+            break;
+        default:
+            v = rsv->value;
+        }
+
+        info->rs_set[i].state = rsv->state;
+        info->rs_set[i].value0 = v;
+        info->rs_set[i].value1 = v;
+    }
+}
+
 static void lwTexInfo_LoadFromFile(lwTexInfo* info, FILE* fp)
 {
     fread(&info->stage, sizeof(DWORD), 1, fp);
@@ -67,7 +100,24 @@ LW_RESULT lwMtlTexInfo_Load(lwMtlTexInfo* info, FILE* fp, DWORD version)
             sizeof(lwTexInfo), sizeof(info->tex_seq), ftell(fp));
     OutputDebugStringA(buf);
 
-    if(version >= EXP_OBJ_VERSION_1_0_0_0)
+    if(version >= EXP_OBJ_VERSION_1_0_0_6)
+    {
+        fread(&info->opacity, sizeof(info->opacity), 1, fp);
+        fread(&info->transp_type, sizeof(info->transp_type), 1, fp);
+        fread(&info->mtl, sizeof(lwMaterial), 1, fp);
+        lwMtlTexInfo_LoadRenderStateSetMtl2(info, fp);
+
+        sprintf(buf, "PKO: lwMtlTexInfo_Load - before tex_seq read, file pos=%ld\n", ftell(fp));
+        OutputDebugStringA(buf);
+
+        for (int i = 0; i < LW_MAX_TEXTURESTAGE_NUM; i++) {
+            lwTexInfo_LoadFromFile(&info->tex_seq[i], fp);
+        }
+
+        sprintf(buf, "PKO: lwMtlTexInfo_Load - after tex_seq read, file pos=%ld\n", ftell(fp));
+        OutputDebugStringA(buf);
+    }
+    else if(version >= EXP_OBJ_VERSION_1_0_0_0)
     {
         fread(&info->opacity, sizeof(info->opacity), 1, fp);
         fread(&info->transp_type, sizeof(info->transp_type), 1, fp);
@@ -309,7 +359,24 @@ LW_RESULT lwMtlTexInfo_Save(lwMtlTexInfo* info, FILE* fp, DWORD version)
     fwrite(&info->opacity, sizeof(info->opacity), 1, fp);
     fwrite(&info->transp_type, sizeof(info->transp_type), 1, fp);
     fwrite(&info->mtl, sizeof(lwMaterial), 1, fp);
-    fwrite(&info->rs_set[0], sizeof(info->rs_set), 1, fp);
+    if(version >= EXP_OBJ_VERSION_1_0_0_6)
+    {
+        lwRenderStateSetMtl2 rsm;
+        lwRenderStateSetTemplate_Construct(&rsm);
+        for(DWORD i = 0; i < LW_MTL_RS_NUM; i++)
+        {
+            if(info->rs_set[i].state == LW_INVALID_INDEX)
+                break;
+
+            rsm.rsv_seq[0][i].state = info->rs_set[i].state;
+            rsm.rsv_seq[0][i].value = info->rs_set[i].value0;
+        }
+        fwrite(&rsm, sizeof(rsm), 1, fp);
+    }
+    else
+    {
+        fwrite(&info->rs_set[0], sizeof(info->rs_set), 1, fp);
+    }
     fwrite(&info->tex_seq[0], sizeof(info->tex_seq), 1, fp);
 
     return LW_RET_OK;
@@ -353,10 +420,14 @@ LW_RESULT lwSaveMtlTexInfo(FILE* fp, const lwMtlTexInfo* info, DWORD num)
 
     return LW_RET_OK;
 }
-DWORD lwMtlTexInfo_GetDataSize(lwMtlTexInfo* info)
+DWORD lwMtlTexInfo_GetDataSize(lwMtlTexInfo* info, DWORD version)
 { 
+    const DWORD rs_size = (version >= EXP_OBJ_VERSION_1_0_0_6)
+        ? sizeof(lwRenderStateSetMtl2)
+        : sizeof(info->rs_set);
+
     return sizeof(info->opacity) + sizeof(info->transp_type) 
-        + sizeof(info->mtl) + sizeof(info->rs_set)
+        + sizeof(info->mtl) + rs_size
         + sizeof(info->tex_seq); 
 }
 
@@ -2107,13 +2178,13 @@ LW_RESULT lwAnimDataInfo::GetDataSize() const
 }
 
 // get size function
-DWORD lwGetMtlTexInfoSize(const lwMtlTexInfo* info_seq, DWORD num)
+DWORD lwGetMtlTexInfoSize(const lwMtlTexInfo* info_seq, DWORD num, DWORD version)
 {
     DWORD size = 0;
 
     for(DWORD i = 0; i < num; i++)
     {
-        size += lwMtlTexInfo_GetDataSize(const_cast<lwMtlTexInfo*>(&info_seq[i]));
+        size += lwMtlTexInfo_GetDataSize(const_cast<lwMtlTexInfo*>(&info_seq[i]), version);
     }
 
     if(size > 0)
@@ -2942,6 +3013,14 @@ LW_RESULT lwGeomObjInfo::Load(const char* file)
     char buf[128];
     sprintf(buf, "PKO: lwGeomObjInfo::Load(file) - version=%u, calling Load(fp)\n", version);
     OutputDebugStringA(buf);
+
+    if(version > EXP_OBJ_VERSION_1_0_0_6)
+    {
+        sprintf(buf, "PKO: lwGeomObjInfo::Load(file) - unsupported version %u\n", version);
+        OutputDebugStringA(buf);
+        fclose(fp);
+        return LW_RET_FAILED;
+    }
 
     LW_RESULT ret = Load(fp, version);
 

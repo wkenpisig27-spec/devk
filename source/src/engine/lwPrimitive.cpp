@@ -934,7 +934,7 @@ LW_RESULT lwPrimitive::ExtractGeomObjInfo(lwIGeomObjInfo* info)
             }
 
             //
-            a->mtl_size = lwGetMtlTexInfoSize(&a->mtl_seq[0], a->mtl_num);
+            a->mtl_size = lwGetMtlTexInfoSize(&a->mtl_seq[0], a->mtl_num, EXP_OBJ_VERSION);
             a->mesh_size = lwMeshInfo_GetDataSize(&a->mesh);
             a->helper_size = a->helper_data.GetDataSize();
             a->anim_size = a->anim_data.GetDataSize();

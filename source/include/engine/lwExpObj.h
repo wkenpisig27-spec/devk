@@ -33,8 +33,10 @@ const DWORD EXP_OBJ_VERSION_1_0_0_3 = 0x1003;
 const DWORD EXP_OBJ_VERSION_1_0_0_4 = 0x1004;
 // 增加新的动画类型lwAnimDataMtlOpacty
 const DWORD EXP_OBJ_VERSION_1_0_0_5 = 0x1005;
+// 材质渲染状态由 lwRenderStateAtom 数组改为 lwRenderStateSetMtl2 存储
+const DWORD EXP_OBJ_VERSION_1_0_0_6 = 0x1006;
 
-const DWORD EXP_OBJ_VERSION = EXP_OBJ_VERSION_1_0_0_5;
+const DWORD EXP_OBJ_VERSION = EXP_OBJ_VERSION_1_0_0_6;
 
 const DWORD MTLTEX_VERSION0000 = 0x0000;
 const DWORD MTLTEX_VERSION0001 = 0x0001;
@@ -996,7 +998,7 @@ public:
 
 // =============================================
 
-DWORD lwGetMtlTexInfoSize(const lwMtlTexInfo* info_seq, DWORD num);
+DWORD lwGetMtlTexInfoSize(const lwMtlTexInfo* info_seq, DWORD num, DWORD version);
 DWORD lwGetAnimKeySetPRSSize(const lwAnimKeySetPRS* info);
 
 LW_RESULT lwCreateHelperMeshInfo(lwHelperMeshInfo* info, const lwMeshInfo* mi);
