@@ -1,4 +1,4 @@
-/* Notice-inspired in-game inventory — split Character + Backpack + right tabs. */
+/* Notice-inspired in-game inventory — Character + Backpack. */
 
 body.inv-body {
 	position: relative;
@@ -32,7 +32,7 @@ body.inv-body .inv-modal-open {
 	display: block;
 	box-sizing: border-box;
 	height: 100%;
-	/* Equal air between Character | Backpack | tabs */
+	/* Equal air between Character | Backpack */
 	margin-right: 8dp;
 	padding: 0dp;
 	/* visible: clipping the shell shaves soft-AA corners unevenly (L≠R). */
@@ -74,7 +74,7 @@ body.inv-body .inv-modal-open {
 	/* 12 pad + 284 grid + 6 gap + 10 scroll + 12 pad = 324; +8 chrome = 332 */
 	width: 332dp;
 	min-width: 332dp;
-	margin-right: 8dp;
+	margin-right: 0dp;
 }
 
 .inv-panel-header {
@@ -807,26 +807,36 @@ button.inv-footer-icon-last {
 }
 
 .inv-tabs {
-	display: block;
-	flex: none;
-	width: 110dp;
-	height: 100%;
+	display: flex;
+	flex-direction: row;
+	position: absolute;
+	z-index: 3;
+	/* Right side above the body seam; leave room for close (12 + 28 + 4). */
+	right: 44dp;
+	left: auto;
+	top: auto;
+	bottom: 0dp;
+	height: 28dp;
+	margin: 0dp;
+	padding: 0dp;
 	pointer-events: auto;
-	padding-top: 56dp;
 }
 
-/* Inactive: solid muted pill (no opacity on soft-AA TGA — that causes white corners). */
+/* Folder tabs with icons — inactive: white glyph on blue; active: white folder into body. */
 .inv-tab,
 button.inv-tab {
 	display: block;
 	box-sizing: border-box;
-	width: 100%;
-	height: 36dp;
-	line-height: 36dp;
-	margin-bottom: 6dp;
-	padding: 0dp 8dp;
+	flex: none;
+	width: 36dp;
+	height: 28dp;
+	line-height: 28dp;
+	margin-left: 2dp;
+	margin-right: 0dp;
+	margin-bottom: 0dp;
+	padding: 0dp;
 	font-family: LatoLatin;
-	font-size: 12dp;
+	font-size: 1dp;
 	font-weight: bold;
 	text-align: center;
 	color: #ffffff;
@@ -836,26 +846,48 @@ button.inv-tab {
 	border-bottom-width: 0dp;
 	border-left-width: 0dp;
 	border-radius: 0dp;
-	decorator: tiled-horizontal(
-		ui/rml/frames/notice/btn_blue_l.tga,
-		ui/rml/frames/notice/btn_blue_c.tga,
-		ui/rml/frames/notice/btn_blue_r.tga
-	);
-	image-color: #b8d0ee;
+	drag: block;
+	decorator: none;
+	image-color: #ffffff;
+}
+
+.inv-tabs .inv-tab:first-child,
+.inv-tabs button.inv-tab:first-child {
+	margin-left: 0dp;
+}
+
+.inv-tab:hover,
+button.inv-tab:hover {
+	color: #eef5ff;
 }
 
 .inv-tab-active,
 button.inv-tab-active,
 .inv-tab-active:hover,
 button.inv-tab-active:hover {
-	color: #ffffff;
+	color: #2a4a80;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/tab_folder_l.tga,
+		ui/rml/frames/notice/tab_folder_c.tga,
+		ui/rml/frames/notice/tab_folder_r.tga
+	);
 	image-color: #ffffff;
 }
 
-.inv-tab:hover,
-button.inv-tab:hover {
-	color: #ffffff;
-	image-color: #d0e2f8;
+.inv-tab-icon {
+	display: block;
+	width: 16dp;
+	height: 16dp;
+	margin: 6dp auto 0dp auto;
+	background-color: transparent;
+	pointer-events: none;
+	image-color: #ffffff;
+}
+
+.inv-tab-active .inv-tab-icon,
+button.inv-tab-active .inv-tab-icon {
+	/* Dark glyph on the white folder face. */
+	image-color: #2a4a80;
 }
 
 /* Full-screen Notice confirm overlays (lock / bag slots). */

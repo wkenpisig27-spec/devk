@@ -44,6 +44,24 @@
 					<handle class="inv-drag-handle" move_target="inv-root">
 						<div class="inv-panel-title">Backpack</div>
 					</handle>
+					<!-- Icon filter tabs: right-aligned so the title stays clear. -->
+					<div id="inv-tabs" class="inv-tabs">
+						<button class="inv-tab inv-tab-active" id="tabItems" type="button" data-filter="all" title="Items">
+							<img class="inv-tab-icon" src="ui/rml/frames/notice/ico_tab_items.tga"/>
+						</button>
+						<button class="inv-tab" id="tabEquipment" type="button" data-filter="equipment" title="Equipment">
+							<img class="inv-tab-icon" src="ui/rml/frames/notice/ico_tab_equip.tga"/>
+						</button>
+						<button class="inv-tab" id="tabConsumable" type="button" data-filter="consumable" title="Consumable">
+							<img class="inv-tab-icon" src="ui/rml/frames/notice/ico_tab_consumable.tga"/>
+						</button>
+						<button class="inv-tab" id="tabMaterial" type="button" data-filter="material" title="Material">
+							<img class="inv-tab-icon" src="ui/rml/frames/notice/ico_tab_material.tga"/>
+						</button>
+						<button class="inv-tab" id="tabOther" type="button" data-filter="other" title="Other">
+							<img class="inv-tab-icon" src="ui/rml/frames/notice/ico_tab_other.tga"/>
+						</button>
+					</div>
 					<button class="inv-close" id="btnClose" type="button">X</button>
 				</div>
 				<div class="inv-backpack-body">
@@ -74,15 +92,6 @@
 						<img class="inv-footer-icon-img" src="ui/rml/frames/notice/ico_temp.tga"/>
 					</button>
 				</div>
-			</div>
-
-			<!-- Category tabs -->
-			<div id="inv-tabs" class="inv-tabs">
-				<button class="inv-tab inv-tab-active" id="tabItems" type="button" data-filter="all">Items</button>
-				<button class="inv-tab" id="tabEquipment" type="button" data-filter="equipment">Equipment</button>
-				<button class="inv-tab" id="tabConsumable" type="button" data-filter="consumable">Consumable</button>
-				<button class="inv-tab" id="tabMaterial" type="button" data-filter="material">Material</button>
-				<button class="inv-tab" id="tabOther" type="button" data-filter="other">Other</button>
 			</div>
 		</div>
 
