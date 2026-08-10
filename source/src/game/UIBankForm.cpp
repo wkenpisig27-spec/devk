@@ -15,6 +15,9 @@
 #include "packetcmd.h"
 #include "Character.h"
 #include "GameApp.h"
+#include "rmlui/RmlUiBankForm.h"
+#include "rmlui/RmlUiManager.h"
+#include <vector>
 
 namespace GUI {
 //=======================================================================
@@ -36,13 +39,10 @@ bool CBankMgr::Init() // ?????????
 	if (!grdBank)
 		return Error(RES_STRING(CL_LANGUAGE_MATCH_439),
 					 frmBank->GetName(), "grdNPCstorage");
-	grdBank->evtBeforeAccept = CUIInterface::_evtDragToGoodsEvent; // ????? ????????? CUIInterface::_evtDragToGoodsEvent
+	grdBank->evtBeforeAccept = CUIInterface::_evtDragToGoodsEvent;
 	grdBank->evtSwapItem = _evtBankToBank;
-	grdBank->evtUseCommand = _evtBankUseCommand; // dblclick → withdraw to bag (no CDrag)
+	grdBank->evtUseCommand = _evtBankUseCommand;
 	labCharName = dynamic_cast<CLabel*>(frmBank->Find("labOwnerName"));
-	if (!grdBank)
-		return Error(RES_STRING(CL_LANGUAGE_MATCH_439),
-					 frmBank->GetName(), "labOwnerName");
 
 	return true;
 }
@@ -55,24 +55,89 @@ void CBankMgr::_evtOnClose(CForm* pForm, bool& IsClose) // ??????
 }
 
 //-------------------------------------------------------------------------
-void CBankMgr::ShowBank() // ????
-{
-	// ??????????
+bool CBankMgr::IsBankOpen() const {
+	if (CRmlUiBankForm::Instance().IsVisible())
+		return true;
+	return frmBank && frmBank->GetIsShow();
+}
 
-	if (!g_stUIBoat.GetHuman()) // ???
+//-------------------------------------------------------------------------
+void CBankMgr::ShowBank() {
+	if (!g_stUIBoat.GetHuman())
 		return;
 
-	char szBuf[32];
-	sprintf(szBuf, "%s%s", g_stUIBoat.GetHuman()->getName(), RES_STRING(CL_LANGUAGE_MATCH_440)); // ????????
-	labCharName->SetCaption(szBuf);														 // ??????
+	char szBuf[64];
+	sprintf(szBuf, "%s%s", g_stUIBoat.GetHuman()->getName(), RES_STRING(CL_LANGUAGE_MATCH_440));
+	if (labCharName)
+		labCharName->SetCaption(szBuf);
 
-	frmBank->Show();
-
-	// Rml inventory is the bag UI; bank transfers use index-based Move* wrappers.
 	if (!g_stUIEquip.IsInventoryUiVisible())
 		g_stUIEquip.ShowInventoryUi();
 
-	CFormMgr::s_Mgr.SetEnableHotKey(HOTKEY_BANK, false); // ??????
+	// Prefer Notice Rml bank when loaded; otherwise legacy chrome.
+	if (CRmlUiManager::Instance().IsReady() && CRmlUiBankForm::Instance().LoadOk()) {
+		if (frmBank && frmBank->GetIsShow())
+			frmBank->SetIsShow(false);
+		CRmlUiBankForm& rml = CRmlUiBankForm::Instance();
+		rml.SetOwnerName(szBuf);
+		rml.Show();
+		rml.PlaceBesideInventory();
+		RefreshBankUi();
+	} else if (frmBank) {
+		frmBank->Show();
+	}
+
+	CFormMgr::s_Mgr.SetEnableHotKey(HOTKEY_BANK, false);
+}
+
+//-------------------------------------------------------------------------
+void CBankMgr::CloseBankUi(bool hideInventory) {
+	const bool rmlOpen = CRmlUiBankForm::Instance().IsVisible();
+	const bool legacyOpen = frmBank && frmBank->GetIsShow();
+	const bool wasOpen = rmlOpen || legacyOpen;
+
+	CRmlUiBankForm::Instance().Hide();
+	if (legacyOpen)
+		frmBank->SetIsShow(false);
+
+	if (wasOpen) {
+		CS_BeginAction(g_stUIBoat.GetHuman(), enumACTION_CLOSE_BANK, nullptr);
+		CFormMgr::s_Mgr.SetEnableHotKey(HOTKEY_BANK, true);
+	}
+
+	if (hideInventory)
+		g_stUIEquip.HideInventoryUi();
+}
+
+//-------------------------------------------------------------------------
+void CBankMgr::RefreshBankUi() {
+	CRmlUiBankForm& rml = CRmlUiBankForm::Instance();
+	if (!rml.IsVisible() || !grdBank)
+		return;
+
+	std::vector<RmlInvSlotView> slots;
+	int used = 0;
+	const int maxNum = grdBank->GetMaxNum();
+	const int cols = grdBank->GetCol() > 0 ? grdBank->GetCol() : 4;
+	slots.reserve((size_t)maxNum);
+	for (int i = 0; i < maxNum; ++i) {
+		RmlInvSlotView view;
+		view.id = i;
+		if (CItemCommand* cmd = dynamic_cast<CItemCommand*>(grdBank->GetItem(i))) {
+			if (CItemRecord* info = cmd->GetItemInfo()) {
+				if (info->lID != 32767) {
+					view.iconPath = info->GetIconFile();
+					view.qty = cmd->GetTotalNum();
+					used++;
+				} else {
+					view.locked = true;
+				}
+			}
+		}
+		slots.push_back(view);
+	}
+	rml.SetSlots(slots, cols);
+	rml.SetCapacity(used, maxNum);
 }
 
 //-------------------------------------------------------------------------
@@ -129,6 +194,19 @@ void CBankMgr::_evtBankUseCommand(CCommandObj* pSender, bool& isUse) {
 
 	g_stUIBank.MoveBankToBag(bankIndex, -1);
 	g_stUIEquip.RefreshRmlInventory();
+	g_stUIBank.RefreshBankUi();
+}
+
+//-------------------------------------------------------------------------
+bool CBankMgr::MoveBankItem(int srcBankIndex, int dstBankIndex) {
+	if (!grdBank || srcBankIndex < 0 || dstBankIndex < 0 || srcBankIndex == dstBankIndex)
+		return false;
+	if (!grdBank->GetItem(srcBankIndex))
+		return false;
+
+	bool isSwap = false;
+	_evtBankToBank(grdBank, dstBankIndex, srcBankIndex, isSwap);
+	return true;
 }
 
 //-------------------------------------------------------------------------
@@ -241,12 +319,9 @@ void CBankMgr::_MoveAItemEvent(CCompent* pSender, int nMsgType, int x, int y, DW
 }
 
 //-------------------------------------------------------------------------
-void CBankMgr::CloseForm() // ???????
-{
-	if (frmBank->GetIsShow()) {
-		frmBank->Close();
-		g_stUIEquip.HideInventoryUi();
-	}
+void CBankMgr::CloseForm() {
+	if (IsBankOpen() || (frmBank && frmBank->GetIsShow()))
+		CloseBankUi(true);
 }
 
 //-------------------------------------------------------------------------

@@ -2025,6 +2025,8 @@ void NetChangeKitbag(DWORD dwChaID, stNetKitbag& SKitbag) {
 
 	if (grd == g_stUIEquip.GetGoodsGrid())
 		g_stUIEquip.RefreshRmlInventory();
+	if (grd == g_stUIBank.GetBankGoodsGrid())
+		g_stUIBank.RefreshBankUi();
 }
 
 void NetKitbagCapacity(unsigned int nID, short sKbCap) {

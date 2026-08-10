@@ -393,7 +393,11 @@ bool CUIInterface::_evtESCKey(char& key) {
 		if (g_stUITrade.IsTrading())
 			return false;
 
-		// Notice inventory is not a CForm — Esc closes modals first, then the panel.
+		// Notice bank/inventory are not CForms — Esc closes bank session first, then inventory.
+		if (g_stUIBank.IsBankOpen()) {
+			g_stUIBank.CloseBankUi(true);
+			return true;
+		}
 		if (CRmlUiInventoryForm::Instance().IsVisible()) {
 			if (CRmlUiInventoryForm::Instance().IsModalOpen()) {
 				CRmlUiInventoryForm::Instance().HideModals();

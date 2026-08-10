@@ -33,6 +33,7 @@ public:
 	void HideLoginForms();
 	void HideSelectChaForm();
 	void HideInventoryForm();
+	void HideBankForm();
 
 private:
 	CRmlUiManager() = default;

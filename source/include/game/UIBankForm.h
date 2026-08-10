@@ -18,37 +18,41 @@ struct stNumBox;
 
 class CBankMgr : public CUIInterface {
 public:
-	void ShowBank();								   // 显示道具栏物品
-	CGoodsGrid* GetBankGoodsGrid() { return grdBank; } // 获取道具栏格子
-	CForm* GetBankForm() { return frmBank; }
-	bool IsBankOpen() const { return frmBank && frmBank->GetIsShow(); }
+	void ShowBank();
+	void CloseBankUi(bool hideInventory = true);
+	void RefreshBankUi();
 
-	bool PushToBank(CGoodsGrid& rkDrag, CGoodsGrid& rkSelf, int nGridID, CCommandObj& rkItem);	// 将物品放入银行
-	bool PopFromBank(CGoodsGrid& rkDrag, CGoodsGrid& rkSelf, int nGridID, CCommandObj& rkItem); // 从银行中拖出物品
-	bool BankToBank(CGoodsGrid& rkDrag, CGoodsGrid& rkSelf, int nGridID, CCommandObj& rkItem);	// 将物品从一个银行移到另一个银行
+	CGoodsGrid* GetBankGoodsGrid() { return grdBank; }
+	CForm* GetBankForm() { return frmBank; } // legacy data host (never shown)
+	bool IsBankOpen() const;
+
+	bool PushToBank(CGoodsGrid& rkDrag, CGoodsGrid& rkSelf, int nGridID, CCommandObj& rkItem);
+	bool PopFromBank(CGoodsGrid& rkDrag, CGoodsGrid& rkSelf, int nGridID, CCommandObj& rkItem);
+	bool BankToBank(CGoodsGrid& rkDrag, CGoodsGrid& rkSelf, int nGridID, CCommandObj& rkItem);
 
 	// Index-based transfer (no CDrag::GetParent); pile prompt unchanged.
 	bool MoveBagToBank(int bagIndex, int bankSlot = -1);
 	bool MoveBankToBag(int bankIndex, int bagSlot = -1);
+	bool MoveBankItem(int srcBankIndex, int dstBankIndex);
 
 protected:
-	virtual bool Init();	  // 用户界面银行信息初始化
-	virtual void CloseForm(); // 关闭表单
+	virtual bool Init();
+	virtual void CloseForm();
 
 private:
-	static void _MoveItemsEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey); // 移动多个物品
-	static void _MoveAItemEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey); // 移动单个物品
-	static void _evtBankToBank(CGuiData* pSender, int nFirst, int nSecond, bool& isSwap);	 // 用于用户银行表单中道具互换
-	static void _evtOnClose(CForm* pForm, bool& IsClose);									 // 关闭银行表单
-	static void _evtBankUseCommand(CCommandObj* pSender, bool& isUse);						 // dblclick withdraw → bag
+	static void _MoveItemsEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
+	static void _MoveAItemEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
+	static void _evtBankToBank(CGuiData* pSender, int nFirst, int nSecond, bool& isSwap);
+	static void _evtOnClose(CForm* pForm, bool& IsClose);
+	static void _evtBankUseCommand(CCommandObj* pSender, bool& isUse);
 
 private:
-	stNumBox* m_pkNumberBox; // 询问个数
+	stNumBox* m_pkNumberBox;
 	stNetBank m_kNetBank;
 
-	// 界面
-	CForm* frmBank;		 // 银行表单
-	CGoodsGrid* grdBank; // 格子表单
+	// Data host only — player chrome is CRmlUiBankForm.
+	CForm* frmBank;
+	CGoodsGrid* grdBank;
 	CLabel* labCharName;
 
 }; // end of class CBankMgr

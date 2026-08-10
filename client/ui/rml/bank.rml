@@ -1,0 +1,32 @@
+<rml>
+	<head>
+		<title>Bank</title>
+		<link type="text/rcss" href="notice.rcss"/>
+		<link type="text/rcss" href="bank.rcss"/>
+	</head>
+	<body class="bank-body">
+		<div id="bank-root" class="bank-panel">
+			<div class="bank-header">
+				<handle class="bank-drag" move_target="bank-root">
+					<div class="bank-title">Bank</div>
+				</handle>
+				<button class="bank-close" id="btnBankClose" type="button">X</button>
+			</div>
+			<div id="labBankOwner" class="bank-owner">Owner</div>
+			<div class="bank-body-grid">
+				<div id="bank-grid" class="bank-grid"></div>
+				<div id="bank-scrollbar" class="bank-scrollbar">
+					<div id="bank-scroll-thumb" class="bank-scroll-thumb"></div>
+				</div>
+			</div>
+			<div class="bank-footer">
+				<div class="bank-capacity-label">Capacity</div>
+				<div class="bank-capacity-pill">
+					<div id="labBankUsed" class="bank-capacity-used">0</div>
+					<div class="bank-capacity-sep">/</div>
+					<div id="labBankMax" class="bank-capacity-max">0</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</rml>

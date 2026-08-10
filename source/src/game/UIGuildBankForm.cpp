@@ -45,6 +45,7 @@ bool CGuildBankMgr::Init() // ?????????
 
 	grdBank->evtBeforeAccept = CUIInterface::_evtDragToGoodsEvent;
 	grdBank->evtSwapItem = _evtBankToBank;
+	grdBank->evtUseCommand = _evtBankUseCommand; // dblclick → withdraw to bag (no CDrag)
 
 	btnGoldPut->evtMouseClick = _OnClickGoldPut;
 	btnGoldTake->evtMouseClick = _OnClickGoldTake;
@@ -116,11 +117,67 @@ void CGuildBankMgr::ShowBank() // ????
 
 	frmBank->Show();
 
-	// ????????
+	// Rml inventory is the bag UI; guild transfers use index-based Move* wrappers.
 	if (!g_stUIEquip.IsInventoryUiVisible())
 		g_stUIEquip.ShowInventoryUi();
 
 	CFormMgr::s_Mgr.SetEnableHotKey(HOTKEY_BANK, false); // ??????
+}
+
+//-------------------------------------------------------------------------
+bool CGuildBankMgr::MoveBagToBank(int bagIndex, int bankSlot) {
+	CGoodsGrid* bag = g_stUIEquip.GetGoodsGrid();
+	if (!bag || !grdBank || bagIndex < 0)
+		return false;
+
+	CCommandObj* item = bag->GetItem(bagIndex);
+	if (!item)
+		return false;
+
+	if (bankSlot < 0)
+		bankSlot = grdBank->GetFreeIndex();
+	if (bankSlot < 0)
+		return false;
+
+	bag->SetDragIndex(bagIndex);
+	return PushToBank(*bag, *grdBank, bankSlot, *item);
+}
+
+//-------------------------------------------------------------------------
+bool CGuildBankMgr::MoveBankToBag(int bankIndex, int bagSlot) {
+	CGoodsGrid* bag = g_stUIEquip.GetGoodsGrid();
+	if (!bag || !grdBank || bankIndex < 0)
+		return false;
+
+	CCommandObj* item = grdBank->GetItem(bankIndex);
+	if (!item)
+		return false;
+
+	if (bagSlot < 0)
+		bagSlot = bag->GetFreeIndex();
+	if (bagSlot < 0)
+		return false;
+
+	grdBank->SetDragIndex(bankIndex);
+	return PopFromBank(*grdBank, *bag, bagSlot, *item);
+}
+
+//-------------------------------------------------------------------------
+void CGuildBankMgr::_evtBankUseCommand(CCommandObj* pSender, bool& isUse) {
+	isUse = false;
+	if (!g_stUIGuildBank.IsBankOpen())
+		return;
+
+	CItemCommand* item = dynamic_cast<CItemCommand*>(pSender);
+	if (!item)
+		return;
+
+	const int bankIndex = item->GetIndex();
+	if (bankIndex < 0)
+		return;
+
+	g_stUIGuildBank.MoveBankToBag(bankIndex, -1);
+	g_stUIEquip.RefreshRmlInventory();
 }
 
 //-------------------------------------------------------------------------

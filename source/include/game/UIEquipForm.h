@@ -60,7 +60,7 @@ public:
 	void UseBagItem(int bagIndex);
 	void MoveBagItem(int srcBagIndex, int dstBagIndex, short srcNum = 0);
 	void UnequipLink(int link, int bagIndex = -1);
-	// Index-based bank transfer (no CDrag; works while frmInv is hidden)
+	// Index-based personal/guild bank transfer (no CDrag; works while frmInv is hidden)
 	bool MoveBagToBank(int bagIndex, int bankSlot = -1);
 	bool MoveBankToBag(int bankIndex, int bagSlot = -1);
 	void OnRmlItemConfirmYes();

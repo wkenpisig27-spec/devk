@@ -20,11 +20,17 @@ class CGuildBankMgr : public CUIInterface {
 public:
 	void ShowBank();								   // 显示道具栏物品
 	CGoodsGrid* GetBankGoodsGrid() { return grdBank; } // 获取道具栏格子
+	CForm* GetBankForm() { return frmBank; }
+	bool IsBankOpen() const { return frmBank && frmBank->GetIsShow(); }
 
 	bool PushToBank(CGoodsGrid& rkDrag, CGoodsGrid& rkSelf, int nGridID, CCommandObj& rkItem);	// 将物品放入银行
 	bool PopFromBank(CGoodsGrid& rkDrag, CGoodsGrid& rkSelf, int nGridID, CCommandObj& rkItem); // 从银行中拖出物品
 	bool BankToBank(CGoodsGrid& rkDrag, CGoodsGrid& rkSelf, int nGridID, CCommandObj& rkItem);	// 将物品从一个银行移到另一个银行
 	void UpdateGuildGold(const char* value);
+
+	// Index-based transfer (no CDrag); pile prompt unchanged.
+	bool MoveBagToBank(int bagIndex, int bankSlot = -1);
+	bool MoveBankToBag(int bankIndex, int bagSlot = -1);
 
 protected:
 	virtual bool Init();	  // 用户界面银行信息初始化
@@ -35,6 +41,7 @@ private:
 	static void _MoveAItemEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey); // 移动单个物品
 	static void _evtBankToBank(CGuiData* pSender, int nFirst, int nSecond, bool& isSwap);	 // 用于用户银行表单中道具互换
 	static void _evtOnClose(CForm* pForm, bool& IsClose);									 // 关闭银行表单
+	static void _evtBankUseCommand(CCommandObj* pSender, bool& isUse);						 // dblclick withdraw → bag
 
 	static void _EnterGoldTake(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
 	static void _EnterGoldPut(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);

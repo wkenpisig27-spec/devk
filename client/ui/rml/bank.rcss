@@ -1,0 +1,246 @@
+/* Notice personal bank — self-contained (do not pull inventory.rcss at load time). */
+
+body.bank-body {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	justify-content: flex-start;
+	align-items: flex-start;
+	padding: 0dp;
+	pointer-events: none;
+	font-family: LatoLatin;
+}
+
+body.bank-body .bank-panel {
+	pointer-events: auto;
+}
+
+.bank-panel {
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	flex: none;
+	width: 248dp;
+	min-width: 248dp;
+	height: 560dp;
+	margin: 0dp;
+	padding: 0dp;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/panel_tl.tga,
+		ui/rml/frames/notice/panel_t.tga,
+		ui/rml/frames/notice/panel_tr.tga,
+		ui/rml/frames/notice/panel_l.tga,
+		ui/rml/frames/notice/panel_c.tga,
+		ui/rml/frames/notice/panel_r.tga,
+		ui/rml/frames/notice/panel_bl.tga,
+		ui/rml/frames/notice/panel_b.tga,
+		ui/rml/frames/notice/panel_br.tga
+	);
+}
+
+.bank-header {
+	display: block;
+	position: relative;
+	z-index: 2;
+	box-sizing: border-box;
+	height: 56dp;
+	padding: 0dp 16dp;
+	background-color: transparent;
+}
+
+.bank-drag {
+	display: block;
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	right: 0dp;
+	bottom: 0dp;
+	z-index: 1;
+	padding: 0dp 16dp;
+	box-sizing: border-box;
+	cursor: move;
+}
+
+.bank-title {
+	display: block;
+	padding-top: 16dp;
+	font-size: 18dp;
+	font-weight: bold;
+	color: #ffffff;
+	text-align: left;
+}
+
+.bank-close,
+button.bank-close {
+	display: block;
+	position: absolute;
+	right: 12dp;
+	top: 14dp;
+	z-index: 3;
+	width: 28dp;
+	height: 28dp;
+	line-height: 28dp;
+	padding: 0dp;
+	font-family: LatoLatin;
+	font-size: 14dp;
+	font-weight: bold;
+	text-align: center;
+	color: #ffffff;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_blue_l.tga,
+		ui/rml/frames/notice/btn_blue_c.tga,
+		ui/rml/frames/notice/btn_blue_r.tga
+	);
+}
+
+.bank-owner {
+	display: block;
+	flex: none;
+	box-sizing: border-box;
+	padding: 0dp 16dp 6dp 16dp;
+	font-size: 12dp;
+	line-height: 16dp;
+	color: #5a7ab0;
+	pointer-events: none;
+}
+
+.bank-body-grid {
+	display: flex;
+	flex-direction: row;
+	flex: 1;
+	box-sizing: border-box;
+	padding: 0dp 12dp;
+	overflow: hidden;
+}
+
+.bank-grid {
+	display: block;
+	flex: 1;
+	overflow: hidden;
+	clip: always;
+}
+
+.bank-scrollbar {
+	display: block;
+	position: relative;
+	flex: none;
+	width: 10dp;
+	margin-left: 6dp;
+	overflow: visible;
+	decorator: tiled-vertical(
+		ui/rml/frames/notice/scroll_track_t.tga,
+		ui/rml/frames/notice/scroll_track_c.tga,
+		ui/rml/frames/notice/scroll_track_b.tga
+	);
+}
+
+.bank-scroll-thumb {
+	display: none;
+	position: absolute;
+	left: 0dp;
+	width: 10dp;
+	height: 40dp;
+	decorator: tiled-vertical(
+		ui/rml/frames/notice/scroll_thumb_t.tga,
+		ui/rml/frames/notice/scroll_thumb_c.tga,
+		ui/rml/frames/notice/scroll_thumb_b.tga
+	);
+}
+
+.bank-footer {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex: none;
+	box-sizing: border-box;
+	height: 50dp;
+	padding: 0dp 12dp;
+}
+
+.bank-capacity-label {
+	display: block;
+	font-size: 11dp;
+	color: #5a7ab0;
+	margin-right: 8dp;
+}
+
+.bank-capacity-pill {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 28dp;
+	padding: 0dp 10dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/cap_pill_l.tga,
+		ui/rml/frames/notice/cap_pill_c.tga,
+		ui/rml/frames/notice/cap_pill_r.tga
+	);
+}
+
+.bank-capacity-used,
+.bank-capacity-max,
+.bank-capacity-sep {
+	display: block;
+	font-size: 13dp;
+	font-weight: bold;
+	line-height: 28dp;
+	color: #2a4a80;
+}
+
+.bank-capacity-sep {
+	margin: 0dp 4dp;
+}
+
+/* Slot chrome — match inventory 44dp Notice slots (set mostly inline in C++). */
+.bank-slot {
+	display: block;
+	position: relative;
+	box-sizing: border-box;
+	flex: none;
+	width: 44dp;
+	height: 44dp;
+	padding: 4dp;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: image(ui/rml/frames/notice/slot_rounded.tga);
+	drag: none;
+	focus: none;
+	pointer-events: auto;
+}
+
+.bank-slot-icon {
+	display: block;
+	width: 36dp;
+	height: 36dp;
+	background-color: transparent;
+	pointer-events: none;
+}
+
+.bank-slot-qty {
+	display: block;
+	position: absolute;
+	right: 2dp;
+	bottom: 0dp;
+	font-size: 11dp;
+	font-weight: bold;
+	color: #2a4a80;
+	pointer-events: none;
+}

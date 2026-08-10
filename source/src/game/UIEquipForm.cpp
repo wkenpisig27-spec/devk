@@ -35,6 +35,8 @@
 #include "WorldScene.h"
 #include "UICozeForm.h"
 #include "UIBankForm.h"
+#include "UIGuildBankForm.h"
+#include "rmlui/RmlUiBankForm.h"
 #include <algorithm>
 #include <string>
 
@@ -58,6 +60,10 @@ enum class RmlInvPendingConfirm {
 
 RmlInvPendingConfirm g_rmlInvPendingConfirm = RmlInvPendingConfirm::None;
 int g_rmlInvPendingThrowNum = 1;
+
+// Dragdrop already moved bag↔bank; dragend must not send a second ACTION_BANK
+// (empty source → server "Equipment does not exist").
+bool g_rmlBankTransferHandled = false;
 
 bool ShowRmlItemConfirm(const char* title, const char* message, const char* hint, RmlInvPendingConfirm action) {
 	if (!CRmlUiInventoryForm::Instance().IsVisible())
@@ -2121,6 +2127,10 @@ void CEquipMgr::ShowInventoryUi() {
 }
 
 void CEquipMgr::HideInventoryUi() {
+	// Closing bag while Notice personal bank is open also ends that session.
+	if (CRmlUiBankForm::Instance().IsVisible())
+		g_stUIBank.CloseBankUi(false);
+
 	if (CGoodsGrid* bag = GetGoodsGrid())
 		bag->ResetItemSelections();
 	CRmlUiInventoryForm::Instance().Hide();
@@ -2213,7 +2223,7 @@ void CEquipMgr::ShowBagContextMenu(int bagIndex) {
 			flags.deleteItem = allowDelete;
 			if (g_stUINpcTrade.GetIsShow() && allowTrade)
 				flags.sellItem = true;
-			if (g_stUIBank.IsBankOpen())
+			if (g_stUIBank.IsBankOpen() || g_stUIGuildBank.IsBankOpen())
 				flags.depositItem = true;
 			if (rec && IsChestPreviewSupported(rec->lID))
 				flags.boxRates = true;
@@ -2631,11 +2641,19 @@ void CEquipMgr::UseBagItem(int bagIndex) {
 }
 
 bool CEquipMgr::MoveBagToBank(int bagIndex, int bankSlot) {
-	return g_stUIBank.MoveBagToBank(bagIndex, bankSlot);
+	if (g_stUIBank.IsBankOpen())
+		return g_stUIBank.MoveBagToBank(bagIndex, bankSlot);
+	if (g_stUIGuildBank.IsBankOpen())
+		return g_stUIGuildBank.MoveBagToBank(bagIndex, bankSlot);
+	return false;
 }
 
 bool CEquipMgr::MoveBankToBag(int bankIndex, int bagSlot) {
-	return g_stUIBank.MoveBankToBag(bankIndex, bagSlot);
+	if (g_stUIBank.IsBankOpen())
+		return g_stUIBank.MoveBankToBag(bankIndex, bagSlot);
+	if (g_stUIGuildBank.IsBankOpen())
+		return g_stUIGuildBank.MoveBankToBag(bankIndex, bagSlot);
+	return false;
 }
 
 void CEquipMgr::MoveBagItem(int srcBagIndex, int dstBagIndex, short srcNum) {
@@ -2783,8 +2801,8 @@ void RmlInv_OnExpandConfirm() {
 }
 
 void RmlInv_OnBagDblClick(int index) {
-	// With personal bank open, dblclick deposits (legacy bag→bank drag replacement).
-	if (g_stUIBank.IsBankOpen()) {
+	// With personal/guild bank open, dblclick deposits (legacy bag→bank drag replacement).
+	if (g_stUIBank.IsBankOpen() || g_stUIGuildBank.IsBankOpen()) {
 		g_stUIEquip.MoveBagToBank(index, -1);
 	} else {
 		g_stUIEquip.UseBagItem(index);
@@ -2851,14 +2869,63 @@ void RmlInv_OnDrop(int srcBag, int srcEquip, int dstBag, int dstEquip) {
 
 void RmlInv_OnItemDragEnd(int srcBag, int srcEquip, int mouseX, int mouseY) {
 	(void)srcEquip;
-	// Drop bag item onto visible personal bank form → deposit (no CDrag).
-	if (srcBag >= 0 && g_stUIBank.IsBankOpen()) {
-		if (CForm* bankForm = g_stUIBank.GetBankForm()) {
-			if (bankForm->InRect(mouseX, mouseY))
-				g_stUIEquip.MoveBagToBank(srcBag, -1);
+	const bool alreadyMoved = g_rmlBankTransferHandled;
+	g_rmlBankTransferHandled = false;
+
+	// Drop bag item onto personal/guild bank panel (when dragdrop didn't already handle a slot).
+	if (!alreadyMoved && srcBag >= 0) {
+		if (g_stUIBank.IsBankOpen() && CRmlUiBankForm::Instance().ContainsScreenPoint(mouseX, mouseY)) {
+			g_stUIEquip.MoveBagToBank(srcBag, -1);
+		} else if (g_stUIGuildBank.IsBankOpen()) {
+			if (CForm* bankForm = g_stUIGuildBank.GetBankForm()) {
+				if (bankForm->InRect(mouseX, mouseY))
+					g_stUIEquip.MoveBagToBank(srcBag, -1);
+			}
 		}
 	}
 	g_stUIEquip.RefreshRmlInventory();
+	if (g_stUIBank.IsBankOpen())
+		g_stUIBank.RefreshBankUi();
+}
+
+void RmlBank_OnClose() {
+	g_stUIBank.CloseBankUi(true);
+}
+
+void RmlBank_OnDblClick(int index) {
+	g_stUIEquip.MoveBankToBag(index, -1);
+	g_stUIEquip.RefreshRmlInventory();
+	g_stUIBank.RefreshBankUi();
+}
+
+void RmlBank_OnDrop(int srcBank, int srcBag, int dstBank, int dstBag) {
+	bool moved = false;
+	if (srcBag >= 0 && dstBank >= 0) {
+		moved = g_stUIEquip.MoveBagToBank(srcBag, dstBank);
+	} else if (srcBank >= 0 && dstBag >= 0) {
+		moved = g_stUIEquip.MoveBankToBag(srcBank, dstBag);
+	} else if (srcBank >= 0 && dstBank >= 0) {
+		moved = g_stUIBank.MoveBankItem(srcBank, dstBank);
+	}
+	if (moved || srcBag >= 0 || srcBank >= 0)
+		g_rmlBankTransferHandled = true;
+	g_stUIEquip.RefreshRmlInventory();
+	g_stUIBank.RefreshBankUi();
+}
+
+void RmlBank_OnDragEnd(int srcBank, int mouseX, int mouseY) {
+	const bool alreadyMoved = g_rmlBankTransferHandled;
+	g_rmlBankTransferHandled = false;
+
+	if (!alreadyMoved && srcBank >= 0) {
+		float x = 0.f, y = 0.f, w = 0.f, h = 0.f;
+		if (CRmlUiInventoryForm::Instance().GetRootScreenRect(x, y, w, h)) {
+			if (mouseX >= (int)x && mouseY >= (int)y && mouseX <= (int)(x + w) && mouseY <= (int)(y + h))
+				g_stUIEquip.MoveBankToBag(srcBank, -1);
+		}
+	}
+	g_stUIEquip.RefreshRmlInventory();
+	g_stUIBank.RefreshBankUi();
 }
 
 void RmlInv_ApplyItemHint(int bagIndex, int equipLink, int mouseX, int mouseY) {

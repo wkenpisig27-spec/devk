@@ -30,6 +30,7 @@ public:
 	void Hide();
 	bool IsVisible() const;
 	bool IsItemDragging() const;
+	bool GetRootScreenRect(float& x, float& y, float& w, float& h) const;
 
 	// Rebuild legacy CTextHint after FormMgr clears it; render after RmlUi.
 	void UpdateItemHint(int mouseX, int mouseY);

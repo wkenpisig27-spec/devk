@@ -24,6 +24,7 @@ extern bool RmlInv_OnBagMouseDown(int index, bool ctrl);
 extern void RmlInv_OnEquipDblClick(int link);
 extern void RmlInv_OnDrop(int srcBag, int srcEquip, int dstBag, int dstEquip);
 extern void RmlInv_OnItemDragEnd(int srcBag, int srcEquip, int mouseX, int mouseY);
+extern void RmlBank_OnDrop(int srcBank, int srcBag, int dstBank, int dstBag);
 extern void RmlInv_OnFilterChanged();
 extern void RmlInv_OnToggleApparel(bool apparel);
 extern void RmlInv_OnToggleLock();
@@ -504,6 +505,22 @@ void CRmlUiInventoryForm::RenderChaPreview() {
 
 bool CRmlUiInventoryForm::IsVisible() const {
 	return m_impl && m_impl->document && m_impl->document->IsVisible();
+}
+
+bool CRmlUiInventoryForm::GetRootScreenRect(float& x, float& y, float& w, float& h) const {
+	x = y = w = h = 0.f;
+	if (!IsVisible() || !m_impl)
+		return false;
+	Rml::Element* root = m_impl->Get("inv-root");
+	if (!root)
+		return false;
+	const Rml::Vector2f off = root->GetAbsoluteOffset(Rml::BoxArea::Border);
+	const Rml::Vector2f size = root->GetBox().GetSize(Rml::BoxArea::Border);
+	x = off.x;
+	y = off.y;
+	w = size.x;
+	h = size.y;
+	return w > 0.f && h > 0.f;
 }
 
 bool CRmlUiInventoryForm::IsItemDragging() const {
@@ -1090,6 +1107,25 @@ void CRmlUiInventoryForm::Impl::ProcessEvent(Rml::Event& event) {
 		if (!dragEl)
 			return;
 		int srcBag = -1, srcEquip = -1, dstBag = -1, dstEquip = -1;
+		int srcBank = -1;
+		// Cross-document: bank → bag (drag_element may live outside this document).
+		{
+			Rml::Element* el = dragEl;
+			while (el) {
+				if (el->HasAttribute("data-bank")) {
+					srcBank = el->GetAttribute("data-bank", -1);
+					break;
+				}
+				if (el->HasAttribute("data-bag") || el->HasAttribute("data-equip"))
+					break;
+				el = el->GetParentNode();
+			}
+		}
+		if (srcBank >= 0) {
+			if (ResolveInvSlot(target, document, dstBag, dstEquip) && dstBag >= 0)
+				RmlBank_OnDrop(srcBank, -1, -1, dstBag);
+			return;
+		}
 		if (!ResolveInvSlot(dragEl, document, srcBag, srcEquip))
 			return;
 		if (!ResolveInvSlot(target, document, dstBag, dstEquip))
