@@ -28,11 +28,11 @@
 				<div id="equip-bottom" class="inv-equip-row"></div>
 				<div class="inv-currency-row">
 					<div class="inv-currency">
-						<div class="inv-currency-label">Gold</div>
+						<div class="inv-currency-tag inv-currency-tag-gold">Gold</div>
 						<div id="labGold" class="inv-currency-value">0</div>
 					</div>
 					<div class="inv-currency inv-currency-last">
-						<div class="inv-currency-label">IMP</div>
+						<div class="inv-currency-tag inv-currency-tag-imp">Crystals</div>
 						<div id="labIMP" class="inv-currency-value">0</div>
 					</div>
 				</div>

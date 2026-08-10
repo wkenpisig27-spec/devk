@@ -255,10 +255,30 @@ def gen_input() -> None:
 
 def gen_pill(name: str, top: tuple[int, int, int], bot: tuple[int, int, int],
              bhi: tuple[int, int, int], blo: tuple[int, int, int]) -> None:
-    h = 46
-    radius = 8.0
-    cap = 18
-    mid = 12
+    """Fully capsule / oblong ends (radius = half height)."""
+    h = 40
+    radius = h * 0.5
+    cap = 20
+    mid = 10
+    w = cap * 2 + mid
+
+    def sample(px: float, py: float) -> tuple[int, int, int, int]:
+        ix, iy, iw, ih = with_edge_inset(px, py, float(w), float(h))
+        return sample_gradient_framed(ix, iy, iw, ih, radius, BORDER, top, bot, bhi, blo)
+
+    master = render(w, h, sample)
+    write_tga(OUT / f"{name}_l.tga", cap, h, crop(master, w, 0, 0, cap, h))
+    write_tga(OUT / f"{name}_c.tga", mid, h, crop(master, w, cap, 0, mid, h))
+    write_tga(OUT / f"{name}_r.tga", cap, h, crop(master, w, cap + mid, 0, cap, h))
+
+
+def gen_capsule(name: str, top: tuple[int, int, int], bot: tuple[int, int, int],
+                bhi: tuple[int, int, int], blo: tuple[int, int, int]) -> None:
+    """Compact label capsules (Character UI section / bar tags)."""
+    h = 32
+    radius = h * 0.5
+    cap = 16
+    mid = 8
     w = cap * 2 + mid
 
     def sample(px: float, py: float) -> tuple[int, int, int, int]:
@@ -448,6 +468,10 @@ def main() -> None:
     gen_input()
     gen_pill("btn_blue", (126, 180, 240), (74, 138, 208), (170, 205, 250), (58, 120, 192))
     gen_pill("btn_gold", (245, 215, 130), (224, 176, 64), (255, 235, 170), (200, 152, 48))
+    # Compact fully-oval label capsules (Character UI tags / section headers).
+    gen_capsule("capsule_blue", (126, 180, 240), (74, 138, 208), (170, 205, 250), (58, 120, 192))
+    gen_capsule("capsule_gold", (245, 215, 130), (224, 176, 64), (255, 235, 170), (200, 152, 48))
+    gen_capsule("capsule_rose", (236, 150, 160), (200, 90, 105), (250, 190, 198), (170, 70, 85))
     gen_checkbox()
     gen_cap_pill()
     gen_scroll()

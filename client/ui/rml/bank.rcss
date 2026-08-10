@@ -172,8 +172,9 @@ button.bank-close {
 
 .bank-capacity-label {
 	display: block;
-	font-size: 11dp;
-	color: #5a7ab0;
+	font-size: 12dp;
+	font-weight: bold;
+	color: #2a4a80;
 	margin-right: 8dp;
 }
 

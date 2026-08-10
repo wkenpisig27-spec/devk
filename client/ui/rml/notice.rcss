@@ -11,7 +11,10 @@ body {
 	align-items: center;
 	pointer-events: none;
 	font-family: LatoLatin;
-	color: #3a63a5;
+	font-weight: normal;
+	/* Slightly larger / darker base for readable glyphs on DX9. */
+	font-size: 14dp;
+	color: #2a4a80;
 }
 
 #notice-scrim {
@@ -92,7 +95,8 @@ body {
 	display: block;
 	margin-bottom: 8dp;
 	font-size: 13dp;
-	color: #5a7ab0;
+	font-weight: bold;
+	color: #2a4a80;
 }
 
 .notice-list-shell {

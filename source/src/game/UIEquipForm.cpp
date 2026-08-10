@@ -855,6 +855,7 @@ void CEquipMgr::SwitchMap() {
 	refreshSpyModel = true;
 	HideChestPreview();
 	CRmlUiManager::Instance().HideInventoryForm();
+	CRmlUiManager::Instance().HideCharacterForm();
 }
 
 void CEquipMgr::RenderModel(int x, int y, CCharacter* original, CCharacter* model, int rotation, bool refresh, float scaleBias) {

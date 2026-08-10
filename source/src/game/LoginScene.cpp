@@ -1235,6 +1235,8 @@ bool CLoginScene::_Bill() {
 }
 
 void CLoginScene::_Connect() {
+	// Hide Notice account overlay so legacy Waiting / MsgBox are visible on top.
+	CRmlUiAccountForm::Instance().Hide();
 	CGameApp::Waiting(true, "Connecting...");
 
 	// PlayWhalePose();	//?????????????(Michael Chen 2005-06-03)

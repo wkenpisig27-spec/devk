@@ -1,0 +1,527 @@
+/* Notice character — compact RO Origin-style profile (capsule TGA labels). */
+
+body.char-body {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	justify-content: flex-start;
+	align-items: flex-start;
+	padding: 0dp;
+	pointer-events: none;
+	font-family: LatoLatin;
+}
+
+body.char-body .char-panel {
+	pointer-events: auto;
+}
+
+.char-panel {
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	flex: none;
+	width: 312dp;
+	min-width: 312dp;
+	margin: 0dp;
+	padding: 0dp 0dp 10dp 0dp;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/panel_tl.tga,
+		ui/rml/frames/notice/panel_t.tga,
+		ui/rml/frames/notice/panel_tr.tga,
+		ui/rml/frames/notice/panel_l.tga,
+		ui/rml/frames/notice/panel_c.tga,
+		ui/rml/frames/notice/panel_r.tga,
+		ui/rml/frames/notice/panel_bl.tga,
+		ui/rml/frames/notice/panel_b.tga,
+		ui/rml/frames/notice/panel_br.tga
+	);
+}
+
+.char-header {
+	display: block;
+	position: relative;
+	z-index: 2;
+	box-sizing: border-box;
+	/* Must clear baked blue band in panel_t* (~52px). */
+	height: 56dp;
+	padding: 0dp 12dp;
+	background-color: transparent;
+}
+
+.char-drag {
+	display: block;
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	right: 0dp;
+	bottom: 0dp;
+	z-index: 1;
+	padding: 0dp 12dp;
+	box-sizing: border-box;
+	cursor: move;
+}
+
+.char-title {
+	display: block;
+	padding-top: 16dp;
+	font-size: 17dp;
+	font-weight: bold;
+	color: #ffffff;
+	text-align: left;
+}
+
+.char-close,
+button.char-close {
+	display: block;
+	position: absolute;
+	right: 10dp;
+	top: 14dp;
+	z-index: 3;
+	width: 26dp;
+	height: 26dp;
+	line-height: 26dp;
+	padding: 0dp;
+	font-family: LatoLatin;
+	font-size: 13dp;
+	font-weight: bold;
+	text-align: center;
+	color: #ffffff;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/capsule_blue_l.tga,
+		ui/rml/frames/notice/capsule_blue_c.tga,
+		ui/rml/frames/notice/capsule_blue_r.tga
+	);
+}
+
+/* —— Identity —— */
+.char-identity {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex: none;
+	box-sizing: border-box;
+	/* Keep job pill clear of the baked header band. */
+	padding: 6dp 12dp 8dp 12dp;
+	pointer-events: none;
+}
+
+.char-avatar {
+	display: block;
+	flex: none;
+	width: 48dp;
+	height: 48dp;
+	margin-right: 10dp;
+	padding-top: 12dp;
+	box-sizing: border-box;
+	overflow: visible;
+	decorator: image(ui/rml/frames/notice/slot_rounded.tga);
+}
+
+.char-avatar-lv {
+	display: block;
+	font-size: 16dp;
+	font-weight: bold;
+	line-height: 24dp;
+	color: #2a4a80;
+	text-align: center;
+}
+
+.char-id-main {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-width: 0dp;
+}
+
+.char-job-pill {
+	display: block;
+	flex: none;
+	align-self: flex-start;
+	height: 18dp;
+	line-height: 18dp;
+	padding: 0dp 10dp;
+	margin-bottom: 2dp;
+	font-size: 11dp;
+	font-weight: bold;
+	color: #5a4010;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/capsule_gold_l.tga,
+		ui/rml/frames/notice/capsule_gold_c.tga,
+		ui/rml/frames/notice/capsule_gold_r.tga
+	);
+}
+
+.char-name {
+	display: block;
+	font-size: 18dp;
+	font-weight: bold;
+	line-height: 22dp;
+	color: #2a4a80;
+}
+
+.char-tag-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex: none;
+	margin-top: 3dp;
+}
+
+.char-tag {
+	display: block;
+	flex: none;
+	height: 18dp;
+	line-height: 18dp;
+	padding: 0dp 9dp;
+	margin-right: 6dp;
+	font-size: 11dp;
+	font-weight: bold;
+	color: #ffffff;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/capsule_blue_l.tga,
+		ui/rml/frames/notice/capsule_blue_c.tga,
+		ui/rml/frames/notice/capsule_blue_r.tga
+	);
+}
+
+.char-tag-value {
+	display: block;
+	flex: 1;
+	font-size: 12dp;
+	font-weight: bold;
+	line-height: 18dp;
+	color: #3a5a90;
+}
+
+/* —— Progress bars —— */
+.char-bars {
+	display: flex;
+	flex-direction: column;
+	flex: none;
+	box-sizing: border-box;
+	padding: 0dp 12dp 4dp 12dp;
+	pointer-events: none;
+}
+
+.char-bar {
+	display: flex;
+	flex-direction: column;
+	flex: none;
+	margin-bottom: 5dp;
+}
+
+.char-bar-head {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	flex: none;
+	margin-bottom: 2dp;
+}
+
+.char-bar-label {
+	display: block;
+	flex: none;
+	height: 18dp;
+	line-height: 18dp;
+	padding: 0dp 9dp;
+	font-size: 11dp;
+	font-weight: bold;
+	color: #ffffff;
+}
+
+.char-bar-label-exp {
+	color: #5a4010;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/capsule_gold_l.tga,
+		ui/rml/frames/notice/capsule_gold_c.tga,
+		ui/rml/frames/notice/capsule_gold_r.tga
+	);
+}
+
+.char-bar-label-hp {
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/capsule_rose_l.tga,
+		ui/rml/frames/notice/capsule_rose_c.tga,
+		ui/rml/frames/notice/capsule_rose_r.tga
+	);
+}
+
+.char-bar-label-sp {
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/capsule_blue_l.tga,
+		ui/rml/frames/notice/capsule_blue_c.tga,
+		ui/rml/frames/notice/capsule_blue_r.tga
+	);
+}
+
+.char-bar-nums {
+	display: block;
+	font-size: 12dp;
+	font-weight: bold;
+	line-height: 18dp;
+	color: #2a4a80;
+}
+
+.char-points-label {
+	display: block;
+	font-size: 12dp;
+	font-weight: bold;
+	line-height: 26dp;
+	color: #2a4a80;
+}
+
+.char-points-value {
+	display: block;
+	font-size: 13dp;
+	font-weight: bold;
+	line-height: 26dp;
+	color: #1e3a6e;
+}
+
+.char-bar-track {
+	display: block;
+	position: relative;
+	width: 100%;
+	height: 7dp;
+	padding: 0dp;
+	overflow: hidden;
+	background-color: #d6e4f6;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+}
+
+.char-bar-fill {
+	display: block;
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	height: 7dp;
+	width: 0%;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+}
+
+.char-bar-fill-exp { background-color: #efb04a; }
+.char-bar-fill-hp { background-color: #e07888; }
+.char-bar-fill-sp { background-color: #5a9ae0; }
+
+.char-points-row {
+	display: flex;
+	flex-direction: row;
+	flex: none;
+	margin-top: 2dp;
+}
+
+.char-points {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	flex: 1;
+	height: 26dp;
+	margin-right: 6dp;
+	padding: 0dp 8dp;
+	box-sizing: border-box;
+	decorator: tiled-box(
+		ui/rml/frames/notice/input_tl.tga,
+		ui/rml/frames/notice/input_t.tga,
+		ui/rml/frames/notice/input_tr.tga,
+		ui/rml/frames/notice/input_l.tga,
+		ui/rml/frames/notice/input_c.tga,
+		ui/rml/frames/notice/input_r.tga,
+		ui/rml/frames/notice/input_bl.tga,
+		ui/rml/frames/notice/input_b.tga,
+		ui/rml/frames/notice/input_br.tga
+	);
+}
+
+.char-points-stat { margin-right: 0dp; }
+
+.char-points-stat .char-points-value { color: #3a63a5; }
+
+/* —— Sections —— */
+.char-section {
+	display: flex;
+	flex-direction: column;
+	flex: none;
+	box-sizing: border-box;
+	padding: 2dp 12dp 0dp 12dp;
+}
+
+.char-section-last { padding-bottom: 2dp; }
+
+.char-section-pill {
+	display: block;
+	flex: none;
+	align-self: flex-start;
+	height: 18dp;
+	line-height: 18dp;
+	padding: 0dp 10dp;
+	margin: 2dp 0dp 5dp 0dp;
+	font-size: 11dp;
+	font-weight: bold;
+	color: #ffffff;
+	pointer-events: none;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/capsule_blue_l.tga,
+		ui/rml/frames/notice/capsule_blue_c.tga,
+		ui/rml/frames/notice/capsule_blue_r.tga
+	);
+}
+
+.char-row {
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	flex: none;
+	margin-bottom: 4dp;
+}
+
+.char-attr {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex: 1;
+	height: 40dp;
+	margin-right: 6dp;
+	padding: 0dp 6dp 0dp 8dp;
+	box-sizing: border-box;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/input_tl.tga,
+		ui/rml/frames/notice/input_t.tga,
+		ui/rml/frames/notice/input_tr.tga,
+		ui/rml/frames/notice/input_l.tga,
+		ui/rml/frames/notice/input_c.tga,
+		ui/rml/frames/notice/input_r.tga,
+		ui/rml/frames/notice/input_bl.tga,
+		ui/rml/frames/notice/input_b.tga,
+		ui/rml/frames/notice/input_br.tga
+	);
+}
+
+.char-attr-last { margin-right: 0dp; }
+
+.char-attr-spacer {
+	display: block;
+	flex: 1;
+	height: 40dp;
+}
+
+.char-attr-text {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-width: 0dp;
+	pointer-events: none;
+}
+
+.char-attr-label {
+	display: block;
+	font-size: 11dp;
+	font-weight: bold;
+	line-height: 14dp;
+	color: #2a4a80;
+}
+
+.char-attr-val {
+	display: block;
+	font-size: 15dp;
+	font-weight: bold;
+	line-height: 18dp;
+	color: #1e3a6e;
+}
+
+.char-plus,
+button.char-plus {
+	display: none;
+	flex: none;
+	width: 22dp;
+	height: 22dp;
+	line-height: 22dp;
+	padding: 0dp;
+	margin-left: 2dp;
+	font-family: LatoLatin;
+	text-align: center;
+	color: #ffffff;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/capsule_blue_l.tga,
+		ui/rml/frames/notice/capsule_blue_c.tga,
+		ui/rml/frames/notice/capsule_blue_r.tga
+	);
+}
+
+.char-plus.char-plus-visible { display: block; }
+
+.char-plus-icon {
+	display: block;
+	width: 10dp;
+	height: 10dp;
+	margin: 6dp auto;
+	pointer-events: none;
+}
+
+.char-stat {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	flex: 1;
+	height: 22dp;
+	margin-right: 6dp;
+	padding: 0dp 2dp;
+	box-sizing: border-box;
+	pointer-events: none;
+}
+
+.char-stat-last { margin-right: 0dp; }
+
+.char-stat-label {
+	display: block;
+	flex: none;
+	font-size: 12dp;
+	font-weight: bold;
+	line-height: 22dp;
+	color: #2a4a80;
+}
+
+.char-stat-value {
+	display: block;
+	flex: none;
+	font-size: 13dp;
+	font-weight: bold;
+	line-height: 22dp;
+	color: #1e3a6e;
+}

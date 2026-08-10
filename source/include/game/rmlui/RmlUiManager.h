@@ -34,6 +34,7 @@ public:
 	void HideSelectChaForm();
 	void HideInventoryForm();
 	void HideBankForm();
+	void HideCharacterForm();
 
 private:
 	CRmlUiManager() = default;

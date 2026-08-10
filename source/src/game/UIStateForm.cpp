@@ -13,23 +13,63 @@
 #include "tools.h"
 #include "GuildData.h"
 #include "uiboatform.h"
+#include "worldscene.h"
+#include "rmlui/RmlUiManager.h"
+#include "rmlui/RmlUiCharacterForm.h"
 #include <unordered_map>
 using namespace std;
 using namespace GUI;
 
 int g_BattlePoints = 0;
 
+void RmlCharacter_OnClose() {
+	g_stUIState.HideCharacterUi();
+}
+
+void RmlCharacter_OnAllocate(const char* btnId) {
+	if (!btnId)
+		return;
+
+	std::unordered_map<std::string, int> buttonAttributeMap = {
+		{"btnStr", ATTR_STR},
+		{"btnAgi", ATTR_AGI},
+		{"btnCon", ATTR_CON},
+		{"btnSta", ATTR_STA},
+		{"btnDex", ATTR_DEX}};
+
+	auto it = buttonAttributeMap.find(btnId);
+	if (it == buttonAttributeMap.end())
+		return;
+
+	CCharacter* pCha = g_stUIBoat.GetHuman();
+	if (!pCha || pCha->getGameAttr()->get(ATTR_AP) <= 0)
+		return;
+
+	CChaAttr attr;
+	attr.ResetChangeFlag();
+	attr.DirectSetAttr(it->second, 1);
+	attr.SetChangeBitFlag(it->second);
+
+	CProCirculateCS* proCir = (CProCirculateCS*)g_NetIF->GetProCir();
+	proCir->SynBaseAttribute(&attr);
+	g_stUIState.RefreshStateFrm();
+}
+
 //---------------------------------------------------------------------------
 //  class CStateMgr
 //---------------------------------------------------------------------------
 bool CStateMgr::Init() {
 	CFormMgr& mgr = CFormMgr::s_Mgr;
-	frmState = _FindForm("frmState"); // ���Ա���
+	frmState = _FindForm("frmState");
 	if (!frmState)
 		return false;
 	frmState->evtShow = _evtMainShow;
+	// Data host only — player chrome is Notice Rml character panel.
+	frmState->SetHotKey(0);
+	frmState->SetIsEscClose(false);
+	frmState->SetIsShow(false);
+	CFormMgr::s_Mgr.AddHotKeyEvent(_OnCharacterHotKey);
 
-	// frmState �ڵĿؼ��б�
 	labStateName = dynamic_cast<CLabelEx*>(frmState->Find("labStateName"));
 	if (!labStateName)
 		return Error(RES_STRING(CL_LANGUAGE_MATCH_45), frmState->GetName(), "labStateName");
@@ -61,7 +101,6 @@ bool CStateMgr::Init() {
 	if (!labBattlepoints)
 		return Error(RES_STRING(CL_LANGUAGE_MATCH_45), frmState->GetName(), "labBattlepoints");
 
-	// 6��
 	btnStr = dynamic_cast<CTextButton*>(frmState->Find("btnStr"));
 	if (!btnStr)
 		return Error(RES_STRING(CL_LANGUAGE_MATCH_45), frmState->GetName(), "btnStr");
@@ -86,17 +125,12 @@ bool CStateMgr::Init() {
 	btnSta->evtMouseClick = MainMouseDown;
 	btnSta->evtMouseDownContinue = MainMouseDownContinue;
 
-	// btnLuk  = dynamic_cast<CTextButton *>(frmState->Find("btnLuk"));
-	// if( !btnLuk )			return Error( "msgui.clu����<%s>���Ҳ����ؼ�<%s>", frmState->GetName(), "btnLuk" );
-	// btnLuk->evtMouseClick = MainMouseDown;
-
 	btnDex = dynamic_cast<CTextButton*>(frmState->Find("btnDex"));
 	if (!btnDex)
 		return Error(RES_STRING(CL_LANGUAGE_MATCH_45), frmState->GetName(), "btnDex");
 	btnDex->evtMouseClick = MainMouseDown;
 	btnDex->evtMouseDownContinue = MainMouseDownContinue;
 
-	// frmState�µĽ������ؼ�
 	labStateEXP = dynamic_cast<CLabelEx*>(frmState->Find("labStateEXP"));
 	if (!labStateEXP)
 		return Error(RES_STRING(CL_LANGUAGE_MATCH_45), frmState->GetName(), "labStateEXP");
@@ -112,17 +146,14 @@ bool CStateMgr::Init() {
 		return Error(RES_STRING(CL_LANGUAGE_MATCH_45), frmState->GetName(), "labStateSP");
 	labStateSP->SetIsCenter(true);
 
-	// 6����������
 	labStrshow = (CLabelEx*)frmState->Find("labStrshow");
 	labDexshow = (CLabelEx*)frmState->Find("labDexshow");
 	labAgishow = (CLabelEx*)frmState->Find("labAgishow");
 	labConshow = (CLabelEx*)frmState->Find("labConshow");
 	labStashow = (CLabelEx*)frmState->Find("labStashow");
-	// labLukshow  = 	( CLabelEx *)frmState->Find( "labLukshow" );
 	labSailLevel = (CLabelEx*)frmState->Find("labSailLevel");
 	labSailEXP = (CLabelEx*)frmState->Find("labSailEXP");
 
-	// 8����������
 	labMinAtackShow = (CLabelEx*)frmState->Find("labMinAtackShow");
 	labMaxAtackShow = (CLabelEx*)frmState->Find("labMaxAtackShow");
 	labFleeShow = (CLabelEx*)frmState->Find("labFleeShow");
@@ -130,8 +161,6 @@ bool CStateMgr::Init() {
 	labMspeedShow = (CLabelEx*)frmState->Find("labMspeedShow");
 	labHitShow = (CLabelEx*)frmState->Find("labHitShow");
 	labDefenceShow = (CLabelEx*)frmState->Find("labDefenceShow");
-	// labCriticalShow  = 	( CLabelEx *)frmState->Find( "labCriticalShow" );
-	// labMfShow        = 	( CLabelEx *)frmState->Find( "labMfShow" );
 	labPhysDefineShow = (CLabelEx*)frmState->Find("labPhysDefineShow");
 	return true;
 }
@@ -140,20 +169,81 @@ void CStateMgr::End() {
 }
 
 void CStateMgr::FrameMove(DWORD dwTime) {
-	if (frmState->GetIsShow()) {
+	if (IsCharacterUiVisible()) {
 		static CTimeWork time(100);
 		if (time.IsTimeOut(dwTime))
 			RefreshStateFrm();
 	}
+	// Never leave legacy chrome visible.
+	if (frmState && frmState->GetIsShow())
+		frmState->SetIsShow(false);
 }
 
 void CStateMgr::_evtMainShow(CGuiData* pSender) {
-	g_stUIState.RefreshStateFrm();
+	(void)pSender;
+	// Something asked frmState to show — redirect to Notice Rml and hide host.
+	if (g_stUIState.frmState)
+		g_stUIState.frmState->SetIsShow(false);
+	g_stUIState.ShowCharacterUi();
+}
+
+bool CStateMgr::_OnCharacterHotKey(char& key, int& control) {
+	(void)control;
+	if (key != 'A' && key != 'a')
+		return false;
+	if (!CFormMgr::s_Mgr.GetEnableHotKey())
+		return false;
+	if (!dynamic_cast<CWorldScene*>(CGameApp::GetCurScene()))
+		return false;
+	g_stUIState.ToggleCharacterUi();
+	return true; // swallow Alt+A so lua cannot reopen legacy frmState
+}
+
+void CStateMgr::ShowCharacterUi() {
+	if (frmState && frmState->GetIsShow())
+		frmState->SetIsShow(false);
+
+	if (!CRmlUiManager::Instance().IsReady())
+		return;
+
+	CRmlUiCharacterForm::Instance().Show();
+	RefreshStateFrm();
+}
+
+void CStateMgr::HideCharacterUi() {
+	CRmlUiCharacterForm::Instance().Hide();
+	if (frmState && frmState->GetIsShow())
+		frmState->SetIsShow(false);
+}
+
+bool CStateMgr::IsCharacterUiVisible() const {
+	return CRmlUiCharacterForm::Instance().IsVisible();
+}
+
+void CStateMgr::ToggleCharacterUi() {
+	if (IsCharacterUiVisible()) {
+		HideCharacterUi();
+		return;
+	}
+	ShowCharacterUi();
+}
+
+void CStateMgr::AllocateAttribute(int attributeType) {
+	CCharacter* pCha = g_stUIBoat.GetHuman();
+	if (!pCha || pCha->getGameAttr()->get(ATTR_AP) <= 0)
+		return;
+
+	CChaAttr attr;
+	attr.ResetChangeFlag();
+	attr.DirectSetAttr(attributeType, 1);
+	attr.SetChangeBitFlag(attributeType);
+
+	CProCirculateCS* proCir = (CProCirculateCS*)g_NetIF->GetProCir();
+	proCir->SynBaseAttribute(&attr);
 }
 
 void CStateMgr::RefreshStateFrm() {
-	CForm* f = g_stUIState.frmState;
-	if (!f->GetIsShow())
+	if (!IsCharacterUiVisible())
 		return;
 
 	CCharacter* pCha = g_stUIBoat.GetHuman();
@@ -165,14 +255,16 @@ void CStateMgr::RefreshStateFrm() {
 		return;
 
 	char pszCha[256] = {0};
+	CRmlUiCharacterForm::StateView view;
 
-	// Ѫ��
-	if (labStateHP) {
-		snprintf(pszCha, sizeof(pszCha), "%lld/%lld", pCChaAttr->get(ATTR_HP), pCChaAttr->get(ATTR_MXHP));
-		labStateHP->SetCaption(pszCha);
+	snprintf(pszCha, sizeof(pszCha), "%lld/%lld", pCChaAttr->get(ATTR_HP), pCChaAttr->get(ATTR_MXHP));
+	view.hp = pszCha;
+	{
+		const LONG64 hp = pCChaAttr->get(ATTR_HP);
+		const LONG64 mxhp = pCChaAttr->get(ATTR_MXHP);
+		view.hpPct = (mxhp > 0) ? (float)((hp * 100.0) / mxhp) : 0.f;
 	}
 
-	// ��Ҿ���
 	LONG64 num = pCChaAttr->get(ATTR_CEXP);
 	LONG64 curlev = pCChaAttr->get(ATTR_CLEXP);
 	LONG64 nextlev = pCChaAttr->get(ATTR_NLEXP);
@@ -182,204 +274,171 @@ void CStateMgr::RefreshStateFrm() {
 	if (num < 0)
 		num = 0;
 
-	if (labStateEXP) {
-		if (max != 0)
-			sprintf(pszCha, "%4.2f%%", num * 100.0f / max);
-		else
-			sprintf(pszCha, "0.00%");
-
-		labStateEXP->SetCaption(pszCha);
+	if (max != 0) {
+		view.expPct = (float)((num * 100.0) / max);
+		sprintf(pszCha, "%4.2f%%", view.expPct);
+	} else {
+		view.expPct = 0.f;
+		sprintf(pszCha, "0.00%%");
 	}
+	view.exp = pszCha;
 
-	// ħ��
 	num = pCChaAttr->get(ATTR_SP);
 	max = pCChaAttr->get(ATTR_MXSP);
-	if (labStateSP) {
-		snprintf(pszCha, sizeof(pszCha), "%lld/%lld", num, max);
-		labStateSP->SetCaption(pszCha);
-	}
+	snprintf(pszCha, sizeof(pszCha), "%lld/%lld", num, max);
+	view.sp = pszCha;
+	view.spPct = (max > 0) ? (float)((num * 100.0) / max) : 0.f;
 
-	// �������
-	if (labStateName) {
-		sprintf(pszCha, "%s", pCha->getName());
-		labStateName->SetCaption((const char*)pszCha);
-	}
+	view.name = pCha->getName() ? pCha->getName() : "";
+	if (CGuildData::GetGuildID())
+		view.guild = CGuildData::GetGuildName();
+	else
+		view.guild.clear();
 
-	// ����
-	if (labGuildName) {
-		if (CGuildData::GetGuildID()) {
-			labGuildName->SetCaption(CGuildData::GetGuildName().c_str());
-		} else {
-			labGuildName->SetCaption("");
-		}
-	}
+	view.job = g_GetJobName((short)pCChaAttr->get(ATTR_JOB));
 
-	// ���ְҵ
-	if (labStateJob) {
-		sprintf(pszCha, "%s", g_GetJobName((short)pCChaAttr->get(ATTR_JOB)));
-		labStateJob->SetCaption((const char*)pszCha);
-	}
+	sprintf(pszCha, "%d", (int)pCChaAttr->get(ATTR_LV));
+	view.level = pszCha;
 
-	// ��ҵȼ�
-	if (labStateLevel) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_LV)); // ��ʾ��ɫ�ȼ�
-		labStateLevel->SetCaption((const char*)pszCha);
-	}
+	sprintf(pszCha, "%d", (int)pCChaAttr->get(ATTR_AP));
+	view.statPts = pszCha;
 
-	// ������Ե�
-	if (labStatePoint) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_AP)); // ��ʾ��ɫ�����Ե�
-		labStatePoint->SetCaption((const char*)pszCha);
-	}
+	sprintf(pszCha, "%d", (int)pCChaAttr->get(ATTR_TP));
+	view.skillPts = pszCha;
 
-	if (labSkillPoint) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_TP)); // ��ʾ��ɫ�ļ��ܵ�
-		labSkillPoint->SetCaption((const char*)pszCha);
-	}
+	view.showAllocate = pCChaAttr->get(ATTR_AP) > 0;
 
-	// ���Ե����0������ʾ6���������԰�ť
-	if (pCChaAttr->get(ATTR_AP) > 0) {
-		btnStr->SetIsShow(true);
-		btnAgi->SetIsShow(true);
-		btnCon->SetIsShow(true);
-		btnSta->SetIsShow(true);
-		// btnLuk->SetIsShow(true);
-		btnDex->SetIsShow(true);
-	} else {
-		btnStr->SetIsShow(false);
-		btnAgi->SetIsShow(false);
-		btnCon->SetIsShow(false);
-		btnSta->SetIsShow(false);
-		// btnLuk->SetIsShow(false);
-		btnDex->SetIsShow(false);
-	}
-	// 6����������
-	if (labStrshow) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_STR));
-		labStrshow->SetCaption((const char*)pszCha);
-	}
+	sprintf(pszCha, "%d", (int)pCChaAttr->get(ATTR_STR));
+	view.str = pszCha;
+	sprintf(pszCha, "%d", (int)pCChaAttr->get(ATTR_DEX));
+	view.dex = pszCha;
+	sprintf(pszCha, "%d", (int)pCChaAttr->get(ATTR_AGI));
+	view.agi = pszCha;
+	sprintf(pszCha, "%d", (int)pCChaAttr->get(ATTR_CON));
+	view.con = pszCha;
+	sprintf(pszCha, "%d", (int)pCChaAttr->get(ATTR_STA));
+	view.sta = pszCha;
 
-	if (labDexshow) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_DEX));
-		labDexshow->SetCaption((const char*)pszCha);
-	}
+	sprintf(pszCha, "%d", (int)pCChaAttr->get(ATTR_MNATK));
+	view.minAtk = pszCha;
+	sprintf(pszCha, "%d", (int)pCChaAttr->get(ATTR_MXATK));
+	view.maxAtk = pszCha;
+	sprintf(pszCha, "%d", (int)pCChaAttr->get(ATTR_FLEE));
+	view.flee = pszCha;
 
-	if (labAgishow) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_AGI));
-		labAgishow->SetCaption((const char*)pszCha);
-	}
-
-	if (labConshow) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_CON));
-		labConshow->SetCaption((const char*)pszCha);
-	}
-
-	if (labStashow) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_STA));
-		labStashow->SetCaption((const char*)pszCha);
-	}
-
-	if (labSailLevel) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_SAILLV));
-		labSailLevel->SetCaption((const char*)pszCha);
-	}
-
-	if (labSailEXP) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_CSAILEXP));
-		labSailEXP->SetCaption((const char*)pszCha);
-	}
-
-	// sprintf( pszCha , "%d" , pCChaAttr->get(ATTR_LUK));
-	// if(labLukshow)		labLukshow->SetCaption( (const char* ) pszCha);
-
-	// 8����������
-	if (labMinAtackShow) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_MNATK)); // ��С������
-		labMinAtackShow->SetCaption((const char*)pszCha);
-	}
-
-	if (labMaxAtackShow) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_MXATK)); // ��󹥻���
-		labMaxAtackShow->SetCaption((const char*)pszCha);
-	}
-
-	if (labFleeShow) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_FLEE)); // ������
-		labFleeShow->SetCaption((const char*)pszCha);
-	}
-
-	if (labAspeedShow) {
-		int v = pCChaAttr->get(ATTR_ASPD);
+	{
+		int v = (int)pCChaAttr->get(ATTR_ASPD);
 		if (v == 0)
 			sprintf(pszCha, "-1");
 		else
-			sprintf(pszCha, "%d", 100000 / v); // �������
-
-		labAspeedShow->SetCaption((const char*)pszCha);
+			sprintf(pszCha, "%d", 100000 / v);
+		view.aspeed = pszCha;
 	}
 
-	if (labMspeedShow) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_MSPD));
-		labMspeedShow->SetCaption((const char*)pszCha);
-	}
+	sprintf(pszCha, "%d", (int)pCChaAttr->get(ATTR_MSPD));
+	view.mspeed = pszCha;
+	sprintf(pszCha, "%d", (int)pCChaAttr->get(ATTR_HIT));
+	view.hit = pszCha;
+	sprintf(pszCha, "%d", (int)pCChaAttr->get(ATTR_DEF));
+	view.def = pszCha;
+	sprintf(pszCha, "%d", (int)pCChaAttr->get(ATTR_PDEF));
+	view.pdef = pszCha;
+	sprintf(pszCha, "%d", (int)pCChaAttr->get(ATTR_FAME));
+	view.fame = pszCha;
 
-	if (labHitShow) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_HIT)); // ������
-		labHitShow->SetCaption((const char*)pszCha);
-	}
+	sprintf(pszCha, "%ld", g_BattlePoints);
+	view.battle = pszCha;
 
-	if (labDefenceShow) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_DEF)); // ������
-		labDefenceShow->SetCaption((const char*)pszCha);
-	}
+	CRmlUiCharacterForm::Instance().ApplyState(view);
 
-	// if(labCriticalShow)
-	//{
-	//	sprintf( pszCha , "%d" , pCChaAttr->get(ATTR_CRT)); // ������
-	//	labCriticalShow->SetCaption( (const char* ) pszCha);
-	// }
+	// Keep legacy labels in sync if anything still reads them.
+	if (labStateHP)
+		labStateHP->SetCaption(view.hp.c_str());
+	if (labStateEXP)
+		labStateEXP->SetCaption(view.exp.c_str());
+	if (labStateSP)
+		labStateSP->SetCaption(view.sp.c_str());
+	if (labStateName)
+		labStateName->SetCaption(view.name.c_str());
+	if (labGuildName)
+		labGuildName->SetCaption(view.guild.c_str());
+	if (labStateJob)
+		labStateJob->SetCaption(view.job.c_str());
+	if (labStateLevel)
+		labStateLevel->SetCaption(view.level.c_str());
+	if (labStatePoint)
+		labStatePoint->SetCaption(view.statPts.c_str());
+	if (labSkillPoint)
+		labSkillPoint->SetCaption(view.skillPts.c_str());
+	if (labStrshow)
+		labStrshow->SetCaption(view.str.c_str());
+	if (labDexshow)
+		labDexshow->SetCaption(view.dex.c_str());
+	if (labAgishow)
+		labAgishow->SetCaption(view.agi.c_str());
+	if (labConshow)
+		labConshow->SetCaption(view.con.c_str());
+	if (labStashow)
+		labStashow->SetCaption(view.sta.c_str());
+	if (labMinAtackShow)
+		labMinAtackShow->SetCaption(view.minAtk.c_str());
+	if (labMaxAtackShow)
+		labMaxAtackShow->SetCaption(view.maxAtk.c_str());
+	if (labFleeShow)
+		labFleeShow->SetCaption(view.flee.c_str());
+	if (labAspeedShow)
+		labAspeedShow->SetCaption(view.aspeed.c_str());
+	if (labMspeedShow)
+		labMspeedShow->SetCaption(view.mspeed.c_str());
+	if (labHitShow)
+		labHitShow->SetCaption(view.hit.c_str());
+	if (labDefenceShow)
+		labDefenceShow->SetCaption(view.def.c_str());
+	if (labPhysDefineShow)
+		labPhysDefineShow->SetCaption(view.pdef.c_str());
+	if (labFameShow)
+		labFameShow->SetCaption(view.fame.c_str());
 
-	// if(labMfShow)
-	//{
-	//	sprintf( pszCha , "%d" , pCChaAttr->get(ATTR_MF));	 // Ѱ����
-	//	labMfShow->SetCaption( (const char* ) pszCha);
-	// }
+	if (btnStr)
+		btnStr->SetIsShow(view.showAllocate);
+	if (btnAgi)
+		btnAgi->SetIsShow(view.showAllocate);
+	if (btnCon)
+		btnCon->SetIsShow(view.showAllocate);
+	if (btnSta)
+		btnSta->SetIsShow(view.showAllocate);
+	if (btnDex)
+		btnDex->SetIsShow(view.showAllocate);
 
-	if (labPhysDefineShow) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_PDEF)); // �����ֿ�
-		labPhysDefineShow->SetCaption((const char*)pszCha);
-	}
-
-	if (labFameShow) {
-		sprintf(pszCha, "%d", pCChaAttr->get(ATTR_FAME)); // ����
-		labFameShow->SetCaption((const char*)pszCha);
-	}
-
-	if (labBattlepoints) {
-		CS_RequestBattlePoint(); // ����
-		UpdateBattlePointDisplay();
-	}
+	// Battle points: poll slowly; display uses cached g_BattlePoints (no SetInnerRML spam).
+	static CTimeWork battlePoll(2000);
+	if (battlePoll.IsTimeOut(CGameApp::GetCurTick()))
+		CS_RequestBattlePoint();
+	UpdateBattlePointDisplay();
 }
 
 void CStateMgr::UpdateBattlePointDisplay() {
-	if (!labBattlepoints) {
-		return;
-	}
-
 	char pszCha[32];
 	sprintf(pszCha, "%ld", g_BattlePoints);
-	labBattlepoints->SetCaption((const char*)pszCha);
+
+	if (labBattlepoints)
+		labBattlepoints->SetCaption((const char*)pszCha);
+
+	if (IsCharacterUiVisible())
+		CRmlUiCharacterForm::Instance().SetBattlePoints(pszCha);
+}
+
+long CStateMgr::BattlePoints() {
+	return g_BattlePoints;
 }
 
 void CStateMgr::MainMouseDown(CGuiData* pSender, int x, int y, DWORD key) {
-	CCharacter* pCha = g_stUIBoat.GetHuman();
-	if (!pCha || pCha->getGameAttr()->get(ATTR_AP) <= 0)
+	(void)x;
+	(void)y;
+	(void)key;
+	if (!pSender)
 		return;
 
-	CChaAttr attr;
-	attr.ResetChangeFlag();
-
-	// Map button names to attribute types
 	std::unordered_map<std::string, int> buttonAttributeMap = {
 		{"btnStr", ATTR_STR},
 		{"btnAgi", ATTR_AGI},
@@ -387,48 +446,11 @@ void CStateMgr::MainMouseDown(CGuiData* pSender, int x, int y, DWORD key) {
 		{"btnSta", ATTR_STA},
 		{"btnDex", ATTR_DEX}};
 
-	std::string name = pSender->GetName();
-
-	// Check if the button name is in the map
-	auto it = buttonAttributeMap.find(name);
-	if (it != buttonAttributeMap.end()) {
-		int attributeType = it->second;
-
-		attr.DirectSetAttr(attributeType, 1);
-		attr.SetChangeBitFlag(attributeType);
-
-		CProCirculateCS* proCir = (CProCirculateCS*)g_NetIF->GetProCir();
-		proCir->SynBaseAttribute(&attr);
-	}
+	auto it = buttonAttributeMap.find(pSender->GetName());
+	if (it != buttonAttributeMap.end())
+		AllocateAttribute(it->second);
 }
 
 void CStateMgr::MainMouseDownContinue(CGuiData* pSender) {
-	CCharacter* pCha = g_stUIBoat.GetHuman();
-	if (!pCha || pCha->getGameAttr()->get(ATTR_AP) <= 0)
-		return;
-
-	CChaAttr attr;
-	attr.ResetChangeFlag();
-
-	// Map button names to attribute types
-	std::unordered_map<std::string, int> buttonAttributeMap = {
-		{"btnStr", ATTR_STR},
-		{"btnAgi", ATTR_AGI},
-		{"btnCon", ATTR_CON},
-		{"btnSta", ATTR_STA},
-		{"btnDex", ATTR_DEX}};
-
-	std::string name = pSender->GetName();
-
-	// Check if the button name is in the map
-	auto it = buttonAttributeMap.find(name);
-	if (it != buttonAttributeMap.end()) {
-		int attributeType = it->second;
-
-		attr.DirectSetAttr(attributeType, 1);
-		attr.SetChangeBitFlag(attributeType);
-
-		CProCirculateCS* proCir = (CProCirculateCS*)g_NetIF->GetProCir();
-		proCir->SynBaseAttribute(&attr);
-	}
+	MainMouseDown(pSender, 0, 0, 0);
 }

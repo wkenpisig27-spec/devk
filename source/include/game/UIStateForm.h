@@ -4,12 +4,17 @@
 extern int g_BattlePoints;
 
 namespace GUI {
-// 玩家属性
+// Player attributes — Notice Rml chrome; frmState remains a silent data host.
 class CStateMgr : public CUIInterface {
 public:
 	void RefreshStateFrm();
 	void UpdateBattlePointDisplay();
 	long BattlePoints();
+
+	void ShowCharacterUi();
+	void HideCharacterUi();
+	void ToggleCharacterUi();
+	bool IsCharacterUiVisible() const;
 
 protected:
 	virtual bool Init();
@@ -20,20 +25,21 @@ private:
 	static void _evtMainShow(CGuiData* pSender);
 	static void MainMouseDown(CGuiData* pSender, int x, int y, DWORD key);
 	static void MainMouseDownContinue(CGuiData* pSender);
+	static bool _OnCharacterHotKey(char& key, int& control);
+	static void AllocateAttribute(int attributeType);
 
 private:
-	// frmState界面的控件
+	// frmState host widgets (kept for Init wiring; UI is Rml)
 	CForm* frmState;
-	CLabelEx* labName;		 // 创建角色名称
-	CLabelEx* labGuildName;	 // 创建公会名称
-	CLabelEx* labStateLevel; // 创建等级
-	CLabelEx* labStatePoint; // 创建属性点数
-	CLabelEx* labSkillPoint; // 创建技能点数
-	CLabelEx* labJobShow;	 // 职业
-	CLabelEx* labFameShow;	 // 创建名声
+	CLabelEx* labName;
+	CLabelEx* labGuildName;
+	CLabelEx* labStateLevel;
+	CLabelEx* labStatePoint;
+	CLabelEx* labSkillPoint;
+	CLabelEx* labJobShow;
+	CLabelEx* labFameShow;
 	CLabelEx* labBattlepoints;
 
-	// 6个基本属性
 	CLabelEx* labStrshow;
 	CLabelEx* labDexshow;
 	CLabelEx* labAgishow;
@@ -43,7 +49,6 @@ private:
 	CLabelEx* labSailLevel;
 	CLabelEx* labSailEXP;
 
-	// 8个附加属性
 	CLabelEx* labMinAtackShow;
 	CLabelEx* labMaxAtackShow;
 	CLabelEx* labFleeShow;
@@ -51,23 +56,19 @@ private:
 	CLabelEx* labMspeedShow;
 	CLabelEx* labHitShow;
 	CLabelEx* labDefenceShow;
-	// CLabelEx*		labCriticalShow;
-	// CLabelEx*		labMfShow;
 	CLabelEx* labPhysDefineShow;
 
-	// 6 个基本属性按钮
-	CTextButton* btnStr; // 创建力量栏
-	CTextButton* btnAgi; // 创建敏捷栏
-	CTextButton* btnCon; // 创建体质栏
-	CTextButton* btnSta; // 创建精神栏
-	// CTextButton*   btnLuk;						//创建幸运栏
-	CTextButton* btnDex; // 创建专注栏
+	CTextButton* btnStr;
+	CTextButton* btnAgi;
+	CTextButton* btnCon;
+	CTextButton* btnSta;
+	CTextButton* btnDex;
 
 	CLabelEx* labStateEXP;
 	CLabelEx* labStateHP;
 	CLabelEx* labStateSP;
 
-	CLabelEx* labFameSho; // 创建名声
+	CLabelEx* labFameSho;
 	CLabelEx* labStateName;
 	CLabelEx* labStateJob;
 };

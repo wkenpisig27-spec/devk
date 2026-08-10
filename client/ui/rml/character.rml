@@ -1,0 +1,190 @@
+<rml>
+	<head>
+		<title>Character</title>
+		<link type="text/rcss" href="notice.rcss"/>
+		<link type="text/rcss" href="character.rcss"/>
+	</head>
+	<body class="char-body">
+		<div id="char-root" class="char-panel">
+			<div class="char-header">
+				<handle class="char-drag" move_target="char-root">
+					<div class="char-title">Character</div>
+				</handle>
+				<button class="char-close" id="btnClose" type="button">X</button>
+			</div>
+
+			<!-- Identity (RO Origin-style header) -->
+			<div class="char-identity">
+				<div class="char-avatar">
+					<div id="labLevel" class="char-avatar-lv">0</div>
+				</div>
+				<div class="char-id-main">
+					<div id="labJob" class="char-job-pill">—</div>
+					<div id="labName" class="char-name">—</div>
+					<div class="char-tag-row">
+						<div class="char-tag">Guild</div>
+						<div id="labGuild" class="char-tag-value">—</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Progress bars -->
+			<div class="char-bars">
+				<div class="char-bar">
+					<div class="char-bar-head">
+						<div class="char-bar-label char-bar-label-exp">Base Level</div>
+						<div id="labExp" class="char-bar-nums">0.00%</div>
+					</div>
+					<div class="char-bar-track">
+						<div id="barExp" class="char-bar-fill char-bar-fill-exp"></div>
+					</div>
+				</div>
+				<div class="char-bar">
+					<div class="char-bar-head">
+						<div class="char-bar-label char-bar-label-hp">HP</div>
+						<div id="labHP" class="char-bar-nums">0/0</div>
+					</div>
+					<div class="char-bar-track">
+						<div id="barHP" class="char-bar-fill char-bar-fill-hp"></div>
+					</div>
+				</div>
+				<div class="char-bar">
+					<div class="char-bar-head">
+						<div class="char-bar-label char-bar-label-sp">SP</div>
+						<div id="labSP" class="char-bar-nums">0/0</div>
+					</div>
+					<div class="char-bar-track">
+						<div id="barSP" class="char-bar-fill char-bar-fill-sp"></div>
+					</div>
+				</div>
+				<div class="char-points-row">
+					<div class="char-points">
+						<div class="char-points-label">Skill Points</div>
+						<div id="labSkillPts" class="char-points-value">0</div>
+					</div>
+					<div class="char-points char-points-stat">
+						<div class="char-points-label">Stat Points</div>
+						<div id="labStatPts" class="char-points-value">0</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Attributes -->
+			<div class="char-section">
+				<div class="char-section-pill">Attributes</div>
+				<div class="char-row">
+					<div class="char-attr">
+						<div class="char-attr-text">
+							<div class="char-attr-label">Strength</div>
+							<div id="labStr" class="char-attr-val">0</div>
+						</div>
+						<button class="char-plus" id="btnStr" type="button" title="Add">
+							<img class="char-plus-icon" src="ui/rml/frames/notice/ico_plus.tga"/>
+						</button>
+					</div>
+					<div class="char-attr char-attr-last">
+						<div class="char-attr-text">
+							<div class="char-attr-label">Agility</div>
+							<div id="labAgi" class="char-attr-val">0</div>
+						</div>
+						<button class="char-plus" id="btnAgi" type="button" title="Add">
+							<img class="char-plus-icon" src="ui/rml/frames/notice/ico_plus.tga"/>
+						</button>
+					</div>
+				</div>
+				<div class="char-row">
+					<div class="char-attr">
+						<div class="char-attr-text">
+							<div class="char-attr-label">Constitution</div>
+							<div id="labCon" class="char-attr-val">0</div>
+						</div>
+						<button class="char-plus" id="btnCon" type="button" title="Add">
+							<img class="char-plus-icon" src="ui/rml/frames/notice/ico_plus.tga"/>
+						</button>
+					</div>
+					<div class="char-attr char-attr-last">
+						<div class="char-attr-text">
+							<div class="char-attr-label">Spirit</div>
+							<div id="labSta" class="char-attr-val">0</div>
+						</div>
+						<button class="char-plus" id="btnSta" type="button" title="Add">
+							<img class="char-plus-icon" src="ui/rml/frames/notice/ico_plus.tga"/>
+						</button>
+					</div>
+				</div>
+				<div class="char-row">
+					<div class="char-attr">
+						<div class="char-attr-text">
+							<div class="char-attr-label">Accuracy</div>
+							<div id="labDex" class="char-attr-val">0</div>
+						</div>
+						<button class="char-plus" id="btnDex" type="button" title="Add">
+							<img class="char-plus-icon" src="ui/rml/frames/notice/ico_plus.tga"/>
+						</button>
+					</div>
+					<div class="char-attr-spacer"></div>
+				</div>
+			</div>
+
+			<!-- Combat -->
+			<div class="char-section">
+				<div class="char-section-pill">Combat</div>
+				<div class="char-row">
+					<div class="char-stat">
+						<div class="char-stat-label">Min Attack</div>
+						<div id="labMinAtk" class="char-stat-value">0</div>
+					</div>
+					<div class="char-stat char-stat-last">
+						<div class="char-stat-label">Max Attack</div>
+						<div id="labMaxAtk" class="char-stat-value">0</div>
+					</div>
+				</div>
+				<div class="char-row">
+					<div class="char-stat">
+						<div class="char-stat-label">Hit Rate</div>
+						<div id="labHit" class="char-stat-value">0</div>
+					</div>
+					<div class="char-stat char-stat-last">
+						<div class="char-stat-label">Dodge</div>
+						<div id="labFlee" class="char-stat-value">0</div>
+					</div>
+				</div>
+				<div class="char-row">
+					<div class="char-stat">
+						<div class="char-stat-label">Defense</div>
+						<div id="labDef" class="char-stat-value">0</div>
+					</div>
+					<div class="char-stat char-stat-last">
+						<div class="char-stat-label">Atk Speed</div>
+						<div id="labAspeed" class="char-stat-value">0</div>
+					</div>
+				</div>
+				<div class="char-row">
+					<div class="char-stat">
+						<div class="char-stat-label">Phys Resist</div>
+						<div id="labPdef" class="char-stat-value">0</div>
+					</div>
+					<div class="char-stat char-stat-last">
+						<div class="char-stat-label">Move Speed</div>
+						<div id="labMspeed" class="char-stat-value">0</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Fame -->
+			<div class="char-section char-section-last">
+				<div class="char-section-pill">Fame</div>
+				<div class="char-row">
+					<div class="char-stat">
+						<div class="char-stat-label">Reputation</div>
+						<div id="labFame" class="char-stat-value">0</div>
+					</div>
+					<div class="char-stat char-stat-last">
+						<div class="char-stat-label">Might</div>
+						<div id="labBattle" class="char-stat-value">0</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</rml>

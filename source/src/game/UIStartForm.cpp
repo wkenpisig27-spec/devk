@@ -30,6 +30,7 @@
 #include "smallmap.h"
 #include "mapset.h"
 #include "uiequipform.h"
+#include "uistateform.h"
 #include "uiTradeForm.h"
 #include "uiFindTeamForm.h"
 #include "uistoreform.h"
@@ -917,12 +918,8 @@ void CStartMgr::_evtReliveFormMouseEvent(CCompent* pSender, int nMsgType, int x,
 void CStartMgr::_evtStartFormMouseEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
 	string name = pSender->GetName();
 
-	if (name == "btnState") // ??????????e
-	{
-		CForm* f = CFormMgr::s_Mgr.Find("frmState");
-		if (f) {
-			f->SetIsShow(!f->GetIsShow());
-		}
+	if (name == "btnState") {
+		g_stUIState.ToggleCharacterUi();
 		return;
 	}
 	// else if( name=="btnItem" )	// ??????????

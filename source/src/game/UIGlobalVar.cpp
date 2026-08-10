@@ -393,9 +393,13 @@ bool CUIInterface::_evtESCKey(char& key) {
 		if (g_stUITrade.IsTrading())
 			return false;
 
-		// Notice bank/inventory are not CForms — Esc closes bank session first, then inventory.
+		// Notice bank/inventory/character are not CForms — Esc closes them before legacy FindESCForm.
 		if (g_stUIBank.IsBankOpen()) {
 			g_stUIBank.CloseBankUi(true);
+			return true;
+		}
+		if (g_stUIState.IsCharacterUiVisible()) {
+			g_stUIState.HideCharacterUi();
 			return true;
 		}
 		if (CRmlUiInventoryForm::Instance().IsVisible()) {
