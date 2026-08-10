@@ -133,19 +133,29 @@ CGameApp::~CGameApp() {
 void CGameApp::End() {
 	_IsInit = false;
 
-	delete _pDrawPoints;
+	// Same race as SwitchMap: background texture/mesh loaders can still touch
+	// scene memory while we tear it down on close, which BugTrap reported as
+	// ACCESS_VIOLATION in CGameApp::End / _ClearScene.
+	lwIThreadPool* tp = nullptr;
+	if (g_Render.GetInterfaceMgr()) {
+		tp = g_Render.GetInterfaceMgr()->tp_loadres;
+		if (tp)
+			tp->SetPoolEvent(TRUE);
+	}
 
+	SAFE_DELETE(_pDrawPoints);
 	SAFE_DELETE(_pCamTrack);
 
 	CNavigationBar::g_cNaviBar.Clear();
 
-	_stCursorMgr.ClearMemory();
+	// Clear scene while cursors still exist (_Clear calls GetCursor()->SceneClear).
 	if (_pCurScene) {
 		_pCurScene->_Clear();
 		_pCurScene->_ClearMemory();
 		delete _pCurScene;
-		_pCurScene = NULL;
+		_pCurScene = nullptr;
 	}
+	_stCursorMgr.ClearMemory();
 
 	CGameScene::_ClearScene();
 
@@ -173,12 +183,17 @@ void CGameApp::End() {
 	SAFE_DELETE(_rsm);
 
 	// Add by lark.li 20080923 begin
-	_pSteady->Exit();
+	if (_pSteady)
+		_pSteady->Exit();
 	// End
 
 #ifdef TESTDEMO
 	ReleaseTestDemo();
 #endif
+
+	// Leave the load pool locked for process exit — do not resume workers
+	// while the rest of shutdown (render/audio) is still tearing down.
+	(void)tp;
 
 	MPGameApp::End();
 }

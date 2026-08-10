@@ -57,7 +57,7 @@
     <ClCompile>
       <AdditionalOptions>/EHa %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)../include;$(ProjectDir)../../ipss/include;$(ProjectDir)../../sdl-1.2.7/include;$(ProjectDir)../../enclib/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\util;$(ProjectDir)..\..\include;$(ProjectDir)..\..\include\util;$(ProjectDir)..\..\include\icuhelper;$(ProjectDir)..\..\include\ipss;$(ProjectDir)..\..\include\sdl;$(ProjectDir)..\..\include\enclib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN64;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>

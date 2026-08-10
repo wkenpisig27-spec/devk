@@ -112,10 +112,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	}
 	// =============================================
 
-	// Add by lark.li 20080909 begin
-	ErrorHandler::Initialize();
+	// Crash reporting via BugTrap (UI + detailed report under log\crashes)
+	ErrorHandler::Initialize("GameClient", true);
 	ErrorHandler::DisableErrorDialogs();
-	// End
 
 	DWORD dx_ver = DX_VERSION_X_X;
 

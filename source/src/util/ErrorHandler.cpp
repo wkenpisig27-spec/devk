@@ -5,10 +5,8 @@
 
 /**
  *  @file ErrorHandler.cpp
- *  The implementation file for the application-wide error handling functions
- *  used by WinUnit.exe.  These have been put in a separate class to avoid
- *  cluttering up main (and so the dependencies can be more easily removed
- *  if desired).
+ *  Crash handling via BugTrap on Windows (https://github.com/bchavez/BugTrap);
+ *  Linux keeps signal handlers + backtrace.
  */
 
 #include "ErrorHandler.h"
@@ -25,24 +23,74 @@
 #include "ReturnValues.h"
 #include "Stacktrace.h"
 
-#include <windows.h> // for SetUnhandledExceptionFilter
-#include <eh.h>		 // for set_terminate
-#include <crtdbg.h>	 // for _CrtSetReport*
-#include <DbgHelp.h> // for MiniDumpWriteDump
+#include <windows.h>
+#include <eh.h>
+#include <crtdbg.h>
+#include <DbgHelp.h>
+#include <cstdint>
+
+#include "BugTrap/BugTrap.h"
 
 #pragma comment(lib, "DbgHelp.lib")
+#ifdef _DEBUG
+#pragma comment(lib, "BugTrapD-x64.lib")
+#else
+#pragma comment(lib, "BugTrap-x64.lib")
+#endif
 
 using namespace std;
 
-/// This function sets up a process-wide unhandled exception handler.
-void ErrorHandler::Initialize() {
-	::SetUnhandledExceptionFilter(UnhandledExceptionFilter);
+bool ErrorHandler::s_nonInteractive = false;
+
+void CALLBACK ErrorHandler::BugTrapPreErrHandler(INT_PTR /*nParam*/) {
+	// Keep a lightweight breadcrumb next to existing game logs.
+	std::string strfile;
+	LG_GetDir(strfile);
+	strfile += "\\exception.txt";
+
+	FILE* fp = fopen(strfile.c_str(), "a+");
+	if (!fp)
+		return;
+
+	SYSTEMTIME st;
+	GetLocalTime(&st);
+	fprintf(fp, "%02d-%02d %02d:%02d:%02d BugTrap crash handler invoked\n",
+			st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+	fclose(fp);
+}
+
+void ErrorHandler::Initialize(const char* appName, bool interactive) {
+	if (!appName || !appName[0])
+		appName = "Game";
+
+	std::string reportDir;
+	LG_GetDir(reportDir);
+	if (reportDir.empty())
+		reportDir = ".";
+	reportDir += "\\crashes";
+	CreateDirectoryA(reportDir.c_str(), nullptr);
+
+	BT_SetAppName(appName);
+	BT_SetFlags(BTF_DETAILEDMODE | BTF_LISTPROCESSES |
+				(interactive ? (BTF_SCREENCAPTURE | BTF_SHOWADVANCEDUI) : BTF_NONE));
+	BT_SetReportFilePath(reportDir.c_str());
+	BT_SetActivityType(interactive ? BTA_SHOWUI : BTA_SAVEREPORT);
+	BT_SetPreErrHandler(BugTrapPreErrHandler, 0);
+
+	// Attach common log crumbs when present.
+	std::string exceptionLog;
+	LG_GetDir(exceptionLog);
+	exceptionLog += "\\exception.txt";
+	BT_AddLogFile(exceptionLog.c_str());
+
+	BT_InstallSehFilter();
+	BT_SetTerminate();
 }
 
 void ErrorHandler::DisableErrorDialogs() {
 	s_nonInteractive = true;
 
-	/* DWORD oldProcessErrorMode = */ ::SetErrorMode(SEM_NOGPFAULTERRORBOX);
+	::SetErrorMode(SEM_NOGPFAULTERRORBOX);
 
 	_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
 	_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
@@ -50,99 +98,87 @@ void ErrorHandler::DisableErrorDialogs() {
 	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
 	_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
 
-	::set_terminate(TerminateFunction);
-	signal(SIGABRT, AbortFunction);
+	// Do not override set_terminate/abort — BugTrap installs those in Initialize().
 	::_set_error_mode(_OUT_TO_STDERR);
 }
 
-LONG WINAPI ErrorHandler::UnhandledExceptionFilter(
-	EXCEPTION_POINTERS* pExceptionPointers)
-{
+LONG WINAPI ErrorHandler::UnhandledExceptionFilter(EXCEPTION_POINTERS* pExceptionPointers) {
+	// Retained as a fallback if BugTrap is unavailable; prefer BT_InstallSehFilter path.
 	RuntimeStack statck(pExceptionPointers);
 
+	DWORD exceptionCode = 0;
+	PVOID exceptionAddress = nullptr;
+	if (pExceptionPointers && pExceptionPointers->ExceptionRecord) {
+		exceptionCode = pExceptionPointers->ExceptionRecord->ExceptionCode;
+		exceptionAddress = pExceptionPointers->ExceptionRecord->ExceptionAddress;
+	}
+
+	std::string exceptionName = SEHTranslator::name(exceptionCode);
+	std::string exceptionDesc = SEHTranslator::description(exceptionCode);
+
+	char moduleNameBuf[MAX_PATH] = {0};
+	HMODULE hModule = nullptr;
+	if (exceptionAddress &&
+		GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+						   (LPCSTR)exceptionAddress, &hModule)) {
+		GetModuleFileNameA(hModule, moduleNameBuf, MAX_PATH);
+	}
+
 	std::stringstream text;
-	text << "UnhandledException" << std::endl
-		 << statck << std::endl;
+	text << "UnhandledException" << std::endl;
+	text << "  Exception: " << exceptionName << " (0x" << std::hex << exceptionCode << ")" << std::endl;
+	text << "  Description: " << exceptionDesc << std::endl;
+	text << "  Address: 0x" << std::hex << (uintptr_t)exceptionAddress << std::dec << std::endl;
+	if (moduleNameBuf[0]) {
+		text << "  Module: " << moduleNameBuf << std::endl;
+	}
+	text << "  Stack Trace:" << std::endl;
+	text << statck << std::endl;
 	std::string mText = text.str();
 
 	std::string strfile;
 	LG_GetDir(strfile);
 	strfile += "\\exception.txt";
 	FILE* fp = fopen(strfile.c_str(), "a+");
-
 	if (fp) {
 		SYSTEMTIME st;
 		char tim[100] = {0};
 		GetLocalTime(&st);
-		sprintf(tim, "%02d-%02d %02d:%02d:%02d", st.wMonth, st.wDay, st.wHour,
-				st.wMinute, st.wSecond);
-
+		sprintf(tim, "%02d-%02d %02d:%02d:%02d", st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
 		fwrite(tim, strlen(tim), 1, fp);
 		fwrite(mText.c_str(), strlen(mText.c_str()) - 1, 1, fp);
 		fclose(fp);
 	}
 
-	// Create minidump file for detailed crash analysis
 	std::string dumpfile;
 	LG_GetDir(dumpfile);
 	SYSTEMTIME st;
 	GetLocalTime(&st);
 	char dumpname[256] = {0};
-	sprintf(dumpname, "\\crash_%04d%02d%02d_%02d%02d%02d.dmp", 
-			st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+	sprintf(dumpname, "\\crash_%04d%02d%02d_%02d%02d%02d.dmp", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute,
+			st.wSecond);
 	dumpfile += dumpname;
-	
 	CreateMiniDump(pExceptionPointers, dumpfile.c_str());
 
 	return EXCEPTION_CONTINUE_SEARCH;
 }
 
 void ErrorHandler::CreateMiniDump(EXCEPTION_POINTERS* pExceptionPointers, const char* dumpFilePath) {
-	HANDLE hFile = CreateFileA(
-		dumpFilePath,
-		GENERIC_WRITE,
-		0,
-		NULL,
-		CREATE_ALWAYS,
-		FILE_ATTRIBUTE_NORMAL,
-		NULL
-	);
-
-	if (hFile == INVALID_HANDLE_VALUE) {
+	HANDLE hFile = CreateFileA(dumpFilePath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE)
 		return;
-	}
 
 	MINIDUMP_EXCEPTION_INFORMATION mdei;
 	mdei.ThreadId = GetCurrentThreadId();
 	mdei.ExceptionPointers = pExceptionPointers;
 	mdei.ClientPointers = FALSE;
 
-	MINIDUMP_TYPE dumpType = static_cast<MINIDUMP_TYPE>(
-		MiniDumpNormal |
-		MiniDumpWithHandleData |
-		MiniDumpWithThreadInfo |
-		MiniDumpWithUnloadedModules
-	);
+	MINIDUMP_TYPE dumpType = static_cast<MINIDUMP_TYPE>(MiniDumpNormal | MiniDumpWithHandleData | MiniDumpWithThreadInfo |
+														MiniDumpWithUnloadedModules);
 
-	BOOL success = MiniDumpWriteDump(
-		GetCurrentProcess(),
-		GetCurrentProcessId(),
-		hFile,
-		dumpType,
-		pExceptionPointers ? &mdei : NULL,
-		NULL,
-		NULL
-	);
-
+	MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, dumpType, pExceptionPointers ? &mdei : NULL,
+					  NULL, NULL);
 	CloseHandle(hFile);
-
-	if (success) {
-		FILE* fp = fopen("minidump_status.log", "a+");
-		if (fp) {
-			fprintf(fp, "Minidump created: %s\n", dumpFilePath);
-			fclose(fp);
-		}
-	}
 }
 
 void ErrorHandler::TerminateFunction() {
@@ -155,12 +191,7 @@ void ErrorHandler::AbortFunction(int /* signal */) {
 	::ExitProcess(WINUNIT_EXIT_UNHANDLED_EXCEPTION);
 }
 
-void ErrorHandler::DisplayError(const wchar_t* errorMessage,
-								const wchar_t* details /* L"" */) {
-	// Logging removed — was originally logger-based
-	(void)errorMessage;
-	(void)details;
-}
+void ErrorHandler::DisplayError(const wchar_t* /*errorMessage*/, const wchar_t* /*details*/) {}
 
 #else // Linux implementation
 
@@ -173,13 +204,15 @@ void ErrorHandler::DisplayError(const wchar_t* errorMessage,
 
 using namespace std;
 
+bool ErrorHandler::s_nonInteractive = false;
+
 /// Install signal handlers for crash signals
-void ErrorHandler::Initialize() {
+void ErrorHandler::Initialize(const char* /*appName*/, bool /*interactive*/) {
 	struct sigaction sa;
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_sigaction = SignalHandler;
 	sa.sa_flags = SA_SIGINFO | SA_RESETHAND; // Reset after first signal to allow core dump
-	
+
 	sigaction(SIGSEGV, &sa, nullptr);   // Segmentation fault
 	sigaction(SIGBUS,  &sa, nullptr);   // Bus error
 	sigaction(SIGFPE,  &sa, nullptr);   // Floating point exception
@@ -251,7 +284,7 @@ void ErrorHandler::WriteBacktrace(const char* signalName) {
 
 		fprintf(fp, "\n%s Crash: %s (PID: %d)\n", tim, signalName, (int)getpid());
 		fprintf(fp, "Backtrace (%d frames):\n", nframes);
-		
+
 		for (int i = 0; i < nframes; ++i) {
 			// Try to demangle C++ names
 			if (symbols && symbols[i]) {
@@ -260,13 +293,13 @@ void ErrorHandler::WriteBacktrace(const char* signalName) {
 				char* mangled = nullptr;
 				char* offset_begin = nullptr;
 				char* offset_end = nullptr;
-				
+
 				for (char* p = symbols[i]; *p; ++p) {
 					if (*p == '(') mangled = p + 1;
 					else if (*p == '+') offset_begin = p;
 					else if (*p == ')') { offset_end = p; break; }
 				}
-				
+
 				if (mangled && offset_begin && offset_end && mangled < offset_begin) {
 					*offset_begin = '\0';
 					int status;
@@ -285,7 +318,7 @@ void ErrorHandler::WriteBacktrace(const char* signalName) {
 				fprintf(fp, "  #%d  %p\n", i, frames[i]);
 			}
 		}
-		
+
 		fprintf(fp, "--- End of backtrace ---\n\n");
 		fclose(fp);
 	}
@@ -316,5 +349,3 @@ void ErrorHandler::DisplayError(const wchar_t* errorMessage,
 }
 
 #endif // _WIN32
-
-bool ErrorHandler::s_nonInteractive = false;

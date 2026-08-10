@@ -4,8 +4,8 @@
 
 /**
  *  @file ErrorHandler.h
- *  The header file for the application-wide error handling functions used by
- *  WinUnit.exe.
+ *  Application-wide crash handling via BugTrap on Windows
+ *  (replaces basic SEH/minidump-only path); Linux keeps signal handlers.
  */
 
 #pragma once
@@ -21,11 +21,13 @@ class ErrorHandler {
 	typedef void (*SignalHandlerPointer)(int);
 
 public:
-	// Sets up application-wide exception handling.
-	static void Initialize();
+	/// Install crash reporting.
+	/// @param appName Display name in BugTrap reports (e.g. "GameClient", "GameServer").
+	/// @param interactive If true, show BugTrap UI (client). If false, auto-save report (servers).
+	///                    Ignored on Linux.
+	static void Initialize(const char* appName = "Game", bool interactive = true);
 
-	// Sets process- and CRT-wide variables that disable dialogs for several
-	// classes of errors and asserts.
+	/// Quiet CRT assert/abort dialogs (does not disable BugTrap UI on unhandled crashes).
 	static void DisableErrorDialogs();
 
 private:
@@ -34,17 +36,15 @@ private:
 	static bool s_nonInteractive;
 
 #if defined(_WIN32) || defined(_WIN64)
-	// This is the function that gets called when an unhandled exception
-	// bubbles up to the top.
-	static LONG WINAPI UnhandledExceptionFilter(
-		EXCEPTION_POINTERS* pExceptionPointers);
+	static void CALLBACK BugTrapPreErrHandler(INT_PTR nParam);
 
-	// Creates a minidump file for crash analysis
+	// Legacy helpers kept for optional diagnostics / CRT terminate paths
+	static LONG WINAPI UnhandledExceptionFilter(EXCEPTION_POINTERS* pExceptionPointers);
 	static void CreateMiniDump(EXCEPTION_POINTERS* pExceptionPointers, const char* dumpFilePath);
 #else
 	// Linux signal handler for crashes
 	static void SignalHandler(int signo, siginfo_t* info, void* context);
-	
+
 	// Write a backtrace to the exception log
 	static void WriteBacktrace(const char* signalName);
 #endif
@@ -56,8 +56,7 @@ private:
 	static void AbortFunction(int /* signal */);
 
 	// Called by the other error handlers to display the error message.
-	static void DisplayError(const wchar_t* errorMessage,
-							 const wchar_t* details = L"");
+	static void DisplayError(const wchar_t* errorMessage, const wchar_t* details = L"");
 
 private:
 	~ErrorHandler(void);

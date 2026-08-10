@@ -26,8 +26,8 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	}
 	// =============================================
 
-	// Initialize crash dump generation
-	ErrorHandler::Initialize();
+	// Crash reporting via BugTrap (auto-save under log\crashes, no UI)
+	ErrorHandler::Initialize("GroupServer", false);
 
 	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 

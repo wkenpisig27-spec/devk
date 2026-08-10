@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copy BugTrap runtime DLL next to built executables (and deploy folders). -->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <BugTrapRoot>$(MSBuildThisFileDirectory)..\..\third_party\BugTrap</BugTrapRoot>
+    <BugTrapDll Condition="'$(Configuration)'=='Debug'">BugTrapD-x64.dll</BugTrapDll>
+    <BugTrapDll Condition="'$(Configuration)'!='Debug'">BugTrap-x64.dll</BugTrapDll>
+    <BugTrapRepoRoot>$(MSBuildThisFileDirectory)..\..</BugTrapRepoRoot>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <PostBuildEvent>
+      <Command>if not exist "$(OutDir)" mkdir "$(OutDir)"
+copy /Y "$(BugTrapRoot)\bin\$(BugTrapDll)" "$(OutDir)"
+if exist "$(BugTrapRepoRoot)\client\" copy /Y "$(BugTrapRoot)\bin\$(BugTrapDll)" "$(BugTrapRepoRoot)\client\"
+if exist "$(BugTrapRepoRoot)\server\" copy /Y "$(BugTrapRoot)\bin\$(BugTrapDll)" "$(BugTrapRepoRoot)\server\"
+</Command>
+      <Message>Copying $(BugTrapDll) for BugTrap crash reporting</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+</Project>

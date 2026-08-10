@@ -264,8 +264,8 @@ int main(int argc, char* argv[]) {
 	}
 	// =============================================
 
-	// Initialize crash dump generation
-	ErrorHandler::Initialize();
+	// Crash reporting via BugTrap (auto-save under log\crashes, no UI)
+	ErrorHandler::Initialize("AccountServer", false);
 
 	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 

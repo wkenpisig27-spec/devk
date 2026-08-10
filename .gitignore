@@ -54,6 +54,11 @@
 # Allow x64 libraries to be tracked
 !**/source/lib/x64/**/*.lib
 !**/source/bin/x64/**/*.dll
+# Allow BugTrap crash-reporter binaries (needed to build/link)
+!**/third_party/BugTrap/bin/*.dll
+!**/third_party/BugTrap/lib/*.lib
+!**/source/lib/Release/BugTrap*.lib
+!**/source/lib/Debug/BugTrap*.lib
 
 # RmlUi / FreeType: allow source trees and client static libs under 100MB.
 # Debug rmlui.lib is ~100MB+ and exceeds GitHub's file limit — build it locally:

@@ -1635,6 +1635,11 @@ void CBigMap::Create() {
 }
 
 void CBigMap::Destory() {
+	// Create() is optional (M key). Without this guard, closing the client
+	// crashes in ~CBigMap when _pTex was never allocated or already freed.
+	if (!_pTex)
+		return;
+
 	for (int n = 0; n < 4 * 3; n++) {
 		SAFE_RELEASE(_pTex[n]);
 	}
