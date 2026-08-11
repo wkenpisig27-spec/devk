@@ -41,6 +41,29 @@ extern "C" __declspec(dllimport) void lwSetAnimVelocity(float velocity);
 extern bool g_IsShowStates;
 extern bool g_IsCameraMode;
 
+void CSystemProperties::ResolveIniPath(const char* relativePath, char* outBuffer, size_t bufferSize) {
+	char gameRoot[MAX_PATH];
+	GetModuleFileNameA(NULL, gameRoot, MAX_PATH);
+
+	char* slash = strrchr(gameRoot, '\\');
+	if (slash)
+		*slash = '\0';
+
+	// Game.exe lives in system/; user data lives at the install root.
+	slash = strrchr(gameRoot, '\\');
+	if (slash && _stricmp(slash + 1, "system") == 0)
+		*slash = '\0';
+
+	_snprintf(outBuffer, bufferSize, "%s\\%s", gameRoot, relativePath);
+	outBuffer[bufferSize - 1] = '\0';
+
+	// Ensure user\ exists so WritePrivateProfileString can create system.ini.
+	char userDir[MAX_PATH];
+	_snprintf(userDir, MAX_PATH, "%s\\user", gameRoot);
+	userDir[MAX_PATH - 1] = '\0';
+	CreateDirectoryA(userDir, NULL);
+}
+
 //---------------------------------------------------------
 // class CSystemProperties
 //---------------------------------------------------------
@@ -216,6 +239,7 @@ int CSystemProperties::readFromFile(const char* szIniFileName) {
 
 	// gameOption
 	m_gameOption.bRunMode    = int2bool(GetPrivateProfileInt("gameOption", "runMode",    1, szIniFileName));
+	m_gameOption.bLockMode   = int2bool(GetPrivateProfileInt("gameOption", "lockMode",   0, szIniFileName));
 	m_gameOption.bHelpMode   = int2bool(GetPrivateProfileInt("gameOption", "helpMode",   1, szIniFileName));
 	m_gameOption.bCameraMode = int2bool(GetPrivateProfileInt("gameOption", "cameraMode", 1, szIniFileName));
 	m_gameOption.bAppMode    = int2bool(GetPrivateProfileInt("gameOption", "apparel",    1, szIniFileName));
@@ -272,8 +296,17 @@ int CSystemProperties::writeToFile(const char* szIniFileName) {
 		return -3;
 	}
 
-	// Ensure the user\ directory exists before writing; CreateDirectoryA is a no-op if it already exists.
-	CreateDirectoryA("user", NULL);
+	// Ensure parent directory exists (absolute path from ResolveIniPath).
+	{
+		char szDir[MAX_PATH];
+		strncpy(szDir, szIniFileName, MAX_PATH - 1);
+		szDir[MAX_PATH - 1] = '\0';
+		char* slash = strrchr(szDir, '\\');
+		if (slash) {
+			*slash = '\0';
+			CreateDirectoryA(szDir, NULL);
+		}
+	}
 
 	// video
 	if (!WriteInteger("video", "texture", m_videoProp.nTexture, szIniFileName)) {
@@ -310,8 +343,9 @@ int CSystemProperties::writeToFile(const char* szIniFileName) {
 		return OTHER_ERROR;
 
 	// gameOption
-	// if (!WriteInteger("gameOption", "runMode", bool2int(m_gameOption.bRunMode), szIniFileName))
-	if (!WriteInteger("gameOption", "runMode", bool2int(true), szIniFileName))
+	if (!WriteInteger("gameOption", "runMode", bool2int(m_gameOption.bRunMode), szIniFileName))
+		return OTHER_ERROR;
+	if (!WriteInteger("gameOption", "lockMode", bool2int(m_gameOption.bLockMode), szIniFileName))
 		return OTHER_ERROR;
 	if (!WriteInteger("gameOption", "helpMode", bool2int(m_gameOption.bHelpMode), szIniFileName))
 		return OTHER_ERROR;
@@ -391,12 +425,11 @@ void CSystemMgr::LoadCustomProp() {
 	if (!m_isLoad) {
 		char szIniPath[MAX_PATH];
 		CSystemProperties::ResolveIniPath("user\\system.ini", szIniPath, MAX_PATH);
-		if (m_sysProp.Load(szIniPath)) {
-			// ��ȡ�����ļ�ʧ��,��Ĭ��ֵ���
+		// Load() returns 0 on success. Non-zero => missing/broken — apply defaults once.
+		if (m_sysProp.Load(szIniPath) != 0) {
 			m_sysProp.m_videoProp.nTexture = 0;
 			m_sysProp.m_videoProp.bAnimation = true;
 			m_sysProp.m_videoProp.bCameraRotate = false; // RO: locked isometric
-			// m_sysProp.m_videoProp.bViewFar=true;      //ȡ����ҰԶ��(Michael Chen 2005-04-22
 			m_sysProp.m_videoProp.nShadowMode = 1; // Soft blob foot-shadow On
 			m_sysProp.m_videoProp.bDepth32 = true;
 			m_sysProp.m_videoProp.nQuality = 0;
@@ -404,11 +437,17 @@ void CSystemMgr::LoadCustomProp() {
 			m_sysProp.m_videoProp.bResolution = 0;
 			m_sysProp.m_videoProp.nMsaa = 4;
 
-			m_sysProp.m_audioProp.nMusicSound = static_cast<int>(10.0f * g_pGameApp->GetMusicSize());
-			m_sysProp.m_audioProp.nMusicEffect = static_cast<int>(10.0f * g_pGameApp->GetCurScene()->GetSoundSize());
+			m_sysProp.m_audioProp.nMusicSound = 5;
+			m_sysProp.m_audioProp.nMusicEffect = 5;
+			if (g_pGameApp) {
+				m_sysProp.m_audioProp.nMusicSound = static_cast<int>(10.0f * g_pGameApp->GetMusicSize());
+				if (g_pGameApp->GetCurScene())
+					m_sysProp.m_audioProp.nMusicEffect = static_cast<int>(10.0f * g_pGameApp->GetCurScene()->GetSoundSize());
+			}
 
 			m_sysProp.m_gameOption.bRunMode = true;
 			m_sysProp.m_gameOption.bLockMode = false;
+			m_sysProp.m_gameOption.bHelpMode = true;
 			m_sysProp.m_gameOption.bCameraMode = true;
 			m_sysProp.m_gameOption.bAppMode = true;
 			m_sysProp.m_gameOption.bEffMode = true;
@@ -418,14 +457,14 @@ void CSystemMgr::LoadCustomProp() {
 			m_sysProp.m_gameOption.bShowPercentages = false;
 			m_sysProp.m_gameOption.bShowInfo = false;
 			m_sysProp.m_gameOption.nFramerate = 30;
+			m_sysProp.m_gameOption.bVsync = false;
 			m_sysProp.m_gameOption.bShowMounts = true;
 			m_sysProp.m_gameOption.bDisableMelee = true;
 			m_sysProp.m_gameOption.bOutline = true;
+
+			// Only write when the file was missing — never rewrite a good ini on every boot.
+			m_sysProp.Save(szIniPath);
 		}
-		// Always persist the current config — ensures all keys exist on disk
-		// so the next startup Load() will succeed without falling back to defaults.
-		m_sysProp.Save(szIniPath);
-		//	m_sysProp.m_gameOption.bRunMode = true;//�����ļ���������Σ���һ�Ϊtrue����ʱ
 		m_isLoad = true;
 	}
 	{
@@ -614,6 +653,10 @@ bool CSystemMgr::Init() {
 		return Error(RES_STRING(CL_LANGUAGE_MATCH_45), frmGameOption->GetName(), "cbxVsync_p");
 	}
 
+	// Keep checkbox state in sync with loaded props so End() does not overwrite
+	// user\\system.ini with form defaults (all Off/Hide) on every exit.
+	SyncGameOptionControls();
+
 	//////// ����
 	frmAskRelogin = _FindForm("frmAskRelogin");
 	if (frmAskRelogin)
@@ -638,21 +681,22 @@ void CSystemMgr::End() {
 	char szIniPath[MAX_PATH];
 	CSystemProperties::ResolveIniPath("user\\system.ini", szIniPath, MAX_PATH);
 
-	const char* Value = cboResolution->GetText();
-	int setResolution;
-	if (strcmp("800x600", Value) == 0) {
-		setResolution = 0;
-	}
-	if (strcmp("1152x648", Value) == 0) {
-		setResolution = 1;
-	} else if (strcmp("1280x720", Value) == 0) {
-		setResolution = 2;
-	} else if (strcmp("1366x768", Value) == 0) {
-		setResolution = 3;
-	} else if (strcmp("1600x900", Value) == 0) {
-		setResolution = 4;
-	} else if (strcmp("1920x1080", Value) == 0) {
-		setResolution = 5;
+	int setResolution = m_sysProp.m_videoProp.bResolution;
+	if (cboResolution) {
+		const char* Value = cboResolution->GetText();
+		if (strcmp("800x600", Value) == 0) {
+			setResolution = 0;
+		} else if (strcmp("1152x648", Value) == 0) {
+			setResolution = 1;
+		} else if (strcmp("1280x720", Value) == 0) {
+			setResolution = 2;
+		} else if (strcmp("1366x768", Value) == 0) {
+			setResolution = 3;
+		} else if (strcmp("1600x900", Value) == 0) {
+			setResolution = 4;
+		} else if (strcmp("1920x1080", Value) == 0) {
+			setResolution = 5;
+		}
 	}
 
 	// ��ϵͳ���ñ��浽�ļ�(Michael Chen 2005-04-19)
@@ -678,42 +722,9 @@ void CSystemMgr::End() {
 	if (proAudioMidi)
 		m_sysProp.m_audioProp.nMusicEffect = static_cast<int>(proAudioMidi->GetPosition());
 
-	if (cbxRunMode)
-		m_sysProp.m_gameOption.bRunMode = cbxRunMode->GetActiveIndex() == 0 ? false : true;
-	if (cbxLockMode)
-		m_sysProp.m_gameOption.bLockMode = cbxLockMode->GetActiveIndex() == 1 ? true : false;
-	if (cbxHelpMode)
-		m_sysProp.m_gameOption.bHelpMode = cbxHelpMode->GetActiveIndex() == 1 ? true : false;
-	if (cbxCameraMode)
-		m_sysProp.m_gameOption.bCameraMode = cbxCameraMode->GetActiveIndex() == 1 ? true : false;
-	if (cbxAppMode)
-		m_sysProp.m_gameOption.bAppMode = cbxAppMode->GetActiveIndex() == 1 ? true : false;
-	if (cbxEffMode)
-		m_sysProp.m_gameOption.bEffMode = cbxEffMode->GetActiveIndex() == 1 ? true : false;
-	if (cbxStateMode)
-		m_sysProp.m_gameOption.bStateMode = cbxStateMode->GetActiveIndex() == 1 ? true : false;
-	if (cbxEnemyNames)
-		m_sysProp.m_gameOption.bEnemyNames = cbxEnemyNames->GetActiveIndex() == 1 ? true : false;
-	if (cbxShowBars)
-		m_sysProp.m_gameOption.bShowBars = cbxShowBars->GetActiveIndex() == 1 ? true : false;
-	if (cbxShowPercentages)
-		m_sysProp.m_gameOption.bShowPercentages = cbxShowPercentages->GetActiveIndex() == 1 ? true : false;
-	if (cbxShowInfo)
-		m_sysProp.m_gameOption.bShowInfo = cbxShowInfo->GetActiveIndex() == 1 ? true : false;
-	if (cbxFramerate)
-	{
-		const int frIdx = cbxFramerate->GetActiveIndex();
-		m_sysProp.m_gameOption.nFramerate = frIdx == 2 ? 144 : frIdx == 1 ? 60 : 30;
-		lwSetAnimVelocity(1.0f / CSteadyFrame::GetAnimMultiplier());
-	}
-	if (cbxShowMounts)
-		m_sysProp.m_gameOption.bShowMounts = cbxShowMounts->GetActiveIndex() == 1 ? true : false;
-	if (cbxDisableMelee)
-		m_sysProp.m_gameOption.bDisableMelee = cbxDisableMelee->GetActiveIndex() == 1 ? true : false;
-
-	// if (cbxAppMode)
-	//	m_sysProp.m_gameOption.bAppMode = cbxAppMode->GetActiveIndex() == 0 ? false : true;
-
+	// Do NOT read game-option checkboxes here. Unsynced form defaults are all Off/Hide
+	// and were overwriting user\\system.ini on every exit. Game options are applied +
+	// saved when the user clicks Confirm (_evtGameOptionFormMouseDown).
 	if (m_sysProp.Save(szIniPath)) {
 		// error when save the system properties.
 	}
@@ -1248,65 +1259,76 @@ void CSystemMgr::_evtGameOptionFormMouseDown(CCompent* pSender, int nMsgType, in
 	g_stUISystem.m_sysProp.Save(szIniPath);
 }
 
-void CSystemMgr::_evtGameOptionFormBeforeShow(CForm* pForm, bool& IsShow) {
-	CCheckGroup* pGroup = g_stUISystem.cbxRunMode;
+void CSystemMgr::SyncGameOptionControls() {
+	CCheckGroup* pGroup = cbxRunMode;
 	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bRunMode ? 1 : 0);
+		pGroup->SetActiveIndex(m_sysProp.m_gameOption.bRunMode ? 1 : 0);
 
-	pGroup = g_stUISystem.cbxLockMode;
+	pGroup = cbxLockMode;
 	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bLockMode ? 1 : 0);
+		pGroup->SetActiveIndex(m_sysProp.m_gameOption.bLockMode ? 1 : 0);
 
-	pGroup = g_stUISystem.cbxHelpMode;
+	pGroup = cbxHelpMode;
 	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bHelpMode ? 1 : 0);
+		pGroup->SetActiveIndex(m_sysProp.m_gameOption.bHelpMode ? 1 : 0);
 
-	pGroup = g_stUISystem.cbxCameraMode;
+	pGroup = cbxCameraMode;
 	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bCameraMode ? 1 : 0);
+		pGroup->SetActiveIndex(m_sysProp.m_gameOption.bCameraMode ? 1 : 0);
 
-	pGroup = g_stUISystem.cbxAppMode;
+	pGroup = cbxAppMode;
 	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bAppMode ? 1 : 0);
+		pGroup->SetActiveIndex(m_sysProp.m_gameOption.bAppMode ? 1 : 0);
 
-	pGroup = g_stUISystem.cbxEffMode;
+	pGroup = cbxEffMode;
 	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bEffMode ? 1 : 0);
-	pGroup = g_stUISystem.cbxStateMode;
-	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bStateMode ? 1 : 0);
-	// Add by Mdr.st May 2020 - FPO alpha
-	pGroup = g_stUISystem.cbxEnemyNames;
-	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bEnemyNames ? 1 : 0);
+		pGroup->SetActiveIndex(m_sysProp.m_gameOption.bEffMode ? 1 : 0);
 
-	pGroup = g_stUISystem.cbxShowBars;
+	pGroup = cbxStateMode;
 	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bShowBars ? 1 : 0);
+		pGroup->SetActiveIndex(m_sysProp.m_gameOption.bStateMode ? 1 : 0);
 
-	pGroup = g_stUISystem.cbxShowPercentages;
+	pGroup = cbxEnemyNames;
 	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bShowPercentages ? 1 : 0);
-	pGroup = g_stUISystem.cbxShowInfo;
+		pGroup->SetActiveIndex(m_sysProp.m_gameOption.bEnemyNames ? 1 : 0);
+
+	pGroup = cbxShowBars;
 	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bShowInfo ? 1 : 0);
-	pGroup = g_stUISystem.cbxFramerate;
+		pGroup->SetActiveIndex(m_sysProp.m_gameOption.bShowBars ? 1 : 0);
+
+	pGroup = cbxShowPercentages;
+	if (pGroup)
+		pGroup->SetActiveIndex(m_sysProp.m_gameOption.bShowPercentages ? 1 : 0);
+
+	pGroup = cbxShowInfo;
+	if (pGroup)
+		pGroup->SetActiveIndex(m_sysProp.m_gameOption.bShowInfo ? 1 : 0);
+
+	pGroup = cbxFramerate;
 	if (pGroup) {
-		const int nFps = g_stUISystem.m_sysProp.m_gameOption.nFramerate;
+		const int nFps = m_sysProp.m_gameOption.nFramerate;
 		pGroup->SetActiveIndex(nFps >= 144 ? 2 : nFps >= 60 ? 1 : 0);
 	}
-	pGroup = g_stUISystem.cbxShowMounts;
+
+	pGroup = cbxShowMounts;
 	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bShowMounts ? 1 : 0);
-	pGroup = g_stUISystem.cbxDisableMelee;
+		pGroup->SetActiveIndex(m_sysProp.m_gameOption.bShowMounts ? 1 : 0);
+
+	pGroup = cbxDisableMelee;
 	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bDisableMelee ? 1 : 0);
-	pGroup = g_stUISystem.cbxOutline;
+		pGroup->SetActiveIndex(m_sysProp.m_gameOption.bDisableMelee ? 1 : 0);
+
+	pGroup = cbxOutline;
 	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bOutline ? 1 : 0);
-	pGroup = g_stUISystem.cbxVsync;
+		pGroup->SetActiveIndex(m_sysProp.m_gameOption.bOutline ? 1 : 0);
+
+	pGroup = cbxVsync;
 	if (pGroup)
-		pGroup->SetActiveIndex(g_stUISystem.m_sysProp.m_gameOption.bVsync ? 1 : 0);
+		pGroup->SetActiveIndex(m_sysProp.m_gameOption.bVsync ? 1 : 0);
+}
+
+void CSystemMgr::_evtGameOptionFormBeforeShow(CForm* pForm, bool& IsShow) {
+	g_stUISystem.SyncGameOptionControls();
 }
 
 void CSystemMgr::CloseForm() {

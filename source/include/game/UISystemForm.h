@@ -116,13 +116,11 @@ public:
 	int ApplyGameOption();
 
 	/**
-	 * Converts a relative ini path to an absolute path using the process CWD.
-	 * IMPORTANT: WritePrivateProfileString / GetPrivateProfileInt resolve relative
-	 * paths against C:\Windows, NOT the exe's directory. Always call this first.
+	 * Resolves a relative INI path to the game install root (parent of system/
+	 * when Game.exe runs from system/). Do not use GetFullPathName/CWD — that
+	 * breaks when the working directory is client/system/.
 	 */
-	static void ResolveIniPath(const char* relativePath, char* outBuffer, size_t bufferSize) {
-		GetFullPathNameA(relativePath, (DWORD)bufferSize, outBuffer, NULL);
-	}
+	static void ResolveIniPath(const char* relativePath, char* outBuffer, size_t bufferSize);
 
 private:
 	/**
@@ -223,6 +221,8 @@ private:
 	static void _evtAskChangeFormMouseDown(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
 	static void _evtGameOptionFormMouseDown(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
 	static void _evtGameOptionFormBeforeShow(CForm* pForm, bool& IsShow);
+
+	void SyncGameOptionControls();
 
 private:
 	CForm* frmSystem;
