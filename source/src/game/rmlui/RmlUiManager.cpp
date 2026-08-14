@@ -11,6 +11,8 @@
 #include "rmlui/RmlUiSkillForm.h"
 #include "rmlui/RmlUiNpcTradeForm.h"
 #include "rmlui/RmlUiNpcTalkForm.h"
+#include "rmlui/RmlUiQuestForm.h"
+#include "rmlui/RmlUiNpcMissionForm.h"
 
 #include "UIMenu.h"
 #include "MPRender.h"
@@ -239,6 +241,12 @@ bool CRmlUiManager::Init(HWND hwnd) {
 	if (!CRmlUiNpcTalkForm::Instance().Load(g_context)) {
 		OutputDebugStringA("RmlUi: warning - npctalk.rml failed to load\n");
 	}
+	if (!CRmlUiQuestForm::Instance().Load(g_context)) {
+		OutputDebugStringA("RmlUi: warning - quest.rml failed to load\n");
+	}
+	if (!CRmlUiNpcMissionForm::Instance().Load(g_context)) {
+		OutputDebugStringA("RmlUi: warning - npcmission.rml failed to load\n");
+	}
 
 	m_ready = true;
 	OutputDebugStringA("RmlUi: initialized OK\n");
@@ -279,6 +287,14 @@ void CRmlUiManager::HideNpcTalkForm() {
 	CRmlUiNpcTalkForm::Instance().Hide();
 }
 
+void CRmlUiManager::HideQuestForm() {
+	CRmlUiQuestForm::Instance().Hide();
+}
+
+void CRmlUiManager::HideNpcMissionForm() {
+	CRmlUiNpcMissionForm::Instance().Hide();
+}
+
 void CRmlUiManager::Shutdown() {
 	m_ready = false;
 
@@ -292,6 +308,8 @@ void CRmlUiManager::Shutdown() {
 	CRmlUiSkillForm::Instance().Unload();
 	CRmlUiNpcTradeForm::Instance().Unload();
 	CRmlUiNpcTalkForm::Instance().Unload();
+	CRmlUiQuestForm::Instance().Unload();
+	CRmlUiNpcMissionForm::Instance().Unload();
 
 	if (g_context) {
 		g_context->UnloadAllDocuments();

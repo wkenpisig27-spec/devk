@@ -1,0 +1,414 @@
+/* Notice Quest Log + NPC mission page. */
+
+body.quest-body,
+body.nmis-body {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	justify-content: flex-start;
+	align-items: flex-start;
+	padding: 0dp;
+	pointer-events: none;
+	font-family: LatoLatin;
+}
+
+body.quest-body .quest-root,
+body.nmis-body .nmis-panel {
+	pointer-events: auto;
+}
+
+.quest-root {
+	position: absolute;
+	display: none;
+	flex-direction: row;
+	align-items: stretch;
+	box-sizing: border-box;
+	height: 480dp;
+	margin: 0dp;
+	padding: 0dp;
+	overflow: visible;
+}
+
+.quest-root-open {
+	display: flex;
+}
+
+.quest-panel,
+.quest-detail,
+.nmis-panel {
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	flex: none;
+	margin: 0dp;
+	padding: 0dp 0dp 10dp 0dp;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/panel_tl.tga,
+		ui/rml/frames/notice/panel_t.tga,
+		ui/rml/frames/notice/panel_tr.tga,
+		ui/rml/frames/notice/panel_l.tga,
+		ui/rml/frames/notice/panel_c.tga,
+		ui/rml/frames/notice/panel_r.tga,
+		ui/rml/frames/notice/panel_bl.tga,
+		ui/rml/frames/notice/panel_b.tga,
+		ui/rml/frames/notice/panel_br.tga
+	);
+}
+
+.quest-panel {
+	width: 280dp;
+	min-width: 280dp;
+	height: 480dp;
+	margin-right: 8dp;
+}
+
+.quest-detail {
+	width: 340dp;
+	min-width: 340dp;
+	height: 480dp;
+}
+
+.nmis-panel {
+	display: none;
+	position: absolute;
+	width: 420dp;
+	min-width: 420dp;
+}
+
+.nmis-panel-open {
+	display: flex;
+}
+
+.quest-header {
+	display: block;
+	position: relative;
+	z-index: 2;
+	box-sizing: border-box;
+	height: 56dp;
+	padding: 0dp 12dp;
+}
+
+.quest-drag {
+	display: block;
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	right: 0dp;
+	bottom: 0dp;
+	z-index: 1;
+	cursor: move;
+}
+
+.quest-title {
+	display: block;
+	padding-top: 16dp;
+	padding-left: 12dp;
+	font-size: 17dp;
+	font-weight: bold;
+	color: #ffffff;
+	text-align: left;
+}
+
+.quest-close,
+button.quest-close {
+	display: block;
+	position: absolute;
+	right: 10dp;
+	top: 14dp;
+	z-index: 3;
+	width: 26dp;
+	height: 26dp;
+	line-height: 26dp;
+	padding: 0dp;
+	drag: block;
+	font-family: LatoLatin;
+	font-size: 13dp;
+	font-weight: bold;
+	text-align: center;
+	color: #ffffff;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/capsule_blue_l.tga,
+		ui/rml/frames/notice/capsule_blue_c.tga,
+		ui/rml/frames/notice/capsule_blue_r.tga
+	);
+}
+
+.quest-list {
+	display: block;
+	flex: none;
+	box-sizing: border-box;
+	width: 280dp;
+	padding: 0dp 12dp 4dp 12dp;
+	overflow: visible;
+}
+
+.quest-cat {
+	display: block;
+	width: 256dp;
+	height: 22dp;
+	line-height: 22dp;
+	margin: 4dp 0dp 4dp 0dp;
+	font-size: 11dp;
+	font-weight: bold;
+	color: #5a7ab0;
+}
+
+.quest-row,
+button.quest-row {
+	display: block;
+	box-sizing: border-box;
+	width: 256dp;
+	height: 36dp;
+	line-height: 36dp;
+	margin: 0dp 0dp 6dp 0dp;
+	padding: 0dp 10dp;
+	font-family: LatoLatin;
+	font-size: 12dp;
+	font-weight: bold;
+	text-align: left;
+	color: #2a4a80;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_blue_l.tga,
+		ui/rml/frames/notice/btn_blue_c.tga,
+		ui/rml/frames/notice/btn_blue_r.tga
+	);
+	image-color: #d7e8fb;
+}
+
+.quest-row:hover,
+button.quest-row:hover {
+	image-color: #c4dbf7;
+}
+
+.quest-row-sel,
+button.quest-row-sel {
+	image-color: #b6d4f4;
+}
+
+.quest-row-done,
+button.quest-row-done {
+	color: #1a4a28;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_green_l.tga,
+		ui/rml/frames/notice/btn_green_c.tga,
+		ui/rml/frames/notice/btn_green_r.tga
+	);
+	image-color: #ffffff;
+}
+
+.qd-name {
+	display: block;
+	flex: none;
+	width: 316dp;
+	margin: 0dp 12dp 4dp 12dp;
+	font-size: 15dp;
+	font-weight: bold;
+	line-height: 20dp;
+	color: #2a4a80;
+}
+
+.nmis-panel .qd-name {
+	width: 384dp;
+	margin: 0dp 18dp 6dp 18dp;
+}
+
+.qd-status {
+	display: block;
+	flex: none;
+	width: 316dp;
+	margin: 0dp 12dp 8dp 12dp;
+	font-size: 11dp;
+	font-weight: bold;
+	line-height: 14dp;
+	color: #5a7ab0;
+}
+
+.qd-body,
+.nmis-body-text {
+	display: block;
+	flex: none;
+	width: 316dp;
+	margin: 0dp 12dp 10dp 12dp;
+	font-size: 13dp;
+	font-weight: bold;
+	line-height: 18dp;
+	color: #2a4a80;
+}
+
+.nmis-body-text {
+	width: 384dp;
+	margin: 0dp 18dp 10dp 18dp;
+}
+
+.qd-section-title {
+	display: block;
+	flex: none;
+	width: 316dp;
+	margin: 0dp 12dp 4dp 12dp;
+	font-size: 11dp;
+	font-weight: bold;
+	line-height: 14dp;
+	color: #5a7ab0;
+}
+
+.nmis-panel .qd-section-title {
+	width: 384dp;
+	margin: 0dp 18dp 4dp 18dp;
+}
+
+.qd-needs,
+.qd-prizes {
+	display: block;
+	flex: none;
+	width: 340dp;
+	padding: 0dp 12dp 6dp 12dp;
+}
+
+.nmis-panel .qd-needs,
+.nmis-panel .qd-prizes {
+	width: 420dp;
+	padding: 0dp 18dp 6dp 18dp;
+}
+
+.qd-need {
+	display: block;
+	width: 316dp;
+	font-size: 12dp;
+	font-weight: bold;
+	line-height: 18dp;
+	color: #2a4a80;
+	margin-bottom: 2dp;
+}
+
+.qd-need-done {
+	color: #2a8a48;
+}
+
+.qd-prize,
+button.qd-prize {
+	display: block;
+	box-sizing: border-box;
+	width: 316dp;
+	height: 32dp;
+	line-height: 32dp;
+	margin: 0dp 0dp 4dp 0dp;
+	padding: 0dp 10dp;
+	font-family: LatoLatin;
+	font-size: 12dp;
+	font-weight: bold;
+	text-align: left;
+	color: #5a4010;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_gold_l.tga,
+		ui/rml/frames/notice/btn_gold_c.tga,
+		ui/rml/frames/notice/btn_gold_r.tga
+	);
+	image-color: #f3e2b0;
+}
+
+.qd-prize-sel,
+button.qd-prize-sel {
+	image-color: #edd49a;
+}
+
+.quest-detail-footer,
+.nmis-footer {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	flex: none;
+	height: 40dp;
+	padding: 4dp 12dp 2dp 12dp;
+}
+
+.nmis-footer {
+	width: 420dp;
+	padding: 4dp 18dp 2dp 18dp;
+}
+
+.quest-abandon,
+button.quest-abandon,
+.nmis-action,
+button.nmis-action,
+.nmis-exit,
+button.nmis-exit {
+	display: block;
+	flex: none;
+	height: 28dp;
+	line-height: 28dp;
+	padding: 0dp;
+	font-family: LatoLatin;
+	font-size: 12dp;
+	font-weight: bold;
+	text-align: center;
+	color: #ffffff;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_blue_l.tga,
+		ui/rml/frames/notice/btn_blue_c.tga,
+		ui/rml/frames/notice/btn_blue_r.tga
+	);
+}
+
+.quest-abandon,
+button.quest-abandon {
+	width: 140dp;
+}
+
+.nmis-action,
+button.nmis-action {
+	width: 120dp;
+	margin-right: 10dp;
+	color: #1a4a28;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_green_l.tga,
+		ui/rml/frames/notice/btn_green_c.tga,
+		ui/rml/frames/notice/btn_green_r.tga
+	);
+}
+
+.nmis-exit,
+button.nmis-exit {
+	width: 120dp;
+}
+
+.quest-btn-disabled,
+button.quest-btn-disabled {
+	image-color: #9ab4d4;
+	color: #d8e4f4;
+}
+
+.nmis-hidden {
+	display: none;
+}

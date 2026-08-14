@@ -405,6 +405,14 @@ bool CUIInterface::_evtESCKey(char& key) {
 			g_stUINpcTalk.HideTalkUi();
 			return true;
 		}
+		if (g_stUIMission.IsMissionUiVisible()) {
+			g_stUIMission.HideMissionUi();
+			return true;
+		}
+		if (g_stUIMisLog.IsQuestUiVisible()) {
+			g_stUIMisLog.HideQuestUi();
+			return true;
+		}
 		if (g_stUINpcTrade.GetIsShow()) {
 			if (CRmlUiNpcTradeForm::Instance().IsModalOpen()) {
 				CRmlUiNpcTradeForm::Instance().HideModals();

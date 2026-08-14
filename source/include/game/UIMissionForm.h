@@ -14,6 +14,9 @@ public:
 	virtual ~CMissionMgr();
 
 	void ShowMissionPage(DWORD dwNpcID, BYTE byCmd, const NET_MISPAGE& page);
+	void HideMissionUi();
+	bool IsMissionUiVisible() const;
+	void ConfirmMission();
 
 protected:
 	bool Init();
@@ -33,6 +36,7 @@ private:
 
 	DWORD m_dwNpcID;
 	BYTE m_byMisCmd;
+	bool m_prizePick = false;
 };
 
 } // namespace GUI

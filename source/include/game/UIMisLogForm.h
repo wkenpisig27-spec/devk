@@ -19,6 +19,12 @@ public:
 	void MisAddLog(WORD wMisID, BYTE byState);
 	void MisRefresh();
 
+	void ShowQuestUi();
+	void HideQuestUi();
+	void ToggleQuestUi();
+	bool IsQuestUiVisible() const;
+	void ConfirmAbandon();
+
 protected:
 	bool Init();
 	void End();
@@ -50,6 +56,11 @@ private:
 
 	// 锟斤拷锟斤拷锟斤拷志锟斤拷息
 	NET_MISLOG_LIST m_LogList;
+
+	NET_MISPAGE m_Page;
+	bool m_hasPage = false;
+
+	void PushRmlQuestView();
 
 	// 锟斤拷前锟斤拷锟斤拷说锟斤拷
 	WORD m_wMisID;

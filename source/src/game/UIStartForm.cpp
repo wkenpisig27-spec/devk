@@ -935,12 +935,8 @@ void CStartMgr::_evtStartFormMouseEvent(CCompent* pSender, int nMsgType, int x, 
 	{
 		g_stUIEquip.ToggleSkillUi();
 		return;
-	} else if (name == "btnMission") // ??????????
-	{
-		CForm* f = CFormMgr::s_Mgr.Find("frmMission");
-		if (f) {
-			f->SetIsShow(!f->GetIsShow());
-		}
+	} else if (name == "btnMission") {
+		g_stUIMisLog.ToggleQuestUi();
 		return;
 	}
 	// else if( name=="btnGuild" )	    // ??????????

@@ -1,0 +1,28 @@
+<rml>
+	<head>
+		<title>Quest</title>
+		<link type="text/rcss" href="notice.rcss"/>
+		<link type="text/rcss" href="quest.rcss"/>
+	</head>
+	<body class="nmis-body">
+		<div id="nmis-root" class="nmis-panel">
+			<div class="quest-header">
+				<handle class="quest-drag" move_target="nmis-root">
+					<div id="nmis-title" class="quest-title">Quest</div>
+				</handle>
+				<button class="quest-close" id="btnNmisClose" type="button">X</button>
+			</div>
+			<div id="nmis-name" class="qd-name"></div>
+			<div id="nmis-body" class="qd-body nmis-body-text"></div>
+			<div id="nmis-need-title" class="qd-section-title">Objectives</div>
+			<div id="nmis-needs" class="qd-needs"></div>
+			<div id="nmis-prize-title" class="qd-section-title">Rewards</div>
+			<div id="nmis-prizes" class="qd-prizes"></div>
+			<div class="nmis-footer">
+				<button class="nmis-action nmis-hidden" id="btnNmisAccept" type="button">Accept</button>
+				<button class="nmis-action nmis-hidden" id="btnNmisComplete" type="button">Complete</button>
+				<button class="nmis-exit" id="btnNmisExit" type="button">Close</button>
+			</div>
+		</div>
+	</body>
+</rml>

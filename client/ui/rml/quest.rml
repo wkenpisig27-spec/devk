@@ -1,0 +1,38 @@
+<rml>
+	<head>
+		<title>Quest Log</title>
+		<link type="text/rcss" href="notice.rcss"/>
+		<link type="text/rcss" href="quest.rcss"/>
+	</head>
+	<body class="quest-body">
+		<div id="quest-root" class="quest-root">
+			<div id="quest-panel" class="quest-panel">
+				<div class="quest-header">
+					<handle class="quest-drag" move_target="quest-root">
+						<div class="quest-title">Quest Log</div>
+					</handle>
+					<button class="quest-close" id="btnQuestClose" type="button">X</button>
+				</div>
+				<div id="quest-list" class="quest-list"></div>
+			</div>
+
+			<div id="quest-detail" class="quest-detail">
+				<div class="quest-header">
+					<handle class="quest-drag" move_target="quest-root">
+						<div class="quest-title">Details</div>
+					</handle>
+				</div>
+				<div id="qd-name" class="qd-name">Select a quest</div>
+				<div id="qd-status" class="qd-status"></div>
+				<div id="qd-body" class="qd-body"></div>
+				<div id="qd-need-title" class="qd-section-title">Objectives</div>
+				<div id="qd-needs" class="qd-needs"></div>
+				<div id="qd-prize-title" class="qd-section-title">Rewards</div>
+				<div id="qd-prizes" class="qd-prizes"></div>
+				<div class="quest-detail-footer">
+					<button class="quest-abandon quest-btn-disabled" id="btnQuestAbandon" type="button" disabled>Abandon</button>
+				</div>
+			</div>
+		</div>
+	</body>
+</rml>

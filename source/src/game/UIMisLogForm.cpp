@@ -13,6 +13,9 @@
 #include "UIStartForm.h"
 #include "UIList.h"
 #include "AutoPathService.h"
+#include "ItemRecord.h"
+#include "CharacterRecord.h"
+#include "rmlui/RmlUiQuestForm.h"
 
 using namespace std;
 using namespace GUI;
@@ -48,6 +51,8 @@ CMisLogForm::CMisLogForm() {
 	m_pInvalid = nullptr;
 	m_wMisID = 0xFFFF;
 	m_dwUpdateTick = 0;
+	m_hasPage = false;
+	memset(&m_Page, 0, sizeof(m_Page));
 }
 
 CMisLogForm::~CMisLogForm() {
@@ -84,6 +89,8 @@ bool CMisLogForm::Init() {
 		pButton->SetIsEnabled(false);
 	}
 
+	m_pForm->SetIsEscClose(false);
+	m_pForm->SetIsShow(false);
 	return true;
 }
 
@@ -92,7 +99,9 @@ void CMisLogForm::End() {
 
 void CMisLogForm::_Show(CGuiData* pSender) {
 	if (stricmp("frmMission", pSender->GetName()) == 0) {
-		g_stUIMisLog.MisRefresh();
+		if (g_stUIMisLog.m_pForm && g_stUIMisLog.m_pForm->GetIsShow())
+			g_stUIMisLog.m_pForm->SetIsShow(false);
+		g_stUIMisLog.ShowQuestUi();
 	}
 }
 
@@ -314,6 +323,8 @@ void CMisLogForm::MisLogList(const NET_MISLOG_LIST& List) {
 	if (List.byNumLog > 0) {
 		CS_MisLogInfo(List.MisLog[0].wMisID);
 	}
+	if (CRmlUiQuestForm::Instance().IsVisible())
+		PushRmlQuestView();
 }
 
 void CMisLogForm::MissionLog(WORD wMisID, const NET_MISPAGE& page) {
@@ -325,6 +336,10 @@ void CMisLogForm::MissionLog(WORD wMisID, const NET_MISPAGE& page) {
 	m_pMisInfo->SetMisPage(page);
 	m_pMisInfo->SetIsShow(true);
 	m_wMisID = wMisID;
+	memcpy(&m_Page, &page, sizeof(NET_MISPAGE));
+	m_hasPage = true;
+	if (CRmlUiQuestForm::Instance().IsVisible())
+		PushRmlQuestView();
 }
 
 void CMisLogForm::GetMisData(WORD wMisID, BYTE& byType, char szBuf[], USHORT sBufLen) {
@@ -418,8 +433,12 @@ void CMisLogForm::MisClear(WORD wMisID) {
 		m_pMisInfo->Init();
 		if (m_LogList.byNumLog > 0) {
 			CS_MisLogInfo(m_LogList.MisLog[0].wMisID);
+		} else {
+			m_hasPage = false;
 		}
 	}
+	if (CRmlUiQuestForm::Instance().IsVisible())
+		PushRmlQuestView();
 }
 
 void CMisLogForm::MisAddLog(WORD wMisID, BYTE byState) {
@@ -433,6 +452,8 @@ void CMisLogForm::MisAddLog(WORD wMisID, BYTE byState) {
 	if (m_wMisID == 0xFFFF) {
 		CS_MisLogInfo(m_LogList.MisLog[0].wMisID);
 	}
+	if (CRmlUiQuestForm::Instance().IsVisible())
+		PushRmlQuestView();
 }
 
 void CMisLogForm::MisLogState(WORD wMisID, BYTE byState) {
@@ -527,6 +548,8 @@ void CMisLogForm::MisLogState(WORD wMisID, BYTE byState) {
 	}
 
 	pItem->SetString(strData.c_str());
+	if (CRmlUiQuestForm::Instance().IsVisible())
+		PushRmlQuestView();
 }
 
 void CMisLogForm::_ItemClickEvent(string strItem) {
@@ -540,3 +563,225 @@ void CMisLogForm::_ItemClickEvent(string strItem) {
 		g_stUIBox.ShowMsgBox(nullptr, message);
 	}
 }
+
+namespace {
+
+std::string StripMisMarkup(const char* text) {
+	std::string out;
+	if (!text)
+		return out;
+	for (const char* p = text; *p; ++p) {
+		if (*p == '_') {
+			out += '\n';
+			continue;
+		}
+		if (*p == '<') {
+			const char* end = strchr(p, '>');
+			if (!end)
+				break;
+			if (strncmp(p, "<nav:", 5) == 0) {
+				const char* bar = strchr(p, '|');
+				if (bar && bar < end)
+					out.append(bar + 1, (size_t)(end - bar - 1));
+			}
+			p = end;
+			continue;
+		}
+		out += *p;
+	}
+	while (!out.empty() && (out.back() == ' ' || out.back() == '\n'))
+		out.pop_back();
+	return out;
+}
+
+const char* MisStateLabel(BYTE byState) {
+	if (byState == ROLE_MIS_PENDING_FLAG)
+		return "Incomplete";
+	if (byState == ROLE_MIS_COMPLETE_FLAG)
+		return "Completed";
+	if (byState == ROLE_MIS_FAILURE_FALG)
+		return "Failed";
+	return "Unknown";
+}
+
+int MisStateKind(BYTE byState) {
+	if (byState == ROLE_MIS_PENDING_FLAG)
+		return 0;
+	if (byState == ROLE_MIS_COMPLETE_FLAG)
+		return 1;
+	if (byState == ROLE_MIS_FAILURE_FALG)
+		return 2;
+	return 3;
+}
+
+BYTE FindLogState(const NET_MISLOG_LIST& list, WORD wMisID) {
+	for (BYTE i = 0; i < list.byNumLog; ++i) {
+		if (list.MisLog[i].wMisID == wMisID)
+			return list.MisLog[i].byState;
+	}
+	return ROLE_MIS_PENDING_FLAG;
+}
+
+void FillPageFields(const NET_MISPAGE& page, CRmlUiQuestForm::QuestView& view) {
+	view.title = StripMisMarkup(page.szName);
+	view.body = StripMisMarkup(page.szDesp);
+
+	char buf[256];
+	for (int i = 0; i < page.byNeedNum; ++i) {
+		CRmlUiQuestForm::NeedView need;
+		const NET_MISNEED& n = page.MisNeed[i];
+		if (n.byType == mission::MIS_NEED_ITEM) {
+			CItemRecord* item = GetItemRecordInfo(n.wParam1);
+			sprintf_s(buf, "Obtain %s  %d/%d", item ? item->szName : "Unknown", n.wParam3, n.wParam2);
+			need.text = buf;
+			need.done = n.wParam2 > 0 && n.wParam3 >= n.wParam2;
+		} else if (n.byType == mission::MIS_NEED_KILL) {
+			CChaRecord* cha = GetChaRecordInfo(n.wParam1);
+			sprintf_s(buf, "Hunt %s  %d/%d", cha ? cha->szName : "Unknown", n.wParam3, n.wParam2);
+			need.text = buf;
+			need.done = n.wParam2 > 0 && n.wParam3 >= n.wParam2;
+		} else if (n.byType == mission::MIS_NEED_DESP) {
+			need.text = StripMisMarkup(n.szNeed);
+		} else {
+			need.text = "Unknown objective";
+		}
+		if (!need.text.empty())
+			view.needs.push_back(std::move(need));
+	}
+
+	for (int i = 0; i < page.byPrizeNum; ++i) {
+		CRmlUiQuestForm::PrizeView prize;
+		const NET_MISPRIZE& p = page.MisPrize[i];
+		if (p.byType == mission::MIS_PRIZE_ITEM) {
+			CItemRecord* item = GetItemRecordInfo(p.wParam1);
+			sprintf_s(buf, "%d %s", p.wParam2, item ? item->szName : "Unknown item");
+			prize.text = buf;
+			if (item && item->GetIconFile())
+				prize.iconPath = item->GetIconFile();
+		} else if (p.byType == mission::MIS_PRIZE_MONEY) {
+			sprintf_s(buf, "%dG", p.wParam1);
+			prize.text = buf;
+		} else if (p.byType == mission::MIS_PRIZE_FAME) {
+			sprintf_s(buf, "%d Reputation", p.wParam1);
+			prize.text = buf;
+		} else if (p.byType == mission::MIS_PRIZE_CESS) {
+			sprintf_s(buf, "%d Commerce", p.wParam1);
+			prize.text = buf;
+		} else {
+			prize.text = "Unknown reward";
+		}
+		view.prizes.push_back(std::move(prize));
+	}
+}
+
+} // namespace
+
+void CMisLogForm::PushRmlQuestView() {
+	CRmlUiQuestForm::QuestView view;
+	const BYTE types[] = {
+		mission::MIS_TREENODE_NORMAL,
+		mission::MIS_TREENODE_HISTORY,
+		mission::MIS_TREENODE_GUILD,
+		mission::MIS_TREENODE_INVALID,
+	};
+	const char* titles[] = {"Normal Quest", "Story Quest", "Guild Quest", "Other"};
+
+	for (int t = 0; t < 4; ++t) {
+		bool any = false;
+		for (BYTE i = 0; i < m_LogList.byNumLog; ++i) {
+			if (m_LogList.MisLog[i].byType == types[t]) {
+				any = true;
+				break;
+			}
+		}
+		if (!any)
+			continue;
+
+		CRmlUiQuestForm::RowView header;
+		header.header = true;
+		header.name = titles[t];
+		view.rows.push_back(std::move(header));
+
+		for (BYTE i = 0; i < m_LogList.byNumLog; ++i) {
+			if (m_LogList.MisLog[i].byType != types[t])
+				continue;
+			char nameBuf[128] = {0};
+			BYTE byType = 0;
+			sprintf_s(nameBuf, "Quest %d", m_LogList.MisLog[i].wMisID);
+			GetMisData(m_LogList.MisLog[i].wMisID, byType, nameBuf, 128);
+
+			CRmlUiQuestForm::RowView row;
+			row.misId = m_LogList.MisLog[i].wMisID;
+			row.name = StripMisMarkup(nameBuf);
+			row.status = MisStateLabel(m_LogList.MisLog[i].byState);
+			row.statusKind = MisStateKind(m_LogList.MisLog[i].byState);
+			row.selected = (m_wMisID == m_LogList.MisLog[i].wMisID);
+			view.rows.push_back(std::move(row));
+		}
+	}
+
+	view.selectedId = (m_wMisID == 0xFFFF) ? 0 : m_wMisID;
+	if (m_hasPage && m_wMisID != 0xFFFF) {
+		FillPageFields(m_Page, view);
+		view.status = MisStateLabel(FindLogState(m_LogList, m_wMisID));
+		view.statusKind = MisStateKind(FindLogState(m_LogList, m_wMisID));
+		view.hasDetail = true;
+		view.canAbandon = true;
+	}
+
+	CRmlUiQuestForm::Instance().ApplyView(view);
+}
+
+void CMisLogForm::ShowQuestUi() {
+	MisRefresh();
+	PushRmlQuestView();
+	CRmlUiQuestForm::Instance().Show();
+	if (m_pForm && m_pForm->GetIsShow())
+		m_pForm->SetIsShow(false);
+}
+
+void CMisLogForm::HideQuestUi() {
+	CRmlUiQuestForm::Instance().Hide();
+	if (m_pForm && m_pForm->GetIsShow())
+		m_pForm->SetIsShow(false);
+}
+
+void CMisLogForm::ToggleQuestUi() {
+	if (IsQuestUiVisible())
+		HideQuestUi();
+	else
+		ShowQuestUi();
+}
+
+bool CMisLogForm::IsQuestUiVisible() const {
+	return CRmlUiQuestForm::Instance().IsVisible();
+}
+
+void CMisLogForm::ConfirmAbandon() {
+	if (m_wMisID == 0xFFFF)
+		return;
+	char szData[128] = {0};
+	BYTE byType = 0;
+	sprintf_s(szData, RES_STRING(CL_LANGUAGE_MATCH_722), m_wMisID);
+	GetMisData(m_wMisID, byType, szData, 32);
+	char szBuf[256] = {0};
+	sprintf_s(szBuf, RES_STRING(CL_LANGUAGE_MATCH_723), szData);
+	stSelectBox* pBox = CBoxMgr::ShowSelectBox(_evtBreakYesNoEvent, szBuf, true);
+	if (pBox)
+		pBox->dwTag = m_wMisID;
+}
+
+void RmlQuest_OnClose() {
+	g_stUIMisLog.HideQuestUi();
+}
+
+void RmlQuest_OnSelect(int misId) {
+	if (misId <= 0)
+		return;
+	CS_MisLogInfo((WORD)misId);
+}
+
+void RmlQuest_OnAbandon() {
+	g_stUIMisLog.ConfirmAbandon();
+}
+
