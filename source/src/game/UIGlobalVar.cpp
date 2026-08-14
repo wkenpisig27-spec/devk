@@ -16,6 +16,8 @@
 #include "UIMisLogForm.h"
 #include "uiforgeform.h"
 #include "uinpctradeform.h"
+#include "rmlui/RmlUiNpcTradeForm.h"
+#include "rmlui/RmlUiSkillForm.h"
 #include "uistartform.h"
 #include "uistateform.h"
 #include "uiCozeform.h"
@@ -398,8 +400,25 @@ bool CUIInterface::_evtESCKey(char& key) {
 			g_stUIBank.CloseBankUi(true);
 			return true;
 		}
+		if (g_stUINpcTrade.GetIsShow()) {
+			if (CRmlUiNpcTradeForm::Instance().IsModalOpen()) {
+				CRmlUiNpcTradeForm::Instance().HideModals();
+				g_stUINpcTrade.CancelPendingTrade();
+				return true;
+			}
+			g_stUINpcTrade.HideTradeUi(true);
+			return true;
+		}
 		if (g_stUIState.IsCharacterUiVisible()) {
 			g_stUIState.HideCharacterUi();
+			return true;
+		}
+		if (g_stUIEquip.IsSkillUiVisible()) {
+			if (CRmlUiSkillForm::Instance().IsDetailVisible()) {
+				CRmlUiSkillForm::Instance().ClearSelection();
+				return true;
+			}
+			g_stUIEquip.HideSkillUi();
 			return true;
 		}
 		if (CRmlUiInventoryForm::Instance().IsVisible()) {

@@ -1,0 +1,102 @@
+<rml>
+	<head>
+		<title>Skill</title>
+		<link type="text/rcss" href="notice.rcss"/>
+		<link type="text/rcss" href="skill.rcss"/>
+	</head>
+	<body class="skill-body">
+		<!-- Shared shell: dragging Skill or Skill Info moves both (same pattern as inventory). -->
+		<div id="skill-root" class="skill-root">
+			<div id="skill-panel" class="skill-panel">
+				<div class="skill-header">
+					<handle class="skill-drag" move_target="skill-root">
+						<div class="skill-title">Skill</div>
+					</handle>
+					<!-- Folder icon tabs: Fight / Life / Sail -->
+					<div id="skill-tabs" class="skill-tabs">
+						<button class="skill-tab skill-tab-active" id="tabFight" type="button" data-filter="fight" title="Fight">
+							<img class="skill-tab-icon" src="ui/rml/frames/notice/ico_tab_fight.tga"/>
+						</button>
+						<button class="skill-tab" id="tabLife" type="button" data-filter="life" title="Life">
+							<img class="skill-tab-icon" src="ui/rml/frames/notice/ico_tab_life.tga"/>
+						</button>
+						<button class="skill-tab" id="tabSail" type="button" data-filter="sail" title="Sail">
+							<img class="skill-tab-icon" src="ui/rml/frames/notice/ico_tab_sail.tga"/>
+						</button>
+					</div>
+					<button class="skill-close" id="btnClose" type="button">X</button>
+				</div>
+
+				<div class="skill-body-wrap">
+					<div id="skill-list" class="skill-list"></div>
+					<div id="skill-scrollbar" class="skill-scrollbar">
+						<div id="skill-scroll-thumb" class="skill-scroll-thumb"></div>
+					</div>
+				</div>
+
+				<div class="skill-footer">
+					<div class="skill-pts">
+						<div class="skill-pts-tag skill-pts-tag-fight">Skill Pts</div>
+						<div id="labSkillPts" class="skill-pts-value">0</div>
+					</div>
+					<div class="skill-pts skill-pts-last">
+						<div class="skill-pts-tag skill-pts-tag-life">Life Pts</div>
+						<div id="labLifePts" class="skill-pts-value">0</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Detail / next-level panel (shown when a skill is selected) -->
+			<div id="skill-detail" class="skill-detail skill-detail-hidden">
+				<div class="skill-detail-header">
+					<handle class="skill-detail-drag" move_target="skill-root">
+						<div class="skill-detail-title">Skill Info</div>
+					</handle>
+					<button class="skill-close" id="btnDetailClose" type="button">X</button>
+				</div>
+
+				<div class="skill-detail-hero">
+					<div id="sd-icon-well" class="skill-detail-icon-well">
+						<img id="sd-icon" class="skill-detail-icon" src=""/>
+					</div>
+					<div class="skill-detail-hero-text">
+						<div id="sd-name" class="skill-detail-name"></div>
+						<div id="sd-level" class="skill-detail-level"></div>
+						<div id="sd-tags" class="skill-detail-tags"></div>
+					</div>
+				</div>
+
+				<div id="skill-detail-scroll" class="skill-detail-scroll">
+					<div class="skill-detail-content">
+						<div class="skill-detail-section">
+							<div class="skill-detail-section-title">Description</div>
+							<div id="sd-desc" class="skill-detail-text"></div>
+						</div>
+						<div class="skill-detail-section">
+							<div class="skill-detail-section-title">Effect</div>
+							<div id="sd-effect" class="skill-detail-text"></div>
+						</div>
+						<div id="sd-cost-section" class="skill-detail-section">
+							<div class="skill-detail-section-title">Cost</div>
+							<div id="sd-cost" class="skill-detail-text"></div>
+						</div>
+						<div class="skill-detail-section">
+							<div class="skill-detail-section-title">Details</div>
+							<div id="sd-stats" class="skill-detail-stats"></div>
+						</div>
+						<div class="skill-detail-section skill-detail-next">
+							<div class="skill-detail-section-title">Next Level</div>
+							<div id="sd-next-title" class="skill-detail-next-title"></div>
+							<div id="sd-next-body" class="skill-detail-text"></div>
+							<div id="sd-next-req" class="skill-detail-next-req"></div>
+						</div>
+					</div>
+				</div>
+
+				<div class="skill-detail-footer">
+					<button class="skill-detail-upgrade" id="btnDetailUpgrade" type="button">Upgrade</button>
+				</div>
+			</div>
+		</div>
+	</body>
+</rml>

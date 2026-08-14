@@ -8,6 +8,8 @@
 #include "rmlui/RmlUiInventoryForm.h"
 #include "rmlui/RmlUiBankForm.h"
 #include "rmlui/RmlUiCharacterForm.h"
+#include "rmlui/RmlUiSkillForm.h"
+#include "rmlui/RmlUiNpcTradeForm.h"
 
 #include "UIMenu.h"
 #include "MPRender.h"
@@ -227,6 +229,12 @@ bool CRmlUiManager::Init(HWND hwnd) {
 	if (!CRmlUiCharacterForm::Instance().Load(g_context)) {
 		OutputDebugStringA("RmlUi: warning - character.rml failed to load\n");
 	}
+	if (!CRmlUiSkillForm::Instance().Load(g_context)) {
+		OutputDebugStringA("RmlUi: warning - skill.rml failed to load\n");
+	}
+	if (!CRmlUiNpcTradeForm::Instance().Load(g_context)) {
+		OutputDebugStringA("RmlUi: warning - npctrade.rml failed to load\n");
+	}
 
 	m_ready = true;
 	OutputDebugStringA("RmlUi: initialized OK\n");
@@ -255,6 +263,14 @@ void CRmlUiManager::HideCharacterForm() {
 	CRmlUiCharacterForm::Instance().Hide();
 }
 
+void CRmlUiManager::HideSkillForm() {
+	CRmlUiSkillForm::Instance().Hide();
+}
+
+void CRmlUiManager::HideNpcTradeForm() {
+	CRmlUiNpcTradeForm::Instance().Hide();
+}
+
 void CRmlUiManager::Shutdown() {
 	m_ready = false;
 
@@ -265,6 +281,8 @@ void CRmlUiManager::Shutdown() {
 	CRmlUiInventoryForm::Instance().Unload();
 	CRmlUiBankForm::Instance().Unload();
 	CRmlUiCharacterForm::Instance().Unload();
+	CRmlUiSkillForm::Instance().Unload();
+	CRmlUiNpcTradeForm::Instance().Unload();
 
 	if (g_context) {
 		g_context->UnloadAllDocuments();
@@ -300,8 +318,10 @@ void CRmlUiManager::Update() {
 	SyncViewport();
 	g_context->Update();
 	// FormMgr::FrameMove clears hint items every frame — rebuild after that.
-	if (m_lastX >= 0 && m_lastY >= 0)
+	if (m_lastX >= 0 && m_lastY >= 0) {
 		CRmlUiInventoryForm::Instance().UpdateItemHint(m_lastX, m_lastY);
+		CRmlUiNpcTradeForm::Instance().UpdateItemHint(m_lastX, m_lastY);
+	}
 }
 
 void CRmlUiManager::Render() {
@@ -315,6 +335,7 @@ void CRmlUiManager::Render() {
 	// 3D preview + item hint above the Rml chrome (FormMgr draws underneath).
 	CRmlUiInventoryForm::Instance().RenderChaPreview();
 	CRmlUiInventoryForm::Instance().RenderItemHint();
+	CRmlUiNpcTradeForm::Instance().RenderItemHint();
 }
 
 void CRmlUiManager::ProcessMouse(int x, int y, DWORD mouseKey) {

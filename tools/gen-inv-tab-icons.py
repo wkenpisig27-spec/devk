@@ -184,6 +184,36 @@ def shape_other(px: float, py: float) -> float:
     )
 
 
+def shape_fight(px: float, py: float) -> float:
+    # Sword
+    blade = sd_round_box(px, py, C, 9.0, 1.55, 5.8, 0.55)
+    tip = sd_segment(px, py, C, 3.2, C - 2.4, 6.2, 1.15)
+    tip = op_union(tip, sd_segment(px, py, C, 3.2, C + 2.4, 6.2, 1.15))
+    guard = sd_round_box(px, py, C, 15.0, 5.2, 1.15, 0.55)
+    hilt = sd_round_box(px, py, C, 17.8, 1.4, 2.2, 0.5)
+    pommel = sd_circle(px, py, C, 20.0, 1.6)
+    return op_union(op_union(op_union(op_union(op_union(blade, tip), guard), hilt), pommel), tip)
+
+
+def shape_life(px: float, py: float) -> float:
+    # Hammer
+    head = sd_round_box(px, py, C, 7.2, 6.2, 2.6, 1.1)
+    handle = sd_round_box(px, py, C, 14.5, 1.45, 5.5, 0.55)
+    butt = sd_circle(px, py, C, 19.8, 1.7)
+    return op_union(op_union(head, handle), butt)
+
+
+def shape_sail(px: float, py: float) -> float:
+    # Star / figure
+    arms = sd_circle(px, py, C, 7.0, 2.2)
+    body = sd_segment(px, py, C, 9.0, C, 15.5, 1.4)
+    leg_l = sd_segment(px, py, C, 15.0, C - 4.2, 19.5, 1.25)
+    leg_r = sd_segment(px, py, C, 15.0, C + 4.2, 19.5, 1.25)
+    arm_l = sd_segment(px, py, C, 11.0, C - 5.0, 13.5, 1.2)
+    arm_r = sd_segment(px, py, C, 11.0, C + 5.0, 13.5, 1.2)
+    return op_union(op_union(op_union(op_union(op_union(arms, body), leg_l), leg_r), arm_l), arm_r)
+
+
 def main() -> None:
     paint_tab_face()
     paint_icon("ico_tab_items", shape_items)
@@ -191,6 +221,9 @@ def main() -> None:
     paint_icon("ico_tab_consumable", shape_consumable)
     paint_icon("ico_tab_material", shape_material)
     paint_icon("ico_tab_other", shape_other)
+    paint_icon("ico_tab_fight", shape_fight)
+    paint_icon("ico_tab_life", shape_life)
+    paint_icon("ico_tab_sail", shape_sail)
 
 
 if __name__ == "__main__":

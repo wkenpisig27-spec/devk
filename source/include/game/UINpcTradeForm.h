@@ -22,7 +22,19 @@ public:
 	void LocalSaleToNpc(CGoodsGrid* pNpcGrid, CGoodsGrid* pSelfGrid, int nGridID, CCommandObj* pItem);
 
 	void SellSelectedItems(CGoodsGrid* grid);
-	bool GetIsShow() { return frmNPCtrade->GetIsShow(); }
+	bool GetIsShow() const;
+	bool IsTradeUiVisible() const;
+
+	// Notice Rml trade overlay (legacy grids remain data hosts).
+	void ShowTradeUi(int initialPage);
+	void HideTradeUi(bool hideInventory);
+	void RefreshTradeUi();
+	void BuyFromShopSlot(int page, int shopIndex, int bagSlotHint);
+	void SaleFromBagSlot(int bagIndex);
+	void ConfirmPendingBuy(int count);
+	void ConfirmPendingSale(int count);
+	void CancelPendingTrade();
+	void ApplyShopItemHint(int page, int shopIndex, int mouseX, int mouseY);
 
 protected:
 	bool Init();

@@ -12,8 +12,27 @@
 #include "uiedit.h"
 #include "uiboatform.h"
 #include "StringLib.h"
+#include "rmlui/RmlUiNpcTradeForm.h"
+#include "rmlui/RmlUiInventoryForm.h"
+#include "rmlui/RmlUiManager.h"
+
+#include <vector>
 
 using namespace GUI;
+
+namespace {
+
+enum class RmlTradePending {
+	None,
+	BuyConfirm,
+	SaleConfirm,
+	BuyQty,
+	SaleQty,
+};
+
+RmlTradePending g_rmlTradePending = RmlTradePending::None;
+
+} // namespace
 
 //---------------------------------------------------------------------------
 // class CNpcTradeMgr
@@ -48,6 +67,11 @@ bool CNpcTradeMgr::Init() {
 	if (!grdNPCtradeOther)
 		return Error(RES_STRING(CL_LANGUAGE_MATCH_45), frmNPCtrade->GetName(), "grdNPCtradeOther");
 	grdNPCtradeOther->evtBeforeAccept = _evtDragToGoodsEvent;
+
+	// Data host only — player chrome is Notice Rml trade.
+	frmNPCtrade->SetHotKey(0);
+	frmNPCtrade->SetIsEscClose(false);
+	frmNPCtrade->SetIsShow(false);
 	return true;
 }
 
@@ -131,12 +155,11 @@ void CNpcTradeMgr::ShowTradePage(const NET_TRADEINFO& TradeInfo, BYTE byCmd, DWO
 		pgeNPCtrade->SetIndex(nIndex);
 
 	if (frmNPCtrade) {
-		frmNPCtrade->SetPos(100, 100);
-		frmNPCtrade->Refresh();
-		frmNPCtrade->Show();
+		frmNPCtrade->SetIsShow(false);
 	}
 
 	g_stUIEquip.ShowInventoryUi();
+	ShowTradeUi(nIndex);
 
 	_IsShow = true;
 }
@@ -387,20 +410,34 @@ void CNpcTradeMgr::LocalBuyFromNpc(CGoodsGrid* pNpcGrid, CGoodsGrid* pSelfGrid, 
 	}
 	char buf[256] = {0};
 	sprintf(buf, "%s[%s$]?", pBuy->GetName(), StringSplitNum(pBuy->GetPrice()));
+
+	_sBuy.dwNpcID = _dwNpcID;
+	_sBuy.nBuyGrid = nBuyGrid;
+	_sBuy.nDragIndex = pNpcGrid->GetDragIndex();
+	_sBuy.nIndex = nIndex;
+	_sBuy.pBox = nullptr;
+
+	if (CRmlUiNpcTradeForm::Instance().IsVisible()) {
+		const char* icon = pBuy->GetItemInfo() ? pBuy->GetItemInfo()->GetIconFile() : "";
+		char priceBuf[64];
+		sprintf_s(priceBuf, "%s", StringSplitNum(pBuy->GetPrice()));
+		if (pBuy->GetIsPile()) {
+			g_rmlTradePending = RmlTradePending::BuyQty;
+			CRmlUiNpcTradeForm::Instance().ShowQtyPrompt(true, pBuy->GetName(), priceBuf, icon,
+														  pBuy->GetPrice(), nMax > 0 ? nMax : 1);
+		} else {
+			g_rmlTradePending = RmlTradePending::BuyConfirm;
+			CRmlUiNpcTradeForm::Instance().ShowBuyConfirm(pBuy->GetName(), priceBuf, icon);
+		}
+		return;
+	}
+
 	if (pBuy->GetIsPile() && (_sBuy.pBox = g_stUIBox.ShowTradeBox(_BuyTradeEvent, pBuy->GetPrice(), nMax, buf))) {
-		_sBuy.dwNpcID = _dwNpcID;
-		_sBuy.nBuyGrid = nBuyGrid;
-		_sBuy.nDragIndex = pNpcGrid->GetDragIndex();
-		_sBuy.nIndex = nIndex;
 		return;
 	} else {
-		char buf[256] = {0};
-		sprintf(buf, RES_STRING(CL_LANGUAGE_MATCH_742), pBuy->GetName(), StringSplitNum(pBuy->GetPrice()));
-		if (g_stUIBox.ShowSelectBox(_BuyEquipYesNoTradeEvent, buf, true)) {
-			_sBuy.dwNpcID = _dwNpcID;
-			_sBuy.nBuyGrid = nBuyGrid;
-			_sBuy.nDragIndex = pNpcGrid->GetDragIndex();
-			_sBuy.nIndex = nIndex;
+		char buf2[256] = {0};
+		sprintf(buf2, RES_STRING(CL_LANGUAGE_MATCH_742), pBuy->GetName(), StringSplitNum(pBuy->GetPrice()));
+		if (g_stUIBox.ShowSelectBox(_BuyEquipYesNoTradeEvent, buf2, true)) {
 		}
 		return;
 	}
@@ -414,27 +451,42 @@ void CNpcTradeMgr::LocalSaleToNpc(CGoodsGrid* pNpcGrid, CGoodsGrid* pSelfGrid, i
 		return;
 
 	__int64 nPrice = pSaleItem->GetPrice() / 2;
+	_sSale.dwNpcID = _dwNpcID;
+	_sSale.nIndex = pSelfGrid->GetDragIndex();
+	_sSale.pBox = nullptr;
+
+	if (pSaleItem->GetItemInfo()->sType == 43) {
+		CBoat* pBoat = g_stUIBoat.FindBoat(pSaleItem->GetData().GetDBParam(enumITEMDBP_INST_ID));
+		if (pBoat) {
+			nPrice = pBoat->GetCha()->getGameAttr()->get(ATTR_BOAT_PRICE) / 2;
+		}
+	}
+
+	if (CRmlUiNpcTradeForm::Instance().IsVisible()) {
+		const char* icon = pSaleItem->GetItemInfo() ? pSaleItem->GetItemInfo()->GetIconFile() : "";
+		char priceBuf[64];
+		sprintf_s(priceBuf, "%s", StringSplitNum(nPrice));
+		if (pSaleItem->GetIsPile() && pSaleItem->GetTotalNum() > 1) {
+			g_rmlTradePending = RmlTradePending::SaleQty;
+			CRmlUiNpcTradeForm::Instance().ShowQtyPrompt(false, pSaleItem->GetName(), priceBuf, icon, nPrice,
+														  pSaleItem->GetTotalNum());
+		} else {
+			g_rmlTradePending = RmlTradePending::SaleConfirm;
+			CRmlUiNpcTradeForm::Instance().ShowSellConfirm(pSaleItem->GetName(), priceBuf, icon);
+		}
+		return;
+	}
+
 	if (pSaleItem->GetIsPile() && pSaleItem->GetTotalNum() > 1) {
 		char buf[256] = {0};
 		sprintf(buf, "%s[%s$]", pSaleItem->GetItemInfo()->szName, StringSplitNum(nPrice));
 		if (_sSale.pBox = g_stUIBox.ShowTradeBox(_SaleTradeEvent, nPrice, pItem->GetTotalNum(), buf)) {
-			_sSale.dwNpcID = _dwNpcID;
-			_sSale.nIndex = pSelfGrid->GetDragIndex();
 			return;
 		}
 	} else {
 		char buf[256] = {0};
-		if (pSaleItem->GetItemInfo()->sType == 43) {
-			CBoat* pBoat = g_stUIBoat.FindBoat(pSaleItem->GetData().GetDBParam(enumITEMDBP_INST_ID));
-			if (pBoat) {
-				nPrice = pBoat->GetCha()->getGameAttr()->get(ATTR_BOAT_PRICE) / 2;
-			}
-		}
-
 		sprintf(buf, RES_STRING(CL_LANGUAGE_MATCH_743), pSaleItem->GetName(), StringSplitNum(nPrice));
 		if (g_stUIBox.ShowSelectBox(_SaleEquipYesNoTradeEvent, buf, true)) {
-			_sSale.dwNpcID = _dwNpcID;
-			_sSale.nIndex = pSelfGrid->GetDragIndex();
 		}
 		return;
 	}
@@ -507,15 +559,234 @@ void CNpcTradeMgr::_SaleEquipYesNoTradeEvent(CCompent* pSender, int nMsgType, in
 }
 
 void CNpcTradeMgr::CloseForm() {
-	if (!_IsShow)
+	if (!_IsShow && !CRmlUiNpcTradeForm::Instance().IsVisible())
 		return;
 
-	_IsShow = false;
+	HideTradeUi(true);
+}
 
-	if (g_stUIEquip.IsInventoryUiVisible())
-		g_stUIEquip.HideInventoryUi();
+bool CNpcTradeMgr::GetIsShow() const {
+	return _IsShow || CRmlUiNpcTradeForm::Instance().IsVisible();
+}
 
-	if (frmNPCtrade->GetIsShow()) {
-		frmNPCtrade->Close();
+bool CNpcTradeMgr::IsTradeUiVisible() const {
+	return CRmlUiNpcTradeForm::Instance().IsVisible();
+}
+
+void CNpcTradeMgr::ShowTradeUi(int initialPage) {
+	if (frmNPCtrade && frmNPCtrade->GetIsShow())
+		frmNPCtrade->SetIsShow(false);
+
+	if (!CRmlUiManager::Instance().IsReady() || !CRmlUiNpcTradeForm::Instance().LoadOk()) {
+		if (frmNPCtrade) {
+			frmNPCtrade->SetPos(100, 100);
+			frmNPCtrade->Refresh();
+			frmNPCtrade->Show();
+		}
+		_IsShow = true;
+		return;
 	}
+
+	CRmlUiNpcTradeForm& rml = CRmlUiNpcTradeForm::Instance();
+	rml.SetActivePage(initialPage);
+	rml.Show();
+	rml.PlaceBesideInventory();
+	RefreshTradeUi();
+	_IsShow = true;
+}
+
+void CNpcTradeMgr::HideTradeUi(bool hideInventory) {
+	_IsShow = false;
+	g_rmlTradePending = RmlTradePending::None;
+	CRmlUiNpcTradeForm::Instance().Hide();
+	if (frmNPCtrade && frmNPCtrade->GetIsShow())
+		frmNPCtrade->Close();
+
+	if (hideInventory && g_stUIEquip.IsInventoryUiVisible())
+		g_stUIEquip.HideInventoryUi();
+}
+
+void CNpcTradeMgr::RefreshTradeUi() {
+	CRmlUiNpcTradeForm& rml = CRmlUiNpcTradeForm::Instance();
+	if (!rml.IsVisible())
+		return;
+
+	CGoodsGrid* grids[3] = {grdNPCtradeWeapon, grdNPCtradeEquip, grdNPCtradeOther};
+	const int page = rml.GetActivePage();
+	CGoodsGrid* grid = (page >= 0 && page < 3) ? grids[page] : grdNPCtradeOther;
+	if (!grid)
+		return;
+
+	std::vector<RmlNpcSlotView> slots;
+	const int maxNum = grid->GetMaxNum();
+	const int cols = grid->GetCol() > 0 ? grid->GetCol() : 4;
+	slots.reserve((size_t)maxNum);
+	for (int i = 0; i < maxNum; ++i) {
+		RmlNpcSlotView view;
+		view.id = i;
+		view.page = page;
+		if (CItemCommand* cmd = dynamic_cast<CItemCommand*>(grid->GetItem(i))) {
+			if (CItemRecord* info = cmd->GetItemInfo()) {
+				view.iconPath = info->GetIconFile();
+				char priceBuf[32];
+				sprintf_s(priceBuf, "%s", StringSplitNum(cmd->GetPrice()));
+				view.priceText = priceBuf;
+			}
+		}
+		slots.push_back(view);
+	}
+	rml.SetSlots(slots, cols);
+
+	if (CCharacter* pCha = CGameScene::GetMainCha()) {
+		char goldBuf[32];
+		sprintf_s(goldBuf, "%s", StringSplitNum(pCha->getGameAttr()->get(ATTR_GD)));
+		rml.SetGold(goldBuf);
+	}
+}
+
+void CNpcTradeMgr::BuyFromShopSlot(int page, int shopIndex, int bagSlotHint) {
+	CGoodsGrid* grids[3] = {grdNPCtradeWeapon, grdNPCtradeEquip, grdNPCtradeOther};
+	if (page < 0 || page > 2 || !grids[page])
+		return;
+	CGoodsGrid* shop = grids[page];
+	CGoodsGrid* bag = g_stUIEquip.GetGoodsGrid();
+	if (!bag || shopIndex < 0)
+		return;
+
+	CCommandObj* item = shop->GetItem(shopIndex);
+	if (!item)
+		return;
+
+	int bagSlot = bagSlotHint;
+	if (bagSlot < 0)
+		bagSlot = bag->GetFreeIndex();
+	if (bagSlot < 0)
+		return;
+
+	shop->SetDragIndex(shopIndex);
+	LocalBuyFromNpc(shop, bag, bagSlot, item);
+}
+
+void CNpcTradeMgr::SaleFromBagSlot(int bagIndex) {
+	CGoodsGrid* bag = g_stUIEquip.GetGoodsGrid();
+	if (!bag || bagIndex < 0)
+		return;
+	CCommandObj* item = bag->GetItem(bagIndex);
+	if (!item)
+		return;
+
+	CGoodsGrid* shop = grdNPCtradeWeapon;
+	if (!shop)
+		shop = grdNPCtradeEquip;
+	if (!shop)
+		shop = grdNPCtradeOther;
+	if (!shop)
+		return;
+
+	bag->SetDragIndex(bagIndex);
+	LocalSaleToNpc(shop, bag, 0, item);
+}
+
+void CNpcTradeMgr::ConfirmPendingBuy(int count) {
+	if (count <= 0)
+		return;
+	CS_Buy(_sBuy.dwNpcID, _sBuy.nIndex, _sBuy.nDragIndex, _sBuy.nBuyGrid, count);
+}
+
+void CNpcTradeMgr::ConfirmPendingSale(int count) {
+	if (count <= 0)
+		return;
+	CS_Sale(_sSale.dwNpcID, _sSale.nIndex, count);
+}
+
+void CNpcTradeMgr::CancelPendingTrade() {
+	_sBuy.pBox = nullptr;
+	_sSale.pBox = nullptr;
+}
+
+void CNpcTradeMgr::ApplyShopItemHint(int page, int shopIndex, int mouseX, int mouseY) {
+	CGoodsGrid* grids[3] = {grdNPCtradeWeapon, grdNPCtradeEquip, grdNPCtradeOther};
+	if (page < 0 || page > 2 || !grids[page] || shopIndex < 0)
+		return;
+	CItemCommand* cmd = dynamic_cast<CItemCommand*>(grids[page]->GetItem(shopIndex));
+	if (!cmd)
+		return;
+	CGuiData::SetHintItem(cmd);
+	cmd->ReadyForHint(mouseX, mouseY, nullptr);
+}
+
+void RmlNpcTrade_OnClose() {
+	g_stUINpcTrade.HideTradeUi(true);
+}
+
+void RmlNpcTrade_OnTab(int page) {
+	CRmlUiNpcTradeForm::Instance().SetActivePage(page);
+	g_stUINpcTrade.RefreshTradeUi();
+}
+
+void RmlNpcTrade_OnBuy(int page, int shopIndex, int bagSlot) {
+	g_stUINpcTrade.BuyFromShopSlot(page, shopIndex, bagSlot);
+}
+
+void RmlNpcTrade_OnDrop(int srcPage, int srcShop, int srcBag, int dstBag) {
+	if (srcPage >= 0 && srcShop >= 0 && dstBag >= 0)
+		g_stUINpcTrade.BuyFromShopSlot(srcPage, srcShop, dstBag);
+	else if (srcBag >= 0)
+		g_stUINpcTrade.SaleFromBagSlot(srcBag);
+}
+
+void RmlNpcTrade_OnDragEnd(int srcPage, int srcShop, int mouseX, int mouseY) {
+	if (srcPage < 0 || srcShop < 0)
+		return;
+	float x = 0.f, y = 0.f, w = 0.f, h = 0.f;
+	if (CRmlUiInventoryForm::Instance().GetRootScreenRect(x, y, w, h) && w > 0.f) {
+		if (mouseX >= (int)x && mouseY >= (int)y && mouseX <= (int)(x + w) && mouseY <= (int)(y + h))
+			g_stUINpcTrade.BuyFromShopSlot(srcPage, srcShop, -1);
+	}
+}
+
+void RmlNpcTrade_OnBagSell(int bagIndex) {
+	g_stUINpcTrade.SaleFromBagSlot(bagIndex);
+}
+
+void RmlNpcTrade_OnConfirmYes() {
+	const RmlTradePending pending = g_rmlTradePending;
+	g_rmlTradePending = RmlTradePending::None;
+	if (pending == RmlTradePending::BuyConfirm)
+		g_stUINpcTrade.ConfirmPendingBuy(1);
+	else if (pending == RmlTradePending::SaleConfirm)
+		g_stUINpcTrade.ConfirmPendingSale(1);
+}
+
+void RmlNpcTrade_OnConfirmNo() {
+	g_rmlTradePending = RmlTradePending::None;
+	g_stUINpcTrade.CancelPendingTrade();
+}
+
+void RmlNpcTrade_OnQtyYes() {
+	const int qty = CRmlUiNpcTradeForm::Instance().GetQtyValue();
+	const RmlTradePending pending = g_rmlTradePending;
+	g_rmlTradePending = RmlTradePending::None;
+	if (pending == RmlTradePending::BuyQty)
+		g_stUINpcTrade.ConfirmPendingBuy(qty);
+	else if (pending == RmlTradePending::SaleQty)
+		g_stUINpcTrade.ConfirmPendingSale(qty);
+}
+
+void RmlNpcTrade_OnQtyNo() {
+	g_rmlTradePending = RmlTradePending::None;
+	g_stUINpcTrade.CancelPendingTrade();
+}
+
+void RmlNpcTrade_OnQtyChanged(int qty) {
+	(void)qty;
+}
+
+void RmlNpcTrade_ApplyItemHint(int page, int shopIndex, int mouseX, int mouseY) {
+	g_stUINpcTrade.ApplyShopItemHint(page, shopIndex, mouseX, mouseY);
+}
+
+void RmlNpcTrade_RenderItemHint() {
+	if (CItemObj* item = CGuiData::GetHintItem())
+		item->RenderHint(0, 0);
 }

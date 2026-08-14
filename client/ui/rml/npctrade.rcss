@@ -1,0 +1,489 @@
+/* Notice NPC Item Trade — sits beside inventory like Bank. */
+
+body.npc-body {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	justify-content: flex-start;
+	align-items: flex-start;
+	padding: 0dp;
+	pointer-events: none;
+	font-family: LatoLatin;
+}
+
+body.npc-body .npc-panel {
+	pointer-events: auto;
+}
+
+.npc-panel {
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	flex: none;
+	width: 280dp;
+	min-width: 280dp;
+	height: 560dp;
+	margin: 0dp;
+	padding: 0dp;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/panel_tl.tga,
+		ui/rml/frames/notice/panel_t.tga,
+		ui/rml/frames/notice/panel_tr.tga,
+		ui/rml/frames/notice/panel_l.tga,
+		ui/rml/frames/notice/panel_c.tga,
+		ui/rml/frames/notice/panel_r.tga,
+		ui/rml/frames/notice/panel_bl.tga,
+		ui/rml/frames/notice/panel_b.tga,
+		ui/rml/frames/notice/panel_br.tga
+	);
+}
+
+.npc-header {
+	display: block;
+	position: relative;
+	z-index: 2;
+	box-sizing: border-box;
+	height: 56dp;
+	padding: 0dp 16dp;
+	background-color: transparent;
+}
+
+.npc-drag {
+	display: block;
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	right: 0dp;
+	bottom: 0dp;
+	z-index: 1;
+	padding: 0dp 16dp;
+	box-sizing: border-box;
+	cursor: move;
+}
+
+.npc-title {
+	display: block;
+	padding-top: 16dp;
+	font-size: 18dp;
+	font-weight: bold;
+	color: #ffffff;
+	text-align: left;
+}
+
+.npc-close,
+button.npc-close {
+	display: block;
+	position: absolute;
+	right: 12dp;
+	top: 14dp;
+	z-index: 3;
+	width: 28dp;
+	height: 28dp;
+	line-height: 28dp;
+	padding: 0dp;
+	drag: block;
+	font-family: LatoLatin;
+	font-size: 14dp;
+	font-weight: bold;
+	text-align: center;
+	color: #ffffff;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_blue_l.tga,
+		ui/rml/frames/notice/btn_blue_c.tga,
+		ui/rml/frames/notice/btn_blue_r.tga
+	);
+}
+
+.npc-tabs {
+	display: flex;
+	flex-direction: row;
+	position: absolute;
+	z-index: 3;
+	right: 44dp;
+	left: auto;
+	top: auto;
+	bottom: 0dp;
+	height: 28dp;
+	margin: 0dp;
+	padding: 0dp;
+	pointer-events: auto;
+}
+
+.npc-tab,
+button.npc-tab {
+	display: block;
+	box-sizing: border-box;
+	flex: none;
+	width: 36dp;
+	height: 28dp;
+	line-height: 28dp;
+	margin-left: 2dp;
+	padding: 0dp;
+	font-family: LatoLatin;
+	font-size: 1dp;
+	text-align: center;
+	color: #ffffff;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	drag: block;
+	decorator: none;
+	image-color: #ffffff;
+}
+
+.npc-tabs .npc-tab:first-child,
+.npc-tabs button.npc-tab:first-child {
+	margin-left: 0dp;
+}
+
+.npc-tab-active,
+button.npc-tab-active,
+.npc-tab-active:hover,
+button.npc-tab-active:hover {
+	color: #2a4a80;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/tab_folder_l.tga,
+		ui/rml/frames/notice/tab_folder_c.tga,
+		ui/rml/frames/notice/tab_folder_r.tga
+	);
+	image-color: #ffffff;
+}
+
+.npc-tab-icon {
+	display: block;
+	width: 16dp;
+	height: 16dp;
+	margin: 6dp auto 0dp auto;
+	background-color: transparent;
+	pointer-events: none;
+	image-color: #ffffff;
+}
+
+.npc-tab-active .npc-tab-icon,
+button.npc-tab-active .npc-tab-icon {
+	image-color: #2a4a80;
+}
+
+.npc-body-grid {
+	display: flex;
+	flex-direction: row;
+	flex: 1;
+	box-sizing: border-box;
+	padding: 8dp 12dp 0dp 12dp;
+	overflow: hidden;
+}
+
+.npc-grid {
+	display: block;
+	flex: 1;
+	overflow: hidden;
+	clip: always;
+}
+
+.npc-scrollbar {
+	display: block;
+	position: relative;
+	flex: none;
+	width: 10dp;
+	margin-left: 6dp;
+	overflow: visible;
+	decorator: tiled-vertical(
+		ui/rml/frames/notice/scroll_track_t.tga,
+		ui/rml/frames/notice/scroll_track_c.tga,
+		ui/rml/frames/notice/scroll_track_b.tga
+	);
+}
+
+.npc-scroll-thumb {
+	display: none;
+	position: absolute;
+	left: 0dp;
+	width: 10dp;
+	height: 40dp;
+	decorator: tiled-vertical(
+		ui/rml/frames/notice/scroll_thumb_t.tga,
+		ui/rml/frames/notice/scroll_thumb_c.tga,
+		ui/rml/frames/notice/scroll_thumb_b.tga
+	);
+}
+
+.npc-footer {
+	display: flex;
+	flex-direction: column;
+	flex: none;
+	box-sizing: border-box;
+	padding: 8dp 12dp 10dp 12dp;
+}
+
+.npc-gold {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	height: 30dp;
+	padding: 0dp 8dp 0dp 4dp;
+	box-sizing: border-box;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/cap_pill_l.tga,
+		ui/rml/frames/notice/cap_pill_c.tga,
+		ui/rml/frames/notice/cap_pill_r.tga
+	);
+}
+
+.npc-gold-tag {
+	display: block;
+	flex: none;
+	height: 20dp;
+	line-height: 20dp;
+	padding: 0dp 9dp;
+	font-size: 11dp;
+	font-weight: bold;
+	color: #ffffff;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/capsule_gold_l.tga,
+		ui/rml/frames/notice/capsule_gold_c.tga,
+		ui/rml/frames/notice/capsule_gold_r.tga
+	);
+}
+
+.npc-gold-value {
+	display: block;
+	flex: 1;
+	font-size: 13dp;
+	font-weight: bold;
+	text-align: right;
+	color: #2a4a80;
+	pointer-events: none;
+}
+
+.npc-hint {
+	display: block;
+	margin-top: 6dp;
+	font-size: 10dp;
+	font-weight: bold;
+	color: #5a7ab0;
+	pointer-events: none;
+}
+
+.npc-slot {
+	display: block;
+	position: relative;
+	box-sizing: border-box;
+	flex: none;
+	width: 44dp;
+	height: 44dp;
+	padding: 4dp;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: image(ui/rml/frames/notice/slot_rounded.tga);
+	drag: none;
+	focus: none;
+	pointer-events: none;
+}
+
+.npc-cell {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	flex: none;
+	box-sizing: border-box;
+	width: 52dp;
+	height: 68dp;
+	padding: 0dp;
+	overflow: visible;
+	background-color: transparent;
+	pointer-events: auto;
+	drag: none;
+	focus: none;
+}
+
+.npc-slot-icon {
+	display: block;
+	width: 36dp;
+	height: 36dp;
+	background-color: transparent;
+	pointer-events: none;
+}
+
+.npc-slot-price {
+	display: block;
+	flex: none;
+	box-sizing: border-box;
+	width: 52dp;
+	height: 18dp;
+	line-height: 18dp;
+	margin-top: 4dp;
+	padding: 0dp 2dp;
+	font-size: 11dp;
+	font-weight: bold;
+	text-align: center;
+	color: #8a5a10;
+	background-color: transparent;
+	overflow: visible;
+	pointer-events: none;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/cap_pill_l.tga,
+		ui/rml/frames/notice/cap_pill_c.tga,
+		ui/rml/frames/notice/cap_pill_r.tga
+	);
+	image-color: #f3e2b0;
+}
+
+/* Full-screen Notice buy/sell confirm overlays. */
+.npc-modal {
+	display: none;
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	width: 100%;
+	height: 100%;
+	z-index: 50;
+	pointer-events: none;
+}
+
+.npc-modal-open {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	pointer-events: auto;
+}
+
+.npc-modal-scrim {
+	display: block;
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	width: 100%;
+	height: 100%;
+	z-index: 0;
+	background-color: #000000a0;
+	pointer-events: auto;
+}
+
+.npc-modal-panel {
+	position: relative;
+	z-index: 1;
+	width: 360dp;
+	margin: 0dp;
+	pointer-events: auto;
+}
+
+.npc-confirm-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-bottom: 8dp;
+}
+
+.npc-confirm-icon-well {
+	display: block;
+	flex: none;
+	box-sizing: border-box;
+	width: 48dp;
+	height: 48dp;
+	padding: 6dp;
+	margin-right: 12dp;
+	overflow: visible;
+	background-color: transparent;
+	decorator: image(ui/rml/frames/notice/slot_rounded.tga);
+}
+
+.npc-confirm-icon {
+	display: block;
+	width: 36dp;
+	height: 36dp;
+	background-color: transparent;
+	pointer-events: none;
+}
+
+.npc-confirm-text {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-width: 0dp;
+	pointer-events: none;
+}
+
+.npc-confirm-msg {
+	display: block;
+	font-size: 12dp;
+	font-weight: bold;
+	color: #5a7ab0;
+	margin-bottom: 4dp;
+}
+
+.npc-confirm-name {
+	display: block;
+	font-size: 16dp;
+	font-weight: bold;
+	color: #2a4a80;
+	margin-bottom: 2dp;
+}
+
+.npc-confirm-price {
+	display: block;
+	font-size: 13dp;
+	font-weight: bold;
+	color: #2a4a80;
+}
+
+.npc-qty-controls {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	margin: 10dp 0dp 6dp 0dp;
+}
+
+.npc-qty-btn,
+button.npc-qty-btn {
+	flex: none;
+	width: 36dp;
+	height: 28dp;
+	line-height: 28dp;
+	margin: 0dp 6dp;
+	padding: 0dp;
+	font-size: 16dp;
+	font-weight: bold;
+	text-align: center;
+}
+
+.npc-qty-value {
+	display: block;
+	flex: none;
+	min-width: 48dp;
+	height: 28dp;
+	line-height: 28dp;
+	font-size: 16dp;
+	font-weight: bold;
+	text-align: center;
+	color: #2a4a80;
+	pointer-events: none;
+}
+
+.npc-qty-total {
+	text-align: center;
+	margin-bottom: 4dp;
+}

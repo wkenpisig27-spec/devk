@@ -931,12 +931,9 @@ void CStartMgr::_evtStartFormMouseEvent(CCompent* pSender, int nMsgType, int x, 
 	//	}
 	//	return;
 	// }
-	else if (name == "btnSkill") // ??????????
+	else if (name == "btnSkill") // skill
 	{
-		CForm* f = CFormMgr::s_Mgr.Find("frmSkill");
-		if (f) {
-			f->SetIsShow(!f->GetIsShow());
-		}
+		g_stUIEquip.ToggleSkillUi();
 		return;
 	} else if (name == "btnMission") // ??????????
 	{

@@ -1,0 +1,98 @@
+<rml>
+	<head>
+		<title>Item Trade</title>
+		<link type="text/rcss" href="notice.rcss"/>
+		<link type="text/rcss" href="npctrade.rcss"/>
+	</head>
+	<body class="npc-body">
+		<div id="npc-root" class="npc-panel">
+			<div class="npc-header">
+				<handle class="npc-drag" move_target="npc-root">
+					<div class="npc-title">Item Trade</div>
+				</handle>
+				<div id="npc-tabs" class="npc-tabs">
+					<button class="npc-tab npc-tab-active" id="tabWeapon" type="button" data-page="0" title="Weapons">
+						<img class="npc-tab-icon" src="ui/rml/frames/notice/ico_tab_fight.tga"/>
+					</button>
+					<button class="npc-tab" id="tabEquip" type="button" data-page="1" title="Equipment">
+						<img class="npc-tab-icon" src="ui/rml/frames/notice/ico_tab_equip.tga"/>
+					</button>
+					<button class="npc-tab" id="tabOther" type="button" data-page="2" title="Items">
+						<img class="npc-tab-icon" src="ui/rml/frames/notice/ico_tab_items.tga"/>
+					</button>
+				</div>
+				<button class="npc-close" id="btnNpcClose" type="button">X</button>
+			</div>
+			<div class="npc-body-grid">
+				<div id="npc-grid" class="npc-grid"></div>
+				<div id="npc-scrollbar" class="npc-scrollbar">
+					<div id="npc-scroll-thumb" class="npc-scroll-thumb"></div>
+				</div>
+			</div>
+			<div class="npc-footer">
+				<div class="npc-gold">
+					<div class="npc-gold-tag">Gold</div>
+					<div id="labNpcGold" class="npc-gold-value">0</div>
+				</div>
+				<div class="npc-hint">Drag to bag to buy · Drag here to sell</div>
+			</div>
+		</div>
+
+		<!-- Buy / sell confirm -->
+		<div id="npc-confirm-modal" class="npc-modal">
+			<div class="npc-modal-scrim" id="npc-confirm-scrim"></div>
+			<div class="notice npc-modal-panel">
+				<div class="notice-header">
+					<div class="notice-title" id="npc-confirm-title">Buy Item</div>
+				</div>
+				<div class="notice-body">
+					<div class="npc-confirm-row">
+						<div id="npc-confirm-icon-well" class="npc-confirm-icon-well">
+							<img id="npc-confirm-icon" class="npc-confirm-icon" src=""/>
+						</div>
+						<div class="npc-confirm-text">
+							<div id="npc-confirm-msg" class="npc-confirm-msg">Do you wish to buy this item?</div>
+							<div id="npc-confirm-name" class="npc-confirm-name"></div>
+							<div id="npc-confirm-price" class="npc-confirm-price"></div>
+						</div>
+					</div>
+				</div>
+				<div class="notice-footer">
+					<button class="notice-btn notice-btn-gold" id="btnNpcConfirmYes" type="button">Confirm</button>
+					<button class="notice-btn notice-btn-blue" id="btnNpcConfirmNo" type="button">Cancel</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Quantity buy / sell -->
+		<div id="npc-qty-modal" class="npc-modal">
+			<div class="npc-modal-scrim" id="npc-qty-scrim"></div>
+			<div class="notice npc-modal-panel">
+				<div class="notice-header">
+					<div class="notice-title" id="npc-qty-title">Quantity</div>
+				</div>
+				<div class="notice-body">
+					<div class="npc-confirm-row">
+						<div class="npc-confirm-icon-well">
+							<img id="npc-qty-icon" class="npc-confirm-icon" src=""/>
+						</div>
+						<div class="npc-confirm-text">
+							<div id="npc-qty-name" class="npc-confirm-name"></div>
+							<div id="npc-qty-unit" class="npc-confirm-price"></div>
+						</div>
+					</div>
+					<div class="npc-qty-controls">
+						<button class="notice-btn notice-btn-blue npc-qty-btn" id="btnNpcQtyMinus" type="button">-</button>
+						<div id="npc-qty-value" class="npc-qty-value">1</div>
+						<button class="notice-btn notice-btn-blue npc-qty-btn" id="btnNpcQtyPlus" type="button">+</button>
+					</div>
+					<div id="npc-qty-total" class="npc-confirm-price npc-qty-total">Total: 0</div>
+				</div>
+				<div class="notice-footer">
+					<button class="notice-btn notice-btn-gold" id="btnNpcQtyYes" type="button">Confirm</button>
+					<button class="notice-btn notice-btn-blue" id="btnNpcQtyNo" type="button">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</body>
+</rml>

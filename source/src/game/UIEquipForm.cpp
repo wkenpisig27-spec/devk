@@ -41,6 +41,8 @@
 #include <string>
 
 #include "rmlui/RmlUiInventoryForm.h"
+#include "rmlui/RmlUiSkillForm.h"
+#include "rmlui/RmlUiNpcTradeForm.h"
 #include "rmlui/RmlUiManager.h"
 
 using namespace std;
@@ -228,6 +230,11 @@ bool CEquipMgr::Init() {
 	if (!frmSkill)
 		return false;
 	frmSkill->evtShow = _evtSkillFormShow;
+	// Data host only — player chrome is Notice Rml skill form.
+	frmSkill->SetHotKey(0);
+	frmSkill->SetIsEscClose(false);
+	frmSkill->SetIsShow(false);
+	CFormMgr::s_Mgr.AddHotKeyEvent(_OnSkillHotKey);
 
 	lstFightSkill = dynamic_cast<CSkillList*>(frmSkill->Find("lstSkill"));
 	if (!lstFightSkill)
@@ -688,6 +695,7 @@ void CEquipMgr::SynSkillBag(DWORD dwCharID, stNetSkillBag* pSSkillBag) {
 	lstSailSkill->Refresh();
 	lstFightSkill->Refresh();
 	lstLifeSkill->Refresh();
+	RefreshRmlSkill();
 }
 
 CSkillRecord* CEquipMgr::FindSkill(int nID) {
@@ -1593,7 +1601,11 @@ void CEquipMgr::_SendThrowData(const stThrow& sthrow, int nThrowNum) {
 }
 
 void CEquipMgr::_evtSkillFormShow(CGuiData* pSender) {
-	g_stUIEquip.RefreshUpgrade();
+	// Anything that still calls frmSkill->Show() is redirected to Notice skill UI.
+	if (g_stUIEquip.frmSkill && g_stUIEquip.frmSkill->GetIsShow())
+		g_stUIEquip.frmSkill->SetIsShow(false);
+	if (!CRmlUiSkillForm::Instance().IsVisible())
+		g_stUIEquip.ShowSkillUi();
 }
 
 void CEquipMgr::UpdateIMP(int IMP) {
@@ -1614,15 +1626,18 @@ void CEquipMgr::FrameMove(DWORD dwTime) {
 			return;
 
 		SGameAttr* pGameAttr = pCha->getGameAttr();
-		if (frmSkill->GetIsShow()) {
-			// ???????????
+		if (frmSkill->GetIsShow() || CRmlUiSkillForm::Instance().IsVisible()) {
 			sprintf(szBuf, "%d", pGameAttr->get(ATTR_TP));
-			labPoint->SetCaption(szBuf);
+			if (frmSkill->GetIsShow() && labPoint)
+				labPoint->SetCaption(szBuf);
 
 			sprintf(szBuf, "%d", pGameAttr->get(ATTR_LIFETP));
-			labPointLife->SetCaption(szBuf);
+			if (frmSkill->GetIsShow() && labPointLife)
+				labPointLife->SetCaption(szBuf);
 
 			RefreshUpgrade();
+			if (CRmlUiSkillForm::Instance().IsVisible())
+				RefreshRmlSkill();
 		}
 
 		CCharacter* pMainCha = CGameScene::GetMainCha();
@@ -1645,6 +1660,9 @@ void CEquipMgr::FrameMove(DWORD dwTime) {
 					sprintf(impBuf, "%s", StringSplitNum(GetIMP()));
 					CRmlUiInventoryForm::Instance().SetCurrency(szBuf, impBuf);
 				}
+				if (g_stUINpcTrade.GetIsShow())
+					g_stUINpcTrade.RefreshTradeUi();
+
 
 				for (int i = 0; i < enumEQUIP_NUM; i++)
 					_imgCharges[i].Next();
@@ -1666,8 +1684,9 @@ void CEquipMgr::FrameMove(DWORD dwTime) {
 }
 
 void CEquipMgr::RefreshUpgrade() {
-	CForm* f = frmSkill;
-	if (!f->GetIsShow())
+	const bool legacyOpen = frmSkill && frmSkill->GetIsShow();
+	const bool rmlOpen = CRmlUiSkillForm::Instance().IsVisible();
+	if (!legacyOpen && !rmlOpen)
 		return;
 
 	CCharacter* pCha = CGameScene::GetMainCha();
@@ -2105,6 +2124,7 @@ void CEquipMgr::ShowRepairMsg(const char* pItemName, long lMoney) {
 
 void CEquipMgr::CloseAllForm() {
 	HideInventoryUi();
+	HideSkillUi();
 
 	if (frmSkill && frmSkill->GetIsShow()) {
 		frmSkill->SetIsShow(false);
@@ -2128,9 +2148,11 @@ void CEquipMgr::ShowInventoryUi() {
 }
 
 void CEquipMgr::HideInventoryUi() {
-	// Closing bag while Notice personal bank is open also ends that session.
+	// Closing bag while Notice personal bank / NPC trade is open also ends that session.
 	if (CRmlUiBankForm::Instance().IsVisible())
 		g_stUIBank.CloseBankUi(false);
+	if (g_stUINpcTrade.GetIsShow())
+		g_stUINpcTrade.HideTradeUi(false);
 
 	if (CGoodsGrid* bag = GetGoodsGrid())
 		bag->ResetItemSelections();
@@ -2150,6 +2172,447 @@ void CEquipMgr::ToggleInventoryUi() {
 		return;
 	}
 	ShowInventoryUi();
+}
+
+void CEquipMgr::ShowSkillUi() {
+	if (frmSkill && frmSkill->GetIsShow())
+		frmSkill->SetIsShow(false);
+
+	if (!CRmlUiManager::Instance().IsReady())
+		return;
+
+	CRmlUiSkillForm::Instance().Show();
+	RefreshUpgrade();
+	RefreshRmlSkill();
+}
+
+void CEquipMgr::HideSkillUi() {
+	CRmlUiSkillForm::Instance().Hide();
+	if (frmSkill && frmSkill->GetIsShow())
+		frmSkill->SetIsShow(false);
+}
+
+bool CEquipMgr::IsSkillUiVisible() const {
+	return CRmlUiSkillForm::Instance().IsVisible();
+}
+
+void CEquipMgr::ToggleSkillUi() {
+	if (IsSkillUiVisible()) {
+		HideSkillUi();
+		return;
+	}
+	ShowSkillUi();
+}
+
+bool CEquipMgr::_OnSkillHotKey(char& key, int& control) {
+	(void)control;
+	if (key != 'S' && key != 's')
+		return false;
+	if (!CFormMgr::s_Mgr.GetEnableHotKey())
+		return false;
+	if (!dynamic_cast<CWorldScene*>(CGameApp::GetCurScene()))
+		return false;
+	g_stUIEquip.ToggleSkillUi();
+	return true; // swallow Alt+S so lua-assigned frmSkill hotkey cannot reopen legacy chrome
+}
+
+namespace {
+
+bool SkillHintUseful(const char* text) {
+	if (!text || !text[0])
+		return false;
+	if (strcmp(text, "0") == 0 || strcmp(text, "-1") == 0)
+		return false;
+	return true;
+}
+
+const char* SkillFightTypeLabel(char fightType) {
+	switch (fightType) {
+	case enumSKILL_LAND_LIVE: return "Life";
+	case enumSKILL_FIGHT: return "Fight";
+	case enumSKILL_SAIL: return "Sail";
+	case enumSKILL_SEE_LIVE: return "Sea Life";
+	default: return "Skill";
+	}
+}
+
+const char* SkillTargetLabel(char applyTarget) {
+	switch (applyTarget) {
+	case enumSKILL_TYPE_SELF: return "Self";
+	case enumSKILL_TYPE_TEAM: return "Team";
+	case enumSKILL_TYPE_SCENE: return "Ground";
+	case enumSKILL_TYPE_ENEMY: return "Enemy";
+	case enumSKILL_TYPE_ALL: return "All";
+	case enumSKILL_TYPE_PLAYER_DIE: return "Player corpse";
+	case enumSKILL_TYPE_EXCEPT_SELF: return "Others";
+	case enumSKILL_TYPE_REPAIR: return "Repair";
+	case enumSKILL_TYPE_TREE: return "Tree";
+	case enumSKILL_TYPE_MINE: return "Mine";
+	case enumSKILL_TYPE_TRADE: return "Stall";
+	case enumSKILL_TYPE_FISH: return "Fish";
+	case enumSKILL_TYPE_SALVAGE: return "Salvage";
+	default: return "Target";
+	}
+}
+
+bool TryParseSklvLinear(const char* formula, int level, int& outValue) {
+	if (!formula || level < 0)
+		return false;
+	const char* p = strstr(formula, "sklv");
+	while (p) {
+		int idx = 0, mult = 0, add = 0;
+		if (sscanf(p, "sklv(%d)*%d+%d", &idx, &mult, &add) == 3) {
+			outValue = level * mult + add;
+			return true;
+		}
+		if (sscanf(p, "sklv(%d)*%d-%d", &idx, &mult, &add) == 3) {
+			outValue = level * mult - add;
+			return true;
+		}
+		if (sscanf(p, "sklv(%d)*%d", &idx, &mult) == 2) {
+			outValue = level * mult;
+			return true;
+		}
+		p = strstr(p + 4, "sklv");
+	}
+	return false;
+}
+
+bool TryParsePerLevelFromHint(const char* effect, int level, int& perLevel, int& atLevel) {
+	if (!effect || level < 0)
+		return false;
+	const char* by = strstr(effect, "by ");
+	if (!by)
+		by = strstr(effect, "By ");
+	if (!by)
+		return false;
+	by += 3;
+	while (*by == ' ')
+		++by;
+	int n = atoi(by);
+	if (n <= 0)
+		return false;
+	if (!strstr(by, "per") && !strstr(by, "every") && !strstr(by, "subsequent") && !strstr(by, "each") &&
+		!strstr(by, "Lv") && !strstr(by, "level") && !strstr(by, "Level"))
+		return false;
+	perLevel = n;
+	atLevel = n * level;
+	return true;
+}
+
+void PushStat(CRmlUiSkillForm::DetailView& detail, const char* label, const std::string& value, bool next = false) {
+	CRmlUiSkillForm::DetailStat st;
+	st.label = label ? label : "";
+	st.value = value;
+	st.highlightNext = next;
+	detail.stats.push_back(std::move(st));
+}
+
+void BuildSkillDetailView(CRmlUiSkillForm::DetailView& detail, CSkillCommand* cmd, CSkillRecord* rec, CCharacter* pCha,
+						  bool showUpgrade) {
+	detail = CRmlUiSkillForm::DetailView();
+	if (!cmd || !rec)
+		return;
+
+	detail.visible = true;
+	detail.skillId = cmd->GetSkillID();
+	detail.name = rec->szName ? rec->szName : "";
+	detail.iconPath = "texture/icon/";
+	detail.iconPath += rec->szICON;
+
+	const int level = rec->GetLevel();
+	const int job = pCha && pCha->getGameAttr() ? (int)pCha->getGameAttr()->get(ATTR_JOB) : 0;
+	const int maxLv = rec->GetJobMax(job);
+	char buf[128];
+	if (maxLv > 0)
+		sprintf_s(buf, "Lv. %d / %d", level, maxLv);
+	else
+		sprintf_s(buf, "Lv. %d", level);
+	detail.levelText = buf;
+
+	detail.tags.push_back(rec->chType == 1 ? "Active" : (rec->chType == 2 ? "Passive" : "Innate"));
+	detail.tagGold.push_back(rec->chType == 2);
+	detail.tags.push_back(SkillFightTypeLabel(rec->chFightType));
+	detail.tagGold.push_back(rec->chFightType == enumSKILL_LAND_LIVE || rec->chFightType == enumSKILL_SEE_LIVE);
+	if (rec->chHelpful == 1) {
+		detail.tags.push_back("Helpful");
+		detail.tagGold.push_back(true);
+	} else if (rec->chType == 1) {
+		detail.tags.push_back("Offense");
+		detail.tagGold.push_back(false);
+	}
+
+	detail.description = SkillHintUseful(rec->szDescribeHint) ? rec->szDescribeHint : "";
+	detail.effect = SkillHintUseful(rec->szEffectHint) ? rec->szEffectHint : "";
+	detail.cost = SkillHintUseful(rec->szExpendHint) ? rec->szExpendHint : "";
+
+	if (rec->chType == 1) {
+		sprintf_s(buf, "%d", rec->GetSPExpend());
+		PushStat(detail, "SP Cost", buf);
+		const int resume = rec->GetFireSpeed();
+		if (resume > 0) {
+			sprintf_s(buf, "%.1fs", resume / 1000.0);
+			PushStat(detail, "Cooldown", buf);
+		} else {
+			PushStat(detail, "Cooldown", "None");
+		}
+		if (rec->GetDistance() > 0) {
+			sprintf_s(buf, "%d", rec->GetDistance());
+			PushStat(detail, "Cast Range", buf);
+		}
+		if (rec->IsHarmRange() && rec->GetRange() > 0) {
+			sprintf_s(buf, "%d", rec->GetRange());
+			PushStat(detail, "Area Radius", buf);
+		}
+		PushStat(detail, "Target", SkillTargetLabel(rec->chApplyTarget));
+		if (rec->GetSkillGrid().sUseEndure > 0) {
+			sprintf_s(buf, "%d", (int)rec->GetSkillGrid().sUseEndure);
+			PushStat(detail, "Endure Cost", buf);
+		}
+		if (rec->GetSkillGrid().sUseEnergy > 0) {
+			sprintf_s(buf, "%d", (int)rec->GetSkillGrid().sUseEnergy);
+			PushStat(detail, "Energy Cost", buf);
+		}
+	} else {
+		PushStat(detail, "Type", "Passive");
+	}
+
+	if (rec->sLevelDemand > 0) {
+		sprintf_s(buf, "Character Lv %d", (int)rec->sLevelDemand);
+		PushStat(detail, "Learn Req.", buf);
+	}
+	if (rec->chPointExpend > 0) {
+		sprintf_s(buf, "%d pt%s", (int)rec->chPointExpend, rec->chPointExpend == 1 ? "" : "s");
+		PushStat(detail, "Upgrade Cost", buf);
+	}
+
+	std::string prereq;
+	for (int i = 0; i < defSKILL_PRE_SKILL_NUM; ++i) {
+		const short preId = rec->sPremissSkill[i][0];
+		const short preLv = rec->sPremissSkill[i][1];
+		if (preId <= 0 || preId == (short)cchSkillRecordKeyValue)
+			continue;
+		CSkillRecord* pre = GetSkillRecordInfo(preId);
+		char line[160];
+		bool met = false;
+		if (CSkillRecord* owned = g_stUIEquip.FindSkill(preId))
+			met = owned->GetLevel() >= preLv;
+		sprintf_s(line, "%s Lv %d (%s)", pre && pre->szName[0] ? pre->szName : "Skill", (int)preLv,
+				  met ? "met" : "missing");
+		if (!prereq.empty())
+			prereq += "\n";
+		prereq += line;
+	}
+
+	detail.canUpgrade = showUpgrade && rec->GetIsUpgrade() && !cmd->GetIsSpecial(CSkillCommand::enumNotUpgrade);
+
+	const bool atMax = (maxLv > 0 && level >= maxLv) || rec->GetUpgrade() == enumSKILL_UPGRADE_MAX;
+	if (atMax || !rec->GetIsUpgrade()) {
+		detail.nextTitle = "Max Level Reached";
+		detail.nextBody = "This skill is already at its highest level for your job.";
+		detail.nextReq.clear();
+		detail.canUpgrade = false;
+	} else {
+		const int nextLv = level + 1;
+		sprintf_s(buf, "Lv. %d  ->  Lv. %d", level, nextLv);
+		detail.nextTitle = buf;
+
+		std::string body;
+		int per = 0, curScaled = 0, nextScaled = 0;
+		if (TryParsePerLevelFromHint(rec->szEffectHint, level, per, curScaled) &&
+			TryParsePerLevelFromHint(rec->szEffectHint, nextLv, per, nextScaled)) {
+			sprintf_s(buf, "Scaled effect: %d  ->  %d  (+%d / level)", curScaled, nextScaled, per);
+			body = buf;
+		}
+
+		int curFx = 0, nextFx = 0;
+		const char* fxFormula = SkillHintUseful(rec->szEffect) ? rec->szEffect : nullptr;
+		if (!fxFormula)
+			fxFormula = SkillHintUseful(rec->szActive) ? rec->szActive : nullptr;
+		if (fxFormula && TryParseSklvLinear(fxFormula, level, curFx) && TryParseSklvLinear(fxFormula, nextLv, nextFx)) {
+			if (!body.empty())
+				body += "\n";
+			sprintf_s(buf, "Power scaling: %d  ->  %d", curFx, nextFx);
+			body += buf;
+		}
+
+		int curSp = 0, nextSp = 0;
+		if (TryParseSklvLinear(rec->szUseSP, level, curSp) && TryParseSklvLinear(rec->szUseSP, nextLv, nextSp)) {
+			if (!body.empty())
+				body += "\n";
+			sprintf_s(buf, "SP cost: %d  ->  %d", curSp, nextSp);
+			body += buf;
+			PushStat(detail, "Next SP Cost", std::to_string(nextSp), true);
+		} else if (rec->chType == 1 && rec->GetSPExpend() > 0) {
+			if (!body.empty())
+				body += "\n";
+			sprintf_s(buf, "Current SP cost: %d (updates on upgrade)", rec->GetSPExpend());
+			body += buf;
+		}
+
+		int curCd = 0, nextCd = 0;
+		if (TryParseSklvLinear(rec->szFireSpeed, level, curCd) && TryParseSklvLinear(rec->szFireSpeed, nextLv, nextCd)) {
+			if (!body.empty())
+				body += "\n";
+			sprintf_s(buf, "Cooldown: %.1fs  ->  %.1fs", curCd / 1000.0, nextCd / 1000.0);
+			body += buf;
+			sprintf_s(buf, "%.1fs", nextCd / 1000.0);
+			PushStat(detail, "Next Cooldown", buf, true);
+		}
+
+		if (SkillHintUseful(rec->szEffectHint)) {
+			if (!body.empty())
+				body += "\n\n";
+			body += "Effect note:\n";
+			body += rec->szEffectHint;
+		}
+		if (body.empty())
+			body = "Leveling this skill strengthens its effect. Exact values apply after upgrade.";
+		detail.nextBody = body;
+
+		std::string req;
+		if (rec->chPointExpend > 0) {
+			sprintf_s(buf, "Requires %d skill point%s to upgrade.", (int)rec->chPointExpend,
+					  rec->chPointExpend == 1 ? "" : "s");
+			req = buf;
+		}
+		if (rec->sLevelDemand > 0) {
+			if (!req.empty())
+				req += "\n";
+			sprintf_s(buf, "Character level requirement: %d", (int)rec->sLevelDemand);
+			req += buf;
+		}
+		if (!prereq.empty()) {
+			if (!req.empty())
+				req += "\n";
+			req += "Prerequisites:\n";
+			req += prereq;
+		}
+		if (!detail.canUpgrade && showUpgrade == false) {
+			if (!req.empty())
+				req += "\n";
+			req += "Not enough points to upgrade right now.";
+		}
+		detail.nextReq = req;
+	}
+}
+
+} // namespace
+
+void CEquipMgr::RefreshRmlSkill() {
+	if (!CRmlUiSkillForm::Instance().IsVisible())
+		return;
+
+	RefreshUpgrade();
+
+	CCharacter* pCha = g_stUIBoat.GetHuman();
+	if (!pCha)
+		return;
+	SGameAttr* pAttr = pCha->getGameAttr();
+	if (!pAttr)
+		return;
+
+	CRmlUiSkillForm::SkillView view;
+	char buf[32];
+	sprintf_s(buf, "%d", (int)pAttr->get(ATTR_TP));
+	view.fightPts = buf;
+	sprintf_s(buf, "%d", (int)pAttr->get(ATTR_LIFETP));
+	view.lifePts = buf;
+
+	const char* tab = CRmlUiSkillForm::Instance().GetActiveTab();
+	view.activeTab = tab ? tab : "fight";
+
+	CSkillList* list = lstFightSkill;
+	bool showUpgrade = pAttr->get(ATTR_TP) > 0;
+	if (view.activeTab == "life") {
+		list = lstLifeSkill;
+		showUpgrade = pAttr->get(ATTR_LIFETP) > 0;
+	} else if (view.activeTab == "sail") {
+		list = lstSailSkill;
+		showUpgrade = false;
+	}
+	if (!list)
+		return;
+
+	const int selectedId = CRmlUiSkillForm::Instance().GetSelectedSkillId();
+	const int count = list->GetCount();
+	view.rows.reserve(count);
+	CSkillCommand* selectedCmd = nullptr;
+	CSkillRecord* selectedRec = nullptr;
+	for (int i = 0; i < count; ++i) {
+		CSkillCommand* cmd = list->GetCommand(i);
+		if (!cmd)
+			continue;
+		CSkillRecord* rec = cmd->GetSkillRecord();
+		if (!rec || !rec->IsShow())
+			continue;
+
+		CRmlUiSkillForm::RowView row;
+		row.skillId = cmd->GetSkillID();
+		row.name = rec->szName ? rec->szName : "";
+		if (rec->chType == 1)
+			sprintf_s(buf, "LV:%d  SP:%d", rec->GetLevel(), rec->GetSPExpend());
+		else
+			sprintf_s(buf, "LV:%d", rec->GetLevel());
+		row.meta = buf;
+
+		row.iconPath = "texture/icon/";
+		row.iconPath += rec->szICON;
+
+		row.canUpgrade = showUpgrade && rec->GetIsUpgrade() && !cmd->GetIsSpecial(CSkillCommand::enumNotUpgrade);
+		row.selected = (selectedId > 0 && selectedId == row.skillId);
+		if (row.selected) {
+			selectedCmd = cmd;
+			selectedRec = rec;
+		}
+		view.rows.push_back(std::move(row));
+	}
+
+	if (selectedCmd && selectedRec)
+		BuildSkillDetailView(view.detail, selectedCmd, selectedRec, pCha, showUpgrade);
+	else
+		view.detail.visible = false;
+
+	CRmlUiSkillForm::Instance().ApplyView(view);
+}
+
+void RmlSkill_OnClose() {
+	g_stUIEquip.HideSkillUi();
+}
+
+void RmlSkill_OnTab(const char* filter) {
+	(void)filter;
+	g_stUIEquip.RefreshRmlSkill();
+}
+
+void RmlSkill_OnSelect(int skillId) {
+	(void)skillId;
+	g_stUIEquip.RefreshRmlSkill();
+}
+
+void RmlSkill_OnUse(int skillId) {
+	g_stUIEquip.UseSkillFromUi(skillId);
+}
+
+void RmlSkill_OnUpgrade(int skillId) {
+	if (skillId <= 0)
+		return;
+	g_NetIF->GetProCir()->SkillUpgrade((short)skillId, 1);
+}
+
+void CEquipMgr::UseSkillFromUi(int skillId) {
+	if (skillId <= 0)
+		return;
+	CSkillList* lists[3] = {lstFightSkill, lstLifeSkill, lstSailSkill};
+	for (int i = 0; i < 3; ++i) {
+		CSkillList* list = lists[i];
+		if (!list)
+			continue;
+		if (CSkillCommand* cmd = list->FindSkill(skillId)) {
+			cmd->Exec();
+			return;
+		}
+	}
 }
 
 void CEquipMgr::SetIsShow(bool bShow) {
@@ -2873,10 +3336,12 @@ void RmlInv_OnItemDragEnd(int srcBag, int srcEquip, int mouseX, int mouseY) {
 	const bool alreadyMoved = g_rmlBankTransferHandled;
 	g_rmlBankTransferHandled = false;
 
-	// Drop bag item onto personal/guild bank panel (when dragdrop didn't already handle a slot).
+	// Drop bag item onto personal/guild bank / NPC trade panel.
 	if (!alreadyMoved && srcBag >= 0) {
 		if (g_stUIBank.IsBankOpen() && CRmlUiBankForm::Instance().ContainsScreenPoint(mouseX, mouseY)) {
 			g_stUIEquip.MoveBagToBank(srcBag, -1);
+		} else if (g_stUINpcTrade.GetIsShow() && CRmlUiNpcTradeForm::Instance().ContainsScreenPoint(mouseX, mouseY)) {
+			g_stUINpcTrade.SaleFromBagSlot(srcBag);
 		} else if (g_stUIGuildBank.IsBankOpen()) {
 			if (CForm* bankForm = g_stUIGuildBank.GetBankForm()) {
 				if (bankForm->InRect(mouseX, mouseY))
@@ -2887,6 +3352,8 @@ void RmlInv_OnItemDragEnd(int srcBag, int srcEquip, int mouseX, int mouseY) {
 	g_stUIEquip.RefreshRmlInventory();
 	if (g_stUIBank.IsBankOpen())
 		g_stUIBank.RefreshBankUi();
+	if (g_stUINpcTrade.GetIsShow())
+		g_stUINpcTrade.RefreshTradeUi();
 }
 
 void RmlBank_OnClose() {

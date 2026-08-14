@@ -50,6 +50,15 @@ public:
 	// Alt+E hotkey — registered with CFormMgr::AddHotKeyEvent
 	static bool _OnInventoryHotKey(char& key, int& control);
 	void RefreshRmlInventory();
+
+	// Notice RmlUi skill overlay. frmSkill stays loaded as data host (CSkillList sync).
+	void ToggleSkillUi();
+	void ShowSkillUi();
+	void HideSkillUi();
+	bool IsSkillUiVisible() const;
+	static bool _OnSkillHotKey(char& key, int& control);
+	void RefreshRmlSkill();
+	void UseSkillFromUi(int skillId);
 	void ShowBagContextMenu(int bagIndex);
 	void ExecuteBagContextAction(const char* action);
 	void RequestTogglePackageLock();

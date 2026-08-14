@@ -25,6 +25,7 @@ extern void RmlInv_OnEquipDblClick(int link);
 extern void RmlInv_OnDrop(int srcBag, int srcEquip, int dstBag, int dstEquip);
 extern void RmlInv_OnItemDragEnd(int srcBag, int srcEquip, int mouseX, int mouseY);
 extern void RmlBank_OnDrop(int srcBank, int srcBag, int dstBank, int dstBag);
+extern void RmlNpcTrade_OnDrop(int srcPage, int srcShop, int srcBag, int dstBag);
 extern void RmlInv_OnFilterChanged();
 extern void RmlInv_OnToggleApparel(bool apparel);
 extern void RmlInv_OnToggleLock();
@@ -1108,12 +1109,18 @@ void CRmlUiInventoryForm::Impl::ProcessEvent(Rml::Event& event) {
 			return;
 		int srcBag = -1, srcEquip = -1, dstBag = -1, dstEquip = -1;
 		int srcBank = -1;
-		// Cross-document: bank → bag (drag_element may live outside this document).
+		int srcTradePage = -1, srcTradeShop = -1;
+		// Cross-document: bank/trade → bag (drag_element may live outside this document).
 		{
 			Rml::Element* el = dragEl;
 			while (el) {
 				if (el->HasAttribute("data-bank")) {
 					srcBank = el->GetAttribute("data-bank", -1);
+					break;
+				}
+				if (el->HasAttribute("data-trade")) {
+					srcTradeShop = el->GetAttribute("data-trade", -1);
+					srcTradePage = el->GetAttribute("data-trade-page", 0);
 					break;
 				}
 				if (el->HasAttribute("data-bag") || el->HasAttribute("data-equip"))
@@ -1124,6 +1131,11 @@ void CRmlUiInventoryForm::Impl::ProcessEvent(Rml::Event& event) {
 		if (srcBank >= 0) {
 			if (ResolveInvSlot(target, document, dstBag, dstEquip) && dstBag >= 0)
 				RmlBank_OnDrop(srcBank, -1, -1, dstBag);
+			return;
+		}
+		if (srcTradeShop >= 0) {
+			if (ResolveInvSlot(target, document, dstBag, dstEquip) && dstBag >= 0)
+				RmlNpcTrade_OnDrop(srcTradePage, srcTradeShop, -1, dstBag);
 			return;
 		}
 		if (!ResolveInvSlot(dragEl, document, srcBag, srcEquip))
