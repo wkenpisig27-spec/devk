@@ -37,6 +37,7 @@ public:
 	void HideCharacterForm();
 	void HideSkillForm();
 	void HideNpcTradeForm();
+	void HideNpcTalkForm();
 
 private:
 	CRmlUiManager() = default;

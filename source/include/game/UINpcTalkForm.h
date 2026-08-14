@@ -15,6 +15,9 @@ public:
 
 	DWORD GetNpcId();
 
+	void HideTalkUi();
+	bool IsTalkUiVisible() const;
+
 	static void SetTalkStyle(BYTE bit) { _byTalkStyle = bit; }
 
 protected:

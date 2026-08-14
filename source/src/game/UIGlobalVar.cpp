@@ -18,6 +18,7 @@
 #include "uinpctradeform.h"
 #include "rmlui/RmlUiNpcTradeForm.h"
 #include "rmlui/RmlUiSkillForm.h"
+#include "rmlui/RmlUiNpcTalkForm.h"
 #include "uistartform.h"
 #include "uistateform.h"
 #include "uiCozeform.h"
@@ -398,6 +399,10 @@ bool CUIInterface::_evtESCKey(char& key) {
 		// Notice bank/inventory/character are not CForms — Esc closes them before legacy FindESCForm.
 		if (g_stUIBank.IsBankOpen()) {
 			g_stUIBank.CloseBankUi(true);
+			return true;
+		}
+		if (g_stUINpcTalk.IsTalkUiVisible()) {
+			g_stUINpcTalk.HideTalkUi();
 			return true;
 		}
 		if (g_stUINpcTrade.GetIsShow()) {

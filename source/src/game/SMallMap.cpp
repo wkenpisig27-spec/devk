@@ -1513,6 +1513,8 @@ void CCharacter2D::LoadCha(DWORD dwID, bool IsMonster) {
 	} else {
 		D3DXMatrixPerspectiveFovLH(&_mat3DUIProj, D3DX_PI * 0.12f, 1, 1, 1000);
 	}
+	if (_pChaPart)
+		_pChaPart->sTypeID = (short)dwID;
 	_bLoad = true;
 }
 

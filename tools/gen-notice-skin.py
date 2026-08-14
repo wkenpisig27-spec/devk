@@ -468,6 +468,7 @@ def main() -> None:
     gen_input()
     gen_pill("btn_blue", (126, 180, 240), (74, 138, 208), (170, 205, 250), (58, 120, 192))
     gen_pill("btn_gold", (245, 215, 130), (224, 176, 64), (255, 235, 170), (200, 152, 48))
+    gen_pill("btn_green", (120, 196, 130), (64, 156, 86), (165, 228, 170), (48, 128, 68))
     # Compact fully-oval label capsules (Character UI tags / section headers).
     gen_capsule("capsule_blue", (126, 180, 240), (74, 138, 208), (170, 205, 250), (58, 120, 192))
     gen_capsule("capsule_gold", (245, 215, 130), (224, 176, 64), (255, 235, 170), (200, 152, 48))

@@ -1,0 +1,32 @@
+<rml>
+	<head>
+		<title>NPC Dialogue</title>
+		<link type="text/rcss" href="notice.rcss"/>
+		<link type="text/rcss" href="npctalk.rcss"/>
+	</head>
+	<body class="ntalk-body">
+		<div id="ntalk-root" class="ntalk-panel">
+			<div class="ntalk-header">
+				<handle class="ntalk-drag" move_target="ntalk-root">
+					<div id="ntalk-title" class="ntalk-title">Dialogue</div>
+				</handle>
+				<button class="ntalk-close" id="btnTalkClose" type="button">X</button>
+			</div>
+
+			<div class="ntalk-hero">
+				<div id="ntalk-npc-name" class="ntalk-npc-name">NPC</div>
+				<div class="ntalk-npc-sub">Conversation</div>
+			</div>
+
+			<div id="ntalk-speech" class="ntalk-speech">
+				<div id="ntalk-body" class="ntalk-body-text"></div>
+			</div>
+
+			<div id="ntalk-options" class="ntalk-options"></div>
+
+			<div class="ntalk-footer">
+				<button class="ntalk-exit" id="btnTalkExit" type="button">Exit</button>
+			</div>
+		</div>
+	</body>
+</rml>

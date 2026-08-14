@@ -10,6 +10,7 @@
 #include "rmlui/RmlUiCharacterForm.h"
 #include "rmlui/RmlUiSkillForm.h"
 #include "rmlui/RmlUiNpcTradeForm.h"
+#include "rmlui/RmlUiNpcTalkForm.h"
 
 #include "UIMenu.h"
 #include "MPRender.h"
@@ -235,6 +236,9 @@ bool CRmlUiManager::Init(HWND hwnd) {
 	if (!CRmlUiNpcTradeForm::Instance().Load(g_context)) {
 		OutputDebugStringA("RmlUi: warning - npctrade.rml failed to load\n");
 	}
+	if (!CRmlUiNpcTalkForm::Instance().Load(g_context)) {
+		OutputDebugStringA("RmlUi: warning - npctalk.rml failed to load\n");
+	}
 
 	m_ready = true;
 	OutputDebugStringA("RmlUi: initialized OK\n");
@@ -271,6 +275,10 @@ void CRmlUiManager::HideNpcTradeForm() {
 	CRmlUiNpcTradeForm::Instance().Hide();
 }
 
+void CRmlUiManager::HideNpcTalkForm() {
+	CRmlUiNpcTalkForm::Instance().Hide();
+}
+
 void CRmlUiManager::Shutdown() {
 	m_ready = false;
 
@@ -283,6 +291,7 @@ void CRmlUiManager::Shutdown() {
 	CRmlUiCharacterForm::Instance().Unload();
 	CRmlUiSkillForm::Instance().Unload();
 	CRmlUiNpcTradeForm::Instance().Unload();
+	CRmlUiNpcTalkForm::Instance().Unload();
 
 	if (g_context) {
 		g_context->UnloadAllDocuments();

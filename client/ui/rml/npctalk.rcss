@@ -1,0 +1,289 @@
+/* Notice NPC Dialogue — centered conversation panel. */
+
+body.ntalk-body {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	justify-content: flex-start;
+	align-items: flex-start;
+	padding: 0dp;
+	pointer-events: none;
+	font-family: LatoLatin;
+}
+
+body.ntalk-body .ntalk-panel {
+	pointer-events: auto;
+}
+
+.ntalk-panel {
+	display: none;
+	flex-direction: column;
+	position: absolute;
+	flex: none;
+	width: 420dp;
+	min-width: 420dp;
+	margin: 0dp;
+	padding: 0dp 0dp 12dp 0dp;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	z-index: 1;
+	decorator: tiled-box(
+		ui/rml/frames/notice/panel_tl.tga,
+		ui/rml/frames/notice/panel_t.tga,
+		ui/rml/frames/notice/panel_tr.tga,
+		ui/rml/frames/notice/panel_l.tga,
+		ui/rml/frames/notice/panel_c.tga,
+		ui/rml/frames/notice/panel_r.tga,
+		ui/rml/frames/notice/panel_bl.tga,
+		ui/rml/frames/notice/panel_b.tga,
+		ui/rml/frames/notice/panel_br.tga
+	);
+}
+
+.ntalk-panel-open {
+	display: flex;
+}
+
+.ntalk-header {
+	display: block;
+	position: relative;
+	z-index: 2;
+	box-sizing: border-box;
+	width: 420dp;
+	height: 56dp;
+	padding: 0dp 12dp;
+	background-color: transparent;
+}
+
+.ntalk-drag {
+	display: block;
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	right: 0dp;
+	bottom: 0dp;
+	z-index: 1;
+	padding: 0dp 12dp;
+	box-sizing: border-box;
+	cursor: move;
+}
+
+.ntalk-title {
+	display: block;
+	padding-top: 16dp;
+	font-size: 17dp;
+	font-weight: bold;
+	color: #ffffff;
+	text-align: left;
+}
+
+.ntalk-close,
+button.ntalk-close {
+	display: block;
+	position: absolute;
+	right: 10dp;
+	top: 14dp;
+	z-index: 3;
+	width: 26dp;
+	height: 26dp;
+	line-height: 26dp;
+	padding: 0dp;
+	drag: block;
+	font-family: LatoLatin;
+	font-size: 13dp;
+	font-weight: bold;
+	text-align: center;
+	color: #ffffff;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/capsule_blue_l.tga,
+		ui/rml/frames/notice/capsule_blue_c.tga,
+		ui/rml/frames/notice/capsule_blue_r.tga
+	);
+}
+
+.ntalk-hero {
+	display: block;
+	flex: none;
+	box-sizing: border-box;
+	width: 420dp;
+	padding: 6dp 18dp 10dp 18dp;
+	pointer-events: none;
+}
+
+.ntalk-npc-name {
+	display: block;
+	width: 384dp;
+	font-size: 16dp;
+	font-weight: bold;
+	line-height: 20dp;
+	color: #2a4a80;
+}
+
+.ntalk-npc-sub {
+	display: block;
+	width: 384dp;
+	margin-top: 2dp;
+	font-size: 11dp;
+	font-weight: bold;
+	line-height: 14dp;
+	color: #5a7ab0;
+}
+
+.ntalk-speech {
+	display: block;
+	flex: none;
+	box-sizing: border-box;
+	width: 384dp;
+	margin: 0dp 18dp 12dp 18dp;
+	padding: 0dp;
+	overflow: visible;
+	background-color: transparent;
+}
+
+.ntalk-body-text {
+	display: block;
+	width: 384dp;
+	font-size: 13dp;
+	font-weight: bold;
+	line-height: 19dp;
+	color: #2a4a80;
+}
+
+.ntalk-options {
+	display: block;
+	flex: none;
+	box-sizing: border-box;
+	width: 420dp;
+	padding: 0dp 18dp 6dp 18dp;
+	overflow: visible;
+}
+
+.ntalk-option,
+button.ntalk-option {
+	display: block;
+	box-sizing: border-box;
+	width: 384dp;
+	height: 36dp;
+	line-height: 36dp;
+	margin: 0dp 0dp 8dp 0dp;
+	padding: 0dp 14dp;
+	font-family: LatoLatin;
+	font-size: 13dp;
+	font-weight: bold;
+	text-align: left;
+	color: #2a4a80;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_blue_l.tga,
+		ui/rml/frames/notice/btn_blue_c.tga,
+		ui/rml/frames/notice/btn_blue_r.tga
+	);
+	image-color: #d7e8fb;
+}
+
+.ntalk-option:hover,
+button.ntalk-option:hover {
+	image-color: #c4dbf7;
+}
+
+.ntalk-option-gold,
+button.ntalk-option-gold {
+	color: #5a4010;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_gold_l.tga,
+		ui/rml/frames/notice/btn_gold_c.tga,
+		ui/rml/frames/notice/btn_gold_r.tga
+	);
+	image-color: #f3e2b0;
+}
+
+.ntalk-option-gold:hover,
+button.ntalk-option-gold:hover {
+	image-color: #edd49a;
+}
+
+.ntalk-option-quest,
+button.ntalk-option-quest {
+	color: #1a4a28;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_green_l.tga,
+		ui/rml/frames/notice/btn_green_c.tga,
+		ui/rml/frames/notice/btn_green_r.tga
+	);
+	image-color: #ffffff;
+}
+
+.ntalk-option-quest:hover,
+button.ntalk-option-quest:hover {
+	image-color: #e8ffe8;
+}
+
+.ntalk-option-muted,
+button.ntalk-option-muted {
+	color: #5a7ab0;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_blue_l.tga,
+		ui/rml/frames/notice/btn_blue_c.tga,
+		ui/rml/frames/notice/btn_blue_r.tga
+	);
+	image-color: #e8eef8;
+}
+
+.ntalk-option-muted:hover,
+button.ntalk-option-muted:hover {
+	image-color: #dce6f4;
+}
+
+.ntalk-footer {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	flex: none;
+	box-sizing: border-box;
+	width: 420dp;
+	height: 40dp;
+	padding: 4dp 18dp 2dp 18dp;
+}
+
+.ntalk-exit,
+button.ntalk-exit {
+	display: block;
+	flex: none;
+	width: 120dp;
+	height: 28dp;
+	line-height: 28dp;
+	padding: 0dp;
+	font-family: LatoLatin;
+	font-size: 12dp;
+	font-weight: bold;
+	text-align: center;
+	color: #ffffff;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_blue_l.tga,
+		ui/rml/frames/notice/btn_blue_c.tga,
+		ui/rml/frames/notice/btn_blue_r.tga
+	);
+}
