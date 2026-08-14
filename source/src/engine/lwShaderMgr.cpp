@@ -92,19 +92,22 @@ lwShaderMgr8::lwShaderMgr8(lwIDeviceObject* dev_obj)
 
 lwShaderMgr8::~lwShaderMgr8()
 {
-    for(DWORD i = 0; _vs_num > 0; i++)
-    {
-        if(_vs_seq[i].handle)
-        {
-            UnregisterVertexShader(i);
-            //LW_DELETE_A(_vs_seq[i].data);
-            //_vs_num -= 1;
-        }
-    }
+	// Same bug as DX9: never iterate while `_vs_num > 0` without a size bound.
+	if (_vs_seq)
+	{
+		for (DWORD i = 0; i < _vs_size; i++)
+		{
+			if (_vs_seq[i].handle)
+				UnregisterVertexShader(i);
+		}
+		LW_IF_DELETE_A(_vs_seq);
+		_vs_seq = 0;
+		_vs_num = 0;
+		_vs_size = 0;
+	}
 
-    LW_IF_DELETE_A(_vs_seq);
-
-    LW_IF_RELEASE(_decl_mgr);
+	LW_IF_RELEASE(_decl_mgr);
+	_decl_mgr = 0;
 }
 
 LW_RESULT lwShaderMgr8::Init(DWORD vs_buf_size, DWORD ps_buf_size)
@@ -317,27 +320,39 @@ lwShaderMgr9::lwShaderMgr9(lwIDeviceObject* dev_obj)
 
 lwShaderMgr9::~lwShaderMgr9()
 {
-    for(DWORD i = 0; _vs_num > 0; i++)
-    {
-        if(_vs_seq[i].handle)
-        {
-            LW_DELETE_A(_vs_seq[i].data);
-            LW_RELEASE(_vs_seq[i].handle);
-            _vs_num -= 1;
-        }
-    }
+	// Iterate by allocated size — never by _vs_num. LoseDevice() nulls handles
+	// without clearing _vs_num, so the old `for (; _vs_num > 0; i++)` walked past
+	// the array and called Release on garbage (ACCESS_VIOLATION / this=0xFFFFFFFF).
+	if (_vs_seq)
+	{
+		for (DWORD i = 0; i < _vs_size; i++)
+		{
+			LW_IF_DELETE_A(_vs_seq[i].data);
+			_vs_seq[i].data = 0;
+			LW_SAFE_RELEASE(_vs_seq[i].handle);
+		}
+		LW_IF_DELETE_A(_vs_seq);
+		_vs_seq = 0;
+		_vs_num = 0;
+		_vs_size = 0;
+	}
 
-    for(DWORD i = 0; _decl_num > 0; i++)
-    {
-        if(_decl_seq[i].handle)
-        {
-            LW_DELETE_A(_decl_seq[i].data);
-            LW_RELEASE(_decl_seq[i].handle);
-            _decl_num -= 1;
-        }
-    }
+	if (_decl_seq)
+	{
+		for (DWORD i = 0; i < _decl_size; i++)
+		{
+			LW_IF_DELETE_A(_decl_seq[i].data);
+			_decl_seq[i].data = 0;
+			LW_SAFE_RELEASE(_decl_seq[i].handle);
+		}
+		LW_IF_DELETE_A(_decl_seq);
+		_decl_seq = 0;
+		_decl_num = 0;
+		_decl_size = 0;
+	}
 
-    LW_IF_RELEASE(_decl_mgr);
+	LW_IF_RELEASE(_decl_mgr);
+	_decl_mgr = 0;
 }
 
 LW_RESULT lwShaderMgr9::Init(DWORD vs_buf_size, DWORD decl_buf_size, DWORD ps_buf_size)
