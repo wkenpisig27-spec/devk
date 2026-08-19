@@ -5,6 +5,7 @@
 #include "rmlui/RmlUiRegionForm.h"
 #include "rmlui/RmlUiServerForm.h"
 #include "rmlui/RmlUiSelectChaForm.h"
+#include "rmlui/RmlUiCreateChaForm.h"
 #include "rmlui/RmlUiInventoryForm.h"
 #include "rmlui/RmlUiBankForm.h"
 #include "rmlui/RmlUiCharacterForm.h"
@@ -218,6 +219,9 @@ bool CRmlUiManager::Init(HWND hwnd) {
 	if (!CRmlUiSelectChaForm::Instance().Load(g_context)) {
 		OutputDebugStringA("RmlUi: warning - selectcha.rml failed to load\n");
 	}
+	if (!CRmlUiCreateChaForm::Instance().Load(g_context)) {
+		OutputDebugStringA("RmlUi: warning - createcha.rml failed to load\n");
+	}
 	if (!CRmlUiInventoryForm::Instance().Load(g_context)) {
 		OutputDebugStringA("RmlUi: warning - inventory.rml failed to load\n");
 	}
@@ -243,6 +247,10 @@ void CRmlUiManager::HideSelectChaForm() {
 	CRmlUiSelectChaForm::Instance().Hide();
 }
 
+void CRmlUiManager::HideCreateChaForm() {
+	CRmlUiCreateChaForm::Instance().Hide();
+}
+
 void CRmlUiManager::HideInventoryForm() {
 	CRmlUiInventoryForm::Instance().Hide();
 }
@@ -262,6 +270,7 @@ void CRmlUiManager::Shutdown() {
 	CRmlUiRegionForm::Instance().Unload();
 	CRmlUiServerForm::Instance().Unload();
 	CRmlUiSelectChaForm::Instance().Unload();
+	CRmlUiCreateChaForm::Instance().Unload();
 	CRmlUiInventoryForm::Instance().Unload();
 	CRmlUiBankForm::Instance().Unload();
 	CRmlUiCharacterForm::Instance().Unload();
@@ -314,6 +323,7 @@ void CRmlUiManager::Render() {
 	g_renderer->EndFrame();
 	// 3D preview + item hint above the Rml chrome (FormMgr draws underneath).
 	CRmlUiInventoryForm::Instance().RenderChaPreview();
+	CRmlUiCreateChaForm::Instance().RenderChaPreview();
 	CRmlUiInventoryForm::Instance().RenderItemHint();
 }
 
