@@ -114,6 +114,18 @@ public:
 
 	CForm* frmRoleInfo; // 定义角色初步介绍界面  该界面仅在进入创建角色界面时显示
 
+	void ShowChaFoundForm();
+	void OnAcceptCreate();
+	void OnBackCreate();
+	void OnStepHairLeft();
+	void OnStepHairRight();
+	void OnStepFaceLeft();
+	void OnStepFaceRight();
+	void OnRotateLeft();
+	void OnRotateRight();
+	void OnSelectRace(int index);
+	void RenderChaPreview(int stageX, int stageY, int stageW, int stageH);
+
 protected:
 	// 场景相关函数
 	virtual void _FrameMove(DWORD dwTimeParam);
@@ -181,9 +193,11 @@ protected:
 	void SendChaToServ();
 	void GotoSelChaScene();
 
-	void ShowChaFoundForm();
-
 private:
+	std::string GetChaNameInput() const;
+	void HideCreateChaPanel();
+	void ShowCreateChaPanel();
+
 	enum {
 		CITY_BY_X_MIN = 8,
 		CITY_BY_X_MAX = 230,

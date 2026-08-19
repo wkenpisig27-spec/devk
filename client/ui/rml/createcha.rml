@@ -1,0 +1,80 @@
+<rml>
+	<head>
+		<title>Create Character</title>
+		<link type="text/rcss" href="notice.rcss"/>
+		<link type="text/rcss" href="createcha.rcss"/>
+	</head>
+	<body class="createcha-body">
+		<div id="createcha-panel" class="createcha-panel">
+			<div class="createcha-header">
+				<handle class="createcha-drag" move_target="createcha-panel">
+					<div class="createcha-title">Create Character</div>
+				</handle>
+			</div>
+
+			<div class="createcha-panel-body">
+				<div class="createcha-content">
+					<div id="createcha-preview" class="createcha-preview">
+						<div class="createcha-race-tabs">
+							<button class="createcha-race-tab" id="btnRace0" type="button">Lance</button>
+							<button class="createcha-race-tab" id="btnRace1" type="button">Carsise</button>
+							<button class="createcha-race-tab" id="btnRace2" type="button">Phyllis</button>
+							<button class="createcha-race-tab createcha-race-tab-last" id="btnRace3" type="button">Ami</button>
+						</div>
+						<div id="createcha-preview-stage" class="createcha-preview-stage"></div>
+						<div class="createcha-preview-controls">
+							<button class="createcha-rot" id="btnLeft3d" type="button" title="Rotate left">&lt;</button>
+							<button class="createcha-rot createcha-rot-right" id="btnRight3d" type="button" title="Rotate right">&gt;</button>
+						</div>
+					</div>
+
+					<div class="createcha-side">
+						<div id="memChaDescribe" class="createcha-desc"><p class="createcha-desc-text"></p></div>
+
+						<div class="createcha-field">
+							<div class="createcha-label-row">
+								<div class="createcha-gem"></div>
+								<div class="createcha-label">Name</div>
+								<div class="createcha-gem"></div>
+							</div>
+							<div class="createcha-input-shell">
+								<input class="createcha-input" type="text" id="edtName" name="name" maxlength="32"/>
+							</div>
+						</div>
+
+						<div class="createcha-field">
+							<div class="createcha-label-row">
+								<div class="createcha-gem"></div>
+								<div class="createcha-label">Hair Style</div>
+								<div class="createcha-gem"></div>
+							</div>
+							<div class="createcha-stepper">
+								<button class="createcha-step-btn" id="btnLeftHair" type="button" title="Previous hair">&lt;</button>
+								<div id="labHairShow" class="createcha-step-value">—</div>
+								<button class="createcha-step-btn" id="btnRightHair" type="button" title="Next hair">&gt;</button>
+							</div>
+						</div>
+
+						<div class="createcha-field createcha-field-last">
+							<div class="createcha-label-row">
+								<div class="createcha-gem"></div>
+								<div class="createcha-label">Face</div>
+								<div class="createcha-gem"></div>
+							</div>
+							<div class="createcha-stepper">
+								<button class="createcha-step-btn" id="btnLeftFace" type="button" title="Previous face">&lt;</button>
+								<div id="labFaceShow" class="createcha-step-value">—</div>
+								<button class="createcha-step-btn" id="btnRightFace" type="button" title="Next face">&gt;</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="createcha-footer">
+					<button class="notice-btn notice-btn-gold createcha-btn" id="btnYes" type="button">Accept</button>
+					<button class="notice-btn notice-btn-blue createcha-btn createcha-btn-last" id="btnNo" type="button">Back</button>
+				</div>
+			</div>
+		</div>
+	</body>
+</rml>

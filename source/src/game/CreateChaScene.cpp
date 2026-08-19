@@ -67,6 +67,9 @@
 #include "SelectChaScene.h"
 #include "commfunc.h"
 #include "uiTextButton.h"
+#include "rmlui/RmlUiManager.h"
+#include "rmlui/RmlUiCreateChaForm.h"
+#include "rmlui/RmlUiSelectChaForm.h"
 
 using namespace std;
 
@@ -75,6 +78,32 @@ using namespace std;
 inline bool Error(const char* strInfo, const char* strFormName, const char* strCompentName) {
 	LG("gui", strInfo, strFormName, strCompentName);
 	return false;
+}
+
+std::string CCreateChaScene::GetChaNameInput() const {
+	if (CRmlUiManager::Instance().IsReady() && CRmlUiCreateChaForm::Instance().IsVisible())
+		return CRmlUiCreateChaForm::Instance().GetName();
+	if (edtName)
+		return edtName->GetCaption();
+	return {};
+}
+
+void CCreateChaScene::HideCreateChaPanel() {
+	CRmlUiManager::Instance().HideCreateChaForm();
+	if (frmChaFound)
+		frmChaFound->Close();
+}
+
+void CCreateChaScene::ShowCreateChaPanel() {
+	if (CRmlUiManager::Instance().IsReady()) {
+		if (frmChaFound)
+			frmChaFound->SetIsShow(false);
+		CRmlUiCreateChaForm::Instance().Show();
+		if (!CRmlUiCreateChaForm::Instance().IsVisible() && frmChaFound)
+			frmChaFound->ShowModal();
+	} else if (frmChaFound) {
+		frmChaFound->ShowModal();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -563,6 +592,8 @@ int LoginScene_CreateCha::OnLButtonDown(int flag, int x, int y) {
 	if (pCreateChaScene) {
 		if (pCreateChaScene->frmRoleInfo->GetIsShow())
 			return -1;
+		if (CRmlUiManager::Instance().IsReady() && CRmlUiCreateChaForm::Instance().IsVisible())
+			return -1;
 	}
 
 	lwINodePrimitive* pri;
@@ -823,6 +854,8 @@ bool CCreateChaScene::_Init() {
 
 //-----------------------------------------------------------------------
 bool CCreateChaScene::_Clear() {
+	CRmlUiManager::Instance().HideCreateChaForm();
+
 	bool bResult = CGameScene::_Clear();
 
 	lwIByteSet* res_bs = g_Render.GetInterfaceMgr()->res_mgr->GetByteSet();
@@ -1097,7 +1130,10 @@ bool CCreateChaScene::_InitUI() {
 			(g_pGameApp->GetWindowWidth() - frmQuit->GetWidth()) / 2,
 			g_pGameApp->GetWindowHeight() - frmQuit->GetHeight() - 40);
 		frmQuit->Refresh();
-		frmQuit->Show();
+		if (!CRmlUiManager::Instance().IsReady())
+			frmQuit->Show();
+		else
+			frmQuit->SetIsShow(false);
 	}
 
 	// ???????????
@@ -1108,8 +1144,12 @@ bool CCreateChaScene::_InitUI() {
 			return false;
 		}
 		frmRoleInfo->evtEntrustMouseEvent = _evtRoleInfoFormMouseEvent;
-		frmRoleInfo->SetIsShow(true);
-		DarkScene(true);
+		if (CRmlUiManager::Instance().IsReady()) {
+			frmRoleInfo->SetIsShow(false);
+		} else {
+			frmRoleInfo->SetIsShow(true);
+			DarkScene(true);
+		}
 
 		frmLanchInfo = CFormMgr::s_Mgr.Find("frmLanchInfo");
 		if (!frmLanchInfo) {
@@ -1173,6 +1213,9 @@ bool CCreateChaScene::_InitUI() {
 		}
 	}
 
+	if (CRmlUiManager::Instance().IsReady())
+		ShowChaFoundForm();
+
 	return true;
 }
 
@@ -1200,36 +1243,130 @@ void CCreateChaScene::_ChaFoundFrmMouseEvent(CCompent* pSender, int nMsgType,
 	}
 
 	if (strName == "btnYes") {
-		CCreateChaScene& rkScene = GetCurrScene();
-
-		// ?????t?�?
-
-		// ????�???
-		if (!rkScene.IsValidCheckChaName(edtName->GetCaption()))
-			return;
-
-		if (rkScene.m_bSameNameError) {
-			// ????????????
-
-			GetCurrScene().SendChaToServ(); // ???????????????
-			CGameApp::Waiting();
-		} else {
-			// ???????????
-
-			frmChaFound->Close();
-			rkScene.InitChaCityFrm(); // ????????????
-			frmChaCity->ShowModal();  // ?????h??????
-		}
+		GetCurrScene().OnAcceptCreate();
 	} else if (strName == "btnNo") {
-		// ?????t?�?
-
-		// ???�???,???????
-		frmChaFound->Close();
-
-		// ????????
-		GetCurrScene().DarkScene(false);
-		frmQuit->SetIsShow(true);
+		GetCurrScene().OnBackCreate();
 	}
+}
+
+void CCreateChaScene::OnAcceptCreate() {
+	if (!IsValidCheckChaName(GetChaNameInput().c_str()))
+		return;
+
+	if (m_bSameNameError) {
+		SendChaToServ();
+		CGameApp::Waiting();
+		return;
+	}
+
+	HideCreateChaPanel();
+	InitChaCityFrm();
+	if (frmChaCity)
+		frmChaCity->ShowModal();
+}
+
+void CCreateChaScene::OnBackCreate() {
+	HideCreateChaPanel();
+	if (CRmlUiManager::Instance().IsReady()) {
+		GotoSelChaScene();
+		return;
+	}
+	DarkScene(false);
+	if (frmQuit)
+		frmQuit->SetIsShow(true);
+}
+
+void CCreateChaScene::OnStepHairLeft() {
+	ChangeHair(LEFT);
+}
+
+void CCreateChaScene::OnStepHairRight() {
+	ChangeHair(RIGHT);
+}
+
+void CCreateChaScene::OnStepFaceLeft() {
+	ChangeFace(LEFT);
+}
+
+void CCreateChaScene::OnStepFaceRight() {
+	ChangeFace(RIGHT);
+}
+
+void CCreateChaScene::OnRotateLeft() {
+	RotateChar(LEFT);
+}
+
+void CCreateChaScene::OnRotateRight() {
+	RotateChar(RIGHT);
+}
+
+void CCreateChaScene::OnSelectRace(int index) {
+	if (index < 0 || index > 3)
+		return;
+	if (index == m_nSelChaIndex)
+		return;
+
+	m_nSelChaIndex = index;
+	m_nCurHairIndex = nHairTestCnt[m_nSelChaIndex];
+	m_nCurFaceIndex = nFaceTestCnt[m_nSelChaIndex];
+	m_nChaRotate = 0;
+	InitChaFoundFrm();
+
+	if (CRmlUiManager::Instance().IsReady())
+		CRmlUiCreateChaForm::Instance().SetActiveRace(index);
+}
+
+void CCreateChaScene::RenderChaPreview(int stageX, int stageY, int stageW, int stageH) {
+	if (m_nSelChaIndex < 0 || m_nSelChaIndex > 3)
+		return;
+
+	if (!m_pChaForUI[m_nSelChaIndex])
+		return;
+
+	if (stageW < 1 || stageH < 1)
+		return;
+
+	LPDIRECT3DDEVICE9 dev = g_Render.GetDevice();
+	dev->Clear(0, NULL, D3DCLEAR_ZBUFFER, 0, 1.0f, 0);
+	dev->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+	dev->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+
+	const RECT scissor = {stageX, stageY, stageX + stageW, stageY + stageH};
+	dev->SetScissorRect(&scissor);
+	dev->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
+
+	g_Render.LookAt(D3DXVECTOR3(11.0f, 36.0f, 10.0f), D3DXVECTOR3(8.70f, 12.0f, 8.0f), MPRender::VIEW_3DUI);
+
+	MPMatrix44 old_mat = *m_pChaForUI[m_nSelChaIndex]->GetMatrix();
+	m_pChaForUI[m_nSelChaIndex]->SetUIYaw(180 + m_nChaRotate);
+
+	const float resScale = (float)g_Render.GetScrWidth() / 800.0f;
+	const int typeID = m_pChaForUI[m_nSelChaIndex]->getTypeID();
+	float baseDis = 13.5f;
+	if (typeID == 3)
+		baseDis = 13.0f;
+	else if (typeID == 4)
+		baseDis = 12.0f;
+	else if (typeID == 2)
+		baseDis = 14.5f;
+
+	// Match inventory preview tuning, scaled down for the shorter createcha stage.
+	const float refStageH = 300.0f;
+	float scaleBias = 0.42f;
+	if (stageH > 0)
+		scaleBias = 0.42f * (refStageH / (float)stageH);
+	if (scaleBias < 0.72f)
+		scaleBias = 0.72f;
+
+	m_pChaForUI[m_nSelChaIndex]->SetUIScaleDis(baseDis * resScale * scaleBias);
+
+	const int cx = stageX + stageW / 2;
+	const int cy = stageY + (int)(stageH * 0.84f);
+	m_pChaForUI[m_nSelChaIndex]->RenderForUI(cx, cy);
+	m_pChaForUI[m_nSelChaIndex]->SetMatrix(&old_mat);
+
+	g_Render.SetTransformView(&g_Render.GetWorldViewMatrix());
+	dev->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
 }
 
 //-----------------------------------------------------------------------
@@ -1268,7 +1405,7 @@ void CCreateChaScene::_ChaCityFrmMouseEvent(CCompent* pSender, int nMsgType,
 		frmChaCity->Close();
 
 		// ???????
-		frmChaFound->ShowModal();
+		GetCurrScene().ShowCreateChaPanel();
 	}
 }
 
@@ -1377,7 +1514,10 @@ void CCreateChaScene::ChangeFace(eDirectType enumDirect) {
 		// ??????????"????+???"??????"????"
 		CItemRecord* pItem = GetItemRecordInfo(m_nCurFaceIndex);
 		if (pItem) {
-			labFace->SetCaption(pItem->szName);
+			if (labFace)
+				labFace->SetCaption(pItem->szName);
+			if (CRmlUiManager::Instance().IsReady())
+				CRmlUiCreateChaForm::Instance().SetFaceLabel(pItem->szName);
 		}
 	}
 }
@@ -1404,7 +1544,10 @@ void CCreateChaScene::ChangeHair(eDirectType enumDirect) {
 	if (bOK) {
 		CItemRecord* pItem = GetItemRecordInfo(m_nCurHairIndex);
 		if (pItem) {
-			labHair->SetCaption(pItem->szName);
+			if (labHair)
+				labHair->SetCaption(pItem->szName);
+			if (CRmlUiManager::Instance().IsReady())
+				CRmlUiCreateChaForm::Instance().SetHairLabel(pItem->szName);
 		}
 	} else {
 		LG("error", RES_STRING(CL_LANGUAGE_MATCH_47), m_nCurHairIndex);
@@ -1473,35 +1616,49 @@ void CCreateChaScene::InitChaFoundFrm() {
 	if (nullptr == m_pChaForUI[m_nSelChaIndex])
 		return;
 
-	CTextButton* btnLeftHair = (CTextButton*)frmChaFound->Find("btnLeftHair");
-	if (!btnLeftHair)
-		return;
-	CTextButton* btnRightHair = (CTextButton*)frmChaFound->Find("btnRightHair");
-	if (!btnRightHair)
-		return;
-
-	memChaDescribe->SetCaption(szDescripts(m_nSelChaIndex));
-	memChaDescribe->ProcessCaption();
-	edtName->SetCaption(m_sName.c_str());
+	if (memChaDescribe) {
+		memChaDescribe->SetCaption(szDescripts(m_nSelChaIndex));
+		memChaDescribe->ProcessCaption();
+	}
+	if (edtName)
+		edtName->SetCaption(m_sName.c_str());
 
 	BOOL bOK = m_pChaForUI[m_nSelChaIndex]->ChangePart(enumEQUIP_HEAD, m_nCurHairIndex);
 	if (bOK) {
 		CItemRecord* pItem = GetItemRecordInfo(m_nCurHairIndex);
 		if (pItem) {
-			labHair->SetCaption(pItem->szName);
+			if (labHair)
+				labHair->SetCaption(pItem->szName);
 		}
 	} else {
 		LG("error", RES_STRING(CL_LANGUAGE_MATCH_47), m_nCurHairIndex);
 	}
 	bOK = m_pChaForUI[m_nSelChaIndex]->ChangePart(enumEQUIP_FACE, m_nCurFaceIndex);
 	if (bOK) {
-		// ??????"??+??"????"??"
 		CItemRecord* pItem = GetItemRecordInfo(m_nCurFaceIndex);
 		if (pItem) {
-			labFace->SetCaption(pItem->szName);
+			if (labFace)
+				labFace->SetCaption(pItem->szName);
 		}
 	} else {
 		LG("error", RES_STRING(CL_LANGUAGE_MATCH_48), m_nCurHairIndex);
+	}
+
+	if (CRmlUiManager::Instance().IsReady()) {
+		CRmlUiCreateChaForm& rml = CRmlUiCreateChaForm::Instance();
+		rml.SetRaceLabels(
+			RES_STRING(CL_LANGUAGE_MATCH_681),
+			RES_STRING(CL_LANGUAGE_MATCH_682),
+			RES_STRING(CL_LANGUAGE_MATCH_683),
+			RES_STRING(CL_LANGUAGE_MATCH_684));
+		if (m_nSelChaIndex >= 0 && m_nSelChaIndex <= 3)
+			rml.SetActiveRace(m_nSelChaIndex);
+		rml.SetDescription(szDescripts(m_nSelChaIndex));
+		rml.SetName(m_sName.c_str());
+		if (labHair)
+			rml.SetHairLabel(labHair->GetCaption());
+		if (labFace)
+			rml.SetFaceLabel(labFace->GetCaption());
 	}
 }
 
@@ -1628,7 +1785,7 @@ void CCreateChaScene::SendChaToServ() {
 	int sTypeID = (short)m_pChaForUI[m_nSelChaIndex]->getTypeID();
 	int sHairID = (short)m_pChaForUI[m_nSelChaIndex]->GetPartID(0);
 	int faceID = (short)m_pChaForUI[m_nSelChaIndex]->GetPartID(1);
-	CS_NewCha2(edtName->GetCaption(), szCityNames(m_nCurCityIndex), sTypeID, sHairID, faceID);
+	CS_NewCha2(GetChaNameInput().c_str(), szCityNames(m_nCurCityIndex), sTypeID, sHairID, faceID);
 }
 
 //-----------------------------------------------------------------------
@@ -1638,13 +1795,13 @@ void CCreateChaScene::CreateNewCha() {
 	m_bSameNameError = false;
 
 	// ???�???
-	frmChaFound->Close();
+	HideCreateChaPanel();
 	frmChaCity->Close();
 
 	if (!m_pChaForUI[m_nSelChaIndex])
 		return;
 
-	string sName = edtName->GetCaption();
+	string sName = GetChaNameInput();
 
 	stNetChangeChaPart part;
 	memset(&part, 0, sizeof(part));
@@ -1678,7 +1835,7 @@ void CCreateChaScene::NewChaError(int error_no, const char* error_info) {
 		frmChaCity->Close();
 
 		m_bSameNameError = true;
-		frmChaFound->ShowModal();
+		ShowCreateChaPanel();
 
 		g_pGameApp->MsgBox("%s", g_GetServerError(error_no));
 		LG("error", "%s Error, Code:%d, Info: %s", error_info, error_no, g_GetServerError(error_no));
@@ -1696,7 +1853,10 @@ void CCreateChaScene::NewChaError(int error_no, const char* error_info) {
 
 //-----------------------------------------------------------------------
 void CCreateChaScene::GotoSelChaScene() {
+	CRmlUiManager::Instance().HideCreateChaForm();
 	g_pGameApp->GotoScene(m_pkLastScene, true);
+	if (CRmlUiManager::Instance().IsReady())
+		CRmlUiSelectChaForm::Instance().Show();
 }
 
 //-----------------------------------------------------------------------
@@ -1759,7 +1919,7 @@ void CCreateChaScene::ShowChaFoundForm() {
 	frmQuit->SetIsShow(false);
 
 	// ???????
-	frmChaFound->ShowModal();
+	ShowCreateChaPanel();
 }
 
 void CCreateChaScene::ShowAllRoleInfo(int nRoleInfo) {
@@ -2035,4 +2195,64 @@ void CCreateChaScene::_evtRoleAllInfoFormMouseEvent(CCompent* pSender, int nMsgT
 			}
 		}
 	}
+}
+
+void RmlCreateCha_OnAccept() {
+	CCreateChaScene* scene = dynamic_cast<CCreateChaScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->OnAcceptCreate();
+}
+
+void RmlCreateCha_OnBack() {
+	CCreateChaScene* scene = dynamic_cast<CCreateChaScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->OnBackCreate();
+}
+
+void RmlCreateCha_OnLeftHair() {
+	CCreateChaScene* scene = dynamic_cast<CCreateChaScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->OnStepHairLeft();
+}
+
+void RmlCreateCha_OnRightHair() {
+	CCreateChaScene* scene = dynamic_cast<CCreateChaScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->OnStepHairRight();
+}
+
+void RmlCreateCha_OnLeftFace() {
+	CCreateChaScene* scene = dynamic_cast<CCreateChaScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->OnStepFaceLeft();
+}
+
+void RmlCreateCha_OnRightFace() {
+	CCreateChaScene* scene = dynamic_cast<CCreateChaScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->OnStepFaceRight();
+}
+
+void RmlCreateCha_OnLeftRotate() {
+	CCreateChaScene* scene = dynamic_cast<CCreateChaScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->OnRotateLeft();
+}
+
+void RmlCreateCha_OnRightRotate() {
+	CCreateChaScene* scene = dynamic_cast<CCreateChaScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->OnRotateRight();
+}
+
+void RmlCreateCha_OnSelectRace(int index) {
+	CCreateChaScene* scene = dynamic_cast<CCreateChaScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->OnSelectRace(index);
+}
+
+void RmlCreateCha_RenderPreview(int stageX, int stageY, int stageW, int stageH) {
+	CCreateChaScene* scene = dynamic_cast<CCreateChaScene*>(CGameApp::GetCurScene());
+	if (scene)
+		scene->RenderChaPreview(stageX, stageY, stageW, stageH);
 }
