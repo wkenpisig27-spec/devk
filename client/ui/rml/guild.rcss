@@ -24,11 +24,11 @@ body.guild-body .guild-perm-scrim-open {
 	flex-direction: column;
 	flex: none;
 	box-sizing: border-box;
-	width: 780dp;
-	min-width: 780dp;
-	height: 540dp;
+	width: 455dp;
+	min-width: 455dp;
+	height: 373dp;
 	margin: 0dp;
-	padding: 0dp 0dp 10dp 0dp;
+	padding: 0dp 0dp 6dp 0dp;
 	overflow: visible;
 	background-color: transparent;
 	border-top-width: 0dp;
@@ -79,7 +79,7 @@ body.guild-body .guild-perm-scrim-open {
 .guild-title {
 	display: block;
 	padding-top: 16dp;
-	font-size: 18dp;
+	font-size: 15dp;
 	font-weight: bold;
 	color: #ffffff;
 	text-align: left;
@@ -119,7 +119,7 @@ button.guild-close {
 	flex-direction: row;
 	flex: 1;
 	box-sizing: border-box;
-	padding: 4dp 16dp 0dp 16dp;
+	padding: 2dp 10dp 0dp 10dp;
 	overflow: visible;
 }
 
@@ -127,18 +127,18 @@ button.guild-close {
 	display: flex;
 	flex-direction: column;
 	flex: none;
-	width: 214dp;
-	min-width: 214dp;
-	margin-right: 12dp;
+	width: 148dp;
+	min-width: 148dp;
+	margin-right: 6dp;
 }
 
 .guild-info {
 	display: block;
 	flex: none;
 	box-sizing: border-box;
-	width: 214dp;
-	min-height: 268dp;
-	padding: 8dp 12dp 10dp 12dp;
+	width: 148dp;
+	min-height: 190dp;
+	padding: 4dp 8dp 6dp 8dp;
 	overflow: visible;
 	background-color: transparent;
 	border-top-width: 0dp;
@@ -161,10 +161,10 @@ button.guild-close {
 
 .guild-info-title {
 	display: block;
-	height: 20dp;
-	line-height: 20dp;
-	margin-bottom: 6dp;
-	font-size: 13dp;
+	height: 16dp;
+	line-height: 16dp;
+	margin-bottom: 2dp;
+	font-size: 11dp;
 	font-weight: bold;
 	color: #2a4a80;
 	text-align: center;
@@ -172,7 +172,7 @@ button.guild-close {
 
 .guild-field {
 	display: block;
-	margin-bottom: 4dp;
+	margin-bottom: 2dp;
 	pointer-events: none;
 }
 
@@ -182,45 +182,45 @@ button.guild-close {
 
 .guild-field-label {
 	display: block;
-	font-size: 11dp;
+	font-size: 10dp;
 	font-weight: bold;
 	color: #5a7ab0;
-	line-height: 13dp;
+	line-height: 12dp;
 }
 
 .guild-field-value {
 	display: block;
-	min-height: 16dp;
-	font-size: 13dp;
+	min-height: 13dp;
+	font-size: 11dp;
 	font-weight: bold;
 	color: #2a4a80;
-	line-height: 16dp;
+	line-height: 13dp;
 }
 
 .guild-actions {
 	display: block;
 	flex: none;
-	margin-top: 8dp;
-	width: 214dp;
+	margin-top: 6dp;
+	width: 148dp;
 }
 
 .guild-action-row {
 	display: flex;
 	flex-direction: row;
-	width: 214dp;
-	height: 36dp;
-	margin-bottom: 6dp;
+	width: 148dp;
+	height: 28dp;
+	margin-bottom: 4dp;
 }
 
 .guild-action,
 button.guild-action {
 	display: block;
 	flex: none;
-	width: 104dp;
-	height: 36dp;
-	line-height: 36dp;
+	width: 71dp;
+	height: 28dp;
+	line-height: 28dp;
 	margin: 0dp 6dp 0dp 0dp;
-	font-size: 13dp;
+	font-size: 11dp;
 }
 
 .guild-action-end,
@@ -248,21 +248,21 @@ button.notice-btn.notice-btn-disabled:hover {
 	display: flex;
 	flex-direction: row;
 	flex: none;
-	height: 32dp;
-	padding: 0dp 8dp;
+	height: 24dp;
+	padding: 0dp 4dp;
 }
 
 .guild-tab,
 button.guild-tab {
 	display: block;
 	flex: none;
-	width: 88dp;
-	height: 32dp;
-	line-height: 32dp;
-	margin-right: 4dp;
+	width: 62dp;
+	height: 24dp;
+	line-height: 24dp;
+	margin-right: 2dp;
 	padding: 0dp;
 	font-family: LatoLatin;
-	font-size: 13dp;
+	font-size: 11dp;
 	font-weight: bold;
 	text-align: center;
 	color: #5a7ab0;
@@ -295,7 +295,7 @@ button.guild-tab-active {
 	flex-direction: column;
 	flex: 1;
 	box-sizing: border-box;
-	padding: 8dp 10dp 8dp 10dp;
+	padding: 4dp 6dp 4dp 6dp;
 	overflow: visible;
 	background-color: transparent;
 	border-top-width: 0dp;
@@ -331,18 +331,18 @@ button.guild-tab-active {
 	display: flex;
 	flex-direction: row;
 	flex: none;
-	height: 28dp;
+	height: 20dp;
 	border-bottom: 1dp #9eb8e8;
 }
 
 .guild-th,
 button.guild-th {
 	display: block;
-	height: 28dp;
-	line-height: 28dp;
-	padding: 0dp 8dp;
+	height: 20dp;
+	line-height: 20dp;
+	padding: 0dp 4dp;
 	font-family: LatoLatin;
-	font-size: 12dp;
+	font-size: 11dp;
 	font-weight: bold;
 	text-align: left;
 	color: #5a7ab0;
@@ -354,8 +354,8 @@ button.guild-th {
 	border-radius: 0dp;
 }
 
-.guild-th-name { width: 200dp; }
-.guild-th-class { width: 200dp; }
+.guild-th-name { width: 100dp; }
+.guild-th-class { width: 96dp; }
 .guild-th-level { flex: 1; }
 
 .guild-tbody {
@@ -370,11 +370,11 @@ button.guild-row {
 	flex-direction: row;
 	box-sizing: border-box;
 	width: 100%;
-	height: 28dp;
+	height: 20dp;
 	margin: 0dp;
 	padding: 0dp;
 	font-family: LatoLatin;
-	font-size: 13dp;
+	font-size: 11dp;
 	font-weight: bold;
 	text-align: left;
 	color: #2a4a80;
@@ -406,15 +406,15 @@ button.guild-row-sel:hover {
 
 .guild-cell {
 	display: block;
-	height: 28dp;
-	line-height: 28dp;
-	padding: 0dp 8dp;
+	height: 20dp;
+	line-height: 20dp;
+	padding: 0dp 4dp;
 	overflow: hidden;
 	pointer-events: none;
 }
 
-.guild-cell-name { width: 200dp; }
-.guild-cell-class { width: 200dp; }
+.guild-cell-name { width: 100dp; }
+.guild-cell-class { width: 96dp; }
 .guild-cell-level { flex: 1; }
 
 .guild-vault-gold {
@@ -422,22 +422,22 @@ button.guild-row-sel:hover {
 	flex-direction: row;
 	align-items: center;
 	flex: none;
-	height: 40dp;
-	margin-bottom: 6dp;
+	height: 28dp;
+	margin-bottom: 4dp;
 }
 
 .guild-vault-gold-label {
 	display: block;
-	font-size: 12dp;
+	font-size: 10dp;
 	font-weight: bold;
 	color: #5a7ab0;
-	margin-right: 8dp;
+	margin-right: 6dp;
 }
 
 .guild-vault-gold-value {
 	display: block;
 	flex: 1;
-	font-size: 14dp;
+	font-size: 12dp;
 	font-weight: bold;
 	color: #2a4a80;
 }
@@ -445,11 +445,11 @@ button.guild-row-sel:hover {
 .guild-vault-btn,
 button.guild-vault-btn {
 	flex: none;
-	width: 72dp;
-	height: 32dp;
-	line-height: 32dp;
-	margin: 0dp 0dp 0dp 6dp;
-	font-size: 12dp;
+	width: 56dp;
+	height: 26dp;
+	line-height: 26dp;
+	margin: 0dp 0dp 0dp 4dp;
+	font-size: 11dp;
 }
 
 .guild-vault-body {
@@ -577,25 +577,25 @@ button.guild-vault-btn {
 	align-items: center;
 	justify-content: center;
 	flex: none;
-	height: 40dp;
-	margin-top: 4dp;
+	height: 28dp;
+	margin-top: 2dp;
 }
 
 .guild-log-btn,
 button.guild-log-btn {
 	flex: none;
-	width: 80dp;
-	height: 32dp;
-	line-height: 32dp;
-	font-size: 12dp;
+	width: 64dp;
+	height: 26dp;
+	line-height: 26dp;
+	font-size: 11dp;
 }
 
 .guild-log-page {
 	display: block;
-	width: 48dp;
-	height: 32dp;
-	line-height: 32dp;
-	font-size: 13dp;
+	width: 36dp;
+	height: 26dp;
+	line-height: 26dp;
+	font-size: 12dp;
 	font-weight: bold;
 	color: #2a4a80;
 	text-align: center;
@@ -607,16 +607,16 @@ button.guild-log-btn {
 	align-items: center;
 	flex: none;
 	box-sizing: border-box;
-	height: 48dp;
-	padding: 6dp 16dp 0dp 16dp;
+	height: 36dp;
+	padding: 4dp 8dp 0dp 8dp;
 }
 
 .guild-motto-shell {
 	display: block;
 	box-sizing: border-box;
 	flex: 1;
-	height: 36dp;
-	margin-right: 8dp;
+	height: 28dp;
+	margin-right: 6dp;
 	padding: 2dp;
 	overflow: visible;
 	background-color: transparent;
@@ -643,11 +643,11 @@ input.guild-motto-input {
 	display: block;
 	box-sizing: border-box;
 	width: 100%;
-	height: 32dp;
-	line-height: 32dp;
-	padding: 0dp 10dp;
+	height: 24dp;
+	line-height: 24dp;
+	padding: 0dp 6dp;
 	font-family: LatoLatin;
-	font-size: 13dp;
+	font-size: 11dp;
 	color: #2a4a80;
 	background-color: transparent;
 	border-top-width: 0dp;
@@ -660,11 +660,11 @@ input.guild-motto-input {
 .guild-footer-btn,
 button.guild-footer-btn {
 	flex: none;
-	width: 110dp;
-	height: 36dp;
-	line-height: 36dp;
-	margin-left: 6dp;
-	font-size: 13dp;
+	width: 80dp;
+	height: 28dp;
+	line-height: 28dp;
+	margin-left: 4dp;
+	font-size: 11dp;
 }
 
 .guild-footer-hidden,
@@ -692,14 +692,54 @@ button.guild-footer-btn {
 	position: absolute;
 	left: 50%;
 	top: 50%;
-	margin-left: -210dp;
-	margin-top: -230dp;
+	margin-left: -95dp;
+	margin-top: -140dp;
 	z-index: 9;
-	width: 420dp;
+	flex-direction: column;
+	width: 190dp;
+	min-width: 190dp;
+	height: 281dp;
 }
 
 .guild-perm-modal-open {
-	display: block;
+	display: flex;
+}
+
+.guild-perm-modal .notice-header {
+	flex: none;
+	height: 56dp;
+	padding: 0dp 8dp;
+}
+
+.guild-perm-modal .notice-title {
+	padding-top: 16dp;
+	font-size: 12dp;
+}
+
+.guild-perm-modal .notice-body {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0dp;
+	padding: 4dp 8dp 2dp 8dp;
+	overflow: hidden;
+}
+
+.guild-perm-modal .notice-footer {
+	flex: none;
+	padding: 4dp 8dp 8dp 8dp;
+}
+
+.guild-perm-modal .notice-btn,
+.guild-perm-modal button.notice-btn {
+	height: 24dp;
+	line-height: 24dp;
+	font-size: 11dp;
+}
+
+.guild-perm-modal .notice-btn-gold,
+.guild-perm-modal button.notice-btn-gold {
+	margin-right: 6dp;
 }
 
 .guild-motto-modal {
@@ -707,10 +747,10 @@ button.guild-footer-btn {
 	position: absolute;
 	left: 50%;
 	top: 50%;
-	margin-left: -200dp;
-	margin-top: -110dp;
+	margin-left: -170dp;
+	margin-top: -100dp;
 	z-index: 9;
-	width: 400dp;
+	width: 340dp;
 }
 
 .guild-motto-modal-open {
@@ -764,29 +804,34 @@ input.guild-motto-modal-input {
 
 .guild-perm-who {
 	display: block;
-	margin-bottom: 8dp;
-	font-size: 13dp;
+	flex: none;
+	height: 14dp;
+	line-height: 14dp;
+	margin-bottom: 3dp;
+	font-size: 11dp;
 	font-weight: bold;
 	color: #2a4a80;
+	overflow: hidden;
 }
 
 .guild-perm-presets {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
-	margin-bottom: 8dp;
+	flex: none;
+	margin-bottom: 4dp;
 }
 
 .guild-preset,
 button.guild-preset {
 	display: block;
-	width: 86dp;
-	height: 28dp;
-	line-height: 28dp;
-	margin: 0dp 6dp 6dp 0dp;
+	width: 54dp;
+	height: 18dp;
+	line-height: 18dp;
+	margin: 0dp 4dp 3dp 0dp;
 	padding: 0dp;
 	font-family: LatoLatin;
-	font-size: 11dp;
+	font-size: 9dp;
 	font-weight: bold;
 	text-align: center;
 	color: #ffffff;
@@ -805,18 +850,21 @@ button.guild-preset {
 
 .guild-perm-list {
 	display: block;
+	flex: 1;
+	min-height: 0dp;
+	overflow: auto;
 }
 
 .guild-perm,
 button.guild-perm {
 	display: block;
 	width: 100%;
-	height: 26dp;
-	line-height: 26dp;
-	margin-bottom: 3dp;
-	padding: 0dp 10dp;
+	height: 16dp;
+	line-height: 16dp;
+	margin-bottom: 2dp;
+	padding: 0dp 6dp;
 	font-family: LatoLatin;
-	font-size: 12dp;
+	font-size: 10dp;
 	font-weight: bold;
 	text-align: left;
 	color: #d45a5a;

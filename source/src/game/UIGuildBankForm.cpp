@@ -85,7 +85,8 @@ void CGuildBankMgr::RefreshGuildBankUi() {
 
 	std::vector<RmlInvSlotView> slots;
 	const int maxNum = grdBank->GetMaxNum();
-	const int cols = grdBank->GetCol() > 0 ? grdBank->GetCol() : 8;
+	// Original frmManage is 455×373; five 44dp slots fit the Notice vault pane.
+	const int cols = 5;
 	slots.reserve((size_t)maxNum);
 	for (int i = 0; i < maxNum; ++i) {
 		RmlInvSlotView view;

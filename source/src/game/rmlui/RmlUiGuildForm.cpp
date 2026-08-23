@@ -199,8 +199,8 @@ struct CRmlUiGuildForm::Impl : public Rml::EventListener {
 		if (!root || !context)
 			return;
 		const Rml::Vector2i dim = context->GetDimensions();
-		float x = ((float)dim.x - 780.f) * 0.5f;
-		float y = ((float)dim.y - 540.f) * 0.22f;
+		float x = ((float)dim.x - 455.f) * 0.5f;
+		float y = ((float)dim.y - 373.f) * 0.22f;
 		if (x < 24.f)
 			x = 24.f;
 		if (y < 32.f)
@@ -933,7 +933,7 @@ void CRmlUiGuildForm::SetVaultSlots(const std::vector<RmlInvSlotView>& slots, in
 	if (m_impl->itemDragging)
 		return;
 
-	const int cols = columns > 0 ? columns : 8;
+	const int cols = columns > 0 ? columns : 5;
 	std::string fp = FingerprintSlots(slots);
 	if (cols == m_impl->lastColumns && fp == m_impl->slotFingerprint)
 		return;
