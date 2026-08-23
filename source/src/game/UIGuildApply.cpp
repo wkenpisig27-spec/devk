@@ -11,8 +11,18 @@
 #include "UIEdit.h"
 #include "GuildData.h"
 #include "commfunc.h"
+#include "rmlui/RmlUiManager.h"
+#include "rmlui/RmlUiGuildApplyForm.h"
 
 using namespace std;
+
+namespace {
+
+bool UseRmlGuildApply() {
+	return CRmlUiManager::Instance().IsReady() && CRmlUiGuildApplyForm::Instance().LoadOk();
+}
+
+} // namespace
 
 CForm* CUIGuildApply::m_pGuildNameInputForm = nullptr;
 CEdit* CUIGuildApply::m_pGuildNameEdit = nullptr;
@@ -39,10 +49,22 @@ bool CUIGuildApply::Init() {
 }
 
 void CUIGuildApply::ShowForm() {
-	m_pGuildPasswordEdit->SetCaption("");
-	m_pGuildConfirmEdit->SetCaption("");
-	m_pGuildNameEdit->SetCaption("");
-	m_pGuildNameEdit->SetIsEnabled(true);
+	if (m_pGuildPasswordEdit)
+		m_pGuildPasswordEdit->SetCaption("");
+	if (m_pGuildConfirmEdit)
+		m_pGuildConfirmEdit->SetCaption("");
+	if (m_pGuildNameEdit) {
+		m_pGuildNameEdit->SetCaption("");
+		m_pGuildNameEdit->SetIsEnabled(true);
+	}
+
+	if (UseRmlGuildApply()) {
+		if (m_pGuildNameInputForm)
+			m_pGuildNameInputForm->SetIsShow(false);
+		CRmlUiGuildApplyForm::Instance().Show(true);
+		return;
+	}
+
 	m_pGuildNameInputForm->ShowModal();
 	m_pGuildNameEdit->SetActive(m_pGuildNameEdit);
 }
@@ -79,23 +101,37 @@ inline bool IsValidGuildName(const char* name, unsigned short len, bool bEng) {
 }
 
 void CUIGuildApply::OnEscClose(CForm* pForm) {
-	if (m_pGuildNameInputForm == pForm) {
-		CM_GUILD_PUTNAME(false, "", "");
-		m_pGuildNameInputForm->SetIsShow(false);
-	}
+	if (m_pGuildNameInputForm == pForm)
+		CancelApply();
 }
-void CUIGuildApply::OnConfirm(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
-	if (nMsgType != CForm::mrYes) {
-		CM_GUILD_PUTNAME(false, "", "");
-		return;
-	}
 
-	if (strlen(m_pGuildNameEdit->GetCaption()) > 0) {
-		string name = m_pGuildNameEdit->GetCaption();
+void CUIGuildApply::CancelApply() {
+	CM_GUILD_PUTNAME(false, "", "");
+	if (m_pGuildNameInputForm)
+		m_pGuildNameInputForm->SetIsShow(false);
+	if (UseRmlGuildApply())
+		CRmlUiGuildApplyForm::Instance().Hide();
+}
+
+void CUIGuildApply::TrySubmit(const char* nameRaw, const char* passwordRaw, const char* confirmRaw) {
+	const char* nameIn = nameRaw ? nameRaw : "";
+	const char* passIn = passwordRaw ? passwordRaw : "";
+	const char* confirmIn = confirmRaw ? confirmRaw : "";
+
+	auto hideRmlForMsgBox = []() {
+		if (UseRmlGuildApply())
+			CRmlUiGuildApplyForm::Instance().Hide();
+	};
+
+	if (strlen(nameIn) > 0) {
+		string name = nameIn;
 		bool bEnglishName = true;
-		// Xu qin added for illegal text filtering
 		if (!CTextFilter::IsLegalText(CTextFilter::DIALOG_TABLE, name)) {
-			m_pGuildNameEdit->SetCaption("");
+			if (m_pGuildNameEdit)
+				m_pGuildNameEdit->SetCaption("");
+			if (UseRmlGuildApply())
+				CRmlUiGuildApplyForm::Instance().ClearName();
+			hideRmlForMsgBox();
 			CBoxMgr::ShowMsgBox(OnShowForm, "??????!", true);
 			return;
 		}
@@ -109,29 +145,67 @@ void CUIGuildApply::OnConfirm(CCompent* pSender, int nMsgType, int x, int y, DWO
 		}
 
 		if (!IsValidGuildName(name.c_str(), (unsigned short)name.length(), bEnglishName)) {
+			hideRmlForMsgBox();
 			CBoxMgr::ShowMsgBox(OnShowForm, RES_STRING(CL_LANGUAGE_MATCH_51), true);
 		} else {
-			string strPass = m_pGuildPasswordEdit->GetCaption();
+			string strPass = passIn;
 			if (strPass.length() > 0) {
-				if (strPass == m_pGuildConfirmEdit->GetCaption()) {
-					CM_GUILD_PUTNAME(true, m_pGuildNameEdit->GetCaption(), m_pGuildPasswordEdit->GetCaption());
+				if (strPass == confirmIn) {
+					CM_GUILD_PUTNAME(true, nameIn, passIn);
+					if (m_pGuildNameInputForm)
+						m_pGuildNameInputForm->SetIsShow(false);
+					if (UseRmlGuildApply())
+						CRmlUiGuildApplyForm::Instance().Hide();
 				} else {
-					m_pGuildPasswordEdit->SetCaption("");
-					m_pGuildConfirmEdit->SetCaption("");
+					if (m_pGuildPasswordEdit)
+						m_pGuildPasswordEdit->SetCaption("");
+					if (m_pGuildConfirmEdit)
+						m_pGuildConfirmEdit->SetCaption("");
+					if (UseRmlGuildApply())
+						CRmlUiGuildApplyForm::Instance().ClearPasswords();
+					hideRmlForMsgBox();
 					CBoxMgr::ShowMsgBox(OnShowForm, RES_STRING(CL_LANGUAGE_MATCH_580), true);
 				}
 			} else {
+				hideRmlForMsgBox();
 				CBoxMgr::ShowMsgBox(OnShowForm, RES_STRING(CL_LANGUAGE_MATCH_581), true);
 			}
 		}
 	} else {
+		hideRmlForMsgBox();
 		CBoxMgr::ShowMsgBox(OnShowForm, RES_STRING(CL_LANGUAGE_MATCH_582), true);
 	}
 }
 
+void CUIGuildApply::OnConfirm(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
+	if (nMsgType != CForm::mrYes) {
+		CancelApply();
+		return;
+	}
+
+	TrySubmit(m_pGuildNameEdit ? m_pGuildNameEdit->GetCaption() : "",
+			  m_pGuildPasswordEdit ? m_pGuildPasswordEdit->GetCaption() : "",
+			  m_pGuildConfirmEdit ? m_pGuildConfirmEdit->GetCaption() : "");
+}
+
 void CUIGuildApply::OnShowForm(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
+	if (UseRmlGuildApply()) {
+		if (m_pGuildNameInputForm)
+			m_pGuildNameInputForm->SetIsShow(false);
+		CRmlUiGuildApplyForm::Instance().Show(false);
+		return;
+	}
+
 	m_pGuildNameInputForm->ShowModal();
 	if ((strlen(m_pGuildNameEdit->GetCaption()) > 0)) {
 		m_pGuildPasswordEdit->SetActive(m_pGuildPasswordEdit);
 	}
+}
+
+void RmlGuildApply_OnConfirm(const char* name, const char* password, const char* confirm) {
+	CUIGuildApply::TrySubmit(name, password, confirm);
+}
+
+void RmlGuildApply_OnCancel() {
+	CUIGuildApply::CancelApply();
 }

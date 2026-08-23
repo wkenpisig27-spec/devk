@@ -256,6 +256,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\rmlui\RmlUiGuildApplyForm.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\src\game\rmlui\RmlUi_Renderer_DX9.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -655,6 +659,7 @@
     <ClInclude Include="..\..\include\game\rmlui\RmlUiNpcTalkForm.h" />
     <ClInclude Include="..\..\include\game\rmlui\RmlUiQuestForm.h" />
     <ClInclude Include="..\..\include\game\rmlui\RmlUiNpcMissionForm.h" />
+    <ClInclude Include="..\..\include\game\rmlui\RmlUiGuildApplyForm.h" />
     <ClInclude Include="..\..\include\game\rmlui\RmlUi_Renderer_DX9.h" />
     <ClInclude Include="..\..\src\game\UIRender.h" />
     <ClInclude Include="..\..\src\game\UIRichEdit.h" />

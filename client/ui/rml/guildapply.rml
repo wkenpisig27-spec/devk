@@ -1,0 +1,46 @@
+<rml>
+	<head>
+		<title>Input guild name, password</title>
+		<link type="text/rcss" href="notice.rcss"/>
+		<link type="text/rcss" href="guildapply.rcss"/>
+	</head>
+	<body>
+		<div id="notice-scrim"></div>
+
+		<form id="guildapply-form" class="notice">
+			<div class="notice-header">
+				<div class="notice-title">Input guild name, password</div>
+			</div>
+
+			<div class="notice-body">
+				<div class="guild-card">
+					<div class="guild-row">
+						<label class="guild-label" for="edtName">Name:</label>
+						<div class="guild-input-shell">
+							<input class="guild-input" type="text" id="edtName" name="name" maxlength="16"/>
+						</div>
+					</div>
+
+					<div class="guild-row">
+						<label class="guild-label" for="edtPCode">Password:</label>
+						<div class="guild-input-shell">
+							<input class="guild-input" type="password" id="edtPCode" name="password" maxlength="32"/>
+						</div>
+					</div>
+
+					<div class="guild-row guild-row-last">
+						<label class="guild-label" for="edtPCode2">Re-Enter:</label>
+						<div class="guild-input-shell">
+							<input class="guild-input" type="password" id="edtPCode2" name="confirm" maxlength="32"/>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="notice-footer guild-footer">
+				<button class="notice-btn notice-btn-gold" id="btnConfirm" type="submit">Confirm</button>
+				<button class="notice-btn notice-btn-blue" id="btnCancel" type="button">Cancel</button>
+			</div>
+		</form>
+	</body>
+</rml>

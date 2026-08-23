@@ -1,0 +1,111 @@
+/* Guild apply — Notice modal with inline label + pill rows. */
+
+#guildapply-form {
+	width: 400dp;
+}
+
+#guildapply-form .notice-title {
+	font-size: 16dp;
+	padding-top: 18dp;
+	white-space: nowrap;
+}
+
+.guild-card {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	padding: 14dp 14dp 6dp 14dp;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/input_tl.tga,
+		ui/rml/frames/notice/input_t.tga,
+		ui/rml/frames/notice/input_tr.tga,
+		ui/rml/frames/notice/input_l.tga,
+		ui/rml/frames/notice/input_c.tga,
+		ui/rml/frames/notice/input_r.tga,
+		ui/rml/frames/notice/input_bl.tga,
+		ui/rml/frames/notice/input_b.tga,
+		ui/rml/frames/notice/input_br.tga
+	);
+}
+
+.guild-row {
+	display: flex;
+	flex-direction: row;
+	box-sizing: border-box;
+	width: 100%;
+	height: 40dp;
+	margin-bottom: 10dp;
+}
+
+.guild-row-last {
+	margin-bottom: 4dp;
+}
+
+.guild-label {
+	display: block;
+	width: 92dp;
+	height: 40dp;
+	line-height: 40dp;
+	margin: 0dp 8dp 0dp 0dp;
+	padding: 0dp;
+	font-size: 13dp;
+	font-weight: bold;
+	color: #5a7ab0;
+}
+
+.guild-input-shell {
+	display: block;
+	box-sizing: border-box;
+	flex: 1;
+	width: auto;
+	height: 40dp;
+	padding: 2dp;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/input_tl.tga,
+		ui/rml/frames/notice/input_t.tga,
+		ui/rml/frames/notice/input_tr.tga,
+		ui/rml/frames/notice/input_l.tga,
+		ui/rml/frames/notice/input_c.tga,
+		ui/rml/frames/notice/input_r.tga,
+		ui/rml/frames/notice/input_bl.tga,
+		ui/rml/frames/notice/input_b.tga,
+		ui/rml/frames/notice/input_br.tga
+	);
+}
+
+.guild-input,
+input.guild-input {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	height: 36dp;
+	line-height: 36dp;
+	padding: 0dp 12dp;
+	font-family: LatoLatin;
+	font-size: 14dp;
+	color: #2a4a80;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+}
+
+.guild-footer {
+	padding-bottom: 18dp;
+}

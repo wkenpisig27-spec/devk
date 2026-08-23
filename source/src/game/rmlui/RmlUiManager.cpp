@@ -14,6 +14,7 @@
 #include "rmlui/RmlUiNpcTalkForm.h"
 #include "rmlui/RmlUiQuestForm.h"
 #include "rmlui/RmlUiNpcMissionForm.h"
+#include "rmlui/RmlUiGuildApplyForm.h"
 
 #include "UIMenu.h"
 #include "MPRender.h"
@@ -251,6 +252,9 @@ bool CRmlUiManager::Init(HWND hwnd) {
 	if (!CRmlUiNpcMissionForm::Instance().Load(g_context)) {
 		OutputDebugStringA("RmlUi: warning - npcmission.rml failed to load\n");
 	}
+	if (!CRmlUiGuildApplyForm::Instance().Load(g_context)) {
+		OutputDebugStringA("RmlUi: warning - guildapply.rml failed to load\n");
+	}
 
 	m_ready = true;
 	OutputDebugStringA("RmlUi: initialized OK\n");
@@ -303,6 +307,10 @@ void CRmlUiManager::HideNpcMissionForm() {
 	CRmlUiNpcMissionForm::Instance().Hide();
 }
 
+void CRmlUiManager::HideGuildApplyForm() {
+	CRmlUiGuildApplyForm::Instance().Hide();
+}
+
 void CRmlUiManager::Shutdown() {
 	m_ready = false;
 
@@ -319,6 +327,7 @@ void CRmlUiManager::Shutdown() {
 	CRmlUiNpcTalkForm::Instance().Unload();
 	CRmlUiQuestForm::Instance().Unload();
 	CRmlUiNpcMissionForm::Instance().Unload();
+	CRmlUiGuildApplyForm::Instance().Unload();
 
 	if (g_context) {
 		g_context->UnloadAllDocuments();

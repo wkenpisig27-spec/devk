@@ -41,6 +41,7 @@ public:
 	void HideNpcTalkForm();
 	void HideQuestForm();
 	void HideNpcMissionForm();
+	void HideGuildApplyForm();
 
 private:
 	CRmlUiManager() = default;

@@ -9,6 +9,8 @@ public:
 	CUIGuildApply(void);
 	~CUIGuildApply(void);
 	static void ShowForm();
+	static void TrySubmit(const char* name, const char* password, const char* confirm);
+	static void CancelApply();
 
 protected:
 	virtual bool Init();
