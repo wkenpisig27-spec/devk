@@ -462,6 +462,18 @@ bool CRmlUiManager::ProcessTextInput(char character) {
 	if (!m_ready || !m_enabled || !g_context)
 		return false;
 
+	// Match RmlUi_Platform_Win32 WM_CHAR handling: printable text only.
+	// Backspace/delete/tab/etc. are handled through ProcessKeyDown.
+	unsigned char c = static_cast<unsigned char>(character);
+	if (c == '\r') {
+		character = '\n';
+		c = static_cast<unsigned char>(character);
+	} else if ((c < 32 && c != '\n') || c == 127) {
+		// Swallow the companion WM_CHAR when an RmlUi field has focus so we
+		// don't re-insert a control character after ProcessKeyDown deleted text.
+		return g_context->GetFocusElement() != nullptr;
+	}
+
 	return !g_context->ProcessTextInput(character);
 }
 
