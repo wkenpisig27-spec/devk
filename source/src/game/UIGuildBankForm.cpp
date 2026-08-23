@@ -15,8 +15,11 @@
 #include "packetcmd.h"
 #include "Character.h"
 #include "GameApp.h"
+#include "UIGuildMgr.h"
+#include "rmlui/RmlUiGuildForm.h"
 
 #include "StringLib.h"
+#include <vector>
 
 namespace GUI {
 
@@ -54,8 +57,62 @@ bool CGuildBankMgr::Init() // ?????????
 }
 
 void CGuildBankMgr::UpdateGuildGold(const char* value) {
+	m_goldText = value ? StringSplitNum(value) : "";
+	if (labGuildMoney)
+		labGuildMoney->SetCaption(m_goldText.c_str());
+	if (CRmlUiGuildForm::Instance().IsVisible())
+		CRmlUiGuildForm::Instance().SetGold(m_goldText.c_str());
+}
 
-	labGuildMoney->SetCaption(StringSplitNum(value));
+bool CGuildBankMgr::IsBankOpen() const {
+	if (CRmlUiGuildForm::Instance().IsVisible() && CRmlUiGuildForm::Instance().GetActiveTab() == 2)
+		return true;
+	return frmBank && frmBank->GetIsShow();
+}
+
+void CGuildBankMgr::PromptGoldTake() {
+	_OnClickGoldTake(nullptr, 0, 0, 0);
+}
+
+void CGuildBankMgr::PromptGoldPut() {
+	_OnClickGoldPut(nullptr, 0, 0, 0);
+}
+
+void CGuildBankMgr::RefreshGuildBankUi() {
+	CRmlUiGuildForm& rml = CRmlUiGuildForm::Instance();
+	if (!rml.IsVisible() || rml.GetActiveTab() != 2 || !grdBank)
+		return;
+
+	std::vector<RmlInvSlotView> slots;
+	const int maxNum = grdBank->GetMaxNum();
+	const int cols = grdBank->GetCol() > 0 ? grdBank->GetCol() : 8;
+	slots.reserve((size_t)maxNum);
+	for (int i = 0; i < maxNum; ++i) {
+		RmlInvSlotView view;
+		view.id = i;
+		if (CItemCommand* cmd = dynamic_cast<CItemCommand*>(grdBank->GetItem(i))) {
+			if (CItemRecord* info = cmd->GetItemInfo()) {
+				if (info->lID != 32767) {
+					view.iconPath = info->GetIconFile();
+					view.qty = cmd->GetTotalNum();
+				} else {
+					view.locked = true;
+				}
+			}
+		}
+		slots.push_back(view);
+	}
+	rml.SetVaultSlots(slots, cols);
+}
+
+bool CGuildBankMgr::MoveBankItem(int srcBankIndex, int dstBankIndex) {
+	if (!grdBank || srcBankIndex < 0 || dstBankIndex < 0 || srcBankIndex == dstBankIndex)
+		return false;
+	if (!grdBank->GetItem(srcBankIndex))
+		return false;
+	bool isSwap = false;
+	_evtBankToBank(grdBank, dstBankIndex, srcBankIndex, isSwap);
+	return true;
 }
 
 void CGuildBankMgr::_OnClickGoldPut(CGuiData* pSender, int x, int y, DWORD key) {
@@ -296,7 +353,8 @@ void CGuildBankMgr::_MoveAItemEvent(CCompent* pSender, int nMsgType, int x, int 
 //-------------------------------------------------------------------------
 void CGuildBankMgr::CloseForm() // ???????
 {
-	if (frmBank->GetIsShow()) {
+	CUIGuildMgr::HideUi();
+	if (frmBank && frmBank->GetIsShow()) {
 		frmBank->Close();
 		g_stUIEquip.HideInventoryUi();
 	}

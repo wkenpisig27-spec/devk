@@ -8,6 +8,7 @@
 
 #include "UIGlobalVar.h"
 #include "NetProtocol.h"
+#include <string>
 
 namespace GUI {
 class CForm;
@@ -21,7 +22,11 @@ public:
 	void ShowBank();								   // 显示道具栏物品
 	CGoodsGrid* GetBankGoodsGrid() { return grdBank; } // 获取道具栏格子
 	CForm* GetBankForm() { return frmBank; }
-	bool IsBankOpen() const { return frmBank && frmBank->GetIsShow(); }
+	bool IsBankOpen() const;
+	void RefreshGuildBankUi();
+	void PromptGoldTake();
+	void PromptGoldPut();
+	const char* GetGoldText() const { return m_goldText.c_str(); }
 
 	bool PushToBank(CGoodsGrid& rkDrag, CGoodsGrid& rkSelf, int nGridID, CCommandObj& rkItem);	// 将物品放入银行
 	bool PopFromBank(CGoodsGrid& rkDrag, CGoodsGrid& rkSelf, int nGridID, CCommandObj& rkItem); // 从银行中拖出物品
@@ -31,6 +36,7 @@ public:
 	// Index-based transfer (no CDrag); pile prompt unchanged.
 	bool MoveBagToBank(int bagIndex, int bankSlot = -1);
 	bool MoveBankToBag(int bankIndex, int bagSlot = -1);
+	bool MoveBankItem(int srcBankIndex, int dstBankIndex);
 
 protected:
 	virtual bool Init();	  // 用户界面银行信息初始化
@@ -66,6 +72,7 @@ private:
 	CLabel* labGuildMoney;
 	CTextButton* btnGoldPut;
 	CTextButton* btnGoldTake;
+	std::string m_goldText;
 
 }; // end of class CGuildBankMgr
 

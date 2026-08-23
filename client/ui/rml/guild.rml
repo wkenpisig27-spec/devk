@@ -1,0 +1,174 @@
+<rml>
+	<head>
+		<title>Guild Interface</title>
+		<link type="text/rcss" href="notice.rcss"/>
+		<link type="text/rcss" href="guild.rcss"/>
+	</head>
+	<body class="guild-body">
+		<div id="guild-root" class="guild-root">
+			<div class="guild-header">
+				<handle class="guild-drag" move_target="guild-root">
+					<div class="guild-title">Guild Interface</div>
+				</handle>
+				<button class="guild-close" id="btnGuildClose" type="button">X</button>
+			</div>
+
+			<div class="guild-main">
+				<div class="guild-side">
+					<div class="guild-info">
+						<div class="guild-info-title">Guild Information</div>
+						<div class="guild-field">
+							<div class="guild-field-label">Guild Name</div>
+							<div id="labName" class="guild-field-value">—</div>
+						</div>
+						<div class="guild-field">
+							<div class="guild-field-label">Founder</div>
+							<div id="labFounder" class="guild-field-value">—</div>
+						</div>
+						<div class="guild-field">
+							<div class="guild-field-label">Members / Maximum</div>
+							<div id="labMembers" class="guild-field-value">0/0</div>
+						</div>
+						<div class="guild-field">
+							<div class="guild-field-label">EXP</div>
+							<div id="labExp" class="guild-field-value"></div>
+						</div>
+						<div class="guild-field">
+							<div class="guild-field-label">Gold Coins</div>
+							<div id="labGold" class="guild-field-value"></div>
+						</div>
+						<div class="guild-field guild-field-last">
+							<div class="guild-field-label">Level</div>
+							<div id="labLevel" class="guild-field-value"></div>
+						</div>
+					</div>
+
+					<div class="guild-actions">
+						<div class="guild-action-row">
+							<button class="notice-btn notice-btn-blue guild-action" id="btnRecruit" type="button">Recruit</button>
+							<button class="notice-btn notice-btn-blue guild-action guild-action-end" id="btnRemove" type="button">Remove</button>
+						</div>
+						<div class="guild-action-row">
+							<button class="notice-btn notice-btn-blue guild-action" id="btnReject" type="button">Reject</button>
+							<button class="notice-btn notice-btn-blue guild-action guild-action-end" id="btnExit" type="button">Exit</button>
+						</div>
+					</div>
+				</div>
+
+				<div class="guild-content">
+					<div class="guild-tabs">
+						<button class="guild-tab guild-tab-active" id="tabMembers" type="button">Members</button>
+						<button class="guild-tab" id="tabApply" type="button">Apply</button>
+						<button class="guild-tab" id="tabVault" type="button">Vault</button>
+						<button class="guild-tab" id="tabLogs" type="button">Logs</button>
+					</div>
+
+					<div id="pageMembers" class="guild-page">
+						<div class="guild-table">
+							<div class="guild-thead">
+								<button class="guild-th guild-th-name" id="sortName" type="button">Name</button>
+								<button class="guild-th guild-th-class" id="sortClass" type="button">Class</button>
+								<button class="guild-th guild-th-level" id="sortLevel" type="button">Level</button>
+							</div>
+							<div id="memberRows" class="guild-tbody"></div>
+						</div>
+					</div>
+
+					<div id="pageApply" class="guild-page guild-page-hidden">
+						<div class="guild-table">
+							<div class="guild-thead">
+								<button class="guild-th guild-th-name" id="sortApplyName" type="button">Name</button>
+								<button class="guild-th guild-th-class" id="sortApplyClass" type="button">Class</button>
+								<button class="guild-th guild-th-level" id="sortApplyLevel" type="button">Level</button>
+							</div>
+							<div id="applyRows" class="guild-tbody"></div>
+						</div>
+					</div>
+
+					<div id="pageVault" class="guild-page guild-page-hidden">
+						<div class="guild-vault-gold">
+							<div class="guild-vault-gold-label">Guild Gold</div>
+							<div id="labVaultGold" class="guild-vault-gold-value">0</div>
+							<button class="notice-btn notice-btn-blue guild-vault-btn" id="btnGoldTake" type="button">Take</button>
+							<button class="notice-btn notice-btn-gold guild-vault-btn" id="btnGoldPut" type="button">Put</button>
+						</div>
+						<div class="guild-vault-body">
+							<div id="vault-grid" class="guild-vault-grid"></div>
+							<div id="vault-scrollbar" class="guild-vault-scrollbar">
+								<div id="vault-scroll-thumb" class="guild-vault-scroll-thumb"></div>
+							</div>
+							<div id="vaultLocked" class="guild-vault-locked">You cannot view the guild vault.</div>
+						</div>
+					</div>
+
+					<div id="pageLogs" class="guild-page guild-page-hidden">
+						<div id="logRows" class="guild-logs"></div>
+						<div class="guild-log-nav">
+							<button class="notice-btn notice-btn-blue guild-log-btn" id="btnLogPrev" type="button">Prev</button>
+							<div id="labLogPage" class="guild-log-page">1</div>
+							<button class="notice-btn notice-btn-blue guild-log-btn" id="btnLogNext" type="button">Next</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div id="guild-footer" class="guild-footer">
+				<div class="guild-motto-shell">
+					<input class="guild-motto-input" type="text" id="edtMotto" name="motto" maxlength="32"/>
+				</div>
+				<button class="notice-btn notice-btn-blue guild-footer-btn" id="btnMotto" type="button">Motto</button>
+				<button class="notice-btn notice-btn-gold guild-footer-btn" id="btnPerms" type="button">Permissions</button>
+			</div>
+		</div>
+
+		<div id="guild-perm-scrim" class="guild-perm-scrim"></div>
+		<div id="guild-motto-modal" class="notice guild-motto-modal">
+			<div class="notice-header">
+				<div class="notice-title">Edit Motto</div>
+			</div>
+			<div class="notice-body">
+				<div class="guild-motto-modal-shell">
+					<input class="guild-motto-modal-input" type="text" id="edtMottoEdit" name="mottoedit" maxlength="32"/>
+				</div>
+			</div>
+			<div class="notice-footer">
+				<button class="notice-btn notice-btn-gold" id="btnMottoConfirm" type="button">Confirm</button>
+				<button class="notice-btn notice-btn-blue" id="btnMottoCancel" type="button">Cancel</button>
+			</div>
+		</div>
+		<div id="guild-perm-modal" class="notice guild-perm-modal">
+			<div class="notice-header">
+				<div class="notice-title">Guild Permissions</div>
+			</div>
+			<div class="notice-body">
+				<div id="permMember" class="guild-perm-who">Select a member</div>
+				<div class="guild-perm-presets">
+					<button class="guild-preset" id="permPredef1" type="button">Admin</button>
+					<button class="guild-preset" id="permPredef2" type="button">Leader</button>
+					<button class="guild-preset" id="permPredef3" type="button">Architect</button>
+					<button class="guild-preset" id="permPredef4" type="button">Banker</button>
+					<button class="guild-preset" id="permPredef5" type="button">Trusted</button>
+					<button class="guild-preset" id="permPredef6" type="button">Player</button>
+				</div>
+				<div id="permList" class="guild-perm-list">
+					<button class="guild-perm" id="perm0" type="button" data-perm="0">Speak</button>
+					<button class="guild-perm" id="perm1" type="button" data-perm="1">Manage</button>
+					<button class="guild-perm" id="perm2" type="button" data-perm="2">View Vault</button>
+					<button class="guild-perm" id="perm3" type="button" data-perm="3">Deposit Vault</button>
+					<button class="guild-perm" id="perm4" type="button" data-perm="4">Withdraw Vault</button>
+					<button class="guild-perm" id="perm5" type="button" data-perm="5">Recruit</button>
+					<button class="guild-perm" id="perm6" type="button" data-perm="6">Kick</button>
+					<button class="guild-perm" id="perm7" type="button" data-perm="7">Motto</button>
+					<button class="guild-perm" id="perm8" type="button" data-perm="8">Attributes</button>
+					<button class="guild-perm" id="perm9" type="button" data-perm="9">Enter House</button>
+					<button class="guild-perm" id="perm10" type="button" data-perm="10">Place Objects</button>
+					<button class="guild-perm" id="perm11" type="button" data-perm="11">Remove Objects</button>
+				</div>
+			</div>
+			<div class="notice-footer">
+				<button class="notice-btn notice-btn-gold" id="btnPermConfirm" type="button">Confirm</button>
+				<button class="notice-btn notice-btn-blue" id="btnPermCancel" type="button">Cancel</button>
+			</div>
+		</div>
+	</body>
+</rml>

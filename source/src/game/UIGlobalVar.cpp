@@ -57,6 +57,7 @@
 #include "UIChurchChallenge.h"
 #include "UIKnowledgeBase.h"
 #include "rmlui/RmlUiInventoryForm.h"
+#include "rmlui/RmlUiGuildForm.h"
 
 using namespace std;
 
@@ -399,6 +400,14 @@ bool CUIInterface::_evtESCKey(char& key) {
 		// Notice bank/inventory/character are not CForms — Esc closes them before legacy FindESCForm.
 		if (g_stUIBank.IsBankOpen()) {
 			g_stUIBank.CloseBankUi(true);
+			return true;
+		}
+		if (CUIGuildMgr::IsUiVisible()) {
+			if (CRmlUiGuildForm::Instance().IsModalOpen()) {
+				CRmlUiGuildForm::Instance().HideModal();
+				return true;
+			}
+			CUIGuildMgr::HideUi();
 			return true;
 		}
 		if (g_stUINpcTalk.IsTalkUiVisible()) {

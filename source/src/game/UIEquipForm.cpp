@@ -43,6 +43,7 @@
 #include "rmlui/RmlUiInventoryForm.h"
 #include "rmlui/RmlUiSkillForm.h"
 #include "rmlui/RmlUiNpcTradeForm.h"
+#include "rmlui/RmlUiGuildForm.h"
 #include "rmlui/RmlUiManager.h"
 
 using namespace std;
@@ -864,6 +865,7 @@ void CEquipMgr::SwitchMap() {
 	HideChestPreview();
 	CRmlUiManager::Instance().HideInventoryForm();
 	CRmlUiManager::Instance().HideCharacterForm();
+	CRmlUiManager::Instance().HideGuildForm();
 }
 
 void CEquipMgr::RenderModel(int x, int y, CCharacter* original, CCharacter* model, int rotation, bool refresh, float scaleBias) {
@@ -3273,6 +3275,8 @@ void RmlInv_OnBagDblClick(int index) {
 		g_stUIEquip.MarkChaPreviewDirty();
 	}
 	g_stUIEquip.RefreshRmlInventory();
+	if (g_stUIGuildBank.IsBankOpen())
+		g_stUIGuildBank.RefreshGuildBankUi();
 }
 
 bool RmlInv_OnBagMouseDown(int index, bool ctrl) {
@@ -3342,6 +3346,8 @@ void RmlInv_OnItemDragEnd(int srcBag, int srcEquip, int mouseX, int mouseY) {
 			g_stUIEquip.MoveBagToBank(srcBag, -1);
 		} else if (g_stUINpcTrade.GetIsShow() && CRmlUiNpcTradeForm::Instance().ContainsScreenPoint(mouseX, mouseY)) {
 			g_stUINpcTrade.SaleFromBagSlot(srcBag);
+		} else if (g_stUIGuildBank.IsBankOpen() && CRmlUiGuildForm::Instance().ContainsVaultPoint(mouseX, mouseY)) {
+			g_stUIEquip.MoveBagToBank(srcBag, -1);
 		} else if (g_stUIGuildBank.IsBankOpen()) {
 			if (CForm* bankForm = g_stUIGuildBank.GetBankForm()) {
 				if (bankForm->InRect(mouseX, mouseY))
@@ -3352,6 +3358,8 @@ void RmlInv_OnItemDragEnd(int srcBag, int srcEquip, int mouseX, int mouseY) {
 	g_stUIEquip.RefreshRmlInventory();
 	if (g_stUIBank.IsBankOpen())
 		g_stUIBank.RefreshBankUi();
+	if (g_stUIGuildBank.IsBankOpen())
+		g_stUIGuildBank.RefreshGuildBankUi();
 	if (g_stUINpcTrade.GetIsShow())
 		g_stUINpcTrade.RefreshTradeUi();
 }
@@ -3379,6 +3387,53 @@ void RmlBank_OnDrop(int srcBank, int srcBag, int dstBank, int dstBag) {
 		g_rmlBankTransferHandled = true;
 	g_stUIEquip.RefreshRmlInventory();
 	g_stUIBank.RefreshBankUi();
+}
+
+void RmlGuild_OnVaultDblClick(int index) {
+	g_stUIEquip.MoveBankToBag(index, -1);
+	g_stUIEquip.RefreshRmlInventory();
+	g_stUIGuildBank.RefreshGuildBankUi();
+}
+
+void RmlGuild_OnVaultDrop(int srcVault, int srcBag, int dstVault, int dstBag) {
+	bool moved = false;
+	if (srcBag >= 0 && dstVault >= 0) {
+		moved = g_stUIEquip.MoveBagToBank(srcBag, dstVault);
+	} else if (srcVault >= 0 && dstBag >= 0) {
+		moved = g_stUIEquip.MoveBankToBag(srcVault, dstBag);
+	} else if (srcVault >= 0 && dstVault >= 0) {
+		moved = g_stUIGuildBank.MoveBankItem(srcVault, dstVault);
+	}
+	if (moved || srcBag >= 0 || srcVault >= 0)
+		g_rmlBankTransferHandled = true;
+	g_stUIEquip.RefreshRmlInventory();
+	g_stUIGuildBank.RefreshGuildBankUi();
+}
+
+void RmlGuild_OnVaultDragEnd(int srcVault, int mouseX, int mouseY) {
+	const bool alreadyMoved = g_rmlBankTransferHandled;
+	g_rmlBankTransferHandled = false;
+
+	if (!alreadyMoved && srcVault >= 0) {
+		float x = 0.f, y = 0.f, w = 0.f, h = 0.f;
+		if (CRmlUiInventoryForm::Instance().GetRootScreenRect(x, y, w, h)) {
+			if (mouseX >= (int)x && mouseY >= (int)y && mouseX <= (int)(x + w) && mouseY <= (int)(y + h))
+				g_stUIEquip.MoveBankToBag(srcVault, -1);
+		}
+	}
+	g_stUIEquip.RefreshRmlInventory();
+	g_stUIGuildBank.RefreshGuildBankUi();
+}
+
+void RmlGuild_ApplyItemHint(int vaultIndex, int mouseX, int mouseY) {
+	CGoodsGrid* grid = g_stUIGuildBank.GetBankGoodsGrid();
+	if (!grid || vaultIndex < 0)
+		return;
+	CItemCommand* cmd = dynamic_cast<CItemCommand*>(grid->GetItem(vaultIndex));
+	if (!cmd)
+		return;
+	CGuiData::SetHintItem(cmd);
+	cmd->ReadyForHint(mouseX, mouseY, nullptr);
 }
 
 void RmlBank_OnDragEnd(int srcBank, int mouseX, int mouseY) {

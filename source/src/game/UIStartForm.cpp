@@ -1027,23 +1027,7 @@ void CStartMgr::_evtStartFormMouseEvent(CCompent* pSender, int nMsgType, int x, 
 		// g_stUIStart.frmSociliaty->SetIsShow(false);
 	} else if (name == "btnGuild") // ??????t????
 	{
-		// g_stUIStart.ShowSociliatyButtonForm(! g_stUIStart.frmSociliaty->GetIsShow());
-		// g_stUIStart.ShowBagButtonForm(false);
-
-		// g_stUIStart.frmSociliaty->SetIsShow(! g_stUIStart.frmSociliaty->GetIsShow());
-		// g_stUIStart.frmBag->SetIsShow(false);
-
-		CForm* f = CFormMgr::s_Mgr.Find("frmManage");
-		if (f) {
-			bool a = f->GetIsShow();
-			f->SetIsShow(!a);
-			//	Add by alfred.shi 20080905	begin
-			CCharacter* pMainCha = CGameScene::GetMainCha();
-			if (pMainCha->getGuildID() <= 0) {
-				g_pGameApp->MsgBox("You are not in a guild.");
-			}
-			//	End.
-		}
+		CUIGuildMgr::ToggleForm();
 		return;
 
 	}
@@ -1069,18 +1053,7 @@ void CStartMgr::_evtStartFormMouseEvent(CCompent* pSender, int nMsgType, int x, 
 		g_stUIDoublePwd.ShowDoublePwdForm();
 	} else if (name == "btnOpenGuild") // ???????
 	{
-
-		CForm* f = CFormMgr::s_Mgr.Find("frmManage");
-		if (f) {
-			bool a = f->GetIsShow();
-			f->SetIsShow(!a);
-			//	Add by alfred.shi 20080905	begin
-			CCharacter* pMainCha = CGameScene::GetMainCha();
-			if (pMainCha->getGuildID() <= 0) {
-				g_pGameApp->MsgBox("You are not in a guild.");
-			}
-			//	End.
-		}
+		CUIGuildMgr::ToggleForm();
 		return;
 	} else if (name == "btnOpenTeam") // ????
 	{

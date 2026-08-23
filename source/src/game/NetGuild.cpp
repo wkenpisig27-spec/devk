@@ -98,6 +98,8 @@ void NetPC_GUILD_ONLINE(uLong chaid) {
 			}
 		}
 	}
+	if (CUIGuildMgr::IsUiVisible())
+		CUIGuildMgr::PushRmlView();
 }
 
 void NetPC_GUILD_UPDATEPERM(uLong chaid, uLong perm) {
@@ -105,6 +107,8 @@ void NetPC_GUILD_UPDATEPERM(uLong chaid, uLong perm) {
 	if (!pMemberData)
 		return;
 	pMemberData->SetPerm(perm);
+	if (CUIGuildMgr::IsUiVisible())
+		CUIGuildMgr::PushRmlView();
 }
 
 void NetPC_GUILD_OFFLINE(uLong chaid) {
@@ -128,6 +132,8 @@ void NetPC_GUILD_OFFLINE(uLong chaid) {
 			}
 		}
 	}
+	if (CUIGuildMgr::IsUiVisible())
+		CUIGuildMgr::PushRmlView();
 }
 
 void NetPC_GUILD_START_BEGIN(uLong guildid, cChar* guildname, uLong leaderid) {

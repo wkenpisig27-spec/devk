@@ -12,18 +12,38 @@ public:
 	CUIGuildMgr(void);
 	~CUIGuildMgr(void);
 	static void ShowForm();
+	static void ToggleForm();
+	static void HideUi();
+	static bool IsUiVisible();
 	static void RefreshList();
 	static void RefreshAttribute();
 	static void RefreshForm();
 	static void RemoveForm();
+	static void PushRmlView();
+	static void SelectRmlTab(int tab);
 
 	static void UpdateGuildLogs(LPRPACKET pk);
 	static void RequestGuildLogs(LPRPACKET pk);
 	static void UpdateLogList();
 	static void SetActivePerm(int perm);
 
+	static void _OnClickPrevLogs(CGuiData* pSender, int x, int y, DWORD key);
+	static void _OnClickNextLogs(CGuiData* pSender, int x, int y, DWORD key);
+	static void _OnClickLeave(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
+	static void _OnPassKick(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
+	static void _OnPassDismiss(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
+	static void _OnClickEditMottoName(CGuiData* pSender, int x, int y, DWORD key);
+
+	int rmlTab;
+	int rmlSortCol;
+	bool rmlSortAsc;
+	DWORD rmlMemberId;
+	DWORD rmlApplyId;
+
 protected:
 	virtual bool Init();
+	virtual void CloseForm();
+	virtual void SwitchMap();
 
 private:
 	static CForm* m_pGuildMgrForm;
@@ -52,22 +72,17 @@ private:
 	static CListView* m_plistBankLog;
 	std::vector<BankLog> banklogs;
 	int curLogPage;
+	bool logHasMore;
 	static CTextButton* m_btnNext;
 	static CTextButton* m_btnPrev;
-	static void _OnClickPrevLogs(CGuiData* pSender, int x, int y, DWORD key);
-	static void _OnClickNextLogs(CGuiData* pSender, int x, int y, DWORD key);
 	static CTreeView* m_trvPerm;
 	static CPage* m_ppgeClass;
-	static void _OnClickEditMottoName(CGuiData* pSender, int x, int y, DWORD key);
 	static void _OnClickRecruit(CGuiData* pSender, int x, int y, DWORD key);
 	static void _OnClickRefuse(CGuiData* pSender, int x, int y, DWORD key);
 	static void _OnClickKick(CGuiData* pSender, int x, int y, DWORD key);
 	static void _OnClickPerm(CGuiData* pSender, int x, int y, DWORD key);
 	static void _OnClickConfirmPerm(CGuiData* pSender, int x, int y, DWORD key);
 	static void _OnClickSelectPage(CGuiData* pSender);
-	static void _OnClickLeave(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
-	static void _OnPassKick(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
-	static void _OnPassDismiss(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
 	static void _OnClickPermText(CGuiData* pSender, int x, int y, DWORD key);
 	static void _evtPermFormMouseEvent(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey);
 

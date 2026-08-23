@@ -15,6 +15,7 @@
 #include "rmlui/RmlUiQuestForm.h"
 #include "rmlui/RmlUiNpcMissionForm.h"
 #include "rmlui/RmlUiGuildApplyForm.h"
+#include "rmlui/RmlUiGuildForm.h"
 
 #include "UIMenu.h"
 #include "MPRender.h"
@@ -255,6 +256,9 @@ bool CRmlUiManager::Init(HWND hwnd) {
 	if (!CRmlUiGuildApplyForm::Instance().Load(g_context)) {
 		OutputDebugStringA("RmlUi: warning - guildapply.rml failed to load\n");
 	}
+	if (!CRmlUiGuildForm::Instance().Load(g_context)) {
+		OutputDebugStringA("RmlUi: warning - guild.rml failed to load\n");
+	}
 
 	m_ready = true;
 	OutputDebugStringA("RmlUi: initialized OK\n");
@@ -311,6 +315,10 @@ void CRmlUiManager::HideGuildApplyForm() {
 	CRmlUiGuildApplyForm::Instance().Hide();
 }
 
+void CRmlUiManager::HideGuildForm() {
+	CRmlUiGuildForm::Instance().Hide();
+}
+
 void CRmlUiManager::Shutdown() {
 	m_ready = false;
 
@@ -328,6 +336,7 @@ void CRmlUiManager::Shutdown() {
 	CRmlUiQuestForm::Instance().Unload();
 	CRmlUiNpcMissionForm::Instance().Unload();
 	CRmlUiGuildApplyForm::Instance().Unload();
+	CRmlUiGuildForm::Instance().Unload();
 
 	if (g_context) {
 		g_context->UnloadAllDocuments();
@@ -366,6 +375,7 @@ void CRmlUiManager::Update() {
 	if (m_lastX >= 0 && m_lastY >= 0) {
 		CRmlUiInventoryForm::Instance().UpdateItemHint(m_lastX, m_lastY);
 		CRmlUiNpcTradeForm::Instance().UpdateItemHint(m_lastX, m_lastY);
+		CRmlUiGuildForm::Instance().UpdateItemHint(m_lastX, m_lastY);
 	}
 }
 
@@ -382,6 +392,7 @@ void CRmlUiManager::Render() {
 	CRmlUiCreateChaForm::Instance().RenderChaPreview();
 	CRmlUiInventoryForm::Instance().RenderItemHint();
 	CRmlUiNpcTradeForm::Instance().RenderItemHint();
+	CRmlUiGuildForm::Instance().RenderItemHint();
 }
 
 void CRmlUiManager::ProcessMouse(int x, int y, DWORD mouseKey) {

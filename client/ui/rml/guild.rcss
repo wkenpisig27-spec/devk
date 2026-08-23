@@ -1,0 +1,835 @@
+/* Notice Guild Interface — in-game manager (Members / Apply / Vault / Logs). */
+
+body.guild-body {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	justify-content: flex-start;
+	align-items: flex-start;
+	padding: 0dp;
+	pointer-events: none;
+	font-family: LatoLatin;
+}
+
+body.guild-body .guild-root,
+body.guild-body .guild-perm-modal-open,
+body.guild-body .guild-motto-modal-open,
+body.guild-body .guild-perm-scrim-open {
+	pointer-events: auto;
+}
+
+.guild-root {
+	display: none;
+	position: absolute;
+	flex-direction: column;
+	flex: none;
+	box-sizing: border-box;
+	width: 780dp;
+	min-width: 780dp;
+	height: 540dp;
+	margin: 0dp;
+	padding: 0dp 0dp 10dp 0dp;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/panel_tl.tga,
+		ui/rml/frames/notice/panel_t.tga,
+		ui/rml/frames/notice/panel_tr.tga,
+		ui/rml/frames/notice/panel_l.tga,
+		ui/rml/frames/notice/panel_c.tga,
+		ui/rml/frames/notice/panel_r.tga,
+		ui/rml/frames/notice/panel_bl.tga,
+		ui/rml/frames/notice/panel_b.tga,
+		ui/rml/frames/notice/panel_br.tga
+	);
+}
+
+.guild-root-open {
+	display: flex;
+}
+
+.guild-header {
+	display: block;
+	position: relative;
+	z-index: 2;
+	box-sizing: border-box;
+	height: 56dp;
+	padding: 0dp 16dp;
+	background-color: transparent;
+}
+
+.guild-drag {
+	display: block;
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	right: 0dp;
+	bottom: 0dp;
+	z-index: 1;
+	padding: 0dp 16dp;
+	box-sizing: border-box;
+	cursor: move;
+}
+
+.guild-title {
+	display: block;
+	padding-top: 16dp;
+	font-size: 18dp;
+	font-weight: bold;
+	color: #ffffff;
+	text-align: left;
+}
+
+.guild-close,
+button.guild-close {
+	display: block;
+	position: absolute;
+	right: 12dp;
+	top: 14dp;
+	z-index: 3;
+	width: 28dp;
+	height: 28dp;
+	line-height: 28dp;
+	padding: 0dp;
+	font-family: LatoLatin;
+	font-size: 14dp;
+	font-weight: bold;
+	text-align: center;
+	color: #ffffff;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_blue_l.tga,
+		ui/rml/frames/notice/btn_blue_c.tga,
+		ui/rml/frames/notice/btn_blue_r.tga
+	);
+}
+
+.guild-main {
+	display: flex;
+	flex-direction: row;
+	flex: 1;
+	box-sizing: border-box;
+	padding: 4dp 16dp 0dp 16dp;
+	overflow: visible;
+}
+
+.guild-side {
+	display: flex;
+	flex-direction: column;
+	flex: none;
+	width: 214dp;
+	min-width: 214dp;
+	margin-right: 12dp;
+}
+
+.guild-info {
+	display: block;
+	flex: none;
+	box-sizing: border-box;
+	width: 214dp;
+	min-height: 268dp;
+	padding: 8dp 12dp 10dp 12dp;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/input_tl.tga,
+		ui/rml/frames/notice/input_t.tga,
+		ui/rml/frames/notice/input_tr.tga,
+		ui/rml/frames/notice/input_l.tga,
+		ui/rml/frames/notice/input_c.tga,
+		ui/rml/frames/notice/input_r.tga,
+		ui/rml/frames/notice/input_bl.tga,
+		ui/rml/frames/notice/input_b.tga,
+		ui/rml/frames/notice/input_br.tga
+	);
+}
+
+.guild-info-title {
+	display: block;
+	height: 20dp;
+	line-height: 20dp;
+	margin-bottom: 6dp;
+	font-size: 13dp;
+	font-weight: bold;
+	color: #2a4a80;
+	text-align: center;
+}
+
+.guild-field {
+	display: block;
+	margin-bottom: 4dp;
+	pointer-events: none;
+}
+
+.guild-field-last {
+	margin-bottom: 0dp;
+}
+
+.guild-field-label {
+	display: block;
+	font-size: 11dp;
+	font-weight: bold;
+	color: #5a7ab0;
+	line-height: 13dp;
+}
+
+.guild-field-value {
+	display: block;
+	min-height: 16dp;
+	font-size: 13dp;
+	font-weight: bold;
+	color: #2a4a80;
+	line-height: 16dp;
+}
+
+.guild-actions {
+	display: block;
+	flex: none;
+	margin-top: 8dp;
+	width: 214dp;
+}
+
+.guild-action-row {
+	display: flex;
+	flex-direction: row;
+	width: 214dp;
+	height: 36dp;
+	margin-bottom: 6dp;
+}
+
+.guild-action,
+button.guild-action {
+	display: block;
+	flex: none;
+	width: 104dp;
+	height: 36dp;
+	line-height: 36dp;
+	margin: 0dp 6dp 0dp 0dp;
+	font-size: 13dp;
+}
+
+.guild-action-end,
+button.guild-action-end {
+	margin-right: 0dp;
+}
+
+.notice-btn.notice-btn-disabled,
+button.notice-btn.notice-btn-disabled,
+.notice-btn.notice-btn-disabled:hover,
+button.notice-btn.notice-btn-disabled:hover {
+	image-color: #6a90c0;
+	color: #c8d8ec;
+}
+
+.guild-content {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-width: 0dp;
+	overflow: visible;
+}
+
+.guild-tabs {
+	display: flex;
+	flex-direction: row;
+	flex: none;
+	height: 32dp;
+	padding: 0dp 8dp;
+}
+
+.guild-tab,
+button.guild-tab {
+	display: block;
+	flex: none;
+	width: 88dp;
+	height: 32dp;
+	line-height: 32dp;
+	margin-right: 4dp;
+	padding: 0dp;
+	font-family: LatoLatin;
+	font-size: 13dp;
+	font-weight: bold;
+	text-align: center;
+	color: #5a7ab0;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+}
+
+.guild-tab-active,
+button.guild-tab-active {
+	color: #2a4a80;
+	decorator: tiled-box(
+		ui/rml/frames/notice/input_tl.tga,
+		ui/rml/frames/notice/input_t.tga,
+		ui/rml/frames/notice/input_tr.tga,
+		ui/rml/frames/notice/input_l.tga,
+		ui/rml/frames/notice/input_c.tga,
+		ui/rml/frames/notice/input_r.tga,
+		ui/rml/frames/notice/input_bl.tga,
+		ui/rml/frames/notice/input_b.tga,
+		ui/rml/frames/notice/input_br.tga
+	);
+}
+
+.guild-page {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	box-sizing: border-box;
+	padding: 8dp 10dp 8dp 10dp;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/input_tl.tga,
+		ui/rml/frames/notice/input_t.tga,
+		ui/rml/frames/notice/input_tr.tga,
+		ui/rml/frames/notice/input_l.tga,
+		ui/rml/frames/notice/input_c.tga,
+		ui/rml/frames/notice/input_r.tga,
+		ui/rml/frames/notice/input_bl.tga,
+		ui/rml/frames/notice/input_b.tga,
+		ui/rml/frames/notice/input_br.tga
+	);
+}
+
+.guild-page-hidden {
+	display: none;
+}
+
+.guild-table {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	overflow: hidden;
+}
+
+.guild-thead {
+	display: flex;
+	flex-direction: row;
+	flex: none;
+	height: 28dp;
+	border-bottom: 1dp #9eb8e8;
+}
+
+.guild-th,
+button.guild-th {
+	display: block;
+	height: 28dp;
+	line-height: 28dp;
+	padding: 0dp 8dp;
+	font-family: LatoLatin;
+	font-size: 12dp;
+	font-weight: bold;
+	text-align: left;
+	color: #5a7ab0;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+}
+
+.guild-th-name { width: 200dp; }
+.guild-th-class { width: 200dp; }
+.guild-th-level { flex: 1; }
+
+.guild-tbody {
+	display: block;
+	flex: 1;
+	overflow: auto;
+}
+
+.guild-row,
+button.guild-row {
+	display: flex;
+	flex-direction: row;
+	box-sizing: border-box;
+	width: 100%;
+	height: 28dp;
+	margin: 0dp;
+	padding: 0dp;
+	font-family: LatoLatin;
+	font-size: 13dp;
+	font-weight: bold;
+	text-align: left;
+	color: #2a4a80;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 1dp;
+	border-left-width: 0dp;
+	border-bottom: 1dp #c8daf0;
+	border-radius: 0dp;
+}
+
+.guild-row:hover,
+button.guild-row:hover {
+	background-color: #e8f0fa;
+}
+
+.guild-row-sel,
+button.guild-row-sel,
+.guild-row-sel:hover,
+button.guild-row-sel:hover {
+	background-color: #d4e4f8;
+	color: #1a3a70;
+}
+
+.guild-row-offline {
+	color: #7a8aa8;
+}
+
+.guild-cell {
+	display: block;
+	height: 28dp;
+	line-height: 28dp;
+	padding: 0dp 8dp;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.guild-cell-name { width: 200dp; }
+.guild-cell-class { width: 200dp; }
+.guild-cell-level { flex: 1; }
+
+.guild-vault-gold {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex: none;
+	height: 40dp;
+	margin-bottom: 6dp;
+}
+
+.guild-vault-gold-label {
+	display: block;
+	font-size: 12dp;
+	font-weight: bold;
+	color: #5a7ab0;
+	margin-right: 8dp;
+}
+
+.guild-vault-gold-value {
+	display: block;
+	flex: 1;
+	font-size: 14dp;
+	font-weight: bold;
+	color: #2a4a80;
+}
+
+.guild-vault-btn,
+button.guild-vault-btn {
+	flex: none;
+	width: 72dp;
+	height: 32dp;
+	line-height: 32dp;
+	margin: 0dp 0dp 0dp 6dp;
+	font-size: 12dp;
+}
+
+.guild-vault-body {
+	display: flex;
+	flex-direction: row;
+	position: relative;
+	flex: 1;
+	overflow: hidden;
+}
+
+.guild-vault-grid {
+	display: block;
+	flex: 1;
+	overflow: hidden;
+	clip: always;
+}
+
+.guild-vault-scrollbar {
+	display: block;
+	position: relative;
+	flex: none;
+	width: 10dp;
+	margin-left: 6dp;
+	overflow: visible;
+	decorator: tiled-vertical(
+		ui/rml/frames/notice/scroll_track_t.tga,
+		ui/rml/frames/notice/scroll_track_c.tga,
+		ui/rml/frames/notice/scroll_track_b.tga
+	);
+}
+
+.guild-vault-scroll-thumb {
+	display: none;
+	position: absolute;
+	left: 0dp;
+	width: 10dp;
+	height: 40dp;
+	decorator: tiled-vertical(
+		ui/rml/frames/notice/scroll_thumb_t.tga,
+		ui/rml/frames/notice/scroll_thumb_c.tga,
+		ui/rml/frames/notice/scroll_thumb_b.tga
+	);
+}
+
+.guild-vault-locked {
+	display: none;
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	right: 0dp;
+	bottom: 0dp;
+	padding-top: 80dp;
+	font-size: 14dp;
+	font-weight: bold;
+	color: #5a7ab0;
+	text-align: center;
+	background-color: #f5f9ffe8;
+}
+
+.guild-vault-locked-on {
+	display: block;
+}
+
+.guild-slot {
+	display: block;
+	position: relative;
+	box-sizing: border-box;
+	flex: none;
+	width: 44dp;
+	height: 44dp;
+	padding: 4dp;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: image(ui/rml/frames/notice/slot_rounded.tga);
+	drag: none;
+	focus: none;
+	pointer-events: auto;
+}
+
+.guild-slot-icon {
+	display: block;
+	width: 36dp;
+	height: 36dp;
+	background-color: transparent;
+	pointer-events: none;
+}
+
+.guild-slot-qty {
+	display: block;
+	position: absolute;
+	right: 2dp;
+	bottom: 0dp;
+	font-size: 11dp;
+	font-weight: bold;
+	color: #2a4a80;
+	pointer-events: none;
+}
+
+.guild-logs {
+	display: block;
+	flex: 1;
+	overflow: auto;
+}
+
+.guild-log {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 22dp;
+	padding: 2dp 6dp;
+	font-size: 12dp;
+	font-weight: bold;
+	color: #2a4a80;
+	border-bottom: 1dp #c8daf0;
+}
+
+.guild-log-nav {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	height: 40dp;
+	margin-top: 4dp;
+}
+
+.guild-log-btn,
+button.guild-log-btn {
+	flex: none;
+	width: 80dp;
+	height: 32dp;
+	line-height: 32dp;
+	font-size: 12dp;
+}
+
+.guild-log-page {
+	display: block;
+	width: 48dp;
+	height: 32dp;
+	line-height: 32dp;
+	font-size: 13dp;
+	font-weight: bold;
+	color: #2a4a80;
+	text-align: center;
+}
+
+.guild-footer {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex: none;
+	box-sizing: border-box;
+	height: 48dp;
+	padding: 6dp 16dp 0dp 16dp;
+}
+
+.guild-motto-shell {
+	display: block;
+	box-sizing: border-box;
+	flex: 1;
+	height: 36dp;
+	margin-right: 8dp;
+	padding: 2dp;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/input_tl.tga,
+		ui/rml/frames/notice/input_t.tga,
+		ui/rml/frames/notice/input_tr.tga,
+		ui/rml/frames/notice/input_l.tga,
+		ui/rml/frames/notice/input_c.tga,
+		ui/rml/frames/notice/input_r.tga,
+		ui/rml/frames/notice/input_bl.tga,
+		ui/rml/frames/notice/input_b.tga,
+		ui/rml/frames/notice/input_br.tga
+	);
+}
+
+.guild-motto-input,
+input.guild-motto-input {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	height: 32dp;
+	line-height: 32dp;
+	padding: 0dp 10dp;
+	font-family: LatoLatin;
+	font-size: 13dp;
+	color: #2a4a80;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+}
+
+.guild-footer-btn,
+button.guild-footer-btn {
+	flex: none;
+	width: 110dp;
+	height: 36dp;
+	line-height: 36dp;
+	margin-left: 6dp;
+	font-size: 13dp;
+}
+
+.guild-footer-hidden,
+.guild-footer.guild-footer-hidden {
+	display: none;
+}
+
+.guild-perm-scrim {
+	display: none;
+	position: absolute;
+	top: 0dp;
+	left: 0dp;
+	width: 100%;
+	height: 100%;
+	z-index: 8;
+	background-color: #000000a0;
+}
+
+.guild-perm-scrim-open {
+	display: block;
+}
+
+.guild-perm-modal {
+	display: none;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin-left: -210dp;
+	margin-top: -230dp;
+	z-index: 9;
+	width: 420dp;
+}
+
+.guild-perm-modal-open {
+	display: block;
+}
+
+.guild-motto-modal {
+	display: none;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin-left: -200dp;
+	margin-top: -110dp;
+	z-index: 9;
+	width: 400dp;
+}
+
+.guild-motto-modal-open {
+	display: block;
+}
+
+.guild-motto-modal-shell {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	height: 40dp;
+	padding: 2dp;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-box(
+		ui/rml/frames/notice/input_tl.tga,
+		ui/rml/frames/notice/input_t.tga,
+		ui/rml/frames/notice/input_tr.tga,
+		ui/rml/frames/notice/input_l.tga,
+		ui/rml/frames/notice/input_c.tga,
+		ui/rml/frames/notice/input_r.tga,
+		ui/rml/frames/notice/input_bl.tga,
+		ui/rml/frames/notice/input_b.tga,
+		ui/rml/frames/notice/input_br.tga
+	);
+}
+
+.guild-motto-modal-input,
+input.guild-motto-modal-input {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	height: 36dp;
+	line-height: 36dp;
+	padding: 0dp 12dp;
+	font-family: LatoLatin;
+	font-size: 14dp;
+	color: #2a4a80;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+}
+
+.guild-perm-who {
+	display: block;
+	margin-bottom: 8dp;
+	font-size: 13dp;
+	font-weight: bold;
+	color: #2a4a80;
+}
+
+.guild-perm-presets {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	margin-bottom: 8dp;
+}
+
+.guild-preset,
+button.guild-preset {
+	display: block;
+	width: 86dp;
+	height: 28dp;
+	line-height: 28dp;
+	margin: 0dp 6dp 6dp 0dp;
+	padding: 0dp;
+	font-family: LatoLatin;
+	font-size: 11dp;
+	font-weight: bold;
+	text-align: center;
+	color: #ffffff;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: tiled-horizontal(
+		ui/rml/frames/notice/btn_blue_l.tga,
+		ui/rml/frames/notice/btn_blue_c.tga,
+		ui/rml/frames/notice/btn_blue_r.tga
+	);
+}
+
+.guild-perm-list {
+	display: block;
+}
+
+.guild-perm,
+button.guild-perm {
+	display: block;
+	width: 100%;
+	height: 26dp;
+	line-height: 26dp;
+	margin-bottom: 3dp;
+	padding: 0dp 10dp;
+	font-family: LatoLatin;
+	font-size: 12dp;
+	font-weight: bold;
+	text-align: left;
+	color: #d45a5a;
+	background-color: #f0e4e4;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+}
+
+.guild-perm-on,
+button.guild-perm-on {
+	color: #2a8048;
+	background-color: #d8f0e0;
+}

@@ -31,8 +31,24 @@
 #include "UIGraph.h"
 #include "UIMinimapForm.h"
 #include <conformity.h>
+#include "rmlui/RmlUiManager.h"
+#include "rmlui/RmlUiGuildForm.h"
+#include "UIGuildBankForm.h"
+#include "uiEquipForm.h"
+#include "Scene.h"
+#include "StringLib.h"
+#include "CompCommand.h"
+#include <algorithm>
 
 using namespace std;
+
+namespace {
+
+bool UseRmlGuild() {
+	return CRmlUiManager::Instance().IsReady() && CRmlUiGuildForm::Instance().LoadOk();
+}
+
+} // namespace
 
 CForm* CUIGuildMgr::m_pGuildMgrForm = nullptr;
 CForm* CUIGuildMgr::m_pGuildPermForm = nullptr;
@@ -67,7 +83,8 @@ CTextButton* CUIGuildMgr::m_pbtnGuildMottoFormOK = nullptr;
 
 CTreeView* CUIGuildMgr::m_trvPerm = nullptr;
 
-CUIGuildMgr::CUIGuildMgr(void) {
+CUIGuildMgr::CUIGuildMgr(void)
+	: rmlTab(0), rmlSortCol(0), rmlSortAsc(true), rmlMemberId(0), rmlApplyId(0), curLogPage(1), logHasMore(true) {
 }
 
 CUIGuildMgr::~CUIGuildMgr(void) {
@@ -145,6 +162,12 @@ bool CUIGuildMgr::Init() {
 	// m_plistBankLog->GetList()->GetScroll()->evtChange = _evtLogDrag;
 	// m_plistBankLog->GetList()->GetScroll()->Init();
 	g_stUIGuildMgr.curLogPage = 1;
+	g_stUIGuildMgr.logHasMore = true;
+	g_stUIGuildMgr.rmlTab = 0;
+	g_stUIGuildMgr.rmlSortCol = 0;
+	g_stUIGuildMgr.rmlSortAsc = true;
+	g_stUIGuildMgr.rmlMemberId = 0;
+	g_stUIGuildMgr.rmlApplyId = 0;
 
 	return true;
 }
@@ -281,6 +304,7 @@ void CUIGuildMgr::UpdateGuildLogs(LPRPACKET pk) {
 
 	m_btnPrev->SetIsEnabled(false); // Can't fetch newer logs than what we currently have
 	m_btnNext->SetIsEnabled(true);	// Assume there are more logs unless we receive the end marker
+	g_stUIGuildMgr.logHasMore = true;
 
 	int validLogsReceived = 0;
 	for (int i = 0; i < 13; i++) { // Let's register up to 13 new logs
@@ -289,6 +313,7 @@ void CUIGuildMgr::UpdateGuildLogs(LPRPACKET pk) {
 		if (l.type == 9) {
 			// End marker received - no more logs available
 			m_btnNext->SetIsEnabled(false);
+			g_stUIGuildMgr.logHasMore = false;
 			break;
 		}
 		l.time = pk.ReadLongLong();
@@ -371,6 +396,8 @@ void CUIGuildMgr::UpdateLogList() {
 	m_plistBankLog->Refresh();
 	m_pGuildMgrForm->Refresh();
 	m_btnPrev->SetIsEnabled(g_stUIGuildMgr.curLogPage > 1);
+	if (UseRmlGuild() && CRmlUiGuildForm::Instance().IsVisible())
+		PushRmlView();
 }
 
 void CUIGuildMgr::RequestGuildLogs(LPRPACKET pk) {
@@ -380,6 +407,7 @@ void CUIGuildMgr::RequestGuildLogs(LPRPACKET pk) {
 		l.type = pk.ReadShort();
 		if (l.type == 9) {
 			m_btnNext->SetIsEnabled(false);
+			g_stUIGuildMgr.logHasMore = false;
 			break;
 		}
 		l.time = pk.ReadLongLong();
@@ -420,8 +448,103 @@ void CUIGuildMgr::_OnClickPrevLogs(CGuiData* pSender, int x, int y, DWORD key) {
 
 void CUIGuildMgr::ShowForm() {
 	RefreshForm();
+	if (UseRmlGuild()) {
+		if (m_pGuildMgrForm) {
+			m_pGuildMgrForm->nTag = 1;
+			m_pGuildMgrForm->SetIsShow(false);
+		}
+		PushRmlView();
+		return;
+	}
 	m_pGuildMgrForm->nTag = 1; // nTag==0?????????????
 	m_pGuildMgrForm->Show();
+}
+
+void CUIGuildMgr::ToggleForm() {
+	if (UseRmlGuild()) {
+		if (CRmlUiGuildForm::Instance().IsVisible()) {
+			HideUi();
+			return;
+		}
+		CCharacter* pMainCha = CGameScene::GetMainCha();
+		if (!pMainCha || pMainCha->getGuildID() <= 0) {
+			g_pGameApp->MsgBox("You are not in a guild.");
+			return;
+		}
+		CM_GUILD_LISTTRYPLAYER();
+		return;
+	}
+
+	if (!m_pGuildMgrForm)
+		return;
+	if (m_pGuildMgrForm->GetIsShow()) {
+		m_pGuildMgrForm->Close();
+		return;
+	}
+	CCharacter* pMainCha = CGameScene::GetMainCha();
+	if (!pMainCha || pMainCha->getGuildID() <= 0) {
+		g_pGameApp->MsgBox("You are not in a guild.");
+		return;
+	}
+	m_pGuildMgrForm->nTag = 0;
+	m_pGuildMgrForm->Show();
+}
+
+void CUIGuildMgr::HideUi() {
+	if (CRmlUiGuildForm::Instance().LoadOk())
+		CRmlUiGuildForm::Instance().Hide();
+	if (m_pGuildMgrForm && m_pGuildMgrForm->GetIsShow())
+		m_pGuildMgrForm->Close();
+	if (m_pGuildPermForm && m_pGuildPermForm->GetIsShow())
+		m_pGuildPermForm->Close();
+	if (m_pGuildMottoNameEditForm && m_pGuildMottoNameEditForm->GetIsShow())
+		m_pGuildMottoNameEditForm->Hide();
+}
+
+bool CUIGuildMgr::IsUiVisible() {
+	if (UseRmlGuild() && CRmlUiGuildForm::Instance().IsVisible())
+		return true;
+	return m_pGuildMgrForm && m_pGuildMgrForm->GetIsShow();
+}
+
+void CUIGuildMgr::CloseForm() {
+	HideUi();
+}
+
+void CUIGuildMgr::SwitchMap() {
+	HideUi();
+}
+
+void CUIGuildMgr::SelectRmlTab(int tab) {
+	g_stUIGuildMgr.rmlTab = tab;
+	if (tab == 0) {
+		m_pbtnMemberKick->SetIsEnabled(true);
+		m_pbtnMemberRecruit->SetIsEnabled(false);
+		m_pbtnMemberRefuse->SetIsEnabled(false);
+	} else if (tab == 1) {
+		m_pbtnMemberRecruit->SetIsEnabled(true);
+		m_pbtnMemberRefuse->SetIsEnabled(true);
+		m_pbtnMemberKick->SetIsEnabled(false);
+	} else if (tab == 2) {
+		m_pbtnMemberRecruit->SetIsEnabled(false);
+		m_pbtnMemberRefuse->SetIsEnabled(false);
+		m_pbtnMemberKick->SetIsEnabled(false);
+
+		CGuildMemberData* pSelfData = CGuildMembersMgr::GetSelfData();
+		if (pSelfData) {
+			const int perm = (pSelfData->GetPerm() & emGldPermViewBank);
+			if (perm == emGldPermViewBank) {
+				if (!g_stUIEquip.IsInventoryUiVisible())
+					g_stUIEquip.ShowInventoryUi();
+				CS_BeginAction(g_stUIBoat.GetHuman(), enumACTION_REQUESTGUILDBANK, nullptr);
+			}
+		}
+		g_stUIGuildBank.RefreshGuildBankUi();
+	} else if (tab == 3) {
+		g_stUIGuildMgr.curLogPage = 1;
+		CS_BeginAction(g_stUIBoat.GetHuman(), enumACTION_UPDATEGUILDLOGS, nullptr);
+	}
+	PushRmlView();
 }
 
 void CUIGuildMgr::_OnClickEditMottoName(CGuiData* pSender, int x, int y, DWORD key) {
@@ -552,6 +675,8 @@ void CUIGuildMgr::RefreshAttribute() {
 	}
 
 	m_pGuildMgrForm->Refresh();
+	if (UseRmlGuild() && CRmlUiGuildForm::Instance().IsVisible())
+		PushRmlView();
 }
 
 void CUIGuildMgr::RefreshList() {
@@ -586,6 +711,8 @@ void CUIGuildMgr::RefreshList() {
 		pRow->SetPointer(pMemberData);
 	}
 	m_pGuildMgrForm->Refresh();
+	if (UseRmlGuild() && CRmlUiGuildForm::Instance().IsVisible())
+		PushRmlView();
 }
 
 void CUIGuildMgr::_OnClickSelectPage(CGuiData* pSender) {
@@ -651,7 +778,7 @@ void CUIGuildMgr::_OnClickSelectPage(CGuiData* pSender) {
 }
 
 void CUIGuildMgr::RemoveForm() {
-	m_pGuildMgrForm->Close();
+	HideUi();
 }
 
 void CUIGuildMgr::_OnPassDismiss(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
@@ -675,6 +802,10 @@ void CUIGuildMgr::_OnClickLeave(CCompent* pSender, int nMsgType, int x, int y, D
 void CUIGuildMgr::_OnPassKick(CCompent* pSender, int nMsgType, int x, int y, DWORD dwKey) {
 	if (nMsgType != CForm::mrYes)
 		return;
+	if (UseRmlGuild() && g_stUIGuildMgr.rmlMemberId) {
+		CM_GUILD_KICK(g_stUIGuildMgr.rmlMemberId);
+		return;
+	}
 	CItemRow* pRow = m_plstGuildMember->GetList()->GetSelectItem();
 	if (!pRow) {
 		CBoxMgr::ShowMsgBox(nullptr, RES_STRING(CL_LANGUAGE_MATCH_614), true);
@@ -690,4 +821,314 @@ void CUIGuildMgr::OnBeforeShow(CForm* pForm, bool& IsShow) {
 		IsShow = false;
 	}
 	pForm->nTag = 0;
+}
+
+void CUIGuildMgr::PushRmlView() {
+	if (!UseRmlGuild())
+		return;
+
+	CRmlUiGuildForm::GuildView view;
+	view.name = CGuildData::GetGuildName();
+	view.founder = CGuildData::GetGuildMasterName();
+	char buf[64];
+	sprintf_s(buf, "%d/%d", CGuildData::GetMemberCount(), CGuildData::GetMaxMembers());
+	view.members = buf;
+	if (CGuildData::GetExperence() > 0) {
+		sprintf_s(buf, "%s", StringSplitNum(CGuildData::GetExperence()));
+		view.exp = buf;
+	}
+	view.gold = g_stUIGuildBank.GetGoldText();
+	if (CGuildData::GetGuildLevel() > 0) {
+		sprintf_s(buf, "%u", CGuildData::GetGuildLevel());
+		view.level = buf;
+	}
+	view.motto = CGuildData::GetGuildMottoName();
+
+	CGuildMemberData* pSelfData = CGuildMembersMgr::GetSelfData();
+	view.isLeader = (pSelfData && pSelfData->GetID() == CGuildData::GetGuildMasterID());
+	view.tab = g_stUIGuildMgr.rmlTab;
+	view.sortCol = g_stUIGuildMgr.rmlSortCol;
+	view.sortAsc = g_stUIGuildMgr.rmlSortAsc;
+	view.recruitEnabled = (view.tab == 1);
+	view.removeEnabled = (view.tab == 0);
+	view.rejectEnabled = (view.tab == 1);
+	view.footerVisible = (view.tab == 0);
+	view.vaultLocked = true;
+	if (pSelfData && (pSelfData->GetPerm() & emGldPermViewBank) == emGldPermViewBank)
+		view.vaultLocked = false;
+	view.vaultGold = view.gold;
+	view.logPage = g_stUIGuildMgr.curLogPage;
+	view.logPrevEnabled = g_stUIGuildMgr.curLogPage > 1;
+	view.logNextEnabled = g_stUIGuildMgr.logHasMore ||
+						  ((int)g_stUIGuildMgr.banklogs.size() > g_stUIGuildMgr.curLogPage * 13);
+
+	auto lessRow = [](const CRmlUiGuildForm::MemberRow& a, const CRmlUiGuildForm::MemberRow& b, int col, bool asc) {
+		int cmp = 0;
+		if (col == 1)
+			cmp = _stricmp(a.job.c_str(), b.job.c_str());
+		else if (col == 2)
+			cmp = atoi(a.level.c_str()) - atoi(b.level.c_str());
+		else
+			cmp = _stricmp(a.name.c_str(), b.name.c_str());
+		return asc ? (cmp < 0) : (cmp > 0);
+	};
+
+	for (DWORD i = 0; i < CGuildMembersMgr::GetTotalGuildMembers(); i++) {
+		CGuildMemberData* pMemberData = CGuildMembersMgr::FindGuildMemberByIndex(i);
+		if (!pMemberData)
+			continue;
+		CRmlUiGuildForm::MemberRow row;
+		row.id = pMemberData->GetID();
+		row.name = pMemberData->GetName();
+		row.job = pMemberData->GetJob();
+		sprintf_s(buf, "%u", pMemberData->GetLevel());
+		row.level = buf;
+		row.online = pMemberData->IsOnline();
+		row.selected = (pMemberData->GetID() == g_stUIGuildMgr.rmlMemberId);
+		view.membersList.push_back(std::move(row));
+	}
+	std::sort(view.membersList.begin(), view.membersList.end(),
+			  [&](const CRmlUiGuildForm::MemberRow& a, const CRmlUiGuildForm::MemberRow& b) {
+				  return lessRow(a, b, view.sortCol, view.sortAsc);
+			  });
+
+	for (DWORD i = 0; i < CRecruitMembersMgr::GetTotalRecruitMembers(); i++) {
+		CRecruitMemberData* pMemberData = CRecruitMembersMgr::FindRecruitMemberByIndex(i);
+		if (!pMemberData)
+			continue;
+		CRmlUiGuildForm::MemberRow row;
+		row.id = pMemberData->GetID();
+		row.name = pMemberData->GetName();
+		row.job = pMemberData->GetJob();
+		sprintf_s(buf, "%u", pMemberData->GetLevel());
+		row.level = buf;
+		row.selected = (pMemberData->GetID() == g_stUIGuildMgr.rmlApplyId);
+		view.applyList.push_back(std::move(row));
+	}
+	std::sort(view.applyList.begin(), view.applyList.end(),
+			  [&](const CRmlUiGuildForm::MemberRow& a, const CRmlUiGuildForm::MemberRow& b) {
+				  return lessRow(a, b, view.sortCol, view.sortAsc);
+			  });
+
+	const int finish = g_stUIGuildMgr.curLogPage * 13;
+	const int start = finish - 13;
+	for (int i = start; i < finish && i < (int)g_stUIGuildMgr.banklogs.size(); ++i) {
+		BankLog* curlog = &g_stUIGuildMgr.banklogs.at(i);
+		CGuildMemberData* j = CGuildMembersMgr::FindGuildMemberByID(curlog->userID);
+		string name = j ? j->GetName() : "Unknown";
+		char buf1[256] = {0};
+		char buf2[512] = {0};
+		time_t serverLocalTime = curlog->time + g_stUIMap.GetServerTimezoneOffset();
+		tm* k = gmtime(&serverLocalTime);
+		strftime(buf2, sizeof(buf2), "[%d/%m/%y] %H:%M ", k);
+		switch (curlog->type) {
+		case 0:
+			_snprintf_s(buf1, sizeof(buf1), _TRUNCATE, "%s withdrew %lld gold", name.c_str(), curlog->parameter);
+			break;
+		case 1:
+			_snprintf_s(buf1, sizeof(buf1), _TRUNCATE, "%s deposited %lld gold", name.c_str(), curlog->parameter);
+			break;
+		case 2: {
+			CItemRecord* itemInfo = GetItemRecordInfo(curlog->parameter);
+			const char* itemName = (itemInfo && itemInfo->szName[0]) ? itemInfo->szName : "Unknown Item";
+			_snprintf_s(buf1, sizeof(buf1), _TRUNCATE, "%s withdrew %dx %s", name.c_str(), curlog->quantity, itemName);
+			break;
+		}
+		case 3: {
+			CItemRecord* itemInfo = GetItemRecordInfo(curlog->parameter);
+			const char* itemName = (itemInfo && itemInfo->szName[0]) ? itemInfo->szName : "Unknown Item";
+			_snprintf_s(buf1, sizeof(buf1), _TRUNCATE, "%s deposited %dx %s", name.c_str(), curlog->quantity, itemName);
+			break;
+		}
+		}
+		strncat_s(buf2, sizeof(buf2), buf1, _TRUNCATE);
+		view.logs.push_back(buf2);
+	}
+
+	CRmlUiGuildForm::Instance().ApplyView(view);
+	if (view.tab == 2 && !view.vaultLocked)
+		g_stUIGuildBank.RefreshGuildBankUi();
+}
+
+void RmlGuild_OnClose() {
+	CUIGuildMgr::HideUi();
+}
+
+void RmlGuild_OnTab(int tab) {
+	CUIGuildMgr::SelectRmlTab(tab);
+}
+
+void RmlGuild_OnRecruit() {
+	CGuildMemberData* pSelfData = CGuildMembersMgr::GetSelfData();
+	int perm = pSelfData ? (pSelfData->GetPerm() & emGldPermRecruit) : 0;
+	if (!pSelfData || perm != emGldPermRecruit) {
+		CBoxMgr::ShowMsgBox(nullptr, RES_STRING(CL_LANGUAGE_MATCH_598), true);
+		return;
+	}
+	CRecruitMemberData* pMemberData = CRecruitMembersMgr::FindRecruitMemberByID(g_stUIGuildMgr.rmlApplyId);
+	if (!pMemberData) {
+		CBoxMgr::ShowMsgBox(nullptr, RES_STRING(CL_LANGUAGE_MATCH_597), true);
+		return;
+	}
+	CM_GUILD_APPROVE(pMemberData->GetID());
+	CRecruitMembersMgr::DelRecruitMember(pMemberData);
+	g_stUIGuildMgr.rmlApplyId = 0;
+	CUIGuildMgr::RefreshList();
+}
+
+void RmlGuild_OnReject() {
+	CGuildMemberData* pSelfData = CGuildMembersMgr::GetSelfData();
+	int perm = pSelfData ? (pSelfData->GetPerm() & emGldPermRecruit) : 0;
+	if (!pSelfData || perm != emGldPermRecruit) {
+		CBoxMgr::ShowMsgBox(nullptr, RES_STRING(CL_LANGUAGE_MATCH_599), true);
+		return;
+	}
+	CRecruitMemberData* pMemberData = CRecruitMembersMgr::FindRecruitMemberByID(g_stUIGuildMgr.rmlApplyId);
+	if (!pMemberData) {
+		CBoxMgr::ShowMsgBox(nullptr, RES_STRING(CL_LANGUAGE_MATCH_597), true);
+		return;
+	}
+	CM_GUILD_REJECT(pMemberData->GetID());
+	CRecruitMembersMgr::DelRecruitMember(pMemberData);
+	g_stUIGuildMgr.rmlApplyId = 0;
+	CUIGuildMgr::RefreshList();
+}
+
+void RmlGuild_OnRemove() {
+	CGuildMemberData* pSelfData = CGuildMembersMgr::GetSelfData();
+	if (!pSelfData || (pSelfData->GetPerm() & emGldPermKick) != emGldPermKick) {
+		CBoxMgr::ShowMsgBox(nullptr, RES_STRING(CL_LANGUAGE_MATCH_603), true);
+		return;
+	}
+	CGuildMemberData* pMemberData = CGuildMembersMgr::FindGuildMemberByID(g_stUIGuildMgr.rmlMemberId);
+	if (!pMemberData) {
+		CBoxMgr::ShowMsgBox(nullptr, RES_STRING(CL_LANGUAGE_MATCH_600), true);
+		return;
+	}
+	string str = RES_STRING(CL_LANGUAGE_MATCH_601) + pMemberData->GetName() + RES_STRING(CL_LANGUAGE_MATCH_602);
+	CBoxMgr::ShowSelectBox(CUIGuildMgr::_OnPassKick, str.c_str(), true);
+}
+
+void RmlGuild_OnExit() {
+	CGuildMemberData* pSelfData = CGuildMembersMgr::GetSelfData();
+	const bool isLeader = pSelfData && pSelfData->GetID() == CGuildData::GetGuildMasterID();
+	if (isLeader)
+		CBoxMgr::ShowPasswordBox(CUIGuildMgr::_OnPassDismiss, "Disband Guild");
+	else
+		CBoxMgr::ShowSelectBox(CUIGuildMgr::_OnClickLeave, RES_STRING(CL_LANGUAGE_MATCH_596), true);
+}
+
+void RmlGuild_OnMotto() {
+	CGuildMemberData* pSelfData = CGuildMembersMgr::GetSelfData();
+	int perm = pSelfData ? (pSelfData->GetPerm() & emGldPermMotto) : 0;
+	if (!pSelfData || perm != emGldPermMotto) {
+		CBoxMgr::ShowMsgBox(nullptr, RES_STRING(CL_LANGUAGE_MATCH_594), true);
+		return;
+	}
+	CRmlUiGuildForm::Instance().ShowMottoEdit(CGuildData::GetGuildMottoName().c_str());
+}
+
+void RmlGuild_OnMottoConfirm() {
+	string name = CRmlUiGuildForm::Instance().GetMottoEditInput();
+	if (name.length() > 0 && (!CTextFilter::IsLegalText(CTextFilter::NAME_TABLE, name) ||
+							  !common::conformity::guild::motto::is_valid(name.c_str(), name.length()))) {
+		g_pGameApp->MsgBox(RES_STRING(CL_LANGUAGE_MATCH_51));
+		return;
+	}
+	CM_GUILD_MOTTO(name.c_str());
+	CRmlUiGuildForm::Instance().HideModal();
+}
+
+void RmlGuild_OnMottoCancel() {
+	CRmlUiGuildForm::Instance().HideModal();
+}
+
+void RmlGuild_OnPermissions() {
+	CGuildMemberData* pSelfData = CGuildMembersMgr::GetSelfData();
+	int perm = pSelfData ? (pSelfData->GetPerm() & emGldPermMgr) : 0;
+	if (!pSelfData || perm != emGldPermMgr) {
+		CBoxMgr::ShowMsgBox(nullptr, "You do not have permissions to do this", true);
+		return;
+	}
+	CGuildMemberData* pMemberData = CGuildMembersMgr::FindGuildMemberByID(g_stUIGuildMgr.rmlMemberId);
+	if (!pMemberData) {
+		CBoxMgr::ShowMsgBox(nullptr, "No user selected", true);
+		return;
+	}
+	CRmlUiGuildForm::Instance().SetPermissionMask(pMemberData->GetPerm(), pMemberData->GetName().c_str());
+	CRmlUiGuildForm::Instance().ShowPermissions(true);
+}
+
+void RmlGuild_OnPermConfirm() {
+	CGuildMemberData* pSelfData = CGuildMembersMgr::GetSelfData();
+	int perm = pSelfData ? (pSelfData->GetPerm() & emGldPermMgr) : 0;
+	if (!pSelfData || perm != emGldPermMgr) {
+		CBoxMgr::ShowMsgBox(nullptr, "You do not have permissions to do this", true);
+		return;
+	}
+	CGuildMemberData* pMemberData = CGuildMembersMgr::FindGuildMemberByID(g_stUIGuildMgr.rmlMemberId);
+	if (!pMemberData) {
+		CBoxMgr::ShowMsgBox(nullptr, RES_STRING(CL_LANGUAGE_MATCH_600), true);
+		return;
+	}
+	CS_SetGuildPerms(pMemberData->GetID(), CRmlUiGuildForm::Instance().GetPermissionMask());
+	CRmlUiGuildForm::Instance().ShowPermissions(false);
+}
+
+void RmlGuild_OnPermCancel() {
+	CRmlUiGuildForm::Instance().ShowPermissions(false);
+}
+
+void RmlGuild_OnPermPreset(int preset) {
+	unsigned int mask = 513;
+	if (preset == 1)
+		mask = emGldPermMax;
+	else if (preset == 2)
+		mask = 12029;
+	else if (preset == 3)
+		mask = 3585;
+	else if (preset == 4)
+		mask = 541;
+	else if (preset == 5)
+		mask = 3613;
+	CGuildMemberData* pMemberData = CGuildMembersMgr::FindGuildMemberByID(g_stUIGuildMgr.rmlMemberId);
+	CRmlUiGuildForm::Instance().SetPermissionMask(mask, pMemberData ? pMemberData->GetName().c_str() : "");
+}
+
+void RmlGuild_OnSelectMember(unsigned int id) {
+	g_stUIGuildMgr.rmlMemberId = id;
+	CRmlUiGuildForm::Instance().SetSelectedMember(id);
+	CUIGuildMgr::PushRmlView();
+}
+
+void RmlGuild_OnSelectApply(unsigned int id) {
+	g_stUIGuildMgr.rmlApplyId = id;
+	CRmlUiGuildForm::Instance().SetSelectedApply(id);
+	CUIGuildMgr::PushRmlView();
+}
+
+void RmlGuild_OnSort(int col) {
+	if (g_stUIGuildMgr.rmlSortCol == col)
+		g_stUIGuildMgr.rmlSortAsc = !g_stUIGuildMgr.rmlSortAsc;
+	else {
+		g_stUIGuildMgr.rmlSortCol = col;
+		g_stUIGuildMgr.rmlSortAsc = true;
+	}
+	CUIGuildMgr::PushRmlView();
+}
+
+void RmlGuild_OnLogPrev() {
+	CUIGuildMgr::_OnClickPrevLogs(nullptr, 0, 0, 0);
+}
+
+void RmlGuild_OnLogNext() {
+	CUIGuildMgr::_OnClickNextLogs(nullptr, 0, 0, 0);
+}
+
+void RmlGuild_OnGoldTake() {
+	g_stUIGuildBank.PromptGoldTake();
+}
+
+void RmlGuild_OnGoldPut() {
+	g_stUIGuildBank.PromptGoldPut();
 }

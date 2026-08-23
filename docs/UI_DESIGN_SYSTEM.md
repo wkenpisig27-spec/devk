@@ -56,6 +56,7 @@ client/ui/rml/
   region.rml / server.rml      ← region + server pick
   selectcha.rml / selectcha.rcss ← character-select bottom dock (no scrim)
   inventory.rml / inventory.rcss ← in-game inventory (Character + Backpack + tabs)
+  guild.rml / guild.rcss         ← in-game guild manager (Members / Apply / Vault / Logs)
   frames/notice/               ← soft-AA TGA
   fonts/LatoLatin-*.ttf
   system/aether.rcss           ← dark HUD (separate)
