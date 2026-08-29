@@ -4,7 +4,7 @@
 
 **Build under test:** GameServer, GateServer, GroupServer, AccountServer (Release x64) + updated Lua scripts in `server/resource/script/calculate/`
 
-**Before testing:** deploy all four servers, restart after deploy. Run `database/[12]ItemAuditLog.sql` on GameDB if audit DB tests are included.
+**Before testing:** deploy all four servers, restart after deploy. Run `database/[12]ItemAuditLog.sql` on GameDB_devk if audit DB tests are included.
 
 | Config (GameServer.cfg) | Staging value | Production target |
 |-------------------------|---------------|-------------------|

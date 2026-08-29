@@ -5,10 +5,10 @@
 -- friend-list queries on every login; without indexes these become full
 -- table scans that cause lock storms and HYT00 timeouts under load.
 --
--- RUN ON: GameDB (once, idempotent)
+-- RUN ON: GameDB_devk (once, idempotent)
 -- =============================================
 
-USE [GameDB]
+USE [GameDB_devk]
 GO
 
 PRINT '=== Adding indexes to friends table ==='

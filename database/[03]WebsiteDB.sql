@@ -1,8 +1,8 @@
 USE [master]
 GO
-CREATE DATABASE [WebsiteDB]
+CREATE DATABASE [WebsiteDB_devk]
 GO
-USE [WebsiteDB]
+USE [WebsiteDB_devk]
 GO
 SET
 ANSI_NULLS ON
@@ -67,5 +67,5 @@ CREATE TABLE [dbo].[vote_log](
 GO
 USE [master]
 GO
-ALTER DATABASE [WebsiteDB] SET  READ_WRITE 
+ALTER DATABASE [WebsiteDB_devk] SET  READ_WRITE 
 GO

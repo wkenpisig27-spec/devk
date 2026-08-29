@@ -69,17 +69,17 @@ website/
    ```env
    # Database
    DB_ACCOUNT_HOST=localhost\SQLExpress
-   DB_ACCOUNT_NAME=AccountServer
+   DB_ACCOUNT_NAME=AccountServer_devk
    DB_ACCOUNT_USER=pko_web
    DB_ACCOUNT_PASS=your_secure_password
 
    DB_GAME_HOST=localhost\SQLExpress
-   DB_GAME_NAME=GameDB
+   DB_GAME_NAME=GameDB_devk
    DB_GAME_USER=pko_web
    DB_GAME_PASS=your_secure_password
 
    DB_WEB_HOST=localhost\SQLExpress
-   DB_WEB_NAME=WebsiteDB
+   DB_WEB_NAME=WebsiteDB_devk
    DB_WEB_USER=pko_web
    DB_WEB_PASS=your_secure_password
 
@@ -97,15 +97,15 @@ website/
    -- Run in SQL Server Management Studio
    CREATE LOGIN pko_web WITH PASSWORD = 'your_secure_password';
    
-   USE AccountServer;
+   USE AccountServer_devk;
    CREATE USER pko_web FOR LOGIN pko_web;
    GRANT SELECT, INSERT, UPDATE, EXECUTE TO pko_web;
    
-   USE GameDB;
+   USE GameDB_devk;
    CREATE USER pko_web FOR LOGIN pko_web;
    GRANT SELECT, UPDATE TO pko_web;
    
-   USE WebsiteDB;
+   USE WebsiteDB_devk;
    CREATE USER pko_web FOR LOGIN pko_web;
    GRANT SELECT, INSERT, UPDATE TO pko_web;
    ```
@@ -190,18 +190,18 @@ All responses include:
 
 The website connects to three PKO databases:
 
-### AccountServer
+### AccountServer_devk
 - `account_login` - User accounts
 - `account_details` - VIP status, credits
 - `user_log` - Login history
 
-### GameDB
+### GameDB_devk
 - `account` - Game account credits
 - `character` - Player characters
 - `guild` - Guild information
 - `friends` - Friend relationships
 
-### WebsiteDB
+### WebsiteDB_devk
 - `LarryEdit` - Shop items
 - `LarryLaatikko` - Purchase delivery
 - `vote` - Vote sites
@@ -264,14 +264,14 @@ Edit `/assets/css/style.css` - CSS variables at the top control the theme:
 ```
 
 ### Adding Shop Items
-Insert into `WebsiteDB.LarryEdit`:
+Insert into `WebsiteDB_devk.LarryEdit`:
 ```sql
 INSERT INTO LarryEdit (TuoNimi, TavaraHinta, TavaraTeksti, Quota, Icon, MyyniTyyppi, TavaraID, MontaTavaraa, category, bought)
 VALUES ('Item Name', 100, 'Description', 999, 'icon_name', 'type', 12345, 1, 'category', 0);
 ```
 
 ### Adding Vote Sites
-Insert into `WebsiteDB.vote`:
+Insert into `WebsiteDB_devk.vote`:
 ```sql
 INSERT INTO vote (name, prize, link, image)
 VALUES ('Site Name', 10, 'https://votesite.com/vote?id=123', 'https://example.com/banner.png');

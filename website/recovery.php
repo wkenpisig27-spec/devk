@@ -98,27 +98,27 @@ try {
     try {
         $db = Database::getAccountDb();
         $stmt = $db->query("SELECT 1 as test");
-        out("AccountServer DB: Connected OK", 'success');
+        out("AccountServer_devk DB: Connected OK", 'success');
     } catch (Exception $e) {
-        out("AccountServer DB: FAILED - " . $e->getMessage(), 'error');
+        out("AccountServer_devk DB: FAILED - " . $e->getMessage(), 'error');
     }
     
     // Test Game DB
     try {
         $db = Database::getGameDb();
         $stmt = $db->query("SELECT 1 as test");
-        out("GameDB: Connected OK", 'success');
+        out("GameDB_devk: Connected OK", 'success');
     } catch (Exception $e) {
-        out("GameDB: FAILED - " . $e->getMessage(), 'error');
+        out("GameDB_devk: FAILED - " . $e->getMessage(), 'error');
     }
     
     // Test Web DB
     try {
         $db = Database::getWebDb();
         $stmt = $db->query("SELECT 1 as test");
-        out("WebsiteDB: Connected OK", 'success');
+        out("WebsiteDB_devk: Connected OK", 'success');
     } catch (Exception $e) {
-        out("WebsiteDB: FAILED - " . $e->getMessage(), 'error');
+        out("WebsiteDB_devk: FAILED - " . $e->getMessage(), 'error');
     }
     
 } catch (Exception $e) {

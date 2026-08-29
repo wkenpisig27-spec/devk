@@ -146,7 +146,7 @@ C:\Users\pisig\Desktop\Github\pkodev\website\
 ### .env (Environment Variables)
 ```
 DB_ACCOUNT_HOST=localhost\SQLExpress
-DB_ACCOUNT_NAME=AccountServer
+DB_ACCOUNT_NAME=AccountServer_devk
 DB_ACCOUNT_USER=pko_web
 DB_ACCOUNT_PASS=YourPassword
 

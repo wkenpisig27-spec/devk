@@ -1,4 +1,4 @@
-USE [AccountServer]
+USE [AccountServer_devk]
 GO
 
 -- Password reset tokens table

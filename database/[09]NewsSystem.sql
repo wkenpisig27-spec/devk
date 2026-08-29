@@ -1,9 +1,9 @@
 -- =============================================
 -- PKO Website - News System Database Schema
--- Run this on WebsiteDB
+-- Run this on WebsiteDB_devk
 -- =============================================
 
-USE [WebsiteDB]
+USE [WebsiteDB_devk]
 GO
 
 -- =============================================

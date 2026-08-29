@@ -255,8 +255,8 @@ sqlcmd -S localhost -U SA -P 'YourSAPassword' -C -i '[3]Create SQL Login.sql'
 ```
 
 This creates two SQL logins used by the server binaries:
-- `pko_account` — Used by AccountServer (connects to `AccountServer` DB)
-- `pko_game` — Used by GroupServer (connects to `GameDB`)
+- `pko_account` — Used by AccountServer (connects to `AccountServer_devk` DB)
+- `pko_game` — Used by GroupServer (connects to `GameDB_devk`)
 
 ### Create first game account
 
@@ -332,7 +332,7 @@ log_dir = LOG/AccountServer
 
 [db]
 dbserver = localhost
-db = AccountServer
+db = AccountServer_devk
 userid = pko_account
 passwd = YourDBPassword
 ```
@@ -345,7 +345,7 @@ log_dir = LOG/GroupServer
 
 [Database]
 IP = localhost
-DB = GameDB
+DB = GameDB_devk
 Login = pko_game
 Password = YourDBPassword
 ```

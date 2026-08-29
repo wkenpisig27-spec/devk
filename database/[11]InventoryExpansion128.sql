@@ -6,7 +6,7 @@
 --   Recreates affected stored procedures.
 -- =============================================
 
-USE GameDB
+USE GameDB_devk
 GO
 
 PRINT '=== Starting Inventory Expansion Migration ==='
