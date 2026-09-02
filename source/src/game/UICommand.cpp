@@ -3,6 +3,7 @@
 #include "uifastcommand.h"
 #include "GameApp.h"
 #include "Scene.h"
+#include "rmlui/RmlUiItemHintForm.h"
 
 using namespace GUI;
 
@@ -134,8 +135,11 @@ void CCommandObj::ReadyForHint(int x, int y, CCompent* pCompent) {
 	}
 
 	_hints.ReadyForHint(x, y);
+	RmlItemHint_TryShow(this, x, y);
 }
 
 void CCommandObj::RenderHint(int x, int y) {
+	if (RmlItemHint_IsShowing())
+		return;
 	_hints.Render();
 }

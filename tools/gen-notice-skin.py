@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import math
 import struct
+import sys
 from pathlib import Path
 
 OUT = Path(__file__).resolve().parents[1] / "client" / "ui" / "rml" / "frames" / "notice"
@@ -462,6 +463,61 @@ def gen_ico_plus() -> None:
     write_tga(OUT / "ico_plus.tga", size, size, render(size, size, sample))
 
 
+def gen_circle_disc(name: str, size: int, fill: tuple[int, int, int],
+                    border_rgb: tuple[int, int, int]) -> None:
+    """Circular icon backing (item hint) — not a square inventory slot."""
+    def sample(px: float, py: float) -> tuple[int, int, int, int]:
+        ix, iy, iw, ih = with_edge_inset(px, py, float(size), float(size))
+        return sample_framed(ix, iy, iw, ih, iw * 0.5, BORDER, fill, border_rgb)
+
+    write_tga(OUT / f"{name}.tga", size, size, render(size, size, sample))
+
+
+def gen_stat_star(name: str, size: int) -> None:
+    """4-pointed sparkle bullet (✦) — Notice blue, like the mobile RPG example."""
+    cx = cy = size * 0.5
+    outer = size * 0.46
+    waist = size * 0.12
+    fill = (126, 180, 240)
+    edge = (58, 120, 192)
+
+    def sample(px: float, py: float) -> tuple[int, int, int, int]:
+        dx = px - cx
+        dy = py - cy
+        ax, ay = abs(dx), abs(dy)
+        # Union of two thin diamonds → 4-pointed sparkle (not a box glyph).
+        d_h = ax / outer + ay / waist - 1.0
+        d_v = ay / outer + ax / waist - 1.0
+        sdf = min(d_h, d_v)
+        a = coverage(sdf)
+        if a < 0.004:
+            return (0, 0, 0, 0)
+        t = max(0.0, min(1.0, (sdf + 1.0) * 0.55))
+        rgb = mix_rgb(fill, edge, t)
+        return (clamp(rgb[0]), clamp(rgb[1]), clamp(rgb[2]), clamp(a * 255))
+
+    write_tga(OUT / f"{name}.tga", size, size, render(size, size, sample))
+
+
+def gen_icon_hole_mask(name: str, size: int, fill_top: tuple[int, int, int],
+                       fill_bot: tuple[int, int, int]) -> None:
+    """Square overlay with a circular hole — hides opaque icon corners on the header."""
+    hole_r = size * 0.5 - 1.2 - EDGE_INSET
+
+    def sample(px: float, py: float) -> tuple[int, int, int, int]:
+        cx = cy = size * 0.5
+        # Negative outside the hole = the cover (icon corners).
+        sdf = hole_r - math.hypot(px - cx, py - cy)
+        a = coverage(sdf)
+        if a < 0.004:
+            return (0, 0, 0, 0)
+        t = max(0.0, min(1.0, py / max(1.0, size - 1)))
+        rgb = mix_rgb(fill_top, fill_bot, t)
+        return (clamp(rgb[0]), clamp(rgb[1]), clamp(rgb[2]), clamp(a * 255))
+
+    write_tga(OUT / f"{name}.tga", size, size, render(size, size, sample))
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     gen_panel()
@@ -473,11 +529,15 @@ def main() -> None:
     gen_capsule("capsule_blue", (126, 180, 240), (74, 138, 208), (170, 205, 250), (58, 120, 192))
     gen_capsule("capsule_gold", (245, 215, 130), (224, 176, 64), (255, 235, 170), (200, 152, 48))
     gen_capsule("capsule_rose", (236, 150, 160), (200, 90, 105), (250, 190, 198), (170, 70, 85))
+    gen_capsule("capsule_green", (120, 196, 130), (64, 156, 86), (165, 228, 170), (48, 128, 68))
+    gen_capsule("capsule_red", (236, 118, 118), (196, 58, 58), (250, 168, 168), (160, 42, 42))
     gen_checkbox()
     gen_cap_pill()
     gen_scroll()
     gen_btn_add_slot()
     gen_ico_plus()
+    gen_circle_disc("ih_icon_disc", 48, (72, 122, 188), (186, 214, 245))
+    gen_circle_disc("ih_icon_disc_light", 36, (232, 240, 252), (158, 186, 228))
     for name in ("header_l.tga", "header_c.tga", "header_r.tga"):
         p = OUT / name
         if p.exists():
@@ -487,4 +547,14 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "hint-disc":
+        OUT.mkdir(parents=True, exist_ok=True)
+        gen_circle_disc("ih_icon_disc", 48, (72, 122, 188), (186, 214, 245))
+        gen_circle_disc("ih_icon_disc_light", 36, (232, 240, 252), (158, 186, 228))
+        # Match Notice header / body so square icon corners disappear into the card.
+        gen_icon_hole_mask("ih_icon_mask", 48, (126, 180, 240), (90, 150, 220))
+        gen_icon_hole_mask("ih_icon_mask_light", 36, (245, 249, 255), (245, 249, 255))
+        gen_stat_star("ih_stat_star", 32)
+        print("done ->", OUT)
+    else:
+        main()

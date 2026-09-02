@@ -16,6 +16,7 @@
 #include "rmlui/RmlUiNpcMissionForm.h"
 #include "rmlui/RmlUiGuildApplyForm.h"
 #include "rmlui/RmlUiGuildForm.h"
+#include "rmlui/RmlUiItemHintForm.h"
 
 #include "UIMenu.h"
 #include "MPRender.h"
@@ -259,6 +260,9 @@ bool CRmlUiManager::Init(HWND hwnd) {
 	if (!CRmlUiGuildForm::Instance().Load(g_context)) {
 		OutputDebugStringA("RmlUi: warning - guild.rml failed to load\n");
 	}
+	if (!CRmlUiItemHintForm::Instance().Load(g_context)) {
+		OutputDebugStringA("RmlUi: warning - itemhint.rml failed to load\n");
+	}
 
 	m_ready = true;
 	OutputDebugStringA("RmlUi: initialized OK\n");
@@ -281,6 +285,7 @@ void CRmlUiManager::HideCreateChaForm() {
 
 void CRmlUiManager::HideInventoryForm() {
 	CRmlUiInventoryForm::Instance().Hide();
+	CRmlUiItemHintForm::Instance().Hide();
 }
 
 void CRmlUiManager::HideBankForm() {
@@ -337,6 +342,7 @@ void CRmlUiManager::Shutdown() {
 	CRmlUiNpcMissionForm::Instance().Unload();
 	CRmlUiGuildApplyForm::Instance().Unload();
 	CRmlUiGuildForm::Instance().Unload();
+	CRmlUiItemHintForm::Instance().Unload();
 
 	if (g_context) {
 		g_context->UnloadAllDocuments();
@@ -370,13 +376,16 @@ void CRmlUiManager::Update() {
 		return;
 
 	SyncViewport();
-	g_context->Update();
-	// FormMgr::FrameMove clears hint items every frame — rebuild after that.
+	// FormMgr::FrameMove clears hint items every frame — rebuild Rml hovers before layout.
 	if (m_lastX >= 0 && m_lastY >= 0) {
 		CRmlUiInventoryForm::Instance().UpdateItemHint(m_lastX, m_lastY);
 		CRmlUiNpcTradeForm::Instance().UpdateItemHint(m_lastX, m_lastY);
 		CRmlUiGuildForm::Instance().UpdateItemHint(m_lastX, m_lastY);
 	}
+	if (!CRmlUiItemHintForm::Instance().ConsumeShownThisFrame())
+		CRmlUiItemHintForm::Instance().Hide();
+	g_context->Update();
+	CRmlUiItemHintForm::Instance().PlaceNearCursor();
 }
 
 void CRmlUiManager::Render() {

@@ -1,0 +1,56 @@
+<rml>
+	<head>
+		<title>Item Hint</title>
+		<link type="text/rcss" href="notice.rcss"/>
+		<link type="text/rcss" href="itemhint.rcss"/>
+	</head>
+	<body class="ih-body-doc">
+		<div id="ih-root" class="ih-card">
+			<div class="ih-header">
+				<div class="ih-header-main">
+					<div id="ih-name" class="ih-name"></div>
+					<div class="ih-type-row">
+						<div id="ih-type" class="ih-type"></div>
+						<div id="ih-equipped" class="ih-badge ih-badge-hidden">Equipped</div>
+						<div id="ih-refine" class="ih-badge ih-badge-gold ih-badge-hidden"></div>
+					</div>
+				</div>
+				<div class="ih-header-side">
+					<div class="ih-icon-well">
+						<img id="ih-icon" class="ih-icon" src=""/>
+						<div class="ih-icon-mask"></div>
+						<img id="ih-lock" class="ih-lock ih-badge-hidden" src="ui/rml/frames/notice/ico_lock.tga"/>
+					</div>
+					<div id="ih-gem-dots" class="ih-gem-dots"></div>
+				</div>
+			</div>
+
+			<div class="ih-body">
+				<div id="ih-meta" class="ih-meta"></div>
+				<div id="ih-stats" class="ih-stats"></div>
+
+				<div id="ih-gems-wrap" class="ih-section ih-section-hidden">
+					<div class="ih-rule"></div>
+					<div class="ih-section-head">
+						<div class="ih-stat-star"></div>
+						<div class="ih-section-title">Enchant Stones</div>
+					</div>
+					<div id="ih-gems" class="ih-gems"></div>
+				</div>
+
+				<div id="ih-special-wrap" class="ih-section ih-section-hidden">
+					<div class="ih-rule"></div>
+					<div class="ih-section-head">
+						<div class="ih-stat-star"></div>
+						<div class="ih-section-title">Gem Effect</div>
+					</div>
+					<div id="ih-special" class="ih-special"></div>
+				</div>
+
+				<div id="ih-flags-rule" class="ih-rule ih-rule-flags"></div>
+				<div id="ih-flags" class="ih-flags"></div>
+				<div id="ih-value" class="ih-value"></div>
+			</div>
+		</div>
+	</body>
+</rml>
