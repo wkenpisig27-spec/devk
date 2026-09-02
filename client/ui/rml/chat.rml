@@ -1,0 +1,34 @@
+<rml>
+	<head>
+		<title>Chat</title>
+		<link type="text/rcss" href="notice.rcss"/>
+		<link type="text/rcss" href="chat.rcss"/>
+	</head>
+	<body class="chat-body">
+		<div id="chat-root" class="chat-root">
+			<div id="chat-resize" class="chat-resize">
+				<div class="chat-resize-grip"></div>
+			</div>
+			<div id="chat-log" class="chat-log"></div>
+
+			<div id="chat-channel-menu" class="chat-channel-menu chat-hidden">
+				<button class="chat-channel-item" id="chat-ch-sight" type="button">Local</button>
+				<button class="chat-channel-item" id="chat-ch-team" type="button">Team</button>
+				<button class="chat-channel-item" id="chat-ch-guild" type="button">Guild</button>
+				<button class="chat-channel-item" id="chat-ch-world" type="button">World</button>
+				<button class="chat-channel-item" id="chat-ch-trade" type="button">Trade</button>
+				<button class="chat-channel-item" id="chat-ch-side" type="button">Side</button>
+			</div>
+
+			<div id="chat-bar" class="chat-bar">
+				<button class="chat-channel" id="chat-channel" type="button">Local</button>
+				<div class="chat-input-shell">
+					<input class="chat-input" type="text" id="chat-input" maxlength="120"/>
+				</div>
+				<button class="chat-icon-btn" id="chat-btn-face" type="button">:)</button>
+				<button class="chat-icon-btn" id="chat-btn-action" type="button">Go</button>
+				<button class="chat-icon-btn chat-icon-last" id="chat-btn-filter" type="button">Ch</button>
+			</div>
+		</div>
+	</body>
+</rml>

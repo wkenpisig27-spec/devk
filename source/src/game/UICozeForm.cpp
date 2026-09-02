@@ -22,8 +22,10 @@
 #include "UIMiniMapForm.h"
 #include "UIItemCommand.h"
 #include "ItemRecord.h"
+#include "rmlui/RmlUiChatForm.h"
 #include <cerrno>
 #include <climits>
+#include <cstring>
 
 using namespace std;
 using namespace GUI;
@@ -627,8 +629,10 @@ void CChannelSwitchForm::EventSightCheckChange(CGuiData* pSender) {
 void CChannelSwitchForm::EventSystemCheckChange(CGuiData* pSender) {
 	CCozeForm* pCozeForm = CCozeForm::GetInstance();
 	bool bCheck = CChannelSwitchForm::GetInstance()->m_chkSystem->GetIsChecked();
-	pCozeForm->m_lstSystemPage->SetIsShow(bCheck);
-	pCozeForm->m_drgSystemPage->SetIsShow(bCheck);
+	if (!CRmlUiChatForm::Instance().IsVisible()) {
+		pCozeForm->m_lstSystemPage->SetIsShow(bCheck);
+		pCozeForm->m_drgSystemPage->SetIsShow(bCheck);
+	}
 	if (bCheck) {
 		pCozeForm->OnSystemMsg(RES_STRING(CL_LANGUAGE_MATCH_503));
 	} else {
@@ -835,6 +839,10 @@ void CCozeForm::OnPrivateNameSet(string strName) {
 	string strCurCmd = CCharMsg::GetChannelCommand(CCharMsg::GetChannelIndex(CCharMsg::CHANNEL_PRIVATE)) + strName + " ";
 	m_edtMsg->SetCaption(strCurCmd.c_str());
 	m_edtMsg->SetActive(m_edtMsg);
+	if (CRmlUiChatForm::Instance().IsVisible()) {
+		CRmlUiChatForm::Instance().SetInput(strCurCmd);
+		CRmlUiChatForm::Instance().FocusInput();
+	}
 
 	m_cCallingCard.AddCard(strName);
 }
@@ -858,6 +866,9 @@ void CCozeForm::OnResetAll() {
 	m_itemRawLinkText.clear();
 	m_pendingVisibleToRawLinks.clear();
 	m_bSendMsgCardSwitch = false;
+	CRmlUiChatForm::Instance().Clear();
+	CRmlUiChatForm::Instance().SetChannelLabel(CCharMsg::GetChannelName(m_eCurSelChannel));
+	CRmlUiChatForm::Instance().SetInput("");
 }
 
 bool CCozeForm::IsMouseOnList(int x, int y) {
@@ -878,6 +889,13 @@ bool CCozeForm::IsMouseOnList(int x, int y) {
 }
 
 void CCozeForm::AddToEdit(string strData) {
+	if (CRmlUiChatForm::Instance().IsVisible()) {
+		std::string cur = CRmlUiChatForm::Instance().GetInput();
+		cur += strData;
+		CRmlUiChatForm::Instance().SetInput(cur);
+		return;
+	}
+
 	CEdit* pEdit = dynamic_cast<CEdit*>(CCompent::GetActive());
 	if (!pEdit) {
 		if (!m_edtMsg)
@@ -1048,6 +1066,9 @@ void CCozeForm::SendMsg() {
 	if (!pChar)
 		return;
 
+	if (CRmlUiChatForm::Instance().IsVisible() && m_edtMsg)
+		m_edtMsg->SetCaption(CRmlUiChatForm::Instance().GetInput().c_str());
+
 	string strMsg = m_edtMsg->GetCaption();
 	ExpandPendingItemLinks(strMsg);
 
@@ -1089,6 +1110,8 @@ void CCozeForm::SendMsg() {
 
 					m_edtMsg->SetCaption(strCurCmd.c_str());
 					m_pendingVisibleToRawLinks.clear();
+					if (CRmlUiChatForm::Instance().IsVisible())
+						CRmlUiChatForm::Instance().SetInput(strCurCmd);
 				}
 			}
 		}
@@ -1203,9 +1226,14 @@ void CCozeForm::SendMsg() {
 	strCurCmd = CCharMsg::GetChannelCommand(CCharMsg::GetChannelIndex(enumChannel));
 	m_edtMsg->SetCaption(strCurCmd.c_str());
 	m_pendingVisibleToRawLinks.clear();
+	if (CRmlUiChatForm::Instance().IsVisible())
+		CRmlUiChatForm::Instance().SetInput(strCurCmd);
 }
 
 void CCozeForm::UpdatePages() {
+	if (CRmlUiChatForm::Instance().IsVisible())
+		HideLegacyChatChrome();
+
 	CList* page = m_lstMainPage;
 
 	bool bIndentFlag;
@@ -1220,6 +1248,8 @@ void CCozeForm::UpdatePages() {
 		CCharMsg::sTextInfo msg = m_cMainMsg.GetMsgInfo();
 		string strRawMsg = msg.strShowText;
 		string strMsg = SanitizeItemLinkForDisplay(strRawMsg);
+		if (CRmlUiChatForm::Instance().IsVisible())
+			CRmlUiChatForm::Instance().AppendLine(strMsg, CCharMsg::GetChannelColor(msg.eTextChannel), msg.dwColour);
 
 		bIndentFlag = false;
 
@@ -1331,6 +1361,8 @@ void CCozeForm::UpdatePages() {
 		CCharMsg::sTextInfo msg = m_cSystemMsg.GetMsgInfo();
 		string strRawMsg = msg.strShowText;
 		string strMsg = SanitizeItemLinkForDisplay(strRawMsg);
+		if (CRmlUiChatForm::Instance().IsVisible())
+			CRmlUiChatForm::Instance().AppendLine(strMsg, CCharMsg::GetChannelColor(msg.eTextChannel), msg.dwColour);
 
 		bIndentFlag = false;
 		
@@ -1414,6 +1446,7 @@ void CCozeForm::ResetPages() {
 	bool bIndentFlag;
 	m_itemRawLinkText.clear();
 	m_lstMainPage->GetItems()->Clear();
+	CRmlUiChatForm::Instance().Clear();
 	
 	// Calculate available width for chat text
 	int nChatWidth = m_lstMainPage->GetWidth() - 25;
@@ -1423,6 +1456,8 @@ void CCozeForm::ResetPages() {
 		CCharMsg::sTextInfo msg = m_cMainMsg.GetMsgInfo();
 		string strRawMsg = msg.strShowText;
 		string strMsg = SanitizeItemLinkForDisplay(strRawMsg);
+		if (CRmlUiChatForm::Instance().IsVisible())
+			CRmlUiChatForm::Instance().AppendLine(strMsg, CCharMsg::GetChannelColor(msg.eTextChannel), msg.dwColour);
 
 		bIndentFlag = false;
 
@@ -1475,6 +1510,8 @@ void CCozeForm::ResetPages() {
 		CCharMsg::sTextInfo msg = m_cSystemMsg.GetMsgInfo();
 		string strRawMsg = msg.strShowText;
 		string strMsg = SanitizeItemLinkForDisplay(strRawMsg);
+		if (CRmlUiChatForm::Instance().IsVisible())
+			CRmlUiChatForm::Instance().AppendLine(strMsg, CCharMsg::GetChannelColor(msg.eTextChannel), msg.dwColour);
 
 		bIndentFlag = false;
 		
@@ -1800,7 +1837,9 @@ void CCozeForm::ChangePrivatePlayerName(string strName) {
 		return;
 	}
 
-	string strChat = m_edtMsg->GetCaption();
+	string strChat = CRmlUiChatForm::Instance().IsVisible()
+		? CRmlUiChatForm::Instance().GetInput()
+		: m_edtMsg->GetCaption();
 	string strPrivateCmd = CCharMsg::GetChannelCommand(CCharMsg::GetChannelIndex(CCharMsg::CHANNEL_PRIVATE));
 	int nLTrim = 0;
 	if (strChat.find(CCharMsg::GetChannelCommand(CCharMsg::GetChannelIndex(CCharMsg::CHANNEL_WORLD))) == 0 ||
@@ -1823,6 +1862,10 @@ void CCozeForm::ChangePrivatePlayerName(string strName) {
 		strChat = strPrivateCmd + strName + " ";
 	}
 	m_edtMsg->SetCaption(strChat.c_str());
+	if (CRmlUiChatForm::Instance().IsVisible()) {
+		CRmlUiChatForm::Instance().SetInput(strChat);
+		CRmlUiChatForm::Instance().FocusInput();
+	}
 }
 
 void CCozeForm::EventPublishShowForm(CForm* pForm, bool& IsShow) {
@@ -1891,17 +1934,23 @@ bool CCozeForm::EventEditMsg(CGuiData* pSender, int& key) {
 			if (pThis->m_cSendMsgCard.MoveToLastCard()) {
 				pThis->m_bSendMsgCardSwitch = true;
 				pThis->m_edtMsg->SetCaption(pThis->m_cSendMsgCard.GetCardInfo().c_str());
+				if (CRmlUiChatForm::Instance().IsVisible())
+					CRmlUiChatForm::Instance().SetInput(pThis->m_edtMsg->GetCaption());
 				return true;
 			}
 		} else {
 			if (key == VK_UP) {
 				if (pThis->m_cSendMsgCard.MoveToPrevCard()) {
 					pThis->m_edtMsg->SetCaption(pThis->m_cSendMsgCard.GetCardInfo().c_str());
+					if (CRmlUiChatForm::Instance().IsVisible())
+						CRmlUiChatForm::Instance().SetInput(pThis->m_edtMsg->GetCaption());
 					return true;
 				}
 			} else {
 				if (pThis->m_cSendMsgCard.MoveToNextCard()) {
 					pThis->m_edtMsg->SetCaption(pThis->m_cSendMsgCard.GetCardInfo().c_str());
+					if (CRmlUiChatForm::Instance().IsVisible())
+						CRmlUiChatForm::Instance().SetInput(pThis->m_edtMsg->GetCaption());
 					return true;
 				}
 			}
@@ -1957,6 +2006,10 @@ void CCozeForm::EventSendChannelChange(CGuiData* pSender) {
 		pThis->m_eCurSelChannel = CCharMsg::CHANNEL_NONE;
 	}
 	pThis->m_edtMsg->SetCaption(CCharMsg::GetChannelCommand(CCharMsg::GetChannelIndex(pThis->m_eCurSelChannel)).c_str());
+	if (CRmlUiChatForm::Instance().IsVisible()) {
+		CRmlUiChatForm::Instance().SetChannelLabel(CCharMsg::GetChannelName(pThis->m_eCurSelChannel));
+		CRmlUiChatForm::Instance().SetInput(pThis->m_edtMsg->GetCaption());
+	}
 }
 
 void CCozeForm::EventMainPageDragBegin(CGuiData* pSender, int x, int y, DWORD key) {
@@ -2124,7 +2177,7 @@ void CCozeForm::EventFaceSelected(CGuiData* pSender) {
 		pThis->m_edtMsg->SetActive(pThis->m_edtMsg);
 		char lpszFace[10];
 		sprintf(lpszFace, "#%02d", pThis->m_grdFacePanel->GetSelectIndex());
-		pThis->m_edtMsg->ReplaceSel(lpszFace);
+		pThis->AddToEdit(lpszFace);
 	}
 }
 
@@ -2178,18 +2231,192 @@ void CCozeForm::EventActionSelected(CGuiData* pSender) {
 }
 
 bool GUI::CCozeForm::IsChatBoxActive() const {
-	if (m_edtMsg && m_edtMsg == CCompent::GetActive()) {
+	if (CRmlUiChatForm::Instance().IsInputFocused())
 		return true;
-	}
+	if (m_edtMsg && m_edtMsg == CCompent::GetActive())
+		return true;
 	return false;
 }
 
 void GUI::CCozeForm::ActivateChatBox() {
+	if (CRmlUiChatForm::Instance().IsVisible()) {
+		CRmlUiChatForm::Instance().FocusInput();
+		return;
+	}
 	CCompent::SetActive(m_edtMsg);
 }
 
 void GUI::CCozeForm::DisableChatBox() {
-	if (IsChatBoxActive()) {
+	if (IsChatBoxActive())
 		CCompent::SetActive(nullptr);
+}
+
+void GUI::CCozeForm::HideLegacyChatChrome() {
+	auto hide = [](CGuiData* p) {
+		if (!p)
+			return;
+		if (CCompent* c = dynamic_cast<CCompent*>(p))
+			c->SetAlign(caNone);
+		p->SetIsShow(false);
+		p->SetAlpha(0);
+		p->SetPos(-4000, -4000);
+		p->Refresh();
+	};
+
+	int stripX1 = 0;
+	int stripY1 = 0;
+	int stripX2 = 0;
+	int stripY2 = 0;
+	bool stripValid = false;
+	if (m_edtMsg && m_edtMsg->GetX() > -1000) {
+		stripX1 = m_chkChannelSwitch ? m_chkChannelSwitch->GetX() - 8 : 0;
+		if (stripX1 < 0)
+			stripX1 = 0;
+		stripY1 = m_edtMsg->GetY() - 10;
+		stripY2 = m_edtMsg->GetY2() + 10;
+		stripX2 = m_edtMsg->GetX2() + 48;
+		if (m_cmbChannel && m_cmbChannel->GetX2() + 48 > stripX2)
+			stripX2 = m_cmbChannel->GetX2() + 48;
+		stripValid = true;
 	}
+
+	hide(m_edtMsg);
+	hide(m_cmbChannel);
+	if (m_cmbChannel) {
+		hide(m_cmbChannel->GetEdit());
+		hide(m_cmbChannel->GetButton());
+		hide(m_cmbChannel->GetList());
+		if (m_cmbChannel->GetList() && m_cmbChannel->GetList()->GetScroll())
+			hide(m_cmbChannel->GetList()->GetScroll());
+	}
+	hide(m_lstMainPage);
+	if (m_lstMainPage && m_lstMainPage->GetScroll())
+		hide(m_lstMainPage->GetScroll());
+	hide(m_lstSystemPage);
+	if (m_lstSystemPage && m_lstSystemPage->GetScroll())
+		hide(m_lstSystemPage->GetScroll());
+	hide(m_drgMainPage);
+	hide(m_drgSystemPage);
+	hide(m_chkChannelSwitch);
+	hide(m_btnCallingCardSwitch);
+	hide(m_lstCallingCard);
+	if (m_lstCallingCard && m_lstCallingCard->GetScroll())
+		hide(m_lstCallingCard->GetScroll());
+	hide(m_btnFaceSwitch);
+	hide(m_btnBrowSwitch);
+	hide(m_btnActionSwitch);
+
+	if (m_frmMainChat) {
+		if (CFramePic* frame = m_frmMainChat->GetFrameImage())
+			frame->SetIsShowFrame(false);
+
+		static const char* kExtraNames[] = {
+			"imgChat", "imgSay", "imgCoze", "imgChatBar", "imgChatBg",
+			"imgMainChat", "imgOnSay", "imgChatBack", "imgSayBack",
+		};
+		for (const char* name : kExtraNames) {
+			if (CCompent* c = m_frmMainChat->Find(name))
+				hide(c);
+		}
+	}
+
+	if (stripValid && m_frmMainChat) {
+		struct Strip {
+			int x1, y1, x2, y2;
+		};
+		static Strip s_strip;
+		s_strip = {stripX1, stripY1, stripX2, stripY2};
+		m_frmMainChat->ForEach([](CCompent* p, unsigned int) {
+			if (!p)
+				return;
+			const char* n = p->GetName();
+			if (n && (strcmp(n, "grdFace") == 0 || strcmp(n, "grdHeart") == 0 || strcmp(n, "grdAction") == 0))
+				return;
+			const bool overlap =
+				p->GetX() < s_strip.x2 && p->GetX2() > s_strip.x1 &&
+				p->GetY() < s_strip.y2 && p->GetY2() > s_strip.y1;
+			if (!overlap)
+				return;
+			p->SetAlign(caNone);
+			p->SetIsShow(false);
+			p->SetAlpha(0);
+			p->SetPos(-4000, -4000);
+			p->Refresh();
+		});
+	}
+
+	if (CForm* oldChat = CFormMgr::s_Mgr.Find("frmMainChat"))
+		oldChat->Hide();
+}
+
+void GUI::CCozeForm::SetSendChannel(CCharMsg::eChannel channel) {
+	m_eCurSelChannel = channel;
+	const std::string cmd = CCharMsg::GetChannelCommand(CCharMsg::GetChannelIndex(channel));
+	if (m_edtMsg)
+		m_edtMsg->SetCaption(cmd.c_str());
+	CRmlUiChatForm::Instance().SetChannelLabel(CCharMsg::GetChannelName(channel));
+	CRmlUiChatForm::Instance().SetInput(cmd);
+	CRmlUiChatForm::Instance().SetChannelMenuOpen(false);
+}
+
+void GUI::CCozeForm::ToggleFacePanel() {
+	EventFacePanelSwitchClick(nullptr, 0, 0, 0);
+}
+
+void GUI::CCozeForm::ToggleActionPanel() {
+	EventActionPanelSwitchClick(nullptr, 0, 0, 0);
+}
+
+void GUI::CCozeForm::ToggleChannelFilter() {
+	EventChannelSwitchCheck(nullptr);
+}
+
+void GUI::CCozeForm::ApplyChatHistoryKey(int key) {
+	EventEditMsg(nullptr, key);
+}
+
+void GUI::CCozeForm::SendChat() {
+	SendMsg();
+}
+
+void RmlChat_OnSend() {
+	CCozeForm::GetInstance()->SendChat();
+}
+
+void RmlChat_OnHistory(int direction) {
+	CCozeForm::GetInstance()->ApplyChatHistoryKey(direction < 0 ? VK_UP : VK_DOWN);
+}
+
+void RmlChat_OnToggleChannelMenu() {
+	auto& chat = CRmlUiChatForm::Instance();
+	chat.SetChannelMenuOpen(!chat.IsChannelMenuOpen());
+}
+
+void RmlChat_OnChannelPicked(const char* id) {
+	if (!id)
+		return;
+	CCharMsg::eChannel ch = CCharMsg::CHANNEL_SIGHT;
+	if (strcmp(id, "chat-ch-team") == 0)
+		ch = CCharMsg::CHANNEL_TEAM;
+	else if (strcmp(id, "chat-ch-guild") == 0)
+		ch = CCharMsg::CHANNEL_GUILD;
+	else if (strcmp(id, "chat-ch-world") == 0)
+		ch = CCharMsg::CHANNEL_WORLD;
+	else if (strcmp(id, "chat-ch-trade") == 0)
+		ch = CCharMsg::CHANNEL_TRADE;
+	else if (strcmp(id, "chat-ch-side") == 0)
+		ch = CCharMsg::CHANNEL_SIDE;
+	CCozeForm::GetInstance()->SetSendChannel(ch);
+}
+
+void RmlChat_OnFace() {
+	CCozeForm::GetInstance()->ToggleFacePanel();
+}
+
+void RmlChat_OnAction() {
+	CCozeForm::GetInstance()->ToggleActionPanel();
+}
+
+void RmlChat_OnFilter() {
+	CCozeForm::GetInstance()->ToggleChannelFilter();
 }

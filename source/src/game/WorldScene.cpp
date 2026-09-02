@@ -48,6 +48,8 @@
 #include "event.h"
 #include "isskilluse.h"
 #include "uicozeform.h"
+#include "rmlui/RmlUiChatForm.h"
+#include "rmlui/RmlUiManager.h"
 #include "HairRecord.h"
 #include "uiboatform.h"
 #include "uisystemform.h"
@@ -227,6 +229,7 @@ bool CWorldScene::_Clear() {
 	if (!CGameScene::_Clear())
 		return false;
 
+	CRmlUiManager::Instance().HideChatForm();
 	_cMouseDown.Reset();
 	return true;
 }
@@ -547,16 +550,25 @@ bool CWorldScene::_HandleSuperKey() {
 BOOL CWorldScene::_InitUI() {
 	CForm* form = CFormMgr::s_Mgr.Find("frmMainChat");
 	if (form) {
-		form->Show();
-
-		CEdit* edit = dynamic_cast<CEdit*>(form->Find("edtSay")); // ???????????
-		if (edit)
-			edit->SetIsParseText(true);
+		if (CRmlUiChatForm::Instance().LoadOk()) {
+			form->Hide();
+		} else {
+			form->Show();
+			CEdit* edit = dynamic_cast<CEdit*>(form->Find("edtSay"));
+			if (edit)
+				edit->SetIsParseText(true);
+		}
 	}
 
 	form = CFormMgr::s_Mgr.Find("frmMain800");
 	if (form) {
 		form->Show();
+	}
+
+	if (CRmlUiChatForm::Instance().LoadOk()) {
+		CCozeForm::GetInstance()->HideLegacyChatChrome();
+		CRmlUiChatForm::Instance().SetChannelLabel(CCharMsg::GetChannelName(CCozeForm::GetInstance()->GetSendChannel()));
+		CRmlUiChatForm::Instance().Show();
 	}
 
 	form = CFormMgr::s_Mgr.Find("frmDetail");

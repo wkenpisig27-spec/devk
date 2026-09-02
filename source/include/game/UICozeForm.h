@@ -169,6 +169,14 @@ public:
 	bool IsChatBoxActive() const;
 	void ActivateChatBox();
 	void DisableChatBox();
+	void HideLegacyChatChrome();
+	void SetSendChannel(CCharMsg::eChannel channel);
+	void ToggleFacePanel();
+	void ToggleActionPanel();
+	void ToggleChannelFilter();
+	void ApplyChatHistoryKey(int key);
+	void SendChat();
+	CCharMsg::eChannel GetSendChannel() const { return m_eCurSelChannel; }
 
 protected:
 	bool Init();

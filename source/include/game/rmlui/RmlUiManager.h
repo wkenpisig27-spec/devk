@@ -43,6 +43,7 @@ public:
 	void HideNpcMissionForm();
 	void HideGuildApplyForm();
 	void HideGuildForm();
+	void HideChatForm();
 
 private:
 	CRmlUiManager() = default;

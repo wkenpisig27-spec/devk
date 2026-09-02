@@ -24,6 +24,7 @@
 #include <shellapi.h>
 
 #include "GlobalVar.h"
+#include "rmlui/RmlUiChatForm.h"
 
 using namespace std;
 
@@ -1148,6 +1149,9 @@ void CStoreMgr::_SetIsShowHelpInfo(bool bShow) {
 }
 
 void CStoreMgr::_SetIsShowCozeForm(bool bShow) {
+	if (bShow && CRmlUiChatForm::Instance().IsVisible())
+		return;
+
 	CForm* frmMainChat = _FindForm("frmMain800");
 	if (!frmMainChat)
 		return;
