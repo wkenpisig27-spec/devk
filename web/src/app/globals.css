@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-ink: #120c0c;
+  --color-ink-deep: #0c0808;
+  --color-panel: #1e1616;
+  --color-panel-2: #271a18;
+  --color-foam: #ece3d4;
+  --color-muted: #b6a48f;
+  --color-gold: #e6b85e;
+  --color-gold-2: #f2cf83;
+  --color-sea: #f2cf83;
+  --color-crimson: #c23a2c;
+  --color-crimson-2: #e2503d;
+  --color-line: #3a2a22;
+  --color-head: #f4eff3;
+  --font-sans: var(--font-chakra);
+  --font-display: var(--font-russo);
+}
+
+html,
+body {
+  background: #120c0c;
+  color: #ece3d4;
+}
+
+body {
+  background-color: #120c0c;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -18%, rgba(226, 80, 61, 0.22), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 100% 0%, rgba(230, 184, 94, 0.14), transparent 50%),
+    radial-gradient(ellipse 45% 35% at 0% 85%, rgba(143, 35, 24, 0.2), transparent 50%),
+    linear-gradient(180deg, #120c0c 0%, #171010 42%, #120c0c 100%);
+  background-attachment: fixed;
+}
+
+body::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+::selection {
+  background: rgba(194, 58, 44, 0.4);
+  color: #f4eff3;
+}
+
+.title-glow {
+  background: linear-gradient(120deg, #fff6ea 6%, #f2cf83 42%, #e2503d 96%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.card-glow {
+  background: linear-gradient(180deg, rgba(39, 26, 24, 0.94), rgba(18, 12, 12, 0.92));
+  border: 1px solid rgba(230, 184, 94, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(242, 207, 131, 0.1),
+    0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.card-glow:hover {
+  border-color: rgba(230, 184, 94, 0.48);
+  box-shadow:
+    inset 0 1px 0 rgba(242, 207, 131, 0.16),
+    0 0 28px rgba(226, 80, 61, 0.14);
+}
+
+.btn-crimson {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #e2503d 0%, #c8933c 100%);
+  padding: 0.7rem 1.35rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f4eff3;
+  box-shadow: 0 8px 28px rgba(194, 58, 44, 0.32);
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.btn-crimson:hover {
+  filter: brightness(1.08);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid rgba(230, 184, 94, 0.32);
+  background: rgba(30, 22, 22, 0.55);
+  padding: 0.7rem 1.35rem;
+  font-size: 0.95rem;
+  color: #ece3d4;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.btn-ghost:hover {
+  border-color: #f2cf83;
+  background: rgba(230, 184, 94, 0.1);
+  color: #f2cf83;
+}
