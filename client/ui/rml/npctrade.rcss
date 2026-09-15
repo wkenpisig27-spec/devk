@@ -22,7 +22,7 @@ body.npc-body .npc-panel {
 	flex: none;
 	width: 280dp;
 	min-width: 280dp;
-	height: 560dp;
+	height: 384dp;
 	margin: 0dp;
 	padding: 0dp;
 	overflow: visible;
@@ -71,7 +71,7 @@ body.npc-body .npc-panel {
 .npc-title {
 	display: block;
 	padding-top: 16dp;
-	font-size: 18dp;
+	font-size: 16dp;
 	font-weight: bold;
 	color: #ffffff;
 	text-align: left;

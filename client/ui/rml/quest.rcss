@@ -23,7 +23,7 @@ body.nmis-body .nmis-panel {
 	flex-direction: row;
 	align-items: stretch;
 	box-sizing: border-box;
-	height: 480dp;
+	height: 380dp;
 	margin: 0dp;
 	padding: 0dp;
 	overflow: visible;
@@ -63,23 +63,23 @@ body.nmis-body .nmis-panel {
 }
 
 .quest-panel {
-	width: 280dp;
-	min-width: 280dp;
-	height: 480dp;
+	width: 252dp;
+	min-width: 252dp;
+	height: 380dp;
 	margin-right: 8dp;
 }
 
 .quest-detail {
-	width: 340dp;
-	min-width: 340dp;
-	height: 480dp;
+	width: 300dp;
+	min-width: 300dp;
+	height: 380dp;
 }
 
 .nmis-panel {
 	display: none;
 	position: absolute;
-	width: 420dp;
-	min-width: 420dp;
+	width: 348dp;
+	min-width: 348dp;
 }
 
 .nmis-panel-open {
@@ -150,7 +150,7 @@ button.quest-close {
 	display: block;
 	flex: none;
 	box-sizing: border-box;
-	width: 280dp;
+	width: 252dp;
 	padding: 0dp 12dp 4dp 12dp;
 	overflow: visible;
 }
@@ -218,7 +218,7 @@ button.quest-row-done {
 .qd-name {
 	display: block;
 	flex: none;
-	width: 316dp;
+	width: 276dp;
 	margin: 0dp 12dp 4dp 12dp;
 	font-size: 15dp;
 	font-weight: bold;
@@ -227,14 +227,14 @@ button.quest-row-done {
 }
 
 .nmis-panel .qd-name {
-	width: 384dp;
+	width: 344dp;
 	margin: 0dp 18dp 6dp 18dp;
 }
 
 .qd-status {
 	display: block;
 	flex: none;
-	width: 316dp;
+	width: 276dp;
 	margin: 0dp 12dp 8dp 12dp;
 	font-size: 11dp;
 	font-weight: bold;
@@ -246,7 +246,7 @@ button.quest-row-done {
 .nmis-body-text {
 	display: block;
 	flex: none;
-	width: 316dp;
+	width: 276dp;
 	margin: 0dp 12dp 10dp 12dp;
 	font-size: 13dp;
 	font-weight: bold;
@@ -255,14 +255,14 @@ button.quest-row-done {
 }
 
 .nmis-body-text {
-	width: 384dp;
+	width: 344dp;
 	margin: 0dp 18dp 10dp 18dp;
 }
 
 .qd-section-title {
 	display: block;
 	flex: none;
-	width: 316dp;
+	width: 276dp;
 	margin: 0dp 12dp 4dp 12dp;
 	font-size: 11dp;
 	font-weight: bold;
@@ -271,7 +271,7 @@ button.quest-row-done {
 }
 
 .nmis-panel .qd-section-title {
-	width: 384dp;
+	width: 344dp;
 	margin: 0dp 18dp 4dp 18dp;
 }
 
@@ -279,19 +279,19 @@ button.quest-row-done {
 .qd-prizes {
 	display: block;
 	flex: none;
-	width: 340dp;
+	width: 300dp;
 	padding: 0dp 12dp 6dp 12dp;
 }
 
 .nmis-panel .qd-needs,
 .nmis-panel .qd-prizes {
-	width: 420dp;
+	width: 348dp;
 	padding: 0dp 18dp 6dp 18dp;
 }
 
 .qd-need {
 	display: block;
-	width: 316dp;
+	width: 276dp;
 	font-size: 12dp;
 	font-weight: bold;
 	line-height: 18dp;
@@ -307,7 +307,7 @@ button.quest-row-done {
 button.qd-prize {
 	display: block;
 	box-sizing: border-box;
-	width: 316dp;
+	width: 276dp;
 	height: 32dp;
 	line-height: 32dp;
 	margin: 0dp 0dp 4dp 0dp;
@@ -348,7 +348,7 @@ button.qd-prize-sel {
 }
 
 .nmis-footer {
-	width: 420dp;
+	width: 348dp;
 	padding: 4dp 18dp 2dp 18dp;
 }
 

@@ -20,8 +20,8 @@ body.char-body .char-panel {
 	flex-direction: column;
 	position: absolute;
 	flex: none;
-	width: 312dp;
-	min-width: 312dp;
+	width: 256dp;
+	min-width: 256dp;
 	margin: 0dp;
 	padding: 0dp 0dp 10dp 0dp;
 	overflow: visible;
@@ -70,8 +70,8 @@ body.char-body .char-panel {
 
 .char-title {
 	display: block;
-	padding-top: 16dp;
-	font-size: 17dp;
+	padding-top: 14dp;
+	font-size: 15dp;
 	font-weight: bold;
 	color: #ffffff;
 	text-align: left;
@@ -121,8 +121,8 @@ button.char-close {
 .char-avatar {
 	display: block;
 	flex: none;
-	width: 48dp;
-	height: 48dp;
+	width: 40dp;
+	height: 40dp;
 	margin-right: 10dp;
 	padding-top: 12dp;
 	box-sizing: border-box;
@@ -132,7 +132,7 @@ button.char-close {
 
 .char-avatar-lv {
 	display: block;
-	font-size: 16dp;
+	font-size: 13dp;
 	font-weight: bold;
 	line-height: 24dp;
 	color: #2a4a80;
@@ -166,9 +166,9 @@ button.char-close {
 
 .char-name {
 	display: block;
-	font-size: 18dp;
+	font-size: 13dp;
 	font-weight: bold;
-	line-height: 22dp;
+	line-height: 16dp;
 	color: #2a4a80;
 }
 
@@ -402,7 +402,7 @@ button.char-close {
 	flex-direction: row;
 	align-items: center;
 	flex: 1;
-	height: 40dp;
+	height: 32dp;
 	margin-right: 6dp;
 	padding: 0dp 6dp 0dp 8dp;
 	box-sizing: border-box;
@@ -431,7 +431,7 @@ button.char-close {
 .char-attr-spacer {
 	display: block;
 	flex: 1;
-	height: 40dp;
+	height: 32dp;
 }
 
 .char-attr-text {
@@ -452,9 +452,9 @@ button.char-close {
 
 .char-attr-val {
 	display: block;
-	font-size: 15dp;
+	font-size: 13dp;
 	font-weight: bold;
-	line-height: 18dp;
+	line-height: 16dp;
 	color: #1e3a6e;
 }
 
@@ -462,9 +462,9 @@ button.char-close {
 button.char-plus {
 	display: none;
 	flex: none;
-	width: 22dp;
-	height: 22dp;
-	line-height: 22dp;
+	width: 18dp;
+	height: 18dp;
+	line-height: 18dp;
 	padding: 0dp;
 	margin-left: 2dp;
 	font-family: LatoLatin;
@@ -489,7 +489,7 @@ button.char-plus {
 	display: block;
 	width: 10dp;
 	height: 10dp;
-	margin: 6dp auto;
+	margin: 4dp auto;
 	pointer-events: none;
 }
 
@@ -499,7 +499,7 @@ button.char-plus {
 	align-items: center;
 	justify-content: space-between;
 	flex: 1;
-	height: 22dp;
+	height: 18dp;
 	margin-right: 6dp;
 	padding: 0dp 2dp;
 	box-sizing: border-box;
@@ -511,17 +511,17 @@ button.char-plus {
 .char-stat-label {
 	display: block;
 	flex: none;
-	font-size: 12dp;
+	font-size: 11dp;
 	font-weight: bold;
-	line-height: 22dp;
+	line-height: 18dp;
 	color: #2a4a80;
 }
 
 .char-stat-value {
 	display: block;
 	flex: none;
-	font-size: 13dp;
+	font-size: 12dp;
 	font-weight: bold;
-	line-height: 22dp;
+	line-height: 18dp;
 	color: #1e3a6e;
 }

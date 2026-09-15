@@ -220,9 +220,9 @@ void CRmlUiInventoryForm::Impl::CenterRoot() {
 	const Rml::Vector2i dim = context->GetDimensions();
 	Rml::Vector2f size = root->GetBox().GetSize(Rml::BoxArea::Border);
 	if (size.x < 1.f)
-		size.x = 828.f;
+		size.x = 568.f;
 	if (size.y < 1.f)
-		size.y = 520.f;
+		size.y = 370.f;
 
 	const float left = (static_cast<float>(dim.x) - size.x) * 0.5f;
 	const float top = (static_cast<float>(dim.y) - size.y) * 0.5f;
@@ -500,8 +500,7 @@ void CRmlUiInventoryForm::RenderChaPreview() {
 		return;
 
 	const int cx = (int)(off.x + size.x * 0.5f);
-	// Bias downward so the model sits in the taller preview well.
-	const int cy = (int)(off.y + size.y * 0.78f);
+	const int cy = (int)(off.y + size.y * 0.54f);
 	RmlInv_RenderChaPreview(cx, cy);
 }
 
@@ -644,13 +643,13 @@ Rml::ElementPtr CRmlUiInventoryForm::Impl::MakeSlot(const char* id, const RmlInv
 	slot->SetProperty("display", "block");
 	slot->SetProperty("box-sizing", "border-box");
 	slot->SetProperty("flex", "none");
-	slot->SetProperty("width", "44dp");
-	slot->SetProperty("height", "44dp");
-	slot->SetProperty("min-width", "44dp");
-	slot->SetProperty("min-height", "44dp");
-	slot->SetProperty("max-width", "44dp");
-	slot->SetProperty("max-height", "44dp");
-	slot->SetProperty("padding", "4dp");
+	slot->SetProperty("width", "36dp");
+	slot->SetProperty("height", "36dp");
+	slot->SetProperty("min-width", "36dp");
+	slot->SetProperty("min-height", "36dp");
+	slot->SetProperty("max-width", "36dp");
+	slot->SetProperty("max-height", "36dp");
+	slot->SetProperty("padding", "6dp");
 	// visible so soft-AA corners aren't clipped unevenly on flush grid edges
 	slot->SetProperty("overflow", "visible");
 	slot->SetProperty("background-color", "transparent");
@@ -680,8 +679,8 @@ Rml::ElementPtr CRmlUiInventoryForm::Impl::MakeSlot(const char* id, const RmlInv
 			img->SetClassNames(view.iconDimmed ? "inv-slot-icon inv-slot-icon-dim" : "inv-slot-icon");
 			img->SetAttribute("src", view.iconPath.c_str());
 			img->SetProperty("display", "block");
-			img->SetProperty("width", "36dp");
-			img->SetProperty("height", "36dp");
+			img->SetProperty("width", "24dp");
+			img->SetProperty("height", "24dp");
 			img->SetProperty("background-color", "transparent");
 			img->SetProperty("pointer-events", "none");
 			if (view.iconDimmed)
@@ -705,8 +704,8 @@ Rml::ElementPtr CRmlUiInventoryForm::Impl::MakeSlot(const char* id, const RmlInv
 			img->SetClassNames("inv-slot-icon inv-slot-placeholder");
 			img->SetAttribute("src", view.placeholderPath.c_str());
 			img->SetProperty("display", "block");
-			img->SetProperty("width", "36dp");
-			img->SetProperty("height", "36dp");
+			img->SetProperty("width", "24dp");
+			img->SetProperty("height", "24dp");
 			img->SetProperty("background-color", "transparent");
 			img->SetProperty("pointer-events", "none");
 			slot->AppendChild(std::move(img));
@@ -716,8 +715,8 @@ Rml::ElementPtr CRmlUiInventoryForm::Impl::MakeSlot(const char* id, const RmlInv
 		if (filler) {
 			filler->SetClassNames("inv-slot-icon");
 			filler->SetProperty("display", "block");
-			filler->SetProperty("width", "36dp");
-			filler->SetProperty("height", "36dp");
+			filler->SetProperty("width", "24dp");
+			filler->SetProperty("height", "24dp");
 			filler->SetProperty("background-color", "transparent");
 			filler->SetProperty("pointer-events", "none");
 			slot->AppendChild(std::move(filler));
@@ -742,7 +741,7 @@ void CRmlUiInventoryForm::Impl::FillSlotColumn(Rml::Element* parent, const std::
 			if (i + 1 >= n)
 				slot->SetProperty("margin", "0dp 0dp 0dp 0dp");
 			else
-				slot->SetProperty("margin", "0dp 0dp 4dp 0dp");
+				slot->SetProperty("margin", "0dp 0dp 3dp 0dp");
 			parent->AppendChild(std::move(slot));
 		}
 	}
@@ -762,7 +761,7 @@ void CRmlUiInventoryForm::Impl::FillEquipBottom(Rml::Element* parent, const std:
 		sprintf_s(idBuf, "equip-%d", view.id);
 		Rml::ElementPtr slot = MakeSlot(idBuf, view, "data-equip");
 		if (slot) {
-			slot->SetProperty("margin", "0dp 4dp 4dp 0dp");
+			slot->SetProperty("margin", "0dp 3dp 3dp 0dp");
 			parent->AppendChild(std::move(slot));
 		}
 	}
@@ -823,9 +822,9 @@ void CRmlUiInventoryForm::SetBagSlots(const std::vector<RmlInvSlotView>& slots, 
 			rowPtr->SetProperty("flex-direction", "row");
 			rowPtr->SetProperty("flex-wrap", "nowrap");
 			rowPtr->SetProperty("align-items", "flex-start");
-			rowPtr->SetProperty("width", "284dp");
-			rowPtr->SetProperty("height", "44dp");
-			rowPtr->SetProperty("margin-bottom", "4dp");
+			rowPtr->SetProperty("width", "231dp");
+			rowPtr->SetProperty("height", "36dp");
+			rowPtr->SetProperty("margin-bottom", "3dp");
 			row = grid->AppendChild(std::move(rowPtr));
 		}
 
@@ -837,7 +836,7 @@ void CRmlUiInventoryForm::SetBagSlots(const std::vector<RmlInvSlotView>& slots, 
 			if (col + 1 >= cols)
 				slot->SetProperty("margin", "0dp 0dp 0dp 0dp");
 			else
-				slot->SetProperty("margin", "0dp 4dp 0dp 0dp");
+				slot->SetProperty("margin", "0dp 3dp 0dp 0dp");
 			row->AppendChild(std::move(slot));
 		}
 		col++;

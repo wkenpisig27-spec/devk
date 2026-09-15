@@ -56,8 +56,8 @@ struct CRmlUiChatForm::Impl : public Rml::EventListener {
 	float resizeStartY = 0.f;
 	float resizeStartH = 0.f;
 	static const int kMaxLines = 200;
-	static const int kMinLogHeight = 80;
-	static const int kMaxLogHeight = 360;
+	static const int kMinLogHeight = 56;
+	static const int kMaxLogHeight = 220;
 
 	void ProcessEvent(Rml::Event& event) override;
 	void BindControls();
@@ -151,7 +151,7 @@ void CRmlUiChatForm::Impl::StickLogToBottom() {
 float CRmlUiChatForm::Impl::MaxLogHeight() const {
 	float cap = (float)kMaxLogHeight;
 	if (context) {
-		const float room = (float)context->GetDimensions().y - 56.f;
+		const float room = (float)context->GetDimensions().y - 48.f;
 		if (room > (float)kMinLogHeight && room < cap)
 			cap = room;
 	}

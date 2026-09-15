@@ -49,6 +49,7 @@
 #include "isskilluse.h"
 #include "uicozeform.h"
 #include "rmlui/RmlUiChatForm.h"
+#include "rmlui/RmlUiHotbarForm.h"
 #include "rmlui/RmlUiManager.h"
 #include "HairRecord.h"
 #include "uiboatform.h"
@@ -230,6 +231,7 @@ bool CWorldScene::_Clear() {
 		return false;
 
 	CRmlUiManager::Instance().HideChatForm();
+	CRmlUiManager::Instance().HideHotbarForm();
 	_cMouseDown.Reset();
 	return true;
 }
@@ -588,12 +590,23 @@ BOOL CWorldScene::_InitUI() {
 
 	form = CFormMgr::s_Mgr.Find("frmFast");
 	if (form) {
-		form->Show();
+		if (CRmlUiHotbarForm::Instance().LoadOk())
+			form->Hide();
+		else
+			form->Show();
 	}
 
 	form = CFormMgr::s_Mgr.Find("frmFast2");
 	if (form) {
-		form->Show();
+		if (CRmlUiHotbarForm::Instance().LoadOk())
+			form->Hide();
+		else
+			form->Show();
+	}
+
+	if (CRmlUiHotbarForm::Instance().LoadOk()) {
+		CRmlUiHotbarForm::Instance().Show();
+		g_stUIEquip.RefreshRmlHotbar();
 	}
 
 	ShowMinimap(TRUE);

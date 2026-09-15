@@ -17,6 +17,7 @@
 #include "rmlui/RmlUiGuildApplyForm.h"
 #include "rmlui/RmlUiGuildForm.h"
 #include "rmlui/RmlUiChatForm.h"
+#include "rmlui/RmlUiHotbarForm.h"
 #include "rmlui/RmlUiItemHintForm.h"
 
 #include "UIMenu.h"
@@ -234,6 +235,9 @@ bool CRmlUiManager::Init(HWND hwnd) {
 	if (!CRmlUiChatForm::Instance().Load(g_context)) {
 		OutputDebugStringA("RmlUi: warning - chat.rml failed to load\n");
 	}
+	if (!CRmlUiHotbarForm::Instance().Load(g_context)) {
+		OutputDebugStringA("RmlUi: warning - hotbar.rml failed to load\n");
+	}
 	if (!CRmlUiInventoryForm::Instance().Load(g_context)) {
 		OutputDebugStringA("RmlUi: warning - inventory.rml failed to load\n");
 	}
@@ -332,6 +336,10 @@ void CRmlUiManager::HideChatForm() {
 	CRmlUiChatForm::Instance().Hide();
 }
 
+void CRmlUiManager::HideHotbarForm() {
+	CRmlUiHotbarForm::Instance().Hide();
+}
+
 void CRmlUiManager::Shutdown() {
 	m_ready = false;
 
@@ -341,6 +349,7 @@ void CRmlUiManager::Shutdown() {
 	CRmlUiSelectChaForm::Instance().Unload();
 	CRmlUiCreateChaForm::Instance().Unload();
 	CRmlUiChatForm::Instance().Unload();
+	CRmlUiHotbarForm::Instance().Unload();
 	CRmlUiInventoryForm::Instance().Unload();
 	CRmlUiBankForm::Instance().Unload();
 	CRmlUiCharacterForm::Instance().Unload();
@@ -390,6 +399,7 @@ void CRmlUiManager::Update() {
 		CRmlUiInventoryForm::Instance().UpdateItemHint(m_lastX, m_lastY);
 		CRmlUiNpcTradeForm::Instance().UpdateItemHint(m_lastX, m_lastY);
 		CRmlUiGuildForm::Instance().UpdateItemHint(m_lastX, m_lastY);
+		CRmlUiHotbarForm::Instance().UpdateItemHint(m_lastX, m_lastY);
 	}
 	if (!CRmlUiItemHintForm::Instance().ConsumeShownThisFrame())
 		CRmlUiItemHintForm::Instance().Hide();

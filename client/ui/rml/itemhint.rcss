@@ -18,8 +18,8 @@ body.ih-body-doc {
 	flex-direction: column;
 	left: 0dp;
 	top: 0dp;
-	width: 280dp;
-	min-width: 280dp;
+	width: 256dp;
+	min-width: 256dp;
 	margin: 0dp;
 	padding: 0dp 0dp 12dp 0dp;
 	overflow: visible;
@@ -53,7 +53,7 @@ body.ih-body-doc {
 	align-items: center;
 	position: relative;
 	box-sizing: border-box;
-	width: 280dp;
+	width: 256dp;
 	height: 56dp;
 	padding: 0dp 16dp 0dp 18dp;
 	overflow: visible;
@@ -200,7 +200,7 @@ body.ih-body-doc {
 .ih-body {
 	display: block;
 	box-sizing: border-box;
-	width: 280dp;
+	width: 256dp;
 	padding: 8dp 18dp 4dp 18dp;
 	pointer-events: none;
 }

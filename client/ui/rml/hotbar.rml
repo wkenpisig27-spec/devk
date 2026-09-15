@@ -1,0 +1,18 @@
+<rml>
+	<head>
+		<title>Hotbar</title>
+		<link type="text/rcss" href="hotbar.rcss"/>
+	</head>
+	<body class="hotbar-body">
+		<div id="hotbar-root" class="hotbar-root">
+			<div class="hotbar-grid">
+				<div id="hotbar-items" class="hotbar-row"></div>
+				<div id="hotbar-skills" class="hotbar-row"></div>
+			</div>
+			<div class="hotbar-pages">
+				<button class="hotbar-page-btn hotbar-page-up" id="hotbar-page-up" type="button"></button>
+				<button class="hotbar-page-btn hotbar-page-down" id="hotbar-page-down" type="button"></button>
+			</div>
+		</div>
+	</body>
+</rml>

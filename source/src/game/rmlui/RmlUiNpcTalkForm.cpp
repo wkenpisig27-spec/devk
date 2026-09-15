@@ -69,9 +69,9 @@ struct CRmlUiNpcTalkForm::Impl : public Rml::EventListener {
 		const Rml::Vector2i dim = context->GetDimensions();
 		Rml::Vector2f size = root->GetBox().GetSize(Rml::BoxArea::Border);
 		if (size.x < 1.f)
-			size.x = 420.f;
+			size.x = 348.f;
 		if (size.y < 1.f)
-			size.y = 420.f;
+			size.y = 380.f;
 		float x = ((float)dim.x - size.x) * 0.5f;
 		float y = ((float)dim.y - size.y) * 0.42f;
 		if (x < 8.f)
@@ -126,7 +126,7 @@ struct CRmlUiNpcTalkForm::Impl : public Rml::EventListener {
 
 			btn->SetProperty("display", "block");
 			btn->SetProperty("box-sizing", "border-box");
-			btn->SetProperty("width", "384dp");
+			btn->SetProperty("width", "312dp");
 			btn->SetProperty("height", "36dp");
 			btn->SetProperty("line-height", "36dp");
 			btn->SetProperty("margin", "0dp 0dp 8dp 0dp");

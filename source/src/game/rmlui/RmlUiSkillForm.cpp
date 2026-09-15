@@ -15,11 +15,14 @@
 #include <string>
 #include <windows.h>
 
+#include "rmlui/RmlUiHotbarForm.h"
+
 extern void RmlSkill_OnClose();
 extern void RmlSkill_OnTab(const char* filter);
 extern void RmlSkill_OnSelect(int skillId);
 extern void RmlSkill_OnUse(int skillId);
 extern void RmlSkill_OnUpgrade(int skillId);
+extern void RmlHotbar_OnDropSkill(int slotIndex, int skillId);
 
 namespace {
 
@@ -245,12 +248,18 @@ struct CRmlUiSkillForm::Impl : public Rml::EventListener {
 				row->SetClassNames("skill-detail-stat");
 				row->SetProperty("display", "flex");
 				row->SetProperty("flex-direction", "row");
-				row->SetProperty("width", "308dp");
+				row->SetProperty("align-items", "center");
+				row->SetProperty("justify-content", "space-between");
+				row->SetProperty("width", "240dp");
+				row->SetProperty("height", "16dp");
+				row->SetProperty("min-height", "16dp");
 				Rml::ElementPtr lab = document->CreateElement("div");
 				if (lab) {
 					lab->SetClassNames("skill-detail-stat-label");
 					lab->SetProperty("display", "block");
-					lab->SetProperty("width", "110dp");
+					lab->SetProperty("width", "88dp");
+					lab->SetProperty("height", "16dp");
+					lab->SetProperty("line-height", "16dp");
 					lab->SetInnerRML(EscapeXml(st.label.c_str()));
 					row->AppendChild(std::move(lab));
 				}
@@ -259,7 +268,9 @@ struct CRmlUiSkillForm::Impl : public Rml::EventListener {
 					val->SetClassNames(st.highlightNext ? "skill-detail-stat-value skill-detail-stat-next"
 														: "skill-detail-stat-value");
 					val->SetProperty("display", "block");
-					val->SetProperty("width", "190dp");
+					val->SetProperty("width", "144dp");
+					val->SetProperty("height", "16dp");
+					val->SetProperty("line-height", "16dp");
 					val->SetProperty("text-align", "right");
 					val->SetInnerRML(EscapeXml(st.value.c_str()));
 					row->AppendChild(std::move(val));
@@ -313,15 +324,21 @@ struct CRmlUiSkillForm::Impl : public Rml::EventListener {
 			sprintf_s(idBuf, "skill-row-%d", row.skillId);
 			rowPtr->SetId(idBuf);
 			rowPtr->SetAttribute("data-skill", std::to_string(row.skillId));
+			rowPtr->SetProperty(Rml::PropertyId::Drag, Rml::Property(Rml::Style::Drag::None));
 
 			Rml::ElementPtr well = document->CreateElement("div");
 			if (well) {
 				well->SetClassNames("skill-row-icon-well");
+				well->SetAttribute("data-skill", std::to_string(row.skillId));
+				well->SetProperty(Rml::PropertyId::Drag, Rml::Property(Rml::Style::Drag::Clone));
+				well->SetProperty("pointer-events", "auto");
+				well->AddEventListener(Rml::EventId::Dragend, this);
 				if (!row.iconPath.empty()) {
 					Rml::ElementPtr img = document->CreateElement("img");
 					if (img) {
 						img->SetClassNames("skill-row-icon");
 						img->SetAttribute("src", row.iconPath.c_str());
+						img->SetProperty("pointer-events", "none");
 						well->AppendChild(std::move(img));
 					}
 				}
@@ -412,6 +429,25 @@ struct CRmlUiSkillForm::Impl : public Rml::EventListener {
 			const float delta = mouseY - thumbDragGrabY;
 			const float travel = (std::max)(1.f, trackH - thumbH);
 			SetListScrollTop(thumbDragStartScroll + (delta / travel) * maxScroll);
+			return;
+		}
+
+		if (idEv == Rml::EventId::Dragend) {
+			Rml::Element* el = target;
+			while (el && el != document) {
+				if (el->HasAttribute("data-skill")) {
+					const int skillId = atoi(el->GetAttribute("data-skill", Rml::String("0")).c_str());
+					const int mx = (int)event.GetParameter<float>("mouse_x", 0.f);
+					const int my = (int)event.GetParameter<float>("mouse_y", 0.f);
+					if (skillId > 0 && CRmlUiHotbarForm::Instance().ContainsScreenPoint(mx, my)) {
+						const int slot = CRmlUiHotbarForm::Instance().SlotIndexAtScreenPoint(mx, my);
+						if (slot >= 0)
+							RmlHotbar_OnDropSkill(slot, skillId);
+					}
+					return;
+				}
+				el = el->GetParentNode();
+			}
 			return;
 		}
 

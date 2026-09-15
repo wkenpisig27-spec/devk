@@ -20,8 +20,8 @@ body.ntalk-body .ntalk-panel {
 	flex-direction: column;
 	position: absolute;
 	flex: none;
-	width: 420dp;
-	min-width: 420dp;
+	width: 348dp;
+	min-width: 348dp;
 	margin: 0dp;
 	padding: 0dp 0dp 12dp 0dp;
 	overflow: visible;
@@ -54,7 +54,7 @@ body.ntalk-body .ntalk-panel {
 	position: relative;
 	z-index: 2;
 	box-sizing: border-box;
-	width: 420dp;
+	width: 348dp;
 	height: 56dp;
 	padding: 0dp 12dp;
 	background-color: transparent;
@@ -116,14 +116,14 @@ button.ntalk-close {
 	display: block;
 	flex: none;
 	box-sizing: border-box;
-	width: 420dp;
+	width: 348dp;
 	padding: 6dp 18dp 10dp 18dp;
 	pointer-events: none;
 }
 
 .ntalk-npc-name {
 	display: block;
-	width: 384dp;
+	width: 312dp;
 	font-size: 16dp;
 	font-weight: bold;
 	line-height: 20dp;
@@ -132,7 +132,7 @@ button.ntalk-close {
 
 .ntalk-npc-sub {
 	display: block;
-	width: 384dp;
+	width: 312dp;
 	margin-top: 2dp;
 	font-size: 11dp;
 	font-weight: bold;
@@ -144,7 +144,7 @@ button.ntalk-close {
 	display: block;
 	flex: none;
 	box-sizing: border-box;
-	width: 384dp;
+	width: 312dp;
 	margin: 0dp 18dp 12dp 18dp;
 	padding: 0dp;
 	overflow: visible;
@@ -153,7 +153,7 @@ button.ntalk-close {
 
 .ntalk-body-text {
 	display: block;
-	width: 384dp;
+	width: 312dp;
 	font-size: 13dp;
 	font-weight: bold;
 	line-height: 19dp;
@@ -164,7 +164,7 @@ button.ntalk-close {
 	display: block;
 	flex: none;
 	box-sizing: border-box;
-	width: 420dp;
+	width: 348dp;
 	padding: 0dp 18dp 6dp 18dp;
 	overflow: visible;
 }
@@ -173,7 +173,7 @@ button.ntalk-close {
 button.ntalk-option {
 	display: block;
 	box-sizing: border-box;
-	width: 384dp;
+	width: 312dp;
 	height: 36dp;
 	line-height: 36dp;
 	margin: 0dp 0dp 8dp 0dp;
@@ -257,7 +257,7 @@ button.ntalk-option-muted:hover {
 	align-items: center;
 	flex: none;
 	box-sizing: border-box;
-	width: 420dp;
+	width: 348dp;
 	height: 40dp;
 	padding: 4dp 18dp 2dp 18dp;
 }

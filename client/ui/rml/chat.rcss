@@ -17,7 +17,7 @@ body.chat-body {
 	position: absolute;
 	left: 8dp;
 	bottom: 0dp;
-	width: 430dp;
+	width: 300dp;
 	pointer-events: none;
 }
 
@@ -27,7 +27,7 @@ body.chat-body {
 	justify-content: center;
 	align-items: center;
 	box-sizing: border-box;
-	width: 430dp;
+	width: 300dp;
 	height: 12dp;
 	overflow: hidden;
 	background-color: #0b141ce8;
@@ -53,8 +53,8 @@ body.chat-body {
 .chat-log {
 	display: block;
 	box-sizing: border-box;
-	width: 430dp;
-	height: 196dp;
+	width: 300dp;
+	height: 100dp;
 	margin-bottom: 6dp;
 	padding: 8dp 10dp 8dp 12dp;
 	overflow: auto;
@@ -83,10 +83,10 @@ body.chat-body {
 
 .chat-line {
 	display: block;
-	width: 408dp;
-	margin-bottom: 2dp;
-	font-size: 13dp;
-	line-height: 18dp;
+	width: 278dp;
+	margin-bottom: 1dp;
+	font-size: 11dp;
+	line-height: 14dp;
 	color: #e8eef4;
 }
 
@@ -109,8 +109,8 @@ body.chat-body {
 	flex-direction: row;
 	align-items: center;
 	box-sizing: border-box;
-	width: 430dp;
-	height: 40dp;
+	width: 300dp;
+	height: 30dp;
 	padding: 4dp 6dp;
 	overflow: visible;
 	background-color: transparent;
@@ -138,9 +138,9 @@ button.chat-channel {
 	display: block;
 	flex: none;
 	box-sizing: border-box;
-	width: 72dp;
-	height: 28dp;
-	line-height: 28dp;
+	width: 64dp;
+	height: 24dp;
+	line-height: 24dp;
 	margin-right: 6dp;
 	padding: 0dp;
 	font-family: LatoLatin;
@@ -164,7 +164,7 @@ button.chat-channel {
 .chat-input-shell {
 	display: block;
 	flex: 1;
-	height: 28dp;
+	height: 24dp;
 	margin-right: 6dp;
 	background-color: transparent;
 }
@@ -174,11 +174,11 @@ input.chat-input {
 	display: block;
 	box-sizing: border-box;
 	width: 100%;
-	height: 28dp;
-	line-height: 28dp;
+	height: 24dp;
+	line-height: 24dp;
 	padding: 0dp 8dp;
 	font-family: LatoLatin;
-	font-size: 13dp;
+	font-size: 12dp;
 	color: #2a4a80;
 	background-color: transparent;
 	border-top-width: 0dp;
@@ -193,9 +193,9 @@ button.chat-icon-btn {
 	display: block;
 	flex: none;
 	box-sizing: border-box;
-	width: 32dp;
-	height: 28dp;
-	line-height: 28dp;
+	width: 28dp;
+	height: 24dp;
+	line-height: 24dp;
 	margin-right: 4dp;
 	padding: 0dp;
 	font-family: LatoLatin;
@@ -226,7 +226,7 @@ button.chat-icon-last {
 	flex-direction: column;
 	position: absolute;
 	left: 6dp;
-	bottom: 46dp;
+	bottom: 40dp;
 	width: 88dp;
 	padding: 4dp;
 	background-color: #0b141cf0;

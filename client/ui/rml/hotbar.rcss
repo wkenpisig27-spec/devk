@@ -1,0 +1,142 @@
+/* Dark HUD shortcut bar — opaque rounded slots over the world. */
+
+body.hotbar-body {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	padding: 0dp;
+	pointer-events: none;
+	font-family: LatoLatin;
+	z-index: 18;
+}
+
+.hotbar-root {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: stretch;
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	pointer-events: none;
+}
+
+.hotbar-grid {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	pointer-events: none;
+}
+
+.hotbar-row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: flex-start;
+	margin-bottom: 2dp;
+	pointer-events: none;
+}
+
+.hotbar-grid .hotbar-row:last-child {
+	margin-bottom: 0dp;
+}
+
+.hotbar-cell {
+	display: block;
+	flex: none;
+	width: 30dp;
+	margin-right: 2dp;
+	pointer-events: auto;
+}
+
+.hotbar-cell-last {
+	margin-right: 0dp;
+}
+
+.hotbar-slot {
+	display: block;
+	position: relative;
+	box-sizing: border-box;
+	width: 30dp;
+	height: 30dp;
+	padding: 3dp;
+	overflow: visible;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+	decorator: image(ui/rml/frames/hud/slot_dark.tga);
+	pointer-events: auto;
+}
+
+.hotbar-slot-icon {
+	display: block;
+	width: 24dp;
+	height: 24dp;
+	background-color: transparent;
+	pointer-events: none;
+}
+
+.hotbar-slot-qty {
+	display: block;
+	position: absolute;
+	right: 3dp;
+	bottom: 1dp;
+	font-size: 10dp;
+	font-weight: bold;
+	color: #ffffff;
+	text-align: right;
+	pointer-events: none;
+}
+
+.hotbar-key {
+	display: block;
+	position: absolute;
+	top: 2dp;
+	left: 3dp;
+	font-size: 9dp;
+	font-weight: bold;
+	line-height: 11dp;
+	color: #f4f0e8;
+	text-align: left;
+	pointer-events: none;
+}
+
+.hotbar-pages {
+	display: flex;
+	flex-direction: column;
+	flex: none;
+	justify-content: space-between;
+	width: 18dp;
+	margin-left: 4dp;
+	pointer-events: auto;
+}
+
+.hotbar-page-btn,
+button.hotbar-page-btn {
+	display: block;
+	box-sizing: border-box;
+	width: 18dp;
+	height: 18dp;
+	margin: 0dp;
+	padding: 0dp;
+	font-size: 1dp;
+	line-height: 18dp;
+	color: #ffffff;
+	background-color: transparent;
+	border-top-width: 0dp;
+	border-right-width: 0dp;
+	border-bottom-width: 0dp;
+	border-left-width: 0dp;
+	border-radius: 0dp;
+}
+
+button.hotbar-page-up {
+	decorator: image(ui/rml/frames/hud/btn_page_up.tga);
+}
+
+button.hotbar-page-down {
+	decorator: image(ui/rml/frames/hud/btn_page_down.tga);
+}

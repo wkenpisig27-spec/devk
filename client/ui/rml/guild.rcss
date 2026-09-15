@@ -24,9 +24,9 @@ body.guild-body .guild-perm-scrim-open {
 	flex-direction: column;
 	flex: none;
 	box-sizing: border-box;
-	width: 455dp;
-	min-width: 455dp;
-	height: 373dp;
+	width: 420dp;
+	min-width: 420dp;
+	height: 340dp;
 	margin: 0dp;
 	padding: 0dp 0dp 6dp 0dp;
 	overflow: visible;

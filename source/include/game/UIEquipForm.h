@@ -58,6 +58,14 @@ public:
 	bool IsSkillUiVisible() const;
 	static bool _OnSkillHotKey(char& key, int& control);
 	void RefreshRmlSkill();
+	void RefreshRmlHotbar();
+	void ExecHotbarSlot(int slotIndex, bool rightClick);
+	void CycleHotbarPage(int delta);
+	void HotbarAssignBag(int slotIndex, int bagIndex);
+	void HotbarAssignSkill(int slotIndex, int skillId);
+	void HotbarMoveSlot(int dstSlot, int srcSlot);
+	void HotbarShowHint(int slotIndex, int mouseX, int mouseY);
+	int GetFastPage() const { return _nFastCur; }
 	void UseSkillFromUi(int skillId);
 	void ShowBagContextMenu(int bagIndex);
 	void ExecuteBagContextAction(const char* action);

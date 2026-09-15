@@ -22,7 +22,7 @@ body.skill-body .skill-root {
 	flex-direction: row;
 	align-items: stretch;
 	box-sizing: border-box;
-	height: 520dp;
+	height: 384dp;
 	margin: 0dp;
 	padding: 0dp;
 	overflow: visible;
@@ -34,9 +34,9 @@ body.skill-body .skill-root {
 	flex-direction: column;
 	position: relative;
 	flex: none;
-	width: 300dp;
-	min-width: 300dp;
-	height: 520dp;
+	width: 248dp;
+	min-width: 248dp;
+	height: 384dp;
 	margin: 0dp 8dp 0dp 0dp;
 	padding: 0dp 0dp 10dp 0dp;
 	overflow: visible;
@@ -85,8 +85,8 @@ body.skill-body .skill-root {
 
 .skill-title {
 	display: block;
-	padding-top: 16dp;
-	font-size: 17dp;
+	padding-top: 14dp;
+	font-size: 15dp;
 	font-weight: bold;
 	color: #ffffff;
 	text-align: left;
@@ -208,7 +208,7 @@ button.skill-tab-active .skill-tab-icon {
 	flex: 1;
 	box-sizing: border-box;
 	min-height: 0dp;
-	padding: 8dp 8dp 4dp 12dp;
+	padding: 6dp 6dp 4dp 10dp;
 	overflow: visible;
 }
 
@@ -241,7 +241,7 @@ button.skill-tab-active .skill-tab-icon {
 	display: block;
 	position: relative;
 	width: 10dp;
-	height: 48dp;
+	height: 36dp;
 	background-color: transparent;
 	decorator: tiled-vertical(
 		ui/rml/frames/notice/scroll_thumb_t.tga,
@@ -256,9 +256,9 @@ button.skill-tab-active .skill-tab-icon {
 	align-items: center;
 	box-sizing: border-box;
 	width: 100%;
-	height: 48dp;
+	height: 36dp;
 	margin-bottom: 4dp;
-	padding: 4dp 6dp 4dp 4dp;
+	padding: 2dp 6dp 2dp 4dp;
 	overflow: visible;
 	background-color: transparent;
 	border-top-width: 0dp;
@@ -277,6 +277,7 @@ button.skill-tab-active .skill-tab-icon {
 		ui/rml/frames/notice/input_b.tga,
 		ui/rml/frames/notice/input_br.tga
 	);
+	drag: none;
 }
 
 .skill-row-selected {
@@ -298,19 +299,20 @@ button.skill-tab-active .skill-tab-icon {
 	display: block;
 	flex: none;
 	box-sizing: border-box;
-	width: 40dp;
-	height: 40dp;
+	width: 32dp;
+	height: 32dp;
 	padding: 4dp;
 	overflow: visible;
 	background-color: transparent;
 	decorator: image(ui/rml/frames/notice/slot_rounded.tga);
-	pointer-events: none;
+	pointer-events: auto;
+	drag: clone;
 }
 
 .skill-row-icon {
 	display: block;
-	width: 32dp;
-	height: 32dp;
+	width: 24dp;
+	height: 24dp;
 	background-color: transparent;
 	pointer-events: none;
 }
@@ -326,9 +328,9 @@ button.skill-tab-active .skill-tab-icon {
 
 .skill-row-name {
 	display: block;
-	font-size: 13dp;
+	font-size: 12dp;
 	font-weight: bold;
-	line-height: 16dp;
+	line-height: 14dp;
 	color: #2a4a80;
 }
 
@@ -461,9 +463,9 @@ button.skill-row-upgrade-visible {
 	flex-direction: column;
 	position: relative;
 	flex: none;
-	width: 340dp;
-	min-width: 340dp;
-	height: 520dp;
+	width: 272dp;
+	min-width: 272dp;
+	height: 384dp;
 	margin: 0dp;
 	padding: 0dp 0dp 10dp 0dp;
 	overflow: visible;
@@ -497,9 +499,10 @@ button.skill-row-upgrade-visible {
 	position: relative;
 	z-index: 2;
 	box-sizing: border-box;
-	width: 340dp;
+	width: 272dp;
 	height: 56dp;
 	padding: 0dp 12dp;
+	overflow: hidden;
 	background-color: transparent;
 }
 
@@ -518,11 +521,16 @@ button.skill-row-upgrade-visible {
 
 .skill-detail-title {
 	display: block;
-	padding-top: 16dp;
-	font-size: 17dp;
+	width: 220dp;
+	height: 28dp;
+	padding-top: 14dp;
+	overflow: hidden;
+	font-size: 14dp;
 	font-weight: bold;
+	line-height: 22dp;
 	color: #ffffff;
 	text-align: left;
+	white-space: nowrap;
 }
 
 .skill-detail-hero {
@@ -531,17 +539,18 @@ button.skill-row-upgrade-visible {
 	align-items: center;
 	flex: none;
 	box-sizing: border-box;
-	width: 340dp;
-	padding: 6dp 16dp 10dp 16dp;
+	width: 272dp;
+	min-height: 64dp;
+	padding: 4dp 14dp 6dp 14dp;
 }
 
 .skill-detail-icon-well {
 	display: block;
 	flex: none;
 	box-sizing: border-box;
-	width: 52dp;
-	height: 52dp;
-	padding: 6dp;
+	width: 36dp;
+	height: 36dp;
+	padding: 4dp;
 	margin-right: 10dp;
 	overflow: visible;
 	background-color: transparent;
@@ -550,8 +559,8 @@ button.skill-row-upgrade-visible {
 
 .skill-detail-icon {
 	display: block;
-	width: 40dp;
-	height: 40dp;
+	width: 28dp;
+	height: 28dp;
 	background-color: transparent;
 	pointer-events: none;
 }
@@ -559,22 +568,24 @@ button.skill-row-upgrade-visible {
 .skill-detail-hero-text {
 	display: block;
 	flex: 1;
-	width: 246dp;
+	width: 200dp;
 	pointer-events: none;
 }
 
 .skill-detail-name {
 	display: block;
-	width: 246dp;
-	font-size: 15dp;
+	width: 200dp;
+	overflow: hidden;
+	font-size: 13dp;
 	font-weight: bold;
-	line-height: 18dp;
+	line-height: 16dp;
 	color: #2a4a80;
+	white-space: nowrap;
 }
 
 .skill-detail-level {
 	display: block;
-	width: 246dp;
+	width: 200dp;
 	margin-top: 2dp;
 	font-size: 12dp;
 	font-weight: bold;
@@ -586,7 +597,7 @@ button.skill-row-upgrade-visible {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
-	width: 246dp;
+	width: 200dp;
 	margin-top: 6dp;
 }
 
@@ -618,10 +629,10 @@ button.skill-row-upgrade-visible {
 
 .skill-detail-scroll {
 	display: block;
-	flex: none;
+	flex: 1;
 	box-sizing: border-box;
-	width: 340dp;
-	height: 350dp;
+	width: 272dp;
+	min-height: 0dp;
 	padding: 0dp 16dp 4dp 16dp;
 	overflow-x: hidden;
 	overflow-y: auto;
@@ -629,13 +640,13 @@ button.skill-row-upgrade-visible {
 
 .skill-detail-content {
 	display: block;
-	width: 308dp;
+	width: 240dp;
 }
 
 .skill-detail-section {
 	display: block;
-	width: 308dp;
-	margin-bottom: 12dp;
+	width: 240dp;
+	margin-bottom: 6dp;
 }
 
 .skill-detail-section-hidden {
@@ -644,7 +655,7 @@ button.skill-row-upgrade-visible {
 
 .skill-detail-section-title {
 	display: block;
-	width: 308dp;
+	width: 240dp;
 	margin-bottom: 4dp;
 	font-size: 11dp;
 	font-weight: bold;
@@ -654,45 +665,50 @@ button.skill-row-upgrade-visible {
 
 .skill-detail-text {
 	display: block;
-	width: 308dp;
-	font-size: 12dp;
+	width: 240dp;
+	font-size: 11dp;
 	font-weight: bold;
-	line-height: 17dp;
+	line-height: 15dp;
 	color: #2a4a80;
 }
 
 .skill-detail-stats {
 	display: block;
-	width: 308dp;
+	width: 240dp;
 }
 
 .skill-detail-stat {
 	display: flex;
 	flex-direction: row;
-	align-items: flex-start;
+	align-items: center;
 	justify-content: space-between;
-	width: 308dp;
-	min-height: 18dp;
-	margin-bottom: 4dp;
+	width: 240dp;
+	height: 16dp;
+	min-height: 16dp;
+	margin-bottom: 2dp;
 }
 
 .skill-detail-stat-label {
 	display: block;
 	flex: none;
-	width: 110dp;
+	width: 88dp;
 	font-size: 11dp;
 	font-weight: bold;
 	line-height: 16dp;
+	overflow: hidden;
+	white-space: nowrap;
 	color: #5a7ab0;
 }
 
 .skill-detail-stat-value {
 	display: block;
 	flex: none;
-	width: 190dp;
+	width: 144dp;
 	font-size: 11dp;
 	font-weight: bold;
 	line-height: 16dp;
+	overflow: hidden;
+	white-space: nowrap;
 	text-align: right;
 	color: #2a4a80;
 }
@@ -703,9 +719,10 @@ button.skill-row-upgrade-visible {
 
 .skill-detail-next {
 	display: block;
-	width: 308dp;
+	flex: none;
+	width: 240dp;
 	box-sizing: border-box;
-	padding: 10dp 12dp;
+	padding: 8dp 10dp;
 	overflow: visible;
 	background-color: transparent;
 	decorator: tiled-box(
@@ -726,7 +743,7 @@ button.skill-row-upgrade-visible {
 .skill-detail-next .skill-detail-text,
 .skill-detail-next .skill-detail-next-title,
 .skill-detail-next .skill-detail-next-req {
-	width: 284dp;
+	width: 216dp;
 }
 
 .skill-detail-next-title {
@@ -754,7 +771,7 @@ button.skill-row-upgrade-visible {
 	align-items: center;
 	flex: none;
 	box-sizing: border-box;
-	width: 340dp;
+	width: 272dp;
 	height: 40dp;
 	padding: 4dp 16dp 6dp 16dp;
 }

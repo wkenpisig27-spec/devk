@@ -42,9 +42,12 @@
 
 #include "rmlui/RmlUiInventoryForm.h"
 #include "rmlui/RmlUiSkillForm.h"
+#include "rmlui/RmlUiHotbarForm.h"
 #include "rmlui/RmlUiNpcTradeForm.h"
 #include "rmlui/RmlUiGuildForm.h"
 #include "rmlui/RmlUiManager.h"
+#include "rmlui/RmlUiItemHintForm.h"
+#include "uiskillcommand.h"
 
 using namespace std;
 
@@ -729,6 +732,7 @@ void CEquipMgr::FastChange(int nIndex, short sGridID, char chType, bool update) 
 		SCut.chType[nIndex] = chType;
 		SCut.byGridID[nIndex] = sGridID;
 	}
+	RefreshRmlHotbar();
 }
 
 void CEquipMgr::_evtFastChange(CGuiData* pSender, CCommandObj* pItem, bool& isAccept) {
@@ -1010,8 +1014,8 @@ void CEquipMgr::ReleaseChaPreviewModel() {
 void CEquipMgr::RenderChaPreview(int centerX, int centerY) {
 	if (!chaModel || !chaModel->IsValid())
 		EnsureChaPreviewModel();
-	// Tall Notice preview well — fill height without overflowing the header.
-	RenderCha(centerX, centerY, 0.42f);
+	// Compact Notice preview well — higher divisor = smaller on-screen model.
+	RenderCha(centerX, centerY, 1.85f);
 }
 
 void CEquipMgr::RotateChaPreviewLeft() {
@@ -1193,6 +1197,7 @@ void CEquipMgr::UpdateShortCut(stNetShortCut& stShortCut) {
 			}
 		}
 	}
+	RefreshRmlHotbar();
 }
 
 void CEquipMgr::DelFastCommand(CCommandObj* pObj) {
@@ -1210,6 +1215,7 @@ void CEquipMgr::DelFastCommand(CCommandObj* pObj) {
 			SCut.chType[nIndex] = 0;
 			SCut.byGridID[nIndex] = 0;
 			pFast->DelCommand();
+			g_stUIEquip.RefreshRmlHotbar();
 		}
 	}
 }
@@ -1375,23 +1381,30 @@ void CEquipMgr::_ActiveFast(int num) {
 		}
 	}
 
-	count = (num + 1) * MAX_FAST_COL;
-	for (int i = num * MAX_FAST_COL; i < count; i++) {
-		if (_pFastCommands[i]) {
-			_pFastCommands[i]->SetIsShow(true);
+	const bool rml = CRmlUiHotbarForm::Instance().LoadOk();
+	if (!rml) {
+		count = (num + 1) * MAX_FAST_COL;
+		for (int i = num * MAX_FAST_COL; i < count; i++) {
+			if (_pFastCommands[i]) {
+				_pFastCommands[i]->SetIsShow(true);
+			}
 		}
-	}
 
-	count = 3 * MAX_FAST_COL;
-	for (int i = 2 * MAX_FAST_COL; i < count; i++) {
-		if (_pFastCommands[i]) {
-			_pFastCommands[i]->SetIsShow(true);
+		count = 3 * MAX_FAST_COL;
+		for (int i = 2 * MAX_FAST_COL; i < count; i++) {
+			if (_pFastCommands[i]) {
+				_pFastCommands[i]->SetIsShow(true);
+			}
 		}
+	} else {
+		if (CForm* frm = _FindForm("frmFast"))
+			frm->Hide();
+		if (CForm* frm = _FindForm("frmFast2"))
+			frm->Hide();
 	}
 	_nFastCur = num;
 
-	// sprintf( szBuf, "%d", _nFastCur + 1 );
-	//_pActiveFastLabel->SetCaption( szBuf );
+	RefreshRmlHotbar();
 }
 
 void CEquipMgr::evtSwapItemEvent(CGuiData* pSender, int nFirst, int nSecond, bool& isSwap) {
@@ -1641,6 +1654,9 @@ void CEquipMgr::FrameMove(DWORD dwTime) {
 			if (CRmlUiSkillForm::Instance().IsVisible())
 				RefreshRmlSkill();
 		}
+
+		if (CRmlUiHotbarForm::Instance().IsVisible())
+			RefreshRmlHotbar();
 
 		CCharacter* pMainCha = CGameScene::GetMainCha();
 		if (pMainCha) {
@@ -2501,6 +2517,127 @@ void BuildSkillDetailView(CRmlUiSkillForm::DetailView& detail, CSkillCommand* cm
 
 } // namespace
 
+void CEquipMgr::RefreshRmlHotbar() {
+	CRmlUiHotbarForm& rml = CRmlUiHotbarForm::Instance();
+	if (!rml.IsVisible() || !_pFastCommands)
+		return;
+
+	auto fill = [this](int index, RmlHotbarSlotView& view) {
+		view.index = index;
+		CFastCommand* fast = _pFastCommands[index];
+		if (!fast)
+			return;
+		CCommandObj* cmd = fast->GetCommand();
+		if (!cmd)
+			return;
+		if (CItemCommand* item = dynamic_cast<CItemCommand*>(cmd)) {
+			if (item->GetItemInfo())
+				view.iconPath = item->GetItemInfo()->GetIconFile();
+			view.qty = item->GetTotalNum();
+			view.dimmed = !item->GetIsValid();
+		} else if (CSkillCommand* skill = dynamic_cast<CSkillCommand*>(cmd)) {
+			if (CSkillRecord* rec = skill->GetSkillRecord()) {
+				view.iconPath = "texture/icon/";
+				view.iconPath += rec->szICON;
+				view.dimmed = rec->GetSkillGrid().chState == 0 && !skill->GetIsSpecial(CSkillCommand::enumHighLight);
+			}
+		}
+	};
+
+	std::vector<RmlHotbarSlotView> items;
+	std::vector<RmlHotbarSlotView> skills;
+	items.reserve(MAX_FAST_COL);
+	skills.reserve(MAX_FAST_COL);
+	for (int i = 0; i < (int)MAX_FAST_COL; ++i) {
+		RmlHotbarSlotView view;
+		fill((int)(2 * MAX_FAST_COL + i), view);
+		items.push_back(view);
+	}
+	for (int i = 0; i < (int)MAX_FAST_COL; ++i) {
+		RmlHotbarSlotView view;
+		fill(_nFastCur * (int)MAX_FAST_COL + i, view);
+		char buf[8];
+		sprintf_s(buf, "F%d", i + 1);
+		view.keyLabel = buf;
+		skills.push_back(view);
+	}
+	rml.SetSlots(items, skills);
+}
+
+void CEquipMgr::ExecHotbarSlot(int slotIndex, bool rightClick) {
+	if (slotIndex < 0 || slotIndex >= (int)SHORT_CUT_NUM || !_pFastCommands)
+		return;
+	if (CFastCommand* fast = _pFastCommands[slotIndex])
+		fast->Exec(rightClick);
+}
+
+void CEquipMgr::CycleHotbarPage(int delta) {
+	_ActiveFast(_nFastCur + delta);
+}
+
+void CEquipMgr::HotbarAssignBag(int slotIndex, int bagIndex) {
+	if (slotIndex < 0 || slotIndex >= (int)SHORT_CUT_NUM || bagIndex < 0)
+		return;
+	if (!_pFastCommands || !_pFastCommands[slotIndex])
+		return;
+	FastChange(slotIndex, (short)bagIndex, defItemShortCutType);
+	FastChange(slotIndex, (short)bagIndex, defItemShortCutType, true);
+}
+
+void CEquipMgr::HotbarAssignSkill(int slotIndex, int skillId) {
+	if (slotIndex < 0 || slotIndex >= (int)SHORT_CUT_NUM || skillId <= 0)
+		return;
+	CSkillCommand* cmd = nullptr;
+	char type = 0;
+	if (lstFightSkill)
+		cmd = lstFightSkill->FindSkill(skillId);
+	if (cmd) {
+		type = defSkillFightShortCutType;
+		if (cmd->GetSkillRecord() && cmd->GetSkillRecord()->chType == 2)
+			return;
+	} else if (lstLifeSkill) {
+		cmd = lstLifeSkill->FindSkill(skillId);
+		if (cmd)
+			type = defSkillLifeShortCutType;
+	}
+	if (!cmd && lstSailSkill) {
+		cmd = lstSailSkill->FindSkill(skillId);
+		if (cmd)
+			type = defSkillSailShortCutType;
+	}
+	if (!cmd)
+		return;
+	FastChange(slotIndex, (short)skillId, type);
+	if (_pFastCommands && _pFastCommands[slotIndex])
+		_pFastCommands[slotIndex]->AddCommand(cmd);
+	RefreshRmlHotbar();
+}
+
+void CEquipMgr::HotbarMoveSlot(int dstSlot, int srcSlot) {
+	if (dstSlot < 0 || srcSlot < 0 || dstSlot >= (int)SHORT_CUT_NUM || srcSlot >= (int)SHORT_CUT_NUM || dstSlot == srcSlot)
+		return;
+	const char type = _stShortCut.chType[srcSlot];
+	const short grid = _stShortCut.byGridID[srcSlot];
+	FastChange(dstSlot, grid, type);
+	if (type == defItemShortCutType)
+		FastChange(dstSlot, grid, type, true);
+	else if (_pFastCommands && _pFastCommands[srcSlot] && _pFastCommands[dstSlot])
+		_pFastCommands[dstSlot]->AddCommand(_pFastCommands[srcSlot]->GetCommand());
+	FastChange(srcSlot, 0, 0);
+	if (_pFastCommands && _pFastCommands[srcSlot])
+		_pFastCommands[srcSlot]->AddCommand(nullptr);
+	RefreshRmlHotbar();
+}
+
+void CEquipMgr::HotbarShowHint(int slotIndex, int mouseX, int mouseY) {
+	if (slotIndex < 0 || slotIndex >= (int)SHORT_CUT_NUM || !_pFastCommands)
+		return;
+	CFastCommand* fast = _pFastCommands[slotIndex];
+	if (!fast)
+		return;
+	CRmlUiItemHintForm::Instance().TryShow(fast->GetCommand(), mouseX, mouseY);
+}
+
 void CEquipMgr::RefreshRmlSkill() {
 	if (!CRmlUiSkillForm::Instance().IsVisible())
 		return;
@@ -3353,6 +3490,10 @@ void RmlInv_OnItemDragEnd(int srcBag, int srcEquip, int mouseX, int mouseY) {
 				if (bankForm->InRect(mouseX, mouseY))
 					g_stUIEquip.MoveBagToBank(srcBag, -1);
 			}
+		} else if (CRmlUiHotbarForm::Instance().ContainsScreenPoint(mouseX, mouseY)) {
+			const int slot = CRmlUiHotbarForm::Instance().SlotIndexAtScreenPoint(mouseX, mouseY);
+			if (slot >= 0)
+				g_stUIEquip.HotbarAssignBag(slot, srcBag);
 		}
 	}
 	g_stUIEquip.RefreshRmlInventory();
@@ -3362,6 +3503,30 @@ void RmlInv_OnItemDragEnd(int srcBag, int srcEquip, int mouseX, int mouseY) {
 		g_stUIGuildBank.RefreshGuildBankUi();
 	if (g_stUINpcTrade.GetIsShow())
 		g_stUINpcTrade.RefreshTradeUi();
+}
+
+void RmlHotbar_OnClick(int slotIndex, bool rightClick) {
+	g_stUIEquip.ExecHotbarSlot(slotIndex, rightClick);
+}
+
+void RmlHotbar_OnPage(int delta) {
+	g_stUIEquip.CycleHotbarPage(delta);
+}
+
+void RmlHotbar_OnDropBag(int slotIndex, int bagIndex) {
+	g_stUIEquip.HotbarAssignBag(slotIndex, bagIndex);
+}
+
+void RmlHotbar_OnDropSkill(int slotIndex, int skillId) {
+	g_stUIEquip.HotbarAssignSkill(slotIndex, skillId);
+}
+
+void RmlHotbar_OnDropSlot(int dstSlot, int srcSlot) {
+	g_stUIEquip.HotbarMoveSlot(dstSlot, srcSlot);
+}
+
+void RmlHotbar_OnHint(int slotIndex, int mouseX, int mouseY) {
+	g_stUIEquip.HotbarShowHint(slotIndex, mouseX, mouseY);
 }
 
 void RmlBank_OnClose() {

@@ -44,6 +44,7 @@ public:
 	void HideGuildApplyForm();
 	void HideGuildForm();
 	void HideChatForm();
+	void HideHotbarForm();
 
 private:
 	CRmlUiManager() = default;

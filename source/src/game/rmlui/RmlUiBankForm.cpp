@@ -590,7 +590,7 @@ void CRmlUiBankForm::PlaceBesideInventory() {
 	if (size.x < 1.f)
 		size.x = 248.f;
 	if (size.y < 1.f)
-		size.y = 560.f;
+		size.y = 384.f;
 
 	float x = (float)dim.x * 0.5f + 380.f;
 	float y = ((float)dim.y - size.y) * 0.5f;

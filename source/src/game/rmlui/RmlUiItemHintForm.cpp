@@ -199,7 +199,7 @@ struct CRmlUiItemHintForm::Impl {
 		const Rml::Vector2i dim = context->GetDimensions();
 		Rml::Vector2f size = root->GetBox().GetSize(Rml::BoxArea::Border);
 		if (size.x < 8.f)
-			size.x = 280.f;
+			size.x = 256.f;
 		if (size.y < 8.f)
 			size.y = 180.f;
 

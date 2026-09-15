@@ -22,8 +22,8 @@ body.inv-body .inv-modal-open {
 	flex-direction: row;
 	align-items: stretch;
 	box-sizing: border-box;
-	/* Tall enough for 8 bag rows (44 slot + 4 gap) without scroll jitter. */
-	height: 560dp;
+	/* 5 equip slots + 2 jewelry rows + currency; bag shows ~6 rows and scrolls. */
+	height: 370dp;
 	/* Capture clicks in gaps between panels so they don't reach the world. */
 	pointer-events: auto;
 }
@@ -62,8 +62,8 @@ body.inv-body .inv-modal-open {
 	flex-direction: column;
 	flex: none;
 	/* Match backpack outer width for parallel panel edges. */
-	width: 332dp;
-	min-width: 332dp;
+	width: 280dp;
+	min-width: 280dp;
 }
 
 .inv-backpack {
@@ -72,8 +72,8 @@ body.inv-body .inv-modal-open {
 	position: relative;
 	flex: none;
 	/* 12 pad + 284 grid + 6 gap + 10 scroll + 12 pad = 324; +8 chrome = 332 */
-	width: 332dp;
-	min-width: 332dp;
+	width: 280dp;
+	min-width: 280dp;
 	margin-right: 0dp;
 }
 
@@ -103,8 +103,8 @@ body.inv-body .inv-modal-open {
 
 .inv-panel-title {
 	display: block;
-	padding-top: 16dp;
-	font-size: 18dp;
+	padding-top: 14dp;
+	font-size: 14dp;
 	font-weight: bold;
 	color: #ffffff;
 	text-align: left;
@@ -187,7 +187,7 @@ button.inv-close {
 	flex-direction: row;
 	flex: 1;
 	box-sizing: border-box;
-	height: 336dp;
+	height: 198dp;
 	/* Same 12dp side inset as backpack body */
 	padding: 8dp 12dp 0dp 12dp;
 	overflow: hidden;
@@ -199,7 +199,7 @@ button.inv-close {
 	display: block;
 	flex: none;
 	/* 44 slot + 0 side pad — vertical stack uses 4dp gaps */
-	width: 44dp;
+	width: 36dp;
 	height: 100%;
 	padding-top: 0dp;
 	overflow: hidden;
@@ -277,8 +277,8 @@ button.inv-preview-rot-right {
 	justify-content: center;
 	align-content: flex-start;
 	box-sizing: border-box;
-	/* 2 rows of 44 + one 4dp gap + pads */
-	height: 108dp;
+	/* 2 rows of 36 + one 3dp gap + pads */
+	height: 84dp;
 	padding: 8dp 12dp 0dp 12dp;
 	overflow: hidden;
 	clip: always;
@@ -290,15 +290,15 @@ button.inv-preview-rot-right {
 	position: relative;
 	box-sizing: border-box;
 	flex: none;
-	width: 44dp;
-	height: 44dp;
-	min-width: 44dp;
-	min-height: 44dp;
-	max-width: 44dp;
-	max-height: 44dp;
-	/* Uniform 4dp grid gutters (last cell clears right margin in code). */
-	margin: 0dp 4dp 4dp 0dp;
-	padding: 4dp;
+	width: 36dp;
+	height: 36dp;
+	min-width: 36dp;
+	min-height: 36dp;
+	max-width: 36dp;
+	max-height: 36dp;
+	/* Uniform 3dp grid gutters (last cell clears right margin in code). */
+	margin: 0dp 3dp 3dp 0dp;
+	padding: 6dp;
 	/* visible: overflow:hidden clipped soft-AA corners unevenly on flush edges. */
 	overflow: visible;
 	/* Soft-AA rounded slot @ 1:1 with TGA (DX9 — no CSS border-radius). */
@@ -412,18 +412,18 @@ button.inv-preview-rot-right {
 
 .inv-equip-col .inv-slot {
 	display: block;
-	margin: 0dp 0dp 4dp 0dp;
+	margin: 0dp 0dp 3dp 0dp;
 }
 
 .inv-equip-row .inv-slot {
 	display: block;
-	margin: 0dp 4dp 4dp 0dp;
+	margin: 0dp 3dp 3dp 0dp;
 }
 
 .inv-slot-icon {
 	display: block;
-	width: 36dp;
-	height: 36dp;
+	width: 24dp;
+	height: 24dp;
 	/* Keep square icons inside the curve without clipping the slot TGA. */
 	overflow: hidden;
 	background-color: transparent;
@@ -437,8 +437,8 @@ button.inv-preview-rot-right {
 
 .inv-slot-placeholder {
 	display: block;
-	width: 36dp;
-	height: 36dp;
+	width: 24dp;
+	height: 24dp;
 	background-color: transparent;
 	pointer-events: none;
 }
@@ -454,7 +454,7 @@ button.inv-preview-rot-right {
 	position: absolute;
 	right: 2dp;
 	bottom: 1dp;
-	font-size: 11dp;
+	font-size: 10dp;
 	font-weight: bold;
 	color: #2a4a80;
 	text-align: right;
@@ -474,8 +474,8 @@ button.inv-preview-rot-right {
 	flex: none;
 	align-items: center;
 	box-sizing: border-box;
-	height: 40dp;
-	padding: 4dp 12dp 8dp 12dp;
+	height: 32dp;
+	padding: 2dp 12dp 4dp 12dp;
 }
 
 .inv-currency {
@@ -538,9 +538,9 @@ button.inv-preview-rot-right {
 	display: block;
 	flex: none;
 	margin-left: 8dp;
-	font-size: 14dp;
+	font-size: 11dp;
 	font-weight: bold;
-	line-height: 30dp;
+	line-height: 28dp;
 	color: #1e3a6e;
 	text-align: right;
 }
@@ -550,10 +550,10 @@ button.inv-preview-rot-right {
 	flex-direction: row;
 	flex: 1;
 	box-sizing: border-box;
-	/* 284 grid + 6 + 10 scroll track */
-	width: 300dp;
-	/* Visible window: 8 rows * 44 + 7 gutters * 4 = 380 */
-	height: 380dp;
+	/* 231 grid + 6 + 10 scroll track */
+	width: 247dp;
+	/* Visible window: 6 rows * 36 + 5 gutters * 3 = 231 */
+	height: 268dp;
 	margin-top: 8dp;
 	margin-left: 12dp;
 	margin-right: 12dp;
@@ -567,8 +567,8 @@ button.inv-preview-rot-right {
 	display: block;
 	flex: none;
 	box-sizing: border-box;
-	/* 6*44 + 5*4 = 284 */
-	width: 284dp;
+	/* 6*36 + 5*3 = 231 */
+	width: 231dp;
 	height: 100%;
 	padding: 0dp;
 	/* Hidden (not auto): keeps item drag/dblclick stable; wheel + custom bar scroll instead. */
@@ -637,19 +637,19 @@ button.inv-preview-rot-right {
 	align-items: flex-start;
 	justify-content: flex-start;
 	box-sizing: border-box;
-	/* Exact: 6*44 + 5*4 */
-	width: 284dp;
-	height: 44dp;
-	margin-bottom: 4dp;
+	/* Exact: 6*36 + 5*3 */
+	width: 231dp;
+	height: 36dp;
+	margin-bottom: 3dp;
 }
 
 .inv-bag-row .inv-slot {
 	display: block;
 	flex: none;
-	width: 44dp;
-	height: 44dp;
+	width: 36dp;
+	height: 36dp;
 	/* Code clears margin on the last column for a flush right edge. */
-	margin: 0dp 4dp 0dp 0dp;
+	margin: 0dp 3dp 0dp 0dp;
 }
 
 .inv-backpack-footer {
@@ -674,7 +674,7 @@ button.inv-preview-rot-right {
 	display: block;
 	flex: none;
 	margin-right: 8dp;
-	font-size: 13dp;
+	font-size: 11dp;
 	font-weight: bold;
 	color: #2a4a80;
 }
@@ -714,29 +714,29 @@ button.inv-preview-rot-right {
 .inv-capacity-used {
 	display: block;
 	flex: none;
-	font-size: 14dp;
+	font-size: 12dp;
 	font-weight: bold;
 	color: #4a9af0;
-	line-height: 32dp;
+	line-height: 28dp;
 }
 
 .inv-capacity-sep {
 	display: block;
 	flex: none;
 	margin: 0dp 2dp;
-	font-size: 14dp;
+	font-size: 12dp;
 	font-weight: bold;
 	color: #5a7ab0;
-	line-height: 32dp;
+	line-height: 28dp;
 }
 
 .inv-capacity-max {
 	display: block;
 	flex: none;
-	font-size: 14dp;
+	font-size: 12dp;
 	font-weight: bold;
 	color: #5a7ab0;
-	line-height: 32dp;
+	line-height: 28dp;
 }
 
 .inv-capacity-add,
@@ -745,8 +745,8 @@ button.inv-capacity-add {
 	position: relative;
 	z-index: 2;
 	flex: none;
-	width: 36dp;
-	height: 36dp;
+	width: 28dp;
+	height: 28dp;
 	line-height: 36dp;
 	margin: 0dp;
 	padding: 0dp;
@@ -780,9 +780,9 @@ button.inv-capacity-add:hover {
 .inv-footer-icon,
 button.inv-footer-icon {
 	flex: none;
-	width: 40dp;
-	height: 40dp;
-	line-height: 40dp;
+	width: 32dp;
+	height: 32dp;
+	line-height: 32dp;
 	margin-right: 6dp;
 	padding: 0dp;
 	font-size: 1dp;
@@ -799,9 +799,9 @@ button.inv-footer-icon-last {
 
 .inv-footer-icon-img {
 	display: block;
-	width: 22dp;
-	height: 22dp;
-	margin: 9dp auto 0dp auto;
+	width: 18dp;
+	height: 18dp;
+	margin: 7dp auto 0dp auto;
 	background-color: transparent;
 	pointer-events: none;
 }

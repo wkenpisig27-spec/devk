@@ -80,9 +80,9 @@ struct CRmlUiNpcMissionForm::Impl : public Rml::EventListener {
 		const Rml::Vector2i dim = context->GetDimensions();
 		Rml::Vector2f size = root->GetBox().GetSize(Rml::BoxArea::Border);
 		if (size.x < 1.f)
-			size.x = 420.f;
+			size.x = 348.f;
 		if (size.y < 1.f)
-			size.y = 420.f;
+			size.y = 380.f;
 		float x = ((float)dim.x - size.x) * 0.5f;
 		float y = ((float)dim.y - size.y) * 0.38f;
 		if (x < 8.f)
@@ -140,7 +140,7 @@ struct CRmlUiNpcMissionForm::Impl : public Rml::EventListener {
 			el->SetAttribute("type", "button");
 			el->SetAttribute("data-prize", std::to_string(p.index));
 			el->SetProperty("display", "block");
-			el->SetProperty("width", "384dp");
+			el->SetProperty("width", "312dp");
 			el->SetProperty("height", "32dp");
 			el->SetProperty("line-height", "32dp");
 			el->SetInnerRML(EscapeXml(p.text.c_str()));
