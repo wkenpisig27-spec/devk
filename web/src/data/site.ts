@@ -6,12 +6,34 @@ export const site = {
     "Abyss-Sea Online is Pirates King Online brought back to life — Navy or Pirate, land or sea, classes, ships, and trade — looking sharper, running smoother, and waiting for your crew.",
   discord: "https://discord.com/invite/NHmFsuMpS5",
   engine: "devk",
+  /** Public site origin. Override with NEXT_PUBLIC_SITE_URL in production. */
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://157.245.52.152",
 } as const;
 
 export const nav = [
   { href: "/features", label: "Features" },
   { href: "/progress", label: "News" },
   { href: "/classes", label: "Classes" },
+  { href: "/guides/pko-classes", label: "Guide" },
+] as const;
+
+export const firstJobOptions = [
+  { id: "swordsman", label: "Swordsman" },
+  { id: "hunter", label: "Hunter" },
+  { id: "herbalist", label: "Herbalist" },
+  { id: "explorer", label: "Explorer" },
+] as const;
+
+export const intentOptions = [
+  { id: "yes", label: "Yes — I will play at launch" },
+  { id: "maybe", label: "Maybe — watching for now" },
+  { id: "watching", label: "Just browsing" },
+] as const;
+
+export const factionOptions = [
+  { id: "navy", label: "Navy" },
+  { id: "pirate", label: "Pirate" },
+  { id: "undecided", label: "Not sure yet" },
 ] as const;
 
 export const kit = [
@@ -44,18 +66,18 @@ export const kit = [
 export const preregSteps = [
   {
     n: "1",
-    title: "Join the Discord.",
-    body: "That is how we know you are a real sailor, and how you hear the opening bell. No mailing list. No extra forms.",
+    title: "Claim your spot below.",
+    body: "Email, desired username, first job, and whether you will sail at launch. That is how we hold your name and know who is serious.",
   },
   {
     n: "2",
-    title: "Claim your name with the crew.",
-    body: "Tell us the username you want to log in with. When account creation opens, that name is the one we hold for you — not a waitlist we forget.",
+    title: "Join the Discord.",
+    body: "Same crew, patch talk, and the opening bell. Bring friends with your referral link for extra kit credit later.",
   },
   {
     n: "3",
     title: "Log in on opening day.",
-    body: "There is nothing extra to create on the day. Your account is waiting, and the starter kit is already tied to it.",
+    body: "Nothing extra to create. Your reserved name and starter kit are waiting.",
   },
   {
     n: "4",

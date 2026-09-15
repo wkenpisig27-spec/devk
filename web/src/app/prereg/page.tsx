@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { KitIcon } from "@/components/KitIcon";
+import { PreregForm } from "@/components/PreregForm";
 import { Shell } from "@/components/Shell";
 import { kit, preregSteps, site } from "@/data/site";
 
 export const metadata: Metadata = {
   title: "Pre-register",
   description:
-    "Pre-register for Abyss-Sea Online. Your name waits on opening day, with a starter kit tied to it.",
+    "Pre-register for Abyss-Sea Online. Reserve your username, pick a first job, and get a starter kit on opening day.",
+  openGraph: {
+    title: "Pre-register · Abyss-Sea Online",
+    description: "Reserve your name and starter kit before the seas open.",
+  },
 };
 
 export default function PreregPage() {
@@ -20,9 +26,11 @@ export default function PreregPage() {
           Pre-register
         </h1>
         <p className="mt-5 text-[17px] leading-7 text-muted">
-          Make your account with the crew now. When the seas open, it is already waiting —
-          not a form we keep in a drawer — with a starter kit tied to it.
+          Reserve the username you want to sail with. When the seas open, that name and a starter
+          kit are waiting — not a waitlist we forget.
         </p>
+
+        <PreregForm />
 
         <h2 className="font-display mt-14 text-[2rem] tracking-wide text-gold-2">What you get</h2>
         <p className="mt-2 text-sm text-muted">Held for you until you claim it in game.</p>
@@ -82,18 +90,24 @@ export default function PreregPage() {
           ))}
         </ol>
 
-        <a href={site.discord} target="_blank" rel="noreferrer" className="btn-crimson mt-10">
-          Join Discord to pre-register
+        <a
+          href={site.discord}
+          target="_blank"
+          rel="noreferrer"
+          className="btn-ghost mt-10"
+          data-track="cta_discord_prereg"
+        >
+          Or jump straight to Discord
         </a>
 
         <p className="mt-8 text-sm text-muted">
-          <a href="/" className="text-gold hover:underline">
+          <Link href="/" className="text-gold hover:underline">
             ← Back to the site
-          </a>
+          </Link>
           <span className="mx-2 text-line">·</span>
-          <a href={site.discord} target="_blank" rel="noreferrer" className="text-gold hover:underline">
-            Ask on Discord
-          </a>
+          <Link href="/guides/pko-classes" className="text-gold hover:underline">
+            Class guide
+          </Link>
         </p>
       </article>
     </Shell>

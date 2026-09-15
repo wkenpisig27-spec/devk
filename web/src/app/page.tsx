@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PreregCounter } from "@/components/PreregCounter";
 import { Shell } from "@/components/Shell";
 import { features } from "@/data/features";
 import { latest } from "@/data/progress";
@@ -21,12 +22,15 @@ export default function HomePage() {
         </h1>
         <p className="mt-5 text-[17px] leading-7 text-muted">{site.description}</p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/prereg" className="btn-crimson">
+          <Link href="/prereg" className="btn-crimson" data-track="cta_prereg_home">
             Pre-register
           </Link>
           <Link href="/progress" className="btn-ghost">
             See what&apos;s new
           </Link>
+        </div>
+        <div className="mt-4">
+          <PreregCounter />
         </div>
       </section>
 
@@ -105,6 +109,13 @@ export default function HomePage() {
         <Link href="/classes" className="mt-5 inline-block text-sm text-gold">
           See the full class tree →
         </Link>
+        <p className="mt-2 text-sm text-muted">
+          New to PKO?{" "}
+          <Link href="/guides/pko-classes" className="text-gold hover:underline">
+            Read the class guide
+          </Link>
+          .
+        </p>
       </section>
 
       <section className="mx-auto mt-20 max-w-[40rem] px-4 pb-8 sm:px-6">
@@ -116,7 +127,7 @@ export default function HomePage() {
             Argue Crusader vs Champion, hunt with a pickup party, and tell us what still feels
             off.
           </p>
-          <Link href="/prereg" className="btn-crimson mt-6">
+          <Link href="/prereg" className="btn-crimson mt-6" data-track="cta_prereg_home_bottom">
             Pre-register
           </Link>
         </div>

@@ -1,0 +1,23 @@
+[Unit]
+Description=Abyss-Sea Online Next.js website
+After=network.target
+
+[Service]
+Type=simple
+User=abyssweb
+Group=abyssweb
+WorkingDirectory=/var/www/abyss-sea/.next/standalone
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOSTNAME=127.0.0.1
+Environment=NEXT_PUBLIC_SITE_URL=http://157.245.52.152
+Environment=DATA_DIR=/var/lib/abyss-sea
+EnvironmentFile=-/etc/abyss-sea/web.env
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/abyss-sea/web.log
+StandardError=append:/var/log/abyss-sea/web.err.log
+
+[Install]
+WantedBy=multi-user.target
