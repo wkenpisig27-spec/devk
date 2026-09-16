@@ -226,6 +226,14 @@ void lwDeviceObject11::PopOffscreenTargets()
     }
 }
 
+void lwDeviceObject11::UnbindPixelTextures()
+{
+    if (!_context)
+        return;
+    ID3D11ShaderResourceView* none[8] = {};
+    _context->PSSetShaderResources(0, 8, none);
+}
+
 LW_RESULT lwDeviceObject11::CreateDirect3D()
 {
     if (_factory)

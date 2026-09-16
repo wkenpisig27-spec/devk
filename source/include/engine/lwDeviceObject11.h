@@ -134,6 +134,7 @@ public:
     bool IsShadowPassMode() const { return _bShadowPass; }
     void PushOffscreenTargets(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv);
     void PopOffscreenTargets();
+    void UnbindPixelTextures();
 
     ID3D11Device* GetD3D11Device() { return _device; }
     ID3D11DeviceContext* GetD3D11Context() { return _context; }

@@ -13,6 +13,8 @@
 #include "uifont.h"
 #include "UIMiniMapForm.h"
 #include "UIBoxForm.h"
+#include "lwD3D11Texture.h"
+#include "lwD3D11Gaps.h"
 
 CMaskData* CMaskData::g_MaskData = NULL;
 
@@ -964,9 +966,12 @@ void CSMallMap2D::RenderMask() {
 CAniWnd::CAniWnd() {
 	_bUpdate = false;
 	_pVBWnd = NULL;
+	_pDx11RT = NULL;
+	_bClockOffscreen = false;
 }
 CAniWnd::~CAniWnd() {
 	SAFE_RELEASE(_pVBWnd);
+	SAFE_RELEASE(_pDx11RT);
 }
 void CAniWnd::Play(DWORD dwPlayTime) {
 	if (_bUpdate)
@@ -1051,9 +1056,35 @@ void CAniWnd::Render() {
 	if (!_bUpdate)
 		return;
 
-	if (lwIsDx11Active() || !m_pDev || !_pCurSuf) {
-		lwD3D11Gap(LW_D3D11_SKIP, "aniwnd-rt",
-			"CAniWnd GetRenderTarget is D3D9; clock draws to the backbuffer on DX11");
+	MindPower::lwDeviceObject11* d11 = MindPower::lwGetActiveDeviceObject11();
+	if (d11) {
+		if (!BindDx11ClockRT())
+			return;
+		MindPower::lwD3D11Texture* rt = MindPower::lwAsD3D11Texture(_pDx11RT);
+		if (!rt || !rt->GetRTV())
+			return;
+
+		D3DVIEWPORTX oldvp = {};
+		D3DVIEWPORTX vp = {};
+		d11->GetViewPort(&oldvp);
+		vp.Width = rt->GetWidth();
+		vp.Height = rt->GetHeight();
+		vp.MinZ = 0.0f;
+		vp.MaxZ = 1.0f;
+
+		d11->UnbindPixelTextures();
+		d11->PushOffscreenTargets(rt->GetRTV(), 0);
+		d11->SetViewPort(&vp);
+		_bClockOffscreen = true;
+		RenderScene();
+		_bClockOffscreen = false;
+		d11->PopOffscreenTargets();
+		d11->SetViewPort(&oldvp);
+		RenderMask();
+		return;
+	}
+
+	if (!m_pDev || !_pCurSuf) {
 		RenderScene();
 		return;
 	}
@@ -1075,6 +1106,27 @@ void CAniWnd::Render() {
 	surface->Release();
 	pSaveSuf->Release();
 	RenderMask();
+}
+
+bool CAniWnd::BindDx11ClockRT() {
+	MindPower::lwDeviceObject11* d11 = MindPower::lwGetActiveDeviceObject11();
+	if (!d11 || !d11->GetD3D11Device())
+		return false;
+	int w = _rcWnd.right - _rcWnd.left;
+	int h = _rcWnd.bottom - _rcWnd.top;
+	if (w < 64)
+		w = 64;
+	if (h < 64)
+		h = 64;
+	MindPower::lwD3D11Texture* existing = MindPower::lwAsD3D11Texture(_pDx11RT);
+	if (existing && (int)existing->GetWidth() == w && (int)existing->GetHeight() == h && existing->GetRTV())
+		return true;
+	SAFE_RELEASE(_pDx11RT);
+	if (LW_FAILED(MindPower::lwD3D11CreateRenderTargetTexture(d11->GetD3D11Device(), (UINT)w, (UINT)h, &_pDx11RT)) || !_pDx11RT)
+		return false;
+	lwD3D11Gap(LW_D3D11_FALLBACK, "aniwnd-rt",
+		"CAniWnd clock renders to a DX11 offscreen RT then blits via RenderMask");
+	return true;
 }
 
 void CAniWnd::MoveWnd(int x, int y) {
@@ -1205,10 +1257,12 @@ void CAniWnd::InitScene() {
 
 void CAniWnd::RenderScene() {
 	MindPower::lwDeviceObject11* d11 = MindPower::lwGetActiveDeviceObject11();
-	if (d11)
-		d11->Clear(D3DCLEAR_TARGET, 0x00000000, 0, 0);
-	else if (g_Render.GetDevice())
-		g_Render.GetDevice()->Clear(0, 0, D3DCLEAR_TARGET, 0x00000000, 0, 0);
+	if (_bClockOffscreen) {
+		if (d11)
+			d11->Clear(D3DCLEAR_TARGET, 0x00000000, 0, 0);
+		else if (g_Render.GetDevice())
+			g_Render.GetDevice()->Clear(0, 0, D3DCLEAR_TARGET, 0x00000000, 0, 0);
+	}
 	D3DXMATRIX matIdentity;
 	D3DXMatrixIdentity(&matIdentity);
 	g_Render.SetRenderState(D3DRS_ZENABLE, FALSE);
@@ -1228,22 +1282,19 @@ void CAniWnd::RenderScene() {
 	g_Render.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 	g_Render.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG2);
 
-	// g_Render.SetTextureStageState( 0, D3DTSS_MAGFILTER, D3DTEXF_POINT);
-	// g_Render.SetTextureStageState( 0, D3DTSS_MINFILTER, D3DTEXF_POINT);
-
 	g_Render.SetRenderState(D3DRS_LIGHTING, FALSE);
 	g_Render.SetTexture(0, NULL);
-	// m_pDev->SetStreamSource( 0, _pVB, sizeof(M2D_VER) );
 	g_Render.SetVertexShader(NULL);
 	g_Render.SetFVF(D3DFVF_CLOCK);
 	g_Render.SetTransformWorld(&matIdentity);
-	g_Render.SetTransformProj(&_matProj);
+	if (d11) {
+		D3DXMATRIX proj;
+		D3DXMatrixPerspectiveFovLH(&proj, 1.570796f, 1.0f, 0.1f, 1000.0f);
+		g_Render.SetTransformProj(&proj);
+	} else {
+		g_Render.SetTransformProj(&_matProj);
+	}
 	g_Render.SetTransformView(&_matView);
-
-	// MPInterfaceMgr* imgr = g_Render.GetInterfaceMgr();
-	// lwIDynamicStreamMgr* dsm = imgr->res_mgr->GetDynamicStreamMgr();
-	// dsm->BindDataVB(0, &_vVertex, sizeof(ClockVer) * 6, sizeof(ClockVer));
-	// dsm->DrawPrimitive(D3DPT_TRIANGLEFAN, 0, 4);
 
 	g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 4, &_vVertex, sizeof(ClockVer));
 }
@@ -1279,7 +1330,12 @@ void CAniWnd::RenderMask() {
 	g_Render.SetTexture(1, NULL);
 
 #ifdef MGR
-	g_Render.SetTexture(0, _pCurSuf->GetTex());
+	if (lwIsDx11Active())
+		g_Render.SetTexture(0, _pDx11RT);
+	else if (_pCurSuf)
+		g_Render.SetTexture(0, _pCurSuf->GetTex());
+	else
+		return;
 	_pVBWnd->BeginSet();
 	_pVBWnd->DrawSubset(0);
 	_pVBWnd->EndSet();

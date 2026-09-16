@@ -558,6 +558,10 @@ private:
 	ClockVer _vSave[6];
 
 	M2D_AVER _vWndVer[4];
+	IDirect3DTextureX* _pDx11RT;
+	bool _bClockOffscreen;
+
+	bool BindDx11ClockRT();
 };
 
 /************************************************************************/
