@@ -26,6 +26,8 @@
 #include "lwThreadPool.h"
 #include "lwD3D11Gaps.h"
 #include "lwRenderBackend.h"
+#include "lwD3D11Texture.h"
+#include "lwDeviceObject11.h"
 
 using namespace std;
 
@@ -815,11 +817,12 @@ __load_it:
         {
             IDirect3DDeviceX* d3d9_fileex = dev_obj->GetDevice();
             if (!d3d9_fileex) {
-                lwD3D11Gap(LW_D3D11_SKIP, "tex-fromfileex",
-                    "D3DXCreateTextureFromFileEx needs IDirect3DDevice9; skipped on DX11");
-                goto __ret;
+                lwDeviceObject11* d11 = lwIsDx11Active() ? lwGetActiveDeviceObject11() : 0;
+                if (!d11 || LW_FAILED(lwD3D11CreateTextureFromFile(
+                    d11->GetD3D11Device(), this->_file_name, _colorkey.color, &_tex)) || !_tex)
+                    goto __ret;
             }
-            if(FAILED(D3DXCreateTextureFromFileEx(d3d9_fileex,
+            else if(FAILED(D3DXCreateTextureFromFileEx(d3d9_fileex,
                 this->_file_name, //�ļ���
                 0, //�ļ�����������Ϊ�Զ�
                 0, //�ļ��ߣ�������Ϊ�Զ�
@@ -4239,42 +4242,29 @@ IDirect3DTextureX* lwResourceMgr::_createMonochromaticTexture(
 	if( filterTexture.empty() )
 	{
 		IDirect3DTextureX* texture = 0;
-		IDirect3DDeviceX* device = _dev_obj->GetDevice();
-		if (!device) {
-			lwD3D11Gap(LW_D3D11_SKIP, "mono-tex-create",
-				"color-filter CreateTexture is D3D9; skipped on DX11");
-			return 0;
-		}
-
-		HRESULT hr = device->CreateTexture(
-			width, height,
-			0, D3DUSAGE_DYNAMIC,
-			D3DFMT_A8R8G8B8,
-			D3DPOOL_DEFAULT, 
-			&texture, NULL );
-
-		if( FAILED( hr ) )
+		if (!_dev_obj ||
+			LW_FAILED(_dev_obj->CreateTexture(&texture, (UINT)width, (UINT)height, 1,
+				D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT)) ||
+			!texture)
 		{
+			lwD3D11Gap(LW_D3D11_GAP, "mono-tex-create",
+				"color-filter CreateTexture failed");
 			return 0;
 		}
 
 		D3DLOCKED_RECT lockedRect;
-		hr = texture->LockRect( 0, &lockedRect, 0, D3DLOCK_DISCARD );
-		if( FAILED( hr ) )
+		HRESULT hr = texture->LockRect( 0, &lockedRect, 0, D3DLOCK_DISCARD );
+		if ( FAILED( hr ) || !lockedRect.pBits )
 		{
 			texture->Release();
 			return 0;
 		}
 
-		size_t* writer = reinterpret_cast < size_t* > ( lockedRect.pBits );
 		for( size_t y = 0; y < height; ++y )
 		{
-			size_t offset = y * width;
-
+			DWORD* row = (DWORD*)((BYTE*)lockedRect.pBits + y * (size_t)lockedRect.Pitch);
 			for( size_t x = 0; x < width; ++x )
-			{
-				writer[ offset + x ] = colour;
-			}
+				row[ x ] = colour;
 		}
 		texture->UnlockRect( 0 );
 
@@ -4286,26 +4276,31 @@ IDirect3DTextureX* lwResourceMgr::_createMonochromaticTexture(
 	{
 		IDirect3DTextureX* texture = 0;
 		IDirect3DDeviceX* device = _dev_obj->GetDevice();
-		if (!device) {
-			lwD3D11Gap(LW_D3D11_SKIP, "mono-tex-fromfile",
-				"color-filter D3DXCreateTextureFromFile is D3D9; skipped on DX11");
-			return 0;
-		}
-
-		HRESULT hr = D3DXCreateTextureFromFile(
-			device,
-			filterTexture.c_str(),
-			&texture );
-
-		if( FAILED( hr ) )
-		{
+		if (device) {
+			HRESULT hr = D3DXCreateTextureFromFile(
+				device,
+				filterTexture.c_str(),
+				&texture );
+			if( FAILED( hr ) )
+				return 0;
+		} else if (lwIsDx11Active()) {
+			lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
+			if (!d11 || LW_FAILED(lwD3D11CreateTextureFromFile(
+				d11->GetD3D11Device(), filterTexture.c_str(), 0, &texture)) || !texture)
+			{
+				lwD3D11Gap(LW_D3D11_GAP, "mono-tex-fromfile",
+					"color-filter CreateTextureFromFile failed %s", filterTexture.c_str());
+				return 0;
+			}
+		} else {
 			return 0;
 		}
 
 		D3DSURFACE_DESC description;
-		hr = texture->GetLevelDesc( 0, &description );
-		if( FAILED( hr ) )
+		HRESULT hr = texture->GetLevelDesc( 0, &description );
+		if ( FAILED( hr ) )
 		{
+			texture->Release();
 			return 0;
 		}
 
@@ -4314,29 +4309,21 @@ IDirect3DTextureX* lwResourceMgr::_createMonochromaticTexture(
 
 		D3DLOCKED_RECT lockedRect;
 		hr = texture->LockRect( 0, &lockedRect, 0, D3DLOCK_DISCARD );
-		if( FAILED( hr ) )
+		if ( FAILED( hr ) || !lockedRect.pBits )
 		{
 			texture->Release();
 			return 0;
 		}
 
-		size_t* writer = reinterpret_cast < size_t* > ( lockedRect.pBits );
 		for( size_t y = 0; y < height; ++y )
 		{
-			size_t offset = y * width;
-
+			DWORD* row = (DWORD*)((BYTE*)lockedRect.pBits + y * (size_t)lockedRect.Pitch);
 			for( size_t x = 0; x < width; ++x )
 			{
-				if( ( writer[ offset + x ] >> 24 ) )
-				{
-					writer[ offset + x ] = colour;
-				}
+				if( ( row[ x ] >> 24 ) )
+					row[ x ] = colour;
 				else
-				{
-					writer[ offset + x ] |= 0xFF000000;
-					//writer[ offset + x ] = trasparent;
-					//writer[ offset + x ] = 0xFF000000;
-				}
+					row[ x ] |= 0xFF000000;
 			}
 		}
 		texture->UnlockRect( 0 );

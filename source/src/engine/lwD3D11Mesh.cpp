@@ -34,6 +34,7 @@ static const char* kMeshHLSL =
     "};\n"
     "Texture2D tex0 : register(t0);\n"
     "Texture2D tex1 : register(t1);\n"
+    "Texture2D tex2 : register(t2);\n"
     "SamplerState samp0 : register(s0);\n"
     "struct VSInRigid { float3 pos : POSITION; float3 nrm : NORMAL; float2 uv : TEXCOORD0; float2 uv1 : TEXCOORD1; float4 col : COLOR; };\n"
     "struct VSInSkin {\n"
@@ -106,15 +107,20 @@ static const char* kMeshHLSL =
     "}\n"
     "float4 PSMain(PSIn i) : SV_TARGET {\n"
     "  float4 tex = tex0.Sample(samp0, i.uv);\n"
-    "  if (more.z > 0.5 && more.z < 1.5) {\n"
+    "  float z = more.z;\n"
+    "  if (z > 0.5) {\n"
     "    float4 t1 = tex1.Sample(samp0, i.uv1);\n"
-    "    tex = float4(t1.rgb, tex.a);\n"
-    "  } else if (more.z > 1.5 && more.z < 2.5) {\n"
-    "    float4 t1 = tex1.Sample(samp0, i.uv1);\n"
-    "    tex.rgb *= t1.rgb;\n"
-    "  } else if (more.z > 2.5) {\n"
-    "    float4 t1 = tex1.Sample(samp0, i.uv1);\n"
-    "    tex.rgb = tex.rgb + tex.a * t1.rgb;\n"
+    "    if (z < 1.5) tex = float4(t1.rgb, tex.a);\n"
+    "    else if (z < 2.5) tex.rgb *= t1.rgb;\n"
+    "    else if (z < 3.5) tex.rgb = tex.rgb + tex.a * t1.rgb;\n"
+    "    else if (z < 4.5) tex.rgb += t1.rgb;\n"
+    "    else if (z < 5.5) tex.rgb = tex.rgb + t1.rgb - 0.5;\n"
+    "    else if (z < 6.5) tex.rgb *= t1.rgb * 2.0;\n"
+    "    else {\n"
+    "      float4 t2 = tex2.Sample(samp0, i.uv1);\n"
+    "      tex.a *= t1.a;\n"
+    "      tex.rgb = tex.rgb + tex.a * t2.rgb;\n"
+    "    }\n"
     "  }\n"
     "  if (extra.w >= 0.0) clip(tex.a - extra.w);\n"
     "  if (extra.y > 0.5) return float4(outlineColor.rgb, outlineColor.a * tex.a);\n"
@@ -752,12 +758,19 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     if (!s_mesh.outline)
     {
         DWORD cop1_early = dev->GetCachedTSS(1, D3DTSS_COLOROP);
+        DWORD cop2_early = dev->GetCachedTSS(2, D3DTSS_COLOROP);
         lwD3D11Texture* tex1_early = lwAsD3D11Texture(dev->GetBoundTex(1));
-        const int dual_early = (cop1_early && cop1_early != D3DTOP_DISABLE &&
+        lwD3D11Texture* tex2_early = lwAsD3D11Texture(dev->GetBoundTex(2));
+        const int dual_early = ((cop1_early && cop1_early != D3DTOP_DISABLE &&
             cop1_early != 0xffffffff && cop1_early != D3DTSS_FORCE_DWORD &&
-            tex1_early && tex1_early->GetSRV()) ? 1 : 0;
+            tex1_early && tex1_early->GetSRV()) ||
+            (cop2_early && cop2_early != D3DTOP_DISABLE &&
+            cop2_early != 0xffffffff && cop2_early != D3DTSS_FORCE_DWORD &&
+            tex2_early && tex2_early->GetSRV())) ? 1 : 0;
         const int rhw = ((fvf & D3DFVF_POSITION_MASK) == D3DFVF_XYZRHW) ? 1 : 0;
-        if (!dual_early && !rhw)
+        const int eff_xyzb1 = ((fvf & D3DFVF_POSITION_MASK) == D3DFVF_XYZB1) &&
+            !(fvf & (D3DFVF_LASTBETA_UBYTE4 | D3DFVF_LASTBETA_D3DCOLOR));
+        if (!dual_early && !rhw && !eff_xyzb1)
         {
             ID3D11InputLayout* sm_layout = 0;
             if (lwD3D11ShaderMgrPrepareDraw(dev, &sm_layout) && sm_layout)
@@ -877,18 +890,31 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
         tf = 0xffffffff;
     ArgbToFloat(tf, cb.tfactor);
     DWORD cop1 = dev->GetCachedTSS(1, D3DTSS_COLOROP);
-    DWORD carg1 = dev->GetCachedTSS(1, D3DTSS_COLORARG1);
+    DWORD s1_ca1 = dev->GetCachedTSS(1, D3DTSS_COLORARG1);
+    DWORD s1_ca2 = dev->GetCachedTSS(1, D3DTSS_COLORARG2);
     lwD3D11Texture* tex1_check = lwAsD3D11Texture(dev->GetBoundTex(1));
+    lwD3D11Texture* tex2_check = lwAsD3D11Texture(dev->GetBoundTex(2));
     float dual = 0.0f;
     if (cop1 && cop1 != D3DTOP_DISABLE && cop1 != 0xffffffff && cop1 != D3DTSS_FORCE_DWORD && tex1_check && tex1_check->GetSRV())
     {
-        if (cop1 == D3DTOP_SELECTARG1)
+        if (cop1 == D3DTOP_SELECTARG1 && s1_ca1 == D3DTA_TEXTURE)
+            dual = 1.0f;
+        else if (cop1 == D3DTOP_SELECTARG2 && s1_ca2 == D3DTA_TEXTURE)
+            dual = 1.0f;
+        else if (cop1 == D3DTOP_SELECTARG1 && s1_ca1 == D3DTA_CURRENT)
         {
-            if (carg1 == D3DTA_TEXTURE)
-                dual = 1.0f;
+            DWORD cop2 = dev->GetCachedTSS(2, D3DTSS_COLOROP);
+            if (cop2 == D3DTOP_MODULATEALPHA_ADDCOLOR && tex2_check && tex2_check->GetSRV())
+                dual = 7.0f;
         }
         else if (cop1 == D3DTOP_MODULATEALPHA_ADDCOLOR)
             dual = 3.0f;
+        else if (cop1 == D3DTOP_ADD || cop1 == D3DTOP_ADDSMOOTH)
+            dual = 4.0f;
+        else if (cop1 == D3DTOP_ADDSIGNED)
+            dual = 5.0f;
+        else if (cop1 == D3DTOP_MODULATE2X || cop1 == D3DTOP_ADDSIGNED2X)
+            dual = (cop1 == D3DTOP_ADDSIGNED2X) ? 5.0f : 6.0f;
         else if (cop1 != D3DTOP_SELECTARG2)
             dual = 2.0f;
     }
@@ -1004,6 +1030,11 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     if (tex1 && tex1->GetSRV())
         srv1 = tex1->GetSRV();
     s_mesh.context->PSSetShaderResources(1, 1, &srv1);
+    ID3D11ShaderResourceView* srv2 = s_mesh.white_srv;
+    lwD3D11Texture* tex2 = lwAsD3D11Texture(dev->GetBoundTex(2));
+    if (tex2 && tex2->GetSRV())
+        srv2 = tex2->GetSRV();
+    s_mesh.context->PSSetShaderResources(2, 1, &srv2);
     ID3D11SamplerState* samp = s_mesh.samp;
     DWORD addr = dev->GetCachedSS(0, D3DSAMP_ADDRESSU);
     DWORD mag = dev->GetCachedSS(0, D3DSAMP_MAGFILTER);
@@ -1017,6 +1048,7 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
         samp = s_mesh.samp_clamp;
     s_mesh.context->PSSetSamplers(0, 1, &samp);
     s_mesh.context->PSSetSamplers(1, 1, &samp);
+    s_mesh.context->PSSetSamplers(2, 1, &samp);
     s_mesh.context->RSSetState(rast);
     s_mesh.context->OMSetDepthStencilState(depth, 0);
     float bf[4] = { 0, 0, 0, 0 };

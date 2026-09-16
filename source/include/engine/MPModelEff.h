@@ -111,6 +111,7 @@ public:
 
 	void FillModelUVSoft(CEffectModel*	pCModel);
 	void FillTextureUVSoft(CEffectModel*	pCModel);
+	void FillDefaultUVSoft(CEffectModel* pCModel, TEXCOORD& coord);
 	////ģ�ͱ任����//////////////////////////////////////////////////////////////////////
 	//!��ǰʱ��
 	float				m_fCurTime;

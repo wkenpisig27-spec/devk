@@ -1237,8 +1237,9 @@ int CCharacterModel::Lit(DWORD part_id, DWORD lit_id) {
 	extern LitMgr g_lit_mgr;
 
 	if (_ModelType == MODEL_CHARACTER) {
-		D3DCAPSX* caps = g_Render.GetInterfaceMgr()->dev_obj->GetDeviceCaps();
-		if (caps->MaxTextureBlendStages < 4 || caps->MaxSimultaneousTextures < 4)
+		MPIDeviceObject* lit_dev = g_Render.GetInterfaceMgr()->dev_obj;
+		D3DCAPSX* caps = lit_dev ? lit_dev->GetDeviceCaps() : 0;
+		if (!caps || caps->MaxTextureBlendStages < 4 || caps->MaxSimultaneousTextures < 4)
 			return 1;
 
 		char file[260];

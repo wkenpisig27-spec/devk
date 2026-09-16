@@ -58,6 +58,52 @@ void CEffectCortrol::FillTextureUVSoft(CEffectModel* pCModel)
 	pCModel->Unlock();
 }
 
+void CEffectCortrol::FillDefaultUVSoft(CEffectModel* pCModel, TEXCOORD& coord)
+{
+	SEFFECT_VERTEX* pVertex;
+	pCModel->Lock((BYTE**)&pVertex);
+	if (!pVertex)
+		return;
+	const WORD n = pCModel->GetVerCount();
+	const WORD ncoord = (WORD)coord.size();
+	if (ncoord == 0)
+	{
+		pCModel->Unlock();
+		return;
+	}
+	for (WORD i = 0; i < n; ++i)
+		pVertex[i].m_SUV = coord[i < ncoord ? i : 0];
+	pCModel->Unlock();
+}
+
+static void Dx11BindEffectPass(I_Effect* eff, const D3DXMATRIX& world, const D3DXCOLOR& color)
+{
+	if (!lwIsDx11Active() || !eff || !eff->m_pDev)
+		return;
+	eff->m_pDev->SetTransformWorld((const lwMatrix44*)&world);
+	eff->m_pDev->SetRenderState(D3DRS_TEXTUREFACTOR, (DWORD)color);
+	eff->m_pDev->SetTextureStageStateForced(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	eff->m_pDev->SetTextureStageStateForced(0, D3DTSS_COLORARG2, D3DTA_TFACTOR);
+	eff->m_pDev->SetTextureStageStateForced(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	eff->m_pDev->SetTextureStageStateForced(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+	eff->m_pDev->SetTextureStageStateForced(0, D3DTSS_ALPHAARG2, D3DTA_TFACTOR);
+	eff->m_pDev->SetTextureStageStateForced(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+}
+
+static void Dx11FillEffectUV(CEffectCortrol* ctrl, I_Effect* eff)
+{
+	if (!lwIsDx11Active() || !ctrl || !eff || !eff->m_pCModel)
+		return;
+	if (eff->getType() == EFFECT_MODEL)
+		return;
+	if (eff->getType() == EFFECT_MODELUV)
+		ctrl->FillModelUVSoft(eff->m_pCModel);
+	else if (eff->getType() == EFFECT_FRAMETEX)
+		ctrl->FillDefaultUVSoft(eff->m_pCModel, eff->m_CTexFrame.m_vecCoord);
+	else
+		ctrl->FillTextureUVSoft(eff->m_pCModel);
+}
+
 bool	CEffPath::LoadPathFromFile(char* pszName)
 {
 	FILE*     stream;
@@ -627,7 +673,12 @@ void CMPModelEff::Render()
 	if (!m_bPlay)
 		return;
 
-	if (lwIsDx11Active() || m_bUseSoft)
+	// DX11 has no D3D9 effect VS objects. Use the hardware-path control
+	// flow (billboard, rota-loop, per-effect blend) and bind world/TFACTOR
+	// / vertex UVs the mesh shader understands.
+	if (lwIsDx11Active())
+		RenderVS();
+	else if (m_bUseSoft)
 		RenderSoft();
 	else
 		RenderVS();
@@ -745,6 +796,9 @@ void CMPModelEff::RenderVS()
 			//for fix missing model
 			m_pCEffect->m_pDev->SetVertexShaderConstantF(4, *m_pMatViewProj, 4);
 			m_pCEffect->m_pDev->SetVertexShaderConstantF(8, m_pCurCortrol->m_dwCurColor, 1);
+			Dx11BindEffectPass(m_pCEffect,
+				m_bBindbone ? m_pCurCortrol->m_SMatResult : m_SMatResult,
+				m_pCurCortrol->m_dwCurColor);
 			
             // begin by lsh
 			//m_pCEffect->m_pCModel->SetExternalTexture(0,m_pCEffect->m_CTextruelist.m_lpCurTex);
@@ -875,12 +929,14 @@ void CMPModelEff::RenderVS()
 			m_SMatResult._42 += m_CPathCtrl.m_SCurPath.y;
 			m_SMatResult._43 += m_CPathCtrl.m_SCurPath.z;
 		}*/
+		Dx11BindEffectPass(m_pCEffect, m_SMatResult, m_pCurCortrol->m_dwCurColor);
+		Dx11FillEffectUV(m_pCurCortrol, m_pCEffect);
 		D3DXMatrixTranspose(&m_pCurCortrol->m_SMatResult, &m_SMatResult);
 	
 		//D3DXMATRIX tm;
 		//Transpose(m_pCurCortrol->m_SMatResult,m_SMatResult);
 
-			if(m_pCEffect->getType() != EFFECT_MODEL )
+			if(!lwIsDx11Active() && m_pCEffect->getType() != EFFECT_MODEL )
 			{
 
 				if(m_pCEffect->getType() == EFFECT_MODELUV)

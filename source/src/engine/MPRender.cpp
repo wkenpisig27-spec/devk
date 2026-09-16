@@ -255,6 +255,8 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 		memset(&_d3dCaps, 0, sizeof(_d3dCaps));
 		_d3dCaps.VertexShaderVersion = D3DVS_VERSION(3, 0);
 		_d3dCaps.PixelShaderVersion = D3DPS_VERSION(3, 0);
+		_d3dCaps.MaxSimultaneousTextures = 8;
+		_d3dCaps.MaxTextureBlendStages = 8;
 		bUsePixelShader = false;
 		lwD3D11Gap(LW_D3D11_SKIP, "d3d9-adapter-probe",
 			"D3D11 Init fills present_param from HWND; D3D9 adapter/MSAA probe skipped");

@@ -66,11 +66,11 @@ public:
 		SAFE_RELEASE(_lpVB);
 		SAFE_RELEASE(_lpIBLine);
 		_pDev = pDev;
-		if (!pDev) {
-			lwD3D11Gap(LW_D3D11_SKIP, "effectbox-create-vb",
-				"CEffectBox CreateVertexBuffer/CreateIndexBuffer is D3D9; skipped on DX11");
-			return;
-		}
+
+		lwIDeviceObject* dev_obj = 0;
+		if (lwInterfaceMgr* im = g_Render.GetInterfaceMgr())
+			dev_obj = im->dev_obj;
+
 		BoxVer ver[8] = {
 		    {-fRadius, -fRadius, fRadius * 2, 0xffff0000},
 		    {-fRadius, fRadius, fRadius * 2, 0xffff0000},
@@ -82,42 +82,72 @@ public:
 		    {fRadius, fRadius, 0, 0xffff0000},
 		    {fRadius, -fRadius, 0, 0xffff0000},
 		};
-		pDev->CreateVertexBuffer(sizeof(BoxVer) * 8, D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC, D3DFVF_XYZ | D3DFVF_DIFFUSE,
-		                         D3DPOOL_DEFAULT, &_lpVB, NULL);
-		BoxVer* pVertex;
-		_lpVB->Lock(0, 0, (void**)&pVertex, D3DLOCK_NOOVERWRITE);
-		memcpy(pVertex, ver, sizeof(BoxVer) * 8);
-		_lpVB->Unlock();
-		WORD wIndex[24] = {
-		    0, 1, 2, 3, // top
-		    5, 4, 7, 6, // bottom
-		    5, 1, 0, 4, // left
-		    7, 3, 2, 6, // right
-		    6, 2, 1, 5, // front
-		    4, 0, 3, 7, // back
+		// Six quads as a triangle list (DX11 has no TRIANGLEFAN). Same winding as the old fans.
+		WORD wIndex[36] = {
+		    0, 1, 2, 0, 2, 3,
+		    5, 4, 7, 5, 7, 6,
+		    5, 1, 0, 5, 0, 4,
+		    7, 3, 2, 7, 2, 6,
+		    6, 2, 1, 6, 1, 5,
+		    4, 0, 3, 4, 3, 7,
 		};
-		pDev->CreateIndexBuffer(sizeof(WORD) * 24, D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_MANAGED, &_lpIB, NULL);
-		WORD* t_pwIndex;
-		_lpIB->Lock(0, 0, (void**)&t_pwIndex, 0);
-		memcpy(t_pwIndex, wIndex, sizeof(WORD) * 24);
-		_lpIB->Unlock();
-
-		////////
-
 		WORD wIndexLine[24] = {
-		    0, 1, 1, 2, // top
-		    2, 3, 3, 0, // bottom
-		    4, 5, 5, 6, // left
-		    6, 7, 7, 4, // right
-		    0, 4, 1, 5, // front
-		    2, 6, 3, 7, // back
+		    0, 1, 1, 2,
+		    2, 3, 3, 0,
+		    4, 5, 5, 6,
+		    6, 7, 7, 4,
+		    0, 4, 1, 5,
+		    2, 6, 3, 7,
 		};
-		pDev->CreateIndexBuffer(sizeof(WORD) * 24, D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_MANAGED, &_lpIBLine,
-		                        NULL);
-		WORD* t_Index;
-		_lpIBLine->Lock(0, 0, (void**)&t_Index, 0);
-		memcpy(t_Index, wIndexLine, sizeof(WORD) * 24);
-		_lpIBLine->Unlock();
+
+		const DWORD fvf = D3DFVF_XYZ | D3DFVF_DIFFUSE;
+		if (dev_obj) {
+			if (LW_FAILED(dev_obj->CreateVertexBuffer(sizeof(BoxVer) * 8, D3DUSAGE_WRITEONLY, fvf,
+			                                          D3DPOOL_DEFAULT, &_lpVB, NULL)) ||
+			    !_lpVB)
+				return;
+			if (LW_FAILED(dev_obj->CreateIndexBuffer(sizeof(wIndex), D3DUSAGE_WRITEONLY, D3DFMT_INDEX16,
+			                                         D3DPOOL_MANAGED, &_lpIB, NULL)) ||
+			    !_lpIB) {
+				SAFE_RELEASE(_lpVB);
+				return;
+			}
+			if (LW_FAILED(dev_obj->CreateIndexBuffer(sizeof(wIndexLine), D3DUSAGE_WRITEONLY, D3DFMT_INDEX16,
+			                                         D3DPOOL_MANAGED, &_lpIBLine, NULL)) ||
+			    !_lpIBLine) {
+				SAFE_RELEASE(_lpVB);
+				SAFE_RELEASE(_lpIB);
+				return;
+			}
+		} else if (pDev) {
+			pDev->CreateVertexBuffer(sizeof(BoxVer) * 8, D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC, fvf,
+			                         D3DPOOL_DEFAULT, &_lpVB, NULL);
+			pDev->CreateIndexBuffer(sizeof(wIndex), D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_MANAGED, &_lpIB, NULL);
+			pDev->CreateIndexBuffer(sizeof(wIndexLine), D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_MANAGED,
+			                        &_lpIBLine, NULL);
+		} else {
+			lwD3D11Gap(LW_D3D11_SKIP, "effectbox-create-vb",
+				"CEffectBox has no DeviceObject or D3D9 device");
+			return;
+		}
+		if (!_lpVB || !_lpIB || !_lpIBLine)
+			return;
+
+		BoxVer* pVertex = 0;
+		if (SUCCEEDED(_lpVB->Lock(0, 0, (void**)&pVertex, 0)) && pVertex) {
+			memcpy(pVertex, ver, sizeof(ver));
+			_lpVB->Unlock();
+		}
+		WORD* t_pwIndex = 0;
+		if (SUCCEEDED(_lpIB->Lock(0, 0, (void**)&t_pwIndex, 0)) && t_pwIndex) {
+			memcpy(t_pwIndex, wIndex, sizeof(wIndex));
+			_lpIB->Unlock();
+		}
+		WORD* t_Index = 0;
+		if (SUCCEEDED(_lpIBLine->Lock(0, 0, (void**)&t_Index, 0)) && t_Index) {
+			memcpy(t_Index, wIndexLine, sizeof(wIndexLine));
+			_lpIBLine->Unlock();
+		}
 	}
 	void setPos(D3DXVECTOR3 vPos) {
 		D3DXMatrixTranslation(&_matWorld, vPos.x, vPos.y, vPos.z);
@@ -173,13 +203,7 @@ public:
 				g_Render.SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 
 			g_Render.SetIndices(_lpIB, 0);
-
-			g_Render.DrawIndexedPrimitive(D3DPT_TRIANGLEFAN, 0, 0, 8, 0, 2);
-			g_Render.DrawIndexedPrimitive(D3DPT_TRIANGLEFAN, 0, 0, 8, 4, 2);
-			g_Render.DrawIndexedPrimitive(D3DPT_TRIANGLEFAN, 0, 0, 8, 8, 2);
-			g_Render.DrawIndexedPrimitive(D3DPT_TRIANGLEFAN, 0, 0, 8, 12, 2);
-			g_Render.DrawIndexedPrimitive(D3DPT_TRIANGLEFAN, 0, 0, 8, 16, 2);
-			g_Render.DrawIndexedPrimitive(D3DPT_TRIANGLEFAN, 0, 0, 8, 20, 2);
+			g_Render.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 8, 0, 12);
 
 			g_Render.SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 			g_Render.SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);

@@ -866,6 +866,7 @@ void lwDeviceObject11::_FillSyntheticCaps()
     _dev_caps.MaxTextureWidth = 16384;
     _dev_caps.MaxTextureHeight = 16384;
     _dev_caps.MaxSimultaneousTextures = 8;
+    _dev_caps.MaxTextureBlendStages = 8;
     _dev_caps.MaxStreams = 8;
     _dev_caps.MaxStreamStride = 256;
     _dev_caps.MaxUserClipPlanes = 6;

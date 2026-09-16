@@ -834,17 +834,11 @@ LW_RESULT lwPhysique::Render()
         lwIPrimitive* p;
 
         lwIDeviceObject* phy_dev = _res_mgr->GetDeviceObject();
-        IDirect3DDeviceX* device = phy_dev ? phy_dev->GetDevice() : 0;
-        if (device)
-        {
-            device->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
-            device->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-            device->SetTexture(1, 0);
-        }
-        else if (phy_dev)
+        if (phy_dev)
         {
             phy_dev->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
             phy_dev->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+            phy_dev->SetTexture(1, 0);
         }
 
         for (DWORD i = 0; i < LW_MAX_SUBSKIN_NUM; i++)
@@ -859,25 +853,23 @@ LW_RESULT lwPhysique::Render()
             }
             else
             {
-
-                if (device && mIndexColourFilterList.find(i) != mIndexColourFilterList.end())
+                const int use_filter = (mIndexColourFilterList.find(i) != mIndexColourFilterList.end()) ? 1 : 0;
+                if (use_filter && phy_dev)
                 {
-                    static IDirect3DTextureX* texture = 0;
-                    if (!texture)
-                    {
-                        texture = _res_mgr->getMonochromaticTexture(mIndexColourFilterList[i].first,
-                            mIndexColourFilterList[i].second);
-                    }
-                    device->SetTexture(1, texture);
-                    device->SetTextureStageState(1, D3DTSS_COLOROP, mIndexTextureOPList[i]);
-                    device->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_CURRENT);
-                    device->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_TEXTURE);
-
-                    device->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-                    device->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
-                    device->SetTextureStageState(1, D3DTSS_ALPHAARG2, D3DTA_TEXTURE);
+                    IDirect3DTextureX* texture = _res_mgr->getMonochromaticTexture(
+                        mIndexColourFilterList[i].first,
+                        mIndexColourFilterList[i].second);
+                    phy_dev->SetTexture(1, texture);
+                    DWORD cop = D3DTOP_MODULATE;
+                    if (mIndexTextureOPList.find(i) != mIndexTextureOPList.end())
+                        cop = mIndexTextureOPList[i];
+                    phy_dev->SetTextureStageState(1, D3DTSS_COLOROP, cop);
+                    phy_dev->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_CURRENT);
+                    phy_dev->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_TEXTURE);
+                    phy_dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+                    phy_dev->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
+                    phy_dev->SetTextureStageState(1, D3DTSS_ALPHAARG2, D3DTA_TEXTURE);
                 }
-
 
                 if (LW_FAILED(p->Render()))
                 {
@@ -885,22 +877,27 @@ LW_RESULT lwPhysique::Render()
                     {
                         lwD3D11Gap(LW_D3D11_GAP, "physique-render-fail",
                             "part %u failed; drawing remaining parts", i);
+                        if (use_filter && phy_dev)
+                        {
+                            phy_dev->SetTexture(1, 0);
+                            phy_dev->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+                            phy_dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+                        }
                         continue;
                     }
                     goto __ret;
                 }
 
-                if (device && mIndexColourFilterList.find(i) != mIndexColourFilterList.end())
+                if (use_filter && phy_dev)
                 {
-                    device->SetTexture(1, 0);
-                    device->SetTextureStageState(1, D3DTSS_TEXCOORDINDEX, 1);
-                    device->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-                    device->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTOP_DISABLE);
-                    device->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTOP_DISABLE);
-
-                    device->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTOP_DISABLE);
-                    device->SetTextureStageState(1, D3DTSS_ALPHAARG2, D3DTOP_DISABLE);
-                    device->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+                    phy_dev->SetTexture(1, 0);
+                    phy_dev->SetTextureStageState(1, D3DTSS_TEXCOORDINDEX, 1);
+                    phy_dev->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+                    phy_dev->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+                    phy_dev->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_CURRENT);
+                    phy_dev->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+                    phy_dev->SetTextureStageState(1, D3DTSS_ALPHAARG2, D3DTA_CURRENT);
+                    phy_dev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
                 }
             }
         }

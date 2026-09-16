@@ -24,6 +24,7 @@ public:
     UINT GetWidth() const { return _w; }
     UINT GetHeight() const { return _h; }
     void InitCpuLock(ID3D11Device* device, D3DFORMAT lock_fmt);
+    void InitCpuLock(ID3D11Device* device, D3DFORMAT lock_fmt, const void* src, UINT src_pitch);
 
     STDMETHOD(QueryInterface)(REFIID riid, void** ppvObj);
     STDMETHOD_(ULONG, AddRef)();

@@ -141,6 +141,12 @@ static UINT LockBpp(D3DFORMAT fmt)
     case D3DFMT_X1R5G5B5:
     case D3DFMT_A4R4G4B4:
         return 2;
+    case D3DFMT_DXT1:
+    case D3DFMT_DXT2:
+    case D3DFMT_DXT3:
+    case D3DFMT_DXT4:
+    case D3DFMT_DXT5:
+        return 0;
     default:
         return 4;
     }
@@ -148,16 +154,34 @@ static UINT LockBpp(D3DFORMAT fmt)
 
 void lwD3D11Texture::InitCpuLock(ID3D11Device* device, D3DFORMAT lock_fmt)
 {
+    InitCpuLock(device, lock_fmt, 0, 0);
+}
+
+void lwD3D11Texture::InitCpuLock(ID3D11Device* device, D3DFORMAT lock_fmt, const void* src, UINT src_pitch)
+{
     _device = device;
     if (lock_fmt != D3DFMT_UNKNOWN && lock_fmt != (D3DFORMAT)0)
         _fmt = lock_fmt;
     const UINT bpp = LockBpp(_fmt);
+    if (bpp == 0 || _w == 0 || _h == 0 || _w > 16384 || _h > 16384)
+        return;
+
     _pitch = _w * bpp;
     _cpu_bytes = _pitch * _h;
     delete[] _cpu;
     _cpu = new BYTE[_cpu_bytes];
     memset(_cpu, 0, _cpu_bytes);
     _locked = 0;
+    if (!src || !_cpu)
+        return;
+
+    const UINT row = _w * bpp;
+    const UINT sp = src_pitch ? src_pitch : row;
+    if (sp < row)
+        return;
+    const BYTE* s = (const BYTE*)src;
+    for (UINT y = 0; y < _h; ++y)
+        memcpy(_cpu + y * _pitch, s + y * sp, row);
 }
 
 static void ConvertLockToBGRA(const BYTE* src, UINT w, UINT h, UINT src_pitch, D3DFORMAT fmt, BYTE* dst, UINT dst_pitch)
@@ -285,6 +309,8 @@ static LW_RESULT CreateFromPixels(
     }
 
     *out_tex = new lwD3D11Texture(tex, srv, w, h, d3d9);
+    if (lwD3D11Texture* t = lwAsD3D11Texture(*out_tex))
+        t->InitCpuLock(device, d3d9, pixels, pitch);
     return LW_RET_OK;
 }
 

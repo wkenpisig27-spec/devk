@@ -84,9 +84,9 @@ void lwD3D11GapReportInventory()
 		{ "inv-fvf",
 		  "SetFVF still used in lwResourceMgr, fonts, particles, minimap — D3D11 has no FVF" },
 		{ "inv-texture-stage",
-		  "SetTextureStageState via lwMisc atoms / materials — must become an FF-emulation PS" },
+		  "Mesh PS maps stage-1/2 combiners (modulate/add/mod2x/lit-A); remaining FF stages still DX9-only" },
 		{ "inv-d3dx-effect",
-		  "eff.fx t0-t6 is a DeviceObject FF state table on DX11; D3DXCreateEffectFromFile remains DX9-only" },
+		  "eff.fx t0-t6 is a DeviceObject FF state table; CMPModelEff uses the VS-path on DX11 with TFACTOR + vertex UVs" },
 		{ "inv-d3dx-sprite-font-tex",
 		  "D3DXCreateSprite is skipped; UI/console sprites blit. CMPFont GPU atlas locks empty DX11 textures" },
 		{ "inv-device-lost",
@@ -114,7 +114,7 @@ void lwD3D11GapReportInventory()
 		{ "inv-ui-captcha",
 		  "UINumAnswer captcha texture is DeviceObject CreateTexture + CPU lock; login captcha is GDI text" },
 		{ "inv-scene-misc",
-		  "Scene.cpp, CharacterModel.cpp, DrawPointList.cpp, GameAppInit.cpp still hold raw device pointers" },
+		  "CEffectBox/CPathBox and color-filter textures use DeviceObject; CharacterModel Lit uses synthetic blend-stage caps" },
 	};
 
 	const int n = (int)(sizeof(kIslands) / sizeof(kIslands[0]));
