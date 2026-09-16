@@ -88,7 +88,7 @@ void lwD3D11GapReportInventory()
 		{ "inv-d3dx-effect",
 		  "eff.fx t0-t6 is a DeviceObject FF state table on DX11; D3DXCreateEffectFromFile remains DX9-only" },
 		{ "inv-d3dx-sprite-font-tex",
-		  "D3DXCreateSprite / Font / TextureFromFile in UIRender, MPFont, GameAppInterface" },
+		  "D3DXCreateSprite is skipped; UI/console sprites blit. CMPFont GPU atlas locks empty DX11 textures" },
 		{ "inv-device-lost",
 		  "lwSysGraphics::TestCooperativeLevel / LoseDevice / ResetDevice — DXGI ResizeBuffers instead" },
 		{ "inv-stream-1mb",
@@ -112,7 +112,7 @@ void lwD3D11GapReportInventory()
 		{ "inv-minimap",
 		  "SMallMap.cpp (~100 D3D9 calls) — UI/map slice" },
 		{ "inv-ui-captcha",
-		  "UINumAnswer.cpp CreateTexture, LoginScene/CreateChaScene/WorldScene SetRenderState on GetDevice" },
+		  "UINumAnswer captcha texture is DeviceObject CreateTexture + CPU lock; login captcha is GDI text" },
 		{ "inv-scene-misc",
 		  "Scene.cpp, CharacterModel.cpp, DrawPointList.cpp, GameAppInit.cpp still hold raw device pointers" },
 	};

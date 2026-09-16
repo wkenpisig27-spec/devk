@@ -11,6 +11,7 @@
 #include "lwRenderBackend.h"
 #include "lwD3D11Gaps.h"
 #include "lwDeviceObject11.h"
+#include "lwD3D11Blit.h"
 
 using namespace std;
 
@@ -1100,7 +1101,12 @@ void MPRender::RenderTextureRect(int nX, int nY, MPTexRect* pRect) {
 	RECT TexRect = {pRect->nTexSX, pRect->nTexSY, pRect->nTexSX + pRect->nTexW, pRect->nTexSY + pRect->nTexH};
 	if (pRect->nTexW != 0)
 		pTexRect = &TexRect;
-	// _p2DSprite->Draw(NULL, NULL, NULL , NULL, 0, &vecDest, pRect->dwColor);
+	if (lwIsDx11Active()) {
+		VECTOR2 vecDest((float)nX, (float)nY);
+		VECTOR2 vecScale(pRect->fScaleX, pRect->fScaleY);
+		lwD3D11BlitSprite(pTexture, pTexRect, &vecScale, &vecDest, pRect->dwColor);
+		return;
+	}
 	_p2DSprite->Begin(D3DXSPRITE_ALPHABLEND);
 	D3DXMATRIX scaleMat;
 	D3DXMatrixIdentity(&scaleMat);

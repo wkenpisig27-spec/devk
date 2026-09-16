@@ -23,6 +23,7 @@ public:
     ID3D11RenderTargetView* GetRTV() const { return _rtv; }
     UINT GetWidth() const { return _w; }
     UINT GetHeight() const { return _h; }
+    void InitCpuLock(ID3D11Device* device, D3DFORMAT lock_fmt);
 
     STDMETHOD(QueryInterface)(REFIID riid, void** ppvObj);
     STDMETHOD_(ULONG, AddRef)();
@@ -56,6 +57,11 @@ private:
     UINT _w;
     UINT _h;
     D3DFORMAT _fmt;
+    ID3D11Device* _device;
+    BYTE* _cpu;
+    UINT _cpu_bytes;
+    UINT _pitch;
+    int _locked;
 };
 
 MINDPOWER_API const GUID& lwD3D11TextureGuid();
@@ -79,6 +85,7 @@ MINDPOWER_API LW_RESULT lwD3D11CreateEmptyTexture(
     ID3D11Device* device,
     UINT width,
     UINT height,
+    D3DFORMAT format,
     IDirect3DTextureX** out_tex);
 
 MINDPOWER_API LW_RESULT lwD3D11CreateRenderTargetTexture(

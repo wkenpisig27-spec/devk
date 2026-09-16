@@ -41,11 +41,17 @@ lwD3D11Texture::lwD3D11Texture(ID3D11Texture2D* tex, ID3D11ShaderResourceView* s
     , _w(w)
     , _h(h)
     , _fmt(fmt)
+    , _device(0)
+    , _cpu(0)
+    , _cpu_bytes(0)
+    , _pitch(0)
+    , _locked(0)
 {
 }
 
 lwD3D11Texture::~lwD3D11Texture()
 {
+    delete[] _cpu;
     if (_rtv)
         _rtv->Release();
     if (_srv)
@@ -126,8 +132,119 @@ HRESULT lwD3D11Texture::GetSurfaceLevel(UINT, IDirect3DSurface9** pp)
     return E_NOTIMPL;
 }
 
-HRESULT lwD3D11Texture::LockRect(UINT, D3DLOCKED_RECT*, const RECT*, DWORD) { return E_NOTIMPL; }
-HRESULT lwD3D11Texture::UnlockRect(UINT) { return E_NOTIMPL; }
+static UINT LockBpp(D3DFORMAT fmt)
+{
+    switch (fmt)
+    {
+    case D3DFMT_R5G6B5:
+    case D3DFMT_A1R5G5B5:
+    case D3DFMT_X1R5G5B5:
+    case D3DFMT_A4R4G4B4:
+        return 2;
+    default:
+        return 4;
+    }
+}
+
+void lwD3D11Texture::InitCpuLock(ID3D11Device* device, D3DFORMAT lock_fmt)
+{
+    _device = device;
+    if (lock_fmt != D3DFMT_UNKNOWN && lock_fmt != (D3DFORMAT)0)
+        _fmt = lock_fmt;
+    const UINT bpp = LockBpp(_fmt);
+    _pitch = _w * bpp;
+    _cpu_bytes = _pitch * _h;
+    delete[] _cpu;
+    _cpu = new BYTE[_cpu_bytes];
+    memset(_cpu, 0, _cpu_bytes);
+    _locked = 0;
+}
+
+static void ConvertLockToBGRA(const BYTE* src, UINT w, UINT h, UINT src_pitch, D3DFORMAT fmt, BYTE* dst, UINT dst_pitch)
+{
+    for (UINT y = 0; y < h; ++y)
+    {
+        const WORD* s16 = (const WORD*)(src + y * src_pitch);
+        DWORD* d32 = (DWORD*)(dst + y * dst_pitch);
+        if (fmt == D3DFMT_A4R4G4B4)
+        {
+            for (UINT x = 0; x < w; ++x)
+            {
+                const WORD p = s16[x];
+                const DWORD a = ((p >> 12) & 0xF) * 17u;
+                const DWORD r = ((p >> 8) & 0xF) * 17u;
+                const DWORD g = ((p >> 4) & 0xF) * 17u;
+                const DWORD b = (p & 0xF) * 17u;
+                d32[x] = (a << 24) | (r << 16) | (g << 8) | b;
+            }
+        }
+        else if (fmt == D3DFMT_R5G6B5)
+        {
+            for (UINT x = 0; x < w; ++x)
+            {
+                const WORD p = s16[x];
+                const DWORD r = ((p >> 11) & 0x1F) * 255u / 31u;
+                const DWORD g = ((p >> 5) & 0x3F) * 255u / 63u;
+                const DWORD b = (p & 0x1F) * 255u / 31u;
+                d32[x] = 0xFF000000u | (r << 16) | (g << 8) | b;
+            }
+        }
+        else
+        {
+            for (UINT x = 0; x < w; ++x)
+            {
+                const WORD p = s16[x];
+                const DWORD a = (fmt == D3DFMT_A1R5G5B5) ? (((p >> 15) & 1) ? 255u : 0u) : 255u;
+                const DWORD r = ((p >> 10) & 0x1F) * 255u / 31u;
+                const DWORD g = ((p >> 5) & 0x1F) * 255u / 31u;
+                const DWORD b = (p & 0x1F) * 255u / 31u;
+                d32[x] = (a << 24) | (r << 16) | (g << 8) | b;
+            }
+        }
+    }
+}
+
+HRESULT lwD3D11Texture::LockRect(UINT Level, D3DLOCKED_RECT* pLockedRect, const RECT* pRect, DWORD)
+{
+    if (Level != 0 || !pLockedRect || !_cpu)
+        return D3DERR_INVALIDCALL;
+    if (_locked || pRect)
+        return D3DERR_INVALIDCALL;
+    _locked = 1;
+    pLockedRect->pBits = _cpu;
+    pLockedRect->Pitch = (INT)_pitch;
+    return S_OK;
+}
+
+HRESULT lwD3D11Texture::UnlockRect(UINT Level)
+{
+    if (Level != 0 || !_locked || !_cpu || !_tex || !_device)
+        return D3DERR_INVALIDCALL;
+    _locked = 0;
+
+    ID3D11DeviceContext* ctx = 0;
+    _device->GetImmediateContext(&ctx);
+    if (!ctx)
+        return D3DERR_INVALIDCALL;
+
+    const BYTE* src = _cpu;
+    UINT src_pitch = _pitch;
+    std::vector<BYTE> bgra;
+    if (LockBpp(_fmt) == 2)
+    {
+        bgra.resize((size_t)_w * _h * 4);
+        ConvertLockToBGRA(_cpu, _w, _h, _pitch, _fmt, bgra.data(), _w * 4);
+        src = bgra.data();
+        src_pitch = _w * 4;
+    }
+
+    ID3D11ShaderResourceView* none = 0;
+    ctx->PSSetShaderResources(0, 1, &none);
+    ctx->UpdateSubresource(_tex, 0, 0, src, src_pitch, 0);
+    ctx->Release();
+    return S_OK;
+}
+
 HRESULT lwD3D11Texture::AddDirtyRect(const RECT*) { return S_OK; }
 
 static LW_RESULT CreateFromPixels(
@@ -803,12 +920,20 @@ LW_RESULT lwD3D11CreateEmptyTexture(
     ID3D11Device* device,
     UINT width,
     UINT height,
+    D3DFORMAT format,
     IDirect3DTextureX** out_tex)
 {
     if (!device || !out_tex || width == 0 || height == 0)
         return LW_RET_FAILED;
+    if (format == 0 || format == D3DFMT_UNKNOWN)
+        format = D3DFMT_A8R8G8B8;
     std::vector<BYTE> zeros((size_t)width * height * 4, 0);
-    return CreateFromPixels(device, zeros.data(), width, height, width * 4, DXGI_FORMAT_B8G8R8A8_UNORM, D3DFMT_A8R8G8B8, out_tex);
+    if (CreateFromPixels(device, zeros.data(), width, height, width * 4,
+        DXGI_FORMAT_B8G8R8A8_UNORM, format, out_tex) != LW_RET_OK || !*out_tex)
+        return LW_RET_FAILED;
+    if (lwD3D11Texture* t = lwAsD3D11Texture(*out_tex))
+        t->InitCpuLock(device, format);
+    return LW_RET_OK;
 }
 
 LW_RESULT lwD3D11CreateRenderTargetTexture(

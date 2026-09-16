@@ -1006,20 +1006,20 @@ LW_RESULT lwDeviceObject11::CreateIndexBuffer(UINT length, DWORD, D3DFORMAT fmt,
     return lwD3D11CreateIndexBuffer(_device, _context, length, fmt, ib);
 }
 
-LW_RESULT lwDeviceObject11::CreateTexture(IDirect3DTextureX** out_tex, const lwTexDataInfo* info, DWORD, DWORD, DWORD, D3DPOOL)
+LW_RESULT lwDeviceObject11::CreateTexture(IDirect3DTextureX** out_tex, const lwTexDataInfo* info, DWORD, DWORD, DWORD format, D3DPOOL)
 {
     if (out_tex) *out_tex = 0;
     if (!info || !_device)
         return LW_RET_FAILED;
-    return lwD3D11CreateEmptyTexture(_device, info->width, info->height, out_tex);
+    return lwD3D11CreateEmptyTexture(_device, info->width, info->height, (D3DFORMAT)format, out_tex);
 }
 
-LW_RESULT lwDeviceObject11::CreateTexture(IDirect3DTextureX** out_tex, UINT width, UINT height, UINT, DWORD, D3DFORMAT, D3DPOOL)
+LW_RESULT lwDeviceObject11::CreateTexture(IDirect3DTextureX** out_tex, UINT width, UINT height, UINT, DWORD, D3DFORMAT format, D3DPOOL)
 {
     if (out_tex) *out_tex = 0;
     if (!_device)
         return LW_RET_FAILED;
-    return lwD3D11CreateEmptyTexture(_device, width, height, out_tex);
+    return lwD3D11CreateEmptyTexture(_device, width, height, format, out_tex);
 }
 
 LW_RESULT lwDeviceObject11::CreateTextureFromFileInMemory(IDirect3DTextureX** out_tex, void* data, UINT data_size, UINT, UINT, UINT, DWORD, D3DFORMAT, D3DPOOL, DWORD, DWORD, D3DCOLOR colorkey, D3DXIMAGE_INFO* src_info, PALETTEENTRY*)

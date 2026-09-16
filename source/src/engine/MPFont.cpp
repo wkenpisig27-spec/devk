@@ -167,12 +167,10 @@ bool CMPFont::CreateFont( IDirect3DDeviceX* pd3dDevice, char szFontName[], int n
 	SetTextAlign( _hDc, TA_TOP );
 
 #ifdef USE_RENDER
-	if (lwIsDx11Active() || !_pDev || !_pDev->GetDevice()) {
-		lwD3D11Gap(LW_D3D11_SKIP, "font-d3d9-tex",
-			"CMPFont mesh/texture create needs D3D9; GDI font is kept, GPU atlas waits for Slice 8");
-		_vecBuf.resize(_Max);
-		return true;
-	}
+	if (!_pDev)
+		return false;
+	if (!lwIsDx11Active() && !_pDev->GetDevice())
+		return false;
 #endif
 	lwIResourceMgr* res_mgr = _pDev->GetInterfaceMgr()->res_mgr;
 
@@ -283,7 +281,7 @@ void CMPFont::BindingRes(CMPResManger* pResMagr)
 	{
 		*_vecValidID[iw] = iw;
 	}
-	if (_pTexFast && !lwIsDx11Active())
+	if (_pTexFast)
 		FillTextToTex(pResMagr->GetDefaultText());
 
 }
@@ -1625,11 +1623,8 @@ bool CMPFont::FindTextFromTex( char c1, char c2, float & tX1, float & tY1 , floa
 
 void CMPFont::FillTextToTex( char* szText )
 {
-	if (!_pTexFast || lwIsDx11Active()) {
-		lwD3D11Gap(LW_D3D11_SKIP, "font-filltext-tex",
-			"FillTextToTex needs the D3D9 font atlas; skipped on DX11");
+	if (!_pTexFast)
 		return;
-	}
 skip:
 
 	if(!_pTexFast->IsLoadingOK())
