@@ -158,6 +158,8 @@ struct MeshState
     ID3D11Buffer* cb1;
     ID3D11SamplerState* samp;
     ID3D11SamplerState* samp_clamp;
+    ID3D11SamplerState* samp_point;
+    ID3D11SamplerState* samp_point_clamp;
     ID3D11RasterizerState* rast_ccw;
     ID3D11RasterizerState* rast_cw;
     ID3D11RasterizerState* rast_none;
@@ -214,6 +216,8 @@ static void ReleaseMesh()
     if (s_mesh.rast_none) s_mesh.rast_none->Release();
     if (s_mesh.rast_cw) s_mesh.rast_cw->Release();
     if (s_mesh.rast_ccw) s_mesh.rast_ccw->Release();
+    if (s_mesh.samp_point_clamp) s_mesh.samp_point_clamp->Release();
+    if (s_mesh.samp_point) s_mesh.samp_point->Release();
     if (s_mesh.samp_clamp) s_mesh.samp_clamp->Release();
     if (s_mesh.samp) s_mesh.samp->Release();
     if (s_mesh.cb1) s_mesh.cb1->Release();
@@ -317,6 +321,15 @@ LW_RESULT lwD3D11MeshInit(ID3D11Device* device, ID3D11DeviceContext* context)
     sd.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
     sd.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
     device->CreateSamplerState(&sd, &s_mesh.samp_clamp);
+    sd.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+    sd.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    sd.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    sd.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    device->CreateSamplerState(&sd, &s_mesh.samp_point);
+    sd.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+    sd.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+    sd.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+    device->CreateSamplerState(&sd, &s_mesh.samp_point_clamp);
 
     s_mesh.rast_ccw = MakeRast(device, D3D11_CULL_BACK);
     s_mesh.rast_cw = MakeRast(device, D3D11_CULL_FRONT);
@@ -861,8 +874,11 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
         if (aref == 0xffffffff)
             aref = 0;
         DWORD afunc = dev->GetCachedRS(D3DRS_ALPHAFUNC);
-        if (afunc == D3DCMP_GREATER || afunc == D3DCMP_GREATEREQUAL || afunc == 0xffffffff)
-            cb.extra[3] = (float)(aref & 0xff) / 255.0f;
+        const float ref = (float)(aref & 0xff) / 255.0f;
+        if (afunc == D3DCMP_NOTEQUAL)
+            cb.extra[3] = ref + 0.5f / 255.0f;
+        else if (afunc == D3DCMP_GREATER || afunc == D3DCMP_GREATEREQUAL || afunc == 0xffffffff)
+            cb.extra[3] = ref;
     }
 
     D3D11_MAPPED_SUBRESOURCE mapped = {};
@@ -940,7 +956,14 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     s_mesh.context->PSSetShaderResources(1, 1, &srv1);
     ID3D11SamplerState* samp = s_mesh.samp;
     DWORD addr = dev->GetCachedSS(0, D3DSAMP_ADDRESSU);
-    if (addr == D3DTADDRESS_CLAMP && s_mesh.samp_clamp)
+    DWORD mag = dev->GetCachedSS(0, D3DSAMP_MAGFILTER);
+    const int point = (mag == D3DTEXF_POINT);
+    const int clamp = (addr == D3DTADDRESS_CLAMP);
+    if (point && clamp && s_mesh.samp_point_clamp)
+        samp = s_mesh.samp_point_clamp;
+    else if (point && s_mesh.samp_point)
+        samp = s_mesh.samp_point;
+    else if (clamp && s_mesh.samp_clamp)
         samp = s_mesh.samp_clamp;
     s_mesh.context->PSSetSamplers(0, 1, &samp);
     s_mesh.context->PSSetSamplers(1, 1, &samp);

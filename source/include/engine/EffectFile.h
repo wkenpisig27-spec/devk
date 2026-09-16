@@ -142,7 +142,10 @@ inline BOOL CMPEffectFile::SetDword(LPCSTR DwName, DWORD dwvalue)
 inline BOOL CMPEffectFile::Begin(DWORD dwIsSave)
 {
 	if(!m_pEffect)
+	{
+		m_passes = 1;
 		return TRUE;
+	}
     if(FAILED(m_pEffect->Begin(&m_passes,dwIsSave)))
 		return FALSE;
 	return TRUE;

@@ -378,14 +378,13 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX
 	}
 
 #ifdef USE_RENDER
-	// DX11 has no D3DX effect runtime and no D3D9 VS objects. Synthetic caps
-	// report VS 3.0, which would otherwise take RenderVS and crash on a NULL
-	// ID3DXEffect (LoadEffectFromFile is skipped). Force the FF/soft path.
+	// DX11 has no D3D9 VS objects (LoadTotalVShader). Keep the FF/soft draw
+	// path; eff.fx t0-t6 is applied as DeviceObject states in CMPEffectFile.
 	if (lwIsDx11Active() || !m_pDev->GetDevice()) {
 		m_bUseSoft = true;
 		m_bUseSoftOrg = true;
-		lwD3D11Gap(LW_D3D11_SKIP, "effect-use-soft",
-			"DX11 has no D3DX effects / D3D9 VS; using CMPModelEff::RenderSoft");
+		lwD3D11Gap(LW_D3D11_FALLBACK, "effect-use-soft",
+			"DX11 uses CMPModelEff::RenderSoft + eff.fx state table");
 	}
 #endif
 
@@ -401,12 +400,6 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX
 	const char* effectName = "shader\\eff.fx";
 #else
 	const char* effectName = "shader\\eff.fx";
-#endif
-#ifdef USE_RENDER
-	if (lwIsDx11Active() || !pDev->GetDevice()) {
-		lwD3D11Gap(LW_D3D11_SKIP, "d3dx-effect-file",
-			"D3DXCreateEffectFromFile needs IDirect3DDevice9; skipped on DX11");
-	} else
 #endif
 	if(!_CEffectFile.LoadEffectFromFile(effectName))
 	{

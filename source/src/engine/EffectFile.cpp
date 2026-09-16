@@ -57,10 +57,16 @@ BOOL CMPEffectFile::LoadEffectFromFile( LPCSTR pszfile)
 	HRESULT hr;
 	ID3DXBuffer* pErrorBuffer = NULL;
 #ifdef USE_RENDER
-	if (!m_pDev || !m_pDev->GetDevice() || lwIsDx11Active()) {
-		lwD3D11Gap(LW_D3D11_SKIP, "d3dx-create-effect",
-			"D3DXCreateEffectFromFile needs IDirect3DDevice9");
-		return FALSE;
+	if (lwIsDx11Active() || !m_pDev || !m_pDev->GetDevice()) {
+		free();
+		_iTechNum = 7;
+		_vecTechniques.resize(7);
+		for (int i = 0; i < 7; ++i)
+			_vecTechniques[i] = (D3DXHANDLE)(INT_PTR)(i + 1);
+		m_passes = 1;
+		lwD3D11Gap(LW_D3D11_FALLBACK, "eff-fx-state-table",
+			"shader\\eff.fx t0-t6 applied as DeviceObject FF states (no D3DX)");
+		return TRUE;
 	}
 	hr = D3DXCreateEffectFromFile(m_pDev->GetDevice(), pszfile, NULL, NULL, 0, NULL, &m_pEffect, &pErrorBuffer);
 #else
@@ -208,27 +214,46 @@ void CMPEffectFile::ApplySoftPass()
 	if (!m_pDev)
 		return;
 
+	// Documented FF subset of client/shader/eff.fx (PixelShader=NULL).
+	// Index i is technique ti. Src/Dest blend is left alone except t5/t6;
+	// model/particle code sets those after Pass().
 	const int tech = _iCurTech;
 	const int zenable = (tech == 5 || tech == 6) ? FALSE : TRUE;
 	const int zwrite = (tech == 1) ? TRUE : FALSE;
 	const int alphablend = (tech == 1) ? FALSE : TRUE;
+	const int alphatest = (tech == 4) ? TRUE : FALSE;
 	const int lighting = FALSE;
+	const int specular = (tech == 0 || tech == 1) ? TRUE : FALSE;
 	const int cull = (tech == 5 || tech == 6) ? D3DCULL_CCW : D3DCULL_NONE;
 	const int clamp_uv = (tech == 2 || tech == 3 || tech == 5) ? 1 : 0;
 	const int tfactor_arg = (tech == 3) ? 1 : 0;
+	const int point_filter = (tech == 5) ? 1 : 0;
+	const int set_filter = (tech == 1 || tech == 3) ? 0 : 1;
 
 	m_pDev->SetRenderState(D3DRS_ZENABLE, zenable);
 	m_pDev->SetRenderState(D3DRS_ZWRITEENABLE, zwrite);
 	m_pDev->SetRenderState(D3DRS_LIGHTING, lighting);
 	m_pDev->SetRenderState(D3DRS_FOGENABLE, FALSE);
+	m_pDev->SetRenderState(D3DRS_STENCILENABLE, FALSE);
+	m_pDev->SetRenderState(D3DRS_DITHERENABLE, FALSE);
+	m_pDev->SetRenderState(D3DRS_SPECULARENABLE, specular);
 	m_pDev->SetRenderState(D3DRS_CULLMODE, cull);
-	m_pDev->SetRenderState(D3DRS_ALPHATESTENABLE, tech == 4 ? TRUE : FALSE);
+	m_pDev->SetRenderState(D3DRS_ALPHATESTENABLE, alphatest);
+	if (alphatest)
+	{
+		m_pDev->SetRenderState(D3DRS_ALPHAREF, 0xff000000);
+		m_pDev->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_NOTEQUAL);
+	}
 	m_pDev->SetRenderState(D3DRS_ALPHABLENDENABLE, alphablend);
 	if (tech == 5 || tech == 6)
 	{
 		m_pDev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 		m_pDev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+		m_pDev->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
 	}
+	if (tech == 5)
+		m_pDev->SetRenderState(D3DRS_CLIPPING, FALSE);
+	m_pDev->SetRenderState(D3DRS_VERTEXBLEND, D3DVBF_DISABLE);
 
 	m_pDev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 	m_pDev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
@@ -241,5 +266,11 @@ void CMPEffectFile::ApplySoftPass()
 
 	m_pDev->SetSamplerState(0, D3DSAMP_ADDRESSU, clamp_uv ? D3DTADDRESS_CLAMP : D3DTADDRESS_WRAP);
 	m_pDev->SetSamplerState(0, D3DSAMP_ADDRESSV, clamp_uv ? D3DTADDRESS_CLAMP : D3DTADDRESS_WRAP);
+	if (set_filter)
+	{
+		const DWORD filt = point_filter ? D3DTEXF_POINT : D3DTEXF_LINEAR;
+		m_pDev->SetSamplerState(0, D3DSAMP_MINFILTER, filt);
+		m_pDev->SetSamplerState(0, D3DSAMP_MAGFILTER, filt);
+	}
 }
 

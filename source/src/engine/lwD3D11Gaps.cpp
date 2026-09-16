@@ -86,7 +86,7 @@ void lwD3D11GapReportInventory()
 		{ "inv-texture-stage",
 		  "SetTextureStageState via lwMisc atoms / materials — must become an FF-emulation PS" },
 		{ "inv-d3dx-effect",
-		  "D3DXCreateEffectFromFile in EffectFile.cpp / MPResManger — no D3DX11 Effects path" },
+		  "eff.fx t0-t6 is a DeviceObject FF state table on DX11; D3DXCreateEffectFromFile remains DX9-only" },
 		{ "inv-d3dx-sprite-font-tex",
 		  "D3DXCreateSprite / Font / TextureFromFile in UIRender, MPFont, GameAppInterface" },
 		{ "inv-device-lost",
