@@ -90,7 +90,7 @@ void lwD3D11GapReportInventory()
 		{ "inv-d3dx-sprite-font-tex",
 		  "D3DXCreateSprite is skipped; UI/console sprites blit. CMPFont GPU atlas locks empty DX11 textures" },
 		{ "inv-device-lost",
-		  "lwSysGraphics::TestCooperativeLevel / LoseDevice / ResetDevice — DXGI ResizeBuffers instead" },
+		  "DX11 resize is DXGI ResizeBuffers + borderless HWND; D3D9 lose/reset fan-out stays skipped" },
 		{ "inv-stream-1mb",
 		  "lwStreamObj 1 MB static-stream cap is a DX9 leftover; lift on D3D11" },
 		{ "inv-shader-mgr9",

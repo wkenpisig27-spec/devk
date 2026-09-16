@@ -309,9 +309,14 @@ LW_RESULT lwDeviceObject11::CreateDevice(lwD3DCreateParam* param)
     sd.OutputWindow = param->hwnd;
     sd.SampleDesc.Count = 1;
     sd.SampleDesc.Quality = 0;
-    sd.Windowed = param->present_param.Windowed ? TRUE : FALSE;
+    sd.Windowed = TRUE;
     sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
     sd.Flags = 0;
+    if (!param->present_param.Windowed)
+    {
+        lwD3D11Gap(LW_D3D11_FALLBACK, "borderless-fs",
+            "DXGI swapchain stays windowed; fullscreen is HWND WS_POPUP + ResizeBuffers");
+    }
 
     hr = _factory->CreateSwapChain(_device, &sd, &_swapchain);
     if (FAILED(hr) || !_swapchain)
@@ -348,7 +353,7 @@ LW_RESULT lwDeviceObject11::CreateDevice(lwD3DCreateParam* param)
     lwD3D11ShaderMgrInit(_device, _context);
 
     LG("d3d11gaps", "[SysGraphics] DeviceObject11 up: feature=0x%X %ux%u windowed=%d vsync=%d\n",
-        (unsigned)got, w, h, (int)sd.Windowed, _vsync);
+        (unsigned)got, w, h, (int)param->present_param.Windowed, _vsync);
     return LW_RET_OK;
 }
 
@@ -359,7 +364,6 @@ LW_RESULT lwDeviceObject11::ResetDevice(D3DPRESENT_PARAMETERS* d3dpp)
 
     UINT w = d3dpp ? d3dpp->BackBufferWidth : _bb_width;
     UINT h = d3dpp ? d3dpp->BackBufferHeight : _bb_height;
-    BOOL windowed = d3dpp ? d3dpp->Windowed : _d3d_create_param.present_param.Windowed;
     if (w == 0) w = 1;
     if (h == 0) h = 1;
 
@@ -368,23 +372,27 @@ LW_RESULT lwDeviceObject11::ResetDevice(D3DPRESENT_PARAMETERS* d3dpp)
 
     _ReleaseTargets();
 
+    DXGI_SWAP_CHAIN_DESC sd = {};
+    if (SUCCEEDED(_swapchain->GetDesc(&sd)) && !sd.Windowed)
+        _swapchain->SetFullscreenState(FALSE, 0);
+
     HRESULT hr = _swapchain->ResizeBuffers(0, w, h, DXGI_FORMAT_UNKNOWN, 0);
+    if (FAILED(hr))
+    {
+        _swapchain->SetFullscreenState(FALSE, 0);
+        hr = _swapchain->ResizeBuffers(0, w, h, DXGI_FORMAT_UNKNOWN, 0);
+    }
     if (FAILED(hr))
     {
         LG("d3d11gaps", "[GAP] resizebuffers — ResizeBuffers failed hr=0x%08X\n", (unsigned)hr);
         return LW_RET_FAILED;
     }
 
-    DXGI_SWAP_CHAIN_DESC sd = {};
-    if (SUCCEEDED(_swapchain->GetDesc(&sd)) && sd.Windowed != windowed)
-    {
-        lwD3D11Gap(LW_D3D11_SKIP, "exclusive-fullscreen",
-            "Slice 1 keeps the HWND swapchain; DXGI exclusive fullscreen is later");
-    }
-
     if (LW_FAILED(_CreateTargets()))
         return LW_RET_FAILED;
 
+    _display_mode.Width = _bb_width;
+    _display_mode.Height = _bb_height;
     UpdateWindowRect();
     return LW_RET_OK;
 }
@@ -473,6 +481,14 @@ LW_RESULT lwDeviceObject11::Present()
     if (!_swapchain)
         return LW_RET_FAILED;
     HRESULT hr = _swapchain->Present(_vsync ? 1 : 0, 0);
+    if (hr == DXGI_STATUS_OCCLUDED)
+        return LW_RET_OK;
+    if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
+    {
+        lwD3D11Gap(LW_D3D11_GAP, "present-removed",
+            "DXGI device removed/reset hr=0x%08X — restart the client", (unsigned)hr);
+        return LW_RET_FAILED;
+    }
     if (FAILED(hr))
     {
         LG("d3d11gaps", "[GAP] present — Present failed hr=0x%08X\n", (unsigned)hr);

@@ -163,6 +163,11 @@ LW_RESULT lwSysGraphics::ToggleFullScreen(D3DPRESENT_PARAMETERS* d3dpp, lwWndInf
             goto __ret;
         }
     }
+    else if (dx11)
+    {
+        if (SetWindowPos(hwnd, HWND_TOP, 0, 0, wnd_info->width, wnd_info->height, SWP_SHOWWINDOW) == 0)
+            goto __ret;
+    }
 
     if(LW_FAILED(_dev_obj->UpdateWindowRect()))
         goto __ret;
