@@ -56,6 +56,10 @@ lwDeviceObject11::lwDeviceObject11(lwSysGraphics* sys_graphics)
     , _depth_tex(0)
     , _rtv(0)
     , _dsv(0)
+    , _saved_rtv(0)
+    , _saved_dsv(0)
+    , _offscreen_push(0)
+    , _bShadowPass(0)
     , _bb_width(0)
     , _bb_height(0)
     , _vsync(0)
@@ -190,6 +194,36 @@ LW_RESULT lwDeviceObject11::_CreateTargets()
     _BindTargets();
     lwD3D11BlitSetViewport(_bb_width, _bb_height);
     return LW_RET_OK;
+}
+
+void lwDeviceObject11::PushOffscreenTargets(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv)
+{
+    if (!rtv)
+        return;
+    if (_offscreen_push == 0)
+    {
+        _saved_rtv = _rtv;
+        _saved_dsv = _dsv;
+    }
+    _offscreen_push++;
+    _rtv = rtv;
+    _dsv = dsv;
+    _BindTargets();
+}
+
+void lwDeviceObject11::PopOffscreenTargets()
+{
+    if (_offscreen_push <= 0)
+        return;
+    _offscreen_push--;
+    if (_offscreen_push == 0)
+    {
+        _rtv = _saved_rtv;
+        _dsv = _saved_dsv;
+        _saved_rtv = 0;
+        _saved_dsv = 0;
+        _BindTargets();
+    }
 }
 
 LW_RESULT lwDeviceObject11::CreateDirect3D()
@@ -523,6 +557,14 @@ LW_RESULT lwDeviceObject11::SetTextureForced(DWORD stage, IDirect3DTextureX* tex
 
 LW_RESULT lwDeviceObject11::SetRenderState(D3DRENDERSTATETYPE state, DWORD value)
 {
+    if (_bShadowPass)
+    {
+        if (state == D3DRS_ALPHATESTENABLE || state == D3DRS_ALPHAREF ||
+            state == D3DRS_ALPHAFUNC || state == D3DRS_CULLMODE ||
+            state == D3DRS_ALPHABLENDENABLE || state == D3DRS_SRCBLEND ||
+            state == D3DRS_DESTBLEND || state == D3DRS_TEXTUREFACTOR)
+            return LW_RET_OK;
+    }
     if ((DWORD)state < LW_MAX_RENDERSTATE_NUM)
         _rs_value[state] = value;
     return LW_RET_OK;
@@ -530,11 +572,19 @@ LW_RESULT lwDeviceObject11::SetRenderState(D3DRENDERSTATETYPE state, DWORD value
 
 LW_RESULT lwDeviceObject11::SetRenderStateForced(D3DRENDERSTATETYPE state, DWORD value)
 {
-    return SetRenderState(state, value);
+    if ((DWORD)state < LW_MAX_RENDERSTATE_NUM)
+        _rs_value[state] = value;
+    return LW_RET_OK;
 }
 
 LW_RESULT lwDeviceObject11::SetTextureStageState(DWORD stage, D3DTEXTURESTAGESTATETYPE type, DWORD value)
 {
+    if (_bShadowPass && stage <= 1)
+    {
+        if (type == D3DTSS_COLOROP || type == D3DTSS_COLORARG1 ||
+            type == D3DTSS_ALPHAOP || type == D3DTSS_ALPHAARG1)
+            return LW_RET_OK;
+    }
     if (stage < LW_MAX_TEXTURESTAGE_NUM && (DWORD)type < LW_MAX_TEXTURESTAGESTATE_NUM)
         _tss_value[stage][type] = value;
     return LW_RET_OK;
@@ -542,7 +592,9 @@ LW_RESULT lwDeviceObject11::SetTextureStageState(DWORD stage, D3DTEXTURESTAGESTA
 
 LW_RESULT lwDeviceObject11::SetTextureStageStateForced(DWORD stage, D3DTEXTURESTAGESTATETYPE type, DWORD value)
 {
-    return SetTextureStageState(stage, type, value);
+    if (stage < LW_MAX_TEXTURESTAGE_NUM && (DWORD)type < LW_MAX_TEXTURESTAGESTATE_NUM)
+        _tss_value[stage][type] = value;
+    return LW_RET_OK;
 }
 
 LW_RESULT lwDeviceObject11::SetSamplerState(DWORD sampler, D3DSAMPLERSTATETYPE type, DWORD value)

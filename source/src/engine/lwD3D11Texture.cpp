@@ -33,10 +33,11 @@ lwD3D11Texture* lwAsD3D11Texture(IDirect3DBaseTextureX* tex)
     return (lwD3D11Texture*)p;
 }
 
-lwD3D11Texture::lwD3D11Texture(ID3D11Texture2D* tex, ID3D11ShaderResourceView* srv, UINT w, UINT h, D3DFORMAT fmt)
+lwD3D11Texture::lwD3D11Texture(ID3D11Texture2D* tex, ID3D11ShaderResourceView* srv, UINT w, UINT h, D3DFORMAT fmt, ID3D11RenderTargetView* rtv)
     : _ref(1)
     , _tex(tex)
     , _srv(srv)
+    , _rtv(rtv)
     , _w(w)
     , _h(h)
     , _fmt(fmt)
@@ -45,6 +46,8 @@ lwD3D11Texture::lwD3D11Texture(ID3D11Texture2D* tex, ID3D11ShaderResourceView* s
 
 lwD3D11Texture::~lwD3D11Texture()
 {
+    if (_rtv)
+        _rtv->Release();
     if (_srv)
         _srv->Release();
     if (_tex)
@@ -806,6 +809,84 @@ LW_RESULT lwD3D11CreateEmptyTexture(
         return LW_RET_FAILED;
     std::vector<BYTE> zeros((size_t)width * height * 4, 0);
     return CreateFromPixels(device, zeros.data(), width, height, width * 4, DXGI_FORMAT_B8G8R8A8_UNORM, D3DFMT_A8R8G8B8, out_tex);
+}
+
+LW_RESULT lwD3D11CreateRenderTargetTexture(
+    ID3D11Device* device,
+    UINT width,
+    UINT height,
+    IDirect3DTextureX** out_tex)
+{
+    if (!device || !out_tex || width == 0 || height == 0)
+        return LW_RET_FAILED;
+    *out_tex = 0;
+
+    D3D11_TEXTURE2D_DESC desc = {};
+    desc.Width = width;
+    desc.Height = height;
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+
+    ID3D11Texture2D* tex = 0;
+    if (FAILED(device->CreateTexture2D(&desc, 0, &tex)) || !tex)
+        return LW_RET_FAILED;
+
+    ID3D11RenderTargetView* rtv = 0;
+    ID3D11ShaderResourceView* srv = 0;
+    if (FAILED(device->CreateRenderTargetView(tex, 0, &rtv)) || !rtv)
+    {
+        tex->Release();
+        return LW_RET_FAILED;
+    }
+    if (FAILED(device->CreateShaderResourceView(tex, 0, &srv)) || !srv)
+    {
+        rtv->Release();
+        tex->Release();
+        return LW_RET_FAILED;
+    }
+
+    *out_tex = new lwD3D11Texture(tex, srv, width, height, D3DFMT_A8R8G8B8, rtv);
+    return LW_RET_OK;
+}
+
+LW_RESULT lwD3D11CreateDepthStencil(
+    ID3D11Device* device,
+    UINT width,
+    UINT height,
+    ID3D11Texture2D** out_tex,
+    ID3D11DepthStencilView** out_dsv)
+{
+    if (!device || !out_tex || !out_dsv || width == 0 || height == 0)
+        return LW_RET_FAILED;
+    *out_tex = 0;
+    *out_dsv = 0;
+
+    D3D11_TEXTURE2D_DESC desc = {};
+    desc.Width = width;
+    desc.Height = height;
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+    ID3D11Texture2D* tex = 0;
+    if (FAILED(device->CreateTexture2D(&desc, 0, &tex)) || !tex)
+        return LW_RET_FAILED;
+    ID3D11DepthStencilView* dsv = 0;
+    if (FAILED(device->CreateDepthStencilView(tex, 0, &dsv)) || !dsv)
+    {
+        tex->Release();
+        return LW_RET_FAILED;
+    }
+    *out_tex = tex;
+    *out_dsv = dsv;
+    return LW_RET_OK;
 }
 
 LW_END

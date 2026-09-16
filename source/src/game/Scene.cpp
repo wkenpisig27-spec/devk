@@ -1756,18 +1756,13 @@ bool CGameScene::RecreateShadowMapFromQuality(int nQuality, bool bEnableShadow) 
 	}
 
 	if (bEnableShadow && g_Config.m_bEnableShadowMap) {
-		if (lwIsDx11Active() || !g_Render.GetDevice()) {
-			lwD3D11Gap(LW_D3D11_SKIP, "scene-shadowmap-create",
-				"CMPShadowMap CreateTexture/D3DX effect is D3D9; blob shadows stay on DX11");
+		_pShadowMap = new CMPShadowMap();
+		if (!_pShadowMap->Create(g_Render.GetDevice(), shadowCfg)) {
+			LG("shadow", "Failed to initialize shadow map\n");
+			delete _pShadowMap;
+			_pShadowMap = nullptr;
 		} else {
-			_pShadowMap = new CMPShadowMap();
-			if (!_pShadowMap->Create(g_Render.GetDevice(), shadowCfg)) {
-				LG("shadow", "Failed to initialize shadow map\n");
-				delete _pShadowMap;
-				_pShadowMap = nullptr;
-			} else {
-				_pShadowMap->SetEnabled(true);
-			}
+			_pShadowMap->SetEnabled(true);
 		}
 	}
 

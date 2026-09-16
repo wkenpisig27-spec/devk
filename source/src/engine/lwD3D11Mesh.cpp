@@ -118,6 +118,10 @@ static const char* kMeshHLSL =
     "  if (extra.w >= 0.0) clip(tex.a - extra.w);\n"
     "  if (extra.y > 0.5) return float4(outlineColor.rgb, outlineColor.a * tex.a);\n"
     "  int mix = (int)(more.w + 0.5);\n"
+    "  if (more.y > 1.5) {\n"
+    "    float sa = (mix & 2) ? tfactor.a : tex.a;\n"
+    "    return float4(tfactor.rgb, sa);\n"
+    "  }\n"
     "  float3 tint;\n"
     "  if (mix & 1) tint = tfactor.rgb;\n"
     "  else if (more.y > 0.5) tint = i.col.rgb;\n"
@@ -832,11 +836,19 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     cb.outlineColor[3] = s_mesh.outline_color[3];
     cb.more[0] = info.has_diff ? 1.0f : 0.0f;
     cb.more[1] = (lighting == 0 || !info.has_nrm) ? 1.0f : 0.0f;
+    DWORD cop0 = dev->GetCachedTSS(0, D3DTSS_COLOROP);
+    DWORD ca1 = dev->GetCachedTSS(0, D3DTSS_COLORARG1);
     DWORD carg2 = dev->GetCachedTSS(0, D3DTSS_COLORARG2);
     DWORD aarg2 = dev->GetCachedTSS(0, D3DTSS_ALPHAARG2);
     const int color_tf = (carg2 == D3DTA_TFACTOR);
     const int alpha_tf = (aarg2 == D3DTA_TFACTOR);
     cb.more[3] = (float)(color_tf + alpha_tf * 2);
+    if (cop0 == D3DTOP_SELECTARG1 && ca1 == D3DTA_TFACTOR)
+    {
+        cb.more[1] = 2.0f;
+        DWORD aa1 = dev->GetCachedTSS(0, D3DTSS_ALPHAARG1);
+        cb.more[3] = (aa1 == D3DTA_TEXTURE) ? 0.0f : 2.0f;
+    }
     DWORD tf = dev->GetCachedRS(D3DRS_TEXTUREFACTOR);
     ArgbToFloat(tf, cb.tfactor);
     DWORD cop1 = dev->GetCachedTSS(1, D3DTSS_COLOROP);

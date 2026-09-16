@@ -100,6 +100,11 @@ private:
     bool CreateResources();
     void ReleaseResources();
     void BuildGroundGrid();
+    bool CreateDx11(const ShadowMapConfig& config);
+    bool CreateResourcesDx11();
+    bool BeginShadowPassDx11();
+    void EndShadowPassDx11();
+    void RenderGroundOverlayDx11(const D3DXMATRIX& matViewProj);
 
 private:
     IDirect3DDeviceX*      _pDev;
@@ -138,7 +143,9 @@ private:
     // Ground overlay grid for terrain shadow rendering
     IDirect3DVertexBuffer9* _pGroundVB;
     IDirect3DIndexBuffer9*  _pGroundIB;
-    int                    _nGroundGridSize;    // Grid subdivisions
+    int                    _nGroundGridSize;
     int                    _nGroundVertCount;
     int                    _nGroundTriCount;
+    void*                  _pDx11DepthTex;
+    void*                  _pDx11DSV;
 };

@@ -130,6 +130,11 @@ public:
     LW_RESULT BeginScene();
     LW_RESULT EndScene();
 
+    void SetShadowPassMode(bool enabled) { _bShadowPass = enabled; }
+    bool IsShadowPassMode() const { return _bShadowPass; }
+    void PushOffscreenTargets(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv);
+    void PopOffscreenTargets();
+
     ID3D11Device* GetD3D11Device() { return _device; }
     ID3D11DeviceContext* GetD3D11Context() { return _context; }
 
@@ -213,6 +218,10 @@ private:
     ID3D11Texture2D* _depth_tex;
     ID3D11RenderTargetView* _rtv;
     ID3D11DepthStencilView* _dsv;
+    ID3D11RenderTargetView* _saved_rtv;
+    ID3D11DepthStencilView* _saved_dsv;
+    int _offscreen_push;
+    int _bShadowPass;
     UINT _bb_width;
     UINT _bb_height;
     int _vsync;

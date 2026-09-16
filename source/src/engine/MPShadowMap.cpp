@@ -3,6 +3,16 @@
 #include "MPShadowMap.h"
 #include "MPRender.h"
 #include "lwDeviceObject.h"
+#include "lwDeviceObject11.h"
+#include "lwD3D11Texture.h"
+#include "lwD3D11Buffer.h"
+#include "lwD3D11Gaps.h"
+#include "lwRenderBackend.h"
+
+#include <d3d11.h>
+#include <d3dcompiler.h>
+
+#pragma comment(lib, "d3dcompiler.lib")
 
 extern MINDPOWER_API MPRender g_Render;
 
@@ -170,6 +180,224 @@ technique ShadowReceive {
 }
 )HLSL";
 
+static const char* s_szShadowOverlay11 =
+    "cbuffer CB0 : register(b0) {\n"
+    "  row_major float4x4 worldViewProj;\n"
+    "  row_major float4x4 shadowTransform;\n"
+    "  float4 params; /* x=intensity y=texel z=border w=pcfRadius */\n"
+    "};\n"
+    "Texture2D shadowMap : register(t0);\n"
+    "SamplerState samp : register(s0);\n"
+    "struct VSIn { float3 pos : POSITION; };\n"
+    "struct PSIn { float4 pos : SV_POSITION; float4 shadowUV : TEXCOORD0; };\n"
+    "PSIn VSMain(VSIn i) {\n"
+    "  PSIn o;\n"
+    "  float4 wp = float4(i.pos, 1);\n"
+    "  o.pos = mul(wp, worldViewProj);\n"
+    "  o.shadowUV = mul(wp, shadowTransform);\n"
+    "  return o;\n"
+    "}\n"
+    "float4 PSMain(PSIn i) : SV_TARGET {\n"
+    "  float2 uv = i.shadowUV.xy / max(i.shadowUV.w, 0.0001);\n"
+    "  float2 edgeDist = saturate((0.5 - abs(uv - 0.5)) / max(params.z, 0.001));\n"
+    "  float fade = edgeDist.x * edgeDist.y;\n"
+    "  float r = params.w * params.y;\n"
+    "  float total = 0;\n"
+    "  total += (1.0 - shadowMap.Sample(samp, uv + float2(-0.326*r, -0.406*r)).r);\n"
+    "  total += (1.0 - shadowMap.Sample(samp, uv + float2(-0.840*r, -0.074*r)).r);\n"
+    "  total += (1.0 - shadowMap.Sample(samp, uv + float2(-0.696*r,  0.457*r)).r);\n"
+    "  total += (1.0 - shadowMap.Sample(samp, uv + float2(-0.203*r,  0.621*r)).r);\n"
+    "  total += (1.0 - shadowMap.Sample(samp, uv + float2( 0.962*r, -0.195*r)).r);\n"
+    "  total += (1.0 - shadowMap.Sample(samp, uv + float2( 0.473*r, -0.480*r)).r);\n"
+    "  total += (1.0 - shadowMap.Sample(samp, uv + float2( 0.519*r,  0.767*r)).r);\n"
+    "  total += (1.0 - shadowMap.Sample(samp, uv + float2( 0.185*r, -0.893*r)).r);\n"
+    "  total += (1.0 - shadowMap.Sample(samp, uv + float2( 0.507*r,  0.064*r)).r);\n"
+    "  total += (1.0 - shadowMap.Sample(samp, uv + float2( 0.896*r,  0.412*r)).r);\n"
+    "  total += (1.0 - shadowMap.Sample(samp, uv + float2(-0.321*r, -0.933*r)).r);\n"
+    "  total += (1.0 - shadowMap.Sample(samp, uv + float2(-0.791*r,  0.498*r)).r);\n"
+    "  float shadow = (total / 12.0) * params.x * fade;\n"
+    "  return float4(0.05, 0.06, 0.12, shadow);\n"
+    "}\n";
+
+struct OverlayCB11
+{
+    float worldViewProj[16];
+    float shadowTransform[16];
+    float params[4];
+};
+
+struct Overlay11State
+{
+    ID3D11VertexShader* vs;
+    ID3D11PixelShader* ps;
+    ID3D11InputLayout* layout;
+    ID3D11Buffer* cb;
+    ID3D11SamplerState* samp;
+    ID3D11BlendState* blend;
+    ID3D11DepthStencilState* depth_off;
+    ID3D11RasterizerState* rast;
+    int ready;
+};
+
+static Overlay11State s_ov = {};
+
+static void Overlay11Shutdown()
+{
+    if (s_ov.vs) s_ov.vs->Release();
+    if (s_ov.ps) s_ov.ps->Release();
+    if (s_ov.layout) s_ov.layout->Release();
+    if (s_ov.cb) s_ov.cb->Release();
+    if (s_ov.samp) s_ov.samp->Release();
+    if (s_ov.blend) s_ov.blend->Release();
+    if (s_ov.depth_off) s_ov.depth_off->Release();
+    if (s_ov.rast) s_ov.rast->Release();
+    memset(&s_ov, 0, sizeof(s_ov));
+}
+
+static int Overlay11Init(ID3D11Device* device)
+{
+    if (s_ov.ready)
+        return 1;
+    ID3DBlob* vsb = 0;
+    ID3DBlob* psb = 0;
+    ID3DBlob* err = 0;
+    if (FAILED(D3DCompile(s_szShadowOverlay11, strlen(s_szShadowOverlay11), "shadowOv", 0, 0, "VSMain", "vs_4_0",
+        D3DCOMPILE_OPTIMIZATION_LEVEL1, 0, &vsb, &err)))
+    {
+        if (err) { lwD3D11Gap(LW_D3D11_GAP, "shadow-ov-vs", "%s", (const char*)err->GetBufferPointer()); err->Release(); }
+        return 0;
+    }
+    if (err) { err->Release(); err = 0; }
+    if (FAILED(D3DCompile(s_szShadowOverlay11, strlen(s_szShadowOverlay11), "shadowOv", 0, 0, "PSMain", "ps_4_0",
+        D3DCOMPILE_OPTIMIZATION_LEVEL1, 0, &psb, &err)))
+    {
+        if (err) { lwD3D11Gap(LW_D3D11_GAP, "shadow-ov-ps", "%s", (const char*)err->GetBufferPointer()); err->Release(); }
+        vsb->Release();
+        return 0;
+    }
+    if (err) err->Release();
+    if (FAILED(device->CreateVertexShader(vsb->GetBufferPointer(), vsb->GetBufferSize(), 0, &s_ov.vs)) ||
+        FAILED(device->CreatePixelShader(psb->GetBufferPointer(), psb->GetBufferSize(), 0, &s_ov.ps)))
+    {
+        vsb->Release();
+        psb->Release();
+        Overlay11Shutdown();
+        return 0;
+    }
+    D3D11_INPUT_ELEMENT_DESC elem = {};
+    elem.SemanticName = "POSITION";
+    elem.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+    elem.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+    if (FAILED(device->CreateInputLayout(&elem, 1, vsb->GetBufferPointer(), vsb->GetBufferSize(), &s_ov.layout)))
+    {
+        vsb->Release();
+        psb->Release();
+        Overlay11Shutdown();
+        return 0;
+    }
+    vsb->Release();
+    psb->Release();
+
+    D3D11_BUFFER_DESC cbd = {};
+    cbd.ByteWidth = sizeof(OverlayCB11);
+    cbd.Usage = D3D11_USAGE_DYNAMIC;
+    cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    if (FAILED(device->CreateBuffer(&cbd, 0, &s_ov.cb)))
+    {
+        Overlay11Shutdown();
+        return 0;
+    }
+
+    D3D11_SAMPLER_DESC sd = {};
+    sd.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+    sd.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+    sd.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+    sd.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+    sd.BorderColor[0] = sd.BorderColor[1] = sd.BorderColor[2] = sd.BorderColor[3] = 1.0f;
+    sd.MaxLOD = 0;
+    device->CreateSamplerState(&sd, &s_ov.samp);
+
+    D3D11_BLEND_DESC bd = {};
+    bd.RenderTarget[0].BlendEnable = TRUE;
+    bd.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    bd.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+    bd.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    bd.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    bd.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
+    bd.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    bd.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+    device->CreateBlendState(&bd, &s_ov.blend);
+
+    D3D11_DEPTH_STENCIL_DESC dd = {};
+    dd.DepthEnable = FALSE;
+    dd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    dd.DepthFunc = D3D11_COMPARISON_ALWAYS;
+    device->CreateDepthStencilState(&dd, &s_ov.depth_off);
+
+    D3D11_RASTERIZER_DESC rd = {};
+    rd.FillMode = D3D11_FILL_SOLID;
+    rd.CullMode = D3D11_CULL_NONE;
+    rd.DepthClipEnable = TRUE;
+    device->CreateRasterizerState(&rd, &s_ov.rast);
+
+    s_ov.ready = 1;
+    return 1;
+}
+
+static lwIDeviceObject* ShadowDevObj()
+{
+    return g_Render.GetInterfaceMgr() ? g_Render.GetInterfaceMgr()->dev_obj : 0;
+}
+
+static void SetShadowPassFlag(bool on)
+{
+    if (MindPower::lwDeviceObject11* d11 = MindPower::lwGetActiveDeviceObject11())
+    {
+        d11->SetShadowPassMode(on);
+        return;
+    }
+    lwIDeviceObject* obj = ShadowDevObj();
+    if (obj)
+        static_cast<lwDeviceObject*>(obj)->SetShadowPassMode(on);
+}
+
+static bool IsShadowPassFlag()
+{
+    if (MindPower::lwDeviceObject11* d11 = MindPower::lwGetActiveDeviceObject11())
+        return d11->IsShadowPassMode();
+    lwIDeviceObject* obj = ShadowDevObj();
+    return obj ? static_cast<lwDeviceObject*>(obj)->IsShadowPassMode() : false;
+}
+
+static void ApplyShadowSilhouetteStates(lwIDeviceObject* obj, bool cutout)
+{
+    if (!obj)
+        return;
+    if (cutout)
+    {
+        obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE, TRUE);
+        obj->SetRenderStateForced(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
+        obj->SetRenderStateForced(D3DRS_ALPHAREF, 128);
+        obj->SetTextureStageStateForced(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+    }
+    else
+    {
+        obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE, FALSE);
+        obj->SetRenderStateForced(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
+        obj->SetRenderStateForced(D3DRS_ALPHAREF, 0);
+        obj->SetTextureStageStateForced(0, D3DTSS_ALPHAARG1, D3DTA_TFACTOR);
+    }
+    obj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, FALSE);
+    obj->SetRenderStateForced(D3DRS_CULLMODE, D3DCULL_NONE);
+    obj->SetRenderStateForced(D3DRS_TEXTUREFACTOR, 0xFF000000);
+    obj->SetTextureStageStateForced(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+    obj->SetTextureStageStateForced(0, D3DTSS_COLORARG1, D3DTA_TFACTOR);
+    obj->SetTextureStageStateForced(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+    obj->SetTextureStageStateForced(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+    obj->SetTextureStageStateForced(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+}
+
 // ============================================================
 // CMPShadowMap Implementation
 // ============================================================
@@ -192,6 +420,8 @@ CMPShadowMap::CMPShadowMap()
     , _nGroundGridSize(32)
     , _nGroundVertCount(0)
     , _nGroundTriCount(0)
+    , _pDx11DepthTex(nullptr)
+    , _pDx11DSV(nullptr)
 {
     D3DXMatrixIdentity(&_matLightView);
     D3DXMatrixIdentity(&_matLightProj);
@@ -205,6 +435,9 @@ CMPShadowMap::~CMPShadowMap() {
 }
 
 bool CMPShadowMap::Create(IDirect3DDeviceX* pDev, const ShadowMapConfig& config) {
+    if (lwIsDx11Active())
+        return CreateDx11(config);
+
     if (!pDev)
         return false;
 
@@ -260,7 +493,125 @@ bool CMPShadowMap::Create(IDirect3DDeviceX* pDev, const ShadowMapConfig& config)
     return true;
 }
 
+bool CMPShadowMap::CreateDx11(const ShadowMapConfig& config)
+{
+    MindPower::lwDeviceObject11* d11 = MindPower::lwGetActiveDeviceObject11();
+    if (!d11 || !d11->GetD3D11Device())
+        return false;
+
+    _pDev = nullptr;
+    _config = config;
+    if (!CreateResourcesDx11())
+    {
+        Release();
+        return false;
+    }
+    _bInitialized = true;
+    lwD3D11Gap(LW_D3D11_FALLBACK, "shadow-map-dx11",
+        "CMPShadowMap RT %dx%d + silhouette casters + SM4 ground overlay",
+        _config.resolution, _config.resolution);
+    LG("shadow", "DX11 shadow map created: %dx%d\n", _config.resolution, _config.resolution);
+    return true;
+}
+
+bool CMPShadowMap::CreateResourcesDx11()
+{
+    MindPower::lwDeviceObject11* d11 = MindPower::lwGetActiveDeviceObject11();
+    if (!d11)
+        return false;
+    ID3D11Device* device = d11->GetD3D11Device();
+    int res = _config.resolution;
+    if (LW_FAILED(lwD3D11CreateRenderTargetTexture(device, res, res, &_pShadowTexture)) || !_pShadowTexture)
+        return false;
+
+    ID3D11Texture2D* depth_tex = 0;
+    ID3D11DepthStencilView* dsv = 0;
+    if (LW_FAILED(lwD3D11CreateDepthStencil(device, res, res, &depth_tex, &dsv)))
+        return false;
+    _pDx11DepthTex = depth_tex;
+    _pDx11DSV = dsv;
+
+    BuildGroundGrid();
+    return _pGroundVB && _pGroundIB;
+}
+
+bool CMPShadowMap::BeginShadowPassDx11()
+{
+    if (!IsEnabled() || !_pShadowTexture || !_pDx11DSV)
+        return false;
+
+    MindPower::lwDeviceObject11* d11 = MindPower::lwGetActiveDeviceObject11();
+    lwD3D11Texture* tex = lwAsD3D11Texture(_pShadowTexture);
+    if (!d11 || !tex || !tex->GetRTV())
+        return false;
+
+    UpdateLightMatrices();
+    d11->GetViewPort(&_oldViewport);
+
+    ID3D11ShaderResourceView* none = 0;
+    d11->GetD3D11Context()->PSSetShaderResources(0, 1, &none);
+
+    lwIDeviceObject* obj = ShadowDevObj();
+    _matSavedView = *(D3DXMATRIX*)obj->GetMatView();
+    _matSavedProj = *(D3DXMATRIX*)obj->GetMatProj();
+    obj->GetRenderState(D3DRS_ALPHAREF, &_savedAlphaRef);
+
+    g_Render.SetTransformView(&_matLightView);
+    g_Render.SetTransformProj(&_matLightProj);
+
+    d11->PushOffscreenTargets(tex->GetRTV(), (ID3D11DepthStencilView*)_pDx11DSV);
+
+    D3DVIEWPORTX vp;
+    vp.X = 0;
+    vp.Y = 0;
+    vp.Width = (DWORD)_config.resolution;
+    vp.Height = (DWORD)_config.resolution;
+    vp.MinZ = 0.0f;
+    vp.MaxZ = 1.0f;
+    d11->SetViewPort(&vp);
+    d11->Clear(D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0xFFFFFFFF, 1.0f, 0);
+
+    SetShadowPassFlag(true);
+    ApplyShadowSilhouetteStates(obj, false);
+    return true;
+}
+
+void CMPShadowMap::EndShadowPassDx11()
+{
+    MindPower::lwDeviceObject11* d11 = MindPower::lwGetActiveDeviceObject11();
+    lwIDeviceObject* obj = ShadowDevObj();
+    if (d11)
+        d11->PopOffscreenTargets();
+    if (d11)
+        d11->SetViewPort(&_oldViewport);
+
+    SetShadowPassFlag(false);
+    if (obj)
+    {
+        obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE, TRUE);
+        obj->SetRenderStateForced(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
+        obj->SetRenderStateForced(D3DRS_ALPHAREF, _savedAlphaRef);
+        obj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, FALSE);
+        obj->SetRenderStateForced(D3DRS_SRCBLEND, D3DBLEND_ONE);
+        obj->SetRenderStateForced(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+        obj->SetRenderStateForced(D3DRS_CULLMODE, D3DCULL_CCW);
+        obj->SetRenderStateForced(D3DRS_TEXTUREFACTOR, 0xFFFFFFFF);
+        obj->SetTextureStageStateForced(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+        obj->SetTextureStageStateForced(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+        obj->SetTextureStageStateForced(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+        obj->SetTextureStageStateForced(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+        obj->SetTextureStageStateForced(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+        obj->SetTextureStageStateForced(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+    }
+
+    g_Render.SetTransformView(&_matSavedView);
+    g_Render.SetTransformProj(&_matSavedProj);
+}
+
 bool CMPShadowMap::CreateResources() {
+    if (lwIsDx11Active())
+        return CreateResourcesDx11();
+
     int res = _config.resolution;
 
     // Create shadow map as a renderable texture
@@ -326,6 +677,8 @@ void CMPShadowMap::ReleaseResources() {
     if (_pShadowTexture) { _pShadowTexture->Release(); _pShadowTexture = nullptr; }
     if (_pGroundVB) { _pGroundVB->Release(); _pGroundVB = nullptr; }
     if (_pGroundIB) { _pGroundIB->Release(); _pGroundIB = nullptr; }
+    if (_pDx11DSV) { ((ID3D11DepthStencilView*)_pDx11DSV)->Release(); _pDx11DSV = nullptr; }
+    if (_pDx11DepthTex) { ((ID3D11Texture2D*)_pDx11DepthTex)->Release(); _pDx11DepthTex = nullptr; }
 }
 
 void CMPShadowMap::Release() {
@@ -438,6 +791,9 @@ void CMPShadowMap::UpdateLightMatrices() {
 }
 
 bool CMPShadowMap::BeginShadowPass() {
+    if (lwIsDx11Active())
+        return BeginShadowPassDx11();
+
     if (!IsEnabled() || !_pShadowSurface || !_pShadowDepthSurface)
         return false;
 
@@ -525,48 +881,22 @@ bool CMPShadowMap::BeginShadowPass() {
 }
 
 void CMPShadowMap::SetAlphaCutoutCasterMode(bool enabled) {
-    if (!_pDev)
+    lwIDeviceObject* obj = ShadowDevObj();
+    if (!obj || !IsShadowPassFlag())
         return;
 
-    lwDeviceObject* pDevObj = static_cast<lwDeviceObject*>(g_Render.GetInterfaceMgr()->dev_obj);
-    if (!pDevObj->IsShadowPassMode())
-        return;  // Only valid inside BeginShadowPass/EndShadowPass
-
-    if (enabled) {
-        // Preserve texture alpha for alpha-tested foliage while still forcing RGB to black.
-        pDevObj->SetRenderStateForced(D3DRS_ALPHATESTENABLE, TRUE);
-        pDevObj->SetRenderStateForced(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
-        pDevObj->SetRenderStateForced(D3DRS_ALPHAREF, 128);
-        pDevObj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, FALSE);
-        pDevObj->SetRenderStateForced(D3DRS_CULLMODE, D3DCULL_NONE);
-
-        pDevObj->SetTextureStageStateForced(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-        pDevObj->SetTextureStageStateForced(0, D3DTSS_COLORARG1, D3DTA_TFACTOR);
-        pDevObj->SetTextureStageStateForced(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-        pDevObj->SetTextureStageStateForced(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-        pDevObj->SetTextureStageStateForced(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-        pDevObj->SetTextureStageStateForced(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-    } else {
-        // Restore the solid silhouette mode used for characters.
-        pDevObj->SetRenderStateForced(D3DRS_ALPHATESTENABLE, FALSE);
-        pDevObj->SetRenderStateForced(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
-        pDevObj->SetRenderStateForced(D3DRS_ALPHAREF, 0);
-        pDevObj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, FALSE);
-        pDevObj->SetRenderStateForced(D3DRS_CULLMODE, D3DCULL_NONE);
-
-        pDevObj->SetTextureStageStateForced(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-        pDevObj->SetTextureStageStateForced(0, D3DTSS_COLORARG1, D3DTA_TFACTOR);
-        pDevObj->SetTextureStageStateForced(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-        pDevObj->SetTextureStageStateForced(0, D3DTSS_ALPHAARG1, D3DTA_TFACTOR);
-        pDevObj->SetTextureStageStateForced(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-        pDevObj->SetTextureStageStateForced(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-    }
-
-    _pDev->SetRenderState(D3DRS_TEXTUREFACTOR, 0xFF000000);
-    _pDev->SetPixelShader(NULL);
+    ApplyShadowSilhouetteStates(obj, enabled);
+    if (_pDev)
+        _pDev->SetPixelShader(NULL);
 }
 
 void CMPShadowMap::EndShadowPass() {
+    if (lwIsDx11Active())
+    {
+        EndShadowPassDx11();
+        return;
+    }
+
     // Restore original render targets
     if (_pOldRenderTarget) {
         _pDev->SetRenderTarget(0, _pOldRenderTarget);
@@ -612,7 +942,7 @@ void CMPShadowMap::EndShadowPass() {
 }
 
 void CMPShadowMap::BindShadowMap(int textureStage) {
-    if (!IsEnabled() || !_pShadowTexture)
+    if (!_pDev || !IsEnabled() || !_pShadowTexture)
         return;
 
     _pDev->SetTexture(textureStage, _pShadowTexture);
@@ -633,20 +963,18 @@ void CMPShadowMap::UnbindShadowMap(int textureStage) {
 }
 
 void CMPShadowMap::BuildGroundGrid() {
-    if (!_pDev)
+    lwIDeviceObject* obj = ShadowDevObj();
+    if (!obj)
         return;
 
-    // Release old buffers
     if (_pGroundVB) { _pGroundVB->Release(); _pGroundVB = nullptr; }
     if (_pGroundIB) { _pGroundIB->Release(); _pGroundIB = nullptr; }
 
-    // Simple quad: 4 vertices, 2 triangles
-    // Eliminates grid seam artifacts that cause visible lines during movement
     _nGroundVertCount = 4;
     _nGroundTriCount = 2;
 
     struct GroundVert { float x, y, z; };
-    HRESULT hr = _pDev->CreateVertexBuffer(
+    HRESULT hr = obj->CreateVertexBuffer(
         4 * sizeof(GroundVert),
         D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY,
         D3DFVF_XYZ,
@@ -654,12 +982,12 @@ void CMPShadowMap::BuildGroundGrid() {
         &_pGroundVB,
         nullptr
     );
-    if (FAILED(hr)) {
+    if (FAILED(hr) || !_pGroundVB) {
         LG("shadow", "Failed to create ground VB: 0x%08X\n", hr);
         return;
     }
 
-    hr = _pDev->CreateIndexBuffer(
+    hr = obj->CreateIndexBuffer(
         6 * sizeof(WORD),
         D3DUSAGE_WRITEONLY,
         D3DFMT_INDEX16,
@@ -685,6 +1013,12 @@ void CMPShadowMap::BuildGroundGrid() {
 }
 
 void CMPShadowMap::RenderGroundOverlay(const D3DXMATRIX& matViewProj) {
+    if (lwIsDx11Active())
+    {
+        RenderGroundOverlayDx11(matViewProj);
+        return;
+    }
+
     if (!IsEnabled() || !_pShadowTexture || !_pShadowEffect || !_pGroundVB || !_pGroundIB)
         return;
 
@@ -754,4 +1088,76 @@ void CMPShadowMap::RenderGroundOverlay(const D3DXMATRIX& matViewProj) {
 
     // Restore Z-test
     _pDev->SetRenderState(D3DRS_ZENABLE, oldZEnable);
+}
+
+void CMPShadowMap::RenderGroundOverlayDx11(const D3DXMATRIX& matViewProj)
+{
+    if (!IsEnabled() || !_pShadowTexture || !_pGroundVB || !_pGroundIB)
+        return;
+
+    MindPower::lwDeviceObject11* d11 = MindPower::lwGetActiveDeviceObject11();
+    if (!d11 || !Overlay11Init(d11->GetD3D11Device()))
+        return;
+
+    float halfSize = _config.orthoSize;
+    float x0 = _vFocusPointSmoothed.x - halfSize;
+    float y0 = _vFocusPointSmoothed.y - halfSize;
+    float x1 = _vFocusPointSmoothed.x + halfSize;
+    float y1 = _vFocusPointSmoothed.y + halfSize;
+    float z  = _vFocusPointSmoothed.z;
+
+    struct GroundVert { float x, y, z; };
+    GroundVert* pVerts = nullptr;
+    if (FAILED(_pGroundVB->Lock(0, 0, (void**)&pVerts, D3DLOCK_DISCARD)) || !pVerts)
+        return;
+    pVerts[0].x = x0; pVerts[0].y = y0; pVerts[0].z = z;
+    pVerts[1].x = x1; pVerts[1].y = y0; pVerts[1].z = z;
+    pVerts[2].x = x0; pVerts[2].y = y1; pVerts[2].z = z;
+    pVerts[3].x = x1; pVerts[3].y = y1; pVerts[3].z = z;
+    _pGroundVB->Unlock();
+
+    lwD3D11VertexBuffer* vb = lwAsD3D11VertexBuffer(_pGroundVB);
+    lwD3D11IndexBuffer* ib = lwAsD3D11IndexBuffer(_pGroundIB);
+    lwD3D11Texture* shadow = lwAsD3D11Texture(_pShadowTexture);
+    ID3D11DeviceContext* ctx = d11->GetD3D11Context();
+    if (!vb || !ib || !shadow || !shadow->GetSRV() || !ctx)
+        return;
+
+    OverlayCB11 cb = {};
+    memcpy(cb.worldViewProj, &matViewProj, sizeof(float) * 16);
+    memcpy(cb.shadowTransform, &_matShadowTransform, sizeof(float) * 16);
+    cb.params[0] = _config.shadowIntensity;
+    cb.params[1] = 1.0f / (float)_config.resolution;
+    cb.params[2] = 0.12f;
+    cb.params[3] = _config.pcfRadius;
+
+    D3D11_MAPPED_SUBRESOURCE mapped = {};
+    if (SUCCEEDED(ctx->Map(s_ov.cb, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))
+    {
+        memcpy(mapped.pData, &cb, sizeof(cb));
+        ctx->Unmap(s_ov.cb, 0);
+    }
+
+    UINT stride = sizeof(GroundVert);
+    UINT offset = 0;
+    ID3D11Buffer* vbb = vb->GetBuffer();
+    ID3D11ShaderResourceView* srv = shadow->GetSRV();
+    ctx->IASetVertexBuffers(0, 1, &vbb, &stride, &offset);
+    ctx->IASetIndexBuffer(ib->GetBuffer(), DXGI_FORMAT_R16_UINT, 0);
+    ctx->IASetInputLayout(s_ov.layout);
+    ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    ctx->VSSetShader(s_ov.vs, 0, 0);
+    ctx->PSSetShader(s_ov.ps, 0, 0);
+    ctx->VSSetConstantBuffers(0, 1, &s_ov.cb);
+    ctx->PSSetConstantBuffers(0, 1, &s_ov.cb);
+    ctx->PSSetShaderResources(0, 1, &srv);
+    ctx->PSSetSamplers(0, 1, &s_ov.samp);
+    ctx->RSSetState(s_ov.rast);
+    ctx->OMSetDepthStencilState(s_ov.depth_off, 0);
+    float bf[4] = { 0, 0, 0, 0 };
+    ctx->OMSetBlendState(s_ov.blend, bf, 0xffffffff);
+    ctx->DrawIndexed(6, 0, 0);
+
+    ID3D11ShaderResourceView* none = 0;
+    ctx->PSSetShaderResources(0, 1, &none);
 }

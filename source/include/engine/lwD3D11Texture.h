@@ -7,6 +7,8 @@
 struct ID3D11Device;
 struct ID3D11Texture2D;
 struct ID3D11ShaderResourceView;
+struct ID3D11RenderTargetView;
+struct ID3D11DepthStencilView;
 
 LW_BEGIN
 
@@ -14,10 +16,11 @@ LW_BEGIN
 class lwD3D11Texture : public IDirect3DTexture9
 {
 public:
-    lwD3D11Texture(ID3D11Texture2D* tex, ID3D11ShaderResourceView* srv, UINT w, UINT h, D3DFORMAT fmt);
+    lwD3D11Texture(ID3D11Texture2D* tex, ID3D11ShaderResourceView* srv, UINT w, UINT h, D3DFORMAT fmt, ID3D11RenderTargetView* rtv = 0);
     ~lwD3D11Texture();
 
     ID3D11ShaderResourceView* GetSRV() const { return _srv; }
+    ID3D11RenderTargetView* GetRTV() const { return _rtv; }
     UINT GetWidth() const { return _w; }
     UINT GetHeight() const { return _h; }
 
@@ -49,6 +52,7 @@ private:
     ULONG _ref;
     ID3D11Texture2D* _tex;
     ID3D11ShaderResourceView* _srv;
+    ID3D11RenderTargetView* _rtv;
     UINT _w;
     UINT _h;
     D3DFORMAT _fmt;
@@ -76,5 +80,18 @@ MINDPOWER_API LW_RESULT lwD3D11CreateEmptyTexture(
     UINT width,
     UINT height,
     IDirect3DTextureX** out_tex);
+
+MINDPOWER_API LW_RESULT lwD3D11CreateRenderTargetTexture(
+    ID3D11Device* device,
+    UINT width,
+    UINT height,
+    IDirect3DTextureX** out_tex);
+
+MINDPOWER_API LW_RESULT lwD3D11CreateDepthStencil(
+    ID3D11Device* device,
+    UINT width,
+    UINT height,
+    ID3D11Texture2D** out_tex,
+    ID3D11DepthStencilView** out_dsv);
 
 LW_END
