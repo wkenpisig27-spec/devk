@@ -57,9 +57,12 @@ LW_RESULT MINDPOWER_API LoadShader0(lwISysGraphics* sys_graphics);
 LW_RESULT MINDPOWER_API LoadShader1(lwISysGraphics* sys_graphics);
 
 // Character-physique outline only (lwPhysique). Items / markers never outline.
-// worldWidth: object-space extrusion distance (typical 0.012–0.025)
+// worldWidth: DX9 object-space extrusion (typical 0.012–0.025).
+//            DX11: values < 0.5 stay world-space in config and map to ~1.6px;
+//            values >= 0.5 are treated as screen-space pixel width.
 // refDepth: reserved / unused (API compat)
 extern "C" MINDPOWER_API void lwSetOutlineEnabled(int enabled);
 extern "C" MINDPOWER_API void lwSetOutlineParams(float worldWidth, float r, float g, float b, float refDepth);
 MINDPOWER_API void lwApplyOutlineVSConstants(lwIDeviceObject* dev_obj);
 MINDPOWER_API void lwGetOutlineParams(float* worldWidth, float* r, float* g, float* b);
+MINDPOWER_API void lwGetOutlineScreenScale(lwIDeviceObject* dev_obj, float* ndcX, float* ndcY);

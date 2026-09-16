@@ -17,6 +17,7 @@ MINDPOWER_API void lwD3D11MeshShutdown();
 
 MINDPOWER_API void lwD3D11MeshSetBonePalette(const lwMatrix44* mats, DWORD count);
 MINDPOWER_API void lwD3D11MeshSetOutline(int enabled, float width, float r, float g, float b);
+MINDPOWER_API int lwD3D11MeshIsOutline();
 
 MINDPOWER_API LW_RESULT lwD3D11MeshDrawPrimitive(
     lwDeviceObject11* dev,

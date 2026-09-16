@@ -107,9 +107,9 @@ void CGameConfig::SetDefault() // Ĭ������
 	m_fExp2 = 0.00035f;
 	m_bFogEnabled = TRUE;
 	m_fOutlineWidth = 0.014f;
-	m_fOutlineColorR = 0.12f;
-	m_fOutlineColorG = 0.08f;
-	m_fOutlineColorB = 0.10f;
+	m_fOutlineColorR = 0.08f;
+	m_fOutlineColorG = 0.05f;
+	m_fOutlineColorB = 0.04f;
 	m_fOutlineRefDepth = 50.0f;
 	m_bStaticCelEnabled = TRUE;
 	m_bWaterEnhance = TRUE;
@@ -140,12 +140,20 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 	// Migrate legacy NDC widths (~0.0025) to world-space default
 	if (m_fOutlineWidth > 0.0f && m_fOutlineWidth < 0.005f)
 		m_fOutlineWidth = 0.014f;
-	GetPrivateProfileStringA("visual", "outlineColorR", "0.12", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "outlineColorR", "0.08", buf, sizeof(buf), pszIniFileName);
 	m_fOutlineColorR = (float)atof(buf);
-	GetPrivateProfileStringA("visual", "outlineColorG", "0.08", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "outlineColorG", "0.05", buf, sizeof(buf), pszIniFileName);
 	m_fOutlineColorG = (float)atof(buf);
-	GetPrivateProfileStringA("visual", "outlineColorB", "0.10", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "outlineColorB", "0.04", buf, sizeof(buf), pszIniFileName);
 	m_fOutlineColorB = (float)atof(buf);
+	if (m_fOutlineColorR > 0.119f && m_fOutlineColorR < 0.121f &&
+		m_fOutlineColorG > 0.079f && m_fOutlineColorG < 0.081f &&
+		m_fOutlineColorB > 0.099f && m_fOutlineColorB < 0.101f)
+	{
+		m_fOutlineColorR = 0.08f;
+		m_fOutlineColorG = 0.05f;
+		m_fOutlineColorB = 0.04f;
+	}
 	GetPrivateProfileStringA("visual", "outlineRefDepth", "50.0", buf, sizeof(buf), pszIniFileName);
 	m_fOutlineRefDepth = (float)atof(buf);
 

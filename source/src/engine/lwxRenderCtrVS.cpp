@@ -6,6 +6,7 @@
 #include "lwRenderBackend.h"
 #include "lwD3D11Mesh.h"
 #include "lwD3D11Gaps.h"
+#include "ShaderLoad.h"
 
 LW_BEGIN
 
@@ -257,6 +258,9 @@ static void Dx11UploadVsSubsetConstants(lwIDeviceObject* dev_obj, lwIRenderCtrlA
         c->r = c->g = c->b = c->a = 0.0f;
     }
     dev_obj->SetVertexShaderConstantF(VS_CONST_REG_LIGHT_AMB, (float*)&amb_dif, 2);
+
+    if (lwD3D11MeshIsOutline())
+        lwApplyOutlineVSConstants(dev_obj);
 
     if (!agent)
         return;

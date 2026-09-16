@@ -4,17 +4,29 @@
 #include "ShaderLoad.h"
 #include "lwgraphicsutil.h"
 #include "lwxRenderCtrlVS.h"
+#include "lwRenderBackend.h"
+#include "lwDeviceObject11.h"
 
 
 #define USER_SHADER_NUM             8
 
 // --- Character-physique outline globals (lwPhysique only; items never outline)
 bool g_lwOutlineEnabled = true;
-static float g_lwOutlineWidth = 0.014f; // world-space extrusion
-static float g_lwOutlineColorR = 0.12f;
-static float g_lwOutlineColorG = 0.08f;
-static float g_lwOutlineColorB = 0.10f;
+static float g_lwOutlineWidth = 0.014f; // DX9 world extrusion; DX11 maps <0.5 to pixels
+static float g_lwOutlineColorR = 0.08f;
+static float g_lwOutlineColorG = 0.05f;
+static float g_lwOutlineColorB = 0.04f;
 static float g_lwOutlineRefDepth = 50.0f; // reserved (unused; kept for API compat)
+
+static float OutlinePixelWidth()
+{
+    float px = g_lwOutlineWidth;
+    if (px < 0.5f)
+        return 1.60f;
+    if (px > 6.0f)
+        return 6.0f;
+    return px;
+}
 
 extern "C" MINDPOWER_API void lwSetOutlineEnabled(int enabled)
 {
@@ -32,11 +44,57 @@ extern "C" MINDPOWER_API void lwSetOutlineParams(float worldWidth, float r, floa
         g_lwOutlineRefDepth = refDepth;
 }
 
+void lwGetOutlineScreenScale(lwIDeviceObject* dev_obj, float* ndcX, float* ndcY)
+{
+    const float px = OutlinePixelWidth();
+    float vw = 1280.0f;
+    float vh = 720.0f;
+    int got_vp = 0;
+    if (lwIsDx11Active())
+    {
+        lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
+        if (d11)
+        {
+            D3DVIEWPORTX vp = {};
+            if (LW_SUCCEEDED(d11->GetViewPort(&vp)) && vp.Width > 1 && vp.Height > 1)
+            {
+                vw = (float)vp.Width;
+                vh = (float)vp.Height;
+                got_vp = 1;
+            }
+        }
+    }
+    if (!got_vp && dev_obj)
+    {
+        RECT wnd = {}, client = {};
+        if (LW_SUCCEEDED(dev_obj->GetWindowRect(&wnd, &client)))
+        {
+            const int cw = client.right - client.left;
+            const int ch = client.bottom - client.top;
+            if (cw > 1)
+                vw = (float)cw;
+            if (ch > 1)
+                vh = (float)ch;
+        }
+    }
+    if (ndcX)
+        *ndcX = px * 2.0f / vw;
+    if (ndcY)
+        *ndcY = px * 2.0f / vh;
+}
+
 void lwApplyOutlineVSConstants(lwIDeviceObject* dev_obj)
 {
     if (!dev_obj)
         return;
     lwVector4 base(1.0f, g_lwOutlineWidth, g_lwOutlineRefDepth, 765.01f);
+    if (lwIsDx11Active())
+    {
+        float sx = 0.0f, sy = 0.0f;
+        lwGetOutlineScreenScale(dev_obj, &sx, &sy);
+        base.y = sx;
+        base.z = sy;
+    }
     lwVector4 outlineColor(g_lwOutlineColorR, g_lwOutlineColorG, g_lwOutlineColorB, 1.0f);
     dev_obj->SetVertexShaderConstantF(VS_CONST_REG_BASE, (float*)&base, 1);
     dev_obj->SetVertexShaderConstantF(VS_CONST_REG_LIGHT_DIF, (float*)&outlineColor, 1);

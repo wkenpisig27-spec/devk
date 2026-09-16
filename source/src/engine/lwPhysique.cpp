@@ -916,7 +916,7 @@ LW_RESULT lwPhysique::Render()
             if (dev_obj)
             {
                 const int dx11 = lwIsDx11Active();
-                float ow = 0.014f, ocr = 0.12f, ocg = 0.08f, ocb = 0.10f;
+                float ow = 0.014f, ocr = 0.08f, ocg = 0.05f, ocb = 0.04f;
                 if (dx11)
                     lwGetOutlineParams(&ow, &ocr, &ocg, &ocb);
 
@@ -959,13 +959,11 @@ LW_RESULT lwPhysique::Render()
                     if (outline_vs == LW_INVALID_INDEX)
                         continue;
 
-                    if (!dx11)
-                        agent->SetVertexShader(outline_vs);
-                    agent->BeginSet();
+                    agent->SetVertexShader(outline_vs);
                     if (dx11)
                         lwD3D11MeshSetOutline(1, ow, ocr, ocg, ocb);
-                    else
-                        lwApplyOutlineVSConstants(dev_obj);
+                    agent->BeginSet();
+                    lwApplyOutlineVSConstants(dev_obj);
 
                     // Re-assert after BeginSet: mesh RSA may have overridden CULLMODE
                     dev_obj->SetRenderStateForced(D3DRS_CULLMODE,         D3DCULL_CW);
@@ -987,20 +985,16 @@ LW_RESULT lwPhysique::Render()
                     agent->EndSet();
                     if (dx11)
                         lwD3D11MeshSetOutline(0, 0, 0, 0, 0);
-                    else
-                        agent->SetVertexShader(cur_vs);
+                    agent->SetVertexShader(cur_vs);
                 }
 
                 // Restore pre-pass states (Forced keeps device cache in sync).
-                // Also clear any leftover outline VS so FF / next draws are safe.
-                if (!dx11)
-                {
+                // Also clear leftover outline VS so FF / next draws are safe.
 #if defined(LW_USE_DX9)
-                    dev_obj->SetVertexShader((IDirect3DVertexShaderX*)NULL);
+                dev_obj->SetVertexShader((IDirect3DVertexShaderX*)NULL);
 #else
-                    dev_obj->SetVertexShader((IDirect3DVertexShaderX)NULL);
+                dev_obj->SetVertexShader((IDirect3DVertexShaderX)NULL);
 #endif
-                }
                 dev_obj->SetRenderStateForced(D3DRS_CULLMODE,         rs_cull);
                 dev_obj->SetRenderStateForced(D3DRS_ZWRITEENABLE,     rs_zwrite);
                 dev_obj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, rs_alphablend);

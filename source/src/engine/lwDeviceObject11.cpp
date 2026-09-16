@@ -62,6 +62,8 @@ lwDeviceObject11::lwDeviceObject11(lwSysGraphics* sys_graphics)
     , _bShadowPass(0)
     , _bb_width(0)
     , _bb_height(0)
+    , _msaa_count(1)
+    , _msaa_quality(0)
     , _vsync(0)
     , _bound_vb(0)
     , _bound_vb_off(0)
@@ -163,7 +165,8 @@ LW_RESULT lwDeviceObject11::_CreateTargets()
     depth.MipLevels = 1;
     depth.ArraySize = 1;
     depth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    depth.SampleDesc.Count = 1;
+    depth.SampleDesc.Count = _msaa_count ? _msaa_count : 1;
+    depth.SampleDesc.Quality = _msaa_quality;
     depth.Usage = D3D11_USAGE_DEFAULT;
     depth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 
@@ -276,12 +279,6 @@ LW_RESULT lwDeviceObject11::CreateDevice(lwD3DCreateParam* param)
         _d3d_create_param.present_param.BackBufferHeight = h;
     }
 
-    if (param->present_param.MultiSampleType > D3DMULTISAMPLE_NONE)
-    {
-        lwD3D11Gap(LW_D3D11_SKIP, "msaa-deferred",
-            "Slice 1 swapchain is 1x; MSAA comes after draw parity");
-    }
-
     D3D_FEATURE_LEVEL levels[] = {
         D3D_FEATURE_LEVEL_11_0,
         D3D_FEATURE_LEVEL_10_1,
@@ -306,6 +303,35 @@ LW_RESULT lwDeviceObject11::CreateDevice(lwD3DCreateParam* param)
         return LW_RET_FAILED;
     }
 
+    UINT want = 1;
+    if (param->present_param.MultiSampleType > D3DMULTISAMPLE_NONE)
+        want = (UINT)param->present_param.MultiSampleType;
+    if (want > 8)
+        want = 8;
+    _msaa_count = 1;
+    _msaa_quality = 0;
+    {
+        UINT try_c[4] = { want, 4, 2, 1 };
+        for (int i = 0; i < 4; ++i)
+        {
+            UINT c = try_c[i];
+            if (c < 2)
+                break;
+            UINT q_color = 0;
+            UINT q_depth = 0;
+            if (FAILED(_device->CheckMultisampleQualityLevels(DXGI_FORMAT_B8G8R8A8_UNORM, c, &q_color)))
+                q_color = 0;
+            if (FAILED(_device->CheckMultisampleQualityLevels(DXGI_FORMAT_D24_UNORM_S8_UINT, c, &q_depth)))
+                q_depth = 0;
+            if (q_color > 0 && q_depth > 0)
+            {
+                _msaa_count = c;
+                _msaa_quality = 0;
+                break;
+            }
+        }
+    }
+
     DXGI_SWAP_CHAIN_DESC sd = {};
     sd.BufferCount = 2;
     sd.BufferDesc.Width = w;
@@ -315,8 +341,8 @@ LW_RESULT lwDeviceObject11::CreateDevice(lwD3DCreateParam* param)
     sd.BufferDesc.RefreshRate.Denominator = 1;
     sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     sd.OutputWindow = param->hwnd;
-    sd.SampleDesc.Count = 1;
-    sd.SampleDesc.Quality = 0;
+    sd.SampleDesc.Count = _msaa_count;
+    sd.SampleDesc.Quality = _msaa_quality;
     sd.Windowed = TRUE;
     sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
     sd.Flags = 0;
@@ -327,6 +353,16 @@ LW_RESULT lwDeviceObject11::CreateDevice(lwD3DCreateParam* param)
     }
 
     hr = _factory->CreateSwapChain(_device, &sd, &_swapchain);
+    if ((FAILED(hr) || !_swapchain) && _msaa_count > 1)
+    {
+        lwD3D11Gap(LW_D3D11_FALLBACK, "msaa-swapchain",
+            "CreateSwapChain %ux MSAA failed hr=0x%08X, retry 1x", _msaa_count, (unsigned)hr);
+        _msaa_count = 1;
+        _msaa_quality = 0;
+        sd.SampleDesc.Count = 1;
+        sd.SampleDesc.Quality = 0;
+        hr = _factory->CreateSwapChain(_device, &sd, &_swapchain);
+    }
     if (FAILED(hr) || !_swapchain)
     {
         LG("d3d11gaps", "[GAP] dxgi-swapchain — CreateSwapChain failed hr=0x%08X\n", (unsigned)hr);
@@ -360,8 +396,8 @@ LW_RESULT lwDeviceObject11::CreateDevice(lwD3DCreateParam* param)
 
     lwD3D11ShaderMgrInit(_device, _context);
 
-    LG("d3d11gaps", "[SysGraphics] DeviceObject11 up: feature=0x%X %ux%u windowed=%d vsync=%d\n",
-        (unsigned)got, w, h, (int)param->present_param.Windowed, _vsync);
+    LG("d3d11gaps", "[SysGraphics] DeviceObject11 up: feature=0x%X %ux%u msaa=%u windowed=%d vsync=%d\n",
+        (unsigned)got, w, h, _msaa_count, (int)param->present_param.Windowed, _vsync);
     return LW_RET_OK;
 }
 

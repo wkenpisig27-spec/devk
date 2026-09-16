@@ -3,6 +3,7 @@
 #include "lwDeviceObject11.h"
 #include "lwD3D11Gaps.h"
 #include "lwRenderBackend.h"
+#include "lwD3D11Mesh.h"
 
 #include <d3d11.h>
 #include <d3dcompiler.h>
@@ -184,7 +185,8 @@ static const char* kModulatePS =
     "Texture2D tex0 : register(t0);\n"
     "SamplerState samp0 : register(s0);\n"
     "float4 main(float4 pos : SV_POSITION, float4 col : COLOR0, float2 uv : TEXCOORD0) : SV_TARGET {\n"
-    "  float4 c = tex0.Sample(samp0, uv) * col;\n"
+    "  float4 tex = tex0.Sample(samp0, uv);\n"
+    "  float4 c = (extra.x > 0.5) ? float4(col.rgb, tex.a) : tex * col;\n"
     "  if (extra.w >= 0 && c.a < extra.w) discard;\n"
     "  return c;\n"
     "}\n";
@@ -654,6 +656,8 @@ int lwD3D11ShaderMgrPrepareDraw(lwDeviceObject11* dev, ID3D11InputLayout** out_l
     }
 
     float ps_extra[4] = { 0, 0, 0, -1.0f };
+    if (lwD3D11MeshIsOutline())
+        ps_extra[0] = 1.0f;
     DWORD atest = dev->GetCachedRS(D3DRS_ALPHATESTENABLE);
     if (atest && atest != 0xffffffff)
     {

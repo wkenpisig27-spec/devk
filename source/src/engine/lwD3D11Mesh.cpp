@@ -5,6 +5,7 @@
 #include "lwD3D11Gaps.h"
 #include "lwDeviceObject11.h"
 #include "lwShaderMgr11.h"
+#include "ShaderLoad.h"
 
 #include <d3d11.h>
 #include <d3dcompiler.h>
@@ -81,11 +82,14 @@ static const char* kMeshHLSL =
     "void FinishVS(inout PSIn o, float3 p, float3 n, float2 uv, float2 uv1, float4 col) {\n"
     "  float4 wp = mul(float4(p, 1), world);\n"
     "  o.nrm = flags.y > 0.5 ? mul(n, (float3x3)world) : float3(0,0,1);\n"
-    "  if (extra.y > 0.5) {\n"
-    "    float3 nn = normalize(o.nrm);\n"
-    "    wp.xyz += nn * extra.z;\n"
-    "  }\n"
     "  o.pos = mul(wp, viewProj);\n"
+    "  if (extra.y > 0.5) {\n"
+    "    float2 nxy = mul(float4(normalize(o.nrm), 0), viewProj).xy;\n"
+    "    float nlen = length(nxy);\n"
+    "    if (nlen > 1e-5) nxy /= nlen;\n"
+    "    o.pos.xy += nxy * float2(extra.z, more.w) * o.pos.w;\n"
+    "    o.pos.z += 0.0002 * o.pos.w;\n"
+    "  }\n"
     "  float2 t = flags.z > 0.5 ? uv : float2(0,0);\n"
     "  o.uv = mul(float4(t, 0, 1), uvMat).xy;\n"
     "  o.uv1 = uv1;\n"
@@ -268,6 +272,8 @@ static ID3D11RasterizerState* MakeRast(ID3D11Device* device, D3D11_CULL_MODE cul
     rd.CullMode = cull;
     rd.FrontCounterClockwise = FALSE;
     rd.DepthClipEnable = FALSE;
+    rd.MultisampleEnable = TRUE;
+    rd.AntialiasedLineEnable = TRUE;
     ID3D11RasterizerState* rs = 0;
     device->CreateRasterizerState(&rd, &rs);
     return rs;
@@ -389,9 +395,9 @@ LW_RESULT lwD3D11MeshInit(ID3D11Device* device, ID3D11DeviceContext* context)
     s_mesh.bone_count = 0;
     s_mesh.outline = 0;
     s_mesh.outline_width = 0.014f;
-    s_mesh.outline_color[0] = 0.12f;
-    s_mesh.outline_color[1] = 0.08f;
-    s_mesh.outline_color[2] = 0.10f;
+    s_mesh.outline_color[0] = 0.08f;
+    s_mesh.outline_color[1] = 0.05f;
+    s_mesh.outline_color[2] = 0.04f;
     s_mesh.outline_color[3] = 1.0f;
     s_mesh.ready = 1;
     return LW_RET_OK;
@@ -428,6 +434,11 @@ void lwD3D11MeshSetOutline(int enabled, float width, float r, float g, float b)
     s_mesh.outline_color[1] = g;
     s_mesh.outline_color[2] = b;
     s_mesh.outline_color[3] = 1.0f;
+}
+
+int lwD3D11MeshIsOutline()
+{
+    return s_mesh.outline ? 1 : 0;
 }
 
 struct FvfInfo
@@ -755,7 +766,6 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
         return LW_RET_OK;
 
     int use_sm4 = 0;
-    if (!s_mesh.outline)
     {
         DWORD cop1_early = dev->GetCachedTSS(1, D3DTSS_COLOROP);
         DWORD cop2_early = dev->GetCachedTSS(2, D3DTSS_COLOROP);
@@ -928,6 +938,14 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
         lwMatrix44 id;
         lwMatrix44Identity(&id);
         CopyMat(cb.uvMat, &id);
+    }
+
+    if (s_mesh.outline)
+    {
+        float sx = 0.0f, sy = 0.0f;
+        lwGetOutlineScreenScale(dev, &sx, &sy);
+        cb.extra[2] = sx;
+        cb.more[3] = sy;
     }
 
     DWORD atest = dev->GetCachedRS(D3DRS_ALPHATESTENABLE);

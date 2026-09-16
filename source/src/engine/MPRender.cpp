@@ -247,11 +247,21 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 		d3dcp.present_param.BackBufferHeight = nScrHeight;
 		d3dcp.present_param.EnableAutoDepthStencil = 1;
 		d3dcp.present_param.AutoDepthStencilFormat = D3DFMT_D24S8;
-		d3dcp.present_param.MultiSampleType = D3DMULTISAMPLE_NONE;
-		d3dcp.present_param.MultiSampleQuality = 0;
+		{
+			int msaa = GetPreferredMSAA();
+			if (msaa >= 8)
+				d3dcp.present_param.MultiSampleType = D3DMULTISAMPLE_8_SAMPLES;
+			else if (msaa >= 4)
+				d3dcp.present_param.MultiSampleType = D3DMULTISAMPLE_4_SAMPLES;
+			else if (msaa >= 2)
+				d3dcp.present_param.MultiSampleType = D3DMULTISAMPLE_2_SAMPLES;
+			else
+				d3dcp.present_param.MultiSampleType = D3DMULTISAMPLE_NONE;
+			d3dcp.present_param.MultiSampleQuality = 0;
+			_d3dCPAdjustInfo.multi_sample_type = d3dcp.present_param.MultiSampleType;
+		}
 		d3dcp.present_param.PresentationInterval =
 		    (!_bVsync) ? D3DPRESENT_INTERVAL_IMMEDIATE : D3DPRESENT_INTERVAL_DEFAULT;
-		_d3dCPAdjustInfo.multi_sample_type = D3DMULTISAMPLE_NONE;
 		memset(&_d3dCaps, 0, sizeof(_d3dCaps));
 		_d3dCaps.VertexShaderVersion = D3DVS_VERSION(3, 0);
 		_d3dCaps.PixelShaderVersion = D3DPS_VERSION(3, 0);
@@ -480,10 +490,7 @@ int MPRender::ToggleFullScreen(int width, int height, D3DFORMAT depth_fmt, BOOL 
 
 	if (lwIsDx11Active()) {
 		lwD3D11Gap(LW_D3D11_SKIP, "toggle-msaa-adjust",
-			"D3D11 resize skips D3D9 MSAA probe and create-param adjust");
-		d3dcp.present_param.MultiSampleType = D3DMULTISAMPLE_NONE;
-		d3dcp.present_param.MultiSampleQuality = 0;
-		_d3dCPAdjustInfo.multi_sample_type = D3DMULTISAMPLE_NONE;
+			"D3D11 resize keeps the swapchain sample count from CreateDevice");
 	} else {
 		d3dcp.present_param.MultiSampleType = SelectBestMSAA(
 			dev,

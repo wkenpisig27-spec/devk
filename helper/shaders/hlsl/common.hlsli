@@ -3,8 +3,9 @@
 //==============================================================================
 
 // Constant Registers (set by engine in lwxRenderCtrVS.cpp)
-// c0      = Base {1.0, outline_world, reserved, 765.01}
-//           Base.y = world-space outline width when >= 0.005 (outline pass)
+// c0      = Base {1.0, outline_x, outline_y, 765.01}
+//           DX11 outline: Base.yz = NDC scale (pixelWidth * 2 / viewport)
+//           DX9 outline:  Base.y = world width, Base.z = reserved refDepth
 //           Base.w = bone index multiplier
 // c1-c4   = ViewProjection matrix (transposed)
 // c5      = Light direction (in object space)
@@ -207,18 +208,15 @@ float3 TransformNormalByBone(float3 nrm, int boneBase)
 //------------------------------------------------------------------------------
 // Outline pass helpers
 //------------------------------------------------------------------------------
-// World-space inverted hull: extrude along the object-space normal by a fixed
-// world-unit width. Zoom in this client is mostly FOV (camera XY only moves
-// ~40→45), so clip-depth scaling barely changes — world extrusion keeps the
-// stroke a constant fraction of the character at every zoom.
+// DX11: screen-space inverted hull. Base.y/Base.z are NDC units per stroke
+// (pixelWidth * 2 / viewport). That keeps the ink ~1.6px at every distance,
+// matching RO-style outlines instead of a world-space 3D shell.
 //
-// Base.y = world width when >= 0.005. Smaller values are treated as legacy NDC
-// leftovers (~0.0025) and fall back to OUTLINE_WORLD so old binaries still look
-// correct after a shader-only deploy.
+// DX9 / legacy: Base.z is refDepth (~50). Base.y is world extrusion when
+// >= 0.005, otherwise OUTLINE_WORLD.
 //
-// OUTLINE_Z_PUSH shifts extruded verts away from the camera so the hull sits
-// slightly behind front faces — reduces black blotches in concave areas
-// (neck, armpits, fingers, muscle creases).
+// A tiny clip.z bias sits the hull just behind the front faces so concave
+// areas (neck, armpits) do not fill in black.
 #ifndef OUTLINE_WORLD
 #define OUTLINE_WORLD 0.014
 #endif
@@ -228,7 +226,11 @@ float3 TransformNormalByBone(float3 nrm, int boneBase)
 #endif
 
 #ifndef OUTLINE_COLOR
-#define OUTLINE_COLOR float4(0.12, 0.08, 0.10, 1.0)
+#define OUTLINE_COLOR float4(0.08, 0.05, 0.04, 1.0)
+#endif
+
+#ifndef OUTLINE_CLIP_Z_BIAS
+#define OUTLINE_CLIP_Z_BIAS 0.0002
 #endif
 
 float GetOutlineWorld()
@@ -248,20 +250,28 @@ float4 GetOutlineColor()
     return OUTLINE_COLOR;
 }
 
-// World-space outline extrusion (scales with FOV / character screen size).
-//
-// posOS - object-space position (post-bone for skinned meshes)
-// nrmOS - object-space normal (post-bone for skinned meshes; should be normalized)
 float4 OutlineClipPos(float3 posOS, float3 nrmOS)
 {
-    float3 toVert = posOS - EyePosOS.xyz;
-    float len = length(toVert);
-    float3 away = (len > 0.0001) ? (toVert / len) : float3(0, 0, 1);
+    // Legacy world extrusion (DX9 assembly path / old cbuffer layout).
+    if (Base.z > 1.0)
+    {
+        float3 toVert = posOS - EyePosOS.xyz;
+        float len = length(toVert);
+        float3 away = (len > 0.0001) ? (toVert / len) : float3(0, 0, 1);
+        float3 extruded = posOS
+                        + nrmOS * GetOutlineWorld()
+                        + away * OUTLINE_Z_PUSH;
+        return mul(float4(extruded, 1.0), ViewProj);
+    }
 
-    float3 extruded = posOS
-                    + nrmOS * GetOutlineWorld()
-                    + away * OUTLINE_Z_PUSH;
-    return mul(float4(extruded, 1.0), ViewProj);
+    float4 clipPos = mul(float4(posOS, 1.0), ViewProj);
+    float2 nxy = mul(float4(nrmOS, 0.0), ViewProj).xy;
+    float nlen = length(nxy);
+    if (nlen > 1e-5)
+        nxy /= nlen;
+    clipPos.xy += nxy * float2(Base.y, Base.z) * clipPos.w;
+    clipPos.z += OUTLINE_CLIP_Z_BIAS * clipPos.w;
+    return clipPos;
 }
 
 // 2.5D toon shading pipeline (Ragnarok Online–leaning preset):

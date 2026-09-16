@@ -225,6 +225,8 @@ private:
     int _bShadowPass;
     UINT _bb_width;
     UINT _bb_height;
+    UINT _msaa_count;
+    UINT _msaa_quality;
     int _vsync;
 
     IDirect3DVertexBufferX* _bound_vb;
