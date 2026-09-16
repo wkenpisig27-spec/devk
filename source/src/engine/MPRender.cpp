@@ -537,8 +537,9 @@ int MPRender::ToggleFullScreen() {
 
 	SetViewport(0, 0, d3dcp->present_param.BackBufferWidth, d3dcp->present_param.BackBufferHeight);
 
-	// LightEnable(0, TRUE);
-	// UpdateLight();
+	LightEnable(0, TRUE);
+	UpdateLight();
+	SetRenderState(D3DRS_AMBIENT, 0xffffffff);
 
 	if (InitMPTextureSetFormat() == 0)
 		return 0;

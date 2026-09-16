@@ -246,6 +246,9 @@ void MPMap::Render()
 
     g_Render.EnableZBuffer(TRUE);
 	g_Render.SetRenderState( D3DRS_LIGHTING, _bEnableNormalLight );
+	// Tile vertex colors are (AMBIENT * dwColor) + dwTColor. dwTColor defaults to 0,
+	// so a zero ambient after device reset bakes the land VB black until the next refill.
+	g_Render.SetRenderState(D3DRS_AMBIENT, 0xffffffff);
 
 	
 	D3DMATERIALX material;
@@ -271,7 +274,21 @@ void MPMap::Render()
 
 	g_Render.SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);  
 	g_Render.SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_DIFFUSE);  
-	g_Render.SetTextureStageState(1, D3DTSS_COLOROP,   D3DTOP_MODULATE);  
+	g_Render.SetTextureStageState(1, D3DTSS_COLOROP,   D3DTOP_MODULATE);
+
+	// Resize / TEXUV / shade leave D3DTS_TEXTURE0 + TEXTURETRANSFORMFLAGS on the device.
+	// Terrain never sets those itself, so an invalid DX11 cache after ResizeBuffers
+	// was applying leftover UV matrices and sampling tiles as black.
+	g_Render.SetRenderState(D3DRS_TEXTUREFACTOR, 0xffffffff);
+	g_Render.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+	g_Render.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+	if (lwIDeviceObject* tex_dev = MapDev())
+	{
+		lwMatrix44 texid;
+		lwMatrix44Identity(&texid);
+		tex_dev->SetTransform(D3DTS_TEXTURE0, &texid);
+		tex_dev->SetTransform(D3DTS_TEXTURE1, &texid);
+	}  
 	
 
 

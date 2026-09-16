@@ -370,6 +370,14 @@ LW_RESULT lwDeviceObject11::ResetDevice(D3DPRESENT_PARAMETERS* d3dpp)
     if (d3dpp)
         _d3d_create_param.present_param = *d3dpp;
 
+    if (_context)
+    {
+        ID3D11ShaderResourceView* none[8] = {};
+        _context->PSSetShaderResources(0, 8, none);
+        _context->VSSetShaderResources(0, 8, none);
+        _context->OMSetRenderTargets(0, 0, 0);
+    }
+
     _ReleaseTargets();
 
     DXGI_SWAP_CHAIN_DESC sd = {};
@@ -399,11 +407,52 @@ LW_RESULT lwDeviceObject11::ResetDevice(D3DPRESENT_PARAMETERS* d3dpp)
 
 LW_RESULT lwDeviceObject11::ResetDeviceStateCache()
 {
-    return InitStateCache();
+    // DXGI ResizeBuffers does not drop D3D9-style RS/TSS. DX9 reset re-applies the
+    // existing cache; calling InitStateCache here zeroed D3DRS_AMBIENT and the next
+    // terrain VB refill baked black vertex colors.
+    DWORD i, j, v;
+    for (i = 0; i < LW_MAX_RENDERSTATE_NUM; ++i)
+    {
+        if ((v = _rs_value[i]) == LW_INVALID_RS_VALUE)
+            continue;
+        SetRenderStateForced((D3DRENDERSTATETYPE)i, v);
+    }
+    for (j = 0; j < LW_MAX_TEXTURESTAGE_NUM; ++j)
+    {
+        for (i = 0; i < LW_MAX_TEXTURESTAGESTATE_NUM; ++i)
+        {
+            if ((v = _tss_value[j][i]) == LW_INVALID_TSS_VALUE)
+                continue;
+            SetTextureStageStateForced(j, (D3DTEXTURESTAGESTATETYPE)i, v);
+        }
+    }
+    for (j = 0; j < LW_MAX_SAMPLESTAGE_NUM; ++j)
+    {
+        for (i = 0; i < LW_MAX_SAMPLESTATE_NUM; ++i)
+        {
+            if ((v = _ss_value[j][i]) == LW_INVALID_SS_VALUE)
+                continue;
+            SetSamplerStateForced(j, (D3DSAMPLERSTATETYPE)i, v);
+        }
+    }
+    return LW_RET_OK;
 }
 
 LW_RESULT lwDeviceObject11::ResetDeviceTransformMatrix()
 {
+    for (DWORD i = 0; i < LW_MAX_LIGHT_NUM; i++)
+    {
+        LightEnableForced(i, _light_enable[i]);
+        if (_light_enable[i])
+            SetLight(i, &_light_seq[i]);
+    }
+
+    for (int i = 0; i < 8; ++i)
+    {
+        lwMatrix44Identity(&_mat_tex[i]);
+        SetTransform((D3DTRANSFORMSTATETYPE)(D3DTS_TEXTURE0 + i), &_mat_tex[i]);
+    }
+
     SetTransformView(&_mat_view);
     SetTransformProj(&_mat_proj);
     SetTransformWorld(&_mat_world);
@@ -730,6 +779,15 @@ LW_RESULT lwDeviceObject11::InitStateCache()
             _ss_value[j][i] = LW_INVALID_SS_VALUE;
     }
 
+    if (_context)
+    {
+        ID3D11ShaderResourceView* none[LW_MAX_TEXTURESTAGE_NUM] = {};
+        _context->PSSetShaderResources(0, LW_MAX_TEXTURESTAGE_NUM, none);
+    }
+
+    for (i = 0; i < 8; ++i)
+        lwMatrix44Identity(&_mat_tex[i]);
+
     SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
     SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
     SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
@@ -741,9 +799,49 @@ LW_RESULT lwDeviceObject11::InitStateCache()
     SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
     SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
     SetRenderState(D3DRS_LIGHTING, TRUE);
-    SetRenderState(D3DRS_AMBIENT, 0x00000000);
+    SetRenderState(D3DRS_AMBIENT, 0xffffffff);
     SetRenderState(D3DRS_FOGENABLE, FALSE);
     SetRenderState(D3DRS_COLORVERTEX, TRUE);
+    SetRenderState(D3DRS_TEXTUREFACTOR, 0xffffffff);
+    SetRenderState(D3DRS_DIFFUSEMATERIALSOURCE, D3DMCS_COLOR1);
+    SetRenderState(D3DRS_AMBIENTMATERIALSOURCE, D3DMCS_MATERIAL);
+    SetRenderState(D3DRS_VERTEXBLEND, D3DVBF_DISABLE);
+    SetRenderState(D3DRS_COLORWRITEENABLE, 0x0000000F);
+    SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+
+    for (i = 0; i < LW_MAX_TEXTURESTAGE_NUM; ++i)
+    {
+        if (i == 0)
+        {
+            SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+            SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+            SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+            SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+            SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+            SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+        }
+        else
+        {
+            SetTextureStageState(i, D3DTSS_COLOROP, D3DTOP_DISABLE);
+            SetTextureStageState(i, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+            SetTextureStageState(i, D3DTSS_COLORARG2, D3DTA_CURRENT);
+            SetTextureStageState(i, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+            SetTextureStageState(i, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+            SetTextureStageState(i, D3DTSS_ALPHAARG2, D3DTA_CURRENT);
+        }
+        SetTextureStageState(i, D3DTSS_TEXCOORDINDEX, i);
+        SetTextureStageState(i, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+    }
+
+    for (i = 0; i < LW_MAX_SAMPLESTAGE_NUM; ++i)
+    {
+        SetSamplerState(i, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+        SetSamplerState(i, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+        SetSamplerState(i, D3DSAMP_MAXANISOTROPY, 1);
+        SetSamplerState(i, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+        SetSamplerState(i, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+        SetSamplerState(i, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+    }
     return LW_RET_OK;
 }
 

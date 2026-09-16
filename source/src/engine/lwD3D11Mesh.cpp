@@ -850,12 +850,14 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
         cb.more[3] = (aa1 == D3DTA_TEXTURE) ? 0.0f : 2.0f;
     }
     DWORD tf = dev->GetCachedRS(D3DRS_TEXTUREFACTOR);
+    if (tf == 0xffffffff || tf == D3DRS_FORCE_DWORD)
+        tf = 0xffffffff;
     ArgbToFloat(tf, cb.tfactor);
     DWORD cop1 = dev->GetCachedTSS(1, D3DTSS_COLOROP);
     DWORD carg1 = dev->GetCachedTSS(1, D3DTSS_COLORARG1);
     lwD3D11Texture* tex1_check = lwAsD3D11Texture(dev->GetBoundTex(1));
     float dual = 0.0f;
-    if (cop1 && cop1 != D3DTOP_DISABLE && cop1 != 0xffffffff && tex1_check && tex1_check->GetSRV())
+    if (cop1 && cop1 != D3DTOP_DISABLE && cop1 != 0xffffffff && cop1 != D3DTSS_FORCE_DWORD && tex1_check && tex1_check->GetSRV())
     {
         if (cop1 == D3DTOP_SELECTARG1)
         {
@@ -870,7 +872,7 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     cb.more[2] = dual;
     const lwMatrix44* uv = dev->GetMatTex(0);
     DWORD ttff = dev->GetCachedTSS(0, D3DTSS_TEXTURETRANSFORMFLAGS);
-    if (uv && ttff && ttff != D3DTTFF_DISABLE && ttff != 0xffffffff)
+    if (uv && ttff && ttff != D3DTTFF_DISABLE && ttff != 0xffffffff && ttff != D3DTSS_FORCE_DWORD)
         CopyMat(cb.uvMat, uv);
     else
     {
@@ -880,7 +882,7 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     }
 
     DWORD atest = dev->GetCachedRS(D3DRS_ALPHATESTENABLE);
-    if (atest && atest != 0xffffffff)
+    if (atest && atest != 0xffffffff && atest != D3DRS_FORCE_DWORD)
     {
         DWORD aref = dev->GetCachedRS(D3DRS_ALPHAREF);
         if (aref == 0xffffffff)

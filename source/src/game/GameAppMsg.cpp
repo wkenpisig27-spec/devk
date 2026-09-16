@@ -435,6 +435,8 @@ void CGameApp::ChangeVideoStyle(int width, int height, D3DFORMAT format, bool bW
 
 	if (GetCurScene()) {
 		GetCurScene()->SetScreen(g_Render.GetScrWidth(), g_Render.GetScrHeight(), !bWindowed);
+		if (MPTerrain* terrain = GetCurScene()->GetTerrain())
+			terrain->UpdateRender(TRUE);
 	}
 }
 
