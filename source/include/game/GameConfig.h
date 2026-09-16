@@ -13,8 +13,9 @@ public:
 	CGameConfig();
 
 	void Load(const char* pszFileName); // 读配置文件
-	void LoadVisualSettings(const char* pszIniFileName); // user/system.ini [visual]
+	void LoadVisualSettings(const char* pszIniFileName); // user/system.ini [visual] + [video] renderer
 	void ApplyVisualSettingsToEngine(); // push outline/sRGB to engine
+	void ApplyRendererToEngine();		// push [video] renderer to lwSetRequestedRenderBackend
 	void SetDefault();					// 默认配置
 	void SetMoveClient(bool v);			// 是否与客户端同步
 
@@ -136,6 +137,10 @@ public:
 	// Shadow mapping settings
 	BOOL m_bEnableShadowMap;   // Enable/disable shadow mapping
 	int  m_nShadowMapQuality;  // 0=Low(512), 1=Medium(1024), 2=High(2048)
+
+	// Runtime renderer: "dx9" (default) or "dx11". DX11 is a request until
+	// DeviceObject11 exists; missing/unknown values resolve to dx9.
+	char m_szRenderer[16];
 };
 
 extern CGameConfig g_Config;

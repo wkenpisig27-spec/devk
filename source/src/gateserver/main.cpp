@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
 	// =============================================
 
 	// Initialize crash dump generation
-	ErrorHandler::Initialize();
+	ErrorHandler::Initialize("GateServer", false);
 
 	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 

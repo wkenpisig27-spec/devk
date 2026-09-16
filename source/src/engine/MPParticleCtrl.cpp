@@ -1016,14 +1016,14 @@ void	CChaModel::PlayPose(DWORD id, DWORD type)
 
 void	CChaModel::Begin()
 {
-	m_pDev->GetDevice()->SetRenderState( D3DRS_LIGHTING, TRUE );
+	m_pDev->SetRenderState( D3DRS_LIGHTING, TRUE );
 	m_pDev->SetRenderState( D3DRS_AMBIENT, 0xffffffff );
 
-	m_pDev->GetDevice()->SetRenderState(D3DRS_ZENABLE, TRUE);
-	m_pDev->GetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-	m_pDev->GetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	m_pDev->GetDevice()->SetRenderState(D3DRS_SRCBLEND,  _eSrcBlend);	 
-	m_pDev->GetDevice()->SetRenderState(D3DRS_DESTBLEND, _eDestBlend);
+	m_pDev->SetRenderState(D3DRS_ZENABLE, TRUE);
+	m_pDev->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+	m_pDev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	m_pDev->SetRenderState(D3DRS_SRCBLEND,  _eSrcBlend);	 
+	m_pDev->SetRenderState(D3DRS_DESTBLEND, _eDestBlend);
 #ifdef USE_RENDER
 	D3DMATERIALX mtl;
 	mtl.Ambient = (D3DCOLORVALUE)_dwCurColor;
@@ -1051,18 +1051,18 @@ void	CChaModel::Begin()
 }
 void	CChaModel::End()
 {
-	m_pDev->GetDevice()->SetRenderState( D3DRS_LIGHTING, FALSE);
+	m_pDev->SetRenderState( D3DRS_LIGHTING, FALSE);
 
-	m_pDev->GetDevice()->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-	m_pDev->GetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+	m_pDev->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+	m_pDev->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
-	m_pDev->GetDevice()->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE); 
-	m_pDev->GetDevice()->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-	m_pDev->GetDevice()->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE);
+	m_pDev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE); 
+	m_pDev->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+	m_pDev->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE);
 
-	m_pDev->GetDevice()->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE); 
-	m_pDev->GetDevice()->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-	m_pDev->GetDevice()->SetTextureStageState(0, D3DTSS_COLOROP,   D3DTOP_MODULATE);  
+	m_pDev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE); 
+	m_pDev->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+	m_pDev->SetTextureStageState(0, D3DTSS_COLOROP,   D3DTOP_MODULATE);  
 }
 
 void	CChaModel::SaveToFile(FILE* file)
@@ -1326,7 +1326,7 @@ void	CMPLink::Render()
 	m_pDev->SetTexture(0,_pTex[_iCurTex]->GetTex());
 	m_pDev->SetVertexShader(NULL);
 	m_pDev->SetFVF(LINK_FVF);
-	m_pDev->GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,
+	m_pDev->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP,
 		20, _pFrame, sizeof(LinkVer));
 
 	_pCEffFile->End();

@@ -2,6 +2,7 @@
 
 #include "SceneNode.h"
 #include "MindPower.h"
+#include "lwD3D11Gaps.h"
 #include "mpeffectctrl.h"
 #include "MPModelEff.h"
 #include "MPShadeMap.h"
@@ -9,14 +10,14 @@
 #include "mpparticlectrl.h"
 
 enum Effect_Type {
-	EFF_SCENE, // 场景特效
-	EFF_CHA,   // 角色绑定,需要角色ID
-	EFF_ITEM,  // 武器绑定,需要item dummy和item id
-	EFF_STRIP, // 刀光
-	EFF_SELF,  // 自身特效
-	EFF_HIT,   // 受击特效,需要起始点
-	EFF_MAGIC, // 飞行特效,需要起始点，目标点
-	EFF_FONT,  // 飞行特效,需要起始点，目标点
+	EFF_SCENE, // ????????
+	EFF_CHA,   // ?????,??????ID
+	EFF_ITEM,  // ??????,???item dummy??item id
+	EFF_STRIP, // ????
+	EFF_SELF,  // ????????
+	EFF_HIT,   // ???????,????????
+	EFF_MAGIC, // ????????,????????????
+	EFF_FONT,  // ????????,????????????
 };
 class CCharacter;
 class CGameScene;
@@ -65,6 +66,11 @@ public:
 		SAFE_RELEASE(_lpVB);
 		SAFE_RELEASE(_lpIBLine);
 		_pDev = pDev;
+		if (!pDev) {
+			lwD3D11Gap(LW_D3D11_SKIP, "effectbox-create-vb",
+				"CEffectBox CreateVertexBuffer/CreateIndexBuffer is D3D9; skipped on DX11");
+			return;
+		}
 		BoxVer ver[8] = {
 		    {-fRadius, -fRadius, fRadius * 2, 0xffff0000},
 		    {-fRadius, fRadius, fRadius * 2, 0xffff0000},
@@ -136,7 +142,7 @@ public:
 	}
 
 	void Render() {
-		if (!_bShow)
+		if (!_bShow || !_lpVB)
 			return;
 		g_Render.SetTexture(0, NULL);
 		g_Render.SetVertexShader(NULL);
@@ -227,7 +233,7 @@ class CMagicEff;
 ///*CMagicEff*/
 ///************************************************************************/
 
-// 定义粒子发出的消息，由CMPEffectCtrl来发出这些消息，
+// ????????????????????CMPEffectCtrl???????????????
 #define PARTCTRL_MSG_PLAY 1
 #define PARTCTRL_MSG_STOP 2
 #define PARTCTRL_MSG_MOVE 3
@@ -235,15 +241,15 @@ class CMagicEff;
 #define PARTCTRL_MSG_RENDER 5
 
 
-// 创建一个特效所需的参数
+// ???????????????????
 struct Eff_Property {
-	int m_iEffType;     // 0 =场景特效，1为角色绑定特效,2为物件绑定特效,3为武器特效,4为魔法攻击特效
-	s_string m_strName; // 特效文件名
+	int m_iEffType;     // 0 =??????????1??????????,2??????????,3?????????,4????????????
+	s_string m_strName; // ?????????
 
-	int m_iIdxRender; // 算法索引
+	int m_iIdxRender; // ??????
 };
 
-//! 控制运动规迹的算法
+//! ?????????i????
 inline void Part_bind(CMagicEff* pEffCtrl);
 inline void Part_follow(CMagicEff* pEffCtrl);
 inline void Part_foldir(CMagicEff* pEffCtrl);
@@ -295,7 +301,7 @@ protected:
 	void RenderMagic();
 
 public:
-	// 指向算法的函数指针
+	// ?????????????
 	void (*RenderUpdate)(CMagicEff* pEffCtrl);
 
 	friend void Part_bind(CMagicEff* pEffCtrl);
@@ -333,7 +339,7 @@ public:
 	}
 
 
-	// iType  0: 角色对象， 1：Item对象
+	// iType  0: ??????? 1??Item????
 	void setFollowObj(CSceneNode* pObj, NODE_TYPE eType = NODE_CHA, int iDummy = -1, int iDummy2 = -1);
 
 	BOOL IsSceneEffect() {
@@ -455,7 +461,7 @@ public:
 		return _dwStartTime;
 	}
 
-	// 设置缩放特效因子 Michael 2005.12.8
+	// ???????????????? Michael 2005.12.8
 	void SetScale(float fX, float fY, float fZ) {
 		_UpdateScale(fX, fY, fZ);
 	}
@@ -483,7 +489,7 @@ protected:
 protected:
 	Effect_Type _eType;
 	CEffDelay* _pEffDelay;
-	CSceneNode* _pObj; // 跟随的对象
+	CSceneNode* _pObj; // ????????
 
 	MPTerrain* _pTerrain;
 	long _nTag;
@@ -536,7 +542,7 @@ protected:
 	int _isID;
 	D3DXVECTOR3 _vsBegin;
 	D3DXVECTOR3 _vsEnd;
-	DWORD _dwStartTime; // 记录飞行特效的起始时间
+	DWORD _dwStartTime; // ???????????????????
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -614,7 +620,7 @@ protected:
 protected:
 	// CGameScene*		_pScene;
 	MPTerrain* _pTerrain;
-	int _iChaID; // 有可能是角色，或物件，或武器或特效的ID
+	int _iChaID; // ?????????????????????????????????ID
 
 	int _iIdxID;
 

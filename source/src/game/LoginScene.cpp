@@ -349,8 +349,13 @@ bool CLoginScene::_Init() {
 
 void CLoginScene::__cha_render_event(C3DCompent* pSender, int x, int y) {
 
-	g_Render.GetDevice()->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
-	g_Render.GetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+	if (IDirect3DDeviceX* d3d9 = g_Render.GetDevice()) {
+		d3d9->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+		d3d9->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+	} else if (MPIDeviceObject* dev_obj = g_Render.GetInterfaceMgr()->dev_obj) {
+		dev_obj->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+		dev_obj->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+	}
 	g_Render.LookAt(D3DXVECTOR3(11.0f, 36.0f, 10.0f), D3DXVECTOR3(8.70f, 12.0f, 8.0f), MPRender::VIEW_3DUI);
 	y += 100;
 	MPMatrix44 old_mat = *modelCha->GetMatrix();

@@ -400,7 +400,7 @@ public:
 		// g_Render.SetTextureStageState( 0, D3DTSS_ADDRESSV , D3DTADDRESS_CLAMP);
 		g_Render.SetVertexShader(NULL);
 		g_Render.SetFVF(D3DFVF_M2DWA);
-		g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &_vWndVer, sizeof(M2D_AVER));
+		g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &_vWndVer, sizeof(M2D_AVER));
 	}
 
 public:

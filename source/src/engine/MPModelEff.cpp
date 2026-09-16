@@ -1362,11 +1362,7 @@ void	CMPStrip::Render()
 		}
 	}
 	if(_vecCtrl.size()>1)
-#ifdef		USE_RENDER
-		m_pDev->GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, _vecPath.size()-2, _vecPath.front(), sizeof(Strip_Vertex));
-#else
-		m_pDev->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, _vecPath.size()-2, _vecPath.front(), sizeof(Strip_Vertex));
-#endif
+		m_pDev->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, (UINT)(_vecPath.size()-2), _vecPath.front(), sizeof(Strip_Vertex));
 	_pCEffFile->End();
 }
 

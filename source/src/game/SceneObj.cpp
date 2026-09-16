@@ -525,7 +525,7 @@ void CSceneObj::MoveLight(D3DXVECTOR3* SVerPos) {
 	_fty = _vPos.y + _fRange + 1;
 
 	DWORD d;
-	g_Render.GetDevice()->GetRenderState(D3DRS_AMBIENT, &d);
+	g_Render.GetRenderState(D3DRS_AMBIENT, &d);
 	D3DXCOLOR amb = d;
 
 	D3DXCOLOR tcolor;

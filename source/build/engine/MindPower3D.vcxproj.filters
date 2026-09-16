@@ -265,6 +265,13 @@
     <ClInclude Include="..\..\include\engine\MPTextureSet.h" />
     <ClInclude Include="..\..\include\engine\MPTile.h" />
     <ClInclude Include="..\..\include\engine\mygraph.h" />
+    <ClInclude Include="..\..\include\engine\lwD3D11Gaps.h" />
+    <ClInclude Include="..\..\include\engine\lwD3D11Blit.h" />
+    <ClInclude Include="..\..\include\engine\lwD3D11Texture.h" />
+    <ClInclude Include="..\..\include\engine\lwD3D11Buffer.h" />
+    <ClInclude Include="..\..\include\engine\lwD3D11Mesh.h" />
+    <ClInclude Include="..\..\include\engine\lwDeviceObject11.h" />
+    <ClInclude Include="..\..\include\engine\lwRenderBackend.h" />
     <ClInclude Include="..\..\include\engine\ShaderLoad.h" />
     <ClInclude Include="..\..\include\engine\STLprerequisite.h" />
     <ClInclude Include="..\..\include\engine\ZRBlock.h" />
@@ -309,10 +316,31 @@
     <ClCompile Include="..\..\src\engine\lwD3DSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\engine\lwD3D11Gaps.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\engine\lwD3D11Blit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\engine\lwD3D11Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\engine\lwD3D11Buffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\engine\lwD3D11Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\engine\lwDDSFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\engine\lwDeviceObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\engine\lwDeviceObject11.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\engine\lwRenderBackend.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\engine\lwDirectoryBrowser.cpp">

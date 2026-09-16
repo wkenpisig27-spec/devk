@@ -8,6 +8,7 @@
 
 #include ".\mpshademap.h"
 #include "MPRender.h"
+#include "lwRenderBackend.h"
 
 #define	 TILESIZE	1.0f
 
@@ -534,8 +535,6 @@ void	CMPShadeMap::FillVertex()
 	_pModel->Lock((BYTE**)&pVertex);
 	if(pVertex == 0)
 	{
-		MessageBox(NULL, "msgLockFailed lock error msglock error CMPShadeMap::FillVertex() line 552", "error", 0);
-		//LG("error","msgLockFailed CMPShadeMap::FillVertex() %s\n ", _pModel->m_strName.c_str());
 		return;
 	}
 
@@ -628,6 +627,9 @@ void CMPShadeMap::RenderSoft() {
 
 void	CMPShadeMap::Render()
 {
+	if(!_bShow)
+		return;
+
 	if(!m_bUseSoft)
 		RenderVS();
 	else

@@ -27,7 +27,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	// =============================================
 
 	// Initialize crash dump generation
-	ErrorHandler::Initialize();
+	ErrorHandler::Initialize("GroupServer", false);
 
 	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 

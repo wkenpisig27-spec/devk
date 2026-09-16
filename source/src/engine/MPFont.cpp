@@ -10,6 +10,8 @@
 
 #include "lwIUtil.h"
 #include "lwPredefinition.h"
+#include "lwRenderBackend.h"
+#include "lwD3D11Gaps.h"
 
 using namespace std;
 
@@ -164,6 +166,14 @@ bool CMPFont::CreateFont( IDirect3DDeviceX* pd3dDevice, char szFontName[], int n
 	SetBkColor( _hDc, 0x00000000 );
 	SetTextAlign( _hDc, TA_TOP );
 
+#ifdef USE_RENDER
+	if (lwIsDx11Active() || !_pDev || !_pDev->GetDevice()) {
+		lwD3D11Gap(LW_D3D11_SKIP, "font-d3d9-tex",
+			"CMPFont mesh/texture create needs D3D9; GDI font is kept, GPU atlas waits for Slice 8");
+		_vecBuf.resize(_Max);
+		return true;
+	}
+#endif
 	lwIResourceMgr* res_mgr = _pDev->GetInterfaceMgr()->res_mgr;
 
 	// begin
@@ -273,7 +283,8 @@ void CMPFont::BindingRes(CMPResManger* pResMagr)
 	{
 		*_vecValidID[iw] = iw;
 	}
-	FillTextToTex(pResMagr->GetDefaultText());
+	if (_pTexFast && !lwIsDx11Active())
+		FillTextToTex(pResMagr->GetDefaultText());
 
 }
 int	  CMPFont::GetHzLength(float fscale)
@@ -1612,6 +1623,11 @@ bool CMPFont::FindTextFromTex( char c1, char c2, float & tX1, float & tY1 , floa
 
 void CMPFont::FillTextToTex( char* szText )
 {
+	if (!_pTexFast || lwIsDx11Active()) {
+		lwD3D11Gap(LW_D3D11_SKIP, "font-filltext-tex",
+			"FillTextToTex needs the D3D9 font atlas; skipped on DX11");
+		return;
+	}
 skip:
 
 	if(!_pTexFast->IsLoadingOK())

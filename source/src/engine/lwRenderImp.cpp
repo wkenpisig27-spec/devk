@@ -7,6 +7,7 @@
 #include "lwResourceMgr.h"
 #include "lwShaderMgr.h"
 #include "lwD3D.h"
+#include "lwRenderBackend.h"
 
 LW_BEGIN
 
@@ -57,7 +58,19 @@ LW_RESULT lwRenderCtrlAgent::SetRenderCtrl(DWORD ctrl_type)
         goto __ret;
 
     if(LW_FAILED(_render_ctrl->Initialize(this)))
+    {
+        if (lwIsDx11Active() && ctrl_type != RENDERCTRL_VS_FIXEDFUNCTION)
+        {
+            LW_IF_RELEASE(_render_ctrl);
+            if (LW_SUCCEEDED(_res_mgr->CreateRenderCtrlVS(&_render_ctrl, RENDERCTRL_VS_FIXEDFUNCTION)) &&
+                LW_SUCCEEDED(_render_ctrl->Initialize(this)))
+            {
+                ret = LW_RET_OK;
+                goto __ret;
+            }
+        }
         goto __ret;
+    }
 
     ret = LW_RET_OK;
 __ret:

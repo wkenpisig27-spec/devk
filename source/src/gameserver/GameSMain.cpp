@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
 	// =============================================
 
 	// Initialize crash dump generation
-	ErrorHandler::Initialize();
+	ErrorHandler::Initialize("GameServer", false);
 
 	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 

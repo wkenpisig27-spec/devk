@@ -2,6 +2,8 @@
 #include "stdafx.h"
 
 #include "uiNumAnswer.h"
+#include "lwRenderBackend.h"
+#include "lwD3D11Gaps.h"
 
 using namespace std;
 
@@ -118,7 +120,11 @@ bool CNumAnswerMgr::Init() {
 	if (!labTimeLeft)
 		return false;
 
-	if (FAILED(
+	if (lwIsDx11Active() || !g_Render.GetDevice()) {
+		lwD3D11Gap(LW_D3D11_SKIP, "numanswer-create-texture",
+			"captcha texture CreateTexture is D3D9; skipped on DX11");
+		_pNumTexture = 0;
+	} else if (FAILED(
 	        g_Render.GetDevice()->CreateTexture(256, 256, 1, 0, D3DFMT_R5G6B5, D3DPOOL_MANAGED, &_pNumTexture, NULL))) {
 		MessageBox(0, TEXT("NumAnswer_CreateTexture Failed!"), 0, MB_ICONERROR);
 		return false;

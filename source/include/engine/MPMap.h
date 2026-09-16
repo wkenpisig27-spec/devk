@@ -249,7 +249,7 @@ protected:
 public:
 	void        CreateSkyDoom(D3DXVECTOR3 center, float radius, char* txPath, bool hemisphere = true); //add by jze 2008.6.27
 	void		SetupPixelFog(DWORD Color, DWORD Mode,float Start, float End, float Density); //add by jze 2008.7.3
-	void        CloseFog(){g_Render.GetDevice()->SetRenderState(D3DRS_FOGENABLE,FALSE);}
+	void        CloseFog(){ g_Render.SetRenderState(D3DRS_FOGENABLE, FALSE); }
 	BOOL        IsSkyDoom(){return m_bSkyDoom;}
 	void        SetSkyDoom(bool bSkyDoom){m_bSkyDoom = bSkyDoom;}
 

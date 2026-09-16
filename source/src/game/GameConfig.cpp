@@ -2,6 +2,7 @@
 #include "GameConfig.h"
 #include "GameApp.h"
 #include "ShaderLoad.h"
+#include "lwRenderBackend.h"
 
 using namespace std;
 
@@ -12,6 +13,7 @@ CGameConfig::CGameConfig() {
 	SetDefault();
 	Load("scripts/kop.cfg"); // �������ļ�
 	LoadVisualSettings("user/system.ini");
+	ApplyRendererToEngine();
 }
 
 void CGameConfig::SetDefault() // Ĭ������
@@ -113,6 +115,9 @@ void CGameConfig::SetDefault() // Ĭ������
 	m_bWaterEnhance = TRUE;
 	m_bSRGBWrite = FALSE;
 	m_fSceneAmbientScale = 1.0f;
+
+	strncpy(m_szRenderer, "dx9", sizeof(m_szRenderer) - 1);
+	m_szRenderer[sizeof(m_szRenderer) - 1] = 0;
 }
 
 void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
@@ -153,10 +158,27 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 		m_fSceneAmbientScale = 0.2f;
 	if (m_fSceneAmbientScale > 1.5f)
 		m_fSceneAmbientScale = 1.5f;
+
+	GetPrivateProfileStringA("video", "renderer", "dx9", buf, sizeof(buf), pszIniFileName);
+	strncpy(m_szRenderer, buf, sizeof(m_szRenderer) - 1);
+	m_szRenderer[sizeof(m_szRenderer) - 1] = 0;
+}
+
+void CGameConfig::ApplyRendererToEngine() {
+	lwRenderBackend backend = lwParseRenderBackend(m_szRenderer, LW_RENDER_BACKEND_DX9);
+	if (m_szRenderer[0] &&
+		_stricmp(m_szRenderer, "dx9") != 0 && _stricmp(m_szRenderer, "d3d9") != 0 &&
+		_stricmp(m_szRenderer, "dx11") != 0 && _stricmp(m_szRenderer, "d3d11") != 0) {
+		LG("d3d11gaps", "[FALLBACK] unknown-renderer — '%s', using dx9\n", m_szRenderer);
+	}
+	strncpy(m_szRenderer, lwRenderBackendName(backend), sizeof(m_szRenderer) - 1);
+	m_szRenderer[sizeof(m_szRenderer) - 1] = 0;
+	lwSetRequestedRenderBackend(backend);
 }
 
 void CGameConfig::ApplyVisualSettingsToEngine() {
 	lwSetOutlineParams(m_fOutlineWidth, m_fOutlineColorR, m_fOutlineColorG, m_fOutlineColorB, m_fOutlineRefDepth);
+	ApplyRendererToEngine();
 	// Fog is applied per-frame in CGameScene::_Render from these fields.
 	// Shadow map stays off by default so soft blob foot-shadows remain (RO look).
 }

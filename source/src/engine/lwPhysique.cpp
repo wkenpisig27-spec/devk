@@ -15,6 +15,8 @@
 #include "ShaderLoad.h"
 #include "lwPredefinition.h"
 #include "lwxRenderCtrlVS.h"
+#include "lwRenderBackend.h"
+#include "lwD3D11Mesh.h"
 
 using namespace std;
 
@@ -830,10 +832,19 @@ LW_RESULT lwPhysique::Render()
     {
         lwIPrimitive* p;
 
-        IDirect3DDeviceX* device = _res_mgr->GetDeviceObject()->GetDevice();
-        device->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
-        device->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-        device->SetTexture(1, 0);
+        lwIDeviceObject* phy_dev = _res_mgr->GetDeviceObject();
+        IDirect3DDeviceX* device = phy_dev ? phy_dev->GetDevice() : 0;
+        if (device)
+        {
+            device->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+            device->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+            device->SetTexture(1, 0);
+        }
+        else if (phy_dev)
+        {
+            phy_dev->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+            phy_dev->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+        }
 
         for (DWORD i = 0; i < LW_MAX_SUBSKIN_NUM; i++)
         {
@@ -848,10 +859,8 @@ LW_RESULT lwPhysique::Render()
             else
             {
 
-                if (mIndexColourFilterList.find(i) != mIndexColourFilterList.end())
+                if (device && mIndexColourFilterList.find(i) != mIndexColourFilterList.end())
                 {
-                    IDirect3DDeviceX* device = _res_mgr->GetDeviceObject()->GetDevice();
-
                     static IDirect3DTextureX* texture = 0;
                     if (!texture)
                     {
@@ -872,9 +881,8 @@ LW_RESULT lwPhysique::Render()
                 if (LW_FAILED(p->Render()))
                     goto __ret;
 
-                if (mIndexColourFilterList.find(i) != mIndexColourFilterList.end())
+                if (device && mIndexColourFilterList.find(i) != mIndexColourFilterList.end())
                 {
-                    IDirect3DDeviceX* device = _res_mgr->GetDeviceObject()->GetDevice();
                     device->SetTexture(1, 0);
                     device->SetTextureStageState(1, D3DTSS_TEXCOORDINDEX, 1);
                     device->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
@@ -901,6 +909,11 @@ LW_RESULT lwPhysique::Render()
             lwIDeviceObject* dev_obj = _res_mgr->GetDeviceObject();
             if (dev_obj)
             {
+                const int dx11 = lwIsDx11Active();
+                float ow = 0.014f, ocr = 0.12f, ocg = 0.08f, ocb = 0.10f;
+                if (dx11)
+                    lwGetOutlineParams(&ow, &ocr, &ocg, &ocb);
+
                 DWORD rs_cull = D3DCULL_CCW;
                 DWORD rs_zwrite = TRUE;
                 DWORD rs_alphablend = FALSE;
@@ -940,9 +953,13 @@ LW_RESULT lwPhysique::Render()
                     if (outline_vs == LW_INVALID_INDEX)
                         continue;
 
-                    agent->SetVertexShader(outline_vs);
+                    if (!dx11)
+                        agent->SetVertexShader(outline_vs);
                     agent->BeginSet();
-                    lwApplyOutlineVSConstants(dev_obj);
+                    if (dx11)
+                        lwD3D11MeshSetOutline(1, ow, ocr, ocg, ocb);
+                    else
+                        lwApplyOutlineVSConstants(dev_obj);
 
                     // Re-assert after BeginSet: mesh RSA may have overridden CULLMODE
                     dev_obj->SetRenderStateForced(D3DRS_CULLMODE,         D3DCULL_CW);
@@ -962,16 +979,22 @@ LW_RESULT lwPhysique::Render()
                         agent->DrawSubset(s);
 
                     agent->EndSet();
-                    agent->SetVertexShader(cur_vs);
+                    if (dx11)
+                        lwD3D11MeshSetOutline(0, 0, 0, 0, 0);
+                    else
+                        agent->SetVertexShader(cur_vs);
                 }
 
                 // Restore pre-pass states (Forced keeps device cache in sync).
                 // Also clear any leftover outline VS so FF / next draws are safe.
+                if (!dx11)
+                {
 #if defined(LW_USE_DX9)
-                dev_obj->SetVertexShader((IDirect3DVertexShaderX*)NULL);
+                    dev_obj->SetVertexShader((IDirect3DVertexShaderX*)NULL);
 #else
-                dev_obj->SetVertexShader((IDirect3DVertexShaderX)NULL);
+                    dev_obj->SetVertexShader((IDirect3DVertexShaderX)NULL);
 #endif
+                }
                 dev_obj->SetRenderStateForced(D3DRS_CULLMODE,         rs_cull);
                 dev_obj->SetRenderStateForced(D3DRS_ZWRITEENABLE,     rs_zwrite);
                 dev_obj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, rs_alphablend);

@@ -308,7 +308,19 @@ void CSelectChaScene::_Render() {
 
 	rsm->BeginScene();
 
-	// ????
+	rsm->BeginSceneObject();
+
+	if (pObj)
+		pObj->FrameMove(0);
+
+	dev_obj->GetRenderState(D3DRS_LIGHTING, &dwOldState);
+	dev_obj->SetRenderState(D3DRS_LIGHTING, FALSE);
+
+	if (pObj)
+		pObj->Render();
+
+	rsm->EndSceneObject();
+
 	rsm->BeginCharacter();
 
 	D3DLIGHTX env_light;
@@ -353,30 +365,19 @@ void CSelectChaScene::_Render() {
 			(*iter)->pCha->setYaw(m_Yaws[m_nCurChaIndex]);
 		}
 
-		(*iter)->pCha->Render();
+		g_Render.EnableZBuffer(TRUE);
+		(*iter)->pCha->MPCharacter::Render();
+		for (int link = 0; link < LINK_ID_NUM; ++link) {
+			CSceneItem* item = (*iter)->pCha->GetLinkItem(link);
+			if (item)
+				item->Render();
+		}
 	}
 	dev_obj->SetRenderState(D3DRS_LIGHTING, dwOldState);
 
 	g_Render.SetLight(0, &env_light_old);
 
 	rsm->EndCharacter();
-
-	// ????
-	rsm->BeginSceneObject();
-
-	if (pObj)
-		pObj->FrameMove(0);
-
-	dev_obj->GetRenderState(D3DRS_LIGHTING, &dwOldState);
-	dev_obj->SetRenderState(D3DRS_LIGHTING, FALSE);
-
-	// orange background
-	// SetupVertexFog(dev_obj, 0, 0, D3DCOLOR_XRGB(255, 104, 13), D3DFOG_EXP2, 1, 0.0025f);
-
-	if (pObj)
-		pObj->Render();
-
-	rsm->EndSceneObject();
 
 	rsm->BeginTranspObject();
 	lwUpdateSceneTransparentObject();

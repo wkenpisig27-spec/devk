@@ -16,6 +16,8 @@
 
 #include <vector>
 #include "lwIFunc.h"
+#include "lwRenderBackend.h"
+#include "lwDeviceObject11.h"
 
 #define USE_MANAGED_RES
 
@@ -79,6 +81,8 @@ public:
     void				EnableClearTarget(BOOL bEnable = TRUE)      { _bClearTarget  = bEnable; } 
     void				EnableClearZBuffer(BOOL bEnable = TRUE)     { _bClearZBuffer = bEnable; }
     void				EnableClearStencil(BOOL bEnable = TRUE)     { _bClearStencil = bEnable; }
+	// D3D9-only escape hatch. New code must go through this object's Set*/Draw*
+	// helpers. DX11 will leave this NULL — see lwD3D11Gaps.
 	IDirect3DDeviceX*	GetDevice()                                 { return _pD3DDevice;	    }
 	IDirect3DX*			GetD3DObj()									{ return _pD3D;				}
 	void				SetTexture(int nStage, IDirect3DTextureX* pTexture);
@@ -177,6 +181,7 @@ public:
     HRESULT SetIndices(IDirect3DIndexBufferX* index_data, UINT base_vert_index);
     HRESULT DrawPrimitive( D3DPRIMITIVETYPE pt_type, UINT start_vertex, UINT count );
     HRESULT DrawIndexedPrimitive( D3DPRIMITIVETYPE pt_type, INT base_vert_index, UINT min_index, UINT vert_num, UINT start_index, UINT count );
+    HRESULT DrawPrimitiveUP(D3DPRIMITIVETYPE pt_type, UINT count, const void* data, UINT stride);
 
 	// Upload to a DISCARD-locked dynamic VB then DrawPrimitive — cheaper under DXVK than DrawPrimitiveUP.
 	HRESULT DrawPrimitiveUP_Dynamic(D3DPRIMITIVETYPE type, UINT primCount, const void* data, UINT stride);
@@ -232,6 +237,12 @@ public:
 
     void GetInvViewMatrix( D3DXMATRIX* mat )
     {
+        if (lwIsDx11Active() && _IMgr.dev_obj) {
+            const lwMatrix44* view = _IMgr.dev_obj->GetMatView();
+            *mat = *(const D3DXMATRIX*)view;
+            D3DXMatrixInverse( mat, NULL, mat );
+            return;
+        }
         GetDevice()->GetTransform( D3DTS_VIEW, mat );
         D3DXMatrixInverse( mat, NULL, mat );
     }
@@ -406,6 +417,14 @@ inline HRESULT MPRender::SetIndices(IDirect3DIndexBufferX* index_data, UINT base
 inline HRESULT MPRender::DrawPrimitive( D3DPRIMITIVETYPE pt_type, UINT start_vertex, UINT count )
 {
     return _IMgr.dev_obj->DrawPrimitive(pt_type, start_vertex, count);
+}
+inline HRESULT MPRender::DrawPrimitiveUP(D3DPRIMITIVETYPE pt_type, UINT count, const void* data, UINT stride)
+{
+    if (lwIsDx11Active() && _IMgr.dev_obj)
+        return (_IMgr.dev_obj->DrawPrimitiveUP(pt_type, count, data, stride) == LW_RET_OK) ? D3D_OK : E_FAIL;
+    if (!_pD3DDevice)
+        return E_FAIL;
+    return _pD3DDevice->DrawPrimitiveUP(pt_type, count, data, stride);
 }
 inline HRESULT MPRender::DrawIndexedPrimitive( D3DPRIMITIVETYPE pt_type, INT base_vert_index, UINT min_index, UINT vert_num, UINT start_index, UINT count )
 {
@@ -634,7 +653,10 @@ inline void MPRender::ResetWorldTransform()
 
 inline void MPRender::UpdateLight()
 {
-    _pD3DDevice->SetLight(0, &_Light);
+    if (lwIsDx11Active() && _IMgr.dev_obj)
+        _IMgr.dev_obj->SetLight(0, &_Light);
+    else
+        _pD3DDevice->SetLight(0, &_Light);
 }
 
 inline void MPRender::SetDirectLightDir(float x, float y, float z)
@@ -644,7 +666,10 @@ inline void MPRender::SetDirectLightDir(float x, float y, float z)
     _Light.Position.x   = x;
     _Light.Position.y   = y;
     _Light.Position.z   = z;
-	_pD3DDevice->SetLight(0, &_Light);
+    if (lwIsDx11Active() && _IMgr.dev_obj)
+        _IMgr.dev_obj->SetLight(0, &_Light);
+    else
+        _pD3DDevice->SetLight(0, &_Light);
 }
 
 inline void MPRender::SetDirectLightColor(float r, float g, float b, float a)
@@ -653,7 +678,10 @@ inline void MPRender::SetDirectLightColor(float r, float g, float b, float a)
     _Light.Diffuse.g   = g;
     _Light.Diffuse.b   = b;
     _Light.Diffuse.a   = a;
-	_pD3DDevice->SetLight(0, &_Light);
+    if (lwIsDx11Active() && _IMgr.dev_obj)
+        _IMgr.dev_obj->SetLight(0, &_Light);
+    else
+        _pD3DDevice->SetLight(0, &_Light);
 }
 inline void MPRender::SetDirectLIghtAmbient(float r, float g, float b, float a)
 {
@@ -661,7 +689,10 @@ inline void MPRender::SetDirectLIghtAmbient(float r, float g, float b, float a)
     _Light.Ambient.g   = g;
     _Light.Ambient.b   = b;
     _Light.Ambient.a   = a;
-	_pD3DDevice->SetLight(0, &_Light);
+    if (lwIsDx11Active() && _IMgr.dev_obj)
+        _IMgr.dev_obj->SetLight(0, &_Light);
+    else
+        _pD3DDevice->SetLight(0, &_Light);
 }
 inline void MPRender::UpdateCullInfo( ) 
 {

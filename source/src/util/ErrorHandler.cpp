@@ -29,14 +29,58 @@
 #include <eh.h>		 // for set_terminate
 #include <crtdbg.h>	 // for _CrtSetReport*
 #include <DbgHelp.h> // for MiniDumpWriteDump
+#include <cstdint>
+
+#include "BugTrap/BugTrap.h"
 
 #pragma comment(lib, "DbgHelp.lib")
+#ifdef _DEBUG
+#pragma comment(lib, "BugTrapD-x64.lib")
+#else
+#pragma comment(lib, "BugTrap-x64.lib")
+#endif
 
 using namespace std;
 
-/// This function sets up a process-wide unhandled exception handler.
-void ErrorHandler::Initialize() {
-	::SetUnhandledExceptionFilter(UnhandledExceptionFilter);
+void CALLBACK ErrorHandler::BugTrapPreErrHandler(INT_PTR /*nParam*/) {
+	std::string strfile;
+	LG_GetDir(strfile);
+	strfile += "\\exception.txt";
+	FILE* fp = fopen(strfile.c_str(), "a+");
+	if (!fp)
+		return;
+	SYSTEMTIME st;
+	GetLocalTime(&st);
+	fprintf(fp, "%02d-%02d %02d:%02d:%02d BugTrap crash handler invoked\n",
+			st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+	fclose(fp);
+}
+
+void ErrorHandler::Initialize(const char* appName, bool interactive) {
+	if (!appName || !appName[0])
+		appName = "GameClient";
+
+	std::string reportDir;
+	LG_GetDir(reportDir);
+	if (reportDir.empty())
+		reportDir = ".";
+	reportDir += "\\crashes";
+	CreateDirectoryA(reportDir.c_str(), nullptr);
+
+	BT_SetAppName(appName);
+	BT_SetFlags(BTF_DETAILEDMODE | BTF_LISTPROCESSES |
+				(interactive ? (BTF_SCREENCAPTURE | BTF_SHOWADVANCEDUI) : BTF_NONE));
+	BT_SetReportFilePath(reportDir.c_str());
+	BT_SetActivityType(interactive ? BTA_SHOWUI : BTA_SAVEREPORT);
+	BT_SetPreErrHandler(BugTrapPreErrHandler, 0);
+
+	std::string exceptionLog;
+	LG_GetDir(exceptionLog);
+	exceptionLog += "\\exception.txt";
+	BT_AddLogFile(exceptionLog.c_str());
+
+	BT_InstallSehFilter();
+	BT_SetTerminate();
 }
 
 void ErrorHandler::DisableErrorDialogs() {
@@ -50,8 +94,7 @@ void ErrorHandler::DisableErrorDialogs() {
 	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
 	_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
 
-	::set_terminate(TerminateFunction);
-	signal(SIGABRT, AbortFunction);
+	// BugTrap already owns terminate/abort when Initialize() ran first.
 	::_set_error_mode(_OUT_TO_STDERR);
 }
 
@@ -60,9 +103,21 @@ LONG WINAPI ErrorHandler::UnhandledExceptionFilter(
 {
 	RuntimeStack statck(pExceptionPointers);
 
+	DWORD exceptionCode = 0;
+	PVOID exceptionAddress = nullptr;
+	if (pExceptionPointers && pExceptionPointers->ExceptionRecord) {
+		exceptionCode = pExceptionPointers->ExceptionRecord->ExceptionCode;
+		exceptionAddress = pExceptionPointers->ExceptionRecord->ExceptionAddress;
+	}
+
 	std::stringstream text;
-	text << "UnhandledException" << std::endl
-		 << statck << std::endl;
+	text << "UnhandledException" << std::endl;
+	text << "  Exception: " << SEHTranslator::name(exceptionCode)
+		 << " (0x" << std::hex << exceptionCode << ")" << std::endl;
+	text << "  Description: " << SEHTranslator::description(exceptionCode) << std::endl;
+	text << "  Address: 0x" << std::hex << (uintptr_t)exceptionAddress << std::dec << std::endl;
+	text << "  Stack Trace:" << std::endl;
+	text << statck << std::endl;
 	std::string mText = text.str();
 
 	std::string strfile;
@@ -78,7 +133,7 @@ LONG WINAPI ErrorHandler::UnhandledExceptionFilter(
 				st.wMinute, st.wSecond);
 
 		fwrite(tim, strlen(tim), 1, fp);
-		fwrite(mText.c_str(), strlen(mText.c_str()) - 1, 1, fp);
+		fwrite(mText.c_str(), strlen(mText.c_str()), 1, fp);
 		fclose(fp);
 	}
 
@@ -174,7 +229,7 @@ void ErrorHandler::DisplayError(const wchar_t* errorMessage,
 using namespace std;
 
 /// Install signal handlers for crash signals
-void ErrorHandler::Initialize() {
+void ErrorHandler::Initialize(const char* /*appName*/, bool /*interactive*/) {
 	struct sigaction sa;
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_sigaction = SignalHandler;

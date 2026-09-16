@@ -6,6 +6,7 @@
 #include "StdAfx.h"
 #include "game/BitmapFontAdapter.h"
 #include "engine/MPRender.h"
+#include "engine/lwRenderBackend.h"
 #include "game/UIRender.h"
 
 using namespace GUI;
@@ -109,7 +110,7 @@ int CGuiFont::CreateFont(const char* font, int size800, int size1024, DWORD dwSt
 
 int CGuiFont::LoadBitmapFont(const char* fntFile) {
     IDirect3DDeviceX* pDevice = GetDevice();
-    if (!pDevice) {
+    if (!pDevice && !lwIsDx11Active()) {
         return -1;
     }
     
@@ -125,8 +126,10 @@ int CGuiFont::LoadBitmapFont(const char* fntFile) {
         texPath = "";
     }
     
-    // Load the font
-    if (!pFont->Load(fntFile, texPath.c_str(), pDevice)) {
+    bool loaded = lwIsDx11Active()
+        ? pFont->Load(fntFile, texPath.c_str(), &g_Render)
+        : pFont->Load(fntFile, texPath.c_str(), pDevice);
+    if (!loaded) {
         delete pFont;
         return -1;
     }

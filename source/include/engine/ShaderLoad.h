@@ -62,3 +62,4 @@ LW_RESULT MINDPOWER_API LoadShader1(lwISysGraphics* sys_graphics);
 extern "C" MINDPOWER_API void lwSetOutlineEnabled(int enabled);
 extern "C" MINDPOWER_API void lwSetOutlineParams(float worldWidth, float r, float g, float b, float refDepth);
 MINDPOWER_API void lwApplyOutlineVSConstants(lwIDeviceObject* dev_obj);
+MINDPOWER_API void lwGetOutlineParams(float* worldWidth, float* r, float* g, float* b);

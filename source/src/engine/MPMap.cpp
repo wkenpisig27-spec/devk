@@ -13,6 +13,7 @@
 #include "MPCamera.h" 
 #include "assert.h" 
 #include "MPRender.h"
+#include "lwRenderBackend.h"
 
 
 using namespace std;
@@ -50,7 +51,8 @@ DWORD CalcEnhancedSeaColor(const VECTOR3& pos, DWORD baseColor, float shoreAlpha
 	float fresnel = 1.0f - ndv;
 	fresnel = fresnel * fresnel;
 
-	float dist = D3DXVec3Length(&(eye - vpos));
+	D3DXVECTOR3 delta = eye - vpos;
+	float dist = D3DXVec3Length(&delta);
 	float fogBlend = 1.0f - expf(-dist * 0.0015f);
 
 	br = (BYTE)min(255.0f, br + fresnel * 70.0f + fogBlend * 20.0f);
@@ -59,6 +61,12 @@ DWORD CalcEnhancedSeaColor(const VECTOR3& pos, DWORD baseColor, float shoreAlpha
 	ba = (BYTE)min(255.0f, ba * shoreAlphaScale + fresnel * 25.0f);
 
 	return D3DCOLOR_ARGB(ba, br, bg, bb);
+}
+
+static lwIDeviceObject* MapDev()
+{
+	lwInterfaceMgr* imgr = g_Render.GetInterfaceMgr();
+	return imgr ? imgr->dev_obj : 0;
 }
 } // namespace
 
@@ -186,11 +194,10 @@ void MPMap::Render()
         {
             int nVertexCnt = MAX_RENDER_TILE * 6; // ���ߴ�
 	        _dwLandVBSize = nVertexCnt * sizeof(MPTileVertex);
-            HRESULT hr = g_Render.GetDevice()->CreateVertexBuffer(_dwLandVBSize, 
-		        0, FVF_LAND, D3DPOOL_MANAGED, &_pLandVB, NULL);
-
-	        if(FAILED(hr)) 
-	        {
+            lwIDeviceObject* dev = MapDev();
+            if (!dev || LW_FAILED(dev->CreateVertexBuffer(_dwLandVBSize,
+		        0, FVF_LAND, D3DPOOL_MANAGED, &_pLandVB, NULL)))
+            {
                 LG("error", "msg MPMap::Render() ����Land Terrain Vertex Bufferʧ��!\n");
                 _pLandVB = NULL;
             }
@@ -204,11 +211,10 @@ void MPMap::Render()
         if(_pVB==NULL)
         {
             int nVertexCnt = (_nShowWidth / SEA_TILE_SIZE + 1)* (_nShowHeight / SEA_TILE_SIZE + 1) * 6;
-	        HRESULT hr = g_Render.GetDevice()->CreateVertexBuffer(sizeof(MPSeaTileVertex) * nVertexCnt, 
-		        D3DUSAGE_WRITEONLY, FVF_SEA,  D3DPOOL_DEFAULT, &_pVB, NULL);
-
-	        if(FAILED(hr)) 
-	        {
+            lwIDeviceObject* dev = MapDev();
+            if (!dev || LW_FAILED(dev->CreateVertexBuffer(sizeof(MPSeaTileVertex) * nVertexCnt,
+		        D3DUSAGE_WRITEONLY, FVF_SEA,  D3DPOOL_DEFAULT, &_pVB, NULL)))
+            {
                 LG("error", "msg MPMap::Render() Sea Vertex Buffer create failed — falling back to DrawPrimitiveUP\n");
                 _pVB = NULL;
                 _bUseVB = FALSE;
@@ -248,7 +254,8 @@ void MPMap::Render()
 	material.Ambient.b = 0.80f;
 	material.Ambient.a = 1.0f;
 	
-	g_Render.GetDevice()->SetMaterial(&material);
+	if (lwIDeviceObject* dev = MapDev())
+		dev->SetMaterial((lwMaterial*)&material);
 
 	g_Render.SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW); // ������Ⱦ
 	
@@ -415,7 +422,8 @@ void MPMap::RenderSmMap()
 	material.Ambient.b = 0.50f;
 	material.Ambient.a = 1.0f;
 	
-	g_Render.GetDevice()->SetMaterial(&material);
+	if (lwIDeviceObject* dev = MapDev())
+		dev->SetMaterial((lwMaterial*)&material);
 
 	g_Render.SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW); // ������Ⱦ
 	
@@ -717,7 +725,7 @@ void MPMap::RenderSea()
 //            LG("error","msg render sea");
 //
 //#else
-		HRESULT hr = _pVB->Lock(0, nVertexCnt * sizeof(MPSeaTileVertex), (void**)&pCurVertex, D3DLOCK_NOOVERWRITE );
+		HRESULT hr = _pVB->Lock(0, nVertexCnt * sizeof(MPSeaTileVertex), (void**)&pCurVertex, D3DLOCK_DISCARD );
 	    if(FAILED(hr)) return;
 		for(y = 0; y < nSeaCntY; y++)
 		{
@@ -819,7 +827,7 @@ void MPMap::RenderSea()
 				if(LW_FAILED(dsm->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2)))
 					LG("error","msg render sea");
 #else
-				g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &SVertex, sizeof(MPSeaTileVertex));
+				g_Render.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &SVertex, sizeof(MPSeaTileVertex));
 #endif
                 // end
 			}
@@ -1391,7 +1399,7 @@ void MPMap::_RenderVB(BOOL bWireframe)
 {
     if(_pLandVB==NULL) return;
     
-    g_Render.GetDevice()->SetStreamSource(0, _pLandVB, 0, sizeof(MPTileVertex));
+    g_Render.SetStreamSource(0, _pLandVB, 0, sizeof(MPTileVertex));
     //g_Render.SetTexture(0, NULL);
         
     int nStartVertex = 0;
@@ -1443,6 +1451,8 @@ void MPMap::_RenderVB(BOOL bWireframe)
 //jze
 BOOL MPMap::UseShader()
 {
+	if (lwIsDx11Active() || !g_Render.GetDevice())
+		return false;
 	if( (g_Render.GetOrgCap().VertexShaderVersion < D3DVS_VERSION(1,1)) || (g_Render.GetOrgCap().PixelShaderVersion < D3DPS_VERSION(1,1)) )
 	{
 		return false;
@@ -1723,22 +1733,18 @@ void MPMap::CreateSkyDoom(D3DXVECTOR3 center, float radius, char* txPath, bool h
 
 void MPMap::SetupPixelFog(DWORD Color, DWORD Mode,float Start, float End, float Density)
 {
-    // Enable fog blending.
-    g_Render.GetDevice()->SetRenderState(D3DRS_FOGENABLE, TRUE);
- 
-    // Set the fog color.
-    g_Render.GetDevice()->SetRenderState(D3DRS_FOGCOLOR, Color);
+    g_Render.SetRenderState(D3DRS_FOGENABLE, TRUE);
+    g_Render.SetRenderState(D3DRS_FOGCOLOR, Color);
     
-    // Set fog parameters.
     if(D3DFOG_LINEAR == Mode)
     {
-        g_Render.GetDevice()->SetRenderState(D3DRS_FOGTABLEMODE, Mode);
-        g_Render.GetDevice()->SetRenderState(D3DRS_FOGSTART, *(DWORD *)(&Start));
-        g_Render.GetDevice()->SetRenderState(D3DRS_FOGEND,   *(DWORD *)(&End));
+        g_Render.SetRenderState(D3DRS_FOGTABLEMODE, Mode);
+        g_Render.SetRenderState(D3DRS_FOGSTART, *(DWORD *)(&Start));
+        g_Render.SetRenderState(D3DRS_FOGEND,   *(DWORD *)(&End));
     }
     else
     {
-        g_Render.GetDevice()->SetRenderState(D3DRS_FOGTABLEMODE, Mode);
-        g_Render.GetDevice()->SetRenderState(D3DRS_FOGDENSITY, *(DWORD *)(&Density));
+        g_Render.SetRenderState(D3DRS_FOGTABLEMODE, Mode);
+        g_Render.SetRenderState(D3DRS_FOGDENSITY, *(DWORD *)(&Density));
     }
 }

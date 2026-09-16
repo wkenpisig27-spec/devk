@@ -14,6 +14,8 @@
 #include "MPResourceSet.h"
 #include "lwExpObj.h"
 #include "lwPhysique.h"
+#include "lwRenderBackend.h"
+#include "lwD3D11Gaps.h"
 
 using namespace std;
 
@@ -292,14 +294,45 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX
 	OutputDebugStringA("PKO: CMPResManger::InitRes() - starting...\n");
 	m_pDev = pDev;
 
-	IDirect3DSurfaceX* pBackBuffer;
+	memset(&m_d3dBackBuffer, 0, sizeof(m_d3dBackBuffer));
 #ifdef USE_RENDER
-	m_pDev->GetDevice()->GetBackBuffer( 0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer );
+	if (lwIsDx11Active() || !m_pDev->GetDevice()) {
+		lwD3D11Gap(LW_D3D11_SKIP, "initres-getbackbuffer",
+			"GetDevice() is NULL on DX11; backbuffer desc comes from the HWND size");
+		RECT rc_bb = {};
+		if (m_pDev->GetInterfaceMgr()->dev_obj)
+			m_pDev->GetInterfaceMgr()->dev_obj->GetWindowRect(NULL, &rc_bb);
+		UINT bb_w = (UINT)(rc_bb.right - rc_bb.left);
+		UINT bb_h = (UINT)(rc_bb.bottom - rc_bb.top);
+		if (bb_w == 0)
+			bb_w = (UINT)m_pDev->GetScrWidth();
+		if (bb_h == 0)
+			bb_h = (UINT)m_pDev->GetScrHeight();
+		if (bb_w == 0)
+			bb_w = 1280;
+		if (bb_h == 0)
+			bb_h = 720;
+		m_d3dBackBuffer.Width = bb_w;
+		m_d3dBackBuffer.Height = bb_h;
+		m_d3dBackBuffer.Format = D3DFMT_A8R8G8B8;
+	} else {
+		IDirect3DSurfaceX* pBackBuffer = 0;
+		m_pDev->GetDevice()->GetBackBuffer( 0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer );
+		if (pBackBuffer) {
+			pBackBuffer->GetDesc( &m_d3dBackBuffer );
+			pBackBuffer->Release();
+		}
+	}
 #else
-	m_pDev->GetBackBuffer( 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer );
+	{
+		IDirect3DSurfaceX* pBackBuffer = 0;
+		m_pDev->GetBackBuffer( 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer );
+		if (pBackBuffer) {
+			pBackBuffer->GetDesc( &m_d3dBackBuffer );
+			pBackBuffer->Release();
+		}
+	}
 #endif
-    pBackBuffer->GetDesc( &m_d3dBackBuffer );
-    pBackBuffer->Release();
 
 	//_iFontBkWidth = m_d3dBackBuffer.Width/2;
 	//_iFontBkHeight= m_d3dBackBuffer.Height/2;
@@ -323,7 +356,12 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX
 
 
 #ifdef USE_RENDER
-	m_pDev->GetDevice()->GetDeviceCaps(&m_caps);
+	if (lwIsDx11Active() || !m_pDev->GetDevice()) {
+		lwD3D11Gap(LW_D3D11_SKIP, "initres-getdevicecaps",
+			"GetDeviceCaps skipped on DX11; using synthetic MPRender caps");
+	} else {
+		m_pDev->GetDevice()->GetDeviceCaps(&m_caps);
+	}
 #else
 	m_pDev->GetDeviceCaps(&m_caps);       // initialize m_pd3dDevice before using
 #endif
@@ -339,6 +377,18 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX
 		m_bUseSoft = false;
 	}
 
+#ifdef USE_RENDER
+	// DX11 has no D3DX effect runtime and no D3D9 VS objects. Synthetic caps
+	// report VS 3.0, which would otherwise take RenderVS and crash on a NULL
+	// ID3DXEffect (LoadEffectFromFile is skipped). Force the FF/soft path.
+	if (lwIsDx11Active() || !m_pDev->GetDevice()) {
+		m_bUseSoft = true;
+		m_bUseSoftOrg = true;
+		lwD3D11Gap(LW_D3D11_SKIP, "effect-use-soft",
+			"DX11 has no D3DX effects / D3D9 VS; using CMPModelEff::RenderSoft");
+	}
+#endif
+
 
 	if(!CScriptFile::m_ctScript.OpenFileRead("effect/model.txt"))
 	{
@@ -351,6 +401,12 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX
 	const char* effectName = "shader\\eff.fx";
 #else
 	const char* effectName = "shader\\eff.fx";
+#endif
+#ifdef USE_RENDER
+	if (lwIsDx11Active() || !pDev->GetDevice()) {
+		lwD3D11Gap(LW_D3D11_SKIP, "d3dx-effect-file",
+			"D3DXCreateEffectFromFile needs IDirect3DDevice9; skipped on DX11");
+	} else
 #endif
 	if(!_CEffectFile.LoadEffectFromFile(effectName))
 	{
@@ -371,8 +427,16 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX
 #endif
 
 	if(!_bMagr)
+	{
+#ifdef USE_RENDER
+		if (lwIsDx11Active() || !pDev->GetDevice()) {
+			lwD3D11Gap(LW_D3D11_SKIP, "initres-vshader",
+				"CreateVertexShader is D3D9; skipped on DeviceObject11");
+		} else
+#endif
 		if(!LoadTotalVShader())
 			return false;
+	}
 
 //#ifdef USE_DDS_FILE
 	lstrcpy(_pszTexPath,"texture\\effect");
@@ -740,18 +804,20 @@ I_Effect*	CMPResManger::GetSubEffectByID(int iID, int iSubIdx)
 
 IDirect3DVertexShaderX*	CMPResManger::GetVShaderByID(int iID)
 {
-	if(!m_bUseSoft)
+	if (_vecVShader.empty())
+		return NULL;
+	if(!m_bUseSoft && iID >= 0 && iID < (int)_vecVShader.size())
 		return _vecVShader[iID];
-	else
-		return _vecVShader[0];
+	return _vecVShader[0];
 }
 
 IDirect3DVertexDeclarationX* CMPResManger::GetVDeclByID(int iID)
 {
-	if (!m_bUseSoft)
-		return _vecVDecl[iID] ;
-	else
-		return _vecVDecl[0];
+	if (_vecVDecl.empty())
+		return NULL;
+	if (!m_bUseSoft && iID >= 0 && iID < (int)_vecVDecl.size())
+		return _vecVDecl[iID];
+	return _vecVDecl[0];
 }
 	
 IDirect3DVertexShaderX*	CMPResManger::GetShadeVS()
@@ -760,6 +826,8 @@ IDirect3DVertexShaderX*	CMPResManger::GetShadeVS()
 }
 IDirect3DVertexDeclarationX* CMPResManger::GetShadeVDecl()
 {
+	if (_vecVDecl.size() <= 5)
+		return NULL;
 	return _vecVDecl[5];
 }
 

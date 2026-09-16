@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "uisystemform.h"
 #include <stdio.h>
+#include <string.h>
 #include <windows.h>
 #include "uiform.h"
 #include "uicheckbox.h"
@@ -26,6 +27,7 @@
 #include "UICozeForm.h"
 #include "MPRender.h"
 #include "ShaderLoad.h"
+#include "lwRenderBackend.h"
 
 #ifndef USE_DSOUND
 #include "AudioThread.h"
@@ -53,6 +55,7 @@ extern bool g_IsCameraMode;
 CSystemProperties::SVideo::SVideo() : bFullScreen(false), bResolution(0), nTexture(0), nQuality(0),
 								  bAnimation(false), bCameraRotate(false), nShadowMode(1), bDepth32(false),
 								  nMsaa(4) {
+	strcpy(szRenderer, "dx9");
 }
 
 int CSystemProperties::ApplyVideo() {
@@ -210,6 +213,14 @@ int CSystemProperties::readFromFile(const char* szIniFileName) {
 	else
 		m_videoProp.nMsaa = 0;
 
+	{
+		char renderer[16];
+		GetPrivateProfileStringA("video", "renderer", "dx9", renderer, sizeof(renderer), szIniFileName);
+		lwRenderBackend backend = lwParseRenderBackend(renderer, LW_RENDER_BACKEND_DX9);
+		strncpy(m_videoProp.szRenderer, lwRenderBackendName(backend), sizeof(m_videoProp.szRenderer) - 1);
+		m_videoProp.szRenderer[sizeof(m_videoProp.szRenderer) - 1] = 0;
+	}
+
 	// audio
 	m_audioProp.nMusicSound  = GetPrivateProfileInt("audio", "musicSound",  5, szIniFileName);
 	m_audioProp.nMusicEffect = GetPrivateProfileInt("audio", "musicEffect", 5, szIniFileName);
@@ -301,6 +312,8 @@ int CSystemProperties::writeToFile(const char* szIniFileName) {
 	if (!WriteInteger("video", "resolution", m_videoProp.bResolution, szIniFileName))
 		return OTHER_ERROR;
 	if (!WriteInteger("video", "msaa", m_videoProp.nMsaa, szIniFileName))
+		return OTHER_ERROR;
+	if (!WritePrivateProfileString("video", "renderer", m_videoProp.szRenderer[0] ? m_videoProp.szRenderer : "dx9", szIniFileName))
 		return OTHER_ERROR;
 
 	// audio
@@ -403,6 +416,7 @@ void CSystemMgr::LoadCustomProp() {
 			m_sysProp.m_videoProp.bFullScreen = false;
 			m_sysProp.m_videoProp.bResolution = 0;
 			m_sysProp.m_videoProp.nMsaa = 4;
+			strcpy(m_sysProp.m_videoProp.szRenderer, "dx9");
 
 			m_sysProp.m_audioProp.nMusicSound = static_cast<int>(10.0f * g_pGameApp->GetMusicSize());
 			m_sysProp.m_audioProp.nMusicEffect = static_cast<int>(10.0f * g_pGameApp->GetCurScene()->GetSoundSize());

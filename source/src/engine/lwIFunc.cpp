@@ -9,6 +9,8 @@
 #include "lwShaderTypes.h"
 #include "lwPreDefinition.h"
 #include "lwxRenderCtrlVS.h"
+#include "lwRenderBackend.h"
+#include "lwD3D11Gaps.h"
 
 
 LW_BEGIN
@@ -328,15 +330,17 @@ LW_RESULT lwInitMeshLibSystem(lwISystem** ret_sys, lwISysGraphics** ret_sys_grap
             goto __ret;
 
         lwIResourceMgr* res_mgr = sys_graphics->GetResourceMgr();
-        lwIStaticStreamMgr* ssm = res_mgr->GetStaticStreamMgr();
-        // PKO FIX: Fixed large buffer sizes to prevent crashes in crowded areas
-        // Do NOT use dynamic growth - reallocation during rendering causes crashes
-        ssm->CreateStreamEntitySeq(16384, 16384);  // Fixed size, no growth
-        ssm->CreateVertexBufferStream(0, 4 * 1024 * 1024);  // 4MB fixed
-        ssm->CreateVertexBufferStream(1, 4 * 1024 * 1024);  // 4MB fixed
-        ssm->CreateIndexBufferStream(0, 4 * 1024 * 1024);   // 4MB fixed
-        lwIDynamicStreamMgr* dsm = res_mgr->GetDynamicStreamMgr();
-        dsm->Create(2 * 1024 * 1024, 2 * 1024 * 1024);  // 2MB each fixed
+        {
+            lwIStaticStreamMgr* ssm = res_mgr->GetStaticStreamMgr();
+            // PKO FIX: Fixed large buffer sizes to prevent crashes in crowded areas
+            // Do NOT use dynamic growth - reallocation during rendering causes crashes
+            ssm->CreateStreamEntitySeq(16384, 16384);  // Fixed size, no growth
+            ssm->CreateVertexBufferStream(0, 4 * 1024 * 1024);  // 4MB fixed
+            ssm->CreateVertexBufferStream(1, 4 * 1024 * 1024);  // 4MB fixed
+            ssm->CreateIndexBufferStream(0, 4 * 1024 * 1024);   // 4MB fixed
+            lwIDynamicStreamMgr* dsm = res_mgr->GetDynamicStreamMgr();
+            dsm->Create(2 * 1024 * 1024, 2 * 1024 * 1024);  // 2MB each fixed
+        }
 
         // begin set default active system
         lwSetActiveISystem(sys);
@@ -444,10 +448,15 @@ LW_RESULT lwInitMeshLibSystem(lwISystem** ret_sys, lwISysGraphics** ret_sys_grap
             goto __ret;
         }
 
-        if (param_info)
+        if (param_info && !lwIsDx11Active())
         {
             if (LW_FAILED(lwAdjustD3DCreateParam(dev_obj->GetDirect3D(), param, param_info)))
                 goto __ret;
+        }
+        else if (param_info)
+        {
+            lwD3D11Gap(LW_D3D11_SKIP, "d3d9-create-param-adjust",
+                "D3D11 uses DXGI swapchain flags, not D3D9 create-param adjust");
         }
 
         if (LW_FAILED(dev_obj->CreateDevice(param)))
@@ -463,16 +472,18 @@ LW_RESULT lwInitMeshLibSystem(lwISystem** ret_sys, lwISysGraphics** ret_sys_grap
             goto __ret;
 
         lwIResourceMgr* res_mgr = sys_graphics->GetResourceMgr();
-        lwIStaticStreamMgr* ssm = res_mgr->GetStaticStreamMgr();
-        // PKO FIX: Fixed large buffer sizes to prevent crashes in crowded areas
-        // Do NOT use dynamic growth - reallocation during rendering causes crashes
-        ssm->CreateStreamEntitySeq(16384, 16384);  // Fixed size, no growth
-        ssm->CreateVertexBufferStream(0, 4 * 1024 * 1024);  // 4MB fixed
-        ssm->CreateVertexBufferStream(1, 4 * 1024 * 1024);  // 4MB fixed
-        ssm->CreateVertexBufferStream(2, 4 * 1024 * 1024);  // 4MB fixed
-        ssm->CreateIndexBufferStream(0, 4 * 1024 * 1024);   // 4MB fixed
-        lwIDynamicStreamMgr* dsm = res_mgr->GetDynamicStreamMgr();
-        dsm->Create(2 * 1024 * 1024, 2 * 1024 * 1024);  // 2MB each fixed
+        {
+            lwIStaticStreamMgr* ssm = res_mgr->GetStaticStreamMgr();
+            // PKO FIX: Fixed large buffer sizes to prevent crashes in crowded areas
+            // Do NOT use dynamic growth - reallocation during rendering causes crashes
+            ssm->CreateStreamEntitySeq(16384, 16384);  // Fixed size, no growth
+            ssm->CreateVertexBufferStream(0, 4 * 1024 * 1024);  // 4MB fixed
+            ssm->CreateVertexBufferStream(1, 4 * 1024 * 1024);  // 4MB fixed
+            ssm->CreateVertexBufferStream(2, 4 * 1024 * 1024);  // 4MB fixed
+            ssm->CreateIndexBufferStream(0, 4 * 1024 * 1024);   // 4MB fixed
+            lwIDynamicStreamMgr* dsm = res_mgr->GetDynamicStreamMgr();
+            dsm->Create(2 * 1024 * 1024, 2 * 1024 * 1024);  // 2MB each fixed
+        }
 
         // begin set default active system
         lwSetActiveISystem(sys);

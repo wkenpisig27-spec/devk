@@ -1,0 +1,3 @@
+﻿BugTrap v1.4.9 (https://github.com/bchavez/BugTrap)
+Original copyright (c) 2005-2009 IntelleSoft / Maksim Pyatkovskiy
+License: MIT (see upstream repository)

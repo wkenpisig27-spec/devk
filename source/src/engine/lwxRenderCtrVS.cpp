@@ -3,6 +3,8 @@
 #include "stdafx.h"
 #include "lwxRenderCtrlVS.h"
 #include "lwDeviceObject.h"
+#include "lwRenderBackend.h"
+#include "lwD3D11Mesh.h"
 
 LW_BEGIN
 
@@ -103,6 +105,33 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_dx8::BeginSet(lwIRenderCtrlAgent* agent)
     if (!mat_global)
         goto __ret;
 
+    if (lwIsDx11Active())
+    {
+        dev_obj->SetTransformWorld(mat_global);
+        anim_agent = agent->GetAnimCtrlAgent();
+        if (anim_agent)
+        {
+            animobj_num = anim_agent->GetAnimCtrlObjNum();
+            for (DWORD idx = 0; idx < animobj_num; ++idx)
+            {
+                animctrl_obj = anim_agent->GetAnimCtrlObj(idx);
+                if (!animctrl_obj)
+                    continue;
+                animctrl_obj->GetTypeInfo(&type_info);
+                if (type_info.type != ANIM_CTRL_TYPE_BONE)
+                    continue;
+                lwIAnimCtrlObjBone* bone_ctrl = (lwIAnimCtrlObjBone*)animctrl_obj;
+                DWORD bone_num = bone_ctrl->GetBoneRTTMNum();
+                const lwMatrix44* rtmat = (const lwMatrix44*)bone_ctrl->GetBoneRTMSeq();
+                if (bone_num && rtmat)
+                    lwD3D11MeshSetBonePalette(rtmat, bone_num);
+                break;
+            }
+        }
+        ret = LW_RET_OK;
+        goto __ret;
+    }
+
     pViewProj = dev_obj->GetMatViewProj();
     if (!pViewProj)
         goto __ret;
@@ -180,6 +209,13 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_dx8::BeginSet(lwIRenderCtrlAgent* agent)
                 lwIAnimCtrlObjBone* bone_ctrl = (lwIAnimCtrlObjBone*)animctrl_obj;
                 DWORD bone_num = bone_ctrl->GetBoneRTTMNum();
                 const lwMatrix44* rtmat = (const lwMatrix44*)bone_ctrl->GetBoneRTMSeq();
+
+                if (lwIsDx11Active())
+                {
+                    if (bone_num && rtmat)
+                        lwD3D11MeshSetBonePalette(rtmat, bone_num);
+                    break;
+                }
 
                 if (bone_num == 0 || !rtmat)
                     goto __ret;
@@ -265,14 +301,17 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_dx8::BeginSet(lwIRenderCtrlAgent* agent)
     #endif
 
     #if defined(LW_USE_DX9)
-        if (LW_FAILED(shader_mgr->QueryVertexShader(&vs, agent->GetVertexShader())))
-            goto __ret;
+        if (!lwIsDx11Active())
+        {
+            if (LW_FAILED(shader_mgr->QueryVertexShader(&vs, agent->GetVertexShader())))
+                goto __ret;
 
-        if (LW_FAILED(shader_mgr->QueryVertexDeclaration(&decl, agent->GetVertexDeclaration())))
-            goto __ret;
+            if (LW_FAILED(shader_mgr->QueryVertexDeclaration(&decl, agent->GetVertexDeclaration())))
+                goto __ret;
 
-        dev_obj->SetVertexDeclarationForced(decl);
-        dev_obj->SetVertexShader(vs);
+            dev_obj->SetVertexDeclarationForced(decl);
+            dev_obj->SetVertexShader(vs);
+        }
     #endif
     }
 
@@ -295,7 +334,8 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_dx8::EndSet(lwIRenderCtrlAgent* agent)
         dev_obj->SetRenderState(D3DRS_FOGENABLE, TRUE);
     }
 
-	dev_obj->GetDevice()->SetPixelShader(0);
+	if (IDirect3DDeviceX* end_dev = dev_obj->GetDevice())
+		end_dev->SetPixelShader(0);
 
 #if(defined LW_USE_DX9)
     dev_obj->SetVertexShader(NULL);
@@ -307,8 +347,40 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_dx8::BeginSetSubset(DWORD subset, lwIRender
     lwIResourceMgr* res_mgr = agent->GetResourceMgr();
     lwIDeviceObject* dev_obj = res_mgr->GetDeviceObject();
     lwIMtlTexAgent* mtltex_agent = agent->GetMtlTexAgent();
+    if (!mtltex_agent)
+        return LW_RET_FAILED;
 
     lwMaterial* mtl = mtltex_agent->GetMaterial();
+
+    if (lwIsDx11Active())
+    {
+        if (mtl)
+            dev_obj->SetMaterial(mtl);
+        lwIAnimCtrlAgent* anim_agent = agent->GetAnimCtrlAgent();
+        if (anim_agent)
+        {
+            DWORD animobj_num = anim_agent->GetAnimCtrlObjNum();
+            for (DWORD i = 0; i < animobj_num; ++i)
+            {
+                lwIAnimCtrlObj* animctrl_obj = anim_agent->GetAnimCtrlObj(i);
+                if (!animctrl_obj)
+                    continue;
+                lwAnimCtrlObjTypeInfo type_info;
+                animctrl_obj->GetTypeInfo(&type_info);
+                if (type_info.data[0] != subset || type_info.type != ANIM_CTRL_TYPE_TEXUV)
+                    continue;
+                if (type_info.data[1] >= 3)
+                    continue;
+                lwIAnimCtrlObjTexUV* texuv_ctrl = (lwIAnimCtrlObjTexUV*)animctrl_obj;
+                lwMatrix44 mat;
+                texuv_ctrl->GetRTM(&mat);
+                DWORD stage = type_info.data[1];
+                dev_obj->SetTransform((D3DTRANSFORMSTATETYPE)(D3DTS_TEXTURE0 + stage), &mat);
+                dev_obj->SetTextureStageState(stage, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
+            }
+        }
+        return LW_RET_OK;
+    }
 
     lwColorValue4f amb_dif[2];
     lwColorValue4f* c;
@@ -407,12 +479,18 @@ LW_RESULT lwxRenderCtrlVSVertexBlend::Clone(lwIRenderCtrlVS** obj)
 }
 LW_RESULT lwxRenderCtrlVSVertexBlend::Initialize(lwIRenderCtrlAgent* agent)
 {
+    _const_tab = 0;
+    if (lwIsDx11Active())
+        return LW_RET_OK;
+
     LW_RESULT ret = LW_RET_FAILED;
 
     lwIResourceMgr* res_mgr = agent->GetResourceMgr();
     lwIShaderMgr* shader_mgr = res_mgr->GetShaderMgr();
 
     lwVertexShaderInfo* vs_info = shader_mgr->GetVertexShaderInfo(agent->GetVertexShader());
+    if(!vs_info || !vs_info->data)
+        goto __ret;
     if(FAILED(D3DXGetShaderConstantTable((DWORD*)vs_info->data, &_const_tab)))
         goto __ret;
 
@@ -455,8 +533,38 @@ LW_RESULT lwxRenderCtrlVSVertexBlend::BeginSet(lwIRenderCtrlAgent* agent)
         goto __ret;
 
     dev = dev_obj->GetDevice();
-    if (!dev)
+    if (!dev && !lwIsDx11Active())
         goto __ret;
+
+    if (lwIsDx11Active())
+    {
+        mat_global = agent->GetGlobalMatrix();
+        if (mat_global)
+            dev_obj->SetTransformWorld(mat_global);
+        lwIAnimCtrlAgent* bones_agent = agent->GetAnimCtrlAgent();
+        if (bones_agent)
+        {
+            DWORD n = bones_agent->GetAnimCtrlObjNum();
+            for (DWORD i = 0; i < n; ++i)
+            {
+                lwIAnimCtrlObj* obj = bones_agent->GetAnimCtrlObj(i);
+                if (!obj)
+                    continue;
+                lwAnimCtrlObjTypeInfo info;
+                obj->GetTypeInfo(&info);
+                if (info.type != ANIM_CTRL_TYPE_BONE)
+                    continue;
+                lwIAnimCtrlObjBone* bone_ctrl = (lwIAnimCtrlObjBone*)obj;
+                DWORD bone_num = bone_ctrl->GetBoneRTTMNum();
+                const lwMatrix44* rtmat = (const lwMatrix44*)bone_ctrl->GetBoneRTMSeq();
+                if (bone_num && rtmat)
+                    lwD3D11MeshSetBonePalette(rtmat, bone_num);
+                break;
+            }
+        }
+        ret = LW_RET_OK;
+        goto __ret;
+    }
 
     mesh_agent = agent->GetMeshAgent();
     if (!mesh_agent)
@@ -647,8 +755,41 @@ LW_RESULT lwxRenderCtrlVSVertexBlend::BeginSetSubset(DWORD subset, lwIRenderCtrl
         goto __ret;
 
     dev = dev_obj->GetDevice();
-    if (!dev)
+    if (!dev && !lwIsDx11Active())
         goto __ret;
+
+    if (lwIsDx11Active())
+    {
+        mtl = mtltex_agent->GetMaterial();
+        if (mtl)
+            dev_obj->SetMaterial(mtl);
+
+        anim_agent = agent->GetAnimCtrlAgent();
+        if (anim_agent)
+        {
+            animobj_num = anim_agent->GetAnimCtrlObjNum();
+            for (DWORD i = 0; i < animobj_num; ++i)
+            {
+                animctrl_obj = anim_agent->GetAnimCtrlObj(i);
+                if (!animctrl_obj)
+                    continue;
+                lwAnimCtrlTypeInfo uvinfo;
+                animctrl_obj->GetTypeInfo(&uvinfo);
+                if (uvinfo.data[0] != subset || uvinfo.type != ANIM_CTRL_TYPE_TEXUV)
+                    continue;
+                if (uvinfo.data[1] >= 3)
+                    continue;
+                lwIAnimCtrlObjTexUV* texuv_ctrl = (lwIAnimCtrlObjTexUV*)animctrl_obj;
+                lwMatrix44 mat;
+                texuv_ctrl->GetRTM(&mat);
+                DWORD stage = uvinfo.data[1];
+                dev_obj->SetTransform((D3DTRANSFORMSTATETYPE)(D3DTS_TEXTURE0 + stage), &mat);
+                dev_obj->SetTextureStageState(stage, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
+            }
+        }
+        ret = LW_RET_OK;
+        goto __ret;
+    }
 
     mtl = mtltex_agent->GetMaterial();
     if (!mtl)

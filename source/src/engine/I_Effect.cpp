@@ -7,6 +7,7 @@
 #include "i_effect.h"
 #include "MPRender.h"
 #include "lwPredefinition.h"
+#include "lwRenderBackend.h"
 //#include "mpresmanger.h"
 
 extern MINDPOWER_API CMPResManger        ResMgr;
@@ -945,7 +946,14 @@ void	I_Effect::SetTexture()
 }
 void	I_Effect::SetVertexShader()
 {
-	m_pDev->SetVertexShader(ResMgr.GetVShaderByID(_iVSIndex));
+#ifdef USE_RENDER
+	if (lwIsDx11Active() || !m_pDev)
+		return;
+#endif
+	IDirect3DVertexShaderX* vs = ResMgr.GetVShaderByID(_iVSIndex);
+	if (!vs)
+		return;
+	m_pDev->SetVertexShader(vs);
 	m_pDev->SetVertexDeclaration(ResMgr.GetVDeclByID(_iVSIndex));
 }
 void	I_Effect::Render()				

@@ -8,6 +8,10 @@
 #include "BitmapFont.h"
 #include "MPRender.h"
 #include "MPFont.h"  // For ui::UIClip
+#include "lwRenderBackend.h"
+#include "lwD3D11Blit.h"
+#include "lwD3D11Texture.h"
+#include "lwDeviceObject11.h"
 
 #include <fstream>
 #include <sstream>
@@ -64,13 +68,16 @@ void CBitmapFont::Release()
 
 bool CBitmapFont::Load(const char* fontFile, const char* texturePath, MPRender* pRender)
 {
+    if (lwIsDx11Active())
+        return Load(fontFile, texturePath, (IDirect3DDeviceX*)0);
     if (!pRender) return false;
     return Load(fontFile, texturePath, pRender->GetDevice());
 }
 
 bool CBitmapFont::Load(const char* fontFile, const char* texturePath, IDirect3DDeviceX* pDevice)
 {
-    if (!pDevice || !fontFile) return false;
+    if (!fontFile) return false;
+    if (!pDevice && !lwIsDx11Active()) return false;
     
     // Release any existing data
     Release();
@@ -224,26 +231,35 @@ bool CBitmapFont::ParsePage(const char* line, const char* texturePath, IDirect3D
     char fullPath[512];
     sprintf_s(fullPath, "%s%s", texturePath, fileName);
     
-    // Load texture using D3DX
     IDirect3DTextureX* pTexture = nullptr;
-    HRESULT hr = D3DXCreateTextureFromFileExA(
-        pDevice,
-        fullPath,
-        D3DX_DEFAULT_NONPOW2,   // Width
-        D3DX_DEFAULT_NONPOW2,   // Height
-        1,                       // MipLevels
-        0,                       // Usage
-        D3DFMT_A8R8G8B8,        // Format (preserve alpha!)
-        D3DPOOL_MANAGED,        // Pool
-        D3DX_FILTER_NONE,       // Filter
-        D3DX_FILTER_NONE,       // MipFilter
-        0,                       // ColorKey (no transparency key)
-        nullptr,                // SrcInfo
-        nullptr,                // Palette
-        &pTexture
-    );
+    if (lwIsDx11Active()) {
+        lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
+        if (!d11 || !d11->GetD3D11Device() ||
+            LW_FAILED(lwD3D11CreateTextureFromFile(d11->GetD3D11Device(), fullPath, 0, &pTexture))) {
+            pTexture = nullptr;
+        }
+    } else {
+        HRESULT hr = D3DXCreateTextureFromFileExA(
+            pDevice,
+            fullPath,
+            D3DX_DEFAULT_NONPOW2,
+            D3DX_DEFAULT_NONPOW2,
+            1,
+            0,
+            D3DFMT_A8R8G8B8,
+            D3DPOOL_MANAGED,
+            D3DX_FILTER_NONE,
+            D3DX_FILTER_NONE,
+            0,
+            nullptr,
+            nullptr,
+            &pTexture
+        );
+        if (FAILED(hr))
+            pTexture = nullptr;
+    }
     
-    if (FAILED(hr) || !pTexture) {
+    if (!pTexture) {
         OutputDebugStringA("BitmapFont: Failed to load texture: ");
         OutputDebugStringA(fullPath);
         OutputDebugStringA("\n");
@@ -544,14 +560,23 @@ void CBitmapFont::AddQuad(float x, float y, float w, float h,
 
 void CBitmapFont::FlushBatch(int textureIndex)
 {
-    if (m_nVertexCount == 0 || !m_pDevice) return;
-    
-    // Set texture
-    if (textureIndex >= 0 && textureIndex < (int)m_Textures.size()) {
-        m_pDevice->SetTexture(0, m_Textures[textureIndex]);
+    if (m_nVertexCount == 0) return;
+
+    IDirect3DTextureX* tex = 0;
+    if (textureIndex >= 0 && textureIndex < (int)m_Textures.size())
+        tex = m_Textures[textureIndex];
+
+    if (lwIsDx11Active()) {
+        lwD3D11BlitDrawUP(m_Vertices, sizeof(FontVertex), (UINT)m_nVertexCount, tex, 1);
+        m_nVertexCount = 0;
+        return;
     }
+
+    if (!m_pDevice) return;
     
-    // Draw triangles
+    if (tex)
+        m_pDevice->SetTexture(0, tex);
+    
     m_pDevice->SetFVF(FontVertex::FVF);
     m_pDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, m_nVertexCount / 3, m_Vertices, sizeof(FontVertex));
     
@@ -560,11 +585,15 @@ void CBitmapFont::FlushBatch(int textureIndex)
 
 void CBitmapFont::Begin()
 {
-    if (!m_pDevice || !m_bLoaded) return;
+    if (!m_bLoaded) return;
+    if (!m_pDevice && !lwIsDx11Active()) return;
     
     m_bInBatch = true;
     m_nVertexCount = 0;
     m_nCurrentPage = -1;
+
+    if (lwIsDx11Active())
+        return;
     
     // Save render states
     m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
@@ -600,8 +629,10 @@ void CBitmapFont::End()
     }
     
     m_bInBatch = false;
+
+    if (lwIsDx11Active() || !m_pDevice)
+        return;
     
-    // Restore render states
     m_pDevice->SetRenderState(D3DRS_ZENABLE, TRUE);
     m_pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }

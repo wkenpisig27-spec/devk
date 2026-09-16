@@ -23,6 +23,7 @@ public:
 		bool bFullScreen;
 		int bResolution;
 		int nMsaa; // 0 / 2 / 4 / 8 — preferred swap-chain MSAA (default 4)
+		char szRenderer[16]; // "dx9" (default) or "dx11"; requires restart
 
 		SVideo();
 

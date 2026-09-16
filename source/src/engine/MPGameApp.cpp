@@ -21,6 +21,8 @@
 #include "MPCharacter.h"
 
 #include "MPResourceSet.h"
+#include "lwRenderBackend.h"
+#include "lwD3D11Gaps.h"
 
 using namespace std;
 //Del by lark.li 20080611
@@ -146,8 +148,15 @@ BOOL MPGameApp::Init(HINSTANCE hInst,const char *pszClassName, int nScrWidth, in
 	//FontModule::FontSystem::getSingleton().init();
 
 	OutputDebugStringA("PKO: MPGameApp::Init - calling _Init()...\n");
-    if( _Init() == 0 ) 
-        return 0;
+    if( _Init() == 0 )
+    {
+        if (lwIsDx11Active()) {
+            lwD3D11Gap(LW_D3D11_SKIP, "game-init-incomplete",
+                "CGameApp::_Init failed on DX11 (shaders/UI/fonts still D3D9); showing the swapchain window anyway");
+        } else {
+            return 0;
+        }
+    }
 	OutputDebugStringA("PKO: MPGameApp::Init - _Init() done\n");
 
 	ShowWindow(_hWnd, SW_SHOW);

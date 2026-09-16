@@ -4,8 +4,8 @@
 
 /**
  *  @file ErrorHandler.h
- *  The header file for the application-wide error handling functions used by
- *  WinUnit.exe.
+ *  Application-wide crash handling via BugTrap on Windows
+ *  (plus a minidump / exception.txt fallback). Linux keeps signal handlers.
  */
 
 #pragma once
@@ -21,8 +21,9 @@ class ErrorHandler {
 	typedef void (*SignalHandlerPointer)(int);
 
 public:
-	// Sets up application-wide exception handling.
-	static void Initialize();
+	// BugTrap on Windows (UI for the client, auto-save for servers).
+	// appName/interactive are ignored on Linux.
+	static void Initialize(const char* appName = "GameClient", bool interactive = true);
 
 	// Sets process- and CRT-wide variables that disable dialogs for several
 	// classes of errors and asserts.
@@ -34,6 +35,8 @@ private:
 	static bool s_nonInteractive;
 
 #if defined(_WIN32) || defined(_WIN64)
+	static void CALLBACK BugTrapPreErrHandler(INT_PTR nParam);
+
 	// This is the function that gets called when an unhandled exception
 	// bubbles up to the top.
 	static LONG WINAPI UnhandledExceptionFilter(

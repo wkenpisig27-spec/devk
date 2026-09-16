@@ -12,6 +12,7 @@
 #include "lwShaderMgr.h"
 #include "lwResourceMgr.h"
 #include "lwRenderImp.h"
+#include "lwRenderBackend.h"
 
 #define USE_VS_INDEXED
 

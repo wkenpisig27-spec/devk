@@ -10,6 +10,7 @@
 #include "LitLoad.h"
 #include "RenderStateMgr.h"
 #include "GameApp.h"
+#include "lwRenderBackend.h"
 
 enum {
 	S_MELEE = 0,  // ���ֽ�ս ���֣�ȭ�ף�Ǯ��
@@ -1278,6 +1279,9 @@ int CCharacterModel::Lit(DWORD part_id, DWORD lit_id) {
 }
 
 BOOL CCharacterModel::Cull() {
+	if (lwIsDx11Active())
+		return 0;
+
 	CChaRecord* pInfo = GetChaRecordInfo(_TypeID);
 	if (pInfo == 0)
 		return 0;

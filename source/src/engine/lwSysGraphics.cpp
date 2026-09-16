@@ -3,6 +3,9 @@
 #include "stdafx.h"
 #include "lwSysGraphics.h"
 #include "lwDeviceObject.h"
+#include "lwDeviceObject11.h"
+#include "lwRenderBackend.h"
+#include "lwD3D11Gaps.h"
 #include "lwResourceMgr.h"
 #include "lwSceneMgr.h"
 
@@ -38,7 +41,10 @@ LW_RESULT lwSysGraphics::GetInterface( LW_VOID** i, lwGUID guid )
 lwSysGraphics::lwSysGraphics( lwSystem* sys )
 : _sys(sys), _dev_obj(0), _res_mgr(0), _scene_mgr(0), _lose_dev_proc(0), _reset_dev_proc(0)
 {
-    _dev_obj = LW_NEW(lwDeviceObject(this));
+    if (lwGetRequestedRenderBackend() == LW_RENDER_BACKEND_DX11)
+        _dev_obj = LW_NEW(lwDeviceObject11(this));
+    else
+        _dev_obj = LW_NEW(lwDeviceObject(this));
     _res_mgr = LW_NEW(lwResourceMgr(this));  
     _scene_mgr = LW_NEW(lwSceneMgr(this));  
 }
@@ -54,7 +60,11 @@ LW_RESULT lwSysGraphics::CreateDeviceObject(lwIDeviceObject** ret_obj)
 {
     LW_RESULT ret = LW_RET_FAILED;
 
-    lwDeviceObject* o = LW_NEW(lwDeviceObject(this));
+    lwIDeviceObject* o = 0;
+    if (lwGetRequestedRenderBackend() == LW_RENDER_BACKEND_DX11)
+        o = LW_NEW(lwDeviceObject11(this));
+    else
+        o = LW_NEW(lwDeviceObject(this));
 
     if(o == 0)
         goto __ret;
@@ -102,15 +112,25 @@ LW_RESULT lwSysGraphics::ToggleFullScreen(D3DPRESENT_PARAMETERS* d3dpp, lwWndInf
 
     HWND hwnd = wnd_info->hwnd;
 
-    //d3dcp->present_param.Windowed
-    if(_lose_dev_proc)
+    const int dx11 = lwIsDx11Active();
+    if (dx11)
     {
-        if(LW_FAILED((*_lose_dev_proc)()))
+        lwD3D11Gap(LW_D3D11_SKIP, "lose-reset-fanout",
+            "D3D11 resize is ResizeBuffers only; D3D9 lose/reset fan-out is skipped");
+        lwD3D11Gap(LW_D3D11_SKIP, "resmgr-lose-fanout",
+            "D3D11 resources survive ResizeBuffers; res_mgr->LoseDevice is skipped");
+    }
+    else
+    {
+        if(_lose_dev_proc)
+        {
+            if(LW_FAILED((*_lose_dev_proc)()))
+                goto __ret;
+        }
+
+        if(LW_FAILED(_res_mgr->LoseDevice()))
             goto __ret;
     }
-
-    if(LW_FAILED(_res_mgr->LoseDevice()))
-        goto __ret;
 
     //AdjustWindowForChange
     LONG style;
@@ -156,14 +176,21 @@ LW_RESULT lwSysGraphics::ToggleFullScreen(D3DPRESENT_PARAMETERS* d3dpp, lwWndInf
     if(LW_FAILED(_dev_obj->InitCapsInfo()))
         goto __ret;
 
-
-    if(LW_FAILED(_res_mgr->ResetDevice()))
-        goto __ret;
-
-    if(_reset_dev_proc)
+    if (dx11)
     {
-        if(LW_FAILED((*_reset_dev_proc)()))
+        lwD3D11Gap(LW_D3D11_SKIP, "resmgr-reset-fanout",
+            "D3D11 resources survive ResizeBuffers; res_mgr->ResetDevice is skipped");
+    }
+    else
+    {
+        if(LW_FAILED(_res_mgr->ResetDevice()))
             goto __ret;
+
+        if(_reset_dev_proc)
+        {
+            if(LW_FAILED((*_reset_dev_proc)()))
+                goto __ret;
+        }
     }
 
     ret = LW_RET_OK;
@@ -174,6 +201,13 @@ __ret:
 LW_RESULT lwSysGraphics::TestCooperativeLevel()
 {
     LW_RESULT ret = LW_RET_FAILED;
+
+    if (lwIsDx11Active())
+    {
+        lwD3D11Gap(LW_D3D11_SKIP, "cooperative-level-skip",
+            "D3D11 has no device-lost protocol; TestCooperativeLevel reports render-normally");
+        return LW_RET_OK;
+    }
     
     HRESULT hr = _dev_obj->GetDevice()->TestCooperativeLevel();
 

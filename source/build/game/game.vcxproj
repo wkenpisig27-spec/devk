@@ -30,6 +30,7 @@
     <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Import Project="$(ProjectDir)..\BugTrap.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
@@ -84,7 +85,7 @@
       <ConformanceMode>false</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>AudioSDL_D.lib;MindPower3D_D9D.lib;d3d9.lib;d3dx9d.lib;Ws2_32.lib;lua51.lib;CaLua.lib;LIBDBC_D.lib;util_D.lib;Common_D.lib;dxguid.lib;ddraw.lib;atls.lib;Status_D.lib;SDL.lib;SDL_mixer.lib;SDLmain.lib;ICUHelper_D.lib;icudt.lib;icuucd.lib;icuind.lib;Psapi.lib;discord-rpc.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AudioSDL_D.lib;MindPower3D_D9D.lib;d3d9.lib;d3dx9d.lib;d3d11.lib;dxgi.lib;Ws2_32.lib;lua51.lib;CaLua.lib;LIBDBC_D.lib;util_D.lib;Common_D.lib;dxguid.lib;ddraw.lib;atls.lib;Status_D.lib;SDL.lib;SDL_mixer.lib;SDLmain.lib;ICUHelper_D.lib;icudt.lib;icuucd.lib;icuind.lib;Psapi.lib;discord-rpc.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\$(Configuration);$(ProjectDir)..\..\lib\Release;$(ProjectDir)..\..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -137,7 +138,7 @@
     </ClCompile>
     <Link>
       <RegisterOutput>false</RegisterOutput>
-      <AdditionalDependencies>AudioSDL.lib;MindPower3D_D9R.lib;d3d9.lib;lua51.lib;CaLua.lib;d3dx9.lib;Ws2_32.lib;botan.lib;LIBDBC.lib;util.lib;Common.lib;dxguid.lib;atls.lib;Status.lib;SDL.lib;SDL_mixer.lib;SDLmain.lib;ddraw.lib;Psapi.lib;discord-rpc.lib;legacy_stdio_definitions.lib;ICUHelper.lib;icudt.lib;icuuc.lib;icuin.lib;EncLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AudioSDL.lib;MindPower3D_D9R.lib;d3d9.lib;d3d11.lib;dxgi.lib;lua51.lib;CaLua.lib;d3dx9.lib;Ws2_32.lib;botan.lib;LIBDBC.lib;util.lib;Common.lib;dxguid.lib;atls.lib;Status.lib;SDL.lib;SDL_mixer.lib;SDLmain.lib;ddraw.lib;Psapi.lib;discord-rpc.lib;legacy_stdio_definitions.lib;ICUHelper.lib;icudt.lib;icuuc.lib;icuin.lib;EncLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>

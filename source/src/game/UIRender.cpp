@@ -26,6 +26,9 @@
 #include "uipage.h"
 #include "uitreeview.h"
 #include "GameConfig.h"
+#include "lwRenderBackend.h"
+#include "lwD3D11Gaps.h"
+#include "lwD3D11Blit.h"
 #include "uitextparse.h"
 
 #include "GlobalVar.h"
@@ -412,11 +415,15 @@ HRESULT UI_OnResetDevice() {
 }
 
 void UIRender::OnLostDevice() {
+	if (!_p2DSprite)
+		return;
 	if (FAILED(_p2DSprite->OnLostDevice()))
 		LG("error", "msglost");
 }
 
 void UIRender::OnResetDevice() {
+	if (!_p2DSprite)
+		return;
 	if (FAILED(_p2DSprite->OnResetDevice()))
 		LG("error", "msgreset");
 }
@@ -427,8 +434,12 @@ void UIRender::RegisterFunc() {
 }
 
 bool UIRender::Init() {
-	//_p2DSprite->
-	D3DXCreateSprite(g_Render.GetDevice(), &_p2DSprite);
+	if (lwIsDx11Active()) {
+		lwD3D11Gap(LW_D3D11_SKIP, "uirender-d3dx-sprite",
+			"D3DXCreateSprite needs a D3D9 device; UI sprites wait for Slice 8");
+	} else {
+		D3DXCreateSprite(g_Render.GetDevice(), &_p2DSprite);
+	}
 
 	_nTex = GetTextureID("texture/ui/frame.tga");
 	_nOutLine = GetTextureID("texture/ui/outline.tga");
@@ -1371,6 +1382,10 @@ void UIRender::RenderSprite(LPTEXTURE tex, RECT* rc, VECTOR2* vscale, VECTOR2* v
 		rc->right = __max(rc->right + x2, rc->left);
 		rc->top = __max(rc->top - y1, 0);
 		rc->bottom = __max(rc->bottom + y2, rc->top);
+	}
+	if (lwIsDx11Active()) {
+		lwD3D11BlitSprite(tex, rc, vscale, vdest, dwColor);
+		return;
 	}
 	if (_p2DSprite) {
 		_p2DSprite->Begin(D3DXSPRITE_ALPHABLEND);

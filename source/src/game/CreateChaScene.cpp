@@ -1434,10 +1434,13 @@ void CCreateChaScene::ChangeCity(eDirectType enumDirect) {
 //-----------------------------------------------------------------------
 void CCreateChaScene::RenderCha(int x, int y) {
 	// DX9 fix: Clear the depth buffer before rendering 3D character on top of UI
-	g_Render.GetDevice()->Clear(0, NULL, D3DCLEAR_ZBUFFER, 0, 1.0f, 0);
-	
-	g_Render.GetDevice()->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
-	g_Render.GetDevice()->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+	if (IDirect3DDeviceX* d3d9 = g_Render.GetDevice()) {
+		d3d9->Clear(0, NULL, D3DCLEAR_ZBUFFER, 0, 1.0f, 0);
+		d3d9->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+		d3d9->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+	} else {
+		g_Render.EnableZBuffer(TRUE);
+	}
 
 	if (m_nSelChaIndex < 0 || m_nSelChaIndex > 3)
 		return;

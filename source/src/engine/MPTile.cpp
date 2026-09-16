@@ -14,7 +14,7 @@ int MPTile::Offset[4][2] =
 
 
 //--------------------------- 
-// 增加贴图层(经典啊, 够简洁)
+// ?????????(????, ?????)
 //---------------------------
 void MPTile::AddTexLayer(BYTE btTexNo, BYTE btAlphaNo)
 {
@@ -86,7 +86,7 @@ void MPTile::AddTexLayer(BYTE btTexNo, BYTE btAlphaNo)
 	TexLayer[0].btAlphaNo = 15;
 	if(btValid < 4)
 	{
-		TexLayer[btValid].btTexNo = 0; // 此层开始无效
+		TexLayer[btValid].btTexNo = 0; // ????????
 	}
 }
 
@@ -95,7 +95,7 @@ MPTileVertex		MPTile::_TVertex[4];
 MPSeaTileVertex		MPTile::_SVertex[4];
 
 //-----------------------------
-// 调试渲染, 非VertexBuffer方式
+// ???????, ??VertexBuffer???
 //-----------------------------
 
 
@@ -103,17 +103,22 @@ MPSeaTileVertex		MPTile::_SVertex[4];
 void MPTile::RenderTerrain(int nX, int nY, MPTile *TileList[4])
 {
     // begin by lsh
-    // 这里有关得到render state ambient 的颜色应该使用统一的缓存
-    // 不是每次render都通过device来动态得到
+    // ??????????render state ambient ??????????????????
+    // ???????render?????device????????
     lwColorValue4b amb, vert_amb, c, t, x;
-    g_Render.GetDevice()->GetRenderState(D3DRS_AMBIENT, &amb.color);
+    DWORD amb_color = 0xffa0a0a0;
+    g_Render.GetRenderState(D3DRS_AMBIENT, &amb_color);
+    amb.color = amb_color;
     // end by lsh
 
 	float fOff = 0.0f;
     for(int i = 0; i < 4; i++)
 	{
 		MPTile* _pCurTile = TileList[i];
-        // if(_pCurTile->getBlock()) _pCurTile->dwColor = 0xf1000000;		
+		if (!_pCurTile)
+			_pCurTile = TileList[0];
+		if (!_pCurTile)
+			continue;
             
         _TVertex[i].dwColor = _pCurTile->dwTColor;
 		
@@ -153,7 +158,7 @@ void MPTile::RenderSea(int nX, int nY, int nTileSize)
     dsm->BindDataVB(0, &_SVertex, sizeof(MPSeaTileVertex) * 4, sizeof(MPSeaTileVertex));
     dsm->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
 #else
-	g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &_SVertex, sizeof(MPSeaTileVertex));
+	g_Render.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &_SVertex, sizeof(MPSeaTileVertex));
 #endif
     // end
 }

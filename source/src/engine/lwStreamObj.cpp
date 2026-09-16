@@ -4,6 +4,7 @@
 #include "lwDeviceObject.h"
 #include "lwErrorCode.h"
 #include "lwStdInc.h"
+#include "lwRenderBackend.h"
 
 LW_BEGIN
 
@@ -1930,8 +1931,11 @@ LW_RESULT lwVertexBuffer::Release()
     if(LW_FAILED(Destroy()))
         goto __ret;
     {
-        lwDeviceObject* devobj = reinterpret_cast<lwDeviceObject*>(_dev_obj);
-        devobj->_ReleaseStreamBuffer(this);
+        if (!lwIsDx11Active())
+        {
+            lwDeviceObject* devobj = reinterpret_cast<lwDeviceObject*>(_dev_obj);
+            devobj->_ReleaseStreamBuffer(this);
+        }
 
         LW_DELETE(this);
     }
@@ -2067,8 +2071,11 @@ LW_RESULT lwIndexBuffer::Release()
     if(LW_FAILED(Destroy()))
         goto __ret;
     {
-        lwDeviceObject* devobj = reinterpret_cast<lwDeviceObject*>(_dev_obj);
-        devobj->_ReleaseStreamBuffer(this);
+        if (!lwIsDx11Active())
+        {
+            lwDeviceObject* devobj = reinterpret_cast<lwDeviceObject*>(_dev_obj);
+            devobj->_ReleaseStreamBuffer(this);
+        }
 
         LW_DELETE(this);
     }

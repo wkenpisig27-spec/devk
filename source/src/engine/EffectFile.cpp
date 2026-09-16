@@ -10,6 +10,8 @@
 #include "EffectFile.h"
 //#include "DXUtil.h"
 #include "MPRender.h"
+#include "lwRenderBackend.h"
+#include "lwD3D11Gaps.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -53,6 +55,11 @@ BOOL CMPEffectFile::LoadEffectFromFile( LPCSTR pszfile)
 	HRESULT hr;
 	ID3DXBuffer* pErrorBuffer = NULL;
 #ifdef USE_RENDER
+	if (!m_pDev || !m_pDev->GetDevice() || lwIsDx11Active()) {
+		lwD3D11Gap(LW_D3D11_SKIP, "d3dx-create-effect",
+			"D3DXCreateEffectFromFile needs IDirect3DDevice9");
+		return FALSE;
+	}
 	hr = D3DXCreateEffectFromFile(m_pDev->GetDevice(), pszfile, NULL, NULL, 0, NULL, &m_pEffect, &pErrorBuffer);
 #else
 	hr = D3DXCreateEffectFromFile(m_pDev, pszfile, &m_pEffect, &pErrorBuffer);

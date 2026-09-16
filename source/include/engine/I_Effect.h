@@ -513,9 +513,7 @@ public:
 
 		if(LW_FAILED(_lpSVB->Lock(0, 0, (void**)pvEffVer, 0)))
 		{
-			MessageBox(NULL, "lock error msglock error", "error", 0);
 			*pvEffVer = 0;
-			assert(false);
 		}
 #else
 		_lpVB->Lock(0, 0, pvEffVer, 0 );
@@ -533,10 +531,15 @@ public:
 	void						LockIB(BYTE** pIdx)
 	{
 #ifdef USE_MGR
+		if (_lpSIB == 0)
+		{
+			*pIdx = 0;
+			return;
+		}
+
 		if(LW_FAILED(_lpSIB->Lock(0, 0, (void**)pIdx, 0)))
 		{
-			MessageBox(NULL, "lock error msglock error", "error", 0);
-			assert(false);
+			*pIdx = 0;
 		}
 #else
 		_lpIB->Lock(0, 0, pIdx, 0 );

@@ -8,6 +8,9 @@
 #include "lwPredefinition.h"
 #include "d3dutil.h"
 #include "MPGameApp.h"
+#include "lwRenderBackend.h"
+#include "lwD3D11Gaps.h"
+#include "lwDeviceObject11.h"
 
 using namespace std;
 
@@ -159,6 +162,9 @@ void MPRender::End() {
 
 HRESULT MPRender::DrawPrimitiveUP_Dynamic(D3DPRIMITIVETYPE type, UINT primCount, const void* data, UINT stride)
 {
+	if (lwIsDx11Active())
+		return DrawPrimitiveUP(type, primCount, data, stride);
+
 	if (!_pD3DDevice || !data || stride == 0 || primCount == 0)
 		return E_FAIL;
 
@@ -216,6 +222,9 @@ HRESULT MPRender::DrawPrimitiveUP_Dynamic(D3DPRIMITIVETYPE type, UINT primCount,
 BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOOL bFullScreen) {
 	_hWnd = hWnd;
 
+	lwResolveRenderBackend();
+	lwD3D11GapReportInventory();
+
 	g_bBinaryTable = TRUE;
 	::GetClientRect(::GetDesktopWindow(), &_rcDeskTop);
 
@@ -227,6 +236,28 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 	d3dcp.behavior_flag = D3DCREATE_HARDWARE_VERTEXPROCESSING;
 	d3dcp.dev_type = D3DDEVTYPE_HAL;
 
+	if (lwIsDx11Active()) {
+		d3dcp.present_param.hDeviceWindow = hWnd;
+		d3dcp.present_param.Windowed = !bFullScreen;
+		d3dcp.present_param.SwapEffect = D3DSWAPEFFECT_DISCARD;
+		d3dcp.present_param.BackBufferCount = 2;
+		d3dcp.present_param.BackBufferFormat = D3DFMT_A8R8G8B8;
+		d3dcp.present_param.BackBufferWidth = nScrWidth;
+		d3dcp.present_param.BackBufferHeight = nScrHeight;
+		d3dcp.present_param.EnableAutoDepthStencil = 1;
+		d3dcp.present_param.AutoDepthStencilFormat = D3DFMT_D24S8;
+		d3dcp.present_param.MultiSampleType = D3DMULTISAMPLE_NONE;
+		d3dcp.present_param.MultiSampleQuality = 0;
+		d3dcp.present_param.PresentationInterval =
+		    (!_bVsync) ? D3DPRESENT_INTERVAL_IMMEDIATE : D3DPRESENT_INTERVAL_DEFAULT;
+		_d3dCPAdjustInfo.multi_sample_type = D3DMULTISAMPLE_NONE;
+		memset(&_d3dCaps, 0, sizeof(_d3dCaps));
+		_d3dCaps.VertexShaderVersion = D3DVS_VERSION(3, 0);
+		_d3dCaps.PixelShaderVersion = D3DPS_VERSION(3, 0);
+		bUsePixelShader = false;
+		lwD3D11Gap(LW_D3D11_SKIP, "d3d9-adapter-probe",
+			"D3D11 Init fills present_param from HWND; D3D9 adapter/MSAA probe skipped");
+	} else {
 	IDirect3DX* d3d = Direct3DCreateX(D3D_SDK_VERSION);
 	D3DDISPLAYMODE d3ddm;
 	d3d->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
@@ -295,6 +326,7 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 
 	d3dcp.behavior_flag |= D3DCREATE_MULTITHREADED;
 	d3d->Release();
+	}
 
 
 	// Init Mesh Lib
@@ -332,16 +364,26 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 	_IMgr.res_mgr = sys_graphics->GetResourceMgr();
 	_IMgr.tp_loadres = _IMgr.res_mgr->GetThreadPoolMgr()->GetThreadPool(THREAD_POOL_LOADRES);
 
-	LoadShader0(sys_graphics);
-	LoadShader1(sys_graphics);
+	if (lwIsDx11Active()) {
+		lwD3D11Gap(LW_D3D11_SKIP, "shader-load-skip",
+			"Slice 1 has no ShaderMgr11; LoadShader0/1 wait for Slice 3");
+		lwD3D11Gap(LW_D3D11_SKIP, "vs-shader-skip",
+			"ResMgr.LoadTotalVShader is D3D9 vs_3_0; skipped on DeviceObject11");
+		lwD3D11Gap(LW_D3D11_SKIP, "d3dx-sprite-skip",
+			"D3DXCreateSprite needs IDirect3DDevice9; UI sprites wait for Slice 8");
+	} else {
+		LoadShader0(sys_graphics);
+		LoadShader1(sys_graphics);
+	}
 
 	ToggleFullScreen();
 
 	ResMgr.m_pSys = sys;
 	ResMgr.m_pSysGraphics = sys_graphics;
-	ResMgr.LoadTotalVShader(sys_graphics);
-
-	D3DXCreateSprite(_pD3DDevice, &_p2DSprite);
+	if (!lwIsDx11Active()) {
+		ResMgr.LoadTotalVShader(sys_graphics);
+		D3DXCreateSprite(_pD3DDevice, &_p2DSprite);
+	}
 	D3DUtil_InitLight(_Light, D3DLIGHT_DIRECTIONAL, -1.0f, -1.0f, -1.0f);
 	SetDirectLIghtAmbient(0.05f, 0.05f, 0.10f, 1.0f);  // subtle cool fill light (complements warm diffuse)
 	SetLight(0, &_Light);
@@ -404,7 +446,7 @@ BOOL MPRender::InitRes3() {
 int MPRender::ToggleFullScreen(int width, int height, D3DFORMAT depth_fmt, BOOL be_windowed) {
 	lwIResourceMgr* res_mgr = _IMgr.res_mgr;
 	lwIDeviceObject* dev_obj = _IMgr.dev_obj;
-	IDirect3DX* dev = dev_obj->GetDirect3D();
+	IDirect3DX* dev = lwIsDx11Active() ? 0 : dev_obj->GetDirect3D();
 
 	HWND hwnd = _hWnd;
 
@@ -437,18 +479,26 @@ int MPRender::ToggleFullScreen(int width, int height, D3DFORMAT depth_fmt, BOOL 
 	d3dcp.present_param.BackBufferHeight = height;
 	d3dcp.present_param.AutoDepthStencilFormat = depth_fmt;
 
-	d3dcp.present_param.MultiSampleType = SelectBestMSAA(
-		dev,
-		d3dcp.present_param.BackBufferFormat,
-		d3dcp.present_param.AutoDepthStencilFormat,
-		be_windowed,
-		_nPreferredMSAA);
-	d3dcp.present_param.MultiSampleQuality = 0;
-	_d3dCPAdjustInfo.multi_sample_type = d3dcp.present_param.MultiSampleType;
+	if (lwIsDx11Active()) {
+		lwD3D11Gap(LW_D3D11_SKIP, "toggle-msaa-adjust",
+			"D3D11 resize skips D3D9 MSAA probe and create-param adjust");
+		d3dcp.present_param.MultiSampleType = D3DMULTISAMPLE_NONE;
+		d3dcp.present_param.MultiSampleQuality = 0;
+		_d3dCPAdjustInfo.multi_sample_type = D3DMULTISAMPLE_NONE;
+	} else {
+		d3dcp.present_param.MultiSampleType = SelectBestMSAA(
+			dev,
+			d3dcp.present_param.BackBufferFormat,
+			d3dcp.present_param.AutoDepthStencilFormat,
+			be_windowed,
+			_nPreferredMSAA);
+		d3dcp.present_param.MultiSampleQuality = 0;
+		_d3dCPAdjustInfo.multi_sample_type = d3dcp.present_param.MultiSampleType;
 
-	if (LW_FAILED(lwAdjustD3DCreateParam(dev, &d3dcp, &_d3dCPAdjustInfo))) {
-		LG("error", "msgToggleFullScreen error");
-		return 0;
+		if (LW_FAILED(lwAdjustD3DCreateParam(dev, &d3dcp, &_d3dCPAdjustInfo))) {
+			LG("error", "msgToggleFullScreen error");
+			return 0;
+		}
 	}
 
 	if (ToggleFullScreen(&d3dcp.present_param, &wnd_info) == 0) {
@@ -465,7 +515,12 @@ int MPRender::ToggleFullScreen(D3DPRESENT_PARAMETERS* d3dpp, lwWndInfo* wnd_info
 	if (LW_FAILED(_IMgr.sys_graphics->ToggleFullScreen(d3dpp, wnd_info)))
 		return 0;
 
-	D3DXCreateSprite(_pD3DDevice, &_p2DSprite);
+	if (lwIsDx11Active()) {
+		lwD3D11Gap(LW_D3D11_SKIP, "toggle-d3dx-sprite",
+			"D3DXCreateSprite needs IDirect3DDevice9; skipped after DXGI resize");
+	} else {
+		D3DXCreateSprite(_pD3DDevice, &_p2DSprite);
+	}
 	return ToggleFullScreen();
 }
 int MPRender::ToggleFullScreen() {
@@ -529,9 +584,15 @@ void MPRender::SetViewport(int nStartX, int nStartY, int nWidth, int nHeight) {
 	_view.Height = nHeight;
 	_view.MinZ = 0.0f;
 	_view.MaxZ = 1.0f;
-	HRESULT hr = _pD3DDevice->SetViewport(&_view);
-	if (FAILED(hr)) {
-		LG("render", "Error when SetViewport(), [%d].\n", hr);
+	if (lwIsDx11Active()) {
+		lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
+		if (!d11 || LW_FAILED(d11->SetViewPort(&_view)))
+			LG("render", "Error when SetViewport() on DeviceObject11\n");
+	} else {
+		HRESULT hr = _pD3DDevice->SetViewport(&_view);
+		if (FAILED(hr)) {
+			LG("render", "Error when SetViewport(), [%d].\n", hr);
+		}
 	}
 	// LG("render", "Set View Port [x = %d, y = %d , w = %d, h = %d\n", nStartX, nStartY, nWidth, nHeight);
 }
@@ -857,6 +918,21 @@ BOOL MPRender::BeginRender(bool clear) // vim
 		_dwClearFlag |= D3DCLEAR_STENCIL;
 
 
+	if (lwIsDx11Active()) {
+		lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
+		if (!d11)
+			return false;
+		if (clear) {
+			if (LW_FAILED(d11->Clear(_dwClearFlag, _dwBackgroundColor, 1.0f, 0L))) {
+				LG("error", "D3D Device Clear Failed!\n");
+				return false;
+			}
+		}
+		if (LW_FAILED(d11->BeginScene()))
+			return false;
+		return true;
+	}
+
 	if (clear) // vim
 	{
 		if (FAILED(_pD3DDevice->Clear(0L, NULL, _dwClearFlag, _dwBackgroundColor, 1.0f, 0L))) {
@@ -874,6 +950,28 @@ BOOL MPRender::BeginRender(bool clear) // vim
 
 void MPRender::EndRender(const bool present) // vim
 {
+	if (lwIsDx11Active()) {
+		lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
+		if (!d11)
+			return;
+		if (LW_FAILED(d11->EndScene())) {
+			LG("error", "D3D End Scene Fail!\n");
+			return;
+		}
+		if (present) {
+			DWORD dwTick = GetTickCount();
+			if ((dwTick - _dwLastTick) >= 1000) {
+				_dwFPS = _dwFrameCnt;
+				_dwFrameCnt = 0;
+				_dwLastTick = dwTick;
+				Print(INFO_FPS, 5, 5, "FPS : %d", _dwFPS);
+			}
+			_dwFrameCnt++;
+			d11->Present();
+		}
+		return;
+	}
+
 	if (FAILED(_pD3DDevice->EndScene())) {
 		LG("error", "D3D End Scene Fail!\n");
 		return;
@@ -1044,7 +1142,7 @@ void MPRender::RenderLine(float x1, float y1, float z1, float x2, float y2, floa
 	SetTexture(0, 0);
 	SetVertexShader(NULL);
 	SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
-	_pD3DDevice->DrawPrimitiveUP(D3DPT_LINELIST, 1, pVertices, sizeof(TMP_VERTEX));
+	DrawPrimitiveUP(D3DPT_LINELIST, 1, pVertices, sizeof(TMP_VERTEX));
 	SetRenderState(D3DRS_LIGHTING, TRUE);
 	// SetRenderState( D3DRS_ZENABLE,  TRUE );
 }

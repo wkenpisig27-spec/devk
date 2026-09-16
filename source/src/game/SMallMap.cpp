@@ -262,6 +262,16 @@ void CSMallWnd::Render() {
 	// cvp.Width = 128;
 	// cvp.Height= 128;
 
+	MindPower::lwDeviceObject11* d11 = MindPower::lwGetActiveDeviceObject11();
+	if (d11) {
+		d11->GetViewPort(&vp);
+		d11->SetViewPort(&cvp);
+		RenderScene();
+		d11->SetViewPort(&vp);
+		return;
+	}
+	if (!g_Render.GetDevice())
+		return;
 	g_Render.GetDevice()->GetViewport(&vp);
 	g_Render.GetDevice()->SetViewport(&cvp);
 
@@ -862,8 +872,8 @@ void CSMallMap2D::RenderScene() {
 	// int r = 0;
 	// for (; r < 5; ++r)
 	//{
-	//	g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_LINELIST,1,&_vCameraTar1,sizeof(D3DXVECTOR3));
-	//	g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_LINELIST,1,&_vCameraTar2,sizeof(D3DXVECTOR3));
+	//	g_Render.DrawPrimitiveUP(D3DPT_LINELIST,1,&_vCameraTar1,sizeof(D3DXVECTOR3));
+	//	g_Render.DrawPrimitiveUP(D3DPT_LINELIST,1,&_vCameraTar2,sizeof(D3DXVECTOR3));
 	// }
 
 	// g_Render.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
@@ -1189,7 +1199,11 @@ void CAniWnd::InitScene() {
 }
 
 void CAniWnd::RenderScene() {
-	g_Render.GetDevice()->Clear(0, 0, D3DCLEAR_TARGET, 0x00000000, 0, 0);
+	MindPower::lwDeviceObject11* d11 = MindPower::lwGetActiveDeviceObject11();
+	if (d11)
+		d11->Clear(D3DCLEAR_TARGET, 0x00000000, 0, 0);
+	else if (g_Render.GetDevice())
+		g_Render.GetDevice()->Clear(0, 0, D3DCLEAR_TARGET, 0x00000000, 0, 0);
 	D3DXMATRIX matIdentity;
 	D3DXMatrixIdentity(&matIdentity);
 	g_Render.SetRenderState(D3DRS_ZENABLE, FALSE);
@@ -1226,7 +1240,7 @@ void CAniWnd::RenderScene() {
 	// dsm->BindDataVB(0, &_vVertex, sizeof(ClockVer) * 6, sizeof(ClockVer));
 	// dsm->DrawPrimitive(D3DPT_TRIANGLEFAN, 0, 4);
 
-	g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 4, &_vVertex, sizeof(ClockVer));
+	g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 4, &_vVertex, sizeof(ClockVer));
 }
 
 void CAniWnd::RenderMask() {
@@ -1273,7 +1287,7 @@ void CAniWnd::RenderMask() {
 	g_Render.DrawPrimitive(D3DPT_TRIANGLEFAN, 0, 2);
 #endif
 
-	// g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN,2,&_vWndVer,sizeof(M2D_VER));
+	// g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN,2,&_vWndVer,sizeof(M2D_VER));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1346,60 +1360,35 @@ void CCharacter2D::Render() {
 	if (!_pModel)
 		return;
 
-
+	MindPower::lwDeviceObject11* d11 = MindPower::lwGetActiveDeviceObject11();
 	D3DVIEWPORTX vp;
-	g_Render.GetDevice()->GetViewport(&vp);
-
-	_vp.MinZ = vp.MinZ;
-	_vp.MaxZ = vp.MaxZ;
-
-	g_Render.GetDevice()->SetViewport(&_vp);
-
-	g_Render.GetDevice()->Clear(0, 0, D3DCLEAR_ZBUFFER, 0, 1, 0);
+	if (d11) {
+		d11->GetViewPort(&vp);
+		_vp.MinZ = vp.MinZ;
+		_vp.MaxZ = vp.MaxZ;
+		d11->SetViewPort(&_vp);
+		d11->Clear(D3DCLEAR_ZBUFFER, 0, 1, 0);
+	} else if (g_Render.GetDevice()) {
+		g_Render.GetDevice()->GetViewport(&vp);
+		_vp.MinZ = vp.MinZ;
+		_vp.MaxZ = vp.MaxZ;
+		g_Render.GetDevice()->SetViewport(&_vp);
+		g_Render.GetDevice()->Clear(0, 0, D3DCLEAR_ZBUFFER, 0, 1, 0);
+	} else {
+		return;
+	}
 
 	g_Render.SetTransformProj(&_mat3DUIProj);
 	g_Render.SetTransformView(&_mat3DUIView);
 
-	// g_Render.SetRenderState(D3DRS_SRCBLEND,  D3DBLEND_SRCALPHA);
-	// g_Render.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-
-	// g_Render.SetTransformWorld(&matIdentity);
-	// g_Render.SetTransformProj(&_matProj);
-	// g_Render.SetTransformView(&_matView);
-
-	// g_Render.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-
-	// g_Render.SetRenderState(D3DRS_ZENABLE,      FALSE);
-	// g_Render.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-	////g_Render.SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL );
-	// g_Render.SetTextureStageState( 0, D3DTSS_MAGFILTER, D3DTEXF_LINEAR );
-	// g_Render.SetTextureStageState( 0, D3DTSS_MINFILTER, D3DTEXF_LINEAR );
-	// g_Render.SetRenderState(D3DRS_TEXTUREFACTOR, 0xffffffff );
-
-	// DWORD rs_amb;
-	// g_Render.GetRenderState(D3DRS_AMBIENT, &rs_amb);
-	// g_Render.SetRenderState(D3DRS_AMBIENT, 0xffffffff);
-
-	// DWORD rs_light;
-	// g_Render.GetRenderState(D3DRS_LIGHTING, &rs_light);
-	// g_Render.SetRenderState(D3DRS_LIGHTING, 0);
-
-
-	//_pModel->SetLightColor(255, 255,255);
-	////lwMatrix44Scale( _pModel->GetMatrix(), 1.0f / (float)1 );
-
-	//_pModel->SetPos((float*)&D3DXVECTOR3(0,0,0));
-
-	//_pModel->FrameMove();
-	//_pModel->SetUIScaleDis(1);
-
 	_pModel->SetPos(&_vPos.x);
 	_pModel->SetUIYaw(180);
-	//_pModel->SetUIScaleDis(1);
 	_pModel->RenderUI(400, 300);
-	//_pModel->SetPoseVelocity(0.25f);			// Mdr May 2020 FPO Beta
 
-	g_Render.GetDevice()->SetViewport(&vp);
+	if (d11)
+		d11->SetViewPort(&vp);
+	else
+		g_Render.GetDevice()->SetViewport(&vp);
 }
 
 void CCharacter2D::LoadCha(DWORD dwID, bool IsMonster) {
@@ -1635,6 +1624,8 @@ void CBigMap::Create() {
 }
 
 void CBigMap::Destory() {
+	if (!_pTex)
+		return;
 	for (int n = 0; n < 4 * 3; n++) {
 		SAFE_RELEASE(_pTex[n]);
 	}
@@ -1680,7 +1671,7 @@ void CBigMap::Render() {
 			g_Render.SetVertexShader(NULL);
 			g_Render.SetFVF(D3DFVF_M2DWA);
 			g_Render.SetTexture(0, _pTex[m * 4 + n]->GetTex());
-			g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &_vWndVer, sizeof(M2D_AVER));
+			g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &_vWndVer, sizeof(M2D_AVER));
 		}
 	}
 	g_Render.SetRenderState(D3DRS_ZENABLE, TRUE);
@@ -1754,7 +1745,7 @@ void Ctemp::Render() {
 	g_Render.SetTexture(0, _pTex->GetTex());
 
 
-	g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &_vWndVer, sizeof(M2D_AVER));
+	g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &_vWndVer, sizeof(M2D_AVER));
 
 	g_Render.SetRenderState(D3DRS_ZENABLE, TRUE);
 	g_Render.SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
@@ -1985,7 +1976,7 @@ void CMinimap::RenderScene() {
 	//			_vPicVer[2].m_vPos = D3DXVECTOR4(float(rc.right),float(rc.bottom),0.9f,1);
 	//			_vPicVer[3].m_vPos = D3DXVECTOR4(float(rc.left),float(rc.bottom),0.9f,1);
 	//
-	//			g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN,2,&_vPicVer,sizeof(M2D_AVER));
+	//			g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN,2,&_vPicVer,sizeof(M2D_AVER));
 	//		}
 	//	}
 
@@ -2071,7 +2062,7 @@ void CMinimap::RenderScene() {
 			_vPicVer[2].m_vPos = D3DXVECTOR4(float(rct.right), float(rct.bottom), 0.9f, 1);
 			_vPicVer[3].m_vPos = D3DXVECTOR4(float(rct.left), float(rct.bottom), 0.9f, 1);
 
-			g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &_vPicVer, sizeof(M2D_AVER));
+			g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &_vPicVer, sizeof(M2D_AVER));
 		}
 	}
 
@@ -2176,12 +2167,12 @@ void CMinimap::RenderScene() {
 	g_Render.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_TFACTOR);
 	g_Render.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG2);
 
-	g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_LINELIST, 1, &_vCameraTar, sizeof(D3DXVECTOR4));
+	g_Render.DrawPrimitiveUP(D3DPT_LINELIST, 1, &_vCameraTar, sizeof(D3DXVECTOR4));
 
 	_vCameraTar[1] = D3DXVECTOR4(float(lenw + 26 + _rcWnd.left), float(lenw / 2 + 6 + _rcWnd.top), 0, 1);
 	D3DXVec4Transform(&_vCameraTar[1], &_vCameraTar[1], &matIden);
 
-	g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_LINELIST, 1, &_vCameraTar, sizeof(D3DXVECTOR4));
+	g_Render.DrawPrimitiveUP(D3DPT_LINELIST, 1, &_vCameraTar, sizeof(D3DXVECTOR4));
 
 	g_Render.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 	g_Render.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
@@ -2231,7 +2222,7 @@ void CMinimap::RenderMask() {
 	g_Render.SetVertexShader(NULL);
 	g_Render.SetFVF(D3DFVF_M2DWA);
 
-	g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &_vWndVer, sizeof(M2D_AVER));
+	g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &_vWndVer, sizeof(M2D_AVER));
 
 	// g_Render.SetTexture(1, NULL);
 }
@@ -2552,7 +2543,7 @@ void CSMNpc::Render(/*int iType,int nx,int ny,int wh = 8*/) {
 		else
 			g_Render.SetTexture(0, NULL);
 
-		g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &_vWndVer, sizeof(M2D_AVER));
+		g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &_vWndVer, sizeof(M2D_AVER));
 	} catch (const std::exception&) {
 	}
 }
@@ -2659,7 +2650,7 @@ void CLargerMap::RenderScene() {
 	//_vPicVer[3].m_vPos = D3DXVECTOR4(float(rc.left),float(rc.bottom),0.9f,1);
 	// g_Render.SetTexture(0, _pTexMask->GetTex());
 
-	// g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN,2,&_vPicVer,sizeof(M2D_AVER));
+	// g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN,2,&_vPicVer,sizeof(M2D_AVER));
 
 
 	g_Render.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
@@ -2691,7 +2682,7 @@ void CLargerMap::RenderScene() {
 			_vPicVer[2].m_vPos = D3DXVECTOR4(float(prc->right), float(prc->bottom), 0.9f, 1);
 			_vPicVer[3].m_vPos = D3DXVECTOR4(float(prc->left), float(prc->bottom), 0.9f, 1);
 
-			g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &_vPicVer, sizeof(M2D_AVER));
+			g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &_vPicVer, sizeof(M2D_AVER));
 		}
 	}
 	// g_Render.SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);

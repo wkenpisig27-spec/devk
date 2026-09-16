@@ -1080,7 +1080,7 @@ void CWorldScene::_KeyDownEvent(int key) {
 #ifdef _DEBUG // ??????
 		if (g_pGameApp->IsAltPress() && (key == 'f' || key == 'F')) {
 			static bool ken = true;
-			g_Render.GetDevice()->SetRenderState(D3DRS_FILLMODE, ken ? D3DFILL_WIREFRAME : D3DFILL_SOLID);
+			g_Render.SetRenderState(D3DRS_FILLMODE, ken ? D3DFILL_WIREFRAME : D3DFILL_SOLID);
 			ken = !ken;
 		}
 #endif

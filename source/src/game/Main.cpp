@@ -113,7 +113,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	// =============================================
 
 	// Add by lark.li 20080909 begin
-	ErrorHandler::Initialize();
+	ErrorHandler::Initialize("GameClient", true);
 	ErrorHandler::DisableErrorDialogs();
 	// End
 

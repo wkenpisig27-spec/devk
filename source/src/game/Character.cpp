@@ -1731,29 +1731,31 @@ bool CCharacter::UpdataItem(int nItem, DWORD nLink) {
 
 			if (_ShowApparel) {
 				CItemRecord* pInfoMain = GetItemRecordInfo(GetPart().SLink[nLink].sID);
-				int itemType = pInfoMain->sType;
-				int slot = nLink;
-				if (itemType == enumItemTypeSword && nLink == enumEQUIP_LHAND) {
-					slot = enumEQUIP_SWORD2APP;
-				} else if (itemType == enumItemTypeSword && nLink == enumEQUIP_RHAND) {
-					slot = enumEQUIP_SWORD1APP;
-				} else if (itemType == enumItemTypeGlave) {
-					slot = enumEQUIP_GREATSWORDAPP;
-				} else if (itemType == enumItemTypeBow) {
-					slot = enumEQUIP_BOWAPP;
-				} else if (itemType == enumItemTypeHarquebus) {
-					slot = enumEQUIP_GUNAPP;
-				} else if (itemType == enumItemTypeStylet) {
-					slot = enumEQUIP_DAGGERAPP;
-				} else if (itemType == enumItemTypeCosh) {
-					slot = enumEQUIP_STAFFAPP;
-				} else if (itemType == enumItemTypeShield) {
-					slot = enumEQUIP_SHIELDAPP;
-				}
+				if (pInfoMain) {
+					int itemType = pInfoMain->sType;
+					int slot = nLink;
+					if (itemType == enumItemTypeSword && nLink == enumEQUIP_LHAND) {
+						slot = enumEQUIP_SWORD2APP;
+					} else if (itemType == enumItemTypeSword && nLink == enumEQUIP_RHAND) {
+						slot = enumEQUIP_SWORD1APP;
+					} else if (itemType == enumItemTypeGlave) {
+						slot = enumEQUIP_GREATSWORDAPP;
+					} else if (itemType == enumItemTypeBow) {
+						slot = enumEQUIP_BOWAPP;
+					} else if (itemType == enumItemTypeHarquebus) {
+						slot = enumEQUIP_GUNAPP;
+					} else if (itemType == enumItemTypeStylet) {
+						slot = enumEQUIP_DAGGERAPP;
+					} else if (itemType == enumItemTypeCosh) {
+						slot = enumEQUIP_STAFFAPP;
+					} else if (itemType == enumItemTypeShield) {
+						slot = enumEQUIP_SHIELDAPP;
+					}
 
-				int appID = GetApparelID(GetPart().SLink[slot]);
-				if (appID != 0) {
-					nItem = appID;
+					int appID = GetApparelID(GetPart().SLink[slot]);
+					if (appID != 0) {
+						nItem = appID;
+					}
 				}
 			}
 

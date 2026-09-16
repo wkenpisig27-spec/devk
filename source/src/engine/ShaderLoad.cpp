@@ -42,6 +42,18 @@ void lwApplyOutlineVSConstants(lwIDeviceObject* dev_obj)
     dev_obj->SetVertexShaderConstantF(VS_CONST_REG_LIGHT_DIF, (float*)&outlineColor, 1);
 }
 
+void lwGetOutlineParams(float* worldWidth, float* r, float* g, float* b)
+{
+    if (worldWidth)
+        *worldWidth = g_lwOutlineWidth;
+    if (r)
+        *r = g_lwOutlineColorR;
+    if (g)
+        *g = g_lwOutlineColorG;
+    if (b)
+        *b = g_lwOutlineColorB;
+}
+
 LW_RESULT LoadShader0(lwISysGraphics* sys_graphics)
 {
     LW_RESULT ret = LW_RET_FAILED;
