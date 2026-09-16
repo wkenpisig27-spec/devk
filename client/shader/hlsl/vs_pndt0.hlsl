@@ -13,7 +13,7 @@ VS_OUTPUT main(VS_INPUT_PNDT input)
     output.Position = mul(worldPos, ViewProj);
     
     // Use vertex color directly
-    output.Color    = input.Color;
+    output.Color    = D3DColorToRgba(input.Color);
     
     // Pass through texture coordinates
     output.TexCoord = input.TexCoord;

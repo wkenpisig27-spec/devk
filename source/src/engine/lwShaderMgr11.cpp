@@ -677,6 +677,12 @@ int lwD3D11ShaderMgrPrepareDraw(lwDeviceObject11* dev, ID3D11InputLayout** out_l
 
     if (out_layout)
         *out_layout = layout;
+    static int logged = 0;
+    if (!logged)
+    {
+        logged = 1;
+        lwD3D11Gap(LW_D3D11_INVENTORY, "sm11-preparedraw", "bound ShaderMgr11 VS + decl layout");
+    }
     return 1;
 }
 

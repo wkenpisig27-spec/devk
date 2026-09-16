@@ -15,7 +15,7 @@ VS_OUTPUT main(VS_INPUT_PNDT input)
     // Calculate lighting and modulate with vertex color
     float3 normal = normalize(input.Normal);
     float4 lighting = CalcLighting(normal);
-    output.Color = input.Color * lighting;
+    output.Color = D3DColorToRgba(input.Color) * lighting;
     
     // Pass through texture coordinates
     output.TexCoord = input.TexCoord;

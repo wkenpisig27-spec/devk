@@ -44,10 +44,12 @@ cbuffer PKO_VS : register(b0)
     float4 EyePosOS                : packoffset(c20);
     float4 BonePalette[235]        : packoffset(c21);
 };
-#define ViewProj float4x4(ViewProj0, ViewProj1, ViewProj2, ViewProj3)
-#define UVMat0   float4x4(UVMat00, UVMat01, UVMat02, UVMat03)
-#define UVMat1   float4x4(UVMat10, UVMat11, UVMat12, UVMat13)
-#define UVMat2   float4x4(UVMat20, UVMat21, UVMat22, UVMat23)
+// float4x4(r0..r3) fills rows. mul(v, M) dots columns, so transpose to match
+// DX9 dp4 against c1-c4: mul(pos, ViewProj).x == dot(pos, ViewProj0).
+#define ViewProj transpose(float4x4(ViewProj0, ViewProj1, ViewProj2, ViewProj3))
+#define UVMat0   transpose(float4x4(UVMat00, UVMat01, UVMat02, UVMat03))
+#define UVMat1   transpose(float4x4(UVMat10, UVMat11, UVMat12, UVMat13))
+#define UVMat2   transpose(float4x4(UVMat20, UVMat21, UVMat22, UVMat23))
 #else
 // Base constants
 float4 Base         : register(c0);   // {1.0, 0.0, 0.0, 765.01}
@@ -151,6 +153,16 @@ struct VS_OUTPUT
 //------------------------------------------------------------------------------
 // Helper Functions
 //------------------------------------------------------------------------------
+
+// D3D9 D3DCOLOR COLOR0 expands ARGB bytes to RGBA. SM4 B8G8R8A8_UNORM is BGRA.
+float4 D3DColorToRgba(float4 c)
+{
+#if defined(SHADER_MODEL_4)
+    return c.zyxw;
+#else
+    return c;
+#endif
+}
 
 // Convert D3DCOLOR blend index component to bone palette base index
 // D3DCOLOR stores values as 0-1 floats. Multiply by 765.01 gives raw value (0-255).

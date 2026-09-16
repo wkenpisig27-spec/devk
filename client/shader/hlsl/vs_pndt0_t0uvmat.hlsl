@@ -12,7 +12,7 @@ VS_OUTPUT main(VS_INPUT_PNDT input)
     output.Position = mul(worldPos, ViewProj);
     
     // Use vertex color directly
-    output.Color    = input.Color;
+    output.Color    = D3DColorToRgba(input.Color);
     
     // Transform texture coordinates by UV matrix
     float4 uv = float4(input.TexCoord, 0.0, 1.0);

@@ -22,6 +22,8 @@ static void Dx11ResetTexTransform(lwIDeviceObject* dev_obj)
     }
 }
 
+static int Dx11BindShaderMgrVS(lwIDeviceObject* dev_obj, lwIResourceMgr* res_mgr, lwIRenderCtrlAgent* agent);
+
 static void Dx11ResetInheritedTexState(lwIDeviceObject* dev_obj)
 {
     Dx11ResetTexTransform(dev_obj);
@@ -64,6 +66,9 @@ static void Dx11ApplyVertexBlend(lwIDeviceObject* dev_obj, lwIRenderCtrlAgent* a
         lwD3D11MeshSetBonePalette(rtmat, bone_num);
     else
         lwD3D11MeshSetBonePalette(0, 0);
+
+    lwIResourceMgr* res_mgr = agent ? agent->GetResourceMgr() : 0;
+    Dx11BindShaderMgrVS(dev_obj, res_mgr, agent);
 
     static int logged = 0;
     if (!logged)
@@ -119,6 +124,15 @@ static void Dx11UploadVsBlendConstants(lwIDeviceObject* dev_obj, lwIRenderCtrlAg
         lwMatrix44Multiply(&mat, mat_global, &mat);
         lwMatrix44Transpose(&mat, &mat);
         dev_obj->SetVertexShaderConstantF(VS_CONST_REG_VIEWPROJ, (float*)&mat, 4);
+    }
+
+    {
+        lwMatrix44 uv_id;
+        lwMatrix44Identity(&uv_id);
+        lwMatrix44Transpose(&uv_id, &uv_id);
+        dev_obj->SetVertexShaderConstantF(VS_CONST_REG_TS0_UVMAT, (float*)&uv_id, 4);
+        dev_obj->SetVertexShaderConstantF(VS_CONST_REG_TS1_UVMAT, (float*)&uv_id, 4);
+        dev_obj->SetVertexShaderConstantF(VS_CONST_REG_TS2_UVMAT, (float*)&uv_id, 4);
     }
 
     DWORD rs_amb = 0;
@@ -601,6 +615,7 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_dx8::EndSet(lwIRenderCtrlAgent* agent)
 
 #if(defined LW_USE_DX9)
     dev_obj->SetVertexShader(NULL);
+    dev_obj->SetVertexDeclaration(NULL);
 #endif
     return LW_RET_OK;
 }
@@ -949,6 +964,7 @@ LW_RESULT lwxRenderCtrlVSVertexBlend::EndSet(lwIRenderCtrlAgent* agent)
     }
 
     dev_obj->SetVertexShader(NULL);
+    dev_obj->SetVertexDeclaration(NULL);
 
     return LW_RET_OK;
 

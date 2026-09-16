@@ -4,6 +4,7 @@
 #include "lwD3D11Texture.h"
 #include "lwD3D11Gaps.h"
 #include "lwDeviceObject11.h"
+#include "lwShaderMgr11.h"
 
 #include <d3d11.h>
 #include <d3dcompiler.h>
@@ -747,6 +748,26 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     if (!layout)
         return LW_RET_OK;
 
+    int use_sm4 = 0;
+    if (!s_mesh.outline)
+    {
+        DWORD cop1_early = dev->GetCachedTSS(1, D3DTSS_COLOROP);
+        lwD3D11Texture* tex1_early = lwAsD3D11Texture(dev->GetBoundTex(1));
+        const int dual_early = (cop1_early && cop1_early != D3DTOP_DISABLE &&
+            cop1_early != 0xffffffff && cop1_early != D3DTSS_FORCE_DWORD &&
+            tex1_early && tex1_early->GetSRV()) ? 1 : 0;
+        const int rhw = ((fvf & D3DFVF_POSITION_MASK) == D3DFVF_XYZRHW) ? 1 : 0;
+        if (!dual_early && !rhw)
+        {
+            ID3D11InputLayout* sm_layout = 0;
+            if (lwD3D11ShaderMgrPrepareDraw(dev, &sm_layout) && sm_layout)
+            {
+                layout = sm_layout;
+                use_sm4 = 1;
+            }
+        }
+    }
+
     ID3D11Buffer* vbb = vb->GetBuffer();
     UINT offset = dev->GetBoundVBOffset();
     s_mesh.context->IASetVertexBuffers(0, 1, &vbb, &stride, &offset);
@@ -765,6 +786,8 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     }
 
     MeshCB0 cb = {};
+    if (!use_sm4)
+    {
     CopyMat(cb.world, dev->GetMatWorld());
     CopyMat(cb.viewProj, dev->GetMatViewProj());
 
@@ -906,6 +929,7 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
         memcpy(mapped.pData, s_mesh.bones, sizeof(s_mesh.bones));
         s_mesh.context->Unmap(s_mesh.cb1, 0);
     }
+    }
 
     ID3D11ShaderResourceView* srv = s_mesh.white_srv;
     lwD3D11Texture* tex = lwAsD3D11Texture(dev->GetBoundTex(0));
@@ -951,17 +975,29 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     if (info.has_blend)
     {
         const lwMatrix44* w = dev->GetMatWorld();
-        lwD3D11Gap(LW_D3D11_INVENTORY, "mesh-skin-draw",
-            "fvf=0x%08X bones=%u skin=%d world=(%.2f,%.2f,%.2f)",
-            (unsigned)fvf, s_mesh.bone_count, (skin && s_mesh.bone_count > 0) ? 1 : 0,
+        lwD3D11Gap(LW_D3D11_INVENTORY, use_sm4 ? "sm4-skin-draw" : "mesh-skin-draw",
+            "fvf=0x%08X bones=%u skin=%d sm4=%d world=(%.2f,%.2f,%.2f)",
+            (unsigned)fvf, s_mesh.bone_count, (skin && s_mesh.bone_count > 0) ? 1 : 0, use_sm4,
             w ? w->_41 : 0.f, w ? w->_42 : 0.f, w ? w->_43 : 0.f);
     }
 
-    s_mesh.context->VSSetShader(skin ? s_mesh.vs_skin : s_mesh.vs_rigid, 0, 0);
-    s_mesh.context->PSSetShader(s_mesh.ps, 0, 0);
-    s_mesh.context->VSSetConstantBuffers(0, 1, &s_mesh.cb0);
-    s_mesh.context->VSSetConstantBuffers(1, 1, &s_mesh.cb1);
-    s_mesh.context->PSSetConstantBuffers(0, 1, &s_mesh.cb0);
+    if (!use_sm4)
+    {
+        s_mesh.context->VSSetShader(skin ? s_mesh.vs_skin : s_mesh.vs_rigid, 0, 0);
+        s_mesh.context->PSSetShader(s_mesh.ps, 0, 0);
+        s_mesh.context->VSSetConstantBuffers(0, 1, &s_mesh.cb0);
+        s_mesh.context->VSSetConstantBuffers(1, 1, &s_mesh.cb1);
+        s_mesh.context->PSSetConstantBuffers(0, 1, &s_mesh.cb0);
+    }
+    else
+    {
+        static int sm4_logged = 0;
+        if (!sm4_logged)
+        {
+            sm4_logged = 1;
+            lwD3D11Gap(LW_D3D11_INVENTORY, "sm4-draw", "ShaderMgr11 VS bound fvf=0x%08X", (unsigned)fvf);
+        }
+    }
     s_mesh.context->PSSetShaderResources(0, 1, &srv);
     ID3D11ShaderResourceView* srv1 = s_mesh.white_srv;
     lwD3D11Texture* tex1 = lwAsD3D11Texture(dev->GetBoundTex(1));
