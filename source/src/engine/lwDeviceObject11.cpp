@@ -6,6 +6,7 @@
 #include "lwD3D11Texture.h"
 #include "lwD3D11Buffer.h"
 #include "lwD3D11Mesh.h"
+#include "lwShaderMgr11.h"
 #include "lwRenderBackend.h"
 #include "lwGraphicsUtil.h"
 #include "lwStreamObj.h"
@@ -63,6 +64,8 @@ lwDeviceObject11::lwDeviceObject11(lwSysGraphics* sys_graphics)
     , _bound_vb_stride(0)
     , _bound_ib(0)
     , _bound_fvf(0)
+    , _bound_vs(0)
+    , _bound_decl(0)
     , _up_vb(0)
     , _up_vb_bytes(0)
 {
@@ -78,6 +81,9 @@ lwDeviceObject11::lwDeviceObject11(lwSysGraphics* sys_graphics)
     memset(_light_enable, 0, sizeof(_light_enable));
     memset(_light_seq, 0, sizeof(_light_seq));
     memset(_tex_seq, 0, sizeof(_tex_seq));
+    memset(_vs_c, 0, sizeof(_vs_c));
+    _vs_c[0] = 1.0f;
+    _vs_c[3] = 765.01f;
 
     lwMatrix44Identity(&_mat_view);
     lwMatrix44Identity(&_mat_proj);
@@ -100,6 +106,7 @@ lwDeviceObject11::~lwDeviceObject11()
         _up_vb = 0;
         _up_vb_bytes = 0;
     }
+    lwD3D11ShaderMgrShutdown();
     lwD3D11MeshShutdown();
     lwD3D11BlitShutdown();
     _ReleaseTargets();
@@ -303,6 +310,8 @@ LW_RESULT lwDeviceObject11::CreateDevice(lwD3DCreateParam* param)
         LG("d3d11gaps", "[GAP] mesh-init — 3D mesh shaders failed to compile\n");
         return LW_RET_FAILED;
     }
+
+    lwD3D11ShaderMgrInit(_device, _context);
 
     LG("d3d11gaps", "[SysGraphics] DeviceObject11 up: feature=0x%X %ux%u windowed=%d vsync=%d\n",
         (unsigned)got, w, h, (int)sd.Windowed, _vsync);
@@ -785,9 +794,10 @@ LW_RESULT lwDeviceObject11::SetFVF(DWORD fvf)
     return LW_RET_OK;
 }
 
-LW_RESULT lwDeviceObject11::SetVertexShader(IDirect3DVertexShaderX*)
+LW_RESULT lwDeviceObject11::SetVertexShader(IDirect3DVertexShaderX* shader)
 {
-    D11_STUB_OK("set-vs", "D3D9 VS handles are not bound on DeviceObject11");
+    _bound_vs = shader;
+    return LW_RET_OK;
 }
 
 LW_RESULT lwDeviceObject11::SetVertexShaderForced(IDirect3DVertexShaderX* shader)
@@ -795,9 +805,10 @@ LW_RESULT lwDeviceObject11::SetVertexShaderForced(IDirect3DVertexShaderX* shader
     return SetVertexShader(shader);
 }
 
-LW_RESULT lwDeviceObject11::SetVertexDeclaration(IDirect3DVertexDeclarationX*)
+LW_RESULT lwDeviceObject11::SetVertexDeclaration(IDirect3DVertexDeclarationX* decl)
 {
-    D11_STUB_OK("set-decl", "D3D9 vertex decls are not bound on DeviceObject11");
+    _bound_decl = decl;
+    return LW_RET_OK;
 }
 
 LW_RESULT lwDeviceObject11::SetVertexDeclarationForced(IDirect3DVertexDeclarationX* decl)
@@ -805,9 +816,16 @@ LW_RESULT lwDeviceObject11::SetVertexDeclarationForced(IDirect3DVertexDeclaratio
     return SetVertexDeclaration(decl);
 }
 
-LW_RESULT lwDeviceObject11::SetVertexShaderConstantF(UINT, const float*, UINT)
+LW_RESULT lwDeviceObject11::SetVertexShaderConstantF(UINT reg_id, const float* data, UINT v_num)
 {
-    D11_STUB_OK("set-vs-cbuffer", "cN uploads wait on ShaderMgr11");
+    if (!data || v_num == 0)
+        return LW_RET_OK;
+    if (reg_id >= 256)
+        return LW_RET_OK;
+    if (reg_id + v_num > 256)
+        v_num = 256 - reg_id;
+    memcpy(_vs_c + reg_id * 4, data, v_num * 16);
+    return LW_RET_OK;
 }
 
 LW_RESULT lwDeviceObject11::SetStreamSource(UINT, IDirect3DVertexBufferX* stream_data, UINT offset_byte, UINT stride)

@@ -7,6 +7,7 @@
 #include "lwShaderDeclMgr.h"
 #include "lwRenderBackend.h"
 #include "lwD3D11Gaps.h"
+#include "lwShaderMgr11.h"
 
 LW_BEGIN
 
@@ -367,6 +368,12 @@ LW_RESULT lwShaderMgr9::RegisterVertexShader(DWORD type, BYTE* data, DWORD size)
     lwVertexShaderInfo* i = 0;            // << declarado antes de qualquer goto
 
     if (!dev) {
+        if (lwIsDx11Active())
+        {
+            lwD3D11Gap(LW_D3D11_SKIP, "shadermgr-create-vs-bytecode",
+                "DX11 RegisterVertexShader(bytecode) is unused; HLSL file path compiles SM4");
+            goto __ret;
+        }
         lwD3D11Gap(LW_D3D11_SKIP, "shadermgr-create-vs",
             "CreateVertexShader is D3D9; ShaderMgr11 is Slice 3");
         goto __ret;
@@ -407,6 +414,25 @@ LW_RESULT lwShaderMgr9::RegisterVertexShader(DWORD type, const char* file, DWORD
 
     ID3DXBuffer* buf_code = 0;
     ID3DXBuffer* buf_error = 0;
+
+    if (lwIsDx11Active())
+    {
+        if (type >= _vs_size)
+            goto __ret;
+        if (_vs_seq[type].handle)
+            goto __ret;
+
+        IDirect3DVertexShaderX* handle = 0;
+        if (LW_FAILED(lwD3D11CompileVertexShader(file, defines, &handle)) || !handle)
+            goto __ret;
+
+        _vs_seq[type].handle = handle;
+        _vs_seq[type].data = 0;
+        _vs_seq[type].size = 0;
+        _vs_num += 1;
+        ret = LW_RET_OK;
+        goto __ret;
+    }
 
     FILE* fp = fopen(file, "rb");
     if(fp == NULL)
@@ -540,6 +566,32 @@ LW_RESULT lwShaderMgr9::RegisterVertexDeclaration(DWORD type, D3DVERTEXELEMENT9*
     D3DVERTEXELEMENT9* p = 0;
 
     if (!dev) {
+        if (lwIsDx11Active())
+        {
+            if (type >= _decl_size)
+                goto __ret;
+            if (_decl_seq[type].handle)
+                goto __ret;
+            if (!data)
+                goto __ret;
+
+            if (LW_FAILED(lwD3D11CreateVertexDecl(data, &handle)) || !handle)
+                goto __ret;
+
+            _decl_seq[type].handle = handle;
+            p = data;
+            while (p->Stream != 0xFF)
+            {
+                ++i;
+                ++p;
+            }
+            ++i;
+            _decl_seq[type].data = LW_NEW(D3DVERTEXELEMENT9[i]);
+            memcpy(_decl_seq[type].data, data, sizeof(D3DVERTEXELEMENT9) * i);
+            _decl_num += 1;
+            ret = LW_RET_OK;
+            goto __ret;
+        }
         lwD3D11Gap(LW_D3D11_SKIP, "shadermgr-create-decl",
             "CreateVertexDeclaration is D3D9; ShaderMgr11 is Slice 3");
         goto __ret;

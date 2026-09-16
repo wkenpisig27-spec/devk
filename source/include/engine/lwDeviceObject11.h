@@ -138,6 +138,9 @@ public:
     UINT GetBoundVBStride() const { return _bound_vb_stride; }
     IDirect3DIndexBufferX* GetBoundIB() const { return _bound_ib; }
     DWORD GetBoundFVF() const { return _bound_fvf; }
+    IDirect3DVertexShaderX* GetBoundVS() const { return _bound_vs; }
+    IDirect3DVertexDeclarationX* GetBoundDecl() const { return _bound_decl; }
+    const float* GetVSConstants() const { return _vs_c; }
     const lwMatrix44* GetMatWorld() const { return &_mat_world; }
     const lwMatrix44* GetMatTex(DWORD stage) const
     {
@@ -219,6 +222,9 @@ private:
     UINT _bound_vb_stride;
     IDirect3DIndexBufferX* _bound_ib;
     DWORD _bound_fvf;
+    IDirect3DVertexShaderX* _bound_vs;
+    IDirect3DVertexDeclarationX* _bound_decl;
+    float _vs_c[256 * 4];
     IDirect3DVertexBufferX* _up_vb;
     UINT _up_vb_bytes;
 };

@@ -78,6 +78,218 @@ static void Dx11ApplyVertexBlend(lwIDeviceObject* dev_obj, lwIRenderCtrlAgent* a
     }
 }
 
+static int Dx11QueryVS(lwIResourceMgr* res_mgr, lwIRenderCtrlAgent* agent,
+    IDirect3DVertexShaderX** vs, IDirect3DVertexDeclarationX** decl)
+{
+    if (vs)
+        *vs = 0;
+    if (decl)
+        *decl = 0;
+    if (!res_mgr || !agent)
+        return 0;
+    lwIShaderMgr* sm = res_mgr->GetShaderMgr();
+    if (!sm)
+        return 0;
+    IDirect3DVertexShaderX* v = 0;
+    if (LW_FAILED(sm->QueryVertexShader(&v, agent->GetVertexShader())) || !v)
+        return 0;
+    if (vs)
+        *vs = v;
+    if (decl)
+        sm->QueryVertexDeclaration(decl, agent->GetVertexDeclaration());
+    return 1;
+}
+
+static void Dx11UploadVsBlendConstants(lwIDeviceObject* dev_obj, lwIRenderCtrlAgent* agent)
+{
+    if (!dev_obj || !agent)
+        return;
+
+    lwMatrix44* mat_global = agent->GetGlobalMatrix();
+    if (!mat_global)
+        return;
+
+    lwVector4 const_base(1.0f, 0.0f, 0.0f, 765.01f);
+    lwVector4 light_dir(0.0f, 0.0f, 0.0f, 0.0f);
+
+    const lwMatrix44* pViewProj = dev_obj->GetMatViewProj();
+    if (pViewProj)
+    {
+        lwMatrix44 mat = *pViewProj;
+        lwMatrix44Multiply(&mat, mat_global, &mat);
+        lwMatrix44Transpose(&mat, &mat);
+        dev_obj->SetVertexShaderConstantF(VS_CONST_REG_VIEWPROJ, (float*)&mat, 4);
+    }
+
+    DWORD rs_amb = 0;
+    DWORD rs_lgt = 0;
+    BOOL lgt_enable = FALSE;
+    D3DLIGHTX lgt;
+    memset(&lgt, 0, sizeof(lgt));
+    dev_obj->GetRenderState(D3DRS_AMBIENT, &rs_amb);
+    dev_obj->GetLight(0, &lgt);
+    dev_obj->GetRenderState(D3DRS_LIGHTING, &rs_lgt);
+    dev_obj->GetLightEnable(0, &lgt_enable);
+
+    if (rs_lgt && lgt_enable && lgt.Type == D3DLIGHT_DIRECTIONAL)
+    {
+        *(lwVector3*)&light_dir = *(lwVector3*)&lgt.Direction;
+        light_dir.x = -light_dir.x;
+        light_dir.y = -light_dir.y;
+        light_dir.z = -light_dir.z;
+        lwMatrix44 mat_light;
+        lwMatrix44InverseNoScaleFactor(&mat_light, mat_global);
+        lwVec3Mat44MulNormal((lwVector3*)&light_dir, &mat_light);
+    }
+
+    dev_obj->SetVertexShaderConstantF(VS_CONST_REG_BASE, (float*)&const_base, 1);
+    dev_obj->SetVertexShaderConstantF(VS_CONST_REG_LIGHT_DIR, (float*)&light_dir, 1);
+
+    const lwMatrix44* mat_view = dev_obj->GetMatView();
+    if (mat_view)
+    {
+        lwMatrix44 inv_view;
+        lwMatrix44InverseNoScaleFactor(&inv_view, mat_view);
+        lwVector3 eye_os(inv_view._41, inv_view._42, inv_view._43);
+        lwMatrix44 inv_world;
+        lwMatrix44InverseNoScaleFactor(&inv_world, mat_global);
+        lwVec3Mat44Mul(&eye_os, &inv_world);
+        lwVector4 eye4(eye_os.x, eye_os.y, eye_os.z, 1.0f);
+        dev_obj->SetVertexShaderConstantF(VS_CONST_REG_EYE_POS, (float*)&eye4, 1);
+    }
+
+    lwIAnimCtrlAgent* anim_agent = agent->GetAnimCtrlAgent();
+    static float pal[50 * 12];
+    for (DWORD bi = 0; bi < 50; ++bi)
+    {
+        float* r = &pal[bi * 12];
+        r[0] = 1; r[1] = 0; r[2] = 0; r[3] = 0;
+        r[4] = 0; r[5] = 1; r[6] = 0; r[7] = 0;
+        r[8] = 0; r[9] = 0; r[10] = 1; r[11] = 0;
+    }
+    if (anim_agent)
+    {
+        DWORD animobj_num = anim_agent->GetAnimCtrlObjNum();
+        for (DWORD idx = 0; idx < animobj_num; ++idx)
+        {
+            lwIAnimCtrlObj* animctrl_obj = anim_agent->GetAnimCtrlObj(idx);
+            if (!animctrl_obj)
+                continue;
+            lwAnimCtrlObjTypeInfo type_info;
+            animctrl_obj->GetTypeInfo(&type_info);
+            if (type_info.type != ANIM_CTRL_TYPE_BONE)
+                continue;
+            lwIAnimCtrlObjBone* bone_ctrl = (lwIAnimCtrlObjBone*)animctrl_obj;
+            DWORD bone_num = bone_ctrl->GetBoneRTTMNum();
+            const lwMatrix44* rtmat = (const lwMatrix44*)bone_ctrl->GetBoneRTMSeq();
+            if (bone_num && rtmat)
+            {
+                if (bone_num > 50)
+                    bone_num = 50;
+                for (DWORD bi = 0; bi < bone_num; ++bi)
+                    lwMatrix44Transpose((lwMatrix44*)&pal[bi * 12], &rtmat[bi]);
+            }
+            break;
+        }
+    }
+    dev_obj->SetVertexShaderConstantF(VS_CONST_REG_MAT_PALETTE, pal, 50 * 3);
+}
+
+static void Dx11UploadVsSubsetConstants(lwIDeviceObject* dev_obj, lwIRenderCtrlAgent* agent, DWORD subset,
+    const lwMaterial* mtl)
+{
+    if (!dev_obj || !mtl)
+        return;
+
+    DWORD rs_amb_d = 0;
+    DWORD rs_lgt = 0;
+    BOOL lgt_enable = FALSE;
+    D3DLIGHTX lgt;
+    memset(&lgt, 0, sizeof(lgt));
+    dev_obj->GetRenderState(D3DRS_AMBIENT, &rs_amb_d);
+    dev_obj->GetLight(0, &lgt);
+    dev_obj->GetRenderState(D3DRS_LIGHTING, &rs_lgt);
+    dev_obj->GetLightEnable(0, &lgt_enable);
+
+    lwColorValue4f rs_amb;
+    rs_amb.a = LW_ARGB_A(rs_amb_d);
+    rs_amb.r = LW_ARGB_R(rs_amb_d);
+    rs_amb.g = LW_ARGB_G(rs_amb_d);
+    rs_amb.b = LW_ARGB_B(rs_amb_d);
+
+    lwColorValue4f amb_dif[2];
+    lwColorValue4f* c;
+    if (rs_lgt && lgt_enable && lgt.Type == D3DLIGHT_DIRECTIONAL)
+    {
+        c = &amb_dif[0];
+        c->r = (lgt.Ambient.r + rs_amb.r) * mtl->amb.r;
+        c->g = (lgt.Ambient.g + rs_amb.g) * mtl->amb.g;
+        c->b = (lgt.Ambient.b + rs_amb.b) * mtl->amb.b;
+        c->a = (lgt.Ambient.a + rs_amb.a) * mtl->amb.a;
+        c = &amb_dif[1];
+        c->r = lgt.Diffuse.r * mtl->dif.r;
+        c->g = lgt.Diffuse.g * mtl->dif.g;
+        c->b = lgt.Diffuse.b * mtl->dif.b;
+        c->a = lgt.Diffuse.a * mtl->dif.a;
+    }
+    else
+    {
+        c = &amb_dif[0];
+        c->r = rs_amb.r * mtl->amb.r;
+        c->g = rs_amb.g * mtl->amb.g;
+        c->b = rs_amb.b * mtl->amb.b;
+        c->a = rs_amb.a * mtl->amb.a;
+        c = &amb_dif[1];
+        c->r = c->g = c->b = c->a = 0.0f;
+    }
+    dev_obj->SetVertexShaderConstantF(VS_CONST_REG_LIGHT_AMB, (float*)&amb_dif, 2);
+
+    if (!agent)
+        return;
+    lwIAnimCtrlAgent* anim_agent = agent->GetAnimCtrlAgent();
+    if (!anim_agent)
+        return;
+
+    DWORD stage_tab[3] = {
+        VS_CONST_REG_TS0_UVMAT,
+        VS_CONST_REG_TS1_UVMAT,
+        VS_CONST_REG_TS2_UVMAT,
+    };
+    DWORD animobj_num = anim_agent->GetAnimCtrlObjNum();
+    for (DWORD i = 0; i < animobj_num; ++i)
+    {
+        lwIAnimCtrlObj* animctrl_obj = anim_agent->GetAnimCtrlObj(i);
+        if (!animctrl_obj)
+            continue;
+        lwAnimCtrlObjTypeInfo type_info;
+        animctrl_obj->GetTypeInfo(&type_info);
+        if (type_info.data[1] >= 3)
+            continue;
+        if ((type_info.data[0] == subset) && (type_info.type == ANIM_CTRL_TYPE_TEXUV))
+        {
+            lwIAnimCtrlObjTexUV* texuv_ctrl = (lwIAnimCtrlObjTexUV*)animctrl_obj;
+            DWORD stage_id = stage_tab[type_info.data[1]];
+            lwMatrix44 mat, mat_src;
+            texuv_ctrl->GetRTM(&mat_src);
+            lwMatrix44Transpose(&mat, &mat_src);
+            dev_obj->SetVertexShaderConstantF(stage_id, (float*)&mat, 4);
+        }
+    }
+}
+
+static int Dx11BindShaderMgrVS(lwIDeviceObject* dev_obj, lwIResourceMgr* res_mgr, lwIRenderCtrlAgent* agent)
+{
+    IDirect3DVertexShaderX* vs = 0;
+    IDirect3DVertexDeclarationX* decl = 0;
+    if (!Dx11QueryVS(res_mgr, agent, &vs, &decl) || !vs)
+        return 0;
+    if (decl)
+        dev_obj->SetVertexDeclarationForced(decl);
+    dev_obj->SetVertexShader(vs);
+    Dx11UploadVsBlendConstants(dev_obj, agent);
+    return 1;
+}
+
 lwIRenderCtrlVS* __RenderCtrlVSProcVSVertexBlend_dx8()
 {
     return LW_NEW(lwxRenderCtrlVSVertexBlend_dx8);
@@ -430,6 +642,8 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_dx8::BeginSetSubset(DWORD subset, lwIRender
                 dev_obj->SetTextureStageState(stage, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
             }
         }
+        if (mtl)
+            Dx11UploadVsSubsetConstants(dev_obj, agent, subset, mtl);
         return LW_RET_OK;
     }
 
@@ -816,6 +1030,8 @@ LW_RESULT lwxRenderCtrlVSVertexBlend::BeginSetSubset(DWORD subset, lwIRenderCtrl
                 dev_obj->SetTextureStageState(stage, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
             }
         }
+        if (mtl)
+            Dx11UploadVsSubsetConstants(dev_obj, agent, subset, mtl);
         ret = LW_RET_OK;
         goto __ret;
     }

@@ -170,6 +170,7 @@
     <ClInclude Include="..\..\include\engine\lwD3D11Texture.h" />
     <ClInclude Include="..\..\include\engine\lwD3D11Buffer.h" />
     <ClInclude Include="..\..\include\engine\lwD3D11Mesh.h" />
+    <ClInclude Include="..\..\include\engine\lwShaderMgr11.h" />
     <ClInclude Include="..\..\include\engine\lwDeviceObject11.h" />
     <ClInclude Include="..\..\include\engine\lwRenderBackend.h" />
     <ClInclude Include="..\..\include\engine\ShaderLoad.h" />
@@ -251,6 +252,7 @@
     <ClCompile Include="..\..\src\engine\lwD3D11Texture.cpp" />
     <ClCompile Include="..\..\src\engine\lwD3D11Buffer.cpp" />
     <ClCompile Include="..\..\src\engine\lwD3D11Mesh.cpp" />
+    <ClCompile Include="..\..\src\engine\lwShaderMgr11.cpp" />
     <ClCompile Include="..\..\src\engine\lwDDSFile.cpp" />
     <ClCompile Include="..\..\src\engine\lwDeviceObject.cpp" />
     <ClCompile Include="..\..\src\engine\lwDeviceObject11.cpp" />

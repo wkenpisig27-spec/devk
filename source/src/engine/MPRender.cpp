@@ -364,23 +364,19 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 	_IMgr.res_mgr = sys_graphics->GetResourceMgr();
 	_IMgr.tp_loadres = _IMgr.res_mgr->GetThreadPoolMgr()->GetThreadPool(THREAD_POOL_LOADRES);
 
-	if (lwIsDx11Active()) {
-		lwD3D11Gap(LW_D3D11_SKIP, "shader-load-skip",
-			"Slice 1 has no ShaderMgr11; LoadShader0/1 wait for Slice 3");
-		lwD3D11Gap(LW_D3D11_SKIP, "vs-shader-skip",
-			"ResMgr.LoadTotalVShader is D3D9 vs_3_0; skipped on DeviceObject11");
-		lwD3D11Gap(LW_D3D11_SKIP, "d3dx-sprite-skip",
-			"D3DXCreateSprite needs IDirect3DDevice9; UI sprites wait for Slice 8");
-	} else {
-		LoadShader0(sys_graphics);
-		LoadShader1(sys_graphics);
-	}
+	LoadShader0(sys_graphics);
+	LoadShader1(sys_graphics);
 
 	ToggleFullScreen();
 
 	ResMgr.m_pSys = sys;
 	ResMgr.m_pSysGraphics = sys_graphics;
-	if (!lwIsDx11Active()) {
+	if (lwIsDx11Active()) {
+		lwD3D11Gap(LW_D3D11_SKIP, "vs-shader-skip",
+			"ResMgr.LoadTotalVShader is D3D9 vs_3_0; skipped on DeviceObject11");
+		lwD3D11Gap(LW_D3D11_SKIP, "d3dx-sprite-skip",
+			"D3DXCreateSprite needs IDirect3DDevice9; UI sprites wait for Slice 8");
+	} else {
 		ResMgr.LoadTotalVShader(sys_graphics);
 		D3DXCreateSprite(_pD3DDevice, &_p2DSprite);
 	}
