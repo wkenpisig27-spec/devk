@@ -77,6 +77,10 @@ build_result.txt
 *.tmp
 *~
 
+# 8-bit BMP unpack backups (helper/convert_8bit_textures.py)
+helper/texture-8bit-backup/
+helper/texture-8bit-convert-report.txt
+
 # Client runtime logs
 **/client/log/
 **/client/log1/
