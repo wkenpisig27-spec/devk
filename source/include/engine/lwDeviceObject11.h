@@ -165,6 +165,11 @@ public:
     {
         return (state < LW_MAX_RENDERSTATE_NUM) ? _rs_value[state] : 0;
     }
+    DWORD GetCachedSS(DWORD sampler, DWORD type) const
+    {
+        return (sampler < LW_MAX_SAMPLESTAGE_NUM && type < LW_MAX_SAMPLESTATE_NUM)
+            ? _ss_value[sampler][type] : 0;
+    }
 
 private:
     void _ReleaseTargets();

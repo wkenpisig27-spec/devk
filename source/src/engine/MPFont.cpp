@@ -422,6 +422,8 @@ bool CMPFont::TextToTexture( char c1, char c2, float & tX, float & tY )
 }
 void CMPFont::DrawTextClipOnce(char* szText, int nLen, LPRECT psrc, LPRECT pclip,D3DXCOLOR color)
 {
+	if (!_pDev || !_pTex || !_pTexFast)
+		return;
 	int x,y;
 	float sx = 0, sy = 0,
 		offset=0, w=0, h=0, tx1=0, ty1=0, tx2=0, ty2=0;
@@ -582,12 +584,12 @@ void CMPFont::DrawTextClipOnce(char* szText, int nLen, LPRECT psrc, LPRECT pclip
 	if(idxAsh)
 	{
 		_pDev->SetTexture( 0, _pTexFast->GetTex() );
-		_pDev->GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST, idxAsh/3, _vecAsh,sizeof(FONT_VER));
+		_pDev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, idxAsh/3, _vecAsh,sizeof(FONT_VER));
 	}
 	if(idxHsl)
 	{	
 		_pDev->SetTexture( 0, _pTex->GetTex() );
-		_pDev->GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST, idxHsl/3, _vecVer,sizeof(FONT_VER));
+		_pDev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, idxHsl/3, _vecVer,sizeof(FONT_VER));
 	}
 }
 
@@ -968,12 +970,12 @@ __ret:
 	if(iAshNum)
 	{
 		_pDev->SetTexture( 0, _pTexFast->GetTex() );
-		_pDev->GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST, iAshNum, _vecAsh,sizeof(FONT_VER));
+		_pDev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, iAshNum, _vecAsh,sizeof(FONT_VER));
 	}
 	if(iHslNum)
 	{	
 		_pDev->SetTexture( 0, _pTex->GetTex() );
-		_pDev->GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST, iHslNum, _vecVer,sizeof(FONT_VER));
+		_pDev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, iHslNum, _vecVer,sizeof(FONT_VER));
 	}
 	_pCEffectFile->End();
 
@@ -994,12 +996,12 @@ void  CMPFont::RenderOptimize(int iIdx)
 	if(prc->iAshNum)
 	{
 		_pDev->SetTexture( 0, _pTexFast->GetTex() );
-		_pDev->GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST, prc->iAshNum, &prc->_vecAsh.front(),sizeof(FONT_VER));
+		_pDev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, prc->iAshNum, &prc->_vecAsh.front(),sizeof(FONT_VER));
 	}
 	if(prc->iHslNum)
 	{	
 		_pDev->SetTexture( 0, _pTex->GetTex() );
-		_pDev->GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST, prc->iHslNum, &prc->_vecHsl.front(),sizeof(FONT_VER));
+		_pDev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, prc->iHslNum, &prc->_vecHsl.front(),sizeof(FONT_VER));
 	}
 	_pCEffectFile->End();
 	_pDev->SetRenderStateForced(D3DRS_ZENABLE,TRUE);
@@ -1014,12 +1016,12 @@ void CMPFont::RenderDrawOptimize(int iIdx)
 	if(prc->iAshNum)
 	{
 		_pDev->SetTexture( 0, _pTexFast->GetTex() );
-		_pDev->GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST, prc->iAshNum, &prc->_vecAsh.front(),sizeof(FONT_VER));
+		_pDev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, prc->iAshNum, &prc->_vecAsh.front(),sizeof(FONT_VER));
 	}
 	if(prc->iHslNum)
 	{	
 		_pDev->SetTexture( 0, _pTex->GetTex() );
-		_pDev->GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST, prc->iHslNum, &prc->_vecHsl.front(),sizeof(FONT_VER));
+		_pDev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, prc->iHslNum, &prc->_vecHsl.front(),sizeof(FONT_VER));
 	}
 }
 #else
@@ -1377,12 +1379,12 @@ __ret:
 	if(iAshNum)
 	{
 		_pDev->SetTexture( 0, _pTexFast->GetTex() );
-		_pDev->GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST, iAshNum, _vecAsh,sizeof(FONT_VER));
+		_pDev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, iAshNum, _vecAsh,sizeof(FONT_VER));
 	}
 	if(iHslNum)
 	{	
 		_pDev->SetTexture( 0, _pTex->GetTex() );
-		_pDev->GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLELIST, iHslNum, _vecVer,sizeof(FONT_VER));
+		_pDev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, iHslNum, _vecVer,sizeof(FONT_VER));
 	}
 
 }

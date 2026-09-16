@@ -14,6 +14,7 @@
 #include "assert.h" 
 #include "MPRender.h"
 #include "lwRenderBackend.h"
+#include "lwD3D11Gaps.h"
 
 
 using namespace std;
@@ -611,17 +612,34 @@ void MPMap::RenderSea()
 	int nStartX = (int)(_fShowCenterX - (float)_nShowWidth  / 2.0f);
 	int nStartY = (int)(_fShowCenterY - (float)_nShowHeight / 2.0f);
 
-	g_Render.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE); 
-	g_Render.SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE);
-	g_Render.SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW); // ������Ⱦ
-	
-	g_Render.SetRenderState(D3DRS_SRCBLEND,  D3DBLEND_SRCALPHA);	 // blend the colors based on the
-	g_Render.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);	 // alpha value
-	
+	// Effects / shade / TEXUV leave TSS + UV matrix + alphatest on the device.
+	// Water is XYZ+DIFFUSE+TEX1; sample wrap, vertex alpha, and write Z like DX9.
+	g_Render.SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+	g_Render.SetRenderState(D3DRS_FOGENABLE, FALSE);
+	g_Render.SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+	g_Render.SetRenderState(D3DRS_SRCBLEND,  D3DBLEND_SRCALPHA);
+	g_Render.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 	g_Render.EnableAlpha(TRUE);
 	g_Render.EnableZBuffer(TRUE);
-	
-	g_Render.SetRenderState( D3DRS_LIGHTING, FALSE );
+	g_Render.SetRenderState(D3DRS_LIGHTING, FALSE);
+	g_Render.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	g_Render.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	g_Render.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+	g_Render.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+	g_Render.SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+	g_Render.SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+	g_Render.SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+	g_Render.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+	g_Render.SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+	g_Render.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+	g_Render.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+	if (lwIDeviceObject* sea_dev = MapDev())
+	{
+		lwMatrix44 texid;
+		lwMatrix44Identity(&texid);
+		sea_dev->SetTransform(D3DTS_TEXTURE0, &texid);
+		sea_dev->SetTransform(D3DTS_TEXTURE1, &texid);
+	}
 
 	g_Render.SetTexture(0, NULL);
 	g_Render.SetTexture(1, NULL);
@@ -640,10 +658,6 @@ void MPMap::RenderSea()
 	SVertex[1].dwColor = 0xFFffffff;
 	SVertex[2].dwColor = 0xFFffffff;
 	SVertex[3].dwColor = 0xFFffffff; 
-	
-	g_Render.SetTextureStageState( 0, D3DTSS_COLOROP,  D3DTOP_MODULATE); // D3DTOP_DOTPRODUCT3 );
-	g_Render.SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
-	g_Render.SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_CURRENT );
 	
 	g_Render.SetTexture(0, GetTextureByID(GetWaterBumpTextureID(_nWaterLoopFrame))); 
 	
@@ -673,7 +687,18 @@ void MPMap::RenderSea()
 	MPSeaTileVertex   *pCurVertex = NULL;
 	
 	int x, y;
-	if(_bUseVB && _pVB)
+	bool use_vb = (_bUseVB && _pVB) ? true : false;
+	if(use_vb)
+	{
+		HRESULT hr = _pVB->Lock(0, nVertexCnt * sizeof(MPSeaTileVertex), (void**)&pCurVertex, D3DLOCK_DISCARD );
+	    if(FAILED(hr) || !pCurVertex)
+		{
+			lwD3D11Gap(LW_D3D11_FALLBACK, "sea-vb-lock",
+				"sea VB lock failed; DrawPrimitiveUP fallback");
+			use_vb = false;
+		}
+	}
+	if(use_vb)
 	{
 //#if(defined DRAW_SEA_USE_DYNAMIC_BUFFER)
 //        DWORD num = 0;
@@ -724,9 +749,7 @@ void MPMap::RenderSea()
 //        if(LW_FAILED(dsm->DrawPrimitive(D3DPT_TRIANGLELIST, 0, num / 3)))
 //            LG("error","msg render sea");
 //
-//#else
-		HRESULT hr = _pVB->Lock(0, nVertexCnt * sizeof(MPSeaTileVertex), (void**)&pCurVertex, D3DLOCK_DISCARD );
-	    if(FAILED(hr)) return;
+//#endif
 		for(y = 0; y < nSeaCntY; y++)
 		{
 			for(x = 0; x < nSeaCntX; x++)

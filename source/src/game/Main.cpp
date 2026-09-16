@@ -592,7 +592,11 @@ catch (std::exception& e) {
 			fprintf(fp, "DirectX Ver %X\r\n", dx_ver);
 
 			D3DCAPSX caps;
-			g_Render.GetDevice()->GetDeviceCaps(&caps);
+			memset(&caps, 0, sizeof(caps));
+			if (IDirect3DDeviceX* d3d9 = g_Render.GetDevice())
+				d3d9->GetDeviceCaps(&caps);
+			else
+				caps = g_Render.GetOrgCap();
 
 			fprintf(fp, "DeviceType %X\r\n", caps.DeviceType);
 			fprintf(fp, "AdapterOrdinal %X\r\n", caps.AdapterOrdinal);

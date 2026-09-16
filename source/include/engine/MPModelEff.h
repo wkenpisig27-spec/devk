@@ -109,27 +109,8 @@ public:
 
 	void FillDefaultUV(CEffectModel*	pCModel,TEXCOORD& coord);
 
-	void FillModelUVSoft(CEffectModel*	pCModel)
-	{
-		SEFFECT_VERTEX *pVertex;
-		pCModel->Lock((BYTE**)&pVertex);
-		for(WORD i = 0; i < pCModel->GetVerCount(); ++i)
-		{
-			pVertex[i].m_SUV = *m_vecCurCoord[i];
-		}
-		pCModel->Unlock();
-
-	}
-	void FillTextureUVSoft(CEffectModel*	pCModel)
-	{
-		SEFFECT_VERTEX *pVertex;
-		pCModel->Lock((BYTE**)&pVertex);
-		for(WORD i = 0; i < pCModel->GetVerCount(); ++i)
-		{
-			pVertex[i].m_SUV = *m_lpCurTex[i];
-		}
-		pCModel->Unlock();
-	}
+	void FillModelUVSoft(CEffectModel*	pCModel);
+	void FillTextureUVSoft(CEffectModel*	pCModel);
 	////ģ�ͱ任����//////////////////////////////////////////////////////////////////////
 	//!��ǰʱ��
 	float				m_fCurTime;
@@ -461,6 +442,7 @@ public:
 				m_vecEffect[n] = new I_Effect;
 				m_vecEffect[n]->CopyEffect(&CEffectArray[n]); 
 		}
+		m_pCEffect = (m_iEffNum > 0) ? m_vecEffect[0] : NULL;
 
 		m_vecCortrol.resize(m_iEffNum);
 		m_vecCortrol.setsize(m_iEffNum);

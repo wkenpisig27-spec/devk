@@ -52,6 +52,7 @@ public:
 	BOOL Begin(DWORD  dwIsSave = 0);
 	BOOL Pass(UINT ipass);
 	BOOL End();
+	void ApplySoftPass();
 
 	int	 GetTechCount()						{ return _iTechNum;}
 	int  GetPassCount()						{ return m_passes;}
@@ -69,12 +70,14 @@ public:
 
 protected:
 	int									_iTechNum;
+	int									_iCurTech;
 	std::vector<D3DXHANDLE>		_vecTechniques;
 
 	DWORD								_dwVShader;
 };
 inline BOOL CMPEffectFile::SetTechnique(int iIdx)
 {
+	_iCurTech = iIdx;
 	if(!m_pEffect)
 		return TRUE;
 	if(iIdx < 0 || iIdx >= (int)_vecTechniques.size())
@@ -148,7 +151,10 @@ inline BOOL CMPEffectFile::Begin(DWORD dwIsSave)
 inline BOOL CMPEffectFile::Pass(UINT ipass = 0)
 {
 	if(!m_pEffect)
+	{
+		ApplySoftPass();
 		return TRUE;
+	}
 #if (defined LW_USE_DX9)
 	if (FAILED(m_pEffect->BeginPass(ipass)) || FAILED(m_pEffect->CommitChanges()))
 #elif (defined LW_USE_DX8)

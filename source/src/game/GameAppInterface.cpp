@@ -486,22 +486,26 @@ BOOL CGameApp::_CreateSmMap(MPTerrain* pTerr) {
 		g_Render.CaptureScreen(fileName);
 
 		IDirect3DTextureX* pTex = nullptr;
-		D3DXCreateTextureFromFileEx(g_Render.GetDevice(),
-		                            fileName,        // ?l???
-		                            256,             // ?l???????????????
-		                            256,             // ?l??????????????
-		                            1,               // ????????mipmap?????????1
-		                            0,               // ??????????;
-		                            D3DFMT_UNKNOWN,  // ???????l????
-		                            D3DPOOL_MANAGED, // ??DXGraphics????
-		                            D3DX_FILTER_TRIANGLE | D3DX_FILTER_MIRROR | D3DX_FILTER_BOX, // ???????????
-		                            D3DX_FILTER_NONE,                                            // mipmap???????????
-		                            0x00000000,                                                  // ???????
-		                            nullptr, // ???????????????a?????
-		                            nullptr, // ?????j???????a?????
-		                            &pTex);  // ???????????
-		D3DXSaveTextureToFile(fileName, D3DXIFF_BMP, pTex, nullptr);
-		SAFE_RELEASE(pTex);
+		if (IDirect3DDeviceX* d3d9 = g_Render.GetDevice()) {
+			D3DXCreateTextureFromFileEx(d3d9,
+			                            fileName,
+			                            256,
+			                            256,
+			                            1,
+			                            0,
+			                            D3DFMT_UNKNOWN,
+			                            D3DPOOL_MANAGED,
+			                            D3DX_FILTER_TRIANGLE | D3DX_FILTER_MIRROR | D3DX_FILTER_BOX,
+			                            D3DX_FILTER_NONE,
+			                            0x00000000,
+			                            nullptr,
+			                            nullptr,
+			                            &pTex);
+			if (pTex) {
+				D3DXSaveTextureToFile(fileName, D3DXIFF_BMP, pTex, nullptr);
+				SAFE_RELEASE(pTex);
+			}
+		}
 	}
 	return TRUE;
 }

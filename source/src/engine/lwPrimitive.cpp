@@ -719,7 +719,10 @@ LW_RESULT lwPrimitive::Render()
     _render_agent->BindMeshAgent( _mesh_agent );
 
     if(LW_FAILED(_render_agent->BeginSet()))
+    {
+        _render_agent->EndSet();
         goto __ret;
+    }
 
     {
         for (DWORD i = 0; i < LW_MAX_SUBSET_NUM; i++)
@@ -740,16 +743,28 @@ LW_RESULT lwPrimitive::Render()
             _render_agent->BindMtlTexAgent(_mtltex_agent_seq[i]);
 
             if (LW_FAILED(ret = _render_agent->BeginSetSubset(i)))
+            {
+                _render_agent->EndSet();
                 goto __ret;
+            }
 
             if (ret == LW_RET_OK_1)
+            {
+                _render_agent->EndSet();
                 goto __ret;
+            }
 
             if (LW_FAILED(_render_agent->DrawSubset(i)))
+            {
+                _render_agent->EndSet();
                 goto __ret;
+            }
 
             if (LW_FAILED(_render_agent->EndSetSubset(i)))
+            {
+                _render_agent->EndSet();
                 goto __ret;
+            }
 
             _mtltex_agent_seq[i]->EndPass();
         }

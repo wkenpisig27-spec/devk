@@ -741,7 +741,7 @@ void CAniClock::Render(int x, int y) {
 		_vTempVer[n].vPos.y = _vVertex[n].vPos.y + y;
 	}
 
-	g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 8, &_vTempVer, sizeof(ClockVer));
+	g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 8, &_vTempVer, sizeof(ClockVer));
 
 	char txt[3];
 	sprintf(txt, "%.0f%", RemainingTime());

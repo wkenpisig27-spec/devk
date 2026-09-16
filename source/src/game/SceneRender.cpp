@@ -900,6 +900,7 @@ void CGameScene::_Render() {
 	}
 	g_Render.SetRenderState(D3DRS_TEXTUREFACTOR, 0xffffffff);
 	g_Render.SetRenderStateForced(D3DRS_TEXTUREFACTOR, 0xffffffff);
+	ResetWeaponGlowStageState();
 	if (_pTerrain) {
 		_pTerrain->RenderSea();
 	}
@@ -1243,6 +1244,7 @@ void CGameScene::RenderSMallMap() {
 
 	g_Render.EnableZBuffer(TRUE);
 
+	ResetWeaponGlowStageState();
 	if (_pTerrain) {
 		_pTerrain->RenderSea();
 	}

@@ -3,6 +3,7 @@
 
 
 #include "lwRenderCtrlEmb.h"
+#include "lwRenderBackend.h"
 
 LW_BEGIN
 
@@ -56,6 +57,19 @@ LW_RESULT lwRenderCtrlVSFixedFunction::BeginSet(lwIRenderCtrlAgent* agent)
     dev_obj->SetVertexShader((IDirect3DVertexShaderX)NULL);
 #endif
     dev_obj->SetTransformWorld(agent->GetGlobalMatrix());
+
+    if (lwIsDx11Active())
+    {
+        lwMatrix44 tex_id;
+        lwMatrix44Identity(&tex_id);
+        for (DWORD s = 0; s < 2; ++s)
+        {
+            dev_obj->SetTransform((D3DTRANSFORMSTATETYPE)(D3DTS_TEXTURE0 + s), &tex_id);
+            dev_obj->SetTextureStageState(s, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+        }
+        dev_obj->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+        dev_obj->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+    }
     
     return LW_RET_OK;
 }
@@ -83,6 +97,17 @@ LW_RESULT lwRenderCtrlVSFixedFunction::BeginSetSubset(DWORD subset, lwIRenderCtr
 	}
 
     lwIAnimCtrlAgent* anim_agent = agent->GetAnimCtrlAgent();
+
+    if (lwIsDx11Active())
+    {
+        lwMatrix44 tex_id;
+        lwMatrix44Identity(&tex_id);
+        for (DWORD s = 0; s < 2; ++s)
+        {
+            dev_obj->SetTransform((D3DTRANSFORMSTATETYPE)(D3DTS_TEXTURE0 + s), &tex_id);
+            dev_obj->SetTextureStageState(s, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+        }
+    }
 
     if(anim_agent == 0)
         goto __ret;

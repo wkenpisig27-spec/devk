@@ -8,6 +8,7 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <map>
+#include <vector>
 
 #pragma comment(lib, "d3dcompiler.lib")
 
@@ -23,7 +24,8 @@ static const char* kMeshHLSL =
     "  float4 flags; /* x=skin, y=hasNrm, z=hasUv, w=blend_floats */\n"
     "  float4 extra; /* x=boneCount, y=outline, z=outlineWidth, w=alphaRef */\n"
     "  float4 outlineColor;\n"
-    "  float4 more; /* x=hasColor, y=unlit, z=dualTex */\n"
+    "  float4 more; /* x=hasColor, y=unlit, z=dualTex, w=tfactor mix */\n"
+    "  float4 tfactor;\n"
     "  row_major float4x4 uvMat;\n"
     "};\n"
     "cbuffer CB1 : register(b1) {\n"
@@ -38,7 +40,8 @@ static const char* kMeshHLSL =
     "  float4 blend : BLENDWEIGHT;\n"
     "  uint4 idx : BLENDINDICES;\n"
     "  float3 nrm : NORMAL;\n"
-    "  float2 uv : TEXCOORD;\n"
+    "  float2 uv : TEXCOORD0;\n"
+    "  float2 uv1 : TEXCOORD1;\n"
     "  float4 col : COLOR;\n"
     "};\n"
     "struct PSIn { float4 pos : SV_POSITION; float3 nrm : NORMAL; float2 uv : TEXCOORD0; float2 uv1 : TEXCOORD1; float4 col : COLOR; };\n"
@@ -97,25 +100,34 @@ static const char* kMeshHLSL =
     "  uint4 idx = ClampBones(i.idx);\n"
     "  float3 p = flags.x > 0.5 ? SkinP(i.pos, w, idx) : i.pos;\n"
     "  float3 n = flags.x > 0.5 ? SkinN(i.nrm, w, idx) : i.nrm;\n"
-    "  FinishVS(o, p, n, i.uv, float2(0,0), i.col);\n"
+    "  FinishVS(o, p, n, i.uv, i.uv1, i.col);\n"
     "  return o;\n"
     "}\n"
     "float4 PSMain(PSIn i) : SV_TARGET {\n"
     "  float4 tex = tex0.Sample(samp0, i.uv);\n"
-    "  if (more.z > 0.5) {\n"
+    "  if (more.z > 0.5 && more.z < 1.5) {\n"
     "    float4 t1 = tex1.Sample(samp0, i.uv1);\n"
     "    tex = float4(t1.rgb, tex.a);\n"
+    "  } else if (more.z > 1.5 && more.z < 2.5) {\n"
+    "    float4 t1 = tex1.Sample(samp0, i.uv1);\n"
+    "    tex.rgb *= t1.rgb;\n"
+    "  } else if (more.z > 2.5) {\n"
+    "    float4 t1 = tex1.Sample(samp0, i.uv1);\n"
+    "    tex.rgb = tex.rgb + tex.a * t1.rgb;\n"
     "  }\n"
     "  if (extra.w >= 0.0) clip(tex.a - extra.w);\n"
     "  if (extra.y > 0.5) return float4(outlineColor.rgb, outlineColor.a * tex.a);\n"
-    "  float3 lit;\n"
-    "  if (more.y > 0.5) lit = i.col.rgb;\n"
+    "  int mix = (int)(more.w + 0.5);\n"
+    "  float3 tint;\n"
+    "  if (mix & 1) tint = tfactor.rgb;\n"
+    "  else if (more.y > 0.5) tint = i.col.rgb;\n"
     "  else {\n"
     "    float3 n = normalize(i.nrm);\n"
     "    float ndl = saturate(dot(n, -normalize(lightDir.xyz)));\n"
-    "    lit = saturate(ambient.rgb + diffuse.rgb * ndl) * i.col.rgb;\n"
+    "    tint = saturate(ambient.rgb + diffuse.rgb * ndl) * i.col.rgb;\n"
     "  }\n"
-    "  return float4(tex.rgb * lit, tex.a * i.col.a);\n"
+    "  float a = tex.a * ((mix & 2) ? tfactor.a : i.col.a);\n"
+    "  return float4(tex.rgb * tint, a);\n"
     "}\n";
 
 struct MeshCB0
@@ -129,6 +141,7 @@ struct MeshCB0
     float extra[4];
     float outlineColor[4];
     float more[4];
+    float tfactor[4];
     float uvMat[16];
 };
 
@@ -144,6 +157,7 @@ struct MeshState
     ID3D11Buffer* cb0;
     ID3D11Buffer* cb1;
     ID3D11SamplerState* samp;
+    ID3D11SamplerState* samp_clamp;
     ID3D11RasterizerState* rast_ccw;
     ID3D11RasterizerState* rast_cw;
     ID3D11RasterizerState* rast_none;
@@ -159,6 +173,8 @@ struct MeshState
     ID3D11ShaderResourceView* white_srv;
     lwMatrix44 bones[64];
     DWORD bone_count;
+    ID3D11Buffer* fan_ib;
+    UINT fan_ib_prims;
     int ready;
 };
 
@@ -187,6 +203,7 @@ static void ReleaseMesh()
     }
     s_blends.clear();
 
+    if (s_mesh.fan_ib) s_mesh.fan_ib->Release();
     if (s_mesh.white_srv) s_mesh.white_srv->Release();
     if (s_mesh.white_tex) s_mesh.white_tex->Release();
     if (s_mesh.blend_opaque) s_mesh.blend_opaque->Release();
@@ -197,6 +214,7 @@ static void ReleaseMesh()
     if (s_mesh.rast_none) s_mesh.rast_none->Release();
     if (s_mesh.rast_cw) s_mesh.rast_cw->Release();
     if (s_mesh.rast_ccw) s_mesh.rast_ccw->Release();
+    if (s_mesh.samp_clamp) s_mesh.samp_clamp->Release();
     if (s_mesh.samp) s_mesh.samp->Release();
     if (s_mesh.cb1) s_mesh.cb1->Release();
     if (s_mesh.cb0) s_mesh.cb0->Release();
@@ -295,6 +313,10 @@ LW_RESULT lwD3D11MeshInit(ID3D11Device* device, ID3D11DeviceContext* context)
     sd.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
     sd.MaxLOD = D3D11_FLOAT32_MAX;
     device->CreateSamplerState(&sd, &s_mesh.samp);
+    sd.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+    sd.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+    sd.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+    device->CreateSamplerState(&sd, &s_mesh.samp_clamp);
 
     s_mesh.rast_ccw = MakeRast(device, D3D11_CULL_BACK);
     s_mesh.rast_cw = MakeRast(device, D3D11_CULL_FRONT);
@@ -421,12 +443,21 @@ static FvfInfo ParseFvf(DWORD fvf)
     }
 
     const int last_ubyte = (fvf & (D3DFVF_LASTBETA_UBYTE4 | D3DFVF_LASTBETA_D3DCOLOR)) ? 1 : 0;
-    if (betas > 0 && last_ubyte)
+    if (last_ubyte && betas > 0)
     {
         i.has_blend = 1;
         i.blend_off = 12;
         i.blend_floats = betas - 1;
         i.idx_off = 12 + i.blend_floats * 4;
+    }
+    else if (last_ubyte)
+    {
+        // XYZ|LASTBETA_UBYTE4|... : DWORD bone index after position, weight 1.
+        i.has_blend = 1;
+        i.blend_off = 12;
+        i.blend_floats = 0;
+        i.idx_off = 12;
+        o += 4;
     }
 
     if (fvf & D3DFVF_NORMAL)
@@ -524,15 +555,12 @@ static ID3D11InputLayout* LayoutFor(DWORD fvf, const FvfInfo& info, int skin)
     elems[n].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
     ++n;
 
-    if (!skin)
-    {
-        elems[n].SemanticName = "TEXCOORD";
-        elems[n].SemanticIndex = 1;
-        elems[n].Format = DXGI_FORMAT_R32G32_FLOAT;
-        elems[n].AlignedByteOffset = (info.ntex >= 2) ? info.uv1_off : (info.has_uv ? info.uv_off : 0);
-        elems[n].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-        ++n;
-    }
+    elems[n].SemanticName = "TEXCOORD";
+    elems[n].SemanticIndex = 1;
+    elems[n].Format = DXGI_FORMAT_R32G32_FLOAT;
+    elems[n].AlignedByteOffset = (info.ntex >= 2) ? info.uv1_off : (info.has_uv ? info.uv_off : 0);
+    elems[n].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+    ++n;
 
     elems[n].SemanticName = "COLOR";
     elems[n].Format = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -618,6 +646,40 @@ static D3D11_PRIMITIVE_TOPOLOGY Topology(D3DPRIMITIVETYPE pt)
     }
 }
 
+static int EnsureFanIB(UINT prims)
+{
+    if (s_mesh.fan_ib && s_mesh.fan_ib_prims >= prims)
+        return 1;
+    if (!s_mesh.device || prims == 0)
+        return 0;
+    UINT cap = prims < 64 ? 64 : prims;
+    if (cap > 4096)
+        cap = 4096;
+    if (prims > cap)
+        return 0;
+    std::vector<USHORT> idx(cap * 3);
+    for (UINT i = 0; i < cap; ++i)
+    {
+        idx[i * 3 + 0] = 0;
+        idx[i * 3 + 1] = (USHORT)(i + 1);
+        idx[i * 3 + 2] = (USHORT)(i + 2);
+    }
+    D3D11_BUFFER_DESC bd = {};
+    bd.ByteWidth = (UINT)(idx.size() * sizeof(USHORT));
+    bd.Usage = D3D11_USAGE_IMMUTABLE;
+    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    D3D11_SUBRESOURCE_DATA srd = {};
+    srd.pSysMem = &idx[0];
+    ID3D11Buffer* nb = 0;
+    if (FAILED(s_mesh.device->CreateBuffer(&bd, &srd, &nb)) || !nb)
+        return 0;
+    if (s_mesh.fan_ib)
+        s_mesh.fan_ib->Release();
+    s_mesh.fan_ib = nb;
+    s_mesh.fan_ib_prims = cap;
+    return 1;
+}
+
 static void ArgbToFloat(DWORD c, float* out)
 {
     out[0] = ((c >> 16) & 0xff) / 255.0f;
@@ -645,7 +707,20 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     if (stride == 0)
         return LW_RET_OK;
 
-    int skin = (info.has_blend && s_mesh.bone_count > 0) ? 1 : 0;
+    ID3D11Buffer* fan_ib = 0;
+    if (pt == D3DPT_TRIANGLEFAN)
+    {
+        if (!EnsureFanIB(prim_count))
+            return LW_RET_OK;
+        fan_ib = s_mesh.fan_ib;
+        if (!indexed)
+            base_vert = (INT)start;
+        start = 0;
+        indexed = 1;
+        pt = D3DPT_TRIANGLELIST;
+    }
+
+    int skin = info.has_blend ? 1 : 0;
     ID3D11InputLayout* layout = LayoutFor(fvf, info, skin);
     if (!layout && skin)
     {
@@ -661,7 +736,9 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     s_mesh.context->IASetInputLayout(layout);
     s_mesh.context->IASetPrimitiveTopology(Topology(pt));
 
-    if (indexed)
+    if (fan_ib)
+        s_mesh.context->IASetIndexBuffer(fan_ib, DXGI_FORMAT_R16_UINT, 0);
+    else if (indexed)
     {
         lwD3D11IndexBuffer* ib = lwAsD3D11IndexBuffer(dev->GetBoundIB());
         if (!ib)
@@ -728,12 +805,12 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     if (cb.ambient[1] > 1.0f) cb.ambient[1] = 1.0f;
     if (cb.ambient[2] > 1.0f) cb.ambient[2] = 1.0f;
 
-    cb.flags[0] = skin ? 1.0f : 0.0f;
+    cb.flags[0] = (skin && s_mesh.bone_count > 0) ? 1.0f : 0.0f;
     cb.flags[1] = info.has_nrm ? 1.0f : 0.0f;
     cb.flags[2] = info.has_uv ? 1.0f : 0.0f;
     cb.flags[3] = (float)info.blend_floats;
     cb.extra[0] = (float)s_mesh.bone_count;
-    cb.extra[1] = s_mesh.outline ? 1.0f : 0.0f;
+    cb.extra[1] = (s_mesh.outline && info.has_nrm) ? 1.0f : 0.0f;
     cb.extra[2] = s_mesh.outline_width;
     cb.extra[3] = -1.0f;
     cb.outlineColor[0] = s_mesh.outline_color[0];
@@ -741,9 +818,31 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     cb.outlineColor[2] = s_mesh.outline_color[2];
     cb.outlineColor[3] = s_mesh.outline_color[3];
     cb.more[0] = info.has_diff ? 1.0f : 0.0f;
-    cb.more[1] = (lighting == 0) ? 1.0f : 0.0f;
+    cb.more[1] = (lighting == 0 || !info.has_nrm) ? 1.0f : 0.0f;
+    DWORD carg2 = dev->GetCachedTSS(0, D3DTSS_COLORARG2);
+    DWORD aarg2 = dev->GetCachedTSS(0, D3DTSS_ALPHAARG2);
+    const int color_tf = (carg2 == D3DTA_TFACTOR);
+    const int alpha_tf = (aarg2 == D3DTA_TFACTOR);
+    cb.more[3] = (float)(color_tf + alpha_tf * 2);
+    DWORD tf = dev->GetCachedRS(D3DRS_TEXTUREFACTOR);
+    ArgbToFloat(tf, cb.tfactor);
     DWORD cop1 = dev->GetCachedTSS(1, D3DTSS_COLOROP);
-    cb.more[2] = (cop1 && cop1 != D3DTOP_DISABLE && cop1 != 0xffffffff) ? 1.0f : 0.0f;
+    DWORD carg1 = dev->GetCachedTSS(1, D3DTSS_COLORARG1);
+    lwD3D11Texture* tex1_check = lwAsD3D11Texture(dev->GetBoundTex(1));
+    float dual = 0.0f;
+    if (cop1 && cop1 != D3DTOP_DISABLE && cop1 != 0xffffffff && tex1_check && tex1_check->GetSRV())
+    {
+        if (cop1 == D3DTOP_SELECTARG1)
+        {
+            if (carg1 == D3DTA_TEXTURE)
+                dual = 1.0f;
+        }
+        else if (cop1 == D3DTOP_MODULATEALPHA_ADDCOLOR)
+            dual = 3.0f;
+        else if (cop1 != D3DTOP_SELECTARG2)
+            dual = 2.0f;
+    }
+    cb.more[2] = dual;
     const lwMatrix44* uv = dev->GetMatTex(0);
     DWORD ttff = dev->GetCachedTSS(0, D3DTSS_TEXTURETRANSFORMFLAGS);
     if (uv && ttff && ttff != D3DTTFF_DISABLE && ttff != 0xffffffff)
@@ -801,6 +900,10 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     const int additive = (destblend == D3DBLEND_ONE || destblend == D3DBLEND_INVSRCCOLOR ||
         destblend == D3DBLEND_SRCCOLOR);
 
+    DWORD alpha = dev->GetCachedRS(D3DRS_ALPHABLENDENABLE);
+    if (alpha == 0xffffffff)
+        alpha = 0;
+
     DWORD zenable = dev->GetCachedRS(D3DRS_ZENABLE);
     DWORD zwrite = dev->GetCachedRS(D3DRS_ZWRITEENABLE);
     ID3D11DepthStencilState* depth = s_mesh.depth_on;
@@ -808,13 +911,21 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
         depth = s_mesh.depth_off;
     else if (s_mesh.outline || zwrite == 0 || additive)
         depth = s_mesh.depth_read;
+    else if (alpha && !info.has_nrm && zwrite != TRUE)
+        depth = s_mesh.depth_read;
 
-    DWORD alpha = dev->GetCachedRS(D3DRS_ALPHABLENDENABLE);
-    if (alpha == 0xffffffff)
-        alpha = 0;
     ID3D11BlendState* blend = s_mesh.blend_opaque;
     if (alpha)
         blend = BlendFor(srcblend, destblend);
+
+    if (info.has_blend)
+    {
+        const lwMatrix44* w = dev->GetMatWorld();
+        lwD3D11Gap(LW_D3D11_INVENTORY, "mesh-skin-draw",
+            "fvf=0x%08X bones=%u skin=%d world=(%.2f,%.2f,%.2f)",
+            (unsigned)fvf, s_mesh.bone_count, (skin && s_mesh.bone_count > 0) ? 1 : 0,
+            w ? w->_41 : 0.f, w ? w->_42 : 0.f, w ? w->_43 : 0.f);
+    }
 
     s_mesh.context->VSSetShader(skin ? s_mesh.vs_skin : s_mesh.vs_rigid, 0, 0);
     s_mesh.context->PSSetShader(s_mesh.ps, 0, 0);
@@ -827,8 +938,12 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     if (tex1 && tex1->GetSRV())
         srv1 = tex1->GetSRV();
     s_mesh.context->PSSetShaderResources(1, 1, &srv1);
-    s_mesh.context->PSSetSamplers(0, 1, &s_mesh.samp);
-    s_mesh.context->PSSetSamplers(1, 1, &s_mesh.samp);
+    ID3D11SamplerState* samp = s_mesh.samp;
+    DWORD addr = dev->GetCachedSS(0, D3DSAMP_ADDRESSU);
+    if (addr == D3DTADDRESS_CLAMP && s_mesh.samp_clamp)
+        samp = s_mesh.samp_clamp;
+    s_mesh.context->PSSetSamplers(0, 1, &samp);
+    s_mesh.context->PSSetSamplers(1, 1, &samp);
     s_mesh.context->RSSetState(rast);
     s_mesh.context->OMSetDepthStencilState(depth, 0);
     float bf[4] = { 0, 0, 0, 0 };

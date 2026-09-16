@@ -182,6 +182,174 @@ static void ApplyColorKey(BYTE* bgra, UINT w, UINT h, D3DCOLOR colorkey)
     }
 }
 
+static void ForceOpaque(BYTE* bgra, UINT w, UINT h)
+{
+    DWORD* p = (DWORD*)bgra;
+    const UINT n = w * h;
+    for (UINT i = 0; i < n; ++i)
+        p[i] |= 0xFF000000u;
+}
+
+// True-alpha sources (TGA/32-bit) sometimes decode with A=0 for every texel.
+// Only fill alpha when the whole image is empty; mixed alpha is real.
+static void ForceOpaqueIfNoAlpha(BYTE* bgra, UINT w, UINT h)
+{
+    DWORD* p = (DWORD*)bgra;
+    const UINT n = w * h;
+    for (UINT i = 0; i < n; ++i)
+    {
+        if (p[i] & 0xFF000000u)
+            return;
+    }
+    ForceOpaque(bgra, w, h);
+}
+
+static UINT ReadU16(const BYTE* p)
+{
+    return (UINT)p[0] | ((UINT)p[1] << 8);
+}
+
+static UINT ReadU32(const BYTE* p)
+{
+    return (UINT)p[0] | ((UINT)p[1] << 8) | ((UINT)p[2] << 16) | ((UINT)p[3] << 24);
+}
+
+static INT ReadI32(const BYTE* p)
+{
+    return (INT)ReadU32(p);
+}
+
+// Paletted Ami faces (8-bit BMP, biClrUsed=255) do not round-trip through
+// GDI+ the same way D3DX did: palette peFlags is treated as alpha, so
+// alphatest punches out eyes/mouth and leaves a peach blob. Decode BMPs
+// ourselves and force opaque before colorkey.
+static LW_RESULT LoadBmp(
+    ID3D11Device* device,
+    const BYTE* data,
+    UINT data_size,
+    D3DCOLOR colorkey,
+    D3DXIMAGE_INFO* src_info,
+    IDirect3DTextureX** out_tex)
+{
+    if (data_size < 54 || data[0] != 'B' || data[1] != 'M')
+        return LW_RET_FAILED;
+
+    const UINT off_bits = ReadU32(data + 10);
+    const UINT hdr_size = ReadU32(data + 14);
+    if (hdr_size < 12 || off_bits >= data_size || 14 + hdr_size > data_size)
+        return LW_RET_FAILED;
+
+    INT width = 0;
+    INT height_signed = 0;
+    UINT bpp = 0;
+    UINT compression = 0;
+    UINT clr_used = 0;
+    UINT pal_entry = 4;
+    if (hdr_size == 12)
+    {
+        width = (INT)ReadU16(data + 18);
+        height_signed = (INT)ReadU16(data + 20);
+        bpp = ReadU16(data + 24);
+        pal_entry = 3;
+    }
+    else
+    {
+        width = ReadI32(data + 18);
+        height_signed = ReadI32(data + 22);
+        bpp = ReadU16(data + 28);
+        compression = ReadU32(data + 30);
+        clr_used = ReadU32(data + 46);
+    }
+    if (width <= 0 || height_signed == 0)
+        return LW_RET_FAILED;
+    if (compression != 0)
+        return LW_RET_FAILED;
+    if (bpp != 8 && bpp != 24 && bpp != 32)
+        return LW_RET_FAILED;
+
+    const int top_down = height_signed < 0;
+    const UINT height = (UINT)(top_down ? -height_signed : height_signed);
+    const UINT w = (UINT)width;
+    if (w > 8192 || height > 8192)
+        return LW_RET_FAILED;
+
+    std::vector<BYTE> pixels((size_t)w * height * 4);
+    const BYTE* bits = data + off_bits;
+
+    if (bpp == 8)
+    {
+        UINT ncolors = clr_used ? clr_used : 256;
+        if (ncolors > 256)
+            ncolors = 256;
+        const BYTE* pal = data + 14 + hdr_size;
+        if (pal + ncolors * pal_entry > data + data_size)
+            return LW_RET_FAILED;
+        const UINT src_stride = (w + 3u) & ~3u;
+        if (off_bits + src_stride * height > data_size)
+            return LW_RET_FAILED;
+        for (UINT y = 0; y < height; ++y)
+        {
+            const UINT src_y = top_down ? y : (height - 1 - y);
+            const BYTE* row = bits + src_y * src_stride;
+            BYTE* dst = pixels.data() + y * w * 4;
+            for (UINT x = 0; x < w; ++x)
+            {
+                UINT idx = row[x];
+                if (idx >= ncolors)
+                    idx = 0;
+                const BYTE* c = pal + idx * pal_entry;
+                dst[0] = c[0];
+                dst[1] = pal_entry == 3 ? c[1] : c[1];
+                dst[2] = pal_entry == 3 ? c[2] : c[2];
+                dst[3] = 255;
+                dst += 4;
+            }
+        }
+    }
+    else
+    {
+        const UINT src_bpp = bpp / 8;
+        const UINT src_stride = (w * src_bpp + 3u) & ~3u;
+        if (off_bits + src_stride * height > data_size)
+            return LW_RET_FAILED;
+        for (UINT y = 0; y < height; ++y)
+        {
+            const UINT src_y = top_down ? y : (height - 1 - y);
+            const BYTE* row = bits + src_y * src_stride;
+            BYTE* dst = pixels.data() + y * w * 4;
+            for (UINT x = 0; x < w; ++x)
+            {
+                dst[0] = row[0];
+                dst[1] = row[1];
+                dst[2] = row[2];
+                dst[3] = (src_bpp == 4) ? row[3] : 255;
+                row += src_bpp;
+                dst += 4;
+            }
+        }
+        if (src_bpp == 4)
+            ForceOpaqueIfNoAlpha(pixels.data(), w, height);
+        else
+            ForceOpaque(pixels.data(), w, height);
+    }
+
+    ApplyColorKey(pixels.data(), w, height, colorkey);
+
+    if (src_info)
+    {
+        memset(src_info, 0, sizeof(*src_info));
+        src_info->Width = w;
+        src_info->Height = height;
+        src_info->Depth = 1;
+        src_info->MipLevels = 1;
+        src_info->Format = D3DFMT_A8R8G8B8;
+        src_info->ResourceType = D3DRTYPE_TEXTURE;
+        src_info->ImageFileFormat = D3DXIFF_BMP;
+    }
+
+    return CreateFromPixels(device, pixels.data(), w, height, w * 4, DXGI_FORMAT_B8G8R8A8_UNORM, D3DFMT_A8R8G8B8, out_tex);
+}
+
 static int EnsureGdiplus()
 {
     static int s_ok = 0;
@@ -225,20 +393,28 @@ static LW_RESULT LoadGdiplus(
     }
 
     Gdiplus::Bitmap bitmap(stream);
-    stream->Release();
     if (bitmap.GetLastStatus() != Gdiplus::Ok)
+    {
+        stream->Release();
         return LW_RET_FAILED;
+    }
 
     const UINT w = bitmap.GetWidth();
     const UINT h = bitmap.GetHeight();
     if (w == 0 || h == 0)
+    {
+        stream->Release();
         return LW_RET_FAILED;
+    }
 
     Gdiplus::BitmapData bd;
     memset(&bd, 0, sizeof(bd));
     Gdiplus::Rect rc(0, 0, (INT)w, (INT)h);
     if (bitmap.LockBits(&rc, Gdiplus::ImageLockModeRead, PixelFormat32bppARGB, &bd) != Gdiplus::Ok)
+    {
+        stream->Release();
         return LW_RET_FAILED;
+    }
 
     std::vector<BYTE> pixels((size_t)w * h * 4);
     const BYTE* src = (const BYTE*)bd.Scan0;
@@ -248,7 +424,14 @@ static LW_RESULT LoadGdiplus(
         memcpy(dst + y * w * 4, src + y * bd.Stride, (size_t)w * 4);
     }
     bitmap.UnlockBits(&bd);
+    stream->Release();
 
+    const BYTE* raw = (const BYTE*)data;
+    const int bmp_or_jpeg = (data_size >= 2 && ((raw[0] == 'B' && raw[1] == 'M') || (raw[0] == 0xFF && raw[1] == 0xD8)));
+    if (bmp_or_jpeg)
+        ForceOpaque(pixels.data(), w, h);
+    else
+        ForceOpaqueIfNoAlpha(pixels.data(), w, h);
     ApplyColorKey(pixels.data(), w, h, colorkey);
 
     if (src_info)
@@ -318,9 +501,15 @@ static LW_RESULT LoadDds(
         d3d9 = D3DFMT_A8R8G8B8;
         bpp = 4;
     }
-    else
+    else if (hdr->ddspf.bit_count == 24)
     {
-        return LW_RET_FAILED;
+        d3d9 = D3DFMT_R8G8B8;
+        bpp = 3;
+    }
+    else if (hdr->ddspf.bit_count == 16)
+    {
+        d3d9 = D3DFMT_A1R5G5B5;
+        bpp = 2;
     }
 
     const BYTE* bits = data + 4 + sizeof(lwDDSHeader);
@@ -352,7 +541,66 @@ static LW_RESULT LoadDds(
         src_info->ImageFileFormat = D3DXIFF_DDS;
     }
 
-    return CreateFromPixels(device, bits, hdr->width, hdr->height, pitch, dxgi, d3d9, out_tex);
+    if (dxgi != DXGI_FORMAT_UNKNOWN)
+        return CreateFromPixels(device, bits, hdr->width, hdr->height, pitch, dxgi, d3d9, out_tex);
+
+    if (bpp != 2 && bpp != 3)
+        return LW_RET_FAILED;
+
+    std::vector<BYTE> rgba((size_t)hdr->width * hdr->height * 4);
+    const UINT rm = hdr->ddspf.bitmask_r;
+    const UINT gm = hdr->ddspf.bitmask_g;
+    const UINT bm = hdr->ddspf.bitmask_b;
+    const UINT am = hdr->ddspf.bitmask_a;
+    for (UINT y = 0; y < hdr->height; ++y)
+    {
+        const BYTE* row = bits + y * pitch;
+        BYTE* out = rgba.data() + (size_t)y * hdr->width * 4;
+        for (UINT x = 0; x < hdr->width; ++x)
+        {
+            BYTE b = 0, g = 0, r = 0, a = 255;
+            if (bpp == 3)
+            {
+                b = row[0];
+                g = row[1];
+                r = row[2];
+                row += 3;
+            }
+            else
+            {
+                const USHORT p = (USHORT)(row[0] | (row[1] << 8));
+                row += 2;
+                if (am == 0x8000 || (rm == 0x7C00 && gm == 0x03E0))
+                {
+                    r = (BYTE)(((p >> 10) & 31) * 255 / 31);
+                    g = (BYTE)(((p >> 5) & 31) * 255 / 31);
+                    b = (BYTE)((p & 31) * 255 / 31);
+                    a = (p & 0x8000) ? 255 : 0;
+                }
+                else if (rm == 0xF800 || gm == 0x07E0)
+                {
+                    r = (BYTE)(((p >> 11) & 31) * 255 / 31);
+                    g = (BYTE)(((p >> 5) & 63) * 255 / 63);
+                    b = (BYTE)((p & 31) * 255 / 31);
+                }
+                else
+                {
+                    r = (BYTE)(((p >> 8) & 0xF) * 17);
+                    g = (BYTE)(((p >> 4) & 0xF) * 17);
+                    b = (BYTE)((p & 0xF) * 17);
+                    a = (BYTE)(((p >> 12) & 0xF) * 17);
+                }
+            }
+            out[0] = b;
+            out[1] = g;
+            out[2] = r;
+            out[3] = a;
+            out += 4;
+        }
+    }
+    ForceOpaqueIfNoAlpha(rgba.data(), hdr->width, hdr->height);
+    return CreateFromPixels(device, rgba.data(), hdr->width, hdr->height, hdr->width * 4,
+        DXGI_FORMAT_B8G8R8A8_UNORM, D3DFMT_A8R8G8B8, out_tex);
 }
 
 #pragma pack(push, 1)
@@ -472,6 +720,7 @@ static LW_RESULT LoadTga(
         }
     }
 
+    ForceOpaqueIfNoAlpha(pixels.data(), w, h);
     ApplyColorKey(pixels.data(), w, h, colorkey);
 
     if (src_info)
@@ -507,6 +756,8 @@ LW_RESULT lwD3D11CreateTextureFromMemory(
         if (LoadDds(device, b, data_size, src_info, out_tex) == LW_RET_OK)
             return LW_RET_OK;
     }
+    if (LoadBmp(device, b, data_size, colorkey, src_info, out_tex) == LW_RET_OK)
+        return LW_RET_OK;
     if (LoadGdiplus(device, data, data_size, colorkey, src_info, out_tex) == LW_RET_OK)
         return LW_RET_OK;
     if (LoadTga(device, b, data_size, colorkey, src_info, out_tex) == LW_RET_OK)

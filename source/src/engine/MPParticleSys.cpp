@@ -11,6 +11,7 @@
 
 #include "mpfont.h"
 #include "MPRender.h"
+#include "lwRenderBackend.h"
 
 /************************************************************************/
 /*                                                                      */

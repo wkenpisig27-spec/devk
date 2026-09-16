@@ -22,6 +22,7 @@ CMPEffectFile::CMPEffectFile()
 	m_pDev = NULL;
 	_vecTechniques.clear();
 	_iTechNum = 0;
+	_iCurTech = 0;
 	_dwVShader = 0;
 }
 #ifdef USE_RENDER
@@ -34,6 +35,7 @@ CMPEffectFile::CMPEffectFile(IDirect3DDeviceX* pDev)
     m_pEffect   = NULL;
 	_vecTechniques.clear();
 	_iTechNum = 0;
+	_iCurTech = 0;
 	_dwVShader = 0;
 
 }
@@ -199,5 +201,45 @@ IDirect3DDeviceX*	CMPEffectFile::GetDev()
 #endif
 {
 	return m_pDev;
+}
+
+void CMPEffectFile::ApplySoftPass()
+{
+	if (!m_pDev)
+		return;
+
+	const int tech = _iCurTech;
+	const int zenable = (tech == 5 || tech == 6) ? FALSE : TRUE;
+	const int zwrite = (tech == 1) ? TRUE : FALSE;
+	const int alphablend = (tech == 1) ? FALSE : TRUE;
+	const int lighting = FALSE;
+	const int cull = (tech == 5 || tech == 6) ? D3DCULL_CCW : D3DCULL_NONE;
+	const int clamp_uv = (tech == 2 || tech == 3 || tech == 5) ? 1 : 0;
+	const int tfactor_arg = (tech == 3) ? 1 : 0;
+
+	m_pDev->SetRenderState(D3DRS_ZENABLE, zenable);
+	m_pDev->SetRenderState(D3DRS_ZWRITEENABLE, zwrite);
+	m_pDev->SetRenderState(D3DRS_LIGHTING, lighting);
+	m_pDev->SetRenderState(D3DRS_FOGENABLE, FALSE);
+	m_pDev->SetRenderState(D3DRS_CULLMODE, cull);
+	m_pDev->SetRenderState(D3DRS_ALPHATESTENABLE, tech == 4 ? TRUE : FALSE);
+	m_pDev->SetRenderState(D3DRS_ALPHABLENDENABLE, alphablend);
+	if (tech == 5 || tech == 6)
+	{
+		m_pDev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		m_pDev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	}
+
+	m_pDev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	m_pDev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	m_pDev->SetTextureStageState(0, D3DTSS_COLORARG2, tfactor_arg ? D3DTA_TFACTOR : D3DTA_DIFFUSE);
+	m_pDev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+	m_pDev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+	m_pDev->SetTextureStageState(0, D3DTSS_ALPHAARG2, tfactor_arg ? D3DTA_TFACTOR : D3DTA_DIFFUSE);
+	m_pDev->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+	m_pDev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+
+	m_pDev->SetSamplerState(0, D3DSAMP_ADDRESSU, clamp_uv ? D3DTADDRESS_CLAMP : D3DTADDRESS_WRAP);
+	m_pDev->SetSamplerState(0, D3DSAMP_ADDRESSV, clamp_uv ? D3DTADDRESS_CLAMP : D3DTADDRESS_WRAP);
 }
 

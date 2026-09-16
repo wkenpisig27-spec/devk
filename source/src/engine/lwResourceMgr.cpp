@@ -24,6 +24,8 @@
 #include "lwFileEncode.h"
 #include "GlobalInc.h"
 #include "lwThreadPool.h"
+#include "lwD3D11Gaps.h"
+#include "lwRenderBackend.h"
 
 using namespace std;
 
@@ -811,7 +813,13 @@ __load_it:
         }
 		else
         {
-            if(FAILED(D3DXCreateTextureFromFileEx(dev_obj->GetDevice(),
+            IDirect3DDeviceX* d3d9_fileex = dev_obj->GetDevice();
+            if (!d3d9_fileex) {
+                lwD3D11Gap(LW_D3D11_SKIP, "tex-fromfileex",
+                    "D3DXCreateTextureFromFileEx needs IDirect3DDevice9; skipped on DX11");
+                goto __ret;
+            }
+            if(FAILED(D3DXCreateTextureFromFileEx(d3d9_fileex,
                 this->_file_name, //�ļ���
                 0, //�ļ�����������Ϊ�Զ�
                 0, //�ļ��ߣ�������Ϊ�Զ�
@@ -907,6 +915,8 @@ __addr_ret_ok:
 
 __ret:
     _state |= RES_STATE_LOADTEST;
+    if (LW_FAILED(ret) && lwIsDx11Active())
+        lwD3D11Gap(LW_D3D11_GAP, "tex-load", "LoadVideoMemory failed: %s", _file_name);
     /*if(LW_FAILED(ret))
     {
         lwMessageBox("load texture file error with: (%d) %s", ret, this->_file_name);
@@ -4230,6 +4240,11 @@ IDirect3DTextureX* lwResourceMgr::_createMonochromaticTexture(
 	{
 		IDirect3DTextureX* texture = 0;
 		IDirect3DDeviceX* device = _dev_obj->GetDevice();
+		if (!device) {
+			lwD3D11Gap(LW_D3D11_SKIP, "mono-tex-create",
+				"color-filter CreateTexture is D3D9; skipped on DX11");
+			return 0;
+		}
 
 		HRESULT hr = device->CreateTexture(
 			width, height,
@@ -4271,6 +4286,11 @@ IDirect3DTextureX* lwResourceMgr::_createMonochromaticTexture(
 	{
 		IDirect3DTextureX* texture = 0;
 		IDirect3DDeviceX* device = _dev_obj->GetDevice();
+		if (!device) {
+			lwD3D11Gap(LW_D3D11_SKIP, "mono-tex-fromfile",
+				"color-filter D3DXCreateTextureFromFile is D3D9; skipped on DX11");
+			return 0;
+		}
 
 		HRESULT hr = D3DXCreateTextureFromFile(
 			device,

@@ -8,6 +8,7 @@
 #include "mpmodeleff.h"
 #include "MPRender.h"
 #include "lwEfxTrack.h"
+#include "lwRenderBackend.h"
 
 void CEffectCortrol::FillModelUV(CEffectModel*	pCModel)
 {
@@ -29,6 +30,32 @@ void CEffectCortrol::FillDefaultUV(CEffectModel*	pCModel,TEXCOORD& coord)
 	{
 		pCModel->GetDev()->SetVertexShaderConstantF(9 + i, coord[i], 1);
 	}
+}
+
+void CEffectCortrol::FillModelUVSoft(CEffectModel* pCModel)
+{
+	SEFFECT_VERTEX *pVertex;
+	pCModel->Lock((BYTE**)&pVertex);
+	if (!pVertex)
+		return;
+	for(WORD i = 0; i < pCModel->GetVerCount(); ++i)
+	{
+		pVertex[i].m_SUV = *m_vecCurCoord[i];
+	}
+	pCModel->Unlock();
+}
+
+void CEffectCortrol::FillTextureUVSoft(CEffectModel* pCModel)
+{
+	SEFFECT_VERTEX *pVertex;
+	pCModel->Lock((BYTE**)&pVertex);
+	if (!pVertex)
+		return;
+	for(WORD i = 0; i < pCModel->GetVerCount(); ++i)
+	{
+		pVertex[i].m_SUV = *m_lpCurTex[i];
+	}
+	pCModel->Unlock();
 }
 
 bool	CEffPath::LoadPathFromFile(char* pszName)
@@ -175,21 +202,21 @@ CMPModelEff::~CMPModelEff(void)
 	ReleaseAll();
 }
 
-//!保存效果到文件
+//!?????????????
 bool	CMPModelEff::SaveToFile(char* pszFileName)	
 {
 	FILE* t_pFile;
 	t_pFile = fopen(pszFileName, "wb");
 	if(!t_pFile)
 	{
-		LG("error","msg %s,只读文件，打开失败",pszFileName);
+		LG("error","msg %s,?????????????",pszFileName);
 		return false;
 	}
-	//!版本
+	//!???
 	DWORD t_dwVersion = 7;
 	fwrite(&t_dwVersion,sizeof(t_dwVersion),1,t_pFile);
 
-	//!效果状态索引
+	//!??????????
 	int t_temp;
 	t_temp = m_iIdxTech;
 	fwrite(&t_temp,sizeof(int),1,t_pFile);
@@ -208,7 +235,7 @@ bool	CMPModelEff::SaveToFile(char* pszFileName)
 	fwrite(&m_SVerRota, sizeof(D3DXVECTOR3),1,t_pFile);
 	fwrite(&m_fRotaVel, sizeof(float),1,t_pFile);
 
-	//!效果数量
+	//!????????
 	t_temp = m_iEffNum;
 	fwrite(&t_temp,sizeof(int),1,t_pFile);
 
@@ -222,14 +249,14 @@ bool	CMPModelEff::SaveToFile(char* pszFileName)
 	fclose(t_pFile);
 	return true;
 }
-//!装入效果从文件
+//!????????????
 bool	CMPModelEff::LoadFromFile(char* pszFileName)
 {
 	return true;
 }
 
 /************************************************************************/
-/*!	释放全部资源*/
+/*!	?????????*/
 /************************************************************************/
 void CMPModelEff::ReleaseAll()
 {
@@ -298,7 +325,7 @@ void	CMPModelEff::ClearEffect()
 }
 
 /************************************************************************/
-/*!重设*/
+/*!????*/
 /************************************************************************/
 void CMPModelEff::Reset()
 {
@@ -318,11 +345,11 @@ void CMPModelEff::Reset()
 	m_fCurRotat = 0;
 }
 ///************************************************************************/
-///*/！初始化*/
+///*/???????*/
 ///************************************************************************/
 
 /************************************************************************/
-/*/！更新桢*/
+/*/????????*/
 /************************************************************************/
 
 void CMPModelEff::FrameMoveAccel(float fDail)
@@ -338,16 +365,14 @@ void CMPModelEff::Begin()
 
 }
 void CMPModelEff::End()  {
-	//this been added when we fixed circle shadow not sure 100% of it but so far it works
-	//@moth
-	m_pCEffect->m_pDev->SetVertexShader(nullptr);
-	m_pCEffect->m_pDev->SetFVF(EFFECT_VER_FVF);
-	//edit end 
+	if (!m_pCEffectFile || !m_pCEffectFile->m_pDev)
+		return;
+	m_pCEffectFile->m_pDev->SetVertexShader(nullptr);
+	m_pCEffectFile->m_pDev->SetFVF(EFFECT_VER_FVF);
 	m_pCEffectFile->End();
-	m_pCEffect->m_pDev->SetRenderState(D3DRS_ZENABLE, TRUE);
-
-	m_pCEffect->m_pDev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	m_pCEffect->m_pDev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	m_pCEffectFile->m_pDev->SetRenderState(D3DRS_ZENABLE, TRUE);
+	m_pCEffectFile->m_pDev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	m_pCEffectFile->m_pDev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 }
 
 void CMPModelEff::RenderAccel(float &fTime)
@@ -512,24 +537,24 @@ void CMPModelEff::FrameMove(DWORD	dwDailTime)
 		int   t_iNextFrame;
 
 		m_pCurCortrol->m_fCurTime += *m_pfDailTime;
-		//!得出当前播放的是哪一帧
+		//!??????????????????
 		if(m_pCurCortrol->m_fCurTime >= m_pCEffect->getFrameTime(m_pCurCortrol->m_wCurFrame))
 		{
 			m_pCurCortrol->m_wCurFrame++;
 			if(m_pCurCortrol->m_wCurFrame >= m_pCEffect->getFrameCount())
 			{
-				m_pCurCortrol->Stop();//重设到第一帧
-				if(m_bLoop)//！循环播放
+				m_pCurCortrol->Stop();//????b????
+				if(m_bLoop)//?????????
 				{
-					if(!IsPlay())//!如果所有的效果都停止，重新播放全部效果
+					if(!IsPlay())//!?????????????????????????????????
 					{
 						Play2(0);
 					}
 					continue;
 				}
-				else//!按次数播放
+				else//!??????????
 				{
-					if(!IsPlay())//!如果所有的效果都停止，停止
+					if(!IsPlay())//!?????????????????????
 					{
 						Stop();
 						return;
@@ -539,20 +564,20 @@ void CMPModelEff::FrameMove(DWORD	dwDailTime)
 
 			m_pCurCortrol->m_fCurTime = 0.0f;
 		}
-		//!得到下一帧
+		//!???????
 		if( m_pCurCortrol->m_wCurFrame == (/*_wFrameCount*/m_pCEffect->getFrameCount() - 1) )
 			t_iNextFrame = 0;
 		else
 			t_iNextFrame = m_pCurCortrol->m_wCurFrame+1;
 
-		//!得到插值系数
+		//!?????????
 		m_fLerp = m_pCurCortrol->m_fCurTime / m_pCEffect->getFrameTime(m_pCurCortrol->m_wCurFrame);
 
 		m_pCEffect->m_ilast = m_pCurCortrol->m_wCurFrame;
 		m_pCEffect->m_inext = t_iNextFrame;
 		m_pCEffect->m_flerp = m_fLerp;
 
-		//!得到当前大小
+		//!??????????
 		m_pCEffect->GetLerpSize(&m_pCurCortrol->m_SCurSize,m_pCurCortrol->m_wCurFrame,t_iNextFrame,m_fLerp);
 
 		if(!m_pCEffect->IsBillBoard())
@@ -560,32 +585,32 @@ void CMPModelEff::FrameMove(DWORD	dwDailTime)
 			//if(!m_pCEffect->IsRotaLoop())
 				m_pCEffect->GetLerpAngle(&m_pCurCortrol->m_SCurAngle,m_pCurCortrol->m_wCurFrame,t_iNextFrame, m_fLerp);
 		}
-		//!得到当前位置
+		//!??????????
 		m_pCEffect->GetLerpPos(&m_pCurCortrol->m_SCurPos,m_pCurCortrol->m_wCurFrame, t_iNextFrame, m_fLerp);
-		//!得到当前颜色
+		//!?????????
 		m_pCEffect->GetLerpColor(&m_pCurCortrol->m_dwCurColor,m_pCurCortrol->m_wCurFrame,t_iNextFrame,m_fLerp);
 
 		if(!m_pCEffect->IsItem())
 		{
 			if(m_pCEffect->getType() == EFFECT_MODELUV)
 			{
-				//!得到当前的纹理坐标
+				//!????????????????
 				m_pCEffect->GetLerpCoord(m_pCurCortrol->m_vecCurCoord, m_pCurCortrol->m_wCurCoordIndex,m_pCurCortrol->m_fCurCoordTime,*m_pfDailTime);
 			}else
 			{
 				if(m_pCEffect->getType() == EFFECT_MODELTEXTURE)
 				{
-					//!得到当前纹理
+					//!??????????
 					m_pCEffect->GetLerpTexture(m_pCurCortrol->m_lpCurTex, m_pCurCortrol->m_wCurTexIndex,m_pCurCortrol->m_fCurTexTime,*m_pfDailTime);
 				}else if(m_pCEffect->getType() == EFFECT_FRAMETEX)
 				{
-					//!得到当前纹理
+					//!??????????
 					m_pCEffect->GetLerpFrame(m_pCurCortrol->m_wCurTexIndex,m_pCurCortrol->m_fCurTexTime,*m_pfDailTime);
 				}
 			}
 		}else if(m_pCEffect->getType() == EFFECT_FRAMETEX)
 		{
-			//!得到当前纹理
+			//!??????????
 			m_pCEffect->GetLerpFrame(m_pCurCortrol->m_wCurTexIndex,m_pCurCortrol->m_fCurTexTime,*m_pfDailTime);
 		}
 	}
@@ -595,22 +620,17 @@ void CMPModelEff::FrameMove(DWORD	dwDailTime)
 	}*/
 }
 /************************************************************************/
-/*/！渲染*/
+/*/?????*/
 /************************************************************************/
 void CMPModelEff::Render()
 {
 	if (!m_bPlay)
 		return;
 
-	if(!m_bUseSoft)
-	{
-		//Begin();
-		//RenderAccel();
-		//End();
-		RenderVS();
-	}
-	else
+	if (lwIsDx11Active() || m_bUseSoft)
 		RenderSoft();
+	else
+		RenderVS();
 }
 void CMPModelEff::RenderVS()
 {
@@ -895,18 +915,24 @@ void CMPModelEff::RenderSoft()
 {
 	if (!m_bPlay)
 		return;
+	if (!m_pCEffectFile || !m_pCEffectFile->m_pDev)
+		return;
 
 	m_pCEffectFile->SetTechnique(m_iIdxTech);
 	m_pCEffectFile->Begin(D3DXFX_DONOTSAVESTATE);
 	m_pCEffectFile->Pass(0);
-	if(!m_bUseZ)
+	if (lwIsDx11Active())
 	{
-		m_pCEffect->m_pDev->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+		m_pCEffectFile->m_pDev->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+	}
+	else if(!m_bUseZ)
+	{
+		m_pCEffectFile->m_pDev->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 	}
 	else
 	{
-		m_pCEffect->m_pDev->SetRenderState(D3DRS_ZENABLE, TRUE);
-		m_pCEffect->m_pDev->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+		m_pCEffectFile->m_pDev->SetRenderState(D3DRS_ZENABLE, TRUE);
+		m_pCEffectFile->m_pDev->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 	}
 
 	m_pCEffectFile->m_pDev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);  
@@ -940,10 +966,13 @@ void CMPModelEff::RenderSoft()
 
 		m_pCEffect  = m_vecEffect[n];
 
-//#ifdef	MULTITHREAD_LOADING_TEXTURE
-		if(!m_pCEffect->m_CTextruelist.m_pTex->IsLoadingOK())
-			return;
-//#endif
+		if(m_pCEffect->getType() == EFFECT_FRAMETEX)
+		{
+			if(!m_pCEffect->m_CTexFrame.m_lpCurTex || !m_pCEffect->m_CTexFrame.m_lpCurTex->IsLoadingOK())
+				continue;
+		}
+		else if(!m_pCEffect->m_CTextruelist.m_pTex || !m_pCEffect->m_CTextruelist.m_pTex->IsLoadingOK())
+			continue;
 
 		m_pCurCortrol->GetTransformMatrix(&m_SMatResult);
 		D3DXMatrixMultiply(&m_SMatResult, &m_SMatResult, &t_STemp);		
@@ -1083,8 +1112,8 @@ void CMPModelEff::RenderSoft()
 
 	}
 	m_pCEffectFile->End();
-	m_pCEffect->m_pDev->SetRenderState(D3DRS_ZENABLE, TRUE);
-	m_pCEffect->m_pDev->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+	m_pCEffectFile->m_pDev->SetRenderState(D3DRS_ZENABLE, TRUE);
+	m_pCEffectFile->m_pDev->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 	//m_pCEffect->m_pDev->SetRenderState(D3DRS_ZENABLE, TRUE);
 
 	//m_pCEffect->m_pDev->SetRenderState( D3DRS_SRCBLEND,D3DBLEND_SRCALPHA );
@@ -1099,12 +1128,12 @@ void	CMPModelEff::ShowCurFrame(int iCurSubEff, int iCurFrame)
 		//m_pCurCortrol = &m_vecCortrol[iCurSubEff];
 		m_pCEffect  = m_vecEffect[iCurSubEff];
 
-	//!得到当前大小
+	//!??????????
 	D3DXVECTOR3 t_sVerSize = m_pCEffect->getFrameSize(iCurFrame);
 
 	D3DXVECTOR3 t_sVerAngle = m_pCEffect->getFrameAngle(iCurFrame);
 
-	//!得到当前位置
+	//!??????????
 	D3DXVECTOR3 t_sVerPos = m_pCEffect->getFramePos(iCurFrame);
 
 	D3DXMATRIX t_SMat, t_SMatRot;
@@ -1122,10 +1151,10 @@ void	CMPModelEff::ShowCurFrame(int iCurSubEff, int iCurFrame)
 	D3DXMatrixMultiply(&m_SMatResult, &m_SMatResult, &t_SMat);
 
 
-	//!得到当前颜色
+	//!?????????
 	D3DXCOLOR   t_sColor = m_pCEffect->getFrameColor(iCurFrame);
 
-	//!得到当前的纹理坐标
+	//!????????????????
 	//TEXCOORD	t_SCoord;
 	//m_pCEffect->getFrameCoord(t_SCoord,0);
 	//		
@@ -1138,7 +1167,7 @@ void	CMPModelEff::ShowCurFrame(int iCurSubEff, int iCurFrame)
 	//		pVertex[i].m_dwDiffuse = 0xffffffff;
 	//	}
 	//	m_pCEffect->m_pCModel->GetVertexBuffer()->Unlock();
-	//!得到当前纹理
+	//!??????????
 		m_pCEffect->SetTexture();
 #ifdef USE_RENDER
 		m_pCEffect->m_pDev->SetTransformWorld(&m_SMatResult);
@@ -1191,7 +1220,7 @@ void	CMPModelEff::ShowTempFrame(int iCurSubEff,
 	//		pVertex[i].m_dwDiffuse = 0xffffffff;//(DWORD)pColor;
 	//	}
 	//	m_pCEffect->m_pCModel->GetVertexBuffer()->Unlock();
-	//!得到当前纹理
+	//!??????????
 	m_pCEffect->SetTexture();
 #ifdef USE_RENDER
 	m_pCEffect->m_pDev->SetTransformWorld(&m_SMatResult);
@@ -1231,7 +1260,7 @@ CMPStrip::CMPStrip()
 	_vecCtrl.resize(m_iMaxLen/2);
 	_pTex = NULL;
 	_pCEffFile = NULL;
-	_strTexName = "无名";
+	_strTexName = "????";
 	_pfDailTime=  NULL;
 	_fCurTime = 0;
 	_bPlay = false;

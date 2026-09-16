@@ -319,7 +319,10 @@ void MPGameApp::_RenderAxis()
 #if(defined USE_MANAGED_RES)
     g_Render.SetTransformWorld(&mat);
 #else
-	g_Render.GetDevice()->SetTransform( D3DTS_WORLD , &mat);
+	if (IDirect3DDeviceX* d3d9 = g_Render.GetDevice())
+		d3d9->SetTransform( D3DTS_WORLD , &mat);
+	else
+		g_Render.SetTransformWorld(&mat);
 #endif
 
 
@@ -347,7 +350,7 @@ void MPGameApp::_RenderAxis()
 	g_Render.SetTexture(0, 0);
 	g_Render.SetVertexShader(NULL);
 	g_Render.SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
-	g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_LINELIST, 3, &pVertices , sizeof(AXIS_VERTEX));
+	g_Render.DrawPrimitiveUP(D3DPT_LINELIST, 3, &pVertices , sizeof(AXIS_VERTEX));
 	// _pD3DDevice->SetRenderState( D3DRS_LIGHTING, TRUE );
 }
 

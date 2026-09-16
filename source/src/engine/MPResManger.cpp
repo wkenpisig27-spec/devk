@@ -456,12 +456,8 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX
 	LoadTotalData();
 
 	_pMatView = pmat;
-	D3DXMatrixInverse( &_MatBBoard, NULL, _pMatView );
-	_MatBBoard._41 = 0.0f;
-    _MatBBoard._42 = 0.0f;
-    _MatBBoard._43 = 0.0f;
-
 	_pMatViewProj = pMatviewproj;
+	UpdateMatrix();
 
 	for(int n = 0; n < _iEffectNum; n++)
 	{
@@ -2440,14 +2436,24 @@ BOOL CMPResManger::OnResetDevice()
 		} 
 	}
 
-	IDirect3DSurfaceX* pBackBuffer;
 #ifdef USE_RENDER
-	m_pDev->GetDevice()->GetBackBuffer( 0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer );
+	if (lwIsDx11Active() || !m_pDev->GetDevice()) {
+		lwD3D11Gap(LW_D3D11_SKIP, "resetdevice-getbackbuffer",
+			"OnResetDevice GetBackBuffer is D3D9; keep the HWND-sized desc from InitRes");
+	} else {
+		IDirect3DSurfaceX* pBackBuffer = 0;
+		m_pDev->GetDevice()->GetBackBuffer( 0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer );
+		if (pBackBuffer) {
+			pBackBuffer->GetDesc( &m_d3dBackBuffer );
+			pBackBuffer->Release();
+		}
+	}
 #else
+	IDirect3DSurfaceX* pBackBuffer;
 	m_pDev->GetBackBuffer( 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer );
-#endif
 	pBackBuffer->GetDesc( &m_d3dBackBuffer );
 	pBackBuffer->Release();
+#endif
 
 	D3DXMatrixOrthoLH(&_Mat2dViewProj, float(m_d3dBackBuffer.Width), float(m_d3dBackBuffer.Height), 0.0f, 1.0f);
 
@@ -2536,6 +2542,19 @@ void CMPResManger::RestoreEffect()
 #endif
 }
 //-----------------------------------------------------------------------------
+void CMPResManger::UpdateMatrix()
+{
+	if (_pMatView)
+	{
+		D3DXMatrixInverse(&_MatBBoard, NULL, _pMatView);
+		_MatBBoard._41 = 0.0f;
+		_MatBBoard._42 = 0.0f;
+		_MatBBoard._43 = 0.0f;
+	}
+	if (_pMatViewProj)
+		D3DXMatrixTranspose(&_MatViewProjPose, _pMatViewProj);
+}
+
 void CMPResManger::FrameMove(DWORD dwTime)
 {
 	m_iCurFrame = 1; // Mark that FrameMove was called (for Render sync)
@@ -2553,12 +2572,7 @@ void CMPResManger::FrameMove(DWORD dwTime)
 	_fCurTime += _fDailTime;
 	_fSaveTime = _fCurTime;
 
-	D3DXMatrixInverse( &_MatBBoard, NULL, _pMatView );
-	_MatBBoard._41 = 0.0f;
-	_MatBBoard._42 = 0.0f;
-	_MatBBoard._43 = 0.0f;
-
-	D3DXMatrixTranspose(&_MatViewProjPose, _pMatViewProj);
+	UpdateMatrix();
 	//Transpose(_MatViewProjPose,*_pMatViewProj);
 
 	DynamicReleaseMeshes(GetTickCount());

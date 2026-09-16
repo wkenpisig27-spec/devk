@@ -17,6 +17,7 @@
 #include "lwxRenderCtrlVS.h"
 #include "lwRenderBackend.h"
 #include "lwD3D11Mesh.h"
+#include "lwD3D11Gaps.h"
 
 using namespace std;
 
@@ -879,7 +880,15 @@ LW_RESULT lwPhysique::Render()
 
 
                 if (LW_FAILED(p->Render()))
+                {
+                    if (lwIsDx11Active())
+                    {
+                        lwD3D11Gap(LW_D3D11_GAP, "physique-render-fail",
+                            "part %u failed; drawing remaining parts", i);
+                        continue;
+                    }
                     goto __ret;
+                }
 
                 if (device && mIndexColourFilterList.find(i) != mIndexColourFilterList.end())
                 {

@@ -180,15 +180,7 @@ public:
 
 	void					FrameMove(DWORD dwTime);
 	void					Render();
-	void					UpdateMatrix()
-	{
-		D3DXMatrixInverse( &_MatBBoard, NULL, _pMatView );
-		_MatBBoard._41 = 0.0f;
-		_MatBBoard._42 = 0.0f;
-		_MatBBoard._43 = 0.0f;
-
-		D3DXMatrixTranspose(&_MatViewProjPose, _pMatViewProj);
-	}
+	void					UpdateMatrix();
 	float*					GetDailTime()		{ return &_fDailTime;}
 	D3DXMATRIX*				GetBBoardMat()		{ return &_MatBBoard;}
 	D3DXMATRIX*				GetViewProjMat()	{ return &_MatViewProjPose;}

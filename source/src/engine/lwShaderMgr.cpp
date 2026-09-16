@@ -5,6 +5,8 @@
 #include "lwSysGraphics.h"
 #include "lwResourceMgr.h"
 #include "lwShaderDeclMgr.h"
+#include "lwRenderBackend.h"
+#include "lwD3D11Gaps.h"
 
 LW_BEGIN
 
@@ -364,6 +366,12 @@ LW_RESULT lwShaderMgr9::RegisterVertexShader(DWORD type, BYTE* data, DWORD size)
     IDirect3DVertexShaderX* handle = 0;
     lwVertexShaderInfo* i = 0;            // << declarado antes de qualquer goto
 
+    if (!dev) {
+        lwD3D11Gap(LW_D3D11_SKIP, "shadermgr-create-vs",
+            "CreateVertexShader is D3D9; ShaderMgr11 is Slice 3");
+        goto __ret;
+    }
+
     if (type >= _vs_size)                 // DWORD � unsigned; "type < 0" nunca � verdadeiro
         goto __ret;
 
@@ -531,6 +539,12 @@ LW_RESULT lwShaderMgr9::RegisterVertexDeclaration(DWORD type, D3DVERTEXELEMENT9*
     int i = 0;
     D3DVERTEXELEMENT9* p = 0;
 
+    if (!dev) {
+        lwD3D11Gap(LW_D3D11_SKIP, "shadermgr-create-decl",
+            "CreateVertexDeclaration is D3D9; ShaderMgr11 is Slice 3");
+        goto __ret;
+    }
+
     // (Com DWORD, "type < 0" nunca � verdadeiro; pode remover se quiser)
     if (type >= _decl_size)
         goto __ret;
@@ -569,6 +583,11 @@ LW_RESULT lwShaderMgr9::LoseDevice()
     LW_RESULT ret = LW_RET_FAILED;
 
     IDirect3DDeviceX* dev = _dev_obj->GetDevice();
+    if (!dev) {
+        lwD3D11Gap(LW_D3D11_SKIP, "shadermgr-lose-device",
+            "D3D11 has no device-lost VS release");
+        return LW_RET_OK;
+    }
 
     lwVertexShaderInfo* s;
 
@@ -589,6 +608,11 @@ LW_RESULT lwShaderMgr9::ResetDevice()
     LW_RESULT ret = LW_RET_FAILED;
 
     IDirect3DDeviceX* dev = _dev_obj->GetDevice();
+    if (!dev) {
+        lwD3D11Gap(LW_D3D11_SKIP, "shadermgr-reset-device",
+            "D3D11 has no device-lost VS recreate");
+        return LW_RET_OK;
+    }
 
     lwVertexShaderInfo* s;
 

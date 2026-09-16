@@ -5,8 +5,78 @@
 #include "lwDeviceObject.h"
 #include "lwRenderBackend.h"
 #include "lwD3D11Mesh.h"
+#include "lwD3D11Gaps.h"
 
 LW_BEGIN
+
+static void Dx11ResetTexTransform(lwIDeviceObject* dev_obj)
+{
+    if (!dev_obj)
+        return;
+    lwMatrix44 tex_id;
+    lwMatrix44Identity(&tex_id);
+    for (DWORD s = 0; s < 2; ++s)
+    {
+        dev_obj->SetTransform((D3DTRANSFORMSTATETYPE)(D3DTS_TEXTURE0 + s), &tex_id);
+        dev_obj->SetTextureStageState(s, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+    }
+}
+
+static void Dx11ResetInheritedTexState(lwIDeviceObject* dev_obj)
+{
+    Dx11ResetTexTransform(dev_obj);
+    if (!dev_obj)
+        return;
+    dev_obj->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+    dev_obj->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+}
+
+static void Dx11ApplyVertexBlend(lwIDeviceObject* dev_obj, lwIRenderCtrlAgent* agent)
+{
+    lwMatrix44* mat_global = agent ? agent->GetGlobalMatrix() : 0;
+    if (mat_global)
+        dev_obj->SetTransformWorld(mat_global);
+
+    Dx11ResetInheritedTexState(dev_obj);
+
+    DWORD bone_num = 0;
+    const lwMatrix44* rtmat = 0;
+    lwIAnimCtrlAgent* bones_agent = agent ? agent->GetAnimCtrlAgent() : 0;
+    if (bones_agent)
+    {
+        DWORD n = bones_agent->GetAnimCtrlObjNum();
+        for (DWORD i = 0; i < n; ++i)
+        {
+            lwIAnimCtrlObj* obj = bones_agent->GetAnimCtrlObj(i);
+            if (!obj)
+                continue;
+            lwAnimCtrlObjTypeInfo info;
+            obj->GetTypeInfo(&info);
+            if (info.type != ANIM_CTRL_TYPE_BONE)
+                continue;
+            lwIAnimCtrlObjBone* bone_ctrl = (lwIAnimCtrlObjBone*)obj;
+            bone_num = bone_ctrl->GetBoneRTTMNum();
+            rtmat = (const lwMatrix44*)bone_ctrl->GetBoneRTMSeq();
+            break;
+        }
+    }
+    if (bone_num && rtmat)
+        lwD3D11MeshSetBonePalette(rtmat, bone_num);
+    else
+        lwD3D11MeshSetBonePalette(0, 0);
+
+    static int logged = 0;
+    if (!logged)
+    {
+        logged = 1;
+        lwD3D11Gap(LW_D3D11_INVENTORY, "char-vertexblend",
+            "world=(%.2f,%.2f,%.2f) bones=%u",
+            mat_global ? mat_global->_41 : 0.f,
+            mat_global ? mat_global->_42 : 0.f,
+            mat_global ? mat_global->_43 : 0.f,
+            bone_num);
+    }
+}
 
 lwIRenderCtrlVS* __RenderCtrlVSProcVSVertexBlend_dx8()
 {
@@ -107,27 +177,7 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_dx8::BeginSet(lwIRenderCtrlAgent* agent)
 
     if (lwIsDx11Active())
     {
-        dev_obj->SetTransformWorld(mat_global);
-        anim_agent = agent->GetAnimCtrlAgent();
-        if (anim_agent)
-        {
-            animobj_num = anim_agent->GetAnimCtrlObjNum();
-            for (DWORD idx = 0; idx < animobj_num; ++idx)
-            {
-                animctrl_obj = anim_agent->GetAnimCtrlObj(idx);
-                if (!animctrl_obj)
-                    continue;
-                animctrl_obj->GetTypeInfo(&type_info);
-                if (type_info.type != ANIM_CTRL_TYPE_BONE)
-                    continue;
-                lwIAnimCtrlObjBone* bone_ctrl = (lwIAnimCtrlObjBone*)animctrl_obj;
-                DWORD bone_num = bone_ctrl->GetBoneRTTMNum();
-                const lwMatrix44* rtmat = (const lwMatrix44*)bone_ctrl->GetBoneRTMSeq();
-                if (bone_num && rtmat)
-                    lwD3D11MeshSetBonePalette(rtmat, bone_num);
-                break;
-            }
-        }
+        Dx11ApplyVertexBlend(dev_obj, agent);
         ret = LW_RET_OK;
         goto __ret;
     }
@@ -356,6 +406,7 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_dx8::BeginSetSubset(DWORD subset, lwIRender
     {
         if (mtl)
             dev_obj->SetMaterial(mtl);
+        Dx11ResetTexTransform(dev_obj);
         lwIAnimCtrlAgent* anim_agent = agent->GetAnimCtrlAgent();
         if (anim_agent)
         {
@@ -538,30 +589,7 @@ LW_RESULT lwxRenderCtrlVSVertexBlend::BeginSet(lwIRenderCtrlAgent* agent)
 
     if (lwIsDx11Active())
     {
-        mat_global = agent->GetGlobalMatrix();
-        if (mat_global)
-            dev_obj->SetTransformWorld(mat_global);
-        lwIAnimCtrlAgent* bones_agent = agent->GetAnimCtrlAgent();
-        if (bones_agent)
-        {
-            DWORD n = bones_agent->GetAnimCtrlObjNum();
-            for (DWORD i = 0; i < n; ++i)
-            {
-                lwIAnimCtrlObj* obj = bones_agent->GetAnimCtrlObj(i);
-                if (!obj)
-                    continue;
-                lwAnimCtrlObjTypeInfo info;
-                obj->GetTypeInfo(&info);
-                if (info.type != ANIM_CTRL_TYPE_BONE)
-                    continue;
-                lwIAnimCtrlObjBone* bone_ctrl = (lwIAnimCtrlObjBone*)obj;
-                DWORD bone_num = bone_ctrl->GetBoneRTTMNum();
-                const lwMatrix44* rtmat = (const lwMatrix44*)bone_ctrl->GetBoneRTMSeq();
-                if (bone_num && rtmat)
-                    lwD3D11MeshSetBonePalette(rtmat, bone_num);
-                break;
-            }
-        }
+        Dx11ApplyVertexBlend(dev_obj, agent);
         ret = LW_RET_OK;
         goto __ret;
     }
@@ -763,6 +791,7 @@ LW_RESULT lwxRenderCtrlVSVertexBlend::BeginSetSubset(DWORD subset, lwIRenderCtrl
         mtl = mtltex_agent->GetMaterial();
         if (mtl)
             dev_obj->SetMaterial(mtl);
+        Dx11ResetTexTransform(dev_obj);
 
         anim_agent = agent->GetAnimCtrlAgent();
         if (anim_agent)
@@ -909,12 +938,18 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_fx::Clone(lwIRenderCtrlVS** obj)
 }
 LW_RESULT lwxRenderCtrlVSVertexBlend_fx::Initialize(lwIRenderCtrlAgent* agent)
 {
+    _const_tab = 0;
+    if (lwIsDx11Active())
+        return LW_RET_OK;
+
     LW_RESULT ret = LW_RET_FAILED;
 
     lwIResourceMgr* res_mgr = agent->GetResourceMgr();
     lwIShaderMgr* shader_mgr = res_mgr->GetShaderMgr();
 
     lwVertexShaderInfo* vs_info = shader_mgr->GetVertexShaderInfo(agent->GetVertexShader());
+    if(!vs_info || !vs_info->data)
+        goto __ret;
     if(FAILED(D3DXGetShaderConstantTable((DWORD*)vs_info->data, &_const_tab)))
         goto __ret;
 
@@ -928,6 +963,11 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_fx::BeginSet(lwIRenderCtrlAgent* agent)
 
     lwIResourceMgr* res_mgr = agent->GetResourceMgr();
     lwIDeviceObject* dev_obj = res_mgr->GetDeviceObject();
+    if (lwIsDx11Active())
+    {
+        Dx11ApplyVertexBlend(dev_obj, agent);
+        return LW_RET_OK;
+    }
     IDirect3DDeviceX* dev = dev_obj->GetDevice();
     lwIMeshAgent* mesh_agent = agent->GetMeshAgent();
     lwIMesh* mesh = mesh_agent->GetMesh();
@@ -1048,6 +1088,17 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_fx::BeginSetSubset(DWORD subset, lwIRenderC
     lwIResourceMgr* res_mgr = agent->GetResourceMgr();
     lwIDeviceObject* dev_obj = res_mgr->GetDeviceObject();
     lwIMtlTexAgent* mtltex_agent = agent->GetMtlTexAgent();
+    if (lwIsDx11Active())
+    {
+        if (mtltex_agent)
+        {
+            lwMaterial* mtl = mtltex_agent->GetMaterial();
+            if (mtl)
+                dev_obj->SetMaterial(mtl);
+        }
+        Dx11ResetTexTransform(dev_obj);
+        return LW_RET_OK;
+    }
     IDirect3DDeviceX* dev = dev_obj->GetDevice();
 
     lwMaterial* mtl = mtltex_agent->GetMaterial();

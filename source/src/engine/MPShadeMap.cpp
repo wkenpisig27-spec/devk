@@ -105,6 +105,8 @@ void	CMPShadeMap::BoundingRes(CMPResManger	*m_CResMagr)
 	_pMatViewProj = m_CResMagr->GetViewProjMat();
 
 	m_bUseSoft = m_CResMagr->m_bUseSoftOrg;
+	if (lwIsDx11Active())
+		m_bUseSoft = TRUE;
 
 #if(defined LW_USE_DX8)
 	DWORD	BOL = 0;
@@ -573,6 +575,12 @@ void CMPShadeMap::RenderSoft() {
 	_pCEffectFile->m_pDev->SetRenderStateForced(D3DRS_BLENDOP, D3DBLENDOP_ADD);
 	_pCEffectFile->m_pDev->SetRenderStateForced(D3DRS_ZWRITEENABLE, FALSE);
 	_pCEffectFile->m_pDev->SetRenderStateForced(D3DRS_CULLMODE, D3DCULL_CCW);
+	_pCEffectFile->m_pDev->SetTextureStageStateForced(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+	if (lwIsDx11Active() && g_Render.GetInterfaceMgr() && g_Render.GetInterfaceMgr()->dev_obj) {
+		lwMatrix44 texid;
+		lwMatrix44Identity(&texid);
+		g_Render.GetInterfaceMgr()->dev_obj->SetTransform(D3DTS_TEXTURE0, &texid);
+	}
 	if (_iIdxTech != 4)
 	{
 		if (!_pCEffectFile->SetTechnique(_iIdxTech))

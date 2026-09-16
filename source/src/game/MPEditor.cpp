@@ -511,7 +511,7 @@ void MPEditor::_RenderSelTile(int nX, int nY) {
 		}
 	}
 
-	g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &v, sizeof(MPSelectTileVertex));
+	g_Render.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &v, sizeof(MPSelectTileVertex));
 }
 
 void MPEditor::SystemReport(DWORD dwTimeParam) {
@@ -1937,7 +1937,7 @@ void MPEditor::_renderTileAttrib(int nX, int nY, int nAttribIndex) {
 		}
 	}
 
-	g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &v, sizeof(MPPropertyTileVertex));
+	g_Render.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &v, sizeof(MPPropertyTileVertex));
 }
 
 void MPEditor::_renderTileIsland(int nX, int nY, int nIslandIndex) {
@@ -1970,7 +1970,7 @@ void MPEditor::_renderTileIsland(int nX, int nY, int nIslandIndex) {
 		}
 	}
 
-	g_Render.GetDevice()->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &v, sizeof(MPPropertyTileVertex));
+	g_Render.DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &v, sizeof(MPPropertyTileVertex));
 }
 
 

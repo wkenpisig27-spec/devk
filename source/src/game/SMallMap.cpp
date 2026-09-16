@@ -1048,28 +1048,33 @@ void CAniWnd::FrameMove(DWORD dwDailTime) {
 }
 
 void CAniWnd::Render() {
-	if (_bUpdate) {
-		IDirect3DSurfaceX* pSaveSuf = NULL;
-		// IDirect3DSurfaceX*	dsface = NULL;
-		IDirect3DSurfaceX* surface = NULL;
+	if (!_bUpdate)
+		return;
 
-		m_pDev->GetRenderTarget(0, &pSaveSuf);
-		// m_pDev->GetDepthStencilSurface(&dsface);
-#ifdef MGR
-		_pCurSuf->GetTex()->GetSurfaceLevel(0, &surface);
-		m_pDev->SetRenderTarget(0, surface);
-#else
-		_pCurSuf->GetSurfaceLevel(0, &surface);
-		m_pDev->SetRenderTarget(surface, _pDSSuf);
-#endif
+	if (lwIsDx11Active() || !m_pDev || !_pCurSuf) {
+		lwD3D11Gap(LW_D3D11_SKIP, "aniwnd-rt",
+			"CAniWnd GetRenderTarget is D3D9; clock draws to the backbuffer on DX11");
 		RenderScene();
-		m_pDev->SetRenderTarget(0, pSaveSuf);
-
-		// dsface->Release();
-		surface->Release();
-		pSaveSuf->Release();
-		RenderMask();
+		return;
 	}
+
+	IDirect3DSurfaceX* pSaveSuf = NULL;
+	IDirect3DSurfaceX* surface = NULL;
+
+	m_pDev->GetRenderTarget(0, &pSaveSuf);
+#ifdef MGR
+	_pCurSuf->GetTex()->GetSurfaceLevel(0, &surface);
+	m_pDev->SetRenderTarget(0, surface);
+#else
+	_pCurSuf->GetSurfaceLevel(0, &surface);
+	m_pDev->SetRenderTarget(surface, _pDSSuf);
+#endif
+	RenderScene();
+	m_pDev->SetRenderTarget(0, pSaveSuf);
+
+	surface->Release();
+	pSaveSuf->Release();
+	RenderMask();
 }
 
 void CAniWnd::MoveWnd(int x, int y) {
