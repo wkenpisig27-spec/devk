@@ -45,6 +45,7 @@
 #include "LitLoad.h"
 #include "LootFilter.h"
 #include "MPShadowMap.h"
+#include "lwRenderBackend.h"
 
 using namespace std;
 
@@ -259,7 +260,7 @@ void CGameScene::OnResetDevice() {
 
 	SAFE_DELETE(_pSmallMap);
 	_pSmallMap = new CMinimap;
-	_pSmallMap->Create(g_Render.GetDevice(), rc, this, 128);
+	_pSmallMap->Create(lwIsDx11Active() ? nullptr : g_Render.GetDevice(), rc, this, 128);
 
 	C3DCompent* pD3d = g_stUIMap.GetBigmapRect();
 	rc.left = pD3d->GetX();
@@ -269,7 +270,7 @@ void CGameScene::OnResetDevice() {
 
 	SAFE_DELETE(_pLargerMap);
 	_pLargerMap = new CLargerMap;
-	_pLargerMap->Create(g_Render.GetDevice(), rc, g_pGameApp->GetCurScene(), 500);
+	_pLargerMap->Create(lwIsDx11Active() ? nullptr : g_Render.GetDevice(), rc, g_pGameApp->GetCurScene(), 500);
 }
 
 void CGameScene::RegisterFunc() {
@@ -1757,7 +1758,7 @@ bool CGameScene::RecreateShadowMapFromQuality(int nQuality, bool bEnableShadow) 
 
 	if (bEnableShadow && g_Config.m_bEnableShadowMap) {
 		_pShadowMap = new CMPShadowMap();
-		if (!_pShadowMap->Create(g_Render.GetDevice(), shadowCfg)) {
+		if (!_pShadowMap->Create(lwIsDx11Active() ? nullptr : g_Render.GetDevice(), shadowCfg)) {
 			LG("shadow", "Failed to initialize shadow map\n");
 			delete _pShadowMap;
 			_pShadowMap = nullptr;
@@ -2137,7 +2138,7 @@ void CGameScene::LoadingCall() {
 	rc.right = rc.left + lenx;
 	rc.bottom = rc.top + lenx;
 
-	_pSmallMap->Create(g_Render.GetDevice(), rc, g_pGameApp->GetCurScene(), lenx);
+	_pSmallMap->Create(lwIsDx11Active() ? nullptr : g_Render.GetDevice(), rc, g_pGameApp->GetCurScene(), lenx);
 
 	// CCompent*pRect = g_stUIMap.GetL
 
@@ -2149,7 +2150,7 @@ void CGameScene::LoadingCall() {
 
 	SAFE_DELETE(_pLargerMap);
 	_pLargerMap = new CLargerMap;
-	_pLargerMap->Create(g_Render.GetDevice(), rc, g_pGameApp->GetCurScene(), 500);
+	_pLargerMap->Create(lwIsDx11Active() ? nullptr : g_Render.GetDevice(), rc, g_pGameApp->GetCurScene(), 500);
 
 	LG("scene init", "create small map\n");
 	//////////////////////////////////////////////////////////////////////////

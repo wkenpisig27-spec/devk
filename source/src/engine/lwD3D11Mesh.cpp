@@ -29,6 +29,11 @@ static const char* kMeshHLSL =
     "  float4 more; /* x=hasColor, y=unlit, z=dualTex, w=tfactor mix */\n"
     "  float4 tfactor;\n"
     "  row_major float4x4 uvMat;\n"
+    "  float4 look; /* xyz=eye, w=stylized */\n"
+    "  float4 hemiSky;\n"
+    "  float4 hemiGnd;\n"
+    "  float4 fog; /* rgb + density */\n"
+    "  float4 fogMore; /* x=fog, y=heightFog, z=sea, w unused */\n"
     "};\n"
     "cbuffer CB1 : register(b1) {\n"
     "  row_major float4x4 bones[64];\n"
@@ -47,7 +52,7 @@ static const char* kMeshHLSL =
     "  float2 uv1 : TEXCOORD1;\n"
     "  float4 col : COLOR;\n"
     "};\n"
-    "struct PSIn { float4 pos : SV_POSITION; float3 nrm : NORMAL; float2 uv : TEXCOORD0; float2 uv1 : TEXCOORD1; float4 col : COLOR; };\n"
+    "struct PSIn { float4 pos : SV_POSITION; float3 nrm : NORMAL; float2 uv : TEXCOORD0; float2 uv1 : TEXCOORD1; float4 col : COLOR; float3 wpos : TEXCOORD2; };\n"
     "uint4 ClampBones(uint4 i) {\n"
     "  uint n = (uint)extra.x;\n"
     "  if (n == 0) return uint4(0,0,0,0);\n"
@@ -94,6 +99,7 @@ static const char* kMeshHLSL =
     "  o.uv = mul(float4(t, 0, 1), uvMat).xy;\n"
     "  o.uv1 = uv1;\n"
     "  o.col = more.x > 0.5 ? col : float4(1,1,1,1);\n"
+    "  o.wpos = wp.xyz;\n"
     "}\n"
     "PSIn VSRigid(VSInRigid i) {\n"
     "  PSIn o;\n"
@@ -138,11 +144,45 @@ static const char* kMeshHLSL =
     "  else if (more.y > 0.5) tint = i.col.rgb;\n"
     "  else {\n"
     "    float3 n = normalize(i.nrm);\n"
-    "    float ndl = saturate(dot(n, -normalize(lightDir.xyz)));\n"
-    "    tint = saturate(ambient.rgb + diffuse.rgb * ndl) * i.col.rgb;\n"
+    "    float3 L = -normalize(lightDir.xyz);\n"
+    "    float ndl = saturate(dot(n, L));\n"
+    "    if (look.w > 0.5) {\n"
+    "      float band = 0.62 + step(0.35, ndl) * 0.22 + step(0.70, ndl) * 0.16;\n"
+    "      float3 lit = ambient.rgb + diffuse.rgb * band;\n"
+    "      lit *= lerp(float3(0.96, 0.97, 1.02), float3(1.02, 1.00, 0.97), band);\n"
+    "      float hz = saturate(n.z * 0.5 + 0.5);\n"
+    "      lit += lerp(hemiGnd.rgb, hemiSky.rgb, hz);\n"
+    "      float3 V = normalize(look.xyz - i.wpos);\n"
+    "      float fres = 1.0 - saturate(dot(n, V));\n"
+    "      lit += float3(1.00, 0.92, 0.82) * step(0.55, fres) * 0.30;\n"
+    "      tint = saturate(lit) * i.col.rgb;\n"
+    "    } else {\n"
+    "      tint = saturate(ambient.rgb + diffuse.rgb * ndl) * i.col.rgb;\n"
+    "    }\n"
     "  }\n"
     "  float a = tex.a * ((mix & 2) ? tfactor.a : i.col.a);\n"
-    "  return float4(tex.rgb * tint, a);\n"
+    "  float3 rgb = tex.rgb * tint;\n"
+    "  if (fogMore.z > 0.5) {\n"
+    "    float3 V = normalize(look.xyz - i.wpos);\n"
+    "    float fresnel = 1.0 - abs(V.z);\n"
+    "    fresnel = fresnel * fresnel;\n"
+    "    rgb += float3(70.0, 85.0, 40.0) / 255.0 * fresnel;\n"
+    "    a = saturate(a + fresnel * 25.0 / 255.0);\n"
+    "  } else if (fogMore.x > 0.5 && extra.y < 0.5 && more.y < 0.5) {\n"
+    "    float2 xy = i.wpos.xy - look.xy;\n"
+    "    float d = max(length(xy) - 40.0, 0.0);\n"
+    "    float dens = fog.w;\n"
+    "    if (dens > 0.0 && dens < 0.002) dens = 0.002;\n"
+    "    float ed = dens * d;\n"
+    "    float f = 1.0 - exp(-ed * ed);\n"
+    "    if (fogMore.y > 0.5) {\n"
+    "      float hf = saturate((12.0 - i.wpos.z) * 0.04);\n"
+    "      f = saturate(f + hf * 0.08);\n"
+    "    }\n"
+    "    f = min(saturate(f), 0.22);\n"
+    "    rgb = lerp(rgb, fog.rgb, f);\n"
+    "  }\n"
+    "  return float4(rgb, a);\n"
     "}\n";
 
 struct MeshCB0
@@ -158,6 +198,11 @@ struct MeshCB0
     float more[4];
     float tfactor[4];
     float uvMat[16];
+    float look[4];
+    float hemiSky[4];
+    float hemiGnd[4];
+    float fog[4];
+    float fogMore[4];
 };
 
 struct MeshState
@@ -195,6 +240,13 @@ struct MeshState
     DWORD bone_count;
     ID3D11Buffer* fan_ib;
     UINT fan_ib_prims;
+    int stylized;
+    int fog_on;
+    int height_fog;
+    int sea;
+    int water_enhance;
+    float fog_color[4];
+    float fog_density;
     int ready;
 };
 
@@ -205,6 +257,18 @@ static std::map<DWORD, ID3D11BlendState*> s_blends;
 static void CopyMat(float* dst, const lwMatrix44* m)
 {
     memcpy(dst, m, sizeof(float) * 16);
+}
+
+static void EyeFromView(const lwMatrix44* v, float* eye)
+{
+    if (!v)
+    {
+        eye[0] = eye[1] = eye[2] = 0.0f;
+        return;
+    }
+    eye[0] = -(v->_41 * v->_11 + v->_42 * v->_21 + v->_43 * v->_31);
+    eye[1] = -(v->_41 * v->_12 + v->_42 * v->_22 + v->_43 * v->_32);
+    eye[2] = -(v->_41 * v->_13 + v->_42 * v->_23 + v->_43 * v->_33);
 }
 
 static void ReleaseMesh()
@@ -408,6 +472,16 @@ LW_RESULT lwD3D11MeshInit(ID3D11Device* device, ID3D11DeviceContext* context)
     s_mesh.outline_color[1] = 0.25f;
     s_mesh.outline_color[2] = 0.20f;
     s_mesh.outline_color[3] = 0.70f;
+    s_mesh.stylized = 1;
+    s_mesh.fog_on = 1;
+    s_mesh.height_fog = 0;
+    s_mesh.sea = 0;
+    s_mesh.water_enhance = 1;
+    s_mesh.fog_color[0] = 185.0f / 255.0f;
+    s_mesh.fog_color[1] = 195.0f / 255.0f;
+    s_mesh.fog_color[2] = 208.0f / 255.0f;
+    s_mesh.fog_color[3] = 1.0f;
+    s_mesh.fog_density = 0.00035f;
     s_mesh.ready = 1;
     return LW_RET_OK;
 }
@@ -443,6 +517,37 @@ void lwD3D11MeshSetOutline(int enabled, float width, float r, float g, float b)
     s_mesh.outline_color[1] = g;
     s_mesh.outline_color[2] = b;
     s_mesh.outline_color[3] = 0.70f;
+}
+
+void lwD3D11MeshSetVisual(
+    int stylized,
+    int fog,
+    int height_fog,
+    float fog_r,
+    float fog_g,
+    float fog_b,
+    float fog_density,
+    int water_enhance)
+{
+    s_mesh.stylized = stylized ? 1 : 0;
+    s_mesh.fog_on = fog ? 1 : 0;
+    s_mesh.height_fog = height_fog ? 1 : 0;
+    s_mesh.fog_color[0] = fog_r;
+    s_mesh.fog_color[1] = fog_g;
+    s_mesh.fog_color[2] = fog_b;
+    s_mesh.fog_color[3] = 1.0f;
+    s_mesh.fog_density = fog_density;
+    s_mesh.water_enhance = water_enhance ? 1 : 0;
+}
+
+void lwD3D11MeshSetSea(int enabled)
+{
+    s_mesh.sea = enabled ? 1 : 0;
+}
+
+int lwD3D11MeshWaterEnhance()
+{
+    return s_mesh.water_enhance ? 1 : 0;
 }
 
 int lwD3D11MeshIsOutline()
@@ -981,6 +1086,25 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
         else if (afunc == D3DCMP_GREATER || afunc == D3DCMP_GREATEREQUAL || afunc == 0xffffffff)
             cb.extra[3] = ref;
     }
+
+    EyeFromView(dev->GetMatView(), cb.look);
+    cb.look[3] = s_mesh.stylized ? 1.0f : 0.0f;
+    cb.hemiSky[0] = cb.ambient[0] * 0.12f + 0.02f;
+    cb.hemiSky[1] = cb.ambient[1] * 0.12f + 0.03f;
+    cb.hemiSky[2] = cb.ambient[2] * 0.12f + 0.05f;
+    cb.hemiSky[3] = 1.0f;
+    cb.hemiGnd[0] = cb.ambient[0] * 0.08f + 0.03f;
+    cb.hemiGnd[1] = cb.ambient[1] * 0.08f + 0.02f;
+    cb.hemiGnd[2] = cb.ambient[2] * 0.08f + 0.01f;
+    cb.hemiGnd[3] = 1.0f;
+    cb.fog[0] = s_mesh.fog_color[0];
+    cb.fog[1] = s_mesh.fog_color[1];
+    cb.fog[2] = s_mesh.fog_color[2];
+    cb.fog[3] = s_mesh.fog_density;
+    cb.fogMore[0] = s_mesh.fog_on ? 1.0f : 0.0f;
+    cb.fogMore[1] = s_mesh.height_fog ? 1.0f : 0.0f;
+    cb.fogMore[2] = s_mesh.sea ? 1.0f : 0.0f;
+    cb.fogMore[3] = 0.0f;
 
     D3D11_MAPPED_SUBRESOURCE mapped = {};
     if (SUCCEEDED(s_mesh.context->Map(s_mesh.cb0, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))

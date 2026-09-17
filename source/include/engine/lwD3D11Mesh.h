@@ -18,6 +18,17 @@ MINDPOWER_API void lwD3D11MeshShutdown();
 MINDPOWER_API void lwD3D11MeshSetBonePalette(const lwMatrix44* mats, DWORD count);
 MINDPOWER_API void lwD3D11MeshSetOutline(int enabled, float width, float r, float g, float b);
 MINDPOWER_API int lwD3D11MeshIsOutline();
+MINDPOWER_API void lwD3D11MeshSetVisual(
+    int stylized,
+    int fog,
+    int height_fog,
+    float fog_r,
+    float fog_g,
+    float fog_b,
+    float fog_density,
+    int water_enhance);
+MINDPOWER_API void lwD3D11MeshSetSea(int enabled);
+MINDPOWER_API int lwD3D11MeshWaterEnhance();
 
 MINDPOWER_API LW_RESULT lwD3D11MeshDrawPrimitive(
     lwDeviceObject11* dev,

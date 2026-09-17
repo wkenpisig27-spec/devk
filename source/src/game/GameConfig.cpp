@@ -4,6 +4,7 @@
 #include "ShaderLoad.h"
 #include "lwRenderBackend.h"
 #include "lwD3D11Post.h"
+#include "lwD3D11Mesh.h"
 
 using namespace std;
 
@@ -146,6 +147,13 @@ void CGameConfig::SetDefault() // Ĭ������
 	m_bSRGBWrite = FALSE;
 	m_fSceneAmbientScale = 1.0f;
 
+	m_bStylizedLit = FALSE;
+	m_bHeightFog = FALSE;
+	strncpy(m_szAA, "off", sizeof(m_szAA) - 1);
+	m_szAA[sizeof(m_szAA) - 1] = 0;
+	strncpy(m_szShadowCasters, "blob", sizeof(m_szShadowCasters) - 1);
+	m_szShadowCasters[sizeof(m_szShadowCasters) - 1] = 0;
+
 	m_bHdr = FALSE;
 	m_bBloom = FALSE;
 	m_bSharpen = FALSE;
@@ -215,6 +223,18 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 
 	const int dx11 = (_stricmp(m_szRenderer, "dx11") == 0 || _stricmp(m_szRenderer, "d3d11") == 0) ? 1 : 0;
 	m_bHdr = GetPrivateProfileInt("visual", "hdr", dx11, pszIniFileName) != 0;
+	m_bStylizedLit = GetPrivateProfileInt("visual", "stylizedLit", dx11, pszIniFileName) != 0;
+	m_bHeightFog = GetPrivateProfileInt("visual", "heightFog", 0, pszIniFileName) != 0;
+	GetPrivateProfileStringA("visual", "aa", (dx11 && m_bHdr) ? "fxaa" : "off", buf, sizeof(buf), pszIniFileName);
+	strncpy(m_szAA, buf, sizeof(m_szAA) - 1);
+	m_szAA[sizeof(m_szAA) - 1] = 0;
+	GetPrivateProfileStringA("visual", "shadowCasters", "blob", buf, sizeof(buf), pszIniFileName);
+	strncpy(m_szShadowCasters, buf, sizeof(m_szShadowCasters) - 1);
+	m_szShadowCasters[sizeof(m_szShadowCasters) - 1] = 0;
+	if (_stricmp(m_szShadowCasters, "characters") == 0)
+		m_bEnableShadowMap = TRUE;
+	else
+		m_bEnableShadowMap = FALSE;
 	m_bBloom = GetPrivateProfileInt("visual", "bloom", m_bHdr ? 1 : 0, pszIniFileName) != 0;
 	m_bSharpen = GetPrivateProfileInt("visual", "sharpen", m_bHdr ? 1 : 0, pszIniFileName) != 0;
 	GetPrivateProfileStringA("visual", "hdrExposure", "0.97", buf, sizeof(buf), pszIniFileName);
@@ -269,6 +289,16 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 		m_fPostSaturation,
 		m_fPostDehaze,
 		m_fPostFill);
+	lwD3D11PostSetAa(_stricmp(m_szAA, "fxaa") == 0 ? 1 : 0);
+	lwD3D11MeshSetVisual(
+		m_bStylizedLit ? 1 : 0,
+		m_bFogEnabled ? 1 : 0,
+		m_bHeightFog ? 1 : 0,
+		m_iFogR / 255.0f,
+		m_iFogG / 255.0f,
+		m_iFogB / 255.0f,
+		m_fExp2,
+		m_bWaterEnhance ? 1 : 0);
 }
 
 void CGameConfig::ApplyRendererToEngine() {
@@ -308,8 +338,62 @@ void CGameConfig::ApplyVisualSettingsToEngine() {
 		m_fPostSaturation,
 		m_fPostDehaze,
 		m_fPostFill);
+	lwD3D11PostSetAa(_stricmp(m_szAA, "fxaa") == 0 ? 1 : 0);
+	lwD3D11MeshSetVisual(
+		m_bStylizedLit ? 1 : 0,
+		m_bFogEnabled ? 1 : 0,
+		m_bHeightFog ? 1 : 0,
+		m_iFogR / 255.0f,
+		m_iFogG / 255.0f,
+		m_iFogB / 255.0f,
+		m_fExp2,
+		m_bWaterEnhance ? 1 : 0);
 	// Fog is applied per-frame in CGameScene::_Render from these fields.
 	// Shadow map stays off by default so soft blob foot-shadows remain (RO look).
+}
+
+void CGameConfig::ApplyQualityPreset(int nQuality) {
+	const int dx11 = (_stricmp(m_szRenderer, "dx11") == 0 || _stricmp(m_szRenderer, "d3d11") == 0) ? 1 : 0;
+	if (nQuality >= 2) {
+		m_bHdr = FALSE;
+		m_bBloom = FALSE;
+		m_bSharpen = FALSE;
+		strncpy(m_szAA, "off", sizeof(m_szAA) - 1);
+		strncpy(m_szShadowCasters, "blob", sizeof(m_szShadowCasters) - 1);
+		m_bEnableShadowMap = FALSE;
+		m_bWaterEnhance = TRUE;
+		m_bFogEnabled = TRUE;
+	} else if (nQuality == 1) {
+		m_bHdr = dx11 ? TRUE : FALSE;
+		m_bBloom = dx11 ? TRUE : FALSE;
+		m_bSharpen = FALSE;
+		m_fBloomIntensity = 0.18f;
+		strncpy(m_szAA, dx11 ? "fxaa" : "off", sizeof(m_szAA) - 1);
+		strncpy(m_szShadowCasters, "blob", sizeof(m_szShadowCasters) - 1);
+		m_bEnableShadowMap = FALSE;
+		m_bWaterEnhance = TRUE;
+		m_bFogEnabled = TRUE;
+	} else {
+		m_bHdr = dx11 ? TRUE : FALSE;
+		m_bBloom = dx11 ? TRUE : FALSE;
+		m_bSharpen = dx11 ? TRUE : FALSE;
+		m_fBloomIntensity = 0.28f;
+		strncpy(m_szAA, dx11 ? "fxaa" : "off", sizeof(m_szAA) - 1);
+		if (dx11) {
+			strncpy(m_szShadowCasters, "characters", sizeof(m_szShadowCasters) - 1);
+			m_bEnableShadowMap = TRUE;
+			m_nShadowMapQuality = 1;
+		} else {
+			strncpy(m_szShadowCasters, "blob", sizeof(m_szShadowCasters) - 1);
+			m_bEnableShadowMap = FALSE;
+		}
+		m_bWaterEnhance = TRUE;
+		m_bFogEnabled = TRUE;
+	}
+	m_szAA[sizeof(m_szAA) - 1] = 0;
+	m_szShadowCasters[sizeof(m_szShadowCasters) - 1] = 0;
+	if (dx11)
+		m_bStylizedLit = TRUE;
 }
 
 void CGameConfig::Load(const char* pszFileName) //  ��kop.cfg

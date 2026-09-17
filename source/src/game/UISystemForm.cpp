@@ -695,6 +695,9 @@ void CSystemMgr::_evtVideoFormMouseEvent(CCompent* pSender, int nMsgType, int x,
 		// bool bViewFar     = g_stUISystem.cbxView->GetActiveIndex()==0?true:false;//ȡ����ҰԶ��(Michael Chen 2005-04-22
 		int nShadowIdx = g_stUISystem.cbxTrail->GetActiveIndex();
 		const bool bShadowOn = (nShadowIdx == 0);
+		if (nQualityIdx != g_stUISystem.m_sysProp.m_videoProp.nQuality)
+			g_Config.ApplyQualityPreset(nQualityIdx);
+		g_Config.ApplyVisualSettingsToEngine();
 		{
 			CGameScene* pBtnSc = dynamic_cast<CGameScene*>(g_pGameApp->GetCurScene());
 			if (pBtnSc) {

@@ -119,3 +119,46 @@ DX9 must keep working after every change. If DX11 is blank/wrong, fix DX11 — d
 - Original canvas: `canvases/dx11-engine-plan.canvas.tsx` (slice todos updated to this checkpoint).
 - DX9 history: `docs/DX9_MIGRATION_PLAN.md`.
 - BugTrap is wired in `ErrorHandler` for DX11 crash dumps during this port.
+
+---
+
+## Stylized DX11 visual playbook (18 Sep 2026)
+
+Status-only checkpoints. DX9 look is unchanged. New look is `[visual]` gated on `renderer=dx11`.
+
+### Stage 0 — crash/parity guards
+- `CGameScene` minimap / large-map `Create` and `RecreateShadowMapFromQuality` pass `nullptr` on DX11 so no live world path calls `GetDevice()`.
+- `CMPShadowMap::Create` already branches to `CreateDx11`. Minimap viewport/clear already uses `lwDeviceObject11`.
+- Character `SetTransformWorld` + bone palette (`ctrl_id` 2/3) left as-is. Soft effects stay forced on DX11.
+
+### Stage 1 — stylizedLit
+- `lwD3D11Mesh` `PSMain` ports 3-band cel (`CEL_LEVEL0=0.62`), muted cool/warm tint, weak Z-up hemisphere, subtle rim. `SPEC_ENABLE` stays 0.
+- `stylizedLit=0` keeps Lambert. Unlit / tfactor / additive paths unchanged.
+- Removed per-character hardcoded white `(-1,-1,-0.5)` light in `SceneRender.cpp` so `CAreaInfo` + `UpdateTileColor` reach the mesh CB.
+
+### Stage 2 — fog
+- Distance EXP2 fog in mesh PS uses **horizontal XZ** distance (this camera sits 20–40 units above the street, so 3D distance was fogging the whole city). Starts after 40 units, cap 0.22, unlit/tfactor/markers skipped so terrain vertex color stays painted.
+- `heightFog` default off. Outlines, tfactor-select, and GPU sea skip mesh fog.
+- `lwDeviceObject11` still caches `FOGENABLE`; pixel shader owns the look.
+- **18 Sep 2026 hotfix:** first EXP2 used `exp(-density*dist^2)`, which painted Argent City as a flat fog wash. Formula + cap fixed.
+
+### Stage 3 — HDR / bloom / grade
+- Existing `R16G16B16A16_FLOAT` stack kept. Quality combo (0=HIGH, 1=MEDIUM, 2=LOW) maps hdr/bloom/sharpen/aa/shadows/sea via `CGameConfig::ApplyQualityPreset` when the user changes quality.
+
+### Stage 4 — shadows
+- Default `shadowCasters=blob`, `m_bEnableShadowMap=FALSE`.
+- HIGH + `shadowCasters=characters` creates the existing PCF overlay (1024). `ShouldCastSceneObjectShadow` not expanded to buildings.
+
+### Stage 5 — water
+- `waterEnhance=0` uses shore fade only.
+- DX11 + enhance: CPU writes shore-only vertex color; mesh PS applies Fresnel using `ocean_h` + eye. DX9 + enhance keeps `CalcEnhancedSeaColor`.
+
+### Stage 6 — sky dome
+- **Skipped.** No shipped `clouds.jpg` / `xingkong` / sky texture on disk. `CreateSkyDoom` stays unused.
+
+### Stage 7 — FXAA
+- `PSFxaa` after tonemap, before UI/sharpen. Default `aa=fxaa` when HDR is on. `aa=off` disables.
+
+### Stage 8 — VFX (hard gate)
+- Particles already draw through `MPRender::DrawPrimitiveUP` into the current (HDR) scene RT. `m_bUseSoft` stays on. Soft particles skipped (no extra depth-copy dance).
+- No Stage 8 rewrite shipped; existing DeviceObject path kept. Revert not required.

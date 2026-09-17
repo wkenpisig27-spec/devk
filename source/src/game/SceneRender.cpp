@@ -23,6 +23,8 @@
 #include "event.h"
 #include "MPShadowMap.h"
 #include "ui3dcompent.h"
+#include "lwRenderBackend.h"
+#include "lwD3D11Mesh.h"
 
 // Effects / weapon-glow / shade maps can leave exotic forced texture-stage
 // state on the device. Slimepirates resets stage 0/1 at item + transparent
@@ -151,6 +153,17 @@ void CGameScene::_Render() {
 			D3DFOG_EXP2, TRUE, g_Config.m_fExp2);
 	} else {
 		dev_obj->SetRenderState(D3DRS_FOGENABLE, FALSE);
+	}
+	if (lwIsDx11Active()) {
+		lwD3D11MeshSetVisual(
+			g_Config.m_bStylizedLit ? 1 : 0,
+			g_Config.m_bFogEnabled ? 1 : 0,
+			g_Config.m_bHeightFog ? 1 : 0,
+			g_Config.m_iFogR / 255.0f,
+			g_Config.m_iFogG / 255.0f,
+			g_Config.m_iFogB / 255.0f,
+			g_Config.m_fExp2,
+			g_Config.m_bWaterEnhance ? 1 : 0);
 	}
 
 	if (g_Config.m_bEditor) {
@@ -615,40 +628,7 @@ void CGameScene::_Render() {
 				// =========================================================
 				// Begin Shading of characters
 				// =========================================================
-				DWORD dwOldState;
 				rsm->BeginScene();
-
-				// set up the light
-				D3DLIGHTX env_light;
-				D3DLIGHTX env_light_old;
-				memset(&env_light, 0, sizeof(env_light));
-
-				// type of light
-				env_light.Type = D3DLIGHT_DIRECTIONAL;
-
-				// direction of the light
-				env_light.Direction.x = -1.0f;
-				env_light.Direction.y = -1.0f;
-				env_light.Direction.z = -0.5f;
-				D3DXVec3Normalize((D3DXVECTOR3*)&env_light.Direction, (D3DXVECTOR3*)&env_light.Direction);
-
-				MPDwordByte4 c;
-				c.b[3] = 0xff;
-				c.b[2] = 0xff;
-				c.b[1] = 0xff;
-				c.b[0] = 0xff;
-				env_light.Diffuse.r = (float)(c.b[2] / 255.0f);
-				env_light.Diffuse.g = (float)(c.b[1] / 255.0f);
-				env_light.Diffuse.b = (float)(c.b[0] / 255.0f);
-
-				// set old light to env_light_old
-				g_Render.GetLight(0, &env_light_old);
-				dev_obj->GetRenderState(D3DRS_LIGHTING, &dwOldState);
-
-				// set new lights
-				g_Render.SetLight(0, &env_light);
-				dev_obj->SetRenderState(D3DRS_LIGHTING, TRUE);
-
 				rsm->BeginSceneObject();
 
 				if (pCha) {
@@ -657,10 +637,6 @@ void CGameScene::_Render() {
 				}
 
 				rsm->EndSceneObject();
-
-				// Restore lightning
-				dev_obj->SetRenderState(D3DRS_LIGHTING, dwOldState);
-				g_Render.SetLight(0, &env_light_old);
 
 				rsm->BeginTranspObject();
 				lwUpdateSceneTransparentObject();

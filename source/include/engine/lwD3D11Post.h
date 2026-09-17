@@ -28,6 +28,7 @@ MINDPOWER_API void lwD3D11PostSetParams(
     float dehaze,
     float fill);
 
+MINDPOWER_API void lwD3D11PostSetAa(int fxaa);
 MINDPOWER_API int lwD3D11PostWantsHdr();
 MINDPOWER_API int lwD3D11PostIsActive();
 

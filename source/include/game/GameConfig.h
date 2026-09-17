@@ -16,6 +16,7 @@ public:
 	void LoadVisualSettings(const char* pszIniFileName); // user/system.ini [visual] + [video] renderer
 	void ApplyVisualSettingsToEngine(); // push outline/sRGB to engine
 	void ApplyRendererToEngine();		// push [video] renderer to lwSetRequestedRenderBackend
+	void ApplyQualityPreset(int nQuality); // 0=HIGH, 1=MEDIUM, 2=LOW
 	void SetDefault();					// 默认配置
 	void SetMoveClient(bool v);			// 是否与客户端同步
 
@@ -46,6 +47,11 @@ public:
 	BOOL m_bWaterEnhance;
 	BOOL m_bSRGBWrite;
 	float m_fSceneAmbientScale; // multiplies map env ambient (1.0 = stock, <1 darker scenery)
+
+	BOOL m_bStylizedLit;
+	BOOL m_bHeightFog;
+	char m_szAA[8];
+	char m_szShadowCasters[16];
 
 	BOOL m_bHdr;              // DX11 HDR scene RT + highlight-only tone
 	BOOL m_bBloom;

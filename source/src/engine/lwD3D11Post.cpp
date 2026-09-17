@@ -74,6 +74,36 @@ static const char* kPostHLSL =
     "  float3 w = tex0.Sample(samp, i.uv + float2(-texel.x, 0.0f)).rgb;\n"
     "  float3 blur = (n + s + e + w) * 0.25f;\n"
     "  return float4(saturate(c + (c - blur) * pack.w), 1.0f);\n"
+    "}\n"
+    "float4 PSFxaa(PSIn i) : SV_TARGET {\n"
+    "  float2 px = texel;\n"
+    "  float3 rgbNW = tex0.Sample(samp, i.uv + float2(-px.x, -px.y)).rgb;\n"
+    "  float3 rgbNE = tex0.Sample(samp, i.uv + float2( px.x, -px.y)).rgb;\n"
+    "  float3 rgbSW = tex0.Sample(samp, i.uv + float2(-px.x,  px.y)).rgb;\n"
+    "  float3 rgbSE = tex0.Sample(samp, i.uv + float2( px.x,  px.y)).rgb;\n"
+    "  float3 rgbM  = tex0.Sample(samp, i.uv).rgb;\n"
+    "  float3 lumaW = float3(0.299f, 0.587f, 0.114f);\n"
+    "  float lumaNW = dot(rgbNW, lumaW);\n"
+    "  float lumaNE = dot(rgbNE, lumaW);\n"
+    "  float lumaSW = dot(rgbSW, lumaW);\n"
+    "  float lumaSE = dot(rgbSE, lumaW);\n"
+    "  float lumaM  = dot(rgbM, lumaW);\n"
+    "  float lumaMin = min(lumaM, min(min(lumaNW, lumaNE), min(lumaSW, lumaSE)));\n"
+    "  float lumaMax = max(lumaM, max(max(lumaNW, lumaNE), max(lumaSW, lumaSE)));\n"
+    "  float2 dir;\n"
+    "  dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));\n"
+    "  dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));\n"
+    "  float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) * 0.03125f, 0.0078125f);\n"
+    "  float rcpDirMin = 1.0f / (min(abs(dir.x), abs(dir.y)) + dirReduce);\n"
+    "  dir = clamp(dir * rcpDirMin, -8.0f, 8.0f) * px;\n"
+    "  float3 rgbA = 0.5f * (\n"
+    "    tex0.Sample(samp, i.uv + dir * (1.0f/3.0f - 0.5f)).rgb +\n"
+    "    tex0.Sample(samp, i.uv + dir * (2.0f/3.0f - 0.5f)).rgb);\n"
+    "  float3 rgbB = rgbA * 0.5f + 0.25f * (\n"
+    "    tex0.Sample(samp, i.uv + dir * -0.5f).rgb +\n"
+    "    tex0.Sample(samp, i.uv + dir *  0.5f).rgb);\n"
+    "  float lumaB = dot(rgbB, lumaW);\n"
+    "  return float4((lumaB < lumaMin || lumaB > lumaMax) ? rgbA : rgbB, 1.0f);\n"
     "}\n";
 
 struct PostCB
@@ -89,6 +119,7 @@ struct PostParams
     int hdr;
     int bloom;
     int sharpen;
+    int aa;
     float exposure;
     float bloom_th;
     float bloom_int;
@@ -108,6 +139,7 @@ struct PostState
     ID3D11PixelShader* ps_blur;
     ID3D11PixelShader* ps_tonemap;
     ID3D11PixelShader* ps_sharpen;
+    ID3D11PixelShader* ps_fxaa;
     ID3D11Buffer* cb;
     ID3D11BlendState* blend_off;
     ID3D11DepthStencilState* depth_off;
@@ -144,7 +176,7 @@ struct PostState
     int targets;
 };
 
-static PostParams s_params = { 0, 0, 0, 0.97f, 1.00f, 0.28f, 0.10f, 0.96f, 1.12f, 0.045f, 0.015f };
+static PostParams s_params = { 0, 0, 0, 0, 0.97f, 1.00f, 0.28f, 0.10f, 0.96f, 1.12f, 0.045f, 0.015f };
 static PostState s_post = {};
 
 template <typename T>
@@ -219,6 +251,11 @@ void lwD3D11PostSetParams(
     s_params.fill = Clampf(fill, 0.0f, 0.20f);
 }
 
+void lwD3D11PostSetAa(int fxaa)
+{
+    s_params.aa = fxaa ? 1 : 0;
+}
+
 int lwD3D11PostWantsHdr()
 {
     return s_params.hdr;
@@ -271,6 +308,7 @@ static void ReleaseAll()
     Rel(s_post.depth_off);
     Rel(s_post.blend_off);
     Rel(s_post.cb);
+    Rel(s_post.ps_fxaa);
     Rel(s_post.ps_sharpen);
     Rel(s_post.ps_tonemap);
     Rel(s_post.ps_blur);
@@ -382,13 +420,15 @@ LW_RESULT lwD3D11PostInit(ID3D11Device* device, ID3D11DeviceContext* context)
     ID3DBlob* blur = Compile("PSBlur", "ps_4_0");
     ID3DBlob* tone = Compile("PSTonemap", "ps_4_0");
     ID3DBlob* sharp = Compile("PSSharpen", "ps_4_0");
-    if (!vsb || !bright || !blur || !tone || !sharp)
+    ID3DBlob* fxaa = Compile("PSFxaa", "ps_4_0");
+    if (!vsb || !bright || !blur || !tone || !sharp || !fxaa)
     {
         if (vsb) vsb->Release();
         if (bright) bright->Release();
         if (blur) blur->Release();
         if (tone) tone->Release();
         if (sharp) sharp->Release();
+        if (fxaa) fxaa->Release();
         ReleaseAll();
         return LW_RET_FAILED;
     }
@@ -402,11 +442,14 @@ LW_RESULT lwD3D11PostInit(ID3D11Device* device, ID3D11DeviceContext* context)
         hr = device->CreatePixelShader(tone->GetBufferPointer(), tone->GetBufferSize(), 0, &s_post.ps_tonemap);
     if (SUCCEEDED(hr))
         hr = device->CreatePixelShader(sharp->GetBufferPointer(), sharp->GetBufferSize(), 0, &s_post.ps_sharpen);
+    if (SUCCEEDED(hr))
+        hr = device->CreatePixelShader(fxaa->GetBufferPointer(), fxaa->GetBufferSize(), 0, &s_post.ps_fxaa);
     vsb->Release();
     bright->Release();
     blur->Release();
     tone->Release();
     sharp->Release();
+    fxaa->Release();
     if (FAILED(hr))
     {
         ReleaseAll();
@@ -624,6 +667,20 @@ LW_RESULT lwD3D11PostResolve(IDXGISwapChain* swapchain, ID3D11RenderTargetView* 
     DrawPS(s_post.ps_tonemap, backbuffer_rtv, s_post.hdr_srv, bloom_srv, s_post.samp_linear,
         width, height,
         1.0f / (float)s_post.w, 1.0f / (float)s_post.h, 0.0f, 0.0f);
+
+    if (s_params.aa && s_post.ps_fxaa && s_post.ldr_copy && swapchain)
+    {
+        UnbindPS();
+        ID3D11Texture2D* back = 0;
+        if (SUCCEEDED(swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&back)) && back)
+        {
+            s_post.context->CopyResource(s_post.ldr_copy, back);
+            back->Release();
+            DrawPS(s_post.ps_fxaa, backbuffer_rtv, s_post.ldr_copy_srv, 0, s_post.samp_linear,
+                width, height,
+                1.0f / (float)width, 1.0f / (float)height, 0.0f, 0.0f);
+        }
+    }
 
     if (s_params.sharpen && s_post.ldr_copy && swapchain)
     {

@@ -15,6 +15,7 @@
 #include "MPRender.h"
 #include "lwRenderBackend.h"
 #include "lwD3D11Gaps.h"
+#include "lwD3D11Mesh.h"
 
 
 using namespace std;
@@ -62,6 +63,25 @@ DWORD CalcEnhancedSeaColor(const VECTOR3& pos, DWORD baseColor, float shoreAlpha
 	ba = (BYTE)min(255.0f, ba * shoreAlphaScale + fresnel * 25.0f);
 
 	return D3DCOLOR_ARGB(ba, br, bg, bb);
+}
+
+DWORD SeaShoreColor(DWORD baseColor, float shoreAlphaScale)
+{
+	BYTE ba = (BYTE)((baseColor >> 24) & 0xff);
+	BYTE br = (BYTE)((baseColor >> 16) & 0xff);
+	BYTE bg = (BYTE)((baseColor >> 8) & 0xff);
+	BYTE bb = (BYTE)(baseColor & 0xff);
+	ba = (BYTE)min(255.0f, ba * shoreAlphaScale);
+	return D3DCOLOR_ARGB(ba, br, bg, bb);
+}
+
+DWORD SeaVertexColor(const VECTOR3& pos, DWORD baseColor, float shoreAlpha)
+{
+	if (lwIsDx11Active() && lwD3D11MeshWaterEnhance())
+		return SeaShoreColor(baseColor, shoreAlpha);
+	if (lwD3D11MeshWaterEnhance())
+		return CalcEnhancedSeaColor(pos, baseColor, shoreAlpha);
+	return SeaShoreColor(baseColor, shoreAlpha);
 }
 
 static lwIDeviceObject* MapDev()
@@ -622,6 +642,9 @@ void MPMap::RenderSea()
 {
     if(!_bRenderSea) return;
 
+	const int gpu_sea = lwIsDx11Active() && lwD3D11MeshWaterEnhance();
+	lwD3D11MeshSetSea(gpu_sea);
+
 	MPTimer t; t.Begin();
     
     g_Render.ResetWorldTransform();
@@ -799,7 +822,7 @@ void MPMap::RenderSea()
 					{
 						shoreAlpha = (SEA_LEVEL - pTile->fHeight - 0.5f);
 					}
-					SVertex[i].dwColor = CalcEnhancedSeaColor(SVertex[i].p, _dwSeaDefaultColor, shoreAlpha);
+					SVertex[i].dwColor = SeaVertexColor(SVertex[i].p, _dwSeaDefaultColor, shoreAlpha);
 				}   
 				// 1 2 3 
 				memcpy(pCurVertex, &SVertex, 3 * sizeof(MPSeaTileVertex));
@@ -855,7 +878,7 @@ void MPMap::RenderSea()
 					{
 						shoreAlpha = (SEA_LEVEL - pTile->fHeight - 0.5f);
 					}
-					SVertex[i].dwColor = CalcEnhancedSeaColor(SVertex[i].p, _dwSeaDefaultColor, shoreAlpha);
+					SVertex[i].dwColor = SeaVertexColor(SVertex[i].p, _dwSeaDefaultColor, shoreAlpha);
 				}
 
                 // begin by lsh
@@ -879,6 +902,7 @@ void MPMap::RenderSea()
 	
 	g_Render.SetRenderState( D3DRS_LIGHTING, TRUE);
 
+	lwD3D11MeshSetSea(0);
     m_dwSeaRenderTime = t.End();
 }
 
