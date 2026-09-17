@@ -37,7 +37,7 @@ public:
 	int m_iFogB;
 	float m_fExp2;
 	BOOL m_bFogEnabled;
-	float m_fOutlineWidth; // DX9 world extrusion; DX11 maps <0.5 to ~1.6px, >=0.5 is pixel width
+	float m_fOutlineWidth; // DX9 world extrusion; DX11 maps <0.5 to ~1.15px, >=0.5 is pixel width
 	float m_fOutlineColorR;
 	float m_fOutlineColorG;
 	float m_fOutlineColorB;

@@ -32,9 +32,22 @@ struct SGameAttr {
 	SGameAttr() {
 		clear();
 	}
-	void set(short sType, LONG64 lValue) { lAttr[sType] = lValue; }
-	void add(short sType, LONG64 lValue) { lAttr[sType] += lValue; }
-	LONG64 get(short sType) { return lAttr[sType]; }
+	void set(short sType, LONG64 lValue)
+	{
+		if (sType >= 0 && sType < MAX_ATTR_CLIENT)
+			lAttr[sType] = lValue;
+	}
+	void add(short sType, LONG64 lValue)
+	{
+		if (sType >= 0 && sType < MAX_ATTR_CLIENT)
+			lAttr[sType] += lValue;
+	}
+	LONG64 get(short sType)
+	{
+		if (sType >= 0 && sType < MAX_ATTR_CLIENT)
+			return lAttr[sType];
+		return 0;
+	}
 	void clear() { memset(lAttr, 0, sizeof(lAttr)); }
 };
 

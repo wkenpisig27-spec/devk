@@ -261,8 +261,11 @@ void CMPEffectFile::ApplySoftPass()
 	m_pDev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 	m_pDev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
 	m_pDev->SetTextureStageState(0, D3DTSS_ALPHAARG2, tfactor_arg ? D3DTA_TFACTOR : D3DTA_DIFFUSE);
-	m_pDev->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-	m_pDev->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+	m_pDev->SetTextureStageStateForced(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+	m_pDev->SetTextureStageStateForced(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+	m_pDev->SetTextureStageStateForced(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+	m_pDev->SetTextureStageStateForced(1, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+	m_pDev->SetTexture(1, NULL);
 
 	m_pDev->SetSamplerState(0, D3DSAMP_ADDRESSU, clamp_uv ? D3DTADDRESS_CLAMP : D3DTADDRESS_WRAP);
 	m_pDev->SetSamplerState(0, D3DSAMP_ADDRESSV, clamp_uv ? D3DTADDRESS_CLAMP : D3DTADDRESS_WRAP);

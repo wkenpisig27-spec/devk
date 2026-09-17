@@ -24,6 +24,24 @@
 //---------------------------------------------------------------------------
 const LONG64 LEVEL80_EXP = 50;
 
+static void TraceLevelUp(const char* step) {
+	FILE* fp = fopen("log/levelup_trace.log", "a");
+	if (!fp)
+		return;
+	SYSTEMTIME st;
+	GetLocalTime(&st);
+	fprintf(fp, "%02d:%02d:%02d.%03d %s\n", st.wHour, st.wMinute, st.wSecond, st.wMilliseconds, step);
+	fflush(fp);
+	fclose(fp);
+}
+
+static void SpawnLevelUpEffect(CCharacter* pCha) {
+	if (!pCha)
+		return;
+	TraceLevelUp("levelup: selfeffect 132");
+	pCha->SelfEffect(132, -1);
+}
+
 inline bool IsHarmMain(CCharacter* pTarget, CCharacter* pAttack) {
 	if (!pTarget->IsMonster()) {
 		if (!(pAttack && pAttack->IsMainCha())) {
@@ -223,9 +241,9 @@ void CAttackEffect::ExecHarm(CSizeArray<stEffect>& Value, CCharacter* pTarget, C
 			if (isMain) {
 				g_pGameApp->PlaySound(21);
 				g_pGameApp->ShowBigText(RES_STRING(CL_LANGUAGE_MATCH_146), pTarget->getGameAttr()->get(ATTR_LV));
-				pTarget->SelfEffect(132, -1);
+				SpawnLevelUpEffect(pTarget);
 			} else {
-				pTarget->SelfEffect(132, -1);
+				SpawnLevelUpEffect(pTarget);
 				g_pGameApp->PlaySound(21);
 			}
 		}
@@ -235,7 +253,7 @@ void CAttackEffect::ExecHarm(CSizeArray<stEffect>& Value, CCharacter* pTarget, C
 		if (isMain) {
 			g_pGameApp->PlaySound(21);
 			g_pGameApp->ShowBigText("reborn level %d", pTarget->getGameAttr()->get(ATTR_SAILLV));
-			pTarget->SelfEffect(132, -1);
+			SpawnLevelUpEffect(pTarget);
 		} else {
 			// pTarget->SelfEffect( 132, -1 );
 		}
@@ -462,21 +480,23 @@ void CAttribSynchro::_Exec() {
 		if (!pCha->IsBoat()) {
 			if (pCha->IsMainCha()) {
 				if (enumATTRSYN_INIT != _nType) {
-					// ?????????
+					TraceLevelUp("levelup: sound");
 					g_pGameApp->PlaySound(21);
+					TraceLevelUp("levelup: bigtext");
 					g_pGameApp->ShowBigText(RES_STRING(CL_LANGUAGE_MATCH_146), pCha->getGameAttr()->get(ATTR_LV));
 
-					if (g_stUISystem.m_sysProp.m_gameOption.bHelpMode && pCha->getGameAttr()->get(ATTR_LV) <= 50) //	Modify by alfred.shi 20080905
+					if (g_stUISystem.m_sysProp.m_gameOption.bHelpMode && pCha->getGameAttr()->get(ATTR_LV) <= 50)
 					{
-						// ??????????????
 						g_stUIStart.ShowLevelUpHelpButton(true);
 					}
 
-					pCha->SelfEffect(132, -1);
+					TraceLevelUp("levelup: spawn vfx 132");
+					SpawnLevelUpEffect(pCha);
+					TraceLevelUp("levelup: selfeffect done");
 				}
 			} else {
 				if (enumATTRSYN_INIT != _nType) {
-					pCha->SelfEffect(132, -1);
+					SpawnLevelUpEffect(pCha);
 				}
 			}
 		}
@@ -489,12 +509,12 @@ void CAttribSynchro::_Exec() {
 					g_pGameApp->PlaySound(21);
 					// g_pGameApp->ShowBigText( "??????%d", pCha->getGameAttr()->get(ATTR_SAILLV) );
 					g_pGameApp->ShowBigText("reborn level %d", pCha->getGameAttr()->get(ATTR_SAILLV));
-					pCha->SelfEffect(132, -1);
+					SpawnLevelUpEffect(pCha);
 				}
 			}
 		} else {
 			if (enumATTRSYN_INIT != _nType) {
-				pCha->SelfEffect(132, -1);
+				SpawnLevelUpEffect(pCha);
 			}
 		}
 	}

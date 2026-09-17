@@ -70,11 +70,12 @@ void	CMPShadeMap::setTextureName(s_string& strName)
 void	CMPShadeMap::BoundingRes(CMPResManger	*m_CResMagr)
 {
 	int t_iID;
+	TraceEffBindF("shade BoundingRes tex=%s", _strTexName.c_str());
 		
 	t_iID = m_CResMagr->GetTextureID(_strTexName);
 	if(t_iID == -1)
 	{
-		MessageBox(NULL,_strTexName.c_str() ,"shade����������",MB_OK);
+		LG("error", "missing shade texture [%s]\n", _strTexName.c_str());
 		_lpCurTex = NULL;
 	}
 	else
@@ -93,8 +94,12 @@ void	CMPShadeMap::BoundingRes(CMPResManger	*m_CResMagr)
 	//SAFE_DELETE(_pModel);
 	if(!_pModel)
 	{
+		TraceEffBind("shade new CEffectModel");
 		_pModel = new CEffectModel;
-		_pModel->InitDevice(m_CResMagr->m_pDev,m_CResMagr->m_pSysGraphics->GetResourceMgr());
+		lwIResourceMgr* pRes = NULL;
+		if (m_CResMagr->m_pSysGraphics)
+			pRes = m_CResMagr->m_pSysGraphics->GetResourceMgr();
+		_pModel->InitDevice(m_CResMagr->m_pDev, pRes);
 	}
 	
 
@@ -129,18 +134,24 @@ void	CMPShadeMap::BoundingRes(CMPResManger	*m_CResMagr)
 	//m_bUseSoft = TRUE;
 
 	_UpSea = false;
+	TraceEffBind("shade BoundingRes done");
 }
 
 bool	CMPShadeMap::CreateShadeMap(float fRadius)
 {
-	//if(fRadius > 7.0f)
-	//	UseSoft(TRUE);
+	TraceEffBindF("shade CreateShadeMap radius=%.3f", fRadius);
 
 	_fRadius = fRadius;
+	if (_fRadius < 0.1f)
+		_fRadius = 0.1f;
+	if (_fRadius > 20.0f)
+		_fRadius = 20.0f;
 	_fGridMax      = _fRadius / TILESIZE + 1;
 	_iGridCrossNum = (int)_fGridMax;
 	if(_fGridMax - (float)_iGridCrossNum > 0)
 		_iGridCrossNum++;
+	if (_iGridCrossNum > 32)
+		_iGridCrossNum = 32;
 
 	if(!SetGridNum(_iGridCrossNum))
 		return false;
@@ -251,6 +262,7 @@ bool	CMPShadeMap::SetGridNum(int iNum)
 #else
 
 	_pModel->CreateShadeModel(_iVerNum,_iFaceCount,_iGridCrossNum,m_bUseSoft);
+	TraceEffBind("shade CreateShadeModel done");
 
 	/*int nIndex = 0;
 	for( int nY = 0; nY < _iGridCrossNum; nY++ )
@@ -540,8 +552,10 @@ void	CMPShadeMap::FillVertex()
 		return;
 	}
 
+	const int nmax = (int)_pModel->GetVerCount();
+	const int nwrite = (_iVerNum < nmax) ? _iVerNum : nmax;
 	int nIndex = 9;//!���õ�VS������9��ʼ
-	for( int n = 0; n < _iVerNum; n++)
+	for( int n = 0; n < nwrite; n++)
 	{
 		pVertex[n].m_dwDiffuse = _dwColor;
 		pVertex[n].m_SPos.x = _SShadePos[n].x;
@@ -594,6 +608,12 @@ void CMPShadeMap::RenderSoft() {
 
 	_pModel->GetDev()->SetRenderStateForced(D3DRS_SRCBLEND, _eSrcBlend);
 	_pModel->GetDev()->SetRenderStateForced(D3DRS_DESTBLEND, _eDestBlend);
+	if (lwIsDx11Active())
+	{
+		_pModel->GetDev()->SetVertexShader(nullptr);
+		_pModel->GetDev()->SetVertexDeclaration(nullptr);
+		_pModel->GetDev()->SetTexture(1, NULL);
+	}
 
 	D3DXMATRIX t_mat;
 	D3DXMatrixIdentity(&t_mat);
@@ -1022,6 +1042,7 @@ CMPShadeCtrl::~CMPShadeCtrl(void)
 bool	CMPShadeCtrl::Create(s_string& strTexName,  CMPResManger	*pCResMagr, float fSize, 
 							 bool bAni,int iRow, int iColnum)
 {
+	TraceEffBindF("shadectrl Create tex=%s size=%.3f ani=%d", strTexName.c_str(), fSize, bAni ? 1 : 0);
 	SAFE_DELETE(_pShadeMap);
 	if(!bAni)
 		_pShadeMap = new CMPShadeMap;
@@ -1029,12 +1050,14 @@ bool	CMPShadeCtrl::Create(s_string& strTexName,  CMPResManger	*pCResMagr, float 
 		_pShadeMap = new CMPShadeEX;
 
 	_pShadeMap->setTextureName(strTexName);
+	TraceEffBind("shadectrl BoundingRes");
 	_pShadeMap->BoundingRes(pCResMagr);
-
+	TraceEffBind("shadectrl CreateShadeMap");
 	_pShadeMap->CreateShadeMap(fSize);
 	if(bAni)
 		((CMPShadeEX*)_pShadeMap)->CreateSpliteTexture(iRow,iColnum);
 
+	TraceEffBind("shadectrl Create done");
 	return true;
 }
 void	CMPShadeCtrl::SetAlphaType(D3DBLEND eSrcBlend, D3DBLEND eDestBlend)

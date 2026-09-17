@@ -1231,7 +1231,10 @@ LW_RESULT lwLockableStreamVB::Lock(UINT offset, UINT size, void** data, DWORD fl
 {
     LW_RESULT ret = LW_RET_FAILED;
 
-    if(_buf == 0 || _lock_cnt > 0 || (offset + size) >= _size)
+    if (data)
+        *data = 0;
+
+    if(_buf == 0 || _data == 0 || _lock_cnt > 0 || (offset + size) >= _size)
         goto __ret;
 
     _lock_offset = offset;
@@ -1256,8 +1259,12 @@ LW_RESULT lwLockableStreamVB::Unlock()
     void* d;
     DWORD s;
 
-    if(LW_FAILED(_buf->Lock(_lock_offset, _lock_size, &p, _lock_flag)))
+    const DWORD lock_flag = (_lock_offset == 0 && _lock_size == 0) ? D3DLOCK_DISCARD : _lock_flag;
+    if(LW_FAILED(_buf->Lock(_lock_offset, _lock_size, &p, lock_flag)) || !p)
+    {
+        _lock_cnt = 0;
         goto __ret;
+    }
 
     if(_lock_offset == 0 && _lock_size == 0)
     {

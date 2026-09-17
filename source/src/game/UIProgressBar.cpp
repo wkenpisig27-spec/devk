@@ -59,7 +59,9 @@ void CProgressBar::RenderHint(int x, int y) {
 	if (_eHintStyle == hsHintNum) {
 		sprintf(buf, "%s:%d/%d", _strHint.c_str(), (int)_step.GetPosition(), (int)_step.GetRange());
 	} else {
-		sprintf(buf, "%s:%.02f%%", _strHint.c_str(), _step.GetPosition() / _step.GetRange() * 100.0f);
+		const float range = _step.GetRange();
+		const float pct = (range > 0.0f) ? (_step.GetPosition() / range * 100.0f) : 100.0f;
+		sprintf(buf, "%s:%.02f%%", _strHint.c_str(), pct);
 	}
 	_RenderHint(buf, x, y);
 }

@@ -781,6 +781,8 @@ static LW_RESULT LoadTga(
     memcpy(&hdr, data, sizeof(hdr));
     if ((hdr.type != 2 && hdr.type != 10) || (hdr.bpp != 24 && hdr.bpp != 32) || hdr.width == 0 || hdr.height == 0)
         return LW_RET_FAILED;
+    if (hdr.width > 4096 || hdr.height > 4096)
+        return LW_RET_FAILED;
 
     const BYTE* src = data + sizeof(TgaHdr) + hdr.id_len;
     if (src > data + data_size)
@@ -884,6 +886,28 @@ static LW_RESULT LoadTga(
     return CreateFromPixels(device, pixels.data(), w, h, w * 4, DXGI_FORMAT_B8G8R8A8_UNORM, D3DFMT_A8R8G8B8, out_tex);
 }
 
+static int LooksLikeTga(const BYTE* data, UINT data_size)
+{
+    if (data_size < sizeof(TgaHdr))
+        return 0;
+    TgaHdr hdr;
+    memcpy(&hdr, data, sizeof(hdr));
+    if ((hdr.type != 2 && hdr.type != 10) || (hdr.bpp != 24 && hdr.bpp != 32))
+        return 0;
+    if (hdr.width == 0 || hdr.height == 0 || hdr.width > 4096 || hdr.height > 4096)
+        return 0;
+    const UINT header = (UINT)sizeof(TgaHdr) + hdr.id_len;
+    if (header >= data_size)
+        return 0;
+    if (hdr.type == 2)
+    {
+        const UINT need = (UINT)hdr.width * hdr.height * (hdr.bpp / 8);
+        if (header + need > data_size)
+            return 0;
+    }
+    return 1;
+}
+
 LW_RESULT lwD3D11CreateTextureFromMemory(
     ID3D11Device* device,
     const void* data,
@@ -902,11 +926,22 @@ LW_RESULT lwD3D11CreateTextureFromMemory(
         if (LoadDds(device, b, data_size, src_info, out_tex) == LW_RET_OK)
             return LW_RET_OK;
     }
-    if (LoadBmp(device, b, data_size, colorkey, src_info, out_tex) == LW_RET_OK)
+    if (data_size >= 2 && b[0] == 'B' && b[1] == 'M')
+    {
+        if (LoadBmp(device, b, data_size, colorkey, src_info, out_tex) == LW_RET_OK)
+            return LW_RET_OK;
+        if (LoadGdiplus(device, data, data_size, colorkey, src_info, out_tex) == LW_RET_OK)
+            return LW_RET_OK;
+        return LW_RET_FAILED;
+    }
+    if (LooksLikeTga(b, data_size))
+    {
+        if (LoadTga(device, b, data_size, colorkey, src_info, out_tex) == LW_RET_OK)
+            return LW_RET_OK;
+    }
+    else if (LoadGdiplus(device, data, data_size, colorkey, src_info, out_tex) == LW_RET_OK)
         return LW_RET_OK;
-    if (LoadGdiplus(device, data, data_size, colorkey, src_info, out_tex) == LW_RET_OK)
-        return LW_RET_OK;
-    if (LoadTga(device, b, data_size, colorkey, src_info, out_tex) == LW_RET_OK)
+    else if (LoadTga(device, b, data_size, colorkey, src_info, out_tex) == LW_RET_OK)
         return LW_RET_OK;
 
     lwD3D11Gap(LW_D3D11_GAP, "tex-decode", "CreateTextureFromMemory failed (%u bytes)", (unsigned)data_size);

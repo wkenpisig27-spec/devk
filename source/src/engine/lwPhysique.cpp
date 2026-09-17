@@ -926,12 +926,16 @@ LW_RESULT lwPhysique::Render()
                 DWORD rs_alphatest = FALSE;
                 DWORD rs_alpharef = 0;
                 DWORD rs_alphafunc = D3DCMP_ALWAYS;
+                DWORD rs_srcblend = D3DBLEND_SRCALPHA;
+                DWORD rs_destblend = D3DBLEND_INVSRCALPHA;
                 dev_obj->GetRenderState(D3DRS_CULLMODE, &rs_cull);
                 dev_obj->GetRenderState(D3DRS_ZWRITEENABLE, &rs_zwrite);
                 dev_obj->GetRenderState(D3DRS_ALPHABLENDENABLE, &rs_alphablend);
                 dev_obj->GetRenderState(D3DRS_ALPHATESTENABLE, &rs_alphatest);
                 dev_obj->GetRenderState(D3DRS_ALPHAREF, &rs_alpharef);
                 dev_obj->GetRenderState(D3DRS_ALPHAFUNC, &rs_alphafunc);
+                dev_obj->GetRenderState(D3DRS_SRCBLEND, &rs_srcblend);
+                dev_obj->GetRenderState(D3DRS_DESTBLEND, &rs_destblend);
 
                 for (DWORD i = 0; i < LW_MAX_SUBSKIN_NUM; i++)
                 {
@@ -968,7 +972,14 @@ LW_RESULT lwPhysique::Render()
                     // Re-assert after BeginSet: mesh RSA may have overridden CULLMODE
                     dev_obj->SetRenderStateForced(D3DRS_CULLMODE,         D3DCULL_CW);
                     dev_obj->SetRenderStateForced(D3DRS_ZWRITEENABLE,     FALSE);
-                    dev_obj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, FALSE);
+                    if (dx11) {
+                        // Light ink + coverage blend so 4x MSAA can soften the hull.
+                        dev_obj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, TRUE);
+                        dev_obj->SetRenderStateForced(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+                        dev_obj->SetRenderStateForced(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+                    } else {
+                        dev_obj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, FALSE);
+                    }
                     if (isTransparent) {
                         dev_obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE, TRUE);
                         dev_obj->SetRenderStateForced(D3DRS_ALPHAREF, 0x00000080);
@@ -998,6 +1009,8 @@ LW_RESULT lwPhysique::Render()
                 dev_obj->SetRenderStateForced(D3DRS_CULLMODE,         rs_cull);
                 dev_obj->SetRenderStateForced(D3DRS_ZWRITEENABLE,     rs_zwrite);
                 dev_obj->SetRenderStateForced(D3DRS_ALPHABLENDENABLE, rs_alphablend);
+                dev_obj->SetRenderStateForced(D3DRS_SRCBLEND,         rs_srcblend);
+                dev_obj->SetRenderStateForced(D3DRS_DESTBLEND,        rs_destblend);
                 dev_obj->SetRenderStateForced(D3DRS_ALPHATESTENABLE,  rs_alphatest);
                 dev_obj->SetRenderStateForced(D3DRS_ALPHAREF,         rs_alpharef);
                 dev_obj->SetRenderStateForced(D3DRS_ALPHAFUNC,        rs_alphafunc);

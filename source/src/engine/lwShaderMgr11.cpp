@@ -186,7 +186,7 @@ static const char* kModulatePS =
     "SamplerState samp0 : register(s0);\n"
     "float4 main(float4 pos : SV_POSITION, float4 col : COLOR0, float2 uv : TEXCOORD0) : SV_TARGET {\n"
     "  float4 tex = tex0.Sample(samp0, uv);\n"
-    "  float4 c = (extra.x > 0.5) ? float4(col.rgb, tex.a) : tex * col;\n"
+    "  float4 c = (extra.x > 0.5) ? float4(col.rgb, tex.a * 0.70) : tex * col;\n"
     "  if (extra.w >= 0 && c.a < extra.w) discard;\n"
     "  return c;\n"
     "}\n";

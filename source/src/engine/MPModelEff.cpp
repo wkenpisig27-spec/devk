@@ -32,46 +32,68 @@ void CEffectCortrol::FillDefaultUV(CEffectModel*	pCModel,TEXCOORD& coord)
 	}
 }
 
-void CEffectCortrol::FillModelUVSoft(CEffectModel* pCModel)
+static void FillUVFromBVector(CEffectModel* pCModel, S_BVECTOR<D3DXVECTOR2>& uvs)
 {
-	SEFFECT_VERTEX *pVertex;
+	if (!pCModel)
+		return;
+	const DWORD n = pCModel->GetVerCount();
+	const int nuv = uvs.size();
+	if (n == 0 || nuv <= 0)
+		return;
+
+	if (lwIsDx11Active() && pCModel->m_vEffVer)
+	{
+		for (DWORD i = 0; i < n; ++i)
+		{
+			D3DXVECTOR2* uv = uvs[(int)(i < (DWORD)nuv ? i : 0)];
+			if (uv)
+				pCModel->m_vEffVer[i].m_SUV = *uv;
+		}
+		return;
+	}
+
+	SEFFECT_VERTEX* pVertex = 0;
 	pCModel->Lock((BYTE**)&pVertex);
 	if (!pVertex)
 		return;
-	for(WORD i = 0; i < pCModel->GetVerCount(); ++i)
+	for (DWORD i = 0; i < n; ++i)
 	{
-		pVertex[i].m_SUV = *m_vecCurCoord[i];
+		D3DXVECTOR2* uv = uvs[(int)(i < (DWORD)nuv ? i : 0)];
+		if (uv)
+			pVertex[i].m_SUV = *uv;
 	}
 	pCModel->Unlock();
+}
+
+void CEffectCortrol::FillModelUVSoft(CEffectModel* pCModel)
+{
+	FillUVFromBVector(pCModel, m_vecCurCoord);
 }
 
 void CEffectCortrol::FillTextureUVSoft(CEffectModel* pCModel)
 {
-	SEFFECT_VERTEX *pVertex;
-	pCModel->Lock((BYTE**)&pVertex);
-	if (!pVertex)
-		return;
-	for(WORD i = 0; i < pCModel->GetVerCount(); ++i)
-	{
-		pVertex[i].m_SUV = *m_lpCurTex[i];
-	}
-	pCModel->Unlock();
+	FillUVFromBVector(pCModel, m_lpCurTex);
 }
 
 void CEffectCortrol::FillDefaultUVSoft(CEffectModel* pCModel, TEXCOORD& coord)
 {
-	SEFFECT_VERTEX* pVertex;
+	if (!pCModel)
+		return;
+	const DWORD n = pCModel->GetVerCount();
+	const DWORD ncoord = (DWORD)coord.size();
+	if (n == 0 || ncoord == 0)
+		return;
+	if (lwIsDx11Active() && pCModel->m_vEffVer)
+	{
+		for (DWORD i = 0; i < n; ++i)
+			pCModel->m_vEffVer[i].m_SUV = coord[i < ncoord ? i : 0];
+		return;
+	}
+	SEFFECT_VERTEX* pVertex = 0;
 	pCModel->Lock((BYTE**)&pVertex);
 	if (!pVertex)
 		return;
-	const WORD n = pCModel->GetVerCount();
-	const WORD ncoord = (WORD)coord.size();
-	if (ncoord == 0)
-	{
-		pCModel->Unlock();
-		return;
-	}
-	for (WORD i = 0; i < n; ++i)
+	for (DWORD i = 0; i < n; ++i)
 		pVertex[i].m_SUV = coord[i < ncoord ? i : 0];
 	pCModel->Unlock();
 }
@@ -80,6 +102,8 @@ static void Dx11BindEffectPass(I_Effect* eff, const D3DXMATRIX& world, const D3D
 {
 	if (!lwIsDx11Active() || !eff || !eff->m_pDev)
 		return;
+	eff->m_pDev->SetVertexShader(nullptr);
+	eff->m_pDev->SetVertexDeclaration(nullptr);
 	eff->m_pDev->SetTransformWorld((const lwMatrix44*)&world);
 	eff->m_pDev->SetRenderState(D3DRS_TEXTUREFACTOR, (DWORD)color);
 	eff->m_pDev->SetTextureStageStateForced(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
@@ -88,6 +112,10 @@ static void Dx11BindEffectPass(I_Effect* eff, const D3DXMATRIX& world, const D3D
 	eff->m_pDev->SetTextureStageStateForced(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
 	eff->m_pDev->SetTextureStageStateForced(0, D3DTSS_ALPHAARG2, D3DTA_TFACTOR);
 	eff->m_pDev->SetTextureStageStateForced(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+	eff->m_pDev->SetTextureStageStateForced(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+	eff->m_pDev->SetTextureStageStateForced(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+	eff->m_pDev->SetTextureStageStateForced(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+	eff->m_pDev->SetTexture(1, NULL);
 }
 
 static void Dx11FillEffectUV(CEffectCortrol* ctrl, I_Effect* eff)
@@ -95,7 +123,10 @@ static void Dx11FillEffectUV(CEffectCortrol* ctrl, I_Effect* eff)
 	if (!lwIsDx11Active() || !ctrl || !eff || !eff->m_pCModel)
 		return;
 	if (eff->getType() == EFFECT_MODEL)
+	{
+		eff->m_pCModel->RestoreBaseUV();
 		return;
+	}
 	if (eff->getType() == EFFECT_MODELUV)
 		ctrl->FillModelUVSoft(eff->m_pCModel);
 	else if (eff->getType() == EFFECT_FRAMETEX)
@@ -129,12 +160,14 @@ bool	CEffPath::LoadPathFromFile(char* pszName)
 	fread( &num,sizeof( DWORD ),1,stream );
 
 	m_iFrameCount = num;
+	if (m_iFrameCount > 200)
+		m_iFrameCount = 200;
+	if (m_iFrameCount < 1) {
+		fclose(stream);
+		return false;
+	}
 
-	//m_vecPath = new D3DXVECTOR3[m_iFrameCount];
-	//m_vecDist = new float[m_iFrameCount-1];
-	//m_vecDir = new D3DXVECTOR3[m_iFrameCount-1];
-
-	for(DWORD n = 0; n < num; n++)
+	for(DWORD n = 0; n < (DWORD)m_iFrameCount; n++)
 	{
 		fread( &tvec,sizeof( D3DXVECTOR3 ),1,stream );
 		ftemp = tvec.y;
@@ -146,7 +179,7 @@ bool	CEffPath::LoadPathFromFile(char* pszName)
 	}
 	fclose( stream );
 
-	for( int n=0;n < num -1;n++ )
+	for( int n=0;n < m_iFrameCount -1;n++ )
 	{
 		m_vecDir[n] = m_vecPath[n+1] - m_vecPath[n];
 		m_vecDist[n] = D3DXVec3Length( &m_vecDir[n] );
@@ -166,6 +199,10 @@ bool CEffPath::LoadPathFromFileLet(const char* file)
         return false;
     data = et.GetData();
     j = data->GetFrameNum();
+    if (j > 200)
+        j = 200;
+    if (j < 1)
+        return false;
     for(i = 0; i < j; i++)
     {
         data->GetValue(&mat, (float)i);
@@ -782,7 +819,13 @@ void CMPModelEff::RenderVS()
 
 				m_pCEffect->m_pCModel->FrameMove(0);
 				m_pCEffect->SetTexture();
-				D3DXMatrixTranspose(&vertexShaderMat, m_pCEffect->m_pCModel->GetPrimitive()->GetRenderCtrlAgent()->GetGlobalMatrix());
+				lwIPrimitive* prim = m_pCEffect->m_pCModel->GetPrimitive();
+				lwIRenderCtrlAgent* rca = prim ? prim->GetRenderCtrlAgent() : 0;
+				const lwMatrix44* gm = rca ? rca->GetGlobalMatrix() : 0;
+				if (gm)
+					D3DXMatrixTranspose(&vertexShaderMat, gm);
+				else
+					D3DXMatrixIdentity(&vertexShaderMat);
 			}
 			else
 			{

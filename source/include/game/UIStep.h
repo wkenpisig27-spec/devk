@@ -22,10 +22,27 @@ public:
 	bool Sub(float v);
 	bool SetRange(float min, float max);
 	float GetRange() { return _fMax - _fMin; }
-	float GetRate() { return _fPosition / (_fMax - _fMin); }
+	float GetRate()
+	{
+		const float span = _fMax - _fMin;
+		if (span <= 0.0f)
+			return 0.0f;
+		return _fPosition / span;
+	}
 	float GetPosition() { return _fPosition; }
 
-	int GetShowPosition() { return (int)(_fPosition / (_fMax - _fMin) * fLen); }
+	int GetShowPosition()
+	{
+		const float span = _fMax - _fMin;
+		if (span <= 0.0f || fLen <= 0.0f)
+			return 0;
+		float w = _fPosition / span * fLen;
+		if (w < 0.0f)
+			w = 0.0f;
+		if (w > fLen)
+			w = fLen;
+		return (int)(w + 0.5f);
+	}
 	bool SetShowPosition(float fPos);
 
 	float fStep; // 递增步长

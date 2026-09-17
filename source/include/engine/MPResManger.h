@@ -345,6 +345,7 @@ protected:
 	char								_psDefault[418];
 //////////////////////////////////////////////////////////////////////////
 	int									_iPartCtrlNum;
+	bool								_bPartCtrlLoaded;
 	VEC_string							_vecPartName;
 //#ifdef USE_GAME
 //	std::vector<CMemoryBuf>				_vecPartCtrl;

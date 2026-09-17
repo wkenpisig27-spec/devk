@@ -179,6 +179,8 @@ int I_Effect::BoundingRes(CMPResManger	*m_CResMagr, const char* pszParentName)
 {
 	//!����0��ʾ����װ�룬1��ʾȱ����ͼ��2��ʾȱ��ģ�͡�3��ʾ��shade
 	int t_iID = 0;
+	TraceEffBindF("ieffect BoundingRes parent=%s model=%s type=%d billboard=%d",
+		pszParentName ? pszParentName : "", m_strModelName.c_str(), (int)_eEffectType, _bBillBoard ? 1 : 0);
 
 	// װ������
 	if(_eEffectType == EFFECT_FRAMETEX)
@@ -199,17 +201,18 @@ int I_Effect::BoundingRes(CMPResManger	*m_CResMagr, const char* pszParentName)
 	}
 	else
 	{
+		TraceEffBindF("ieffect GetTexture %s", m_CTextruelist.m_vecTexName.c_str());
 		m_CTextruelist.m_pTex = 
 			m_CResMagr->GetTextureByNamelw(m_CTextruelist.m_vecTexName);
 		if (!m_CTextruelist.m_pTex)
 		{
-			char pszMsg[64];
-			sprintf(pszMsg,"��Ч�ļ�[%s]������ͼ[%s]ʱ����",
-			pszParentName,m_CTextruelist.m_vecTexName.c_str());
-			LG("ERROR","msg%s",pszMsg);
+			LG("error", "effect [%s] missing texture [%s]\n",
+				pszParentName ? pszParentName : "", m_CTextruelist.m_vecTexName.c_str());
+			TraceEffBind("ieffect GetTexture missing");
 			return 1;
 		}
 		m_CTextruelist.m_lpCurTex = m_CTextruelist.m_pTex->GetTex();
+		TraceEffBind("ieffect GetTexture done");
 	}
 
 
@@ -240,6 +243,7 @@ int I_Effect::BoundingRes(CMPResManger	*m_CResMagr, const char* pszParentName)
 	{
 		if(!m_pCModel)
 		{
+			TraceEffBindF("ieffect NewTobMesh %s", m_strModelName.c_str());
 			m_pCModel = m_CResMagr->NewTobMesh();
 			if(!m_pCModel->CreateTob(m_strModelName, m_nSegments,m_rHeight,m_rRadius,m_rBotRadius))
 			{
@@ -249,11 +253,13 @@ int I_Effect::BoundingRes(CMPResManger	*m_CResMagr, const char* pszParentName)
 				LG("ERROR","msg%s",pszMsg);
 				return 2;
 			}
+			TraceEffBind("ieffect CreateTob done");
 		}
 	}
 	else
 	{
 		m_pCModel = m_CResMagr->GetMeshByName(m_strModelName);
+		TraceEffBindF("ieffect GetMeshByName %s ok=%d", m_strModelName.c_str(), m_pCModel ? 1 : 0);
 		if (!m_pCModel)
 		{
 			char pszMsg[64];
@@ -282,6 +288,7 @@ int I_Effect::BoundingRes(CMPResManger	*m_CResMagr, const char* pszParentName)
 	//}
 
 	// Success 
+	TraceEffBind("ieffect BoundingRes done");
 	return 0;
 }
 //-----------------------------------------------------------------------------
@@ -947,7 +954,16 @@ void	I_Effect::SetTexture()
 void	I_Effect::SetVertexShader()
 {
 #ifdef USE_RENDER
-	if (lwIsDx11Active() || !m_pDev)
+	if (lwIsDx11Active())
+	{
+		if (m_pDev)
+		{
+			m_pDev->SetVertexShader(nullptr);
+			m_pDev->SetVertexDeclaration(nullptr);
+		}
+		return;
+	}
+	if (!m_pDev)
 		return;
 #endif
 	IDirect3DVertexShaderX* vs = ResMgr.GetVShaderByID(_iVSIndex);
@@ -967,6 +983,10 @@ void	I_Effect::Render()
 			m_pCModel->RenderTob(&_CylinderParam[m_ilast],&_CylinderParam[m_inext],m_flerp);
 		else
 			m_pCModel->RenderModel();
+#ifdef USE_RENDER
+		if (lwIsDx11Active())
+			m_pCModel->RestoreBaseUV();
+#endif
 	}
 }
 
@@ -980,6 +1000,8 @@ CEffectModel::CEffectModel()
 
 #ifdef USE_MGR
 	_lwMesh = NULL;
+	_lpSVB = NULL;
+	_lpSIB = NULL;
 #else
 	_lpIB = NULL;
 	_lpVB = NULL;
@@ -1022,6 +1044,8 @@ CEffectModel::CEffectModel(IDirect3DDeviceX*  pDev,lwIResourceMgr*	pRes)
 
 #ifdef USE_MGR
 	_lwMesh = NULL;
+	_lpSVB = NULL;
+	_lpSIB = NULL;
 #else
 	_lpIB = NULL;
 	_lpVB = NULL;
@@ -1078,6 +1102,8 @@ void	CEffectModel::ReleaseModel()
 		}
 	}
 	SAFE_RELEASE(_lwMesh);
+	_lpSVB = NULL;
+	_lpSIB = NULL;
 #else
 	if(!_lpVB)
 		if(m_bItem)
@@ -1094,6 +1120,7 @@ void	CEffectModel::ReleaseModel()
 
 	SAFE_DELETE_ARRAY(m_vEffVer);
 	m_bItem = false;
+	_baseUV.clear();
 
 	m_iID = -1;
 }
@@ -1155,6 +1182,7 @@ bool	CEffectModel::CreateTriangle()
 
 	_lpSVB = _lwMesh->GetLockableStreamVB();
 	_lpSIB = _lwMesh->GetLockableStreamIB();
+	CaptureBaseUV();
 
 #else
 
@@ -1255,6 +1283,7 @@ bool	CEffectModel::CreatePlaneTriangle()
 
 	_lpSVB = _lwMesh->GetLockableStreamVB();
 	_lpSIB = _lwMesh->GetLockableStreamIB();
+	CaptureBaseUV();
 
 #else
 
@@ -1355,6 +1384,7 @@ bool	CEffectModel::CreateRect()
 	_lwMesh->LoadVideoMemory();
 	_lpSVB = _lwMesh->GetLockableStreamVB();
 	_lpSIB = _lwMesh->GetLockableStreamIB();
+	CaptureBaseUV();
 
 #else
 
@@ -1463,6 +1493,7 @@ bool	CEffectModel::CreateRectZ()
 	_lwMesh->LoadVideoMemory();
 	_lpSVB = _lwMesh->GetLockableStreamVB();
 	_lpSIB = _lwMesh->GetLockableStreamIB();
+	CaptureBaseUV();
 
 #else
 
@@ -1570,6 +1601,7 @@ bool	CEffectModel::CreatePlaneRect()
 	_lwMesh->LoadVideoMemory();
 	_lpSVB = _lwMesh->GetLockableStreamVB();
 	_lpSIB = _lwMesh->GetLockableStreamIB();
+	CaptureBaseUV();
 
 #else
 
@@ -1632,19 +1664,65 @@ bool	CEffectModel::CreateCone(int nSeg,float fHei,float fRadius)
 {
 	//ReleaseModel();
 
+	if (nSeg < 1)
+		nSeg = 1;
+	if (nSeg > 128)
+		nSeg = 128;
 	m_nSegments = nSeg;
 	m_rHeight = fHei;
 	m_rRadius = 0;
 	m_rBotRadius	= fRadius;
 
-	_dwVerCount = m_nSegments * 3;
+	_dwVerCount = (DWORD)(m_nSegments + 1) * 2;
 	_dwFaceCount = m_nSegments * 2;
 	
 	if (_lwMesh != NULL)
 		SAFE_RELEASE(_lwMesh);
 
+	if(m_vEffVer != NULL)
+		SAFE_DELETE_ARRAY(m_vEffVer);
+	m_vEffVer = new SEFFECT_VERTEX[_dwVerCount];
+
 #ifdef USE_MGR
+	if (lwIsDx11Active() || !m_pRes)
+	{
+		int idx = 0;
+		const float rDeltaSegAngle = (2.0f * D3DX_PI / m_nSegments);
+		const float rSegmentLength = 1.0f / (float)m_nSegments;
+		for (int nCurrentSegment = 0; nCurrentSegment <= m_nSegments && (DWORD)(idx + 1) < _dwVerCount; nCurrentSegment++)
+		{
+			const float xTop = 0.0f;
+			const float zTop = 0.0f;
+			m_vEffVer[idx].m_SPos = D3DXVECTOR3(xTop, zTop, m_rHeight);
+			m_vEffVer[idx].m_SUV = D3DXVECTOR2(1.0f - (rSegmentLength * (float)nCurrentSegment), 0.0f);
+			m_vEffVer[idx].m_fIdx = (float)idx;
+			m_vEffVer[idx].m_dwDiffuse = 0xffffffff;
+			idx++;
+
+			const float x0 = m_rBotRadius * sinf(nCurrentSegment * rDeltaSegAngle);
+			const float z0 = m_rBotRadius * cosf(nCurrentSegment * rDeltaSegAngle);
+			m_vEffVer[idx].m_SPos = D3DXVECTOR3(x0, z0, 0.0f);
+			m_vEffVer[idx].m_SUV = D3DXVECTOR2(1.0f - (rSegmentLength * (float)nCurrentSegment), 1.5f);
+			m_vEffVer[idx].m_fIdx = (float)idx;
+			m_vEffVer[idx].m_dwDiffuse = 0xffffffff;
+			idx++;
+		}
+		for (DWORD n = (DWORD)idx; n < _dwVerCount; n++)
+		{
+			m_vEffVer[n].m_SPos = D3DXVECTOR3(0, 0, 0);
+			m_vEffVer[n].m_SUV = D3DXVECTOR2(0, 0);
+			m_vEffVer[n].m_fIdx = (float)n;
+			m_vEffVer[n].m_dwDiffuse = 0xffffffff;
+		}
+		_lpSVB = NULL;
+		_lpSIB = NULL;
+		m_strName = MESH_CONE;
+		m_bChangeably = true;
+		return true;
+	}
 	m_pRes->CreateMesh(&_lwMesh);
+	if (_lwMesh == NULL)
+		return false;
 	_lwMesh->SetStreamType(STREAM_LOCKABLE);
 
 	lwMeshInfo mi;
@@ -1666,7 +1744,7 @@ bool	CEffectModel::CreateCone(int nSeg,float fHei,float fRadius)
 	float rDeltaSegAngle = (2.0f * D3DX_PI / m_nSegments);
 	float rSegmentLength = 1.0f / (float)m_nSegments;
 	float ny0 = (90.0f - (float)D3DXToDegree(atan(m_rHeight / m_rBotRadius))) / 90.0f;
-	for(nCurrentSegment = 0; nCurrentSegment <= m_nSegments; nCurrentSegment++)
+	for(nCurrentSegment = 0; nCurrentSegment <= m_nSegments && (DWORD)(idx + 1) < _dwVerCount; nCurrentSegment++)
 	{
 		float x0 = m_rBotRadius * sinf(nCurrentSegment * rDeltaSegAngle);
 		float z0 = m_rBotRadius * cosf(nCurrentSegment * rDeltaSegAngle);
@@ -1676,6 +1754,8 @@ bool	CEffectModel::CreateCone(int nSeg,float fHei,float fRadius)
 		mi.vertex_seq[idx].y = 0.0f;
 		mi.texcoord0_seq[idx].x = 1.0f - (rSegmentLength * (float)nCurrentSegment);
 		mi.texcoord0_seq[idx].y = 0.0f;
+		m_vEffVer[idx].m_SPos = (D3DXVECTOR3)mi.vertex_seq[idx];
+		m_vEffVer[idx].m_SUV = (D3DXVECTOR2)mi.texcoord0_seq[idx];
 		idx++;
 
 		mi.vertex_seq[idx].x = x0;
@@ -1683,12 +1763,16 @@ bool	CEffectModel::CreateCone(int nSeg,float fHei,float fRadius)
 		mi.vertex_seq[idx].y = z0;
 		mi.texcoord0_seq[idx].x = 1.0f - (rSegmentLength * (float)nCurrentSegment);
 		mi.texcoord0_seq[idx].y = 1.5f;
+		m_vEffVer[idx].m_SPos = (D3DXVECTOR3)mi.vertex_seq[idx];
+		m_vEffVer[idx].m_SUV = (D3DXVECTOR2)mi.texcoord0_seq[idx];
 		idx++;
 	}
-	for (WORD n = 0; n < _dwVerCount; n++)
+	for (DWORD n = 0; n < _dwVerCount; n++)
 	{
 		mi.blend_seq[n].weight[0] = n;
 		mi.vercol_seq[n] = 0xffffffff;
+		m_vEffVer[n].m_fIdx = (float)n;
+		m_vEffVer[n].m_dwDiffuse = 0xffffffff;
 	}
 
 	lwSubsetInfo_Construct(&mi.subset_seq[0], _dwFaceCount, 0, _dwVerCount, 0);
@@ -1699,6 +1783,7 @@ bool	CEffectModel::CreateCone(int nSeg,float fHei,float fRadius)
 	if(LW_FAILED(_lwMesh->LoadVideoMemory()))
 		return 0;
 	_lpSVB = _lwMesh->GetLockableStreamVB();
+	CaptureBaseUV();
 	//_lpSIB = _lwMesh->GetLockableStreamIB();
 
 #else
@@ -1740,7 +1825,8 @@ bool	CEffectModel::CreateCone(int nSeg,float fHei,float fRadius)
 	float ny0 = (90.0f - (float)D3DXToDegree(atan(m_rHeight / m_rBotRadius))) / 90.0f;
 
 	//For each segment, add a triangle to the sides triangle list
-	for(nCurrentSegment = 0; nCurrentSegment <= m_nSegments; nCurrentSegment++)
+	DWORD written = 0;
+	for(nCurrentSegment = 0; nCurrentSegment <= m_nSegments && written + 1 < _dwVerCount; nCurrentSegment++)
 	{
 		float x0 = m_rBotRadius * sinf(nCurrentSegment * rDeltaSegAngle);
 		float z0 = m_rBotRadius * cosf(nCurrentSegment * rDeltaSegAngle);
@@ -1752,6 +1838,7 @@ bool	CEffectModel::CreateCone(int nSeg,float fHei,float fRadius)
 		pVertex->m_SUV.y = 0.0f;
 		pVertex->m_dwDiffuse = 0xffffffff;
 		pVertex++;
+		written++;
 
 		pVertex->m_SPos.x = x0;
 		pVertex->m_SPos.z = 0.0f;
@@ -1760,6 +1847,7 @@ bool	CEffectModel::CreateCone(int nSeg,float fHei,float fRadius)
 		pVertex->m_SUV.y = 1.5f;
 		pVertex->m_dwDiffuse = 0xffffffff;
 		pVertex++;
+		written++;
 
 		////Set three indices (1 triangle) per segment
 		//*pIndices = wVertexIndex; 
@@ -1831,12 +1919,16 @@ bool	CEffectModel::CreateCylinder(int nSeg,float fHei,float fTopRadius,float fBo
 {
 	//ReleaseModel();
 
+	if (nSeg < 1)
+		nSeg = 1;
+	if (nSeg > 128)
+		nSeg = 128;
 	m_nSegments = nSeg;
 	m_rHeight = fHei;
 	m_rRadius	= fTopRadius;
 	m_rBotRadius = fBottomRadius;
 
-	_dwVerCount = m_nSegments * 3;
+	_dwVerCount = (DWORD)(m_nSegments + 1) * 2;
 	_dwFaceCount = m_nSegments * 2;
 	
 	if (_lwMesh != NULL)
@@ -1847,6 +1939,42 @@ bool	CEffectModel::CreateCylinder(int nSeg,float fHei,float fTopRadius,float fBo
 
 	m_vEffVer = new SEFFECT_VERTEX[_dwVerCount];
 #ifdef USE_MGR
+	if (lwIsDx11Active() || !m_pRes)
+	{
+		int idx = 0;
+		const float rDeltaSegAngle = (2.0f * D3DX_PI / m_nSegments);
+		const float rSegmentLength = 1.0f / (float)m_nSegments;
+		for (int nCurrentSegment = 0; nCurrentSegment <= m_nSegments && (DWORD)(idx + 1) < _dwVerCount; nCurrentSegment++)
+		{
+			float x0 = m_rRadius * sinf(nCurrentSegment * rDeltaSegAngle);
+			float z0 = m_rRadius * cosf(nCurrentSegment * rDeltaSegAngle);
+			m_vEffVer[idx].m_SPos = D3DXVECTOR3(x0, z0, m_rHeight);
+			m_vEffVer[idx].m_SUV = D3DXVECTOR2(1.0f - (rSegmentLength * (float)nCurrentSegment), 0.0f);
+			m_vEffVer[idx].m_fIdx = (float)idx;
+			m_vEffVer[idx].m_dwDiffuse = 0xffffffff;
+			idx++;
+
+			x0 = m_rBotRadius * sinf(nCurrentSegment * rDeltaSegAngle);
+			z0 = m_rBotRadius * cosf(nCurrentSegment * rDeltaSegAngle);
+			m_vEffVer[idx].m_SPos = D3DXVECTOR3(x0, z0, 0.0f);
+			m_vEffVer[idx].m_SUV = D3DXVECTOR2(1.0f - (rSegmentLength * (float)nCurrentSegment), 1.0f);
+			m_vEffVer[idx].m_fIdx = (float)idx;
+			m_vEffVer[idx].m_dwDiffuse = 0xffffffff;
+			idx++;
+		}
+		for (DWORD n = (DWORD)idx; n < _dwVerCount; n++)
+		{
+			m_vEffVer[n].m_SPos = D3DXVECTOR3(0, 0, 0);
+			m_vEffVer[n].m_SUV = D3DXVECTOR2(0, 0);
+			m_vEffVer[n].m_fIdx = (float)n;
+			m_vEffVer[n].m_dwDiffuse = 0xffffffff;
+		}
+		_lpSVB = NULL;
+		_lpSIB = NULL;
+		m_strName = MESH_CYLINDER;
+		m_bChangeably = true;
+		return true;
+	}
 	m_pRes->CreateMesh(&_lwMesh);
 	if (_lwMesh == NULL)
 		return false;
@@ -1871,7 +1999,7 @@ bool	CEffectModel::CreateCylinder(int nSeg,float fHei,float fTopRadius,float fBo
 	float rDeltaSegAngle = (2.0f * D3DX_PI / m_nSegments);
 	float rSegmentLength = 1.0f / (float)m_nSegments;
 	float ny0 = (90.0f - (float)D3DXToDegree(atan(m_rHeight / m_rRadius))) / 90.0f;
-	for(nCurrentSegment = 0; nCurrentSegment <= m_nSegments; nCurrentSegment++)
+	for(nCurrentSegment = 0; nCurrentSegment <= m_nSegments && (DWORD)(idx + 1) < _dwVerCount; nCurrentSegment++)
 	{
 		float x0 = m_rRadius * sinf(nCurrentSegment * rDeltaSegAngle);
 		float z0 = m_rRadius * cosf(nCurrentSegment * rDeltaSegAngle);
@@ -1904,7 +2032,7 @@ bool	CEffectModel::CreateCylinder(int nSeg,float fHei,float fTopRadius,float fBo
 
 		idx++;
 	}
-	for (WORD n = 0; n < _dwVerCount; n++)
+	for (DWORD n = 0; n < _dwVerCount; n++)
 	{
 		mi.blend_seq[n].weight[0] = n;
 		mi.vercol_seq[n] = 0xffffffff;
@@ -1921,6 +2049,7 @@ bool	CEffectModel::CreateCylinder(int nSeg,float fHei,float fTopRadius,float fBo
 	if(LW_FAILED(_lwMesh->LoadVideoMemory()))
 		return 0;
 	_lpSVB = _lwMesh->GetLockableStreamVB();
+	CaptureBaseUV();
 	//_lpSIB = _lwMesh->GetLockableStreamIB();
 
 #else
@@ -1948,7 +2077,8 @@ bool	CEffectModel::CreateCylinder(int nSeg,float fHei,float fTopRadius,float fBo
 	float ny0 = (90.0f - (float)D3DXToDegree(atan(m_rHeight / m_rRadius))) / 90.0f;
 
 	//For each segment, add a triangle to the sides triangle list
-	for(nCurrentSegment = 0; nCurrentSegment <= m_nSegments; nCurrentSegment++)
+	DWORD written = 0;
+	for(nCurrentSegment = 0; nCurrentSegment <= m_nSegments && written + 1 < _dwVerCount; nCurrentSegment++)
 	{
 		float x0 = m_rRadius * sinf(nCurrentSegment * rDeltaSegAngle);
 		float z0 = m_rRadius * cosf(nCurrentSegment * rDeltaSegAngle);
@@ -1960,6 +2090,7 @@ bool	CEffectModel::CreateCylinder(int nSeg,float fHei,float fTopRadius,float fBo
 		pVertex->m_SUV.y = 0.0f;
 		pVertex->m_dwDiffuse = 0xffffffff;
 		pVertex++;
+		written++;
 
 		x0 = m_rBotRadius * sinf(nCurrentSegment * rDeltaSegAngle);
 		z0 = m_rBotRadius * cosf(nCurrentSegment * rDeltaSegAngle);
@@ -1970,6 +2101,7 @@ bool	CEffectModel::CreateCylinder(int nSeg,float fHei,float fTopRadius,float fBo
 		pVertex->m_SUV.y = 1.0f;
 		pVertex->m_dwDiffuse = 0xffffffff;
 		pVertex++;
+		written++;
 	}
 
 	if(FAILED(_lpVB->Unlock()))
@@ -1989,7 +2121,18 @@ bool	CEffectModel::CreateShadeModel(WORD wVerNum , WORD wFaceNum,int iGridCrossN
 	_dwFaceCount= wFaceNum;
 
 #ifdef USE_MGR
+	if (!m_pRes)
+		return false;
+	if (iGridCrossNum < 1)
+		iGridCrossNum = 1;
+	if (iGridCrossNum > 32)
+		iGridCrossNum = 32;
+	_dwVerCount = (DWORD)(iGridCrossNum + 1) * (DWORD)(iGridCrossNum + 1);
+	_dwFaceCount = (DWORD)iGridCrossNum * (DWORD)iGridCrossNum * 2;
+	TraceEffBindF("shade CreateShadeModel verts=%u faces=%u", _dwVerCount, _dwFaceCount);
 	m_pRes->CreateMesh(&_lwMesh);
+	if (_lwMesh == NULL)
+		return false;
 	//if(usesoft)
 		_lwMesh->SetStreamType(STREAM_LOCKABLE);
 
@@ -1997,14 +2140,14 @@ bool	CEffectModel::CreateShadeModel(WORD wVerNum , WORD wFaceNum,int iGridCrossN
 	mi.fvf = EFFECT_SHADE_FVF;
 	mi.pt_type = D3DPT_TRIANGLELIST;
 	mi.subset_num = 1;
-	mi.vertex_num = wVerNum;
+	mi.vertex_num = _dwVerCount;
 	mi.vertex_seq = LW_NEW(lwVector3[mi.vertex_num]);
 	mi.blend_seq =  LW_NEW(lwBlendInfo[mi.vertex_num]);
 	mi.vercol_seq = LW_NEW(DWORD[mi.vertex_num]);
 	mi.texcoord0_seq = LW_NEW(lwVector2[mi.vertex_num]);
 	mi.texcoord1_seq = LW_NEW(lwVector2[mi.vertex_num]);
     mi.subset_seq = LW_NEW(lwSubsetInfo[mi.subset_num]);
-	mi.index_num = wFaceNum * 6;
+	mi.index_num = _dwFaceCount * 3;
 	mi.index_seq = LW_NEW(DWORD[mi.index_num ]);
 	int nIndex = 9;//!���õ�VS������9��ʼ
 	for( DWORD n = 0; n < mi.vertex_num; n++)
@@ -2048,7 +2191,7 @@ bool	CEffectModel::CreateShadeModel(WORD wVerNum , WORD wFaceNum,int iGridCrossN
 			mi.index_seq[nIndex++] = (nX+1) + (nY+1) * (iGridCrossNum + 1);
 		}
 	}
-	lwSubsetInfo_Construct(&mi.subset_seq[0], wFaceNum, 0, wVerNum, 0);
+	lwSubsetInfo_Construct(&mi.subset_seq[0], _dwFaceCount, 0, _dwVerCount, 0);
 
 	if(LW_FAILED( _lwMesh->LoadSystemMemory(&mi)))
 		LG("error","msg��Ӱģ��װ��ϵͳ�ڴ�ʧ��");
@@ -2162,22 +2305,90 @@ void	CEffectModel::Begin()
 {
 	//Ҫ��vsָ��������
 	//m_pDev->SetVertexShader(EFFECT_VER_FVF);
+#ifdef USE_RENDER
+	if (lwIsDx11Active() && m_pDev)
+	{
+		m_pDev->SetVertexShader(nullptr);
+		m_pDev->SetVertexDeclaration(nullptr);
+	}
+#endif
 #ifdef USE_MGR
 	if(_lwMesh)
 		_lwMesh->BeginSet();
 #endif
 
 }
+
+void CEffectModel::CaptureBaseUV()
+{
+	_baseUV.clear();
+	if (_dwVerCount == 0)
+		return;
+	if (m_vEffVer)
+	{
+		_baseUV.resize(_dwVerCount);
+		for (DWORD i = 0; i < _dwVerCount; ++i)
+			_baseUV[i] = m_vEffVer[i].m_SUV;
+		return;
+	}
+	BYTE* raw = 0;
+	Lock(&raw);
+	if (!raw)
+		return;
+	SEFFECT_VERTEX* v = (SEFFECT_VERTEX*)raw;
+	_baseUV.resize(_dwVerCount);
+	for (DWORD i = 0; i < _dwVerCount; ++i)
+		_baseUV[i] = v[i].m_SUV;
+	Unlock();
+}
+
+void CEffectModel::RestoreBaseUV()
+{
+	if (_baseUV.empty() || _baseUV.size() != _dwVerCount)
+		return;
+	if (m_vEffVer)
+	{
+		for (DWORD i = 0; i < _dwVerCount; ++i)
+			m_vEffVer[i].m_SUV = _baseUV[i];
+		return;
+	}
+	BYTE* raw = 0;
+	Lock(&raw);
+	if (!raw)
+		return;
+	SEFFECT_VERTEX* v = (SEFFECT_VERTEX*)raw;
+	for (DWORD i = 0; i < _dwVerCount; ++i)
+		v[i].m_SUV = _baseUV[i];
+	Unlock();
+}
+
 void	CEffectModel::SetRenderNum(WORD wVer,WORD wFace)
 {
+	_dwVerCount = wVer;
+	_dwFaceCount = wFace;
 #ifdef USE_MGR
+	if (!_lwMesh)
+		return;
 	lwMeshInfo* mi = _lwMesh->GetMeshInfo();
+	if (!mi || !mi->subset_seq)
+		return;
 	lwSubsetInfo_Construct(&mi->subset_seq[0], wFace, 0, wVer, 0);
 #endif
 }
 
 void	CEffectModel::RenderModel()
 {
+	if (lwIsDx11Active() && m_vEffVer && m_bChangeably && m_pDev && _dwVerCount >= 3)
+	{
+		m_pDev->SetVertexShader(nullptr);
+		m_pDev->SetFVF(EFFECT_VER_FVF);
+		UINT faces = _dwFaceCount;
+		if (faces + 2 > _dwVerCount)
+			faces = _dwVerCount - 2;
+		if (faces)
+			m_pDev->DrawPrimitiveUP_Dynamic(D3DPT_TRIANGLESTRIP, faces, m_vEffVer, sizeof(SEFFECT_VERTEX));
+		return;
+	}
 #ifdef USE_MGR
 	if(!_lwMesh)
 	{
@@ -2229,6 +2440,10 @@ void	CEffectModel::RenderModel()
 }
 
 void CEffectModel::End()  {
+#ifdef USE_RENDER
+	if (lwIsDx11Active())
+		RestoreBaseUV();
+#endif
 	//this been added when we fixed circle shadow not sure 100% of it but so far it works
 	//@moth
 	m_pDev->SetVertexShader(nullptr);
@@ -2246,21 +2461,37 @@ void CEffectModel::End()  {
 
 void	CEffectModel::RenderTob(ModelParam* last, ModelParam* next, float lerp)
 {
-	for(WORD n = 0; n < _dwVerCount; ++n )
+	if (!m_vEffVer || !last || !next || _dwVerCount == 0 || !m_pDev)
+		return;
+	const DWORD nlast = (DWORD)last->vecVer.size();
+	const DWORD nnext = (DWORD)next->vecVer.size();
+	if (nlast == 0 || nnext == 0)
+		return;
+	for (DWORD n = 0; n < _dwVerCount; ++n)
 	{
-		D3DXVec3Lerp(&m_vEffVer[n].m_SPos,&last->vecVer[n], &next->vecVer[n],lerp);
+		const D3DXVECTOR3& a = last->vecVer[n < nlast ? n : 0];
+		const D3DXVECTOR3& b = next->vecVer[n < nnext ? n : 0];
+		D3DXVec3Lerp(&m_vEffVer[n].m_SPos, &a, &b, lerp);
 	}
 	m_pDev->SetVertexShader(NULL);
 	m_pDev->SetFVF(EFFECT_VER_FVF);
 
-	m_pDev->DrawPrimitiveUP_Dynamic(D3DPT_TRIANGLESTRIP, _dwFaceCount, m_vEffVer, sizeof(SEFFECT_VERTEX));
+	UINT faces = _dwFaceCount;
+	if (faces + 2 > _dwVerCount)
+		faces = (_dwVerCount > 2) ? (_dwVerCount - 2) : 0;
+	if (faces == 0)
+		return;
+	m_pDev->DrawPrimitiveUP_Dynamic(D3DPT_TRIANGLESTRIP, faces, m_vEffVer, sizeof(SEFFECT_VERTEX));
 
 }
 
 void	ModelParam::Create()
 {
-	DWORD dwVerCount = iSegments * 3;
-
+	if (iSegments < 1)
+		iSegments = 1;
+	if (iSegments > 128)
+		iSegments = 128;
+	DWORD dwVerCount = (DWORD)(iSegments + 1) * 2;
 	vecVer.resize(dwVerCount);
 
 	int nCurrentSegment;
@@ -2270,6 +2501,8 @@ void	ModelParam::Create()
 	float rDeltaSegAngle = (2.0f * D3DX_PI / iSegments);
 	float rSegmentLength = 1.0f / (float)iSegments;
 	float ny0 = (90.0f - (float)D3DXToDegree(atan(fHei / fTopRadius))) / 90.0f;
+	(void)rSegmentLength;
+	(void)ny0;
 	for(nCurrentSegment = 0; nCurrentSegment <= iSegments; nCurrentSegment++)
 	{
 		float x0 = fTopRadius * sinf(nCurrentSegment * rDeltaSegAngle);
@@ -2398,14 +2631,24 @@ void	CTexCoordList::Reset()
 
 void	CTexCoordList::GetCurCoord(S_BVECTOR<D3DXVECTOR2>& vecOutCoord, WORD& wCurIndex,float &fCurTime, float fDailTime)
 {
-	
+	if (m_wVerCount == 0 || m_wCoordCount == 0 || m_vecCoordList.empty())
+		return;
+
+	const WORD nout = (WORD)vecOutCoord.size();
+	const WORD ncopy = (nout < m_wVerCount) ? nout : m_wVerCount;
+	if (ncopy == 0)
+		return;
+
 	if(m_wCoordCount == 1)
 	{
-		//vecOutCoord = m_vecCoordList[0];
-		vecOutCoord.clear();
-		for(int n = 0; n< m_wVerCount; ++n)
+		const TEXCOORD& src = m_vecCoordList[0];
+		const WORD nsrc = (WORD)src.size();
+		for (WORD n = 0; n < ncopy; ++n)
 		{
-			vecOutCoord.push_back(m_vecCoordList[0][n]);
+			D3DXVECTOR2* dst = vecOutCoord[n];
+			if (!dst)
+				continue;
+			*dst = src[n < nsrc ? n : 0];
 		}
 		return;
 	}
@@ -2429,14 +2672,22 @@ void	CTexCoordList::GetCurCoord(S_BVECTOR<D3DXVECTOR2>& vecOutCoord, WORD& wCurI
 	{
 		t_wNextIndex = wCurIndex + 1;
 	}
-	t_fLerp = fCurTime / m_fFrameTime;
+	if (wCurIndex >= (WORD)m_vecCoordList.size() || t_wNextIndex >= (WORD)m_vecCoordList.size())
+		return;
+	t_fLerp = (m_fFrameTime > 0.0f) ? (fCurTime / m_fFrameTime) : 0.0f;
 
-	//vecOutCoord.setsize(m_wVerCount);
-	for(WORD n = 0; n < m_wVerCount; ++n)
+	const TEXCOORD& a = m_vecCoordList[wCurIndex];
+	const TEXCOORD& b = m_vecCoordList[t_wNextIndex];
+	const WORD na = (WORD)a.size();
+	const WORD nb = (WORD)b.size();
+	for (WORD n = 0; n < ncopy; ++n)
 	{
-		D3DXVec2Lerp(vecOutCoord[n],
-			&m_vecCoordList[wCurIndex][n],
-			&m_vecCoordList[t_wNextIndex][n],t_fLerp);
+		D3DXVECTOR2* dst = vecOutCoord[n];
+		if (!dst)
+			continue;
+		const D3DXVECTOR2& va = a[n < na ? n : 0];
+		const D3DXVECTOR2& vb = b[n < nb ? n : 0];
+		D3DXVec2Lerp(dst, &va, &vb, t_fLerp);
 	}
 }
 
@@ -2549,14 +2800,19 @@ void	CTexList::GetTextureFromModel(CEffectModel *pCModel)
 
 void  CTexList::GetCurTexture(S_BVECTOR<D3DXVECTOR2>& coord, WORD&  wCurIndex,float& fCurTime, float fDailTime)
 {
+	if (coord.size() <= 0 || m_wTexCount == 0 || m_vecTexList.empty())
+		return;
 	if(m_wTexCount == 1)
 	{
-		//coord =  m_vecTexList[0];
-		//coord.clear();
+		const TEXCOORD& src = m_vecTexList[0];
+		const WORD nsrc = (WORD)src.size();
+		if (nsrc == 0)
+			return;
 		for(WORD i = 0; i < (WORD)coord.size(); ++i)
 		{
-			//coord.push_back( m_vecTexList[0][i]);
-			*coord[i] = m_vecTexList[0][i];
+			D3DXVECTOR2* dst = coord[i];
+			if (dst)
+				*dst = src[i < nsrc ? i : 0];
 		}
 		return;
 	}
@@ -2570,12 +2826,17 @@ void  CTexList::GetCurTexture(S_BVECTOR<D3DXVECTOR2>& coord, WORD&  wCurIndex,fl
 	{
 		wCurIndex = 0;
 	}
-	//coord =   m_vecTexList[wCurIndex];
-	//coord.clear();
-	for(WORD i = 0; i < coord.size(); ++i)
+	if (wCurIndex >= (WORD)m_vecTexList.size())
+		return;
+	const TEXCOORD& src = m_vecTexList[wCurIndex];
+	const WORD nsrc = (WORD)src.size();
+	if (nsrc == 0)
+		return;
+	for(WORD i = 0; i < (WORD)coord.size(); ++i)
 	{
-		//coord.push_back( m_vecTexList[wCurIndex][i]);
-		*coord[i] = m_vecTexList[wCurIndex][i];
+		D3DXVECTOR2* dst = coord[i];
+		if (dst)
+			*dst = src[i < nsrc ? i : 0];
 	}
 }
 

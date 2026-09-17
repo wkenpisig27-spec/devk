@@ -226,7 +226,7 @@ float3 TransformNormalByBone(float3 nrm, int boneBase)
 #endif
 
 #ifndef OUTLINE_COLOR
-#define OUTLINE_COLOR float4(0.08, 0.05, 0.04, 1.0)
+#define OUTLINE_COLOR float4(0.33, 0.25, 0.20, 1.0)
 #endif
 
 #ifndef OUTLINE_CLIP_Z_BIAS

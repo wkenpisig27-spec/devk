@@ -194,22 +194,38 @@ public:
 
 	void				FrameMove(float fDailTime)
 	{
-		if(m_iFrameCount<=0)
+		if(m_iFrameCount<=1)
 			return;
+		if(m_iCurFrame < 0 || m_iCurFrame >= 200)
+			m_iCurFrame = 0;
 		m_bEnd = false;
 
 		float fvel = m_fVel * fDailTime;
 		m_fCurDist += fvel;
-		while (m_fCurDist >= m_vecDist[m_iCurFrame])
+		int guard = 0;
+		while (m_iCurFrame >= 0 && m_iCurFrame < 200 && m_iCurFrame < m_iFrameCount - 1 &&
+			m_fCurDist >= m_vecDist[m_iCurFrame])
 		{
-			m_fCurDist -= m_vecDist[m_iCurFrame];
-			m_iCurFrame++;
+			if (m_vecDist[m_iCurFrame] <= 0.0f)
+			{
+				m_iCurFrame++;
+			}
+			else
+			{
+				m_fCurDist -= m_vecDist[m_iCurFrame];
+				m_iCurFrame++;
+			}
 			if(m_iCurFrame >= m_iFrameCount-1)
 			{
 				m_iCurFrame = 0;
 				m_bEnd = true;
+				break;
 			}
+			if (++guard > 200)
+				break;
 		}
+		if (m_iCurFrame < 0 || m_iCurFrame >= 200)
+			m_iCurFrame = 0;
 		m_vCurPos = m_vecPath[m_iCurFrame] + (m_vecDir[m_iCurFrame] * m_fCurDist);
 	}
 	D3DXVECTOR3*		GetCurPos()			{ return &m_vCurPos;}
@@ -377,8 +393,12 @@ public:
 			? (*m_pfDailTime * 30.0f) : 1.0f;
 		for(int n = 0; n < m_iEffNum; n++)
 		{
-			m_vecCortrol[n]->Play();
-			m_vecEffect[n]->PlayModel(modelVelocity);
+			if (n >= m_vecCortrol.size() || n >= (int)m_vecEffect.size())
+				break;
+			if (m_vecCortrol[n])
+				m_vecCortrol[n]->Play();
+			if (m_vecEffect[n])
+				m_vecEffect[n]->PlayModel(modelVelocity);
 		}
 	}
 	void		 Play2(int iTime = 0)	/*iTime: 0 == loop, */	
@@ -415,6 +435,8 @@ public:
 	}
 	void		BindingEffect(I_Effect*	pCEffect)			
 	{
+		if (!pCEffect)
+			return;
 		m_pCEffect = pCEffect;
 
 		m_iEffNum++;
@@ -423,8 +445,14 @@ public:
 		m_vecEffect[m_iEffNum - 1] = pCEffect;
 
 		m_vecCortrol.setsize(m_iEffNum);
-		m_vecCortrol[m_iEffNum - 1]->m_vecCurCoord.setsize((WORD)pCEffect->m_pCModel->GetVerCount());
-		m_vecCortrol[m_iEffNum - 1]->m_lpCurTex.setsize((WORD)pCEffect->m_pCModel->GetVerCount());
+		WORD vc = 0;
+		if (pCEffect->m_pCModel)
+			vc = (WORD)pCEffect->m_pCModel->GetVerCount();
+		if (m_vecCortrol[m_iEffNum - 1])
+		{
+			m_vecCortrol[m_iEffNum - 1]->m_vecCurCoord.setsize(vc);
+			m_vecCortrol[m_iEffNum - 1]->m_lpCurTex.setsize(vc);
+		}
 
 	}
 	
@@ -449,9 +477,11 @@ public:
 		m_vecCortrol.setsize(m_iEffNum);
 		for(n = 0; n < m_iEffNum; n++)
 		{
-			m_vecCortrol[n]->m_vecCurCoord.setsize(CEffectArray[n].m_CTexCoordlist.m_wVerCount);
-			//m_vecCortrol[n]->m_lpCurTex.clear();
-			m_vecCortrol[n]->m_lpCurTex.setsize(CEffectArray[n].m_CTexCoordlist.m_wVerCount);
+			if (!m_vecCortrol[n])
+				continue;
+			WORD vc = CEffectArray[n].m_CTexCoordlist.m_wVerCount;
+			m_vecCortrol[n]->m_vecCurCoord.setsize(vc);
+			m_vecCortrol[n]->m_lpCurTex.setsize(vc);
 		}
 	}
 	void	    BindingRes(CMPResManger* pResMagr)			
@@ -460,21 +490,51 @@ public:
 
 		m_pResMgr = pResMagr;
 		int n;
+		TraceEffBindF("modeleff BindingRes effnum=%d", m_iEffNum);
 		for( n = 0; n < m_iEffNum; n++)
+		{
+			if (!m_vecEffect[n])
+			{
+				TraceEffBindF("modeleff skip null effect %d", n);
+				continue;
+			}
+			TraceEffBindF("modeleff BoundingRes %d model=%s", n, m_vecEffect[n]->getEffectModelName().c_str());
 			m_vecEffect[n]->BoundingRes(pResMagr);
+			TraceEffBindF("modeleff BoundingRes %d done", n);
+			WORD vc = 0;
+			if (m_vecEffect[n]->m_pCModel)
+				vc = (WORD)m_vecEffect[n]->m_pCModel->GetVerCount();
+			if (m_vecEffect[n]->m_CTexCoordlist.m_wVerCount > vc)
+				vc = m_vecEffect[n]->m_CTexCoordlist.m_wVerCount;
+			if (m_vecEffect[n]->m_CTextruelist.m_wTexCount > 0 &&
+				!m_vecEffect[n]->m_CTextruelist.m_vecTexList.empty() &&
+				m_vecEffect[n]->m_CTextruelist.m_vecTexList[0].size() > vc)
+				vc = (WORD)m_vecEffect[n]->m_CTextruelist.m_vecTexList[0].size();
+			if (vc > 0 && n < m_vecCortrol.size() && m_vecCortrol[n])
+			{
+				m_vecCortrol[n]->m_vecCurCoord.setsize(vc);
+				m_vecCortrol[n]->m_lpCurTex.setsize(vc);
+			}
+		}
 
 		m_pfDailTime = pResMagr->GetDailTime();
 		m_pCEffectFile = pResMagr->GetEffectFile();
-		int idx = pResMagr->GetEffectID(m_vecEffect[0]->getEffectName());
+		int idx = -1;
+		if (m_iEffNum > 0 && !m_vecEffect.empty() && m_vecEffect[0])
+			idx = pResMagr->GetEffectID(m_vecEffect[0]->getEffectName());
 
-		if( idx == -1 )
+		if( idx < 0 )
 		{
-			char szData[128];
-			sprintf( szData, "��ȡ��Ч��Ϣ(ID%d)����ʧ�ܣ�", idx );
-			MessageBox( NULL, szData, "Error", MB_OK );
+			TraceEffBind("modeleff BindingRes done (no param id)");
+			return;
 		}
 
 		EffParameter *pParam = pResMagr->GetEffectParamByID(idx);
+		if (!pParam)
+		{
+			TraceEffBind("modeleff BindingRes done (no param)");
+			return;
+		}
 		m_iIdxTech = pParam->m_iIdxTech;/*pResMagr->GetEffectTechByID(idx);*/
 
 		m_bUsePath = pParam->m_bUsePath;
@@ -488,13 +548,16 @@ public:
 
 		if(m_bUsePath)
 		{
-			m_pPath = pResMagr->GetEffPath(pResMagr->GetEffPathID(m_strPathName));
+			int pathId = pResMagr->GetEffPathID(m_strPathName);
+			TraceEffBindF("modeleff GetEffPath name=%s id=%d", m_strPathName.c_str(), pathId);
+			m_pPath = pResMagr->GetEffPath(pathId);
 		}
 
 		m_pMatViewProj = pResMagr->GetViewProjMat();
 		m_bUseSoft = pResMagr->m_bUseSoft;
 
 		D3DXMatrixIdentity(&m_SMatTempRota);
+		TraceEffBind("modeleff BindingRes done");
 	}
 
 	int			GetSubEffectFrameCount(int idx)				
@@ -592,6 +655,8 @@ public:
 
 	void	GetRunningDummyMatrix(D3DXMATRIX* pmat, int idx)
 	{
+		if (m_vecEffect.empty() || !m_vecEffect[0] || !m_vecEffect[0]->m_pCModel)
+			return;
 		if(m_vecEffect[0]->IsItem())
 		{
 			m_vecEffect[0]->m_pCModel->GetObjDummyRunTimeMatrix((lwMatrix44*)pmat,idx);

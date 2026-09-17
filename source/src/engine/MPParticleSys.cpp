@@ -574,6 +574,9 @@ void	CMPPartSys::SetMediayEff(bool bMediay)
 void	CMPPartSys::BindingRes(CMPResManger	*pCResMagr)
 {
 	m_pCResMagr = pCResMagr;
+	TraceEffBindF("partsys bind begin name=%s type=%d shade=%d mediay=%d parnum=%d model=%s tex=%s",
+		_strPartName.c_str(), _iType, m_bShade ? 1 : 0, _bMediay ? 1 : 0, _iParNum,
+		_strModelName.c_str(), _strTexName.c_str());
 
 	//if(_bMediay)
 	{	SAFE_DELETE_ARRAY(_CPPart);		}
@@ -589,9 +592,15 @@ void	CMPPartSys::BindingRes(CMPResManger	*pCResMagr)
 
 	if(m_bShade)
 	{
-		m_cShade.Create(_strTexName,pCResMagr, *_vecFrameSize[0]);
+		float fSize = 1.0f;
+		if (_vecFrameSize[0])
+			fSize = *_vecFrameSize[0];
+		TraceEffBindF("partsys shade Create tex=%s size=%.3f", _strTexName.c_str(), fSize);
+		m_cShade.Create(_strTexName,pCResMagr, fSize);
+		TraceEffBind("partsys shade Create done");
 
 		m_cShade.SetAlphaType(_eSrcBlend,_eDestBlend);
+		TraceEffBind("partsys bind done (shade)");
 		return;
 	}
 
@@ -602,36 +611,43 @@ void	CMPPartSys::BindingRes(CMPResManger	*pCResMagr)
 	_pCModel = NULL;
 
 	int id = pCResMagr->GetMeshID(_strModelName);
+	TraceEffBindF("partsys GetMeshID=%d", id);
 	if(id < 0)
 	{
 		id = pCResMagr->GetEffectID(_strModelName);
+		TraceEffBindF("partsys GetEffectID=%d", id);
 		if(id < 0)
 		{
-			MessageBox(NULL,_strModelName.c_str(),"�Ҳ�������ģ��ERROR",0);
+			LG("error", "missing particle model [%s]\n", _strModelName.c_str());
+			TraceEffBind("partsys bind done (missing model)");
 			return;
 		}
 		else
 		{
-			if(_bMediay)
+			int nEff = _iParNum;
+			if (!_bMediay)
+				nEff = 1;
+			if (nEff < 1)
+				nEff = 1;
+			if (nEff > 100)
+				nEff = 100;
+			TraceEffBindF("partsys BindingEffect copies=%d", nEff);
+			_CPPart = new CMPModelEff[nEff];
+			for (int t = 0; t < nEff; t++)
 			{
-				_CPPart = new CMPModelEff[_iParNum];
-				for (int t = 0; t < _iParNum; t++)
-				{
-					_CPPart[t].BindingEffect(pCResMagr->GetEffectByID(id));
-					_CPPart[t].BindingRes(pCResMagr);
-				}
-			}
-			else
-			{
-				_CPPart = new CMPModelEff[1];
-				_CPPart->BindingEffect(pCResMagr->GetEffectByID(id));
-				_CPPart->BindingRes(pCResMagr);
+				TraceEffBindF("partsys BindingEffect %d", t);
+				_CPPart[t].BindingEffect(pCResMagr->GetEffectByID(id));
+				TraceEffBindF("partsys BindingRes eff %d", t);
+				_CPPart[t].BindingRes(pCResMagr);
+				TraceEffBindF("partsys BindingRes eff %d done", t);
 			}
 		}
 	}
 	else 
 	{
+		TraceEffBindF("partsys GetMeshByID %d", id);
 		_pCModel = pCResMagr->GetMeshByID(id);
+		TraceEffBindF("partsys GetMeshByID done item=%d", (_pCModel && _pCModel->IsItem()) ? 1 : 0);
 	}
 
 	if(_pCModel)
@@ -641,7 +657,7 @@ void	CMPPartSys::BindingRes(CMPResManger	*pCResMagr)
 		{
 			_pTex = NULL;
 			_lpCurTex = NULL;
-			MessageBox(NULL,_strTexName.c_str(),"ERROR",0);
+			LG("error", "missing particle texture [%s]\n", _strTexName.c_str());
 			goto __ret;
 		}
 		//_lpCurTex = pCResMagr->GetTextureByID(id);
@@ -668,6 +684,7 @@ __ret:
 		_SpmatBBoard = pCResMagr->GetBBoardMat();
 		//_bBillBoard = false;
 	}
+	TraceEffBind("partsys bind done");
 
 	//if(_bModelRange)
 	//{
@@ -734,7 +751,7 @@ void	CMPPartSys::SetModelName(const s_string& strModelName,CMPResManger	*pCResMa
 		id = pCResMagr->GetEffectID(_strModelName);
 		if(id < 0)
 		{
-			MessageBox(NULL,_strModelName.c_str(),"�Ҳ�������ģ��ERROR",0);
+			LG("error", "missing particle model [%s]\n", _strModelName.c_str());
 			return;
 		}
 		else

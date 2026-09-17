@@ -852,6 +852,7 @@ LW_RESULT lwDeviceObject11::InitStateCache()
     SetRenderState(D3DRS_VERTEXBLEND, D3DVBF_DISABLE);
     SetRenderState(D3DRS_COLORWRITEENABLE, 0x0000000F);
     SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+    SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, _msaa_count > 1 ? TRUE : FALSE);
 
     for (i = 0; i < LW_MAX_TEXTURESTAGE_NUM; ++i)
     {
@@ -1002,6 +1003,11 @@ void lwDeviceObject11::EndBenchMark()
 LW_RESULT lwDeviceObject11::SetFVF(DWORD fvf)
 {
     _bound_fvf = fvf;
+    // DX9 SetFVF is mutually exclusive with a vertex shader + declaration.
+    // Characters leave ShaderMgr11 VS/decl bound; skill/shade/particle meshes
+    // only SetFVF, so leftover skin layout was hijacking those draws.
+    _bound_vs = 0;
+    _bound_decl = 0;
     return LW_RET_OK;
 }
 
@@ -1079,6 +1085,8 @@ LW_RESULT lwDeviceObject11::DrawPrimitiveUP(D3DPRIMITIVETYPE pt_type, UINT count
     case D3DPT_TRIANGLEFAN: verts = count + 2; break;
     default: return LW_RET_FAILED;
     }
+    if (verts > 65535u)
+        return LW_RET_OK;
 
     const DWORD fvf = _bound_fvf;
     const int rhw = ((fvf & D3DFVF_POSITION_MASK) == D3DFVF_XYZRHW) ? 1 : 0;

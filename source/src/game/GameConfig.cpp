@@ -214,7 +214,17 @@ void CGameConfig::ApplyRendererToEngine() {
 }
 
 void CGameConfig::ApplyVisualSettingsToEngine() {
-	lwSetOutlineParams(m_fOutlineWidth, m_fOutlineColorR, m_fOutlineColorG, m_fOutlineColorB, m_fOutlineRefDepth);
+	float r = m_fOutlineColorR;
+	float g = m_fOutlineColorG;
+	float b = m_fOutlineColorB;
+	if (_stricmp(m_szRenderer, "dx11") == 0 || _stricmp(m_szRenderer, "d3d11") == 0) {
+		if (r < 0.12f && g < 0.10f && b < 0.09f) {
+			r = 0.33f;
+			g = 0.25f;
+			b = 0.20f;
+		}
+	}
+	lwSetOutlineParams(m_fOutlineWidth, r, g, b, m_fOutlineRefDepth);
 	ApplyRendererToEngine();
 	// Fog is applied per-frame in CGameScene::_Render from these fields.
 	// Shadow map stays off by default so soft blob foot-shadows remain (RO look).

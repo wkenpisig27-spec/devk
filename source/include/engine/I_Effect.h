@@ -22,9 +22,42 @@
 #include <cassert>
 
 #include "lwDirectX.h"
+#include <stdio.h>
+#include <stdarg.h>
 
 class   MPRender;
 class   CMPResManger;
+
+inline bool& EffBindTraceEnabled()
+{
+	static bool enabled = true;
+	return enabled;
+}
+
+inline void TraceEffBind(const char* step)
+{
+	if (!EffBindTraceEnabled())
+		return;
+	FILE* fp = fopen("log/levelup_trace.log", "a");
+	if (!fp)
+		return;
+	SYSTEMTIME st;
+	GetLocalTime(&st);
+	fprintf(fp, "%02d:%02d:%02d.%03d %s\n", st.wHour, st.wMinute, st.wSecond, st.wMilliseconds, step ? step : "");
+	fflush(fp);
+	fclose(fp);
+}
+
+inline void TraceEffBindF(const char* fmt, ...)
+{
+	char buf[512];
+	va_list ap;
+	va_start(ap, fmt);
+	_vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
+	va_end(ap);
+	buf[sizeof(buf) - 1] = 0;
+	TraceEffBind(buf);
+}
 
 //--------------------------------------------------------------------------------------
 //���õ�struct or type.
@@ -98,6 +131,10 @@ public:
 	}
 	void push_back(_Ty &_Base)
 	{
+		if (m_nCount < 0)
+			m_nCount = 0;
+		if ((size_t)m_nCount >= m_VECPath.size())
+			m_VECPath.resize((size_t)m_nCount + 16);
 		m_VECPath[m_nCount] = _Base;
 		++m_nCount;
 	}
@@ -455,17 +492,24 @@ public:
 	bool	IsChangeably()			{return m_bChangeably;}
 
 	bool	IsItem()
-	{	
+	{
+		// DX11 tob/cylinder meshes skip _lwMesh and keep CPU verts in m_vEffVer.
+		// The old check treated a missing GPU mesh as an .lgo item and then
+		// walked GetObject()/GetPrimitive() during bind/render.
+		if (m_bChangeably || m_vEffVer)
+			return false;
 #ifdef USE_MGR
-		return _lwMesh ? false : true; 
+		return _lwMesh ? false : true;
 #else
-		return _lpVB ? false : true; 
+		return _lpVB ? false : true;
 #endif
-
 	}
 	bool	LoadModel(const char* pszName);
 
 	void	Begin();
+
+	void	CaptureBaseUV();
+	void	RestoreBaseUV();
 
 	void	FrameMove(DWORD dwDailTime);
 	void	RenderModel();
@@ -504,16 +548,16 @@ public:
 
 	void						Lock(BYTE** pvEffVer)
 	{
+		if (pvEffVer)
+			*pvEffVer = 0;
 #ifdef USE_MGR
 		if (_lpSVB == 0)
-		{
-			*pvEffVer = 0;
 			return;
-		}
 
 		if(LW_FAILED(_lpSVB->Lock(0, 0, (void**)pvEffVer, 0)))
 		{
-			*pvEffVer = 0;
+			if (pvEffVer)
+				*pvEffVer = 0;
 		}
 #else
 		_lpVB->Lock(0, 0, pvEffVer, 0 );
@@ -522,7 +566,8 @@ public:
 	void						Unlock()
 	{ 
 #ifdef USE_MGR
-		_lpSVB->Unlock();
+		if (_lpSVB)
+			_lpSVB->Unlock();
 #else
 		_lpVB->Unlock();
 #endif
@@ -602,6 +647,7 @@ protected:
 #endif
 
 	DWORD						_dwVerCount;
+	std::vector<D3DXVECTOR2>	_baseUV;
 	DWORD						_dwFaceCount;
 
 	//CChaModel*					_pChaModel;

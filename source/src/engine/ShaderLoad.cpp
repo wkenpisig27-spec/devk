@@ -13,16 +13,16 @@
 // --- Character-physique outline globals (lwPhysique only; items never outline)
 bool g_lwOutlineEnabled = true;
 static float g_lwOutlineWidth = 0.014f; // DX9 world extrusion; DX11 maps <0.5 to pixels
-static float g_lwOutlineColorR = 0.08f;
-static float g_lwOutlineColorG = 0.05f;
-static float g_lwOutlineColorB = 0.04f;
+static float g_lwOutlineColorR = 0.33f;
+static float g_lwOutlineColorG = 0.25f;
+static float g_lwOutlineColorB = 0.20f;
 static float g_lwOutlineRefDepth = 50.0f; // reserved (unused; kept for API compat)
 
 static float OutlinePixelWidth()
 {
     float px = g_lwOutlineWidth;
     if (px < 0.5f)
-        return 1.60f;
+        return 1.15f;
     if (px > 6.0f)
         return 6.0f;
     return px;

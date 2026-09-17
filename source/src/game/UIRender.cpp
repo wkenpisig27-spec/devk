@@ -1060,10 +1060,15 @@ bool CProgressBar::LoadImage(const char* file, int w, int h, bool isHorizontal) 
 }
 
 void CProgressBar::_RefreshPos() {
+	if (!_pTex)
+		return;
+	int show = _step.GetShowPosition();
+	if (show < 0)
+		show = 0;
 	if (_style == btHorizontal) {
-		_pTex->nTexW = _step.GetShowPosition();
+		_pTex->nTexW = show;
 	} else {
-		_pTex->nTexH = _step.GetShowPosition();
+		_pTex->nTexH = show;
 		_pTex->nTexSY = (int)(_nStart + _step.fLen - _pTex->nTexH);
 	}
 }

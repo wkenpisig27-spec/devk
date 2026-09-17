@@ -843,17 +843,39 @@ CEffectObj* CCharacter::SelfEffect(int nEffectID, int nDummy, bool isLoop, int n
 	if (nEffectID <= 0)
 		return nullptr;
 
+	auto traceSelf = [nEffectID](const char* step) {
+		if (nEffectID != 132)
+			return;
+		FILE* fp = fopen("log/levelup_trace.log", "a");
+		if (!fp)
+			return;
+		SYSTEMTIME st;
+		GetLocalTime(&st);
+		fprintf(fp, "%02d:%02d:%02d.%03d selfeffect %d %s\n",
+			st.wHour, st.wMinute, st.wSecond, st.wMilliseconds, nEffectID, step);
+		fflush(fp);
+		fclose(fp);
+	};
+
+	traceSelf("begin");
+
 	// added by Philip.Wu  2008-01-25 ?????????????????????
 	if (g_stUIMap.IsPKSilver() && this->IsPlayer() && this->GetMainType() != enumMainPlayer) {
 		if (574 <= nEffectID && nEffectID <= 577)
 			return 0;
 	}
 	CEffectObj* pEffect = GetScene() ? GetScene()->GetFirstInvalidEffObj() : nullptr;
-	if (!pEffect)
+	if (!pEffect) {
+		traceSelf("no pool slot");
 		return nullptr;
+	}
 
-	if (!pEffect->Create(nEffectID))
+	traceSelf("create");
+	if (!pEffect->Create(nEffectID)) {
+		traceSelf("create failed");
 		return nullptr;
+	}
+	traceSelf("create ok");
 
 	if (isLoop)
 		pEffect->setLoop(isLoop);
@@ -897,7 +919,9 @@ CEffectObj* CCharacter::SelfEffect(int nEffectID, int nDummy, bool isLoop, int n
 		}
 	}
 
+	traceSelf("follow/emission");
 	pEffect->SetValid(TRUE);
+	traceSelf("done");
 	return pEffect;
 }
 

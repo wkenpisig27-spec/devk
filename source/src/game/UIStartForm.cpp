@@ -1337,24 +1337,25 @@ void CStartMgr::RefreshMainLifeNum(long num, long max) {
 }
 
 void CStartMgr::RefreshMainExperience(LONG64 num, LONG64 curlev, LONG64 nextlev) {
-	LG("exp", RES_STRING(CL_LANGUAGE_MATCH_763), num, curlev, nextlev, 100.0f * (float)(num - curlev) / (float)(nextlev - curlev));
+	LONG64 span = nextlev - curlev;
+	LONG64 pos = num - curlev;
+	float pct = 0.0f;
+	if (span > 0) {
+		if (pos < 0)
+			pos = 0;
+		if (pos > span)
+			pos = span;
+		pct = 100.0f * (float)pos / (float)span;
+	} else {
+		span = 1;
+		pos = 1;
+		pct = 100.0f;
+	}
+	LG("exp", RES_STRING(CL_LANGUAGE_MATCH_763), num, curlev, nextlev, pct);
 
-	//// EXP?i?
-	// long max = nextlev - curlev;
-	// num = num - curlev;
-	// if ( num < 0 ) num = 0;
-
-	// if (max!=0)
-	//	sprintf( szBuf , "%4.2f%%" , num*100.0f/max );
-	// else
-	//	sprintf( szBuf , "0.00%");
-	// szBuf[sizeof(szBuf)-1] = '\0';
-
-	//_pShowExp->SetCaption( szBuf );
 	if (proMainExp) {
-
-		proMainExp->SetRange(0, nextlev - curlev);
-		proMainExp->SetPosition(num - curlev);
+		proMainExp->SetRange(0.0f, (float)span);
+		proMainExp->SetPosition((float)pos);
 	}
 	/*
 		if ( proMainExp )
@@ -1725,10 +1726,13 @@ void CStartMgr::ShowBigText(const char* str) {
 	int nType = 0;
 	CCharacter* pMain = CGameScene::GetMainCha();
 	if (pMain && CGameApp::GetCurScene() && CGameApp::GetCurScene()->GetTerrain()) {
-		int nArea = CGameApp::GetCurScene()->GetTerrain()->GetTile(pMain->GetCurX() / 100, pMain->GetCurY() / 100)->getIsland();
-		CAreaInfo* pArea = GetAreaInfo(nArea);
-		if (pArea) {
-			nType = pArea->chType;
+		MPTile* pTile = CGameApp::GetCurScene()->GetTerrain()->GetTile(pMain->GetCurX() / 100, pMain->GetCurY() / 100);
+		if (pTile) {
+			int nArea = pTile->getIsland();
+			CAreaInfo* pArea = GetAreaInfo(nArea);
+			if (pArea) {
+				nType = pArea->chType;
+			}
 		}
 	}
 

@@ -530,6 +530,7 @@ void CSelectChaScene::LoadingCall() // ?????loading??,???
 		bLoadRes2 = true;
 		// g_pGameApp->LoadRes2();
 		g_pGameApp->LoadRes3();
+		g_pGameApp->WarmupMagicEffectResources();
 		// g_pGameApp->LoadRes4();
 	}
 

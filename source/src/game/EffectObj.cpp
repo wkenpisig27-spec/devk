@@ -55,6 +55,50 @@ void (*GroupList[])(CMagicEff* pEffCtrl, D3DXVECTOR3* pStart, D3DXVECTOR3* pEnd)
     Part_sequence,
 };
 
+namespace {
+constexpr int kOpertionCount = (int)(sizeof(OpertionList) / sizeof(OpertionList[0]));
+constexpr int kMagicCount = (int)(sizeof(MagicList) / sizeof(MagicList[0]));
+constexpr int kGroupCount = (int)(sizeof(GroupList) / sizeof(GroupList[0]));
+
+void TraceEff(const char* step) {
+	FILE* fp = fopen("log/levelup_trace.log", "a");
+	if (!fp)
+		return;
+	SYSTEMTIME st;
+	GetLocalTime(&st);
+	fprintf(fp, "%02d:%02d:%02d.%03d %s\n", st.wHour, st.wMinute, st.wSecond, st.wMilliseconds, step);
+	fflush(fp);
+	fclose(fp);
+}
+
+void BindOpertion(CMagicEff* eff, int idx) {
+	if (!eff)
+		return;
+	if (idx >= 0 && idx < kOpertionCount)
+		eff->RenderUpdate = OpertionList[idx];
+	else
+		eff->RenderUpdate = NULL;
+}
+
+void BindMagicUpdate(CMagicCtrl* ctrl, int idx) {
+	if (!ctrl)
+		return;
+	if (idx >= 0 && idx < kMagicCount)
+		ctrl->MagicUpdate = MagicList[idx];
+	else
+		ctrl->MagicUpdate = NULL;
+}
+
+void BindGroupEmission(CMagicEff* eff, int idx) {
+	if (!eff)
+		return;
+	if (idx >= 0 && idx < kGroupCount)
+		eff->GroupEmission = GroupList[idx];
+	else
+		eff->GroupEmission = NULL;
+}
+} // namespace
+
 inline void Part_bind(CMagicEff* pEffCtrl) {
 	CGameScene* pScene = pEffCtrl->_pScene;
 	CCharacter* pCha = NULL;
@@ -634,11 +678,19 @@ BOOL CMagicEff::Create(int iIdxID) {
 
 	CMagicInfo* pInfo = GetMagicInfo(iIdxID);
 	if (!pInfo) {
+		TraceEff("create: no magicinfo");
 		return FALSE;
 	}
 
+	if (iIdxID == 132) {
+		char buf[256];
+		sprintf(buf, "create 132 name=%s dummy0=%d dummy2=%d eff=%d obj=%d",
+			pInfo->szDataName, pInfo->nDummy[0], pInfo->nDummy2, pInfo->nEffType, pInfo->nObjType);
+		TraceEff(buf);
+	}
 
-	if (getIdxID() == iIdxID) {
+
+	if (getIdxID() == iIdxID && _pEffCtrl) {
 		_bDail = false;
 		_fsCurTime = 0;
 		_fsDailTime = 0;
@@ -687,9 +739,7 @@ BOOL CMagicEff::Create(int iIdxID) {
 		default:
 			nEffType = -1;
 		}
-		RenderUpdate = NULL;
-		if (nEffType >= 0)
-			RenderUpdate = OpertionList[nEffType];
+		BindOpertion(this, nEffType);
 		return TRUE;
 	}
 
@@ -720,10 +770,16 @@ BOOL CMagicEff::Create(int iIdxID) {
 	}
 
 	Property.m_strName = pInfo->szDataName;
+	if (iIdxID == 132)
+		TraceEff("create 132 CopyPartCtrl");
 	if (!Create(&Property, &ResMgr)) {
+		if (iIdxID == 132)
+			TraceEff("create 132 Create(property) failed");
 		Clear();
 		return FALSE;
 	}
+	if (iIdxID == 132)
+		TraceEff("create 132 BindingRes done");
 
 	_nHeightOff = pInfo->nHeightOff;
 
@@ -745,16 +801,19 @@ BOOL CMagicEff::Create(int iIdxID) {
 	setAttachID(pInfo->nObjType);
 	setIdxID(iIdxID);
 	_iDummy = pInfo->nDummy[0];
-	if (pInfo->nDummy2 != -1) {
-		_pEffCtrl->setUseZBuff(false);
+	if (_pEffCtrl) {
+		if (pInfo->nDummy2 != -1) {
+			_pEffCtrl->setUseZBuff(false);
+		}
+		_pEffCtrl->Reset();
 	}
-	_pEffCtrl->Reset();
 
 	SkillCtrl ctrl;
 	ctrl.fSize = 1.0f;
 	SetSkillCtrl(&ctrl);
 
-
+	if (iIdxID == 132)
+		TraceEff("create 132 ok");
 	return TRUE;
 }
 
@@ -762,24 +821,32 @@ BOOL CMagicEff::Create(int iIdxID) {
 BOOL CMagicEff::Create(Eff_Property* pProperty, CMPResManger* pCResMagr) {
 	if (!pProperty || !pCResMagr)
 		return FALSE;
+	if (!_pEffCtrl)
+		return FALSE;
 
+	TraceEff("create prop GetPartCtrlID");
 	int id = pCResMagr->GetPartCtrlID(pProperty->m_strName);
 	if (id < 0) {
 		LG("error", "msgCan't find eff file [%s]", pProperty->m_strName.c_str());
+		TraceEff("create prop missing par");
 		return FALSE;
 	}
 
 	_pEffCtrl->Clear();
+	TraceEff("create prop GetPartCtrlByID");
 	CMPPartCtrl* tctrl = pCResMagr->GetPartCtrlByID(id);
-	if (!tctrl)
+	if (!tctrl) {
+		TraceEff("create prop load par failed");
 		return FALSE;
+	}
+	TraceEff("create prop CopyPartCtrl");
 	_pEffCtrl->CopyPartCtrl(tctrl);
+	TraceEff("create prop BindingRes");
 	_pEffCtrl->BindingRes(pCResMagr);
+	TraceEff("create prop BindingRes done");
 	_pDailTime = pCResMagr->GetDailTime();
 
-	RenderUpdate = NULL;
-	if (pProperty->m_iIdxRender >= 0)
-		RenderUpdate = OpertionList[pProperty->m_iIdxRender];
+	BindOpertion(this, pProperty->m_iIdxRender);
 	return TRUE;
 }
 
@@ -788,7 +855,9 @@ BOOL CMagicEff::CreateMagic(int iIdxID) {
 	_bGroupMagic = FALSE;
 
 	if (getIdxID() == iIdxID) {
-		_pMagicCtrl[0]->MagicUpdate = MagicList[_pMagicCtrl[0]->GetRenderIdx()];
+		if (_pMagicCtrl.empty() || !_pMagicCtrl[0])
+			return FALSE;
+		BindMagicUpdate(_pMagicCtrl[0], _pMagicCtrl[0]->GetRenderIdx());
 
 		_pMagicCtrl[0]->Reset();
 		_iOwnerID = -1;
@@ -804,7 +873,7 @@ BOOL CMagicEff::CreateMagic(int iIdxID) {
 	setIdxID(iIdxID);
 
 	int id = _pMagicCtrl[0]->GetRenderIdx();
-	_pMagicCtrl[0]->MagicUpdate = MagicList[id];
+	BindMagicUpdate(_pMagicCtrl[0], id);
 	_pMagicCtrl[0]->Reset();
 	_bMagic = TRUE;
 	return TRUE;
@@ -816,11 +885,11 @@ BOOL CMagicEff::CreateGroupMagic(int iIdxID) {
 
 	if (getIdxID() == iIdxID) {
 		for (WORD n = 0; n < (WORD)_pMagicCtrl.size(); ++n) {
-			_pMagicCtrl[n]->MagicUpdate = MagicList[_pMagicCtrl[n]->GetRenderIdx()];
+			BindMagicUpdate(_pMagicCtrl[n], _pMagicCtrl[n]->GetRenderIdx());
 			_pMagicCtrl[n]->Reset();
 		}
 		_iOwnerID = -1;
-		GroupEmission = GroupList[_iGroupIdx];
+		BindGroupEmission(this, _iGroupIdx);
 		return TRUE;
 	}
 	Clear();
@@ -848,13 +917,13 @@ BOOL CMagicEff::CreateGroupMagic(int iIdxID) {
 			if (!_pMagicCtrl[idx]->Create(sGroupParam.vecParam[n], &ResMgr))
 				return FALSE;
 			id = _pMagicCtrl[idx]->GetRenderIdx();
-			_pMagicCtrl[idx]->MagicUpdate = MagicList[id];
+			BindMagicUpdate(_pMagicCtrl[idx], id);
 			_pMagicCtrl[idx]->Reset();
 			idx++;
 		}
 	}
 	_iGroupIdx = sGroupParam.nRenderIdx;
-	GroupEmission = GroupList[_iGroupIdx];
+	BindGroupEmission(this, _iGroupIdx);
 #else
 	Group_Param* psGroupParam;
 	psGroupParam = GetGroupParam(iIdxID - 2000);
@@ -872,13 +941,13 @@ BOOL CMagicEff::CreateGroupMagic(int iIdxID) {
 			if (!_pMagicCtrl[idx]->Create(psGroupParam->nTypeID[n], &ResMgr))
 				return FALSE;
 			id = _pMagicCtrl[idx]->GetRenderIdx();
-			_pMagicCtrl[idx]->MagicUpdate = MagicList[id];
+			BindMagicUpdate(_pMagicCtrl[idx], id);
 			_pMagicCtrl[idx]->Reset();
 			idx++;
 		}
 	}
 	_iGroupIdx = psGroupParam->nRenderIdx;
-	GroupEmission = GroupList[_iGroupIdx];
+	BindGroupEmission(this, _iGroupIdx);
 #endif
 
 	setTypeID(-1);
@@ -901,7 +970,7 @@ void CMagicEff::setFollowObj(CSceneNode* pObj, NODE_TYPE eType, int iDummy, int 
 				setTypeID(1);
 
 			setAttachID(1);
-			RenderUpdate = OpertionList[1];
+			BindOpertion(this, 1);
 		} else {
 			if (eType == NODE_ITEM)
 				setTypeID(3);
@@ -909,7 +978,8 @@ void CMagicEff::setFollowObj(CSceneNode* pObj, NODE_TYPE eType, int iDummy, int 
 				setTypeID(1);
 
 			MPMatrix44 mat;
-			if (_pObj->GetRunTimeMatrix(&mat, iDummy)) {
+			const int dummy = (_iDummy >= 0) ? _iDummy : 0;
+			if (_pObj && _pObj->GetRunTimeMatrix(&mat, dummy) && _pEffCtrl) {
 				_pEffCtrl->BindingBone((D3DXMATRIX*)&mat);
 			}
 		}
@@ -918,7 +988,7 @@ void CMagicEff::setFollowObj(CSceneNode* pObj, NODE_TYPE eType, int iDummy, int 
 			_iDummy = iDummy;
 
 			setAttachID(0);
-			RenderUpdate = OpertionList[0];
+			BindOpertion(this, 0);
 
 			if (eType == NODE_CHA)
 				setTypeID(1);
@@ -927,13 +997,13 @@ void CMagicEff::setFollowObj(CSceneNode* pObj, NODE_TYPE eType, int iDummy, int 
 		} else {
 			if (_iDummy == -2) {
 				MPMatrix44 mat;
-				if (_pObj->GetRunTimeMatrix(&mat, iDummy)) {
+				if (_pObj && iDummy >= 0 && _pObj->GetRunTimeMatrix(&mat, iDummy) && _pEffCtrl) {
 					_pEffCtrl->BindingBone((D3DXMATRIX*)&mat);
 				}
 			}
 		}
 	}
-	if (_pEffCtrl->GetPartCtrl()->GetStripNum() > 0) {
+	if (_pEffCtrl && _pEffCtrl->GetPartCtrl() && _pEffCtrl->GetPartCtrl()->GetStripNum() > 0) {
 		RenderUpdate = NULL;
 
 		if (eType == NODE_CHA) {
@@ -943,14 +1013,14 @@ void CMagicEff::setFollowObj(CSceneNode* pObj, NODE_TYPE eType, int iDummy, int 
 			CSceneItem* pItem = (CSceneItem*)pObj;
 			_pEffCtrl->GetPartCtrl()->SetStripItem((MPSceneItem*)pItem);
 		}
-	} else if (eType == NODE_ITEM) {
+	} else if (eType == NODE_ITEM && _pEffCtrl) {
 		CSceneItem* pItem = (CSceneItem*)pObj;
 		_pEffCtrl->SetItemDummy(pItem, 1, 2);
 	}
 }
 
 void CMagicEff::SetEffectDir(int iAngle) {
-	if (_bMagic || _bGroupMagic)
+	if (_bMagic || _bGroupMagic || !_pEffCtrl)
 		return;
 	D3DXMATRIX mat;
 	D3DXVECTOR3 vPos(0, -1, 0);
@@ -1004,7 +1074,8 @@ void CMagicEff::FrameMove(DWORD dwDailTime) {
 			} else
 				_bUpdateHei = false;
 		}
-		_pEffCtrl->FrameMove(dwDailTime);
+		if (_pEffCtrl)
+			_pEffCtrl->FrameMove(dwDailTime);
 	}
 }
 void CMagicEff::Render() {
@@ -1038,7 +1109,7 @@ void CMagicEff::Render() {
 	}
 	if (_pTerrain)
 		if (!_pTerrain->IsPointVisible(_vPos.x, _vPos.y)) {
-			if (!_pEffCtrl->GetPartCtrl()->IsPlaying()) {
+			if (!_pEffCtrl || !_pEffCtrl->GetPartCtrl() || !_pEffCtrl->GetPartCtrl()->IsPlaying()) {
 				SetValid(FALSE);
 				return;
 			}
@@ -1058,7 +1129,7 @@ void CMagicEff::Render() {
 		g_CEffBox.Render();
 		g_CEffBox.Show(false);
 	}
-	if (!_pEffCtrl->GetPartCtrl()->IsPlaying()) {
+	if (!_pEffCtrl || !_pEffCtrl->GetPartCtrl() || !_pEffCtrl->GetPartCtrl()->IsPlaying()) {
 		SetValid(FALSE);
 		return;
 	}
@@ -1180,28 +1251,40 @@ void CMagicEff::Emission(int iID, D3DXVECTOR3* vBegin, D3DXVECTOR3* vEnd, int iT
 		if (vBegin)
 			MoveTo(vBegin);
 
+		if (!_pEffCtrl || !_pEffCtrl->GetPartCtrl()) {
+			_bPlay = FALSE;
+			return;
+		}
+
 		if (_bMagicEm) {
+			if (_iIdxID == 132)
+				TraceEff("emission 132 Play");
 			if (809 <= _iIdxID && _iIdxID <= 818)
-				_pEffCtrl->GetPartCtrl()->Play(0); // �����Ǳ��������
+				_pEffCtrl->GetPartCtrl()->Play(0);
 			else
 				_pEffCtrl->GetPartCtrl()->Play(!_bloop /*0*/);
 			if (_bloop)
 				_pEffCtrl->GetPartCtrl()->SetPlayType(0);
+			if (_iIdxID == 132)
+				TraceEff("emission 132 Play done");
 		} else {
 			_pEffCtrl->GetPartCtrl()->Play(0);
 			_pEffCtrl->GetPartCtrl()->SetPlayType(0);
 		}
 		_bPlay = TRUE;
 	} catch (...) {
-		__debugbreak();
+		LG("error", "CMagicEff::Emission exception id=%d\n", _iIdxID);
+		_bPlay = FALSE;
 	}
 }
 
 void CMagicEff::Stop() {
-	_pEffCtrl->GetPartCtrl()->Stop();
+	if (_pEffCtrl && _pEffCtrl->GetPartCtrl())
+		_pEffCtrl->GetPartCtrl()->Stop();
 }
 void CMagicEff::End() {
-	_pEffCtrl->GetPartCtrl()->End();
+	if (_pEffCtrl && _pEffCtrl->GetPartCtrl())
+		_pEffCtrl->GetPartCtrl()->End();
 }
 
 void CMagicEff::MoveTo(const D3DXVECTOR3* vPos) {

@@ -27,8 +27,17 @@ public:
 	CChaAttrChange() { memset(_szAttr, 0, sizeof(_szAttr)); }
 
 	void Reset() { memset(_szAttr, 0, sizeof(_szAttr)); }
-	void SetChangeBitFlag(int nFlag) { _szAttr[nFlag] = 1; }
-	bool GetChangeBitFlag(int nFlag) { return _szAttr[nFlag] != 0; }
+	void SetChangeBitFlag(int nFlag)
+	{
+		if (nFlag >= 0 && nFlag < MAX_ATTR_CLIENT)
+			_szAttr[nFlag] = 1;
+	}
+	bool GetChangeBitFlag(int nFlag)
+	{
+		if (nFlag >= 0 && nFlag < MAX_ATTR_CLIENT)
+			return _szAttr[nFlag] != 0;
+		return false;
+	}
 
 private:
 	char _szAttr[MAX_ATTR_CLIENT];

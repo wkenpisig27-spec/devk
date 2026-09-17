@@ -226,6 +226,8 @@ public:
 	static void SetLoginTime(DWORD _dwLoginTime) { m_dwLoginTime = _dwLoginTime; }
 	static DWORD GetLoginTime() { return m_dwLoginTime; }
 
+	void WarmupMagicEffectResources();
+
 public:
 	std::list<SAddSceneObj*> m_AddSceneObjList;
 	DWORD m_dwRenderUITime;

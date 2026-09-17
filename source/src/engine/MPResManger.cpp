@@ -88,6 +88,7 @@ CMPResManger::CMPResManger(void)
 
 
 	_iPartCtrlNum = 0;
+	_bPartCtrlLoaded = false;
 
 	_vecPartArray.clear();
 	_vecPartArray.resize(MAXMSG_COUNT);
@@ -500,16 +501,14 @@ int		CMPResManger::GetTextureID(const s_string &sName)
 	LG("error","msg: CMPResManger::GetTextureID(),TextureName=%s", sName.c_str());
 #endif
 
-	// Failure
-	char szMsg[64];
-	sprintf(szMsg,"ȱ����Ч��ͼ[%s](�ļ������ڻ���Ч��Դ�����ļ�����)",
-		sName.c_str());
-	LG("ERROR","msg%s",szMsg);
+	LG("error", "missing effect texture name [%s]\n", sName.c_str());
 	return -1;
 }
 //-----------------------------------------------------------------------------
 IDirect3DTextureX*	CMPResManger::GetTextureByID( int iID)
 { 
+	if (iID < 0 || iID >= (int)_vecTexList.size())
+		return NULL;
 	if(_vecTexList[iID])
 		return _vecTexList[iID]->GetTex();
 	else
@@ -520,6 +519,11 @@ IDirect3DTextureX*	CMPResManger::GetTextureByID( int iID)
 //-----------------------------------------------------------------------------
 lwITex*		CMPResManger::GetTextureByIDlw( int iID)
 {
+	if (iID < 0 || iID >= (int)_vecTexList.size() || iID >= (int)_vecTexName.size())
+	{
+		TraceEffBindF("tex GetTextureByIDlw oob id=%d size=%d", iID, (int)_vecTexList.size());
+		return 0;
+	}
 	if(_vecTexList[iID])
 		return _vecTexList[iID];
 	else
@@ -530,17 +534,17 @@ lwITex*		CMPResManger::GetTextureByIDlw( int iID)
 #else
 		sprintf(t_pszFile, "%s\\%s.tga",_pszTexPath,_vecTexName[iID].c_str());
 #endif
-		lwITex* tex;
+		lwITex* tex = NULL;
+		TraceEffBindF("tex load %s", t_pszFile);
 
-		if(LW_FAILED(lwLoadTex(&tex, m_pSysGraphics->GetResourceMgr(), t_pszFile, 0, D3DFMT_A4R4G4B4)))
+		if(!m_pSysGraphics || LW_FAILED(lwLoadTex(&tex, m_pSysGraphics->GetResourceMgr(), t_pszFile, 0, D3DFMT_A8R8G8B8)))
 		{
-			char szMsg[64];
-			sprintf(szMsg, "������Ч��ͼ[id=%d]����", iID);
-			LG("ERROR","msg%s",szMsg);
+			LG("error", "load effect texture failed [%s]\n", t_pszFile);
+			TraceEffBindF("tex load failed %s", t_pszFile);
 			return 0;
 		}
-		//#endif
 		_vecTexList[iID] = tex;
+		TraceEffBindF("tex load ok %s", t_pszFile);
 
 		return _vecTexList[iID];
 	}
@@ -600,6 +604,9 @@ CEffectModel* CMPResManger::GetMeshByID( int iID)
 
 	CEffectModel* pRetMesh(0);
 	int iUsedSlot = iID;
+
+	if (iID < 0 || iID >= (int)_vecMeshList.size())
+		return 0;
 
 	if(iID >=7)
 	{
@@ -681,6 +688,8 @@ CEffectModel* CMPResManger::GetMeshByID( int iID)
 	{
 		pRetMesh = _vecMeshList[iID];
 	}
+	if (!pRetMesh)
+		return 0;
 	pRetMesh->m_iID = iID;
 	pRetMesh->SetUsing(true);
 	if (iUsedSlot >= 0 && iUsedSlot < (int)_vecMeshLastUse.size())
@@ -769,7 +778,9 @@ int		CMPResManger::GetEffectID(const s_string &pszName)
 }
 std::vector<I_Effect>&	CMPResManger::GetEffectByID( int iID)
 {
-	I_Effect *pEffect = &(_vecEffectList[iID][0]);
+	static std::vector<I_Effect> empty;
+	if (iID < 0 || iID >= (int)_vecEffectList.size())
+		return empty;
 
 	int n = (int)_vecEffectList[iID].size();
 	if( n <=0)
@@ -780,7 +791,8 @@ std::vector<I_Effect>&	CMPResManger::GetEffectByID( int iID)
 		//__asm int 3;
 		if(!LoadEffectFromFile(iID, t_pszFile))
 			return _vecEffectList[iID];
-		_vecEffectList[iID][0].setEffectName(_vecEffectName[iID]);
+		if (!_vecEffectList[iID].empty())
+			_vecEffectList[iID][0].setEffectName(_vecEffectName[iID]);
 
 	}
 	return _vecEffectList[iID];
@@ -841,6 +853,8 @@ IDirect3DVertexDeclarationX* CMPResManger::GetFontVDecl()
 
 EffParameter*   CMPResManger::GetEffectParamByID(int iID)
 {
+	if (iID < 0 || iID >= (int)_vecEffectParam.size())
+		return NULL;
 	return &_vecEffectParam[iID];
 }
 
@@ -2073,6 +2087,8 @@ int		CMPResManger::GetEffPathID(const s_string& pszName)
 
 CEffPath*	CMPResManger::GetEffPath(int iID)
 {
+	if (iID < 0 || iID >= (int)_vecPath.size())
+		return NULL;
 	return &_vecPath[iID];
 }
 
@@ -2222,13 +2238,18 @@ CMPPartCtrl*	CMPResManger::GetPartCtrlByID(int iID)
 		LG("error","msg��ЧID[%d]",iID);
 		return NULL;
 	}
-	if((*_vecPartCtrl[iID]) == NULL)
+	CMPPartCtrl** slot = _vecPartCtrl[iID];
+	if (!slot)
+		return NULL;
+	if(*slot == NULL)
 	{
+		if (iID >= (int)_vecPartName.size())
+			return NULL;
 		char t_Path[MAX_PATH];
 		sprintf(t_Path, "%s\\%s",_pszEFFectPath,_vecPartName[iID].c_str());
 
-		(*_vecPartCtrl[iID]) = new CMPPartCtrl;
-		if(!(*_vecPartCtrl[iID])->LoadFromFile(t_Path))
+		*slot = new CMPPartCtrl;
+		if(!(*slot)->LoadFromFile(t_Path))
 		{
 			//SAFE_DELETE( (*_vecPartCtrl[iID]) ); 
 			LG("error","msgLoad %s error",_vecPartName[iID].c_str());
@@ -2237,15 +2258,19 @@ CMPPartCtrl*	CMPResManger::GetPartCtrlByID(int iID)
 		else
 		{
 			const auto v = D3DXVECTOR3(0, 0, 0);
-			(*_vecPartCtrl[iID])->MoveTo(&v);
+			(*slot)->MoveTo(&v);
 		}
 	}
-	return (*_vecPartCtrl[iID]);
+	return *slot;
 }
 //#endif
 
 void	CMPResManger::LoadTotalPartCtrl()
 {
+	if (_bPartCtrlLoaded)
+		return;
+	_bPartCtrlLoaded = true;
+
 #if RESOURCE_SCRIPT == 0 || RESOURCE_SCRIPT == 1
 	//�����ļ�Ŀ¼����
 	{

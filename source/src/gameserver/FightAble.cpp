@@ -1769,6 +1769,8 @@ void CFightAble::CountLevel() {
 			pNLvRec = GetLevelRecordInfo((int)lCurLevel + 1);
 			if (pNLvRec) {
 				setAttr(ATTR_NLEXP, pNLvRec->ulExp);
+			} else {
+				setAttr(ATTR_NLEXP, pCLvRec->ulExp);
 			}
 			g_CParser.DoString("Shengji_Shuxingchengzhang", enumSCRIPT_RETURN_NONE, 0, enumSCRIPT_PARAM_LIGHTUSERDATA, 1, this->IsCharacter(), DOSTRING_PARAM_END); // 升级计算（配置基本属性，设置属性点）
 			OnLevelUp((USHORT)lCurLevel);

@@ -427,15 +427,18 @@ void	CMPPartCtrl::Play(int iTime)
 
 	for (int n = 0; n < m_iPartNum; ++n)
 	{
-		m_vecPartSys[n]->Play(iTime);
+		if (m_vecPartSys[n])
+			m_vecPartSys[n]->Play(iTime);
 	}
 	for (int n = 0; n < m_iStripNum; ++n)
 	{
-		m_pcStrip[n].Play();
+		if (m_pcStrip)
+			m_pcStrip[n].Play();
 	}
 	for (int n = 0; n <m_iModelNum; n++ )
 	{
-		m_vecModel[n]->Play();
+		if (m_vecModel[n])
+			m_vecModel[n]->Play();
 	}
 }
 bool	CMPPartCtrl::IsPlaying()
@@ -467,13 +470,17 @@ bool	CMPPartCtrl::IsPlaying()
 }
 void	CMPPartCtrl::CopyPartCtrl(CMPPartCtrl* pPart)
 {
+	if (!pPart)
+		return;
 	m_strName = pPart->m_strName;
 
+	m_iPartNum = 0;
 	m_vecPartSys.resize(pPart->m_iPartNum);
  
 	for (int n = 0; n < pPart->m_iPartNum; ++n)
 	{
-		AddPartSys(pPart->m_vecPartSys[n]);
+		if (pPart->m_vecPartSys[n])
+			AddPartSys(pPart->m_vecPartSys[n]);
 	}
 	SAFE_DELETE_ARRAY(m_pcStrip);
 	m_iStripNum = pPart->m_iStripNum;
@@ -514,19 +521,38 @@ void	CMPPartCtrl::CopyPartCtrl(CMPPartCtrl* pPart)
 
 void	CMPPartCtrl::BindingRes(CMPResManger* pResMagr)
 {
+	if (!pResMagr)
+		return;
+	TraceEffBindF("bindctrl begin parts=%d strips=%d models=%d", m_iPartNum, m_iStripNum, m_iModelNum);
 	m_pfDailTime = pResMagr->GetDailTime();
 	for (int n = 0; n < m_iPartNum; ++n)
 	{
+		if (!m_vecPartSys[n])
+			continue;
+		TraceEffBindF("bindctrl part %d/%d name=%s type=%d mediay=%d parnum=%d model=%s tex=%s",
+			n, m_iPartNum,
+			m_vecPartSys[n]->GetSysName().c_str(),
+			m_vecPartSys[n]->GetType(),
+			m_vecPartSys[n]->IsMediay() ? 1 : 0,
+			m_vecPartSys[n]->GetSysNum(),
+			m_vecPartSys[n]->GetModelName().c_str(),
+			m_vecPartSys[n]->GetTextureName().c_str());
 		m_vecPartSys[n]->BindingRes(pResMagr);
+		TraceEffBindF("bindctrl part %d done", n);
 	}
 	for ( int n = 0; n < m_iStripNum; ++n)
 	{
+		if (!m_pcStrip)
+			break;
+		TraceEffBindF("bindctrl strip %d/%d", n, m_iStripNum);
 		m_pcStrip[n].BindingRes(pResMagr);
 	}
 	for (int n = 0; n <m_iModelNum; n++ )
 	{
-		m_vecModel[n]->m_pDev = pResMagr->m_pDev;
+		if (m_vecModel[n])
+			m_vecModel[n]->m_pDev = pResMagr->m_pDev;
 	}
+	TraceEffBind("bindctrl done");
 }
 
 CMPPartSys*		CMPPartCtrl::AddPartSys(CMPPartSys* part)
@@ -696,6 +722,12 @@ bool	CMPPartCtrl::LoadFromFile(char* pszName)
 	m_strName = pszPartName;
 
 	fread(&m_iPartNum,sizeof(int),1,t_pFile);
+	if (m_iPartNum < 0 || m_iPartNum > MAX_PART_SYS)
+	{
+		LG("error", "msg[%s] part count %d invalid.(CMPPartCtrl::LoadFromFile)\n", pszName, m_iPartNum);
+		fclose(t_pFile);
+		return false;
+	}
 #ifdef USE_GAME
 	m_vecPartSys.resize(m_iPartNum);
 #endif

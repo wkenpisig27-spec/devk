@@ -24,6 +24,8 @@
 #include "SteadyFrame.h"
 #include "UICozeForm.h"
 #include "GameMovie.h"
+#include "EffectSet.h"
+#include <set>
 
 using namespace std;
 
@@ -58,6 +60,91 @@ CSteadyFrame* CGameApp::_pSteady = &steady;
 
 extern void LimitCurrentProc();
 
+static int SafeBindPartCtrl(CMPPartCtrl* ctrl)
+{
+	if (!ctrl)
+		return 0;
+	__try {
+		ctrl->BindingRes(&ResMgr);
+		return 1;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		return 0;
+	}
+}
+
+void CGameApp::WarmupMagicEffectResources()
+{
+	if (!CMagicSet::I())
+		return;
+
+	OutputDebugStringA("PKO: WarmupMagicEffectResources()...\n");
+
+	const bool oldTrace = EffBindTraceEnabled();
+	EffBindTraceEnabled() = false;
+
+	lwIByteSet* res_bs = NULL;
+	BYTE oldMt = 0;
+	if (g_Render.GetInterfaceMgr() && g_Render.GetInterfaceMgr()->res_mgr)
+	{
+		res_bs = g_Render.GetInterfaceMgr()->res_mgr->GetByteSet();
+		if (res_bs)
+		{
+			oldMt = res_bs->GetValue(OPT_RESMGR_LOADTEXTURE_MT);
+			res_bs->SetValue(OPT_RESMGR_LOADTEXTURE_MT, 0);
+		}
+	}
+
+	if (ResMgr.GetPartCtrlNum() <= 0)
+		LoadRes3();
+
+	// Binding every magic-table .par at boot uploads broken/editor textures
+	// (jfz01.tga) and kills the process before a window appears. Warm only
+	// combat/UI effects that actually play in-world.
+	static const int kWarmupMagicIDs[] = {
+		132, // level-up
+		130,
+		97, 98,
+		334, 335,
+		345, 346,
+		452, 453, 459, 468,
+	};
+
+	std::set<int> warmed;
+	auto warmupName = [&](const char* name) {
+		if (!name || !name[0])
+			return;
+		const int pid = ResMgr.GetPartCtrlID(s_string(name));
+		if (pid < 0 || !warmed.insert(pid).second)
+			return;
+		char msg[160];
+		sprintf(msg, "PKO: warmup par %s id=%d\n", name, pid);
+		OutputDebugStringA(msg);
+		CMPPartCtrl* ctrl = ResMgr.GetPartCtrlByID(pid);
+		if (!SafeBindPartCtrl(ctrl))
+		{
+			sprintf(msg, "PKO: warmup skipped %s (bind failed)\n", name);
+			OutputDebugStringA(msg);
+		}
+	};
+
+	warmupName("01030007.par");
+	for (int id : kWarmupMagicIDs)
+	{
+		CMagicInfo* info = GetMagicInfo(id);
+		if (!info)
+			continue;
+		warmupName(info->szDataName);
+	}
+
+	if (res_bs)
+		res_bs->SetValue(OPT_RESMGR_LOADTEXTURE_MT, oldMt);
+	EffBindTraceEnabled() = oldTrace;
+
+	char buf[128];
+	sprintf(buf, "PKO: WarmupMagicEffectResources() bound %d particle scripts\n", (int)warmed.size());
+	OutputDebugStringA(buf);
+}
 
 CGameApp::CGameApp()
     : _bEnableSuperKey(FALSE),

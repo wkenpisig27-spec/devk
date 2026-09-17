@@ -178,6 +178,9 @@ struct MeshState
     ID3D11RasterizerState* rast_ccw;
     ID3D11RasterizerState* rast_cw;
     ID3D11RasterizerState* rast_none;
+    ID3D11RasterizerState* rast_ccw_noaa;
+    ID3D11RasterizerState* rast_cw_noaa;
+    ID3D11RasterizerState* rast_none_noaa;
     ID3D11DepthStencilState* depth_on;
     ID3D11DepthStencilState* depth_read;
     ID3D11DepthStencilState* depth_off;
@@ -228,6 +231,9 @@ static void ReleaseMesh()
     if (s_mesh.depth_off) s_mesh.depth_off->Release();
     if (s_mesh.depth_read) s_mesh.depth_read->Release();
     if (s_mesh.depth_on) s_mesh.depth_on->Release();
+    if (s_mesh.rast_none_noaa) s_mesh.rast_none_noaa->Release();
+    if (s_mesh.rast_cw_noaa) s_mesh.rast_cw_noaa->Release();
+    if (s_mesh.rast_ccw_noaa) s_mesh.rast_ccw_noaa->Release();
     if (s_mesh.rast_none) s_mesh.rast_none->Release();
     if (s_mesh.rast_cw) s_mesh.rast_cw->Release();
     if (s_mesh.rast_ccw) s_mesh.rast_ccw->Release();
@@ -265,15 +271,15 @@ static ID3DBlob* Compile(const char* entry, const char* target)
     return blob;
 }
 
-static ID3D11RasterizerState* MakeRast(ID3D11Device* device, D3D11_CULL_MODE cull)
+static ID3D11RasterizerState* MakeRast(ID3D11Device* device, D3D11_CULL_MODE cull, BOOL msaa)
 {
     D3D11_RASTERIZER_DESC rd = {};
     rd.FillMode = D3D11_FILL_SOLID;
     rd.CullMode = cull;
     rd.FrontCounterClockwise = FALSE;
     rd.DepthClipEnable = FALSE;
-    rd.MultisampleEnable = TRUE;
-    rd.AntialiasedLineEnable = TRUE;
+    rd.MultisampleEnable = msaa ? TRUE : FALSE;
+    rd.AntialiasedLineEnable = msaa ? TRUE : FALSE;
     ID3D11RasterizerState* rs = 0;
     device->CreateRasterizerState(&rd, &rs);
     return rs;
@@ -348,9 +354,12 @@ LW_RESULT lwD3D11MeshInit(ID3D11Device* device, ID3D11DeviceContext* context)
     sd.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
     device->CreateSamplerState(&sd, &s_mesh.samp_point_clamp);
 
-    s_mesh.rast_ccw = MakeRast(device, D3D11_CULL_BACK);
-    s_mesh.rast_cw = MakeRast(device, D3D11_CULL_FRONT);
-    s_mesh.rast_none = MakeRast(device, D3D11_CULL_NONE);
+    s_mesh.rast_ccw = MakeRast(device, D3D11_CULL_BACK, TRUE);
+    s_mesh.rast_cw = MakeRast(device, D3D11_CULL_FRONT, TRUE);
+    s_mesh.rast_none = MakeRast(device, D3D11_CULL_NONE, TRUE);
+    s_mesh.rast_ccw_noaa = MakeRast(device, D3D11_CULL_BACK, FALSE);
+    s_mesh.rast_cw_noaa = MakeRast(device, D3D11_CULL_FRONT, FALSE);
+    s_mesh.rast_none_noaa = MakeRast(device, D3D11_CULL_NONE, FALSE);
 
     D3D11_DEPTH_STENCIL_DESC dd = {};
     dd.DepthEnable = TRUE;
@@ -395,10 +404,10 @@ LW_RESULT lwD3D11MeshInit(ID3D11Device* device, ID3D11DeviceContext* context)
     s_mesh.bone_count = 0;
     s_mesh.outline = 0;
     s_mesh.outline_width = 0.014f;
-    s_mesh.outline_color[0] = 0.08f;
-    s_mesh.outline_color[1] = 0.05f;
-    s_mesh.outline_color[2] = 0.04f;
-    s_mesh.outline_color[3] = 1.0f;
+    s_mesh.outline_color[0] = 0.33f;
+    s_mesh.outline_color[1] = 0.25f;
+    s_mesh.outline_color[2] = 0.20f;
+    s_mesh.outline_color[3] = 0.70f;
     s_mesh.ready = 1;
     return LW_RET_OK;
 }
@@ -433,7 +442,7 @@ void lwD3D11MeshSetOutline(int enabled, float width, float r, float g, float b)
     s_mesh.outline_color[0] = r;
     s_mesh.outline_color[1] = g;
     s_mesh.outline_color[2] = b;
-    s_mesh.outline_color[3] = 1.0f;
+    s_mesh.outline_color[3] = 0.70f;
 }
 
 int lwD3D11MeshIsOutline()
@@ -780,7 +789,10 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
         const int rhw = ((fvf & D3DFVF_POSITION_MASK) == D3DFVF_XYZRHW) ? 1 : 0;
         const int eff_xyzb1 = ((fvf & D3DFVF_POSITION_MASK) == D3DFVF_XYZB1) &&
             !(fvf & (D3DFVF_LASTBETA_UBYTE4 | D3DFVF_LASTBETA_D3DCOLOR));
-        if (!dual_early && !rhw && !eff_xyzb1)
+        // FVF-only effect/shade/particle verts have no normal and no LASTBETA.
+        // ShaderMgr11 skin VS + leftover character decl must not consume them.
+        const int fvf_only_fx = (!info.has_nrm && !info.has_blend) || eff_xyzb1;
+        if (!dual_early && !rhw && !fvf_only_fx)
         {
             ID3D11InputLayout* sm_layout = 0;
             if (lwD3D11ShaderMgrPrepareDraw(dev, &sm_layout) && sm_layout)
@@ -987,15 +999,19 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     lwD3D11Texture* tex = lwAsD3D11Texture(dev->GetBoundTex(0));
     if (tex && tex->GetSRV())
         srv = tex->GetSRV();
+    else if (!info.has_nrm && !info.has_blend)
+        return LW_RET_OK;
 
     DWORD cull = dev->GetCachedRS(D3DRS_CULLMODE);
-    ID3D11RasterizerState* rast = s_mesh.rast_ccw;
+    DWORD msaa_aa = dev->GetCachedRS(D3DRS_MULTISAMPLEANTIALIAS);
+    const int no_aa = (msaa_aa == 0);
+    ID3D11RasterizerState* rast = no_aa ? s_mesh.rast_ccw_noaa : s_mesh.rast_ccw;
     if (s_mesh.outline)
         rast = s_mesh.rast_cw;
     else if (cull == D3DCULL_NONE)
-        rast = s_mesh.rast_none;
+        rast = no_aa ? s_mesh.rast_none_noaa : s_mesh.rast_none;
     else if (cull == D3DCULL_CW)
-        rast = s_mesh.rast_cw;
+        rast = no_aa ? s_mesh.rast_cw_noaa : s_mesh.rast_cw;
 
     DWORD srcblend = dev->GetCachedRS(D3DRS_SRCBLEND);
     DWORD destblend = dev->GetCachedRS(D3DRS_DESTBLEND);
@@ -1021,7 +1037,7 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
         depth = s_mesh.depth_read;
 
     ID3D11BlendState* blend = s_mesh.blend_opaque;
-    if (alpha)
+    if (alpha || s_mesh.outline)
         blend = BlendFor(srcblend, destblend);
 
     if (info.has_blend)
