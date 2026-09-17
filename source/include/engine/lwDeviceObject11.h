@@ -129,6 +129,7 @@ public:
     LW_RESULT Present();
     LW_RESULT BeginScene();
     LW_RESULT EndScene();
+    LW_RESULT ResolveScenePost();
 
     void SetShadowPassMode(bool enabled) { _bShadowPass = enabled; }
     bool IsShadowPassMode() const { return _bShadowPass; }
@@ -217,6 +218,8 @@ private:
     IDXGIFactory* _factory;
     IDXGISwapChain* _swapchain;
     ID3D11Texture2D* _depth_tex;
+    ID3D11RenderTargetView* _bb_rtv;
+    ID3D11DepthStencilView* _bb_dsv;
     ID3D11RenderTargetView* _rtv;
     ID3D11DepthStencilView* _dsv;
     ID3D11RenderTargetView* _saved_rtv;
@@ -227,7 +230,9 @@ private:
     UINT _bb_height;
     UINT _msaa_count;
     UINT _msaa_quality;
+    UINT _bb_msaa;
     int _vsync;
+    int _post_resolved;
 
     IDirect3DVertexBufferX* _bound_vb;
     UINT _bound_vb_off;

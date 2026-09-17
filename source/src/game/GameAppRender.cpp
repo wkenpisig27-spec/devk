@@ -96,6 +96,8 @@ void CGameApp::_Render() {
 	g_Editor.Render();
 	g_Render.RenderAllLines();
 
+	g_Render.ResolveScenePost();
+
 	// ����ؼ�����Ⱦ-----------------------------------------------------------------------
 	MPTimer tUI;
 	tUI.Begin();

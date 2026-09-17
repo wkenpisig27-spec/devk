@@ -267,6 +267,7 @@
     <ClInclude Include="..\..\include\engine\mygraph.h" />
     <ClInclude Include="..\..\include\engine\lwD3D11Gaps.h" />
     <ClInclude Include="..\..\include\engine\lwD3D11Blit.h" />
+    <ClInclude Include="..\..\include\engine\lwD3D11Post.h" />
     <ClInclude Include="..\..\include\engine\lwD3D11Texture.h" />
     <ClInclude Include="..\..\include\engine\lwD3D11Buffer.h" />
     <ClInclude Include="..\..\include\engine\lwD3D11Mesh.h" />
@@ -321,6 +322,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\engine\lwD3D11Blit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\engine\lwD3D11Post.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\engine\lwD3D11Texture.cpp">

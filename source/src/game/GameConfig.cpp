@@ -3,6 +3,7 @@
 #include "GameApp.h"
 #include "ShaderLoad.h"
 #include "lwRenderBackend.h"
+#include "lwD3D11Post.h"
 
 using namespace std;
 
@@ -145,6 +146,18 @@ void CGameConfig::SetDefault() // Ĭ������
 	m_bSRGBWrite = FALSE;
 	m_fSceneAmbientScale = 1.0f;
 
+	m_bHdr = FALSE;
+	m_bBloom = FALSE;
+	m_bSharpen = FALSE;
+	m_fHdrExposure = 1.00f;
+	m_fBloomThreshold = 1.00f;
+	m_fBloomIntensity = 0.28f;
+	m_fSharpenStrength = 0.10f;
+	m_fPostContrast = 0.88f;
+	m_fPostSaturation = 1.14f;
+	m_fPostDehaze = 0.00f;
+	m_fPostFill = 0.05f;
+
 	strncpy(m_szRenderer, "dx9", sizeof(m_szRenderer) - 1);
 	m_szRenderer[sizeof(m_szRenderer) - 1] = 0;
 }
@@ -199,6 +212,63 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 	GetPrivateProfileStringA("video", "renderer", "dx9", buf, sizeof(buf), pszIniFileName);
 	strncpy(m_szRenderer, buf, sizeof(m_szRenderer) - 1);
 	m_szRenderer[sizeof(m_szRenderer) - 1] = 0;
+
+	const int dx11 = (_stricmp(m_szRenderer, "dx11") == 0 || _stricmp(m_szRenderer, "d3d11") == 0) ? 1 : 0;
+	m_bHdr = GetPrivateProfileInt("visual", "hdr", dx11, pszIniFileName) != 0;
+	m_bBloom = GetPrivateProfileInt("visual", "bloom", m_bHdr ? 1 : 0, pszIniFileName) != 0;
+	m_bSharpen = GetPrivateProfileInt("visual", "sharpen", m_bHdr ? 1 : 0, pszIniFileName) != 0;
+	GetPrivateProfileStringA("visual", "hdrExposure", "1.00", buf, sizeof(buf), pszIniFileName);
+	m_fHdrExposure = (float)atof(buf);
+	GetPrivateProfileStringA("visual", "bloomThreshold", "1.00", buf, sizeof(buf), pszIniFileName);
+	m_fBloomThreshold = (float)atof(buf);
+	GetPrivateProfileStringA("visual", "bloomIntensity", "0.28", buf, sizeof(buf), pszIniFileName);
+	m_fBloomIntensity = (float)atof(buf);
+	GetPrivateProfileStringA("visual", "sharpenStrength", "0.10", buf, sizeof(buf), pszIniFileName);
+	m_fSharpenStrength = (float)atof(buf);
+	GetPrivateProfileStringA("visual", "contrast", "0.88", buf, sizeof(buf), pszIniFileName);
+	m_fPostContrast = (float)atof(buf);
+	GetPrivateProfileStringA("visual", "saturation", "1.14", buf, sizeof(buf), pszIniFileName);
+	m_fPostSaturation = (float)atof(buf);
+	GetPrivateProfileStringA("visual", "dehaze", "0.00", buf, sizeof(buf), pszIniFileName);
+	m_fPostDehaze = (float)atof(buf);
+	GetPrivateProfileStringA("visual", "fill", "0.05", buf, sizeof(buf), pszIniFileName);
+	m_fPostFill = (float)atof(buf);
+	// Dead-pastel grade: sat 0.87 + gray fill. Keep the flat luma, restore chroma.
+	if (m_fPostSaturation > 0.85f && m_fPostSaturation < 0.89f)
+		m_fPostSaturation = 1.14f;
+	if (m_fPostContrast > 0.97f && m_fPostContrast < 0.99f)
+		m_fPostContrast = 0.88f;
+	if (m_fPostFill > 0.055f && m_fPostFill < 0.065f)
+		m_fPostFill = 0.05f;
+	if (m_fSharpenStrength > 0.11f && m_fSharpenStrength < 0.13f)
+		m_fSharpenStrength = 0.10f;
+	// Punchy first grade (sat/contrast 1.12)
+	if (m_fPostContrast > 1.11f && m_fPostContrast < 1.13f)
+		m_fPostContrast = 0.88f;
+	if (m_fPostSaturation > 1.11f && m_fPostSaturation < 1.13f)
+		m_fPostSaturation = 1.14f;
+	if (m_fBloomIntensity > 0.39f && m_fBloomIntensity < 0.41f)
+		m_fBloomIntensity = 0.28f;
+	// First HDR pass used ACES + 0.90 exposure; that combo reads as dusty yellow.
+	if (m_fHdrExposure > 0.89f && m_fHdrExposure < 0.91f)
+		m_fHdrExposure = 1.00f;
+	if (m_fBloomThreshold > 0.79f && m_fBloomThreshold < 0.81f)
+		m_fBloomThreshold = 1.00f;
+	if (m_fBloomIntensity > 0.49f && m_fBloomIntensity < 0.51f)
+		m_fBloomIntensity = 0.28f;
+
+	lwD3D11PostSetParams(
+		m_bHdr ? 1 : 0,
+		m_bBloom ? 1 : 0,
+		m_bSharpen ? 1 : 0,
+		m_fHdrExposure,
+		m_fBloomThreshold,
+		m_fBloomIntensity,
+		m_fSharpenStrength,
+		m_fPostContrast,
+		m_fPostSaturation,
+		m_fPostDehaze,
+		m_fPostFill);
 }
 
 void CGameConfig::ApplyRendererToEngine() {
@@ -226,6 +296,18 @@ void CGameConfig::ApplyVisualSettingsToEngine() {
 	}
 	lwSetOutlineParams(m_fOutlineWidth, r, g, b, m_fOutlineRefDepth);
 	ApplyRendererToEngine();
+	lwD3D11PostSetParams(
+		m_bHdr ? 1 : 0,
+		m_bBloom ? 1 : 0,
+		m_bSharpen ? 1 : 0,
+		m_fHdrExposure,
+		m_fBloomThreshold,
+		m_fBloomIntensity,
+		m_fSharpenStrength,
+		m_fPostContrast,
+		m_fPostSaturation,
+		m_fPostDehaze,
+		m_fPostFill);
 	// Fog is applied per-frame in CGameScene::_Render from these fields.
 	// Shadow map stays off by default so soft blob foot-shadows remain (RO look).
 }

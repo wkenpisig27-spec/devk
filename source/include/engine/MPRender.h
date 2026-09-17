@@ -76,6 +76,8 @@ public:
     // Render Routines
     BOOL				BeginRender(bool clear=true);
     void				EndRender(bool present=true);
+    // DX11 HDR/bloom/sharpen: resolve 3D into the LDR swapchain before UI.
+    void				ResolveScenePost();
 	void				RenderDebugInfo();
     void				SetBackgroundColor(DWORD dwColor);
     void				EnableClearTarget(BOOL bEnable = TRUE)      { _bClearTarget  = bEnable; } 

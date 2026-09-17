@@ -929,14 +929,14 @@ BOOL MPRender::BeginRender(bool clear) // vim
 		lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
 		if (!d11)
 			return false;
+		if (LW_FAILED(d11->BeginScene()))
+			return false;
 		if (clear) {
 			if (LW_FAILED(d11->Clear(_dwClearFlag, _dwBackgroundColor, 1.0f, 0L))) {
 				LG("error", "D3D Device Clear Failed!\n");
 				return false;
 			}
 		}
-		if (LW_FAILED(d11->BeginScene()))
-			return false;
 		return true;
 	}
 
@@ -953,6 +953,15 @@ BOOL MPRender::BeginRender(bool clear) // vim
 	}
 
 	return true;
+}
+
+void MPRender::ResolveScenePost()
+{
+	if (!lwIsDx11Active())
+		return;
+	lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
+	if (d11)
+		d11->ResolveScenePost();
 }
 
 void MPRender::EndRender(const bool present) // vim

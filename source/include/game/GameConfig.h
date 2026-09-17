@@ -47,6 +47,18 @@ public:
 	BOOL m_bSRGBWrite;
 	float m_fSceneAmbientScale; // multiplies map env ambient (1.0 = stock, <1 darker scenery)
 
+	BOOL m_bHdr;              // DX11 HDR scene RT + highlight-only tone
+	BOOL m_bBloom;
+	BOOL m_bSharpen;
+	float m_fHdrExposure;
+	float m_fBloomThreshold;
+	float m_fBloomIntensity;
+	float m_fSharpenStrength;
+	float m_fPostContrast;
+	float m_fPostSaturation;
+	float m_fPostDehaze;
+	float m_fPostFill;
+
 	int m_nMaxChaType;
 	int m_nMaxSceneObjType;
 	int m_nMaxEffectType;

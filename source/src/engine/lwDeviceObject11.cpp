@@ -3,6 +3,7 @@
 #include "lwSysGraphics.h"
 #include "lwD3D11Gaps.h"
 #include "lwD3D11Blit.h"
+#include "lwD3D11Post.h"
 #include "lwD3D11Texture.h"
 #include "lwD3D11Buffer.h"
 #include "lwD3D11Mesh.h"
@@ -54,6 +55,8 @@ lwDeviceObject11::lwDeviceObject11(lwSysGraphics* sys_graphics)
     , _factory(0)
     , _swapchain(0)
     , _depth_tex(0)
+    , _bb_rtv(0)
+    , _bb_dsv(0)
     , _rtv(0)
     , _dsv(0)
     , _saved_rtv(0)
@@ -64,7 +67,9 @@ lwDeviceObject11::lwDeviceObject11(lwSysGraphics* sys_graphics)
     , _bb_height(0)
     , _msaa_count(1)
     , _msaa_quality(0)
+    , _bb_msaa(1)
     , _vsync(0)
+    , _post_resolved(0)
     , _bound_vb(0)
     , _bound_vb_off(0)
     , _bound_vb_stride(0)
@@ -115,6 +120,7 @@ lwDeviceObject11::~lwDeviceObject11()
     lwD3D11ShaderMgrShutdown();
     lwD3D11MeshShutdown();
     lwD3D11BlitShutdown();
+    lwD3D11PostShutdown();
     _ReleaseTargets();
     D11Release(_swapchain);
     D11Release(_context);
@@ -126,7 +132,11 @@ void lwDeviceObject11::_ReleaseTargets()
 {
     if (_context)
         _context->OMSetRenderTargets(0, 0, 0);
-    D11Release(_rtv);
+    lwD3D11PostReleaseTargets();
+    _rtv = 0;
+    _dsv = _bb_dsv;
+    _bb_dsv = 0;
+    D11Release(_bb_rtv);
     D11Release(_dsv);
     D11Release(_depth_tex);
 }
@@ -149,7 +159,7 @@ LW_RESULT lwDeviceObject11::_CreateTargets()
     if (FAILED(hr) || !back)
         return LW_RET_FAILED;
 
-    hr = _device->CreateRenderTargetView(back, 0, &_rtv);
+    hr = _device->CreateRenderTargetView(back, 0, &_bb_rtv);
     D3D11_TEXTURE2D_DESC bb = {};
     back->GetDesc(&bb);
     back->Release();
@@ -158,6 +168,7 @@ LW_RESULT lwDeviceObject11::_CreateTargets()
 
     _bb_width = bb.Width;
     _bb_height = bb.Height;
+    _bb_msaa = bb.SampleDesc.Count ? bb.SampleDesc.Count : 1;
 
     D3D11_TEXTURE2D_DESC depth = {};
     depth.Width = _bb_width;
@@ -165,8 +176,8 @@ LW_RESULT lwDeviceObject11::_CreateTargets()
     depth.MipLevels = 1;
     depth.ArraySize = 1;
     depth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    depth.SampleDesc.Count = _msaa_count ? _msaa_count : 1;
-    depth.SampleDesc.Quality = _msaa_quality;
+    depth.SampleDesc.Count = _bb_msaa;
+    depth.SampleDesc.Quality = (_bb_msaa > 1) ? _msaa_quality : 0;
     depth.Usage = D3D11_USAGE_DEFAULT;
     depth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 
@@ -177,6 +188,7 @@ LW_RESULT lwDeviceObject11::_CreateTargets()
     hr = _device->CreateDepthStencilView(_depth_tex, 0, &_dsv);
     if (FAILED(hr))
         return LW_RET_FAILED;
+    _bb_dsv = _dsv;
 
     _viewport.X = 0;
     _viewport.Y = 0;
@@ -194,6 +206,8 @@ LW_RESULT lwDeviceObject11::_CreateTargets()
     vp.MaxDepth = 1.0f;
     _context->RSSetViewports(1, &vp);
 
+    _rtv = _bb_rtv;
+    _post_resolved = 1;
     _BindTargets();
     lwD3D11BlitSetViewport(_bb_width, _bb_height);
     return LW_RET_OK;
@@ -332,6 +346,16 @@ LW_RESULT lwDeviceObject11::CreateDevice(lwD3DCreateParam* param)
         }
     }
 
+    if (LW_FAILED(lwD3D11PostInit(_device, _context)))
+    {
+        lwD3D11Gap(LW_D3D11_FALLBACK, "post-init", "HDR/bloom shaders failed to compile; post-fx off");
+        lwD3D11PostSetParams(0, 0, 0, 1.00f, 1.00f, 0.28f, 0.10f, 0.88f, 1.14f, 0.00f, 0.05f);
+    }
+
+    // HDR post samples the scene RT. Keep the swapchain 1x LDR so tonemap/UI
+    // can bind it; MSAA lives on the offscreen HDR target instead.
+    _bb_msaa = lwD3D11PostWantsHdr() ? 1 : _msaa_count;
+
     DXGI_SWAP_CHAIN_DESC sd = {};
     sd.BufferCount = 2;
     sd.BufferDesc.Width = w;
@@ -341,8 +365,8 @@ LW_RESULT lwDeviceObject11::CreateDevice(lwD3DCreateParam* param)
     sd.BufferDesc.RefreshRate.Denominator = 1;
     sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     sd.OutputWindow = param->hwnd;
-    sd.SampleDesc.Count = _msaa_count;
-    sd.SampleDesc.Quality = _msaa_quality;
+    sd.SampleDesc.Count = _bb_msaa;
+    sd.SampleDesc.Quality = (_bb_msaa > 1) ? _msaa_quality : 0;
     sd.Windowed = TRUE;
     sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
     sd.Flags = 0;
@@ -353,10 +377,11 @@ LW_RESULT lwDeviceObject11::CreateDevice(lwD3DCreateParam* param)
     }
 
     hr = _factory->CreateSwapChain(_device, &sd, &_swapchain);
-    if ((FAILED(hr) || !_swapchain) && _msaa_count > 1)
+    if ((FAILED(hr) || !_swapchain) && _bb_msaa > 1)
     {
         lwD3D11Gap(LW_D3D11_FALLBACK, "msaa-swapchain",
-            "CreateSwapChain %ux MSAA failed hr=0x%08X, retry 1x", _msaa_count, (unsigned)hr);
+            "CreateSwapChain %ux MSAA failed hr=0x%08X, retry 1x", _bb_msaa, (unsigned)hr);
+        _bb_msaa = 1;
         _msaa_count = 1;
         _msaa_quality = 0;
         sd.SampleDesc.Count = 1;
@@ -396,8 +421,15 @@ LW_RESULT lwDeviceObject11::CreateDevice(lwD3DCreateParam* param)
 
     lwD3D11ShaderMgrInit(_device, _context);
 
-    LG("d3d11gaps", "[SysGraphics] DeviceObject11 up: feature=0x%X %ux%u msaa=%u windowed=%d vsync=%d\n",
-        (unsigned)got, w, h, _msaa_count, (int)param->present_param.Windowed, _vsync);
+    if (lwD3D11PostWantsHdr())
+    {
+        if (LW_FAILED(lwD3D11PostCreateTargets(_bb_width, _bb_height, _msaa_count)))
+            lwD3D11Gap(LW_D3D11_FALLBACK, "hdr-create", "HDR post targets failed; drawing to swapchain");
+    }
+
+    LG("d3d11gaps", "[SysGraphics] DeviceObject11 up: feature=0x%X %ux%u msaa=%u bb_msaa=%u hdr=%d windowed=%d vsync=%d\n",
+        (unsigned)got, w, h, _msaa_count, _bb_msaa, lwD3D11PostIsActive(),
+        (int)param->present_param.Windowed, _vsync);
     return LW_RET_OK;
 }
 
@@ -442,6 +474,9 @@ LW_RESULT lwDeviceObject11::ResetDevice(D3DPRESENT_PARAMETERS* d3dpp)
 
     if (LW_FAILED(_CreateTargets()))
         return LW_RET_FAILED;
+
+    if (lwD3D11PostWantsHdr())
+        lwD3D11PostCreateTargets(_bb_width, _bb_height, _msaa_count);
 
     _display_mode.Width = _bb_width;
     _display_mode.Height = _bb_height;
@@ -592,13 +627,63 @@ LW_RESULT lwDeviceObject11::Present()
 
 LW_RESULT lwDeviceObject11::BeginScene()
 {
+    _post_resolved = 0;
+    if (lwD3D11PostIsActive())
+    {
+        ID3D11RenderTargetView* scene = lwD3D11PostSceneRTV();
+        ID3D11DepthStencilView* depth = lwD3D11PostSceneDSV();
+        if (scene)
+        {
+            _rtv = scene;
+            _dsv = depth;
+        }
+        else
+        {
+            _rtv = _bb_rtv;
+            _dsv = _bb_dsv;
+        }
+    }
+    else
+    {
+        _rtv = _bb_rtv;
+        _dsv = _bb_dsv;
+    }
     _BindTargets();
+    return LW_RET_OK;
+}
+
+LW_RESULT lwDeviceObject11::ResolveScenePost()
+{
+    if (_post_resolved)
+        return LW_RET_OK;
+    _post_resolved = 1;
+
+    if (lwD3D11PostIsActive() && _bb_rtv)
+    {
+        if (_context)
+            _context->OMSetRenderTargets(0, 0, 0);
+        lwD3D11PostResolve(_swapchain, _bb_rtv, _bb_width, _bb_height);
+    }
+
+    _rtv = _bb_rtv;
+    _dsv = _bb_dsv;
+    _BindTargets();
+
+    if (_context)
+    {
+        D3D11_VIEWPORT vp = {};
+        vp.Width = (float)_bb_width;
+        vp.Height = (float)_bb_height;
+        vp.MinDepth = 0.0f;
+        vp.MaxDepth = 1.0f;
+        _context->RSSetViewports(1, &vp);
+    }
     return LW_RET_OK;
 }
 
 LW_RESULT lwDeviceObject11::EndScene()
 {
-    return LW_RET_OK;
+    return ResolveScenePost();
 }
 
 LW_RESULT lwDeviceObject11::SetTransform(D3DTRANSFORMSTATETYPE state, const lwMatrix44* mat)
