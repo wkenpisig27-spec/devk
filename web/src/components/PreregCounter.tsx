@@ -27,8 +27,8 @@ export function PreregCounter({ className = "" }: { className?: string }) {
   }
 
   return (
-    <p className={`text-sm text-muted ${className}`}>
-      <span className="font-semibold text-gold">{count.toLocaleString()}</span>
+    <p className={`text-sm text-gold ${className}`}>
+      <span className="font-semibold">{count.toLocaleString()}</span>
       {count === 1 ? " sailor has" : " sailors have"} claimed a spot
     </p>
   );

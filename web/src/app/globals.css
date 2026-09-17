@@ -112,3 +112,85 @@ body > * {
   background: rgba(230, 184, 94, 0.1);
   color: #f2cf83;
 }
+
+@keyframes hero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-kenburns {
+  from {
+    transform: scale(1.05);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.hero-banner-img {
+  /* Subtle lift only — keep close to the source art */
+  filter: brightness(1.03) contrast(1.04) saturate(1.04);
+  animation: hero-kenburns 14s ease-out forwards;
+}
+
+.hero-scrim-x {
+  background: linear-gradient(
+    90deg,
+    rgba(12, 8, 8, 0.82) 0%,
+    rgba(12, 8, 8, 0.42) 26%,
+    rgba(12, 8, 8, 0.12) 46%,
+    rgba(12, 8, 8, 0) 58%
+  );
+}
+
+.hero-scrim-y {
+  background: linear-gradient(
+    180deg,
+    rgba(12, 8, 8, 0.28) 0%,
+    transparent 20%,
+    transparent 74%,
+    rgba(12, 8, 8, 0.68) 100%
+  );
+}
+
+.hero-warm-glow {
+  display: none;
+}
+
+.hero-copy {
+  animation: hero-fade-up 0.85s ease-out both;
+}
+
+.hero-pills {
+  animation: hero-fade-up 0.95s ease-out 0.18s both;
+}
+
+.hero-pills > li {
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hero-pills > li:hover {
+  border-color: rgba(230, 184, 94, 0.5);
+  transform: translateY(-2px);
+  box-shadow:
+    0 16px 44px rgba(0, 0, 0, 0.4),
+    0 0 24px rgba(226, 80, 61, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-banner-img,
+  .hero-copy,
+  .hero-pills {
+    animation: none;
+  }
+
+  .hero-pills > li:hover {
+    transform: none;
+  }
+}

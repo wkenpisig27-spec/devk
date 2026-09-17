@@ -17,8 +17,16 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const path = usePathname();
 
+  const onHome = path === "/";
+
   return (
-    <header className="sticky top-0 z-50 border-b border-line/80 bg-[#120c0c]/75 backdrop-blur-xl shadow-[0_1px_0_rgba(230,184,94,0.16)]">
+    <header
+      className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-colors ${
+        onHome
+          ? "border-white/10 bg-[#120c0c]/35 shadow-none"
+          : "border-line/80 bg-[#120c0c]/75 shadow-[0_1px_0_rgba(230,184,94,0.16)]"
+      }`}
+    >
       <div className="mx-auto flex max-w-[1120px] items-center gap-4 px-4 py-3 sm:px-6">
         <Link href="/" className="flex shrink-0 flex-col leading-none">
           <span className="font-display text-[1.05rem] tracking-wide text-gold drop-shadow-[0_0_12px_rgba(230,184,94,0.45)]">

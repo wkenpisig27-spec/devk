@@ -7,7 +7,7 @@ export const site = {
   discord: "https://discord.com/invite/NHmFsuMpS5",
   engine: "devk",
   /** Public site origin. Override with NEXT_PUBLIC_SITE_URL in production. */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://157.245.52.152",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://abyss-sea.online",
 } as const;
 
 export const nav = [
