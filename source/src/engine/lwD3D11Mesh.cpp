@@ -925,6 +925,14 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
             dual = 5.0f;
         else if (cop1 == D3DTOP_MODULATE2X || cop1 == D3DTOP_ADDSIGNED2X)
             dual = (cop1 == D3DTOP_ADDSIGNED2X) ? 5.0f : 6.0f;
+        else if (cop1 == D3DTOP_MODULATE)
+        {
+            // Terrain splats: stage0 = alpha atlas, stage1 = tile, ARG2 = DIFFUSE.
+            // RGB must come from tex1; mask RGB is near-black and must not modulate.
+            // Character dual-tex uses CURRENT and still wants tex0 * tex1.
+            const int uses_current = (s1_ca1 == D3DTA_CURRENT || s1_ca2 == D3DTA_CURRENT);
+            dual = uses_current ? 2.0f : 1.0f;
+        }
         else if (cop1 != D3DTOP_SELECTARG2)
             dual = 2.0f;
     }
