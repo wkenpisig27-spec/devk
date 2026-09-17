@@ -349,7 +349,7 @@ LW_RESULT lwDeviceObject11::CreateDevice(lwD3DCreateParam* param)
     if (LW_FAILED(lwD3D11PostInit(_device, _context)))
     {
         lwD3D11Gap(LW_D3D11_FALLBACK, "post-init", "HDR/bloom shaders failed to compile; post-fx off");
-        lwD3D11PostSetParams(0, 0, 0, 1.00f, 1.00f, 0.28f, 0.10f, 0.88f, 1.14f, 0.00f, 0.05f);
+        lwD3D11PostSetParams(0, 0, 0, 0.97f, 1.00f, 0.28f, 0.10f, 0.96f, 1.12f, 0.045f, 0.015f);
     }
 
     // HDR post samples the scene RT. Keep the swapchain 1x LDR so tonemap/UI

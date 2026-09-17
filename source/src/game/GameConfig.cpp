@@ -149,14 +149,14 @@ void CGameConfig::SetDefault() // Ĭ������
 	m_bHdr = FALSE;
 	m_bBloom = FALSE;
 	m_bSharpen = FALSE;
-	m_fHdrExposure = 1.00f;
+	m_fHdrExposure = 0.97f;
 	m_fBloomThreshold = 1.00f;
 	m_fBloomIntensity = 0.28f;
 	m_fSharpenStrength = 0.10f;
-	m_fPostContrast = 0.88f;
-	m_fPostSaturation = 1.14f;
-	m_fPostDehaze = 0.00f;
-	m_fPostFill = 0.05f;
+	m_fPostContrast = 0.96f;
+	m_fPostSaturation = 1.12f;
+	m_fPostDehaze = 0.045f;
+	m_fPostFill = 0.015f;
 
 	strncpy(m_szRenderer, "dx9", sizeof(m_szRenderer) - 1);
 	m_szRenderer[sizeof(m_szRenderer) - 1] = 0;
@@ -217,7 +217,7 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 	m_bHdr = GetPrivateProfileInt("visual", "hdr", dx11, pszIniFileName) != 0;
 	m_bBloom = GetPrivateProfileInt("visual", "bloom", m_bHdr ? 1 : 0, pszIniFileName) != 0;
 	m_bSharpen = GetPrivateProfileInt("visual", "sharpen", m_bHdr ? 1 : 0, pszIniFileName) != 0;
-	GetPrivateProfileStringA("visual", "hdrExposure", "1.00", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "hdrExposure", "0.97", buf, sizeof(buf), pszIniFileName);
 	m_fHdrExposure = (float)atof(buf);
 	GetPrivateProfileStringA("visual", "bloomThreshold", "1.00", buf, sizeof(buf), pszIniFileName);
 	m_fBloomThreshold = (float)atof(buf);
@@ -225,37 +225,37 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 	m_fBloomIntensity = (float)atof(buf);
 	GetPrivateProfileStringA("visual", "sharpenStrength", "0.10", buf, sizeof(buf), pszIniFileName);
 	m_fSharpenStrength = (float)atof(buf);
-	GetPrivateProfileStringA("visual", "contrast", "0.88", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "contrast", "0.96", buf, sizeof(buf), pszIniFileName);
 	m_fPostContrast = (float)atof(buf);
-	GetPrivateProfileStringA("visual", "saturation", "1.14", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "saturation", "1.12", buf, sizeof(buf), pszIniFileName);
 	m_fPostSaturation = (float)atof(buf);
-	GetPrivateProfileStringA("visual", "dehaze", "0.00", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "dehaze", "0.045", buf, sizeof(buf), pszIniFileName);
 	m_fPostDehaze = (float)atof(buf);
-	GetPrivateProfileStringA("visual", "fill", "0.05", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "fill", "0.015", buf, sizeof(buf), pszIniFileName);
 	m_fPostFill = (float)atof(buf);
-	// Dead-pastel grade: sat 0.87 + gray fill. Keep the flat luma, restore chroma.
+	// Pale grade: contrast 0.88 + fill 0.05 lifted blacks into chalk.
+	if (m_fPostContrast > 0.87f && m_fPostContrast < 0.89f)
+		m_fPostContrast = 0.96f;
+	if (m_fPostFill > 0.045f && m_fPostFill < 0.055f)
+		m_fPostFill = 0.015f;
+	if (m_fPostSaturation > 1.13f && m_fPostSaturation < 1.15f)
+		m_fPostSaturation = 1.12f;
+	if (m_fHdrExposure > 0.99f && m_fHdrExposure < 1.01f)
+		m_fHdrExposure = 0.97f;
+	if (m_fPostDehaze < 0.005f)
+		m_fPostDehaze = 0.045f;
+	// Dead-pastel grade: sat 0.87
 	if (m_fPostSaturation > 0.85f && m_fPostSaturation < 0.89f)
-		m_fPostSaturation = 1.14f;
-	if (m_fPostContrast > 0.97f && m_fPostContrast < 0.99f)
-		m_fPostContrast = 0.88f;
-	if (m_fPostFill > 0.055f && m_fPostFill < 0.065f)
-		m_fPostFill = 0.05f;
-	if (m_fSharpenStrength > 0.11f && m_fSharpenStrength < 0.13f)
-		m_fSharpenStrength = 0.10f;
+		m_fPostSaturation = 1.12f;
 	// Punchy first grade (sat/contrast 1.12)
 	if (m_fPostContrast > 1.11f && m_fPostContrast < 1.13f)
-		m_fPostContrast = 0.88f;
-	if (m_fPostSaturation > 1.11f && m_fPostSaturation < 1.13f)
-		m_fPostSaturation = 1.14f;
+		m_fPostContrast = 0.96f;
 	if (m_fBloomIntensity > 0.39f && m_fBloomIntensity < 0.41f)
 		m_fBloomIntensity = 0.28f;
-	// First HDR pass used ACES + 0.90 exposure; that combo reads as dusty yellow.
 	if (m_fHdrExposure > 0.89f && m_fHdrExposure < 0.91f)
-		m_fHdrExposure = 1.00f;
+		m_fHdrExposure = 0.97f;
 	if (m_fBloomThreshold > 0.79f && m_fBloomThreshold < 0.81f)
 		m_fBloomThreshold = 1.00f;
-	if (m_fBloomIntensity > 0.49f && m_fBloomIntensity < 0.51f)
-		m_fBloomIntensity = 0.28f;
 
 	lwD3D11PostSetParams(
 		m_bHdr ? 1 : 0,

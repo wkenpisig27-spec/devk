@@ -58,9 +58,11 @@ static const char* kPostHLSL =
     "  float l = dot(c, lwgt);\n"
     "  float3 chroma = c - l;\n"
     "  float lFlat = lerp(0.50f, l, look.x);\n"
-    "  lFlat += look.w * saturate(0.62f - lFlat);\n"
+    "  lFlat += look.w * saturate(0.45f - lFlat);\n"
+    "  float haze = look.z;\n"
+    "  lFlat = saturate((lFlat - haze) / max(1e-3f, 1.0f - haze));\n"
     "  float span = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));\n"
-    "  float chromaGain = look.y * (1.0f + 0.16f * (1.0f - saturate(span * 1.7f)));\n"
+    "  float chromaGain = look.y * (1.0f + 0.18f * (1.0f - saturate(span * 1.7f)));\n"
     "  c = saturate(lFlat + chroma * chromaGain);\n"
     "  return float4(c, 1.0f);\n"
     "}\n"
@@ -142,7 +144,7 @@ struct PostState
     int targets;
 };
 
-static PostParams s_params = { 0, 0, 0, 1.00f, 1.00f, 0.28f, 0.10f, 0.88f, 1.14f, 0.00f, 0.05f };
+static PostParams s_params = { 0, 0, 0, 0.97f, 1.00f, 0.28f, 0.10f, 0.96f, 1.12f, 0.045f, 0.015f };
 static PostState s_post = {};
 
 template <typename T>
