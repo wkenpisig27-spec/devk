@@ -258,6 +258,11 @@ void CListItems::SetRect(int x1, int y1, int x2, int y2, int rowheight) {
 
 	_pSelect->SetSize(x2 - x1, rowheight);
 	_nHeight = rowheight;
+
+	// Vertically center BMFont text in the row (old GDI fonts had near-zero yoffset).
+	int fontH = CGuiFont::s_Font.GetHeight("A");
+	if (fontH <= 0) fontH = 12;
+	_nItemTop = (rowheight > fontH) ? (rowheight - fontH) / 2 : 0;
 }
 
 void CListItems::Render() {

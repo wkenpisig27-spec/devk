@@ -497,8 +497,9 @@ void CBitmapFont::AddQuad(float x, float y, float w, float h,
         }
     }
     
-    // Pixel-perfect positioning offset
-    const float offset = -0.5f;
+    // D3D9 needs the classic half-pixel bias; D3D11 pixel centers differ — applying
+    // -0.5 on DX11 shifts quads between texels and causes muddy/bleedy glyphs.
+    const float offset = lwIsDx11Active() ? 0.0f : -0.5f;
     
     // Two triangles forming a quad (6 vertices)
     // Triangle 1: top-left, top-right, bottom-left

@@ -29,8 +29,8 @@ GLYPH_PAD = 1
 
 # (output_name, ttf_file, size_pt, outline_px, bold_flag)
 FONT_MAP = [
-    ("nameoutline",   "OpenSans-Bold.ttf",       14, 1, 1),
-    ("namesmoutline", "OpenSans-Bold.ttf",       12, 1, 1),
+    ("nameoutline",   "OpenSans-SemiBold.ttf",   14, 1, 0),
+    ("namesmoutline", "OpenSans-SemiBold.ttf",   12, 1, 0),
     ("hintoutline",   "OpenSans-Regular.ttf",    12, 1, 0),
     ("titleoutline",  "OpenSans-ExtraBold.ttf",  28, 2, 1),
     ("splashoutline", "OpenSans-ExtraBold.ttf",  40, 2, 1),
@@ -55,12 +55,21 @@ def get_kerning_pairs(font_path):
         return {}
 
 
+def _render_alpha(char, pil_font, canvas_w, canvas_h, draw_x, draw_y):
+    layer = Image.new("L", (canvas_w, canvas_h), 0)
+    ImageDraw.Draw(layer).text((draw_x, draw_y), char, font=pil_font, fill=255)
+    return layer
+
+
 def render_glyph(char, pil_font, outline_thickness=0):
     """
     Returns (img_rgba, xoffset, yoffset, xadvance).
 
-    Keep native advance for natural spacing. Only add outline_thickness so
-    baked strokes don't collide with the next glyph.
+    Critical for in-engine MODULATE (tex.rgb * vertex.rgb):
+      - fill pixels MUST be pure white RGB
+      - outline pixels MUST be pure black RGB
+      - never emit gray RGB (alpha_composite of soft AA creates mud)
+    Soft coverage lives only in alpha.
     """
     bbox = pil_font.getbbox(char)
     native_advance = int(math.ceil(pil_font.getlength(char)))
@@ -71,10 +80,14 @@ def render_glyph(char, pil_font, outline_thickness=0):
     glyph_w = bbox[2] - bbox[0]
     glyph_h = bbox[3] - bbox[1]
     extra = outline_thickness
-    canvas_w = glyph_w + extra * 2
-    canvas_h = glyph_h + extra * 2
-    draw_x = extra - bbox[0]
-    draw_y = extra - bbox[1]
+    # +1px safety so AA fringe isn't clipped
+    pad = extra + 1
+    canvas_w = glyph_w + pad * 2
+    canvas_h = glyph_h + pad * 2
+    draw_x = pad - bbox[0]
+    draw_y = pad - bbox[1]
+
+    fill_layer = _render_alpha(char, pil_font, canvas_w, canvas_h, draw_x, draw_y)
 
     if outline_thickness > 0:
         outline_layer = Image.new("L", (canvas_w, canvas_h), 0)
@@ -84,26 +97,61 @@ def render_glyph(char, pil_font, outline_thickness=0):
                 if dx == 0 and dy == 0:
                     continue
                 ol_draw.text((draw_x + dx, draw_y + dy), char, font=pil_font, fill=255)
-
-        fill_layer = Image.new("L", (canvas_w, canvas_h), 0)
-        ImageDraw.Draw(fill_layer).text((draw_x, draw_y), char, font=pil_font, fill=255)
-
-        black = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
-        white = Image.new("RGBA", (canvas_w, canvas_h), (255, 255, 255, 0))
-        black.putalpha(outline_layer)
-        white.putalpha(fill_layer)
-        img_rgba = Image.alpha_composite(black, white)
     else:
-        canvas = Image.new("L", (canvas_w, canvas_h), 0)
-        ImageDraw.Draw(canvas).text((draw_x, draw_y), char, font=pil_font, fill=255)
-        img_rgba = Image.new("RGBA", (canvas_w, canvas_h), (255, 255, 255, 0))
-        img_rgba.putalpha(canvas)
+        outline_layer = None
 
-    xoffset = bbox[0] - extra
-    yoffset = bbox[1] - extra
-    # Keep native metrics for authentic spacing; only reserve room for the outline.
+    # Build RGBA pixel-by-pixel: white fill wins over black outline; no gray RGB.
+    img_rgba = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
+    fp = fill_layer.load()
+    op = outline_layer.load() if outline_layer is not None else None
+    out = img_rgba.load()
+    for y in range(canvas_h):
+        for x in range(canvas_w):
+            fa = fp[x, y]
+            oa = op[x, y] if op is not None else 0
+            if fa >= 32:
+                # Pure white fill — alpha from fill coverage
+                out[x, y] = (255, 255, 255, fa)
+            elif oa >= 32:
+                # Pure black outline — alpha from outline coverage
+                out[x, y] = (0, 0, 0, oa)
+            # else leave transparent
+
+    # Tight crop to ink (keeps UV boxes honest)
+    bbox2 = img_rgba.getbbox()
+    if bbox2 is None:
+        return None, 0, 0, max(native_advance, 1)
+    left, top, right, bottom = bbox2
+    img_rgba = img_rgba.crop((left, top, right, bottom))
+
+    # Origin was (0,0)=text origin; we drew at (draw_x, draw_y) relative to canvas
+    # Canvas (0,0) corresponds to text origin shifted by (-pad+bbox[0]?):
+    # text origin maps to canvas pixel (draw_x + bbox[0], draw_y + bbox[1]) = (pad, pad)
+    # So canvas (0,0) is text origin + (-pad, -pad) relative to... 
+    # Actually: draw at (draw_x, draw_y) where draw_x = pad - bbox[0].
+    # Pillow draws glyph so ink's bbox[0] lands at draw_x + bbox[0] = pad.
+    # Text origin (0,0) is at canvas position where glyph's local 0 is.
+    # Local glyph coord (0,0) is at canvas (draw_x, draw_y) = (pad - bbox[0], pad - bbox[1]).
+    # So text origin is at canvas (pad - bbox[0], pad - bbox[1]).
+    origin_x = pad - bbox[0]
+    origin_y = pad - bbox[1]
+    xoffset = left - origin_x
+    yoffset = top - origin_y
     xadvance = max(1, native_advance + outline_thickness)
-    return img_rgba, xoffset, yoffset, xadvance
+    return img_rgba, int(xoffset), int(yoffset), int(xadvance)
+
+
+def paste_opaque(dst: Image.Image, src: Image.Image, xy: tuple[int, int]) -> None:
+    """Copy src onto dst without alpha-blending (keeps pure black/white RGB)."""
+    x0, y0 = xy
+    sp = src.load()
+    dp = dst.load()
+    sw, sh = src.size
+    for y in range(sh):
+        for x in range(sw):
+            r, g, b, a = sp[x, y]
+            if a:
+                dp[x0 + x, y0 + y] = (r, g, b, a)
 
 
 def pack_glyphs(glyph_map):
@@ -122,7 +170,7 @@ def pack_glyphs(glyph_map):
         if cy + h + GLYPH_PAD > ATLAS_SIZE:
             print("    WARNING: Atlas overflow!")
             break
-        atlas.paste(img, (cx, cy), img)
+        paste_opaque(atlas, img, (cx, cy))
         placements[cid] = (cx, cy, w, h)
         cx += w + GLYPH_PAD
         row_h = max(row_h, h)
@@ -176,10 +224,16 @@ def generate_bmfont(font_path, font_name, font_size, output_dir, outline_thickne
             f' padding={GLYPH_PAD},{GLYPH_PAD},{GLYPH_PAD},{GLYPH_PAD}'
             f' spacing=1,1 outline={outline_thickness}\n'
         )
+        # Outline fonts store black/white in RGB (MODULATE keeps outline black).
+        # Plain glyphs (outline=0) are white RGB + alpha coverage.
+        if outline_thickness > 0:
+            chnl = "alphaChnl=1 redChnl=0 greenChnl=0 blueChnl=0"
+        else:
+            chnl = "alphaChnl=0 redChnl=4 greenChnl=4 blueChnl=4"
         f.write(
             f'common lineHeight={line_height} base={ascent + outline_thickness}'
             f' scaleW={ATLAS_SIZE} scaleH={ATLAS_SIZE}'
-            f' pages=1 packed=0 alphaChnl=0 redChnl=4 greenChnl=4 blueChnl=4\n'
+            f' pages=1 packed=0 {chnl}\n'
         )
         f.write(f'page id=0 file="{font_name}_0.png"\n')
         f.write(f'chars count={len(placements)}\n')
