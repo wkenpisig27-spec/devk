@@ -1674,10 +1674,7 @@ void CWorldScene::LoadingCall() {
 	}
 
 	if (nLevel <= 1) {
-		// h?????????????
 		g_stUISystem.m_sysProp.m_gameOption.bHelpMode = true;
-		::WritePrivateProfileString("gameOption", "helpMode", "1", "./user/system.ini");
-
 		g_stUIStart.ShowLevelUpHelpButton(true);
 		g_stUIStart.ShowInfoCenterButton(true);
 	}

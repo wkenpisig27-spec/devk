@@ -6,13 +6,42 @@
 
 using namespace std;
 
+static void ResolveSystemIniPath(char* outBuffer, size_t bufferSize) {
+	if (!outBuffer || bufferSize == 0)
+		return;
+	outBuffer[0] = 0;
+
+	char modulePath[MAX_PATH] = {0};
+	if (GetModuleFileNameA(NULL, modulePath, MAX_PATH) == 0)
+		return;
+
+	char* lastSlash = strrchr(modulePath, '\\');
+	if (!lastSlash)
+		lastSlash = strrchr(modulePath, '/');
+	if (lastSlash)
+		*lastSlash = 0;
+
+	char* parentSlash = strrchr(modulePath, '\\');
+	if (!parentSlash)
+		parentSlash = strrchr(modulePath, '/');
+	if (parentSlash && _stricmp(parentSlash + 1, "system") == 0)
+		*parentSlash = 0;
+
+	_snprintf(outBuffer, bufferSize, "%s\\user\\system.ini", modulePath);
+	outBuffer[bufferSize - 1] = 0;
+}
+
 CGameConfig g_Config;
 
 CGameConfig::CGameConfig() {
 	g_bBinaryTable = TRUE; // �˱��������˱���ʹ���Ƿ������
 	SetDefault();
 	Load("scripts/kop.cfg"); // �������ļ�
-	LoadVisualSettings("user/system.ini");
+	{
+		char szIniPath[MAX_PATH];
+		ResolveSystemIniPath(szIniPath, MAX_PATH);
+		LoadVisualSettings(szIniPath);
+	}
 	ApplyRendererToEngine();
 }
 

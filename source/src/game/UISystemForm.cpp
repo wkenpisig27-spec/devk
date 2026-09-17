@@ -283,19 +283,24 @@ int CSystemProperties::writeToFile(const char* szIniFileName) {
 		return -3;
 	}
 
-	// Ensure the user\ directory exists before writing; CreateDirectoryA is a no-op if it already exists.
-	CreateDirectoryA("user", NULL);
-
-	// video
-	if (!WriteInteger("video", "texture", m_videoProp.nTexture, szIniFileName)) {
-		FILE* fp;
-		fp = fopen(szIniFileName, "wb");
-		if (fp) {
-			fclose(fp);
-		} else {
-			return ERROE_FILE_CANNT_CREAT;
+	// Create the INI directory (client\user) without touching an existing file.
+	// Never fopen(..., "wb") as a fallback — that truncates system.ini to empty.
+	{
+		char szDir[MAX_PATH];
+		strncpy(szDir, szIniFileName, MAX_PATH - 1);
+		szDir[MAX_PATH - 1] = 0;
+		char* slash = strrchr(szDir, '\\');
+		if (!slash)
+			slash = strrchr(szDir, '/');
+		if (slash) {
+			*slash = 0;
+			CreateDirectoryA(szDir, NULL);
 		}
 	}
+
+	// video
+	if (!WriteInteger("video", "texture", m_videoProp.nTexture, szIniFileName))
+		return ERROE_FILE_CANNT_CREAT;
 
 	if (!WriteInteger("video", "animation", bool2int(m_videoProp.bAnimation), szIniFileName))
 		return OTHER_ERROR;
@@ -323,8 +328,7 @@ int CSystemProperties::writeToFile(const char* szIniFileName) {
 		return OTHER_ERROR;
 
 	// gameOption
-	// if (!WriteInteger("gameOption", "runMode", bool2int(m_gameOption.bRunMode), szIniFileName))
-	if (!WriteInteger("gameOption", "runMode", bool2int(true), szIniFileName))
+	if (!WriteInteger("gameOption", "runMode", bool2int(m_gameOption.bRunMode), szIniFileName))
 		return OTHER_ERROR;
 	if (!WriteInteger("gameOption", "helpMode", bool2int(m_gameOption.bHelpMode), szIniFileName))
 		return OTHER_ERROR;
@@ -358,6 +362,9 @@ int CSystemProperties::writeToFile(const char* szIniFileName) {
 	if (!WriteInteger("startOption", "first", bool2int(m_startOption.bFirst), szIniFileName))
 		return OTHER_ERROR;
 	// End
+
+	// Flush the Win32 profile cache so a later GetPrivateProfile* sees this write.
+	WritePrivateProfileString(NULL, NULL, NULL, szIniFileName);
 
 	// Success
 	return 0;
@@ -436,10 +443,8 @@ void CSystemMgr::LoadCustomProp() {
 			m_sysProp.m_gameOption.bDisableMelee = true;
 			m_sysProp.m_gameOption.bOutline = true;
 		}
-		// Always persist the current config — ensures all keys exist on disk
-		// so the next startup Load() will succeed without falling back to defaults.
-		m_sysProp.Save(szIniPath);
-		//	m_sysProp.m_gameOption.bRunMode = true;//�����ļ���������Σ���һ�Ϊtrue����ʱ
+		// Do not write system.ini here. Startup must never create or rewrite the
+		// file — only the in-game settings UI is allowed to persist changes.
 		m_isLoad = true;
 	}
 	{
@@ -649,89 +654,9 @@ bool CSystemMgr::Init() {
 }
 
 void CSystemMgr::End() {
-	char szIniPath[MAX_PATH];
-	CSystemProperties::ResolveIniPath("user\\system.ini", szIniPath, MAX_PATH);
-
-	const char* Value = cboResolution->GetText();
-	int setResolution;
-	if (strcmp("800x600", Value) == 0) {
-		setResolution = 0;
-	}
-	if (strcmp("1152x648", Value) == 0) {
-		setResolution = 1;
-	} else if (strcmp("1280x720", Value) == 0) {
-		setResolution = 2;
-	} else if (strcmp("1366x768", Value) == 0) {
-		setResolution = 3;
-	} else if (strcmp("1600x900", Value) == 0) {
-		setResolution = 4;
-	} else if (strcmp("1920x1080", Value) == 0) {
-		setResolution = 5;
-	}
-
-	// ��ϵͳ���ñ��浽�ļ�(Michael Chen 2005-04-19)
-	if (cbxTexture)
-		m_sysProp.m_videoProp.nTexture = cbxTexture->GetActiveIndex();
-	if (cbxMovie)
-		m_sysProp.m_videoProp.bAnimation = cbxMovie->GetActiveIndex() == 0 ? true : false;
-	if (cbxCamera)
-		m_sysProp.m_videoProp.bCameraRotate = cbxCamera->GetActiveIndex() == 0 ? true : false;
-	// m_sysProp.m_videoProp.bViewFar = cbxView->GetActiveIndex() == 0 ? true : false;ȡ����ҰԶ��(Michael Chen 2005-04-22
-	if (cbxTrail)
-		m_sysProp.m_videoProp.nShadowMode = cbxTrail->GetActiveIndex() == 0 ? 1 : 0;
-	if (cbxColor)
-		m_sysProp.m_videoProp.bDepth32 = cbxColor->GetActiveIndex() == 0 ? false : true;
-	if (cbxQuality)
-		m_sysProp.m_videoProp.nQuality = cbxQuality->GetActiveIndex();
-	if (cbxModel)
-		m_sysProp.m_videoProp.bFullScreen = cbxModel->GetActiveIndex() == 0 ? true : false;
-	if (cboResolution)
-		m_sysProp.m_videoProp.bResolution = setResolution;
-	if (proAudioMusic)
-		m_sysProp.m_audioProp.nMusicSound = static_cast<int>(proAudioMusic->GetPosition());
-	if (proAudioMidi)
-		m_sysProp.m_audioProp.nMusicEffect = static_cast<int>(proAudioMidi->GetPosition());
-
-	if (cbxRunMode)
-		m_sysProp.m_gameOption.bRunMode = cbxRunMode->GetActiveIndex() == 0 ? false : true;
-	if (cbxLockMode)
-		m_sysProp.m_gameOption.bLockMode = cbxLockMode->GetActiveIndex() == 1 ? true : false;
-	if (cbxHelpMode)
-		m_sysProp.m_gameOption.bHelpMode = cbxHelpMode->GetActiveIndex() == 1 ? true : false;
-	if (cbxCameraMode)
-		m_sysProp.m_gameOption.bCameraMode = cbxCameraMode->GetActiveIndex() == 1 ? true : false;
-	if (cbxAppMode)
-		m_sysProp.m_gameOption.bAppMode = cbxAppMode->GetActiveIndex() == 1 ? true : false;
-	if (cbxEffMode)
-		m_sysProp.m_gameOption.bEffMode = cbxEffMode->GetActiveIndex() == 1 ? true : false;
-	if (cbxStateMode)
-		m_sysProp.m_gameOption.bStateMode = cbxStateMode->GetActiveIndex() == 1 ? true : false;
-	if (cbxEnemyNames)
-		m_sysProp.m_gameOption.bEnemyNames = cbxEnemyNames->GetActiveIndex() == 1 ? true : false;
-	if (cbxShowBars)
-		m_sysProp.m_gameOption.bShowBars = cbxShowBars->GetActiveIndex() == 1 ? true : false;
-	if (cbxShowPercentages)
-		m_sysProp.m_gameOption.bShowPercentages = cbxShowPercentages->GetActiveIndex() == 1 ? true : false;
-	if (cbxShowInfo)
-		m_sysProp.m_gameOption.bShowInfo = cbxShowInfo->GetActiveIndex() == 1 ? true : false;
-	if (cbxFramerate)
-	{
-		const int frIdx = cbxFramerate->GetActiveIndex();
-		m_sysProp.m_gameOption.nFramerate = frIdx == 2 ? 144 : frIdx == 1 ? 60 : 30;
-		lwSetAnimVelocity(1.0f / CSteadyFrame::GetAnimMultiplier());
-	}
-	if (cbxShowMounts)
-		m_sysProp.m_gameOption.bShowMounts = cbxShowMounts->GetActiveIndex() == 1 ? true : false;
-	if (cbxDisableMelee)
-		m_sysProp.m_gameOption.bDisableMelee = cbxDisableMelee->GetActiveIndex() == 1 ? true : false;
-
-	// if (cbxAppMode)
-	//	m_sysProp.m_gameOption.bAppMode = cbxAppMode->GetActiveIndex() == 0 ? false : true;
-
-	if (m_sysProp.Save(szIniPath)) {
-		// error when save the system properties.
-	}
-	// end of modifying by Michael Chen
+	// Do not rewrite system.ini on shutdown. Game-option widgets are only
+	// synced when the settings form is opened, so dumping their state here
+	// overwrote saved video/audio/game options with UI defaults.
 }
 
 void CSystemMgr::_evtVideoChangeChange(CGuiData* pSender) {
@@ -842,7 +767,7 @@ void CSystemMgr::_evtVideoFormMouseEvent(CCompent* pSender, int nMsgType, int x,
 		g_stUISystem.m_sysProp.m_videoProp.nQuality     = nQualityIdx;
 		g_stUISystem.m_sysProp.m_videoProp.bFullScreen   = (g_Config.m_bFullScreen == TRUE);
 		g_stUISystem.m_sysProp.m_videoProp.bResolution  = g_stUISystem.cboResolution->GetList()->GetItems()->GetSelect()->GetIndex();
-		// bCameraRotate already set above
+		g_stUISystem.m_sysProp.m_videoProp.bCameraRotate = bCameraOn;
 
 		// Persist to disk using absolute path.
 		{

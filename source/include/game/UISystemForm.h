@@ -117,12 +117,42 @@ public:
 	int ApplyGameOption();
 
 	/**
-	 * Converts a relative ini path to an absolute path using the process CWD.
-	 * IMPORTANT: WritePrivateProfileString / GetPrivateProfileInt resolve relative
-	 * paths against C:\Windows, NOT the exe's directory. Always call this first.
+	 * Converts a relative ini path to an absolute path under the client root.
+	 * Game.exe lives in client\system\, so the client root is the parent of the
+	 * exe directory. Do not use CWD: GetPrivateProfile* resolves relative paths
+	 * against C:\Windows, and CWD can change while the game is running.
 	 */
 	static void ResolveIniPath(const char* relativePath, char* outBuffer, size_t bufferSize) {
-		GetFullPathNameA(relativePath, (DWORD)bufferSize, outBuffer, NULL);
+		if (!outBuffer || bufferSize == 0)
+			return;
+		outBuffer[0] = 0;
+		if (!relativePath || !relativePath[0])
+			return;
+
+		char modulePath[MAX_PATH] = {0};
+		if (GetModuleFileNameA(NULL, modulePath, MAX_PATH) == 0) {
+			GetFullPathNameA(relativePath, (DWORD)bufferSize, outBuffer, NULL);
+			return;
+		}
+
+		char* lastSlash = strrchr(modulePath, '\\');
+		if (!lastSlash)
+			lastSlash = strrchr(modulePath, '/');
+		if (lastSlash)
+			*lastSlash = 0;
+
+		char* parentSlash = strrchr(modulePath, '\\');
+		if (!parentSlash)
+			parentSlash = strrchr(modulePath, '/');
+		if (parentSlash && _stricmp(parentSlash + 1, "system") == 0)
+			*parentSlash = 0;
+
+		const char* rel = relativePath;
+		while (*rel == '\\' || *rel == '/')
+			++rel;
+
+		_snprintf(outBuffer, bufferSize, "%s\\%s", modulePath, rel);
+		outBuffer[bufferSize - 1] = 0;
 	}
 
 private:

@@ -527,8 +527,6 @@ void CSMallMap2D::InitScene() {
 }
 
 void CSMallMap2D::RenderScene() {
-	::SetCurrentDirectory(pszAppPath);
-
 	m_pScene = g_pGameApp->GetCurScene();
 	// g_Render.GetDevice()->Clear(0,0,D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER,0xff000000,1,0);
 	D3DXMATRIX matIdentity;
