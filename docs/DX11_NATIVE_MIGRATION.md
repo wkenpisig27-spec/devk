@@ -72,7 +72,10 @@ Exit criterion met: Release|x64 links without `d3dx9.lib`; gameplay smoke passes
 - [x] Tag scene-object + transparent passes — `RenderStateMgr` → `lwD3D11MeshSetSceneObject` / `SetTranspObject`
 - [x] Per-subsystem `SetRenderState` inventory — `docs/DX11_PHASE3_RS_INVENTORY.txt`
 - [x] Native OM bundles (character / scene-object / transparent) — `ResolveMeshOutputMerger` in `lwD3D11Mesh.cpp`
-- [ ] Terrain pass tag + bundle; no-op uncached D3DRS on DX11-only
+- [x] Terrain pass — `SceneRender` → `BeginTerrain` / `EndTerrain`, `lwD3D11MeshSetTerrain`, OM bundle + no stylized cel on land
+- [x] DX11-only no-op cache for legacy RS (shade/dither/fog table/clip/fill) in `lwDeviceObject11::SetRenderState`
+
+**Smoke (2026-09-19):** Phase 3 pass bundles + additive/transparent/character focus passed.
 
 ### Phase 4 — Rename and re-home types
 

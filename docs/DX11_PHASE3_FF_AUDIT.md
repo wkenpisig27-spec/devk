@@ -12,7 +12,8 @@ Goal of Phase 3: classify callers by **pass**, then replace cache-and-translate 
 | Character | `BeginCharacter` / `EndCharacter` | `lwD3D11MeshSetCharacter(1/0)` | Skinned `.lgo`, cha preview |
 | Scene object | `BeginSceneObject` / `EndSceneObject` | `lwD3D11MeshSetSceneObject(1/0)` | Static props, markers |
 | Transparent | `BeginTranspObject` / `EndTranspObject` | `lwD3D11MeshSetTranspObject(1/0)` | Alpha foliage, billboards |
-| Terrain / sea | `BeginTerrain` / `EndTerrain`, `MPMap` sea | `lwD3D11MeshSetSea(1/0)` | Tiles, ocean mesh |
+| Terrain | `BeginTerrain` / `EndTerrain` (`SceneRender` around `MPMap::Render`) | `lwD3D11MeshSetTerrain(1/0)` | Land tiles, splats |
+| Sea | `MPMap::RenderSea` | `lwD3D11MeshSetSea(1/0)` | Ocean mesh |
 | Visual tuning | `GameConfig` / `SceneRender` | `lwD3D11MeshSetVisual(...)` | Fog, stylized lit, water |
 
 Legacy RSA atom sets (`_rsa_cha`, `_rsa_sceneobj`, …) still push D3D9 enums into the cache; on DX11 they remain the **compatibility layer** until each pass gets a dedicated PSO.

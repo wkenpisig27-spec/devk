@@ -31,6 +31,7 @@ MINDPOWER_API void lwD3D11MeshSetSea(int enabled);
 MINDPOWER_API void lwD3D11MeshSetCharacter(int enabled);
 MINDPOWER_API void lwD3D11MeshSetSceneObject(int enabled);
 MINDPOWER_API void lwD3D11MeshSetTranspObject(int enabled);
+MINDPOWER_API void lwD3D11MeshSetTerrain(int enabled);
 MINDPOWER_API int lwD3D11MeshWaterEnhance();
 
 MINDPOWER_API LW_RESULT lwD3D11MeshDrawPrimitive(

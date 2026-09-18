@@ -247,6 +247,7 @@ struct MeshState
     int character;
     int scene_object;
     int transp_object;
+    int terrain;
     int fog_on;
     int height_fog;
     int sea;
@@ -482,6 +483,7 @@ LW_RESULT lwD3D11MeshInit(ID3D11Device* device, ID3D11DeviceContext* context)
     s_mesh.character = 0;
     s_mesh.scene_object = 0;
     s_mesh.transp_object = 0;
+    s_mesh.terrain = 0;
     s_mesh.fog_on = 1;
     s_mesh.height_fog = 0;
     s_mesh.sea = 0;
@@ -567,6 +569,11 @@ void lwD3D11MeshSetSceneObject(int enabled)
 void lwD3D11MeshSetTranspObject(int enabled)
 {
     s_mesh.transp_object = enabled ? 1 : 0;
+}
+
+void lwD3D11MeshSetTerrain(int enabled)
+{
+    s_mesh.terrain = enabled ? 1 : 0;
 }
 
 int lwD3D11MeshWaterEnhance()
@@ -831,7 +838,7 @@ static void ResolveMeshOutputMerger(lwDeviceObject11* dev, const FvfInfo& info, 
     DWORD zwrite = dev->GetCachedRS(D3DRS_ZWRITEENABLE);
 
     const int pass = s_mesh.transp_object ? 3
-        : (s_mesh.character ? 1 : (s_mesh.scene_object ? 2 : 0));
+        : (s_mesh.character ? 1 : (s_mesh.scene_object ? 2 : (s_mesh.terrain ? 4 : 0)));
 
     ID3D11DepthStencilState* depth = s_mesh.depth_on;
     ID3D11BlendState* blend = s_mesh.blend_opaque;
@@ -1193,7 +1200,7 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     }
 
     EyeFromView(dev->GetMatView(), cb.look);
-    cb.look[3] = (s_mesh.stylized && !s_mesh.character && !info.has_blend) ? 1.0f : 0.0f;
+    cb.look[3] = (s_mesh.stylized && !s_mesh.character && !info.has_blend && !s_mesh.terrain) ? 1.0f : 0.0f;
     cb.hemiSky[0] = cb.ambient[0] * 0.12f + 0.02f;
     cb.hemiSky[1] = cb.ambient[1] * 0.12f + 0.03f;
     cb.hemiSky[2] = cb.ambient[2] * 0.12f + 0.05f;

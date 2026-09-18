@@ -10,6 +10,7 @@
 #include "lwShaderMgr11.h"
 #include "lwD3D11NativeContext.h"
 #include "lwRenderBackend.h"
+#include "MindPowerRenderConfig.h"
 #include "lwGraphicsUtil.h"
 #include "lwStreamObj.h"
 
@@ -754,6 +755,26 @@ LW_RESULT lwDeviceObject11::SetTextureForced(DWORD stage, IDirect3DTextureX* tex
 
 LW_RESULT lwDeviceObject11::SetRenderState(D3DRENDERSTATETYPE state, DWORD value)
 {
+#if !MINDPOWER_USE_D3D9_DEVICE
+    switch (state)
+    {
+    case D3DRS_SHADEMODE:
+    case D3DRS_DITHERENABLE:
+    case D3DRS_SPECULARENABLE:
+    case D3DRS_COLORVERTEX:
+    case D3DRS_FOGENABLE:
+    case D3DRS_FOGCOLOR:
+    case D3DRS_FOGTABLEMODE:
+    case D3DRS_FOGSTART:
+    case D3DRS_FOGEND:
+    case D3DRS_FOGDENSITY:
+    case D3DRS_CLIPPING:
+    case D3DRS_FILLMODE:
+        return LW_RET_OK;
+    default:
+        break;
+    }
+#endif
     if (_bShadowPass)
     {
         if (state == D3DRS_ALPHATESTENABLE || state == D3DRS_ALPHAREF ||

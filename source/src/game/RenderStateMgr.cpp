@@ -207,6 +207,8 @@ HRESULT RenderStateMgr::BeginSceneItem() {
 	return 0L;
 }
 HRESULT RenderStateMgr::BeginTerrain() {
+	if (lwIsDx11Active())
+		lwD3D11MeshSetTerrain(1);
 	return 0L;
 }
 HRESULT RenderStateMgr::BeginTranspObject() {
@@ -262,6 +264,8 @@ HRESULT RenderStateMgr::EndSceneItem() {
 	return 0L;
 }
 HRESULT RenderStateMgr::EndTerrain() {
+	if (lwIsDx11Active())
+		lwD3D11MeshSetTerrain(0);
 	return 0L;
 }
 HRESULT RenderStateMgr::EndTranspObject() {

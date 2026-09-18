@@ -277,7 +277,11 @@ void CGameScene::_Render() {
 			// g_pGameApp->m_dwLoadingObjTime = tMap.End();
 
 			_pTerrain->EnableNormalLight(0); // 0 = terrtain lighting : 1 = disable
+			if (RenderStateMgr* rsm = g_pGameApp->GetRenderStateMgr())
+				rsm->BeginTerrain();
 			_pTerrain->Render();
+			if (RenderStateMgr* rsm = g_pGameApp->GetRenderStateMgr())
+				rsm->EndTerrain();
 		}
 	}
 
@@ -1007,7 +1011,11 @@ void CGameScene::RenderSMallMap() {
 		_pTerrain->DynamicLoading(GetTickCount());
 		//_pTerrain->EnableNormalLight(0);
 
+		if (RenderStateMgr* rsm = g_pGameApp->GetRenderStateMgr())
+			rsm->BeginTerrain();
 		_pTerrain->Render();
+		if (RenderStateMgr* rsm = g_pGameApp->GetRenderStateMgr())
+			rsm->EndTerrain();
 	}
 
 	for (it = _SceneObjIdx[SCENEOBJ_TYPE_POINTLIGHT].begin();

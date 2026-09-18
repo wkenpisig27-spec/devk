@@ -53,7 +53,8 @@
   character   : depth_write ON, blend SRCALPHA/INVSRCALPHA, cull from cache
   scene_object: same OM as character; stylized CB via scene_object flag (future)
   transparent : depth_read, blend SRCALPHA/INVSRCALPHA; cache overrides for additive/ZWRITE
-  default     : full cache translation (terrain, sea, untagged draws)
+  terrain     : depth_write ON, blend SRCALPHA/INVSRCALPHA; no stylized cel (look.w)
+  default     : full cache translation (untagged draws)
 
 ## Next: no-op candidates on DX11-only (after bundle coverage)
   D3DRS_SHADEMODE, D3DRS_DITHERENABLE, D3DRS_SPECULARENABLE, D3DRS_COLORVERTEX,
