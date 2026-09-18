@@ -45,21 +45,24 @@ Delivered:
 4. **lwxRenderCtrVS**, **lwShaderMgr** (incl. DX8 mgr stubs on DX11-only)
 5. **EffectFile**, **MPResManger**, **MPMap** sky-doom D3D9 shader path (FF sky on DX11)
 
-**Smoke checklist** (run after each Release x64 build):
+**Smoke checklist** (Release x64, verified 2026-09-19):
 
-- [ ] Login → server list → enter world
-- [ ] Create character (3D preview) if applicable
-- [ ] Minimap + large map open/close
-- [ ] Combat / skill VFX (particles)
-- [ ] Logout or character select; one window resize or alt-tab
+- [x] Login → server list → enter world
+- [x] Create character (3D preview) if applicable
+- [x] Minimap + large map open/close
+- [x] Combat / skill VFX (particles)
+- [x] Logout or character select; one window resize or alt-tab
 
 Exit criterion met: no unguarded `GetDevice()` in the DX11-only compile; dual-build retains D3D9 behind `#if MINDPOWER_USE_D3D9_DEVICE`.
 
-### Phase 2 — Replace D3DX9 link dependency
+### Phase 2 — Replace D3DX9 link dependency *(in progress)*
 
-- Texture creation: route all loads through `lwD3D11Texture` / DirectXTex
-- Remove `d3dx9.lib` from `game.vcxproj` link line
-- Keep `D3DXMath` or migrate to `DirectXMath` in hot paths
+1. **Audit** — `docs/DX11_PHASE2_D3DX_INVENTORY.txt` (symbols still referenced under `MINDPOWER_DX11_ONLY`)
+2. **Textures** — all runtime loads via `lwD3D11Texture` / `lwD3D11CreateTextureFromFile` / DDS path
+3. **Link** — remove `d3dx9.lib` from Release x64 `game.vcxproj` (keep `d3d9.lib` until Phase 5 if still required)
+4. **Math** — defer D3DXMath → DirectXMath unless link audit forces it
+
+Exit: Release|x64 builds without `d3dx9.lib`; Phase 1 smoke still passes.
 
 ### Phase 3 — Shrink FF emulation
 
