@@ -139,6 +139,11 @@ void CCharacterModel::FrameMove() {
 #endif
 	MPCharacter::FrameMove();
 
+	for (DWORD link = 0; link < LINK_ID_NUM; ++link) {
+		if (_LinkItem[link])
+			_LinkItem[link]->FrameMove(0);
+	}
+
 	if (_DrunkCtrl) {
 		_DrunkCtrl->Update();
 	}

@@ -8,6 +8,7 @@
 #include "lwShaderMgr.h"
 #include "lwD3D.h"
 #include "lwRenderBackend.h"
+#include "lwRenderCtrlEmb.h"
 
 LW_BEGIN
 
@@ -176,6 +177,12 @@ LW_RESULT lwRenderCtrlAgent::DrawSubset(DWORD subset)
 
     if(_mesh_agent == NULL)
         goto __ret;
+
+    if (lwIsDx11Active() && _render_ctrl && _anim_agent)
+    {
+        lwIDeviceObject* dev_obj = _res_mgr->GetDeviceObject();
+        lwApplySubsetTexUV(dev_obj, subset, _anim_agent);
+    }
 
     if(LW_FAILED(_mesh_agent->DrawSubset(subset)))
         goto __ret;

@@ -12,6 +12,9 @@ LW_BEGIN
 
 LW_RESULT lwInitInternalRenderCtrlVSProc(lwIResourceMgr* mgr);
 
+// Apply TexUV scroll matrices for one mesh subset (DX11 needs this at draw time).
+void lwApplySubsetTexUV(lwIDeviceObject* dev_obj, DWORD subset, lwIAnimCtrlAgent* anim_agent);
+
 class lwRenderCtrlVSFixedFunction : public lwIRenderCtrlVS
 {
     typedef lwRenderCtrlVSFixedFunction this_type;

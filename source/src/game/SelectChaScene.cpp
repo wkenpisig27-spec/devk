@@ -368,17 +368,24 @@ void CSelectChaScene::_Render() {
 
 		g_Render.EnableZBuffer(TRUE);
 		(*iter)->pCha->MPCharacter::Render();
-		for (int link = 0; link < LINK_ID_NUM; ++link) {
-			CSceneItem* item = (*iter)->pCha->GetLinkItem(link);
-			if (item)
-				item->Render();
-		}
 	}
 	dev_obj->SetRenderState(D3DRS_LIGHTING, dwOldState);
 
 	g_Render.SetLight(0, &env_light_old);
 
 	rsm->EndCharacter();
+
+	for (iter = begin; iter != end; ++iter) {
+		if ((*iter)->pCha == nullptr)
+			continue;
+		for (int link = 0; link < LINK_ID_NUM; ++link) {
+			CSceneItem* item = (*iter)->pCha->GetLinkItem(link);
+			if (!item)
+				continue;
+			item->FrameMove(0);
+			item->Render();
+		}
+	}
 
 	rsm->BeginTranspObject();
 	lwUpdateSceneTransparentObject();

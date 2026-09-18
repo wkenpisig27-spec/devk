@@ -29,6 +29,7 @@ static const char* kMeshHLSL =
     "  float4 more; /* x=hasColor, y=unlit, z=dualTex, w=tfactor mix */\n"
     "  float4 tfactor;\n"
     "  row_major float4x4 uvMat;\n"
+    "  row_major float4x4 uvMat1;\n"
     "  float4 look; /* xyz=eye, w=stylized */\n"
     "  float4 hemiSky;\n"
     "  float4 hemiGnd;\n"
@@ -96,8 +97,9 @@ static const char* kMeshHLSL =
     "    o.pos.z += 0.0002 * o.pos.w;\n"
     "  }\n"
     "  float2 t = flags.z > 0.5 ? uv : float2(0,0);\n"
-    "  o.uv = mul(float4(t, 0, 1), uvMat).xy;\n"
-    "  o.uv1 = uv1;\n"
+    "  o.uv = mul(float3(t, 1), (float3x3)uvMat).xy;\n"
+    "  float2 t1 = hemiSky.w > 0.5 ? uv1 : t;\n"
+    "  o.uv1 = mul(float3(t1, 1), (float3x3)uvMat1).xy;\n"
     "  o.col = more.x > 0.5 ? col : float4(1,1,1,1);\n"
     "  o.wpos = wp.xyz;\n"
     "}\n"
@@ -201,6 +203,7 @@ struct MeshCB0
     float more[4];
     float tfactor[4];
     float uvMat[16];
+    float uvMat1[16];
     float look[4];
     float hemiSky[4];
     float hemiGnd[4];
@@ -264,6 +267,11 @@ static std::map<DWORD, ID3D11BlendState*> s_blends;
 static void CopyMat(float* dst, const lwMatrix44* m)
 {
     memcpy(dst, m, sizeof(float) * 16);
+}
+
+static int TexUvTransformOn(DWORD ttff)
+{
+    return (ttff && ttff != D3DTTFF_DISABLE && ttff != 0xffffffff && ttff != D3DTSS_FORCE_DWORD) ? 1 : 0;
 }
 
 static void EyeFromView(const lwMatrix44* v, float* eye)
@@ -1007,7 +1015,9 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
         // FVF-only effect/shade/particle verts have no normal and no LASTBETA.
         // ShaderMgr11 skin VS + leftover character decl must not consume them.
         const int fvf_only_fx = (!info.has_nrm && !info.has_blend) || eff_xyzb1;
-        if (!dual_early && !rhw && !fvf_only_fx)
+        // Rigid items / lit weapon overlays must use the FF mesh path (uvMat).
+        // Leftover character VS after physique draw must not hijack them.
+        if (!dual_early && !rhw && !fvf_only_fx && info.has_blend)
         {
             ID3D11InputLayout* sm_layout = 0;
             if (lwD3D11ShaderMgrPrepareDraw(dev, &sm_layout) && sm_layout)
@@ -1166,15 +1176,15 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
             dual = 2.0f;
     }
     cb.more[2] = dual;
-    const lwMatrix44* uv = dev->GetMatTex(0);
-    DWORD ttff = dev->GetCachedTSS(0, D3DTSS_TEXTURETRANSFORMFLAGS);
-    if (uv && ttff && ttff != D3DTTFF_DISABLE && ttff != 0xffffffff && ttff != D3DTSS_FORCE_DWORD)
-        CopyMat(cb.uvMat, uv);
-    else
     {
         lwMatrix44 id;
         lwMatrix44Identity(&id);
-        CopyMat(cb.uvMat, &id);
+        const lwMatrix44* uv = dev->GetMatTex(0);
+        DWORD ttff = dev->GetCachedTSS(0, D3DTSS_TEXTURETRANSFORMFLAGS);
+        CopyMat(cb.uvMat, (uv && TexUvTransformOn(ttff)) ? uv : &id);
+        const lwMatrix44* uv1m = dev->GetMatTex(1);
+        DWORD ttff1 = dev->GetCachedTSS(1, D3DTSS_TEXTURETRANSFORMFLAGS);
+        CopyMat(cb.uvMat1, (uv1m && TexUvTransformOn(ttff1)) ? uv1m : &id);
     }
 
     if (s_mesh.outline)
@@ -1204,7 +1214,7 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     cb.hemiSky[0] = cb.ambient[0] * 0.12f + 0.02f;
     cb.hemiSky[1] = cb.ambient[1] * 0.12f + 0.03f;
     cb.hemiSky[2] = cb.ambient[2] * 0.12f + 0.05f;
-    cb.hemiSky[3] = 1.0f;
+    cb.hemiSky[3] = (info.ntex >= 2) ? 1.0f : 0.0f;
     cb.hemiGnd[0] = cb.ambient[0] * 0.08f + 0.03f;
     cb.hemiGnd[1] = cb.ambient[1] * 0.08f + 0.02f;
     cb.hemiGnd[2] = cb.ambient[2] * 0.08f + 0.01f;

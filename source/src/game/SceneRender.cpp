@@ -38,6 +38,20 @@ static void ResetWeaponGlowStageState() {
 	g_Render.SetTextureStageStateForced(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
 	g_Render.SetTextureStageStateForced(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 	g_Render.SetTextureStageStateForced(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+	if (lwIsDx11Active())
+	{
+		lwIDeviceObject* dev = g_Render.GetInterfaceMgr()->dev_obj;
+		if (dev)
+		{
+			lwMatrix44 tex_id;
+			lwMatrix44Identity(&tex_id);
+			for (DWORD s = 0; s < 2; ++s)
+			{
+				dev->SetTransform((D3DTRANSFORMSTATETYPE)(D3DTS_TEXTURE0 + s), &tex_id);
+				g_Render.SetTextureStageStateForced(s, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+			}
+		}
+	}
 }
 
 namespace {

@@ -18,6 +18,7 @@
 #include "EffectObj.h"
 #include "UIItemCommand.h"
 #include "LootFilter.h"
+#include "lwIUtil.h"
 
 lwItemLit g_il;
 BOOL InitItemLit(const char* file) {
@@ -141,21 +142,65 @@ int CSceneItem::Load(const char* file) {
 
 	return 1;
 }
+
+static void RemoveItemTexUVAnim(lwIAnimCtrlAgent* anim_agent, DWORD subset, DWORD stage)
+{
+	if (!anim_agent)
+		return;
+	lwAnimCtrlObjTypeInfo rm;
+	rm.type = ANIM_CTRL_TYPE_TEXUV;
+	rm.data[0] = subset;
+	rm.data[1] = stage;
+	for (;;)
+	{
+		lwIAnimCtrlObj* o = anim_agent->RemoveAnimCtrlObj(&rm);
+		if (!o)
+			break;
+		o->Release();
+	}
+}
+
+static LW_RESULT AddItemLitTexUVAnim(lwIAnimCtrlAgent* anim_agent, lwIResourceMgr* res_mgr, lwIAnimKeySetPRS* aks,
+	DWORD subset, DWORD stage)
+{
+	lwIAnimCtrlObjTexUV* ctrlobj_tc = nullptr;
+	lwIAnimCtrlTexUV* ctrl_tc = nullptr;
+	if (LW_FAILED(res_mgr->CreateAnimCtrlObj((lwIAnimCtrlObj**)&ctrlobj_tc, ANIM_CTRL_TYPE_TEXUV)))
+		return LW_RET_FAILED;
+	if (LW_FAILED(res_mgr->CreateAnimCtrl((lwIAnimCtrl**)&ctrl_tc, ANIM_CTRL_TYPE_TEXUV)))
+		return LW_RET_FAILED;
+
+	lwAnimCtrlObjTypeInfo acti;
+	acti.type = ANIM_CTRL_TYPE_TEXUV;
+	acti.data[0] = subset;
+	acti.data[1] = stage;
+
+	ctrl_tc->SetAnimKeySetPRS(aks);
+	ctrlobj_tc->AttachAnimCtrl(ctrl_tc);
+	ctrlobj_tc->SetTypeInfo(&acti);
+	if (LW_FAILED(anim_agent->AddAnimCtrlObj(ctrlobj_tc)))
+		return LW_RET_FAILED;
+
+	lwPlayPoseInfo ppi;
+	memset(&ppi, 0, sizeof(ppi));
+	ppi.bit_mask = PPI_MASK_DEFAULT;
+	ppi.type = PLAY_LOOP;
+	ppi.pose = 0;
+	ppi.velocity = 1.0f / CSteadyFrame::GetAnimMultiplier();
+	return ctrlobj_tc->PlayPose(&ppi);
+}
+
 HRESULT CSceneItem::LitResetTexture(DWORD item_id, DWORD lit_id) {
 	HRESULT ret = LW_RET_FAILED;
 
-	int flag = 0;
-	lwIMtlTexAgent* mtltex_agent;
-	lwIAnimCtrlAgent* anim_agent;
-	lwIAnimCtrlObjTexUV* ctrlobj_tc;
-	lwIAnimCtrlTexUV* ctrl_tc;
-	lwIAnimKeySetPRS* aks;
-	lwIResourceMgr* res_mgr;
-	MPIPrimitive* pri;
+	int new_anim_agent = 0;
+	lwIAnimCtrlAgent* anim_agent = nullptr;
+	lwIResourceMgr* res_mgr = nullptr;
+	MPIPrimitive* pri = nullptr;
 	lwItemLit* il = &g_il;
 
-	lwItemLitInfo* item_info = 0;
-	lwLitInfo* lit_info;
+	lwItemLitInfo* item_info = nullptr;
+	lwLitInfo* lit_info = nullptr;
 	lwItemLitInfo::_LitBuf_It lit_it;
 
 	LW_FAILED_RET(il->FindItem(item_id, &item_info));
@@ -165,54 +210,61 @@ HRESULT CSceneItem::LitResetTexture(DWORD item_id, DWORD lit_id) {
 	lit_info = (*lit_it);
 
 	pri = MPSceneItem::GetObject()->GetPrimitive();
-	mtltex_agent = pri->GetMtlTexAgent(1);
-	if (mtltex_agent == 0)
+	if (!pri)
 		goto __ret;
 
 	res_mgr = pri->GetResourceMgr();
-	mtltex_agent->SetRenderFlag(TRUE);
-	mtltex_agent->SetOpacity(lit_info->opacity);
-	mtltex_agent->SetTranspType(lit_info->transp_type);
+	lwIPathInfo* path_info = res_mgr->GetSysGraphics()->GetSystem()->GetPathInfo();
+	const char* tex_path = path_info->GetPath(PATH_TYPE_TEXTURE_ITEM);
 
-	if (_tcslen(lit_info->file) > 0) {
-		lwIPathInfo* path_info = res_mgr->GetSysGraphics()->GetSystem()->GetPathInfo();
-		LW_FAILED_RET(pri->ResetTexture(1, 0, lit_info->file, path_info->GetPath(PATH_TYPE_TEXTURE_ITEM)));
+	lwIMtlTexAgent* overlay_mtl = pri->GetMtlTexAgent(1);
+	if (overlay_mtl) {
+		overlay_mtl->SetRenderFlag(TRUE);
+		overlay_mtl->SetOpacity(lit_info->opacity);
+		overlay_mtl->SetTranspType(lit_info->transp_type);
+
+		if (_tcslen(lit_info->file) > 0)
+			pri->ResetTexture(1, 0, lit_info->file, tex_path);
 	}
-	if (lit_info->anim_type > 0) {
+
+	lwIMtlTexAgent* base_mtl = pri->GetMtlTexAgent(0);
+	if (!overlay_mtl && base_mtl && _tcslen(lit_info->file) > 0) {
+		// Some weapons only expose forge lit on mtl 0 / stage 1 (lwPrimitiveTexLit layout).
+		DWORD texuv_anim = (lit_info->anim_type > 0) ? (lit_info->anim_type - 1) : 0;
+		if (texuv_anim < 5)
+			lwPrimitiveTexLitC(pri, lit_info->file, tex_path, texuv_anim);
+		ret = LW_RET_OK;
+		goto __ret;
+	}
+
+	if (lit_info->anim_type > 0 && lit_info->anim_type < __lit_anim_num && __lit_proc[lit_info->anim_type]) {
 		anim_agent = pri->GetAnimAgent();
-		if (anim_agent == 0) {
-			flag = 1;
-			res_mgr->CreateAnimCtrlAgent(&anim_agent);
+		if (!anim_agent) {
+			new_anim_agent = 1;
+			if (LW_FAILED(res_mgr->CreateAnimCtrlAgent(&anim_agent)))
+				goto __ret;
 		}
-		res_mgr->CreateAnimCtrlObj((lwIAnimCtrlObj**)&ctrlobj_tc, ANIM_CTRL_TYPE_TEXCOORD);
-		res_mgr->CreateAnimCtrl((lwIAnimCtrl**)&ctrl_tc, ANIM_CTRL_TYPE_TEXCOORD);
-		lwGUIDCreateObject((lxvoid**)&aks, LW_GUID_ANIMKEYSETPRS);
 
-		(*__lit_proc[lit_info->anim_type])(aks);
+		RemoveItemTexUVAnim(anim_agent, 1, 0);
+		RemoveItemTexUVAnim(anim_agent, 0, 1);
 
-		lwAnimCtrlTypeInfo acti;
-		acti.type = ANIM_CTRL_TYPE_TEXCOORD;
-		acti.data[0] = 1;
-		acti.data[1] = 0;
+		auto add_scroll = [&](DWORD subset, DWORD stage) -> LW_RESULT {
+			lwIAnimKeySetPRS* aks = nullptr;
+			lwGUIDCreateObject((lxvoid**)&aks, LW_GUID_ANIMKEYSETPRS);
+			(*__lit_proc[lit_info->anim_type])(aks);
+			return AddItemLitTexUVAnim(anim_agent, res_mgr, aks, subset, stage);
+		};
 
-		ctrl_tc->SetAnimKeySetPRS(aks);
-		ctrlobj_tc->AttachAnimCtrl(ctrl_tc);
-		ctrlobj_tc->SetTypeInfo(&acti);
-		anim_agent->AddAnimCtrlObj(ctrlobj_tc);
+		// Overlay pass (subset 1 / stage 0) and base dual-tex (subset 0 / stage 1).
+		add_scroll(1, 0);
+		if (base_mtl && base_mtl->GetTex(1))
+			add_scroll(0, 1);
 
-		if (flag == 1)
+		if (new_anim_agent)
 			pri->SetAnimCtrlAgent(anim_agent);
-
-		lwPlayPoseInfo ppi;
-		memset(&ppi, 0, sizeof(ppi));
-		ppi.bit_mask = PPI_MASK_DEFAULT;
-		ppi.type = PLAY_LOOP;
-		ppi.pose = 0;
-		// FPS-aware velocity: halved at 60 FPS to keep real-time speed parity with legacy 30 FPS path.
-		ppi.velocity = 1.0f / CSteadyFrame::GetAnimMultiplier();
-		ctrlobj_tc->PlayPose(&ppi);
 	}
 
+	pri->SetState(STATE_UPDATETRANSPSTATE, 1);
 	ret = LW_RET_OK;
 __ret:
 	return ret;

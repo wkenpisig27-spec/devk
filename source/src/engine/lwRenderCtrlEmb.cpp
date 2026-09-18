@@ -75,8 +75,49 @@ LW_RESULT lwRenderCtrlVSFixedFunction::BeginSet(lwIRenderCtrlAgent* agent)
 }
 LW_RESULT lwRenderCtrlVSFixedFunction::EndSet(lwIRenderCtrlAgent* agent)
 {
+    if (lwIsDx11Active() && agent)
+    {
+        lwIDeviceObject* dev_obj = agent->GetResourceMgr()->GetDeviceObject();
+        lwMatrix44 tex_id;
+        lwMatrix44Identity(&tex_id);
+        for (DWORD s = 0; s < 2; ++s)
+        {
+            dev_obj->SetTransform((D3DTRANSFORMSTATETYPE)(D3DTS_TEXTURE0 + s), &tex_id);
+            dev_obj->SetTextureStageState(s, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+        }
+    }
     return LW_RET_OK;
 }
+void lwApplySubsetTexUV(lwIDeviceObject* dev_obj, DWORD subset, lwIAnimCtrlAgent* anim_agent)
+{
+    if (!dev_obj || !anim_agent)
+        return;
+
+    const DWORD animobj_num = anim_agent->GetAnimCtrlObjNum();
+    for (DWORD i = 0; i < animobj_num; i++)
+    {
+        lwIAnimCtrlObj* animctrl_obj = anim_agent->GetAnimCtrlObj(i);
+        lwAnimCtrlObjTypeInfo type_info;
+        animctrl_obj->GetTypeInfo(&type_info);
+
+        if (type_info.type != ANIM_CTRL_TYPE_TEXUV)
+            continue;
+        if (type_info.data[0] != subset)
+            continue;
+
+        lwIAnimCtrlObjTexUV* texuv = (lwIAnimCtrlObjTexUV*)animctrl_obj;
+        texuv->UpdateObject();
+
+        lwMatrix44 mat;
+        if (LW_FAILED(texuv->GetRTM(&mat)))
+            continue;
+
+        const DWORD stage_id = type_info.data[1];
+        dev_obj->SetTransform((D3DTRANSFORMSTATETYPE)(D3DTS_TEXTURE0 + stage_id), &mat);
+        dev_obj->SetTextureStageState(stage_id, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
+    }
+}
+
 LW_RESULT lwRenderCtrlVSFixedFunction::BeginSetSubset(DWORD subset, lwIRenderCtrlAgent* agent)
 {
     lwIResourceMgr* res_mgr = agent->GetResourceMgr();
@@ -109,50 +150,8 @@ LW_RESULT lwRenderCtrlVSFixedFunction::BeginSetSubset(DWORD subset, lwIRenderCtr
         }
     }
 
-    if(anim_agent == 0)
-        goto __ret;
-
-    {
-        DWORD animobj_num = anim_agent->GetAnimCtrlObjNum();
-        lwIAnimCtrlObj* animctrl_obj;
-        lwAnimCtrlObjTypeInfo type_info;
-
-        for (DWORD i = 0; i < animobj_num; i++)
-        {
-            animctrl_obj = anim_agent->GetAnimCtrlObj(i);
-            animctrl_obj->GetTypeInfo(&type_info);
-
-            BOOL play_type = animctrl_obj->IsPlaying();
-
-            if ((type_info.data[0] == subset) && play_type)
-            {
-                DWORD anim_type = type_info.type;
-                DWORD stage_id = type_info.data[1];
-
-                if (anim_type == ANIM_CTRL_TYPE_TEXUV)
-                {
-                    lwIAnimCtrlObjTexUV* this_ctrl = (lwIAnimCtrlObjTexUV*)animctrl_obj;
-
-                    lwMatrix44 mat;
-                    this_ctrl->GetRTM(&mat);
-
-                    dev_obj->SetTransform((D3DTRANSFORMSTATETYPE)(D3DTS_TEXTURE0 + stage_id), &mat);
-                    dev_obj->SetTextureStageState(stage_id, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
-                }
-                // moved into Primitive.Update procedure
-                //else if(anim_type == ANIM_CTRL_TYPE_MTLOPACITY)
-                //{
-                //    lwIAnimCtrlObjMtlOpacity* this_ctrl = (lwIAnimCtrlObjMtlOpacity*)animctrl_obj;
-
-                //    float opacity = 1.0f;
-                //    if(LW_SUCCEEDED(this_ctrl->GetRunTimeOpacity(&opacity)))
-                //    {
-                //        agent->GetMtlTexAgent()->SetOpacity(opacity);
-                //    }
-                //}
-            }
-        }
-    }
+    if (anim_agent)
+        lwApplySubsetTexUV(dev_obj, subset, anim_agent);
 __ret:
     return LW_RET_OK;
 }
@@ -184,6 +183,9 @@ LW_RESULT lwRenderCtrlVSFixedFunction::EndSetSubset(DWORD subset, lwIRenderCtrlA
 
                 if (anim_type == ANIM_CTRL_TYPE_TEXUV)
                 {
+                    lwMatrix44 tex_id;
+                    lwMatrix44Identity(&tex_id);
+                    dev_obj->SetTransform((D3DTRANSFORMSTATETYPE)(D3DTS_TEXTURE0 + stage_id), &tex_id);
                     dev_obj->SetTextureStageState(stage_id, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
                 }
                 //else if(anim_type == ANIM_CTRL_TYPE_TEXIMG)

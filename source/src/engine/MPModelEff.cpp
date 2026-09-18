@@ -112,7 +112,15 @@ static void Dx11BindEffectPass(I_Effect* eff, const D3DXMATRIX& world, const D3D
 	eff->m_pDev->SetTextureStageStateForced(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
 	eff->m_pDev->SetTextureStageStateForced(0, D3DTSS_ALPHAARG2, D3DTA_TFACTOR);
 	eff->m_pDev->SetTextureStageStateForced(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+	lwMatrix44 tex_id;
+	lwMatrix44Identity(&tex_id);
+	if (lwIDeviceObject* d11 = eff->m_pDev->GetInterfaceMgr()->dev_obj)
+	{
+		d11->SetTransform((D3DTRANSFORMSTATETYPE)D3DTS_TEXTURE0, &tex_id);
+		d11->SetTransform((D3DTRANSFORMSTATETYPE)D3DTS_TEXTURE1, &tex_id);
+	}
 	eff->m_pDev->SetTextureStageStateForced(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+	eff->m_pDev->SetTextureStageStateForced(1, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
 	eff->m_pDev->SetTextureStageStateForced(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 	eff->m_pDev->SetTextureStageStateForced(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 	eff->m_pDev->SetTexture(1, NULL);
