@@ -984,7 +984,7 @@ void	I_Effect::Render()
 		else
 			m_pCModel->RenderModel();
 #ifdef USE_RENDER
-		if (lwIsDx11Active())
+		if (lwIsDx11Active() && _eEffectType == EFFECT_MODEL)
 			m_pCModel->RestoreBaseUV();
 #endif
 	}

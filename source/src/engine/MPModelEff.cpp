@@ -673,27 +673,16 @@ void CMPModelEff::FrameMove(DWORD	dwDailTime)
 		//!?????????
 		m_pCEffect->GetLerpColor(&m_pCurCortrol->m_dwCurColor,m_pCurCortrol->m_wCurFrame,t_iNextFrame,m_fLerp);
 
-		if(!m_pCEffect->IsItem())
+		if(m_pCEffect->getType() == EFFECT_MODELUV)
 		{
-			if(m_pCEffect->getType() == EFFECT_MODELUV)
-			{
-				//!????????????????
-				m_pCEffect->GetLerpCoord(m_pCurCortrol->m_vecCurCoord, m_pCurCortrol->m_wCurCoordIndex,m_pCurCortrol->m_fCurCoordTime,*m_pfDailTime);
-			}else
-			{
-				if(m_pCEffect->getType() == EFFECT_MODELTEXTURE)
-				{
-					//!??????????
-					m_pCEffect->GetLerpTexture(m_pCurCortrol->m_lpCurTex, m_pCurCortrol->m_wCurTexIndex,m_pCurCortrol->m_fCurTexTime,*m_pfDailTime);
-				}else if(m_pCEffect->getType() == EFFECT_FRAMETEX)
-				{
-					//!??????????
-					m_pCEffect->GetLerpFrame(m_pCurCortrol->m_wCurTexIndex,m_pCurCortrol->m_fCurTexTime,*m_pfDailTime);
-				}
-			}
-		}else if(m_pCEffect->getType() == EFFECT_FRAMETEX)
+			m_pCEffect->GetLerpCoord(m_pCurCortrol->m_vecCurCoord, m_pCurCortrol->m_wCurCoordIndex,m_pCurCortrol->m_fCurCoordTime,*m_pfDailTime);
+		}
+		else if(m_pCEffect->getType() == EFFECT_MODELTEXTURE)
 		{
-			//!??????????
+			m_pCEffect->GetLerpTexture(m_pCurCortrol->m_lpCurTex, m_pCurCortrol->m_wCurTexIndex,m_pCurCortrol->m_fCurTexTime,*m_pfDailTime);
+		}
+		else if(m_pCEffect->getType() == EFFECT_FRAMETEX)
+		{
 			m_pCEffect->GetLerpFrame(m_pCurCortrol->m_wCurTexIndex,m_pCurCortrol->m_fCurTexTime,*m_pfDailTime);
 		}
 	}
@@ -842,10 +831,7 @@ void CMPModelEff::RenderVS()
 			Dx11BindEffectPass(m_pCEffect,
 				m_bBindbone ? m_pCurCortrol->m_SMatResult : m_SMatResult,
 				m_pCurCortrol->m_dwCurColor);
-			
-            // begin by lsh
-			//m_pCEffect->m_pCModel->SetExternalTexture(0,m_pCEffect->m_CTextruelist.m_lpCurTex);
-            // end			
+			Dx11FillEffectUV(m_pCurCortrol, m_pCEffect);
 
 			m_pCEffect->Render();
 
@@ -904,6 +890,7 @@ void CMPModelEff::RenderVS()
 			m_pCEffect->m_pDev->SetTextureStageStateForced(0, D3DTSS_COLORARG2, D3DTA_TFACTOR);
 			m_pCEffect->m_pDev->SetTextureStageStateForced(0, D3DTSS_ALPHAARG2, D3DTA_TFACTOR);
 			m_pCEffect->m_pDev->SetVertexShaderConstantF(0, vertexShaderMat, 4);
+			Dx11FillEffectUV(m_pCurCortrol, m_pCEffect);
 
 			m_pCEffect->Render();
 #ifdef USE_MGR
