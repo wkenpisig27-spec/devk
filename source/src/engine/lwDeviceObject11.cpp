@@ -810,6 +810,7 @@ LW_RESULT lwDeviceObject11::SetRenderState(D3DRENDERSTATETYPE state, DWORD value
     }
     if ((DWORD)state < LW_MAX_RENDERSTATE_NUM)
         _rs_value[state] = value;
+    lwD3D11MeshNoteRs((DWORD)state, value);
     return LW_RET_OK;
 }
 
@@ -817,6 +818,7 @@ LW_RESULT lwDeviceObject11::SetRenderStateForced(D3DRENDERSTATETYPE state, DWORD
 {
     if ((DWORD)state < LW_MAX_RENDERSTATE_NUM)
         _rs_value[state] = value;
+    lwD3D11MeshNoteRs((DWORD)state, value);
     return LW_RET_OK;
 }
 
@@ -853,6 +855,7 @@ LW_RESULT lwDeviceObject11::SetTextureStageState(DWORD stage, D3DTEXTURESTAGESTA
     }
     if (stage < LW_MAX_TEXTURESTAGE_NUM && (DWORD)type < LW_MAX_TEXTURESTAGESTATE_NUM)
         _tss_value[stage][type] = value;
+    lwD3D11MeshNoteTss(stage, (DWORD)type, value);
     return LW_RET_OK;
 }
 
@@ -860,6 +863,7 @@ LW_RESULT lwDeviceObject11::SetTextureStageStateForced(DWORD stage, D3DTEXTUREST
 {
     if (stage < LW_MAX_TEXTURESTAGE_NUM && (DWORD)type < LW_MAX_TEXTURESTAGESTATE_NUM)
         _tss_value[stage][type] = value;
+    lwD3D11MeshNoteTss(stage, (DWORD)type, value);
     return LW_RET_OK;
 }
 
@@ -867,6 +871,8 @@ LW_RESULT lwDeviceObject11::SetSamplerState(DWORD sampler, D3DSAMPLERSTATETYPE t
 {
     if (sampler < LW_MAX_SAMPLESTAGE_NUM && (DWORD)type < LW_MAX_SAMPLESTATE_NUM)
         _ss_value[sampler][type] = value;
+    if (sampler == 0)
+        lwD3D11MeshNoteSamp((DWORD)type, value);
     return LW_RET_OK;
 }
 

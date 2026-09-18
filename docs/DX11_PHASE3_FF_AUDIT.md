@@ -21,7 +21,7 @@ Legacy RSA atom sets (`_rsa_cha`, `_rsa_sceneobj`, …) still push D3D9 enums in
 
 ## D3DRS consumed by `lwD3D11Mesh` (FF mesh shader path)
 
-These are read via `GetCachedRS` when building `MeshCB0` and binding OM/RS state:
+These are write-through into `MeshNativeDraw` (`lwD3D11MeshNoteRs`) and read there when building `MeshCB0` and binding OM/RS state:
 
 - `D3DRS_LIGHTING`, `D3DRS_AMBIENT` — lighting vs unlit; ambient scale
 - `D3DRS_TEXTUREFACTOR` — TFACTOR modulate paths

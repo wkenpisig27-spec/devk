@@ -7,7 +7,7 @@ Goal: **true D3D11** end-to-end — no runtime D3D9 device, no long-term relianc
 | Layer | Today (DX11 play path) | Target (native) |
 | --- | --- | --- |
 | Device | `lwD3D11NativeContext` (`ID3D11Device` / context / swapchain); `GetDevice()` is a D3D9 leftover that returns NULL | same (PSO later) |
-| State | Pass objects (`kMeshPass` / `kEffPass`); leftover RS cache only for intra-pass blend | PSO + root signature / explicit CBs per pass |
+| State | Pass objects (`kMeshPass` / `kEffPass`) + `MeshNativeDraw` notes | PSO + root signature / explicit CBs per pass |
 | Shaders | SM4 HLSL + FF mesh shader + ShaderMgr11 VS (`.hlsl` keys) | same |
 | Loaders | DDS/BMP/TGA + GDI+ (`lwD3D11CreateTextureFromMemory`) | same (DirectXTex optional) |
 | Effects | Compiled `shader\\eff.hlsl` (tex * diffuse/TFACTOR); OM still from `Pass()` | same |
@@ -130,7 +130,12 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 Highest-value leftover vs the native target table:
 
-1. Leftover D3D9 *language*: character/scene/terrain still decode some RS/TSS for intra-pass variation. Effects use native `kEffPass`. Shader keys are `.hlsl`.
+1. Leftover D3D9 *language*: callers still `SetRenderState` / TSS; `DrawCommon` now reads `MeshNativeDraw` (hair alpha, dest-blend, dual-tex, lights, UV, alpha-test, sampler). Effects use `kEffPass`.
+
+### native draw notes — **complete**
+
+- `lwDeviceObject11` write-through updates `MeshNativeDraw` on the RS/TSS/sampler that mesh actually uses.
+- Character hair alpha, scene additive, terrain splat, and weapon dual-tex no longer call `GetCachedRS` / `GetCachedTSS` at draw time.
 
 ### D3D9 sources — **complete**
 

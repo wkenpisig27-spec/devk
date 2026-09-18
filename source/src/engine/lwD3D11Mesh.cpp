@@ -264,7 +264,33 @@ struct MeshState
     int ready;
 };
 
+struct MeshNativeDraw
+{
+    int alpha;
+    DWORD src;
+    DWORD dest;
+    int zenable;
+    int zwrite;
+    DWORD cull;
+    int msaa;
+    int lighting;
+    DWORD ambient;
+    DWORD tfactor;
+    int atest;
+    DWORD aref;
+    DWORD afunc;
+    DWORD cop[3];
+    DWORD ca1[3];
+    DWORD ca2[3];
+    DWORD aa1[3];
+    DWORD aa2[3];
+    DWORD ttff[3];
+    DWORD samp_addr;
+    DWORD samp_mag;
+};
+
 static MeshState s_mesh = {};
+static MeshNativeDraw s_draw = {};
 static std::map<DWORD, ID3D11InputLayout*> s_layouts;
 static std::map<DWORD, ID3D11BlendState*> s_blends;
 
@@ -508,6 +534,31 @@ LW_RESULT lwD3D11MeshInit(ID3D11Device* device, ID3D11DeviceContext* context)
     s_mesh.fog_color[3] = 1.0f;
     s_mesh.fog_density = 0.00035f;
     s_mesh.eff_tech = -1;
+    s_draw.alpha = 0;
+    s_draw.src = D3DBLEND_SRCALPHA;
+    s_draw.dest = D3DBLEND_INVSRCALPHA;
+    s_draw.zenable = 1;
+    s_draw.zwrite = 1;
+    s_draw.cull = D3DCULL_CCW;
+    s_draw.msaa = 1;
+    s_draw.lighting = 1;
+    s_draw.ambient = 0xffffffff;
+    s_draw.tfactor = 0xffffffff;
+    s_draw.atest = 0;
+    s_draw.aref = 0;
+    s_draw.afunc = D3DCMP_ALWAYS;
+    s_draw.cop[0] = D3DTOP_MODULATE;
+    s_draw.ca1[0] = D3DTA_TEXTURE;
+    s_draw.ca2[0] = D3DTA_DIFFUSE;
+    s_draw.aa1[0] = D3DTA_TEXTURE;
+    s_draw.aa2[0] = D3DTA_DIFFUSE;
+    s_draw.cop[1] = D3DTOP_DISABLE;
+    s_draw.cop[2] = D3DTOP_DISABLE;
+    s_draw.ca1[1] = s_draw.ca1[2] = D3DTA_TEXTURE;
+    s_draw.ca2[1] = s_draw.ca2[2] = D3DTA_CURRENT;
+    s_draw.ttff[0] = s_draw.ttff[1] = D3DTTFF_DISABLE;
+    s_draw.samp_addr = D3DTADDRESS_WRAP;
+    s_draw.samp_mag = D3DTEXF_LINEAR;
     lwD3D11MeshCompileEff("shader\\eff.hlsl");
     s_mesh.ready = 1;
     return LW_RET_OK;
@@ -600,6 +651,51 @@ void lwD3D11MeshSetVfx(int enabled)
 void lwD3D11MeshHintAdditive(int enabled)
 {
     s_mesh.hint_additive = enabled ? 1 : 0;
+}
+
+void lwD3D11MeshNoteRs(DWORD state, DWORD value)
+{
+    switch (state)
+    {
+    case D3DRS_ALPHABLENDENABLE: s_draw.alpha = value ? 1 : 0; break;
+    case D3DRS_SRCBLEND: s_draw.src = value; break;
+    case D3DRS_DESTBLEND: s_draw.dest = value; break;
+    case D3DRS_ZENABLE: s_draw.zenable = value ? 1 : 0; break;
+    case D3DRS_ZWRITEENABLE: s_draw.zwrite = value ? 1 : 0; break;
+    case D3DRS_CULLMODE: s_draw.cull = value; break;
+    case D3DRS_MULTISAMPLEANTIALIAS: s_draw.msaa = value ? 1 : 0; break;
+    case D3DRS_LIGHTING: s_draw.lighting = value ? 1 : 0; break;
+    case D3DRS_AMBIENT: s_draw.ambient = value; break;
+    case D3DRS_TEXTUREFACTOR: s_draw.tfactor = value; break;
+    case D3DRS_ALPHATESTENABLE: s_draw.atest = value ? 1 : 0; break;
+    case D3DRS_ALPHAREF: s_draw.aref = value; break;
+    case D3DRS_ALPHAFUNC: s_draw.afunc = value; break;
+    default: break;
+    }
+}
+
+void lwD3D11MeshNoteTss(DWORD stage, DWORD type, DWORD value)
+{
+    if (stage > 2)
+        return;
+    switch (type)
+    {
+    case D3DTSS_COLOROP: s_draw.cop[stage] = value; break;
+    case D3DTSS_COLORARG1: s_draw.ca1[stage] = value; break;
+    case D3DTSS_COLORARG2: s_draw.ca2[stage] = value; break;
+    case D3DTSS_ALPHAARG1: s_draw.aa1[stage] = value; break;
+    case D3DTSS_ALPHAARG2: s_draw.aa2[stage] = value; break;
+    case D3DTSS_TEXTURETRANSFORMFLAGS: s_draw.ttff[stage] = value; break;
+    default: break;
+    }
+}
+
+void lwD3D11MeshNoteSamp(DWORD type, DWORD value)
+{
+    if (type == D3DSAMP_ADDRESSU)
+        s_draw.samp_addr = value;
+    else if (type == D3DSAMP_MAGFILTER)
+        s_draw.samp_mag = value;
 }
 
 static const char* kEffHLSL =
@@ -1050,11 +1146,11 @@ static int TexHasSrv(lwD3D11Texture* tex)
     return (tex && tex->GetSRV()) ? 1 : 0;
 }
 
-static float DecodeDualFromTss(lwDeviceObject11* dev, lwD3D11Texture* tex1, lwD3D11Texture* tex2)
+static float DecodeDualFromNative(lwDeviceObject11* dev, lwD3D11Texture* tex1, lwD3D11Texture* tex2)
 {
-    DWORD cop1 = dev->GetCachedTSS(1, D3DTSS_COLOROP);
-    DWORD s1_ca1 = dev->GetCachedTSS(1, D3DTSS_COLORARG1);
-    DWORD s1_ca2 = dev->GetCachedTSS(1, D3DTSS_COLORARG2);
+    DWORD cop1 = s_draw.cop[1];
+    DWORD s1_ca1 = s_draw.ca1[1];
+    DWORD s1_ca2 = s_draw.ca2[1];
     if (!cop1 || cop1 == D3DTOP_DISABLE || cop1 == 0xffffffff || cop1 == D3DTSS_FORCE_DWORD || !TexHasSrv(tex1))
         return 0.0f;
     if (cop1 == D3DTOP_SELECTARG1 && s1_ca1 == D3DTA_TEXTURE)
@@ -1063,7 +1159,7 @@ static float DecodeDualFromTss(lwDeviceObject11* dev, lwD3D11Texture* tex1, lwD3
         return 1.0f;
     if (cop1 == D3DTOP_SELECTARG1 && s1_ca1 == D3DTA_CURRENT)
     {
-        DWORD cop2 = dev->GetCachedTSS(2, D3DTSS_COLOROP);
+        DWORD cop2 = s_draw.cop[2];
         if (cop2 == D3DTOP_MODULATEALPHA_ADDCOLOR && TexHasSrv(tex2))
             return 7.0f;
         return 0.0f;
@@ -1099,24 +1195,22 @@ static float ResolvePassCombiner(const MeshPassDesc* pass, lwDeviceObject11* dev
         // Layer 0 disables COLOROP and may leave tex1 bound. Splats set
         // MODULATE + tex1. Always dual=1 (tex1 RGB, tex0 alpha) — TSS decode
         // would pick dual=2 and multiply by the near-black mask.
-        DWORD cop1 = dev->GetCachedTSS(1, D3DTSS_COLOROP);
+        DWORD cop1 = s_draw.cop[1];
         if (!cop1 || cop1 == D3DTOP_DISABLE || cop1 == 0xffffffff || cop1 == D3DTSS_FORCE_DWORD)
             return 0.0f;
         return TexHasSrv(tex1) ? 1.0f : 0.0f;
     }
-    return DecodeDualFromTss(dev, tex1, tex2);
+    return DecodeDualFromNative(dev, tex1, tex2);
 }
 
-// Pass object supplies OM defaults. Cache is only consulted for cull/MSAA and
-// documented intra-pass variation (character hair alpha, VFX additive).
-// Compiled eff.hlsl uses kEffPass instead of D3DRS for z/cull/alpha.
+// Pass object supplies OM defaults. Intra-pass variation (hair alpha, additive,
+// dual-tex) comes from MeshNativeDraw, filled when materials write RS/TSS.
 static void ResolveMeshOutputMerger(lwDeviceObject11* dev, const FvfInfo& info, MeshOmResolved* om)
 {
     const MeshPassDesc* pass = CurrentMeshPass();
     const EffPassDesc* eff = CurrentEffPass();
 
-    DWORD msaa_aa = dev->GetCachedRS(D3DRS_MULTISAMPLEANTIALIAS);
-    const int no_aa = (msaa_aa == 0);
+    const int no_aa = (s_draw.msaa == 0);
     ID3D11RasterizerState* rast = no_aa ? s_mesh.rast_ccw_noaa : s_mesh.rast_ccw;
     if (s_mesh.outline)
         rast = s_mesh.rast_cw;
@@ -1124,14 +1218,10 @@ static void ResolveMeshOutputMerger(lwDeviceObject11* dev, const FvfInfo& info, 
         rast = eff->cull_none
             ? (no_aa ? s_mesh.rast_none_noaa : s_mesh.rast_none)
             : (no_aa ? s_mesh.rast_ccw_noaa : s_mesh.rast_ccw);
-    else
-    {
-        DWORD cull = dev->GetCachedRS(D3DRS_CULLMODE);
-        if (cull == D3DCULL_NONE)
-            rast = no_aa ? s_mesh.rast_none_noaa : s_mesh.rast_none;
-        else if (cull == D3DCULL_CW)
-            rast = no_aa ? s_mesh.rast_cw_noaa : s_mesh.rast_cw;
-    }
+    else if (s_draw.cull == D3DCULL_NONE)
+        rast = no_aa ? s_mesh.rast_none_noaa : s_mesh.rast_none;
+    else if (s_draw.cull == D3DCULL_CW)
+        rast = no_aa ? s_mesh.rast_cw_noaa : s_mesh.rast_cw;
 
     DWORD srcblend = D3DBLEND_SRCALPHA;
     DWORD destblend = D3DBLEND_INVSRCALPHA;
@@ -1141,26 +1231,23 @@ static void ResolveMeshOutputMerger(lwDeviceObject11* dev, const FvfInfo& info, 
     {
         if (!eff->force_srcdest)
         {
-            DWORD src_c = dev->GetCachedRS(D3DRS_SRCBLEND);
-            DWORD dest_c = dev->GetCachedRS(D3DRS_DESTBLEND);
-            if (src_c && src_c != 0xffffffff)
-                srcblend = src_c;
-            if (dest_c && dest_c != 0xffffffff)
-                destblend = dest_c;
+            if (s_draw.src && s_draw.src != 0xffffffff)
+                srcblend = s_draw.src;
+            if (s_draw.dest && s_draw.dest != 0xffffffff)
+                destblend = s_draw.dest;
         }
         additive = (destblend == D3DBLEND_ONE || destblend == D3DBLEND_INVSRCCOLOR ||
             destblend == D3DBLEND_SRCCOLOR);
     }
     else if (pass->cache_blend != CACHE_BLEND_NONE)
     {
-        DWORD a = dev->GetCachedRS(D3DRS_ALPHABLENDENABLE);
-        if (a != 0xffffffff && a != 0)
+        if (s_draw.alpha)
             alpha = 1;
         if (pass->cache_blend == CACHE_BLEND_FULL ||
             (pass->id == MESH_PASS_SCENE && s_mesh.hint_additive))
         {
-            srcblend = dev->GetCachedRS(D3DRS_SRCBLEND);
-            destblend = dev->GetCachedRS(D3DRS_DESTBLEND);
+            srcblend = s_draw.src;
+            destblend = s_draw.dest;
             if (srcblend == 0xffffffff || srcblend == 0)
                 srcblend = D3DBLEND_SRCALPHA;
             if (destblend == 0xffffffff || destblend == 0)
@@ -1179,12 +1266,8 @@ static void ResolveMeshOutputMerger(lwDeviceObject11* dev, const FvfInfo& info, 
     }
     else if (pass->cache_blend == CACHE_BLEND_FULL || pass->id == MESH_PASS_DEFAULT)
     {
-        DWORD ze = dev->GetCachedRS(D3DRS_ZENABLE);
-        DWORD zw = dev->GetCachedRS(D3DRS_ZWRITEENABLE);
-        if (ze != 0xffffffff)
-            zenable = ze;
-        if (zw != 0xffffffff)
-            zwrite = zw;
+        zenable = s_draw.zenable;
+        zwrite = s_draw.zwrite;
     }
 
     ID3D11DepthStencilState* depth = s_mesh.depth_on;
@@ -1368,18 +1451,10 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     CopyMat(cb.viewProj, dev->GetMatViewProj());
 
     const EffPassDesc* eff = CurrentEffPass();
-    DWORD lighting = 1;
-    if (eff)
-        lighting = 0;
-    else
-    {
-        lighting = dev->GetCachedRS(D3DRS_LIGHTING);
-        if (lighting == 0xffffffff)
-            lighting = 1;
-    }
+    DWORD lighting = eff ? 0 : (s_draw.lighting ? 1 : 0);
 
     float rs_amb[4] = { 1, 1, 1, 1 };
-    DWORD amb_rs = dev->GetCachedRS(D3DRS_AMBIENT);
+    DWORD amb_rs = s_draw.ambient;
     if (amb_rs && amb_rs != 0xffffffff && amb_rs != D3DRS_FORCE_DWORD)
         ArgbToFloat(amb_rs, rs_amb);
 
@@ -1444,10 +1519,10 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     cb.more[1] = (lighting == 0 || !info.has_nrm) ? 1.0f : 0.0f;
     if (pass->unlit || info.has_blend)
         cb.more[1] = 1.0f;
-    DWORD cop0 = dev->GetCachedTSS(0, D3DTSS_COLOROP);
-    DWORD ca1 = dev->GetCachedTSS(0, D3DTSS_COLORARG1);
-    DWORD carg2 = dev->GetCachedTSS(0, D3DTSS_COLORARG2);
-    DWORD aarg2 = dev->GetCachedTSS(0, D3DTSS_ALPHAARG2);
+    DWORD cop0 = s_draw.cop[0];
+    DWORD ca1 = s_draw.ca1[0];
+    DWORD carg2 = s_draw.ca2[0];
+    DWORD aarg2 = s_draw.aa2[0];
     const int color_tf = (eff && eff->tfactor) || (carg2 == D3DTA_TFACTOR);
     const int alpha_tf = (eff && eff->tfactor) || (aarg2 == D3DTA_TFACTOR);
     cb.more[3] = (float)(color_tf + alpha_tf * 2);
@@ -1456,10 +1531,10 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     if (cop0 == D3DTOP_SELECTARG1 && ca1 == D3DTA_TFACTOR)
     {
         cb.more[1] = 2.0f;
-        DWORD aa1 = dev->GetCachedTSS(0, D3DTSS_ALPHAARG1);
+        DWORD aa1 = s_draw.aa1[0];
         cb.more[3] = (aa1 == D3DTA_TEXTURE) ? 0.0f : 2.0f;
     }
-    DWORD tf = dev->GetCachedRS(D3DRS_TEXTUREFACTOR);
+    DWORD tf = s_draw.tfactor;
     if (tf == 0xffffffff || tf == D3DRS_FORCE_DWORD)
         tf = 0xffffffff;
     ArgbToFloat(tf, cb.tfactor);
@@ -1470,10 +1545,10 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
         lwMatrix44 id;
         lwMatrix44Identity(&id);
         const lwMatrix44* uv = dev->GetMatTex(0);
-        DWORD ttff = dev->GetCachedTSS(0, D3DTSS_TEXTURETRANSFORMFLAGS);
+        DWORD ttff = s_draw.ttff[0];
         CopyMat(cb.uvMat, (uv && TexUvTransformOn(ttff)) ? uv : &id);
         const lwMatrix44* uv1m = dev->GetMatTex(1);
-        DWORD ttff1 = dev->GetCachedTSS(1, D3DTSS_TEXTURETRANSFORMFLAGS);
+        DWORD ttff1 = s_draw.ttff[1];
         CopyMat(cb.uvMat1, (uv1m && TexUvTransformOn(ttff1)) ? uv1m : &id);
     }
 
@@ -1491,13 +1566,11 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     {
         DWORD atest = 0;
         if (pass->id != MESH_PASS_TERRAIN && pass->id != MESH_PASS_SEA)
-            atest = dev->GetCachedRS(D3DRS_ALPHATESTENABLE);
-        if (atest && atest != 0xffffffff && atest != D3DRS_FORCE_DWORD)
+            atest = s_draw.atest;
+        if (atest)
         {
-            DWORD aref = dev->GetCachedRS(D3DRS_ALPHAREF);
-            if (aref == 0xffffffff)
-                aref = 0;
-            DWORD afunc = dev->GetCachedRS(D3DRS_ALPHAFUNC);
+            DWORD aref = s_draw.aref;
+            DWORD afunc = s_draw.afunc;
             const float ref = (float)(aref & 0xff) / 255.0f;
             if (afunc == D3DCMP_NOTEQUAL)
                 cb.extra[3] = ref + 0.5f / 255.0f;
@@ -1595,10 +1668,8 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     }
     else
     {
-        DWORD addr = dev->GetCachedSS(0, D3DSAMP_ADDRESSU);
-        DWORD mag = dev->GetCachedSS(0, D3DSAMP_MAGFILTER);
-        point = (mag == D3DTEXF_POINT);
-        clamp = (addr == D3DTADDRESS_CLAMP);
+        point = (s_draw.samp_mag == D3DTEXF_POINT);
+        clamp = (s_draw.samp_addr == D3DTADDRESS_CLAMP);
     }
     if (point && clamp && s_mesh.samp_point_clamp)
         samp = s_mesh.samp_point_clamp;
