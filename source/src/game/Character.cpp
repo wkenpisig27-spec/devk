@@ -1010,11 +1010,21 @@ void CCharacter::_UpdateHeight() {
 			_fMapHeight = (float)_pDefaultChaInfo->sSeaHeight / 100.0f;
 			break;
 		default:
-			// PKO FIX: Null-check _pScene to prevent crash during map transitions
-			_fMapHeight = _pScene ? _pScene->GetGridHeight(_vPos.x, _vPos.y) : 0.0f;
+			// Snap-to-grid height sits below the drawn tile on slopes.
+			// Use the higher of the grid sample and the interpolated surface.
+			_fMapHeight = 0.0f;
+			if (_pScene) {
+				const float grid = _pScene->GetGridHeight(_vPos.x, _vPos.y);
+				const float vis = _pScene->GetTerrain()
+					? _pScene->GetTerrain()->GetHeight(_vPos.x, _vPos.y)
+					: grid;
+				_fMapHeight = (vis > grid) ? vis : grid;
+			}
 		}
 
-		_vPos.z = _fMapHeight + (float)(_nHeightOff) / 100.0f;
+		// Model pivot sits in the ankles; a small lift keeps soles on the pavement.
+		const float stand = (_pDefaultChaInfo->chTerritory == 1) ? 0.0f : 0.08f;
+		_vPos.z = _fMapHeight + (float)(_nHeightOff) / 100.0f + stand;
 	} else {
 		_vPos.z = (float)(_nPoseHeightOff) / 100.0f;
 	}
