@@ -13,6 +13,8 @@
 #include "ItemRecord.h"
 #include "PacketCmd.h"
 #include "GameConfig.h"
+#include "lwDeviceObject11.h"
+#include "MindPowerRenderConfig.h"
 
 #include "Character.h"
 #include "caLua.h"
@@ -349,12 +351,17 @@ bool CLoginScene::_Init() {
 
 void CLoginScene::__cha_render_event(C3DCompent* pSender, int x, int y) {
 
-	if (IDirect3DDeviceX* d3d9 = g_Render.GetDevice()) {
-		d3d9->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
-		d3d9->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+	if (lwDeviceObject11* d11 = lwGetActiveDeviceObject11()) {
+		d11->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+		d11->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 	} else if (MPIDeviceObject* dev_obj = g_Render.GetInterfaceMgr()->dev_obj) {
 		dev_obj->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
 		dev_obj->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+#if MINDPOWER_USE_D3D9_DEVICE
+	} else if (IDirect3DDeviceX* d3d9 = g_Render.GetDevice()) {
+		d3d9->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+		d3d9->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+#endif
 	}
 	g_Render.LookAt(D3DXVECTOR3(11.0f, 36.0f, 10.0f), D3DXVECTOR3(8.70f, 12.0f, 8.0f), MPRender::VIEW_3DUI);
 	y += 100;

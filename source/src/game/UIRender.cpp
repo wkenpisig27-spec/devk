@@ -22,12 +22,13 @@
 #include "uiimeinput.h"
 #include "uigrid.h"
 #include "Character.h"
+#include "MindPowerRenderConfig.h"
+#include "lwD3D11Gaps.h"
+#include "lwRenderBackend.h"
 #include "uilistview.h"
 #include "uipage.h"
 #include "uitreeview.h"
 #include "GameConfig.h"
-#include "lwRenderBackend.h"
-#include "lwD3D11Gaps.h"
 #include "lwD3D11Blit.h"
 #include "uitextparse.h"
 
@@ -437,8 +438,10 @@ bool UIRender::Init() {
 	if (lwIsDx11Active()) {
 		lwD3D11Gap(LW_D3D11_SKIP, "uirender-d3dx-sprite",
 			"D3DXCreateSprite needs a D3D9 device; UI sprites wait for Slice 8");
+#if MINDPOWER_USE_D3D9_DEVICE
 	} else {
 		D3DXCreateSprite(g_Render.GetDevice(), &_p2DSprite);
+#endif
 	}
 
 	_nTex = GetTextureID("texture/ui/frame.tga");

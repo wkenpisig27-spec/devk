@@ -33,6 +33,7 @@
 #include "Track.h"
 #include "CommFunc.h"
 #include "uiminimapform.h"
+#include "MindPowerGameDevice.h"
 #include "uiequipform.h"
 #include "uistartform.h"
 #include "scenesign.h"
@@ -229,7 +230,7 @@ void CGameScene::OnResetDevice() {
 	// rc.bottom = (LONG)(rc.top + 160* (ResMgr.GetBackBufferHeight() == 768 ? 1 : lerpx));
 	// static int n = 0;
 
-	g_CEffBox.Create(g_Render.GetDevice());
+	g_CEffBox.Create(MP_LegacyD3D9DeviceOpt());
 	g_CEffBox.setColor(0xffff0000);
 	g_CEffBox.setWriteFrame(FALSE);
 	g_CEffBox.ShowLine(TRUE);
@@ -260,7 +261,7 @@ void CGameScene::OnResetDevice() {
 
 	SAFE_DELETE(_pSmallMap);
 	_pSmallMap = new CMinimap;
-	_pSmallMap->Create(lwIsDx11Active() ? nullptr : g_Render.GetDevice(), rc, this, 128);
+	_pSmallMap->Create(MP_LegacyD3D9DeviceOpt(), rc, this, 128);
 
 	C3DCompent* pD3d = g_stUIMap.GetBigmapRect();
 	rc.left = pD3d->GetX();
@@ -270,7 +271,7 @@ void CGameScene::OnResetDevice() {
 
 	SAFE_DELETE(_pLargerMap);
 	_pLargerMap = new CLargerMap;
-	_pLargerMap->Create(lwIsDx11Active() ? nullptr : g_Render.GetDevice(), rc, g_pGameApp->GetCurScene(), 500);
+	_pLargerMap->Create(MP_LegacyD3D9DeviceOpt(), rc, g_pGameApp->GetCurScene(), 500);
 }
 
 void CGameScene::RegisterFunc() {
@@ -385,12 +386,12 @@ CGameScene::CGameScene(stSceneInitParam& param)
       _pMapInfo(nullptr),
       m_bShowTerrain(true),
       _pShadowMap(nullptr) {
-	g_CEffBox.Create(g_Render.GetDevice());
+	g_CEffBox.Create(MP_LegacyD3D9DeviceOpt());
 	g_CEffBox.setColor(0xffff0000);
 	g_CEffBox.setWriteFrame(FALSE);
 	g_CEffBox.ShowLine(TRUE);
 
-	CPathBox.Create(g_Render.GetDevice(), 0.25f);
+	CPathBox.Create(MP_LegacyD3D9DeviceOpt(), 0.25f);
 
 	_nSceneLightCnt = 100;
 	_pSceneLightArray = new SceneLight[_nSceneLightCnt];
@@ -1758,7 +1759,7 @@ bool CGameScene::RecreateShadowMapFromQuality(int nQuality, bool bEnableShadow) 
 
 	if (bEnableShadow && g_Config.m_bEnableShadowMap) {
 		_pShadowMap = new CMPShadowMap();
-		if (!_pShadowMap->Create(lwIsDx11Active() ? nullptr : g_Render.GetDevice(), shadowCfg)) {
+		if (!_pShadowMap->Create(MP_LegacyD3D9DeviceOpt(), shadowCfg)) {
 			LG("shadow", "Failed to initialize shadow map\n");
 			delete _pShadowMap;
 			_pShadowMap = nullptr;
@@ -2138,7 +2139,7 @@ void CGameScene::LoadingCall() {
 	rc.right = rc.left + lenx;
 	rc.bottom = rc.top + lenx;
 
-	_pSmallMap->Create(lwIsDx11Active() ? nullptr : g_Render.GetDevice(), rc, g_pGameApp->GetCurScene(), lenx);
+	_pSmallMap->Create(MP_LegacyD3D9DeviceOpt(), rc, g_pGameApp->GetCurScene(), lenx);
 
 	// CCompent*pRect = g_stUIMap.GetL
 
@@ -2150,7 +2151,7 @@ void CGameScene::LoadingCall() {
 
 	SAFE_DELETE(_pLargerMap);
 	_pLargerMap = new CLargerMap;
-	_pLargerMap->Create(lwIsDx11Active() ? nullptr : g_Render.GetDevice(), rc, g_pGameApp->GetCurScene(), 500);
+	_pLargerMap->Create(MP_LegacyD3D9DeviceOpt(), rc, g_pGameApp->GetCurScene(), 500);
 
 	LG("scene init", "create small map\n");
 	//////////////////////////////////////////////////////////////////////////

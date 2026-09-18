@@ -7,6 +7,7 @@
 #include "game/BitmapFontAdapter.h"
 #include "engine/MPRender.h"
 #include "engine/lwRenderBackend.h"
+#include "MindPowerRenderConfig.h"
 #include "game/UIRender.h"
 
 using namespace GUI;
@@ -326,7 +327,10 @@ void CGuiFont::End() {
 // Helper: Get D3D Device
 //----------------------------------------------------------------------
 IDirect3DDeviceX* CGuiFont::GetDevice() {
-    // Access global render from engine
     extern MINDPOWER_API MPRender g_Render;
+#if !MINDPOWER_USE_D3D9_DEVICE
+    return nullptr;
+#else
     return g_Render.GetDevice();
+#endif
 }

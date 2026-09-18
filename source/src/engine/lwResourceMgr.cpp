@@ -870,7 +870,15 @@ __load_it:
 #endif
 
 #else
-        if(FAILED(D3DXCreateTextureFromFileEx(dev_obj->GetDevice(),
+        {
+            IDirect3DDeviceX* d3d9_fileex = dev_obj->GetDevice();
+            if (!d3d9_fileex) {
+                lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
+                if (!d11 || LW_FAILED(lwD3D11CreateTextureFromFile(
+                    d11->GetD3D11Device(), this->_file_name, _colorkey.color, &_tex)) || !_tex)
+                    goto __ret;
+            }
+            else if(FAILED(D3DXCreateTextureFromFileEx(d3d9_fileex,
             this->_file_name, //�ļ���
             0, //�ļ�����������Ϊ�Զ�
             0, //�ļ��ߣ�������Ϊ�Զ�
@@ -884,8 +892,9 @@ __load_it:
             NULL, //������ͼ���ʽ�洢�ںα�����
             NULL, //�����ĵ�ɫ��洢�ںα�����
             &_tex)))//Ҫ����������
-        {
-            goto __ret;
+            {
+                goto __ret;
+            }
         }
 #endif
 
@@ -1651,7 +1660,10 @@ LW_RESULT lwMesh::DrawSubset(DWORD subset)
 #if(defined USE_STENCILBUFFER_FILTER_COLORKEY)
         if (_colorkey)
         {
-            dev_obj->GetDevice()->Clear(0, NULL, D3DCLEAR_STENCIL, 0, 1.0f, 0);
+            if (lwDeviceObject11* d11_st = lwGetActiveDeviceObject11())
+                d11_st->Clear(D3DCLEAR_STENCIL, 0, 1.0f, 0);
+            else if (IDirect3DDeviceX* dev_st = dev_obj->GetDevice())
+                dev_st->Clear(0, NULL, D3DCLEAR_STENCIL, 0, 1.0f, 0);
 
             dev_obj->SetRenderState(D3DRS_STENCILENABLE, TRUE);
             dev_obj->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);

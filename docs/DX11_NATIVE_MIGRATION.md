@@ -37,8 +37,8 @@ Native API work uses **`lwD3D11NativeContext`** as the long-term home for device
 
 Port or guard every `GetDevice()` site (~75 references in `source/src`). Priority order:
 
-1. **Crash / map enter** — `Scene.cpp` (EffBox, PathBox, SmallMap), `SMallMap.cpp`
-2. **Resources** — `lwResourceMgr.cpp` (`D3DXCreateTextureFromFileEx` → 11 or DDS)
+1. **Crash / map enter** — `Scene.cpp` (EffBox, PathBox, SmallMap), `SMallMap.cpp` *(in progress: `MP_LegacyD3D9DeviceOpt()`, PathBox/EffBox null dev_obj)*
+2. **Resources** — `lwResourceMgr.cpp` (`D3DXCreateTextureFromFileEx` → 11 or DDS) *(stencil clear + file-load `#else` branch)*
 3. **UI** — `UIRender.cpp`, `BitmapFont*.cpp`, `GameAppInit.cpp`
 4. **Legacy VS** — `lwxRenderCtrVS.cpp`, `lwShaderMgr.cpp` (DX9 only paths `#if !MINDPOWER_DX11_ONLY`)
 5. **Effects / sky** — `EffectFile.cpp`, `MPMap` sky dome, `MPResManger.cpp`

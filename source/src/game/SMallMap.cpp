@@ -15,6 +15,7 @@
 #include "UIBoxForm.h"
 #include "lwD3D11Texture.h"
 #include "lwD3D11Gaps.h"
+#include "MindPowerRenderConfig.h"
 
 CMaskData* CMaskData::g_MaskData = NULL;
 
@@ -1446,8 +1447,10 @@ void CCharacter2D::Render() {
 
 	if (d11)
 		d11->SetViewPort(&vp);
-	else
-		g_Render.GetDevice()->SetViewport(&vp);
+#if MINDPOWER_USE_D3D9_DEVICE
+	else if (IDirect3DDeviceX* dev = g_Render.GetDevice())
+		dev->SetViewport(&vp);
+#endif
 }
 
 void CCharacter2D::LoadCha(DWORD dwID, bool IsMonster) {

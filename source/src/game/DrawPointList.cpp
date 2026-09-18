@@ -4,6 +4,7 @@
 #include "GameApp.h"
 #include "Scene.h"
 #include "UIFont.h"
+#include "MindPowerGameDevice.h"
 
 using namespace std;
 
@@ -81,7 +82,7 @@ void CDrawPointList::OnLostDevice() {
 }
 
 void CDrawPointList::OnResetDevice() {
-	CPathBox.Create(g_Render.GetDevice(), 0.25f);
+	CPathBox.Create(MP_LegacyD3D9DeviceOpt(), 0.25f);
 	CPathBox.Show(TRUE);
 	CPathBox.setWriteFrame(TRUE);
 	CPathBox.ShowLine(TRUE);
