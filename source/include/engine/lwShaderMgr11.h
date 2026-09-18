@@ -4,13 +4,6 @@
 #include "lwHeader.h"
 #include "lwDirectX.h"
 
-struct ID3D11Device;
-struct ID3D11DeviceContext;
-struct ID3D11VertexShader;
-struct ID3D11PixelShader;
-struct ID3D11Buffer;
-struct ID3D11InputLayout;
-
 class lwDeviceObject11;
 
 LW_BEGIN

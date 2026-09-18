@@ -4,9 +4,6 @@
 #include "lwHeader.h"
 #include "lwDirectX.h"
 
-struct ID3D11Device;
-struct ID3D11DeviceContext;
-
 LW_BEGIN
 
 MINDPOWER_API LW_RESULT lwD3D11BlitInit(ID3D11Device* device, ID3D11DeviceContext* context, UINT width, UINT height);

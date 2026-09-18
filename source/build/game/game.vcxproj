@@ -138,7 +138,7 @@
     </ClCompile>
     <Link>
       <RegisterOutput>false</RegisterOutput>
-      <AdditionalDependencies>AudioSDL.lib;MindPower3D_D9R.lib;d3d9.lib;d3d11.lib;dxgi.lib;lua51.lib;CaLua.lib;Ws2_32.lib;botan.lib;LIBDBC.lib;util.lib;Common.lib;dxguid.lib;atls.lib;Status.lib;SDL.lib;SDL_mixer.lib;SDLmain.lib;ddraw.lib;Psapi.lib;discord-rpc.lib;legacy_stdio_definitions.lib;ICUHelper.lib;icudt.lib;icuuc.lib;icuin.lib;EncLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AudioSDL.lib;MindPower3D_D11R.lib;d3d9.lib;d3d11.lib;dxgi.lib;lua51.lib;CaLua.lib;Ws2_32.lib;botan.lib;LIBDBC.lib;util.lib;Common.lib;dxguid.lib;atls.lib;Status.lib;SDL.lib;SDL_mixer.lib;SDLmain.lib;ddraw.lib;Psapi.lib;discord-rpc.lib;legacy_stdio_definitions.lib;ICUHelper.lib;icudt.lib;icuuc.lib;icuin.lib;EncLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>

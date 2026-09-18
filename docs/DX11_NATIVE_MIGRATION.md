@@ -79,13 +79,17 @@ Exit criterion met: Release|x64 links without `d3dx9.lib`; gameplay smoke passes
 
 **Smoke (2026-09-19):** Phase 3 pass bundles + additive/transparent/character focus passed. VFX re-smoke (combat skills, death particles, ground shade, weapon lit, quest) passed.
 
-Stage 0–2 combiner ops still translate per draw (not full DX9 TSS). D3DX math types stay until Phase 4.
+Stage 0–2 combiner ops still translate per draw (not full DX9 TSS). D3DXVECTOR/MATRIX typedefs live in `lwDirectXShared.h`; DirectXMath swap is still optional later.
 
-### Phase 4 — Rename and re-home types
+### Phase 4 — Rename and re-home types — **complete**
 
-- Split `lwDirectX.h`: shared math/viewport vs D3D9 legacy (behind `#if !MINDPOWER_DX11_ONLY`)
-- Public engine headers expose `d3d11.h` types where needed
-- Rename lib output `MindPower3D_D11R.lib` (optional, cosmetic)
+- [x] Split `lwDirectX.h`: shared math/viewport/COM typedefs in `lwDirectXShared.h`; public headers include `d3d11.h`
+- [x] D3D9 device lib pragma (`d3d9.lib`) only when `MINDPOWER_USE_D3D9_DEVICE`; `d3dx9.lib` stays for math until DirectXMath
+- [x] Release|x64 lib output `MindPower3D_D11R.lib` (Debug dual-build stays `MindPower3D_D9D.lib`)
+
+Create*X device macros stay so remaining D3D9 `.cpp` still compiles; they are unused on the DX11-only play path.
+
+**Smoke (2026-09-19):** login → world after header/lib rename passed.
 
 ### Phase 5 — Delete DX9 backend
 

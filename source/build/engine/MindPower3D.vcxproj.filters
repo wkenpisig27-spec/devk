@@ -210,6 +210,7 @@
     <ClInclude Include="..\..\include\engine\lwClassDecl.h" />
     <ClInclude Include="..\..\include\engine\lwD3D.h" />
     <ClInclude Include="..\..\include\engine\lwDirectX.h" />
+    <ClInclude Include="..\..\include\engine\lwDirectXShared.h" />
     <ClInclude Include="..\..\include\engine\lwErrorCode.h" />
     <ClInclude Include="..\..\include\engine\lwFrontAPI.h" />
     <ClInclude Include="..\..\include\engine\lwGuidObj.h" />

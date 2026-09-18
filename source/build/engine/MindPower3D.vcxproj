@@ -51,7 +51,7 @@
     <OutDir>$(ProjectDir)..\..\lib\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)..\..\tmp\engine\$(Configuration)\</IntDir>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <TargetName>$(ProjectName)_D9R</TargetName>
+    <TargetName>$(ProjectName)_D11R</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -108,6 +108,7 @@
     <ClInclude Include="..\..\include\engine\lwClassDecl.h" />
     <ClInclude Include="..\..\include\engine\lwD3D.h" />
     <ClInclude Include="..\..\include\engine\lwDirectX.h" />
+    <ClInclude Include="..\..\include\engine\lwDirectXShared.h" />
     <ClInclude Include="..\..\include\engine\lwErrorCode.h" />
     <ClInclude Include="..\..\include\engine\lwFrontAPI.h" />
     <ClInclude Include="..\..\include\engine\lwGuidObj.h" />

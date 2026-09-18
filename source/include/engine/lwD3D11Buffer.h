@@ -4,10 +4,6 @@
 #include "lwHeader.h"
 #include "lwDirectX.h"
 
-struct ID3D11Device;
-struct ID3D11DeviceContext;
-struct ID3D11Buffer;
-
 LW_BEGIN
 
 class lwD3D11VertexBuffer : public IDirect3DVertexBuffer9

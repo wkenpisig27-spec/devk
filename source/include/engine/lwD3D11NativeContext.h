@@ -2,10 +2,7 @@
 
 #include "MindPowerAPI.h"
 #include "MindPowerRenderConfig.h"
-
-struct ID3D11Device;
-struct ID3D11DeviceContext;
-struct IDXGISwapChain;
+#include "lwDirectX.h"
 
 // Long-term native D3D11 access point (Phase 0+). Prefer this over
 // IDirect3DDevice9 / GetDevice() in new code on feature/dx11-native.

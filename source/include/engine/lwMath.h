@@ -15,7 +15,7 @@
 
 #ifdef LW_USE_DXMATH_LIB
 
-#include "lwDirectX.h"
+#include "lwDirectXShared.h"
 
 // dll-interface to be used by clients
 #pragma warning(disable : 4251)

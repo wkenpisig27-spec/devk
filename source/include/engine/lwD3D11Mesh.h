@@ -5,9 +5,6 @@
 #include "lwDirectX.h"
 #include "lwMath.h"
 
-struct ID3D11Device;
-struct ID3D11DeviceContext;
-
 LW_BEGIN
 
 class lwDeviceObject11;

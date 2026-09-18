@@ -7,8 +7,8 @@
 //   * Backend forced to DX11 at runtime
 //   * Long-term: remove dual-backend code when Phase 5 completes
 //
-// MINDPOWER_NATIVE_DX11_API — future gate for Phase 3+ (direct ID3D11* in subsystems).
-//   Not enabled yet; reserved so we can stage FF-emulation removal.
+// MINDPOWER_NATIVE_DX11_API — Phase 4+ gate for subsystems that include d3d11.h
+//   via lwDirectX.h. Reserved; do not require it for existing DeviceObject11 paths.
 
 #if defined(MINDPOWER_DX11_ONLY)
 #define MINDPOWER_USE_D3D9_DEVICE 0

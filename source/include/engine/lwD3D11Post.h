@@ -4,12 +4,6 @@
 #include "lwHeader.h"
 #include "lwDirectX.h"
 
-struct ID3D11Device;
-struct ID3D11DeviceContext;
-struct ID3D11RenderTargetView;
-struct ID3D11DepthStencilView;
-struct IDXGISwapChain;
-
 LW_BEGIN
 
 // DX11 scene post: HDR MSAA color, highlight-only tone, bloom, unsharp.

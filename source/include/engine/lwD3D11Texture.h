@@ -4,12 +4,6 @@
 #include "lwHeader.h"
 #include "lwDirectX.h"
 
-struct ID3D11Device;
-struct ID3D11Texture2D;
-struct ID3D11ShaderResourceView;
-struct ID3D11RenderTargetView;
-struct ID3D11DepthStencilView;
-
 LW_BEGIN
 
 // COM wrapper so existing IDirect3DTexture9* / lwITex paths can hold a D3D11 SRV.
