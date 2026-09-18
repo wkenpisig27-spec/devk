@@ -653,6 +653,57 @@ void lwD3D11MeshHintAdditive(int enabled)
     s_mesh.hint_additive = enabled ? 1 : 0;
 }
 
+void lwD3D11MeshSetAlpha(int enabled)
+{
+    s_draw.alpha = enabled ? 1 : 0;
+}
+
+void lwD3D11MeshSetBlend(DWORD src, DWORD dest)
+{
+    if (src && src != 0xffffffff)
+        s_draw.src = src;
+    if (dest && dest != 0xffffffff)
+        s_draw.dest = dest;
+}
+
+void lwD3D11MeshSetCombiner(int stage, DWORD op)
+{
+    if (stage >= 0 && stage <= 2)
+        s_draw.cop[stage] = op;
+}
+
+void lwD3D11MeshSetCombinerArgs(int stage, DWORD op, DWORD arg1, DWORD arg2)
+{
+    if (stage < 0 || stage > 2)
+        return;
+    s_draw.cop[stage] = op;
+    s_draw.ca1[stage] = arg1;
+    s_draw.ca2[stage] = arg2;
+}
+
+void lwD3D11MeshSetLighting(int enabled, DWORD ambient)
+{
+    s_draw.lighting = enabled ? 1 : 0;
+    if (ambient)
+        s_draw.ambient = ambient;
+}
+
+void lwD3D11MeshSetAlphaTest(int enabled)
+{
+    s_draw.atest = enabled ? 1 : 0;
+}
+
+void lwD3D11MeshSetTFactor(DWORD tf)
+{
+    s_draw.tfactor = tf;
+}
+
+void lwD3D11MeshSetUvXform(int stage, int enabled)
+{
+    if (stage >= 0 && stage <= 2)
+        s_draw.ttff[stage] = enabled ? D3DTTFF_COUNT2 : D3DTTFF_DISABLE;
+}
+
 void lwD3D11MeshNoteRs(DWORD state, DWORD value)
 {
     switch (state)

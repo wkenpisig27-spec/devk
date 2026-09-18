@@ -19,6 +19,7 @@
 #include "lwRenderBackend.h"
 #include "lwDeviceObject11.h"
 #include "lwD3D11NativeContext.h"
+#include "lwD3D11Mesh.h"
 
 #define USE_MANAGED_RES
 
@@ -534,6 +535,11 @@ inline void MPRender::LightEnable(DWORD id, DWORD flag)
 
 inline void MPRender::EnableAlpha(BOOL bEnable)
 {
+	if (lwIsDx11Active())
+	{
+		lwD3D11MeshSetAlpha(bEnable ? 1 : 0);
+		return;
+	}
 #if(defined USE_MANAGED_RES)
     _IMgr.dev_obj->SetRenderState(D3DRS_ALPHABLENDENABLE, bEnable);
 #else

@@ -1605,7 +1605,7 @@ LW_RESULT lwMesh::BeginSet()
         if (MeshRsaDestIsAdditive(&_rsa_0))
         {
             lwD3D11MeshHintAdditive(1);
-            dev_obj->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+            lwD3D11MeshSetAlpha(1);
         }
         else
         {
@@ -2242,11 +2242,18 @@ LW_RESULT lwMtlTexAgent::BeginSet()
         _rsa_0.SetValue(id[1], v[1]);
         // RSA may not contain SRC/DEST (FindState fails). Push the additive
         // pair into the device cache so DX11 mesh OM can honor it.
-        dev_obj->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-        dev_obj->SetRenderState(D3DRS_SRCBLEND, v[0]);
-        dev_obj->SetRenderState(D3DRS_DESTBLEND, v[1]);
         if (lwIsDx11Active())
+        {
+            lwD3D11MeshSetAlpha(1);
+            lwD3D11MeshSetBlend(v[0], v[1]);
             lwD3D11MeshHintAdditive(1);
+        }
+        else
+        {
+            dev_obj->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+            dev_obj->SetRenderState(D3DRS_SRCBLEND, v[0]);
+            dev_obj->SetRenderState(D3DRS_DESTBLEND, v[1]);
+        }
     }
 
     // check opacity flag
@@ -2342,7 +2349,7 @@ LW_RESULT lwMtlTexAgent::BeginSet()
         if (lwIsDx11Active() && MeshRsaDestIsAdditive(&_rsa_0))
         {
             lwD3D11MeshHintAdditive(1);
-            dev_obj->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+            lwD3D11MeshSetAlpha(1);
         }
 
     }

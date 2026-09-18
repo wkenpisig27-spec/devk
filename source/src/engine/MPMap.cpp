@@ -293,9 +293,14 @@ void MPMap::Render()
 	
 	g_Render.SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);  
 
-	g_Render.SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);  
-	g_Render.SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_DIFFUSE);  
-	g_Render.SetTextureStageState(1, D3DTSS_COLOROP,   D3DTOP_MODULATE);
+	if (lwIsDx11Active())
+		lwD3D11MeshSetCombinerArgs(1, D3DTOP_MODULATE, D3DTA_TEXTURE, D3DTA_DIFFUSE);
+	else
+	{
+		g_Render.SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+		g_Render.SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+		g_Render.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	}
 
 	// Resize / TEXUV / shade leave D3DTS_TEXTURE0 + TEXTURETRANSFORMFLAGS on the device.
 	// Terrain never sets those itself, so an invalid DX11 cache after ResizeBuffers
@@ -410,7 +415,10 @@ void MPMap::Render()
 	
     g_Render.SetRenderState(D3DRS_CLIPPING, TRUE);
 
-    g_Render.SetTextureStageState(1, D3DTSS_COLOROP,   D3DTOP_DISABLE);  
+	if (lwIsDx11Active())
+		lwD3D11MeshSetCombiner(1, D3DTOP_DISABLE);
+	else
+		g_Render.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 
     m_dwTerrainRenderTime = t.End();
 
@@ -473,9 +481,14 @@ void MPMap::RenderSmMap()
 	g_Render.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 	g_Render.SetTextureStageState(0, D3DTSS_COLOROP,   D3DTOP_MODULATE);  
 	
-	g_Render.SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);  
-	g_Render.SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_DIFFUSE);  
-	g_Render.SetTextureStageState(1, D3DTSS_COLOROP,   D3DTOP_MODULATE);  
+	if (lwIsDx11Active())
+		lwD3D11MeshSetCombinerArgs(1, D3DTOP_MODULATE, D3DTA_TEXTURE, D3DTA_DIFFUSE);
+	else
+	{
+		g_Render.SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+		g_Render.SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+		g_Render.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	}
 	
 	
 	//g_Render.SetTextureStageState( 0, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
@@ -1496,7 +1509,10 @@ void MPMap::_RenderVB(BOOL bWireframe)
             //g_Render.SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_MIRROR);
 			g_Render.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_MIRROR);
 			g_Render.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_MIRROR);
-            g_Render.SetTextureStageState(1, D3DTSS_COLOROP,   D3DTOP_MODULATE);
+			if (lwIsDx11Active())
+				lwD3D11MeshSetCombiner(1, D3DTOP_MODULATE);
+			else
+				g_Render.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_MODULATE);
             g_Render.SetTexture(1, GetTextureByID(GetTerrainTextureID(pGroup->btTextureID)));
 	    }
         g_Render.DrawPrimitive(D3DPT_TRIANGLELIST, nStartVertex, pGroup->sTileCnt * 2);

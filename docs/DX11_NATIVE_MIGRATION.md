@@ -7,7 +7,7 @@ Goal: **true D3D11** end-to-end — no runtime D3D9 device, no long-term relianc
 | Layer | Today (DX11 play path) | Target (native) |
 | --- | --- | --- |
 | Device | `lwD3D11NativeContext` (`ID3D11Device` / context / swapchain); `GetDevice()` is a D3D9 leftover that returns NULL | same (PSO later) |
-| State | Pass objects (`kMeshPass` / `kEffPass`) + `MeshNativeDraw` notes | PSO + root signature / explicit CBs per pass |
+| State | Pass objects + native `SetAlpha`/`SetBlend`/`SetCombiner` writers | PSO + root signature / explicit CBs per pass |
 | Shaders | SM4 HLSL + FF mesh shader + ShaderMgr11 VS (`.hlsl` keys) | same |
 | Loaders | DDS/BMP/TGA + GDI+ (`lwD3D11CreateTextureFromMemory`) | same (DirectXTex optional) |
 | Effects | Compiled `shader\\eff.hlsl` (tex * diffuse/TFACTOR); OM still from `Pass()` | same |
@@ -130,7 +130,12 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 Highest-value leftover vs the native target table:
 
-1. Leftover D3D9 *language*: callers still `SetRenderState` / TSS; `DrawCommon` now reads `MeshNativeDraw` (hair alpha, dest-blend, dual-tex, lights, UV, alpha-test, sampler). Effects use `kEffPass`.
+1. Leftover D3D9 *language*: some materials still apply RSA atoms via `SetRenderState` (hair). Pass begin, `EnableAlpha`, additive materials, and terrain combiners use native setters.
+
+### native write APIs — **complete**
+
+- `EnableAlpha`, `RenderStateMgr` pass begin, additive materials, and terrain splat combiners call `lwD3D11MeshSetAlpha` / `SetBlend` / `SetCombiner` instead of D3DRS/TSS.
+- DX11 skips character/scene/transp RSA begin/end.
 
 ### native draw notes — **complete**
 
