@@ -51,6 +51,10 @@ static void ResetWeaponGlowStageState() {
 				g_Render.SetTextureStageStateForced(s, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
 			}
 		}
+		g_Render.SetRenderStateForced(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		g_Render.SetRenderStateForced(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+		g_Render.SetRenderStateForced(D3DRS_ALPHATESTENABLE, FALSE);
+		g_Render.SetRenderStateForced(D3DRS_TEXTUREFACTOR, 0xffffffff);
 	}
 }
 

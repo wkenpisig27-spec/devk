@@ -207,8 +207,18 @@ HRESULT RenderStateMgr::BeginSceneItem() {
 	return 0L;
 }
 HRESULT RenderStateMgr::BeginTerrain() {
-	if (lwIsDx11Active())
+	if (lwIsDx11Active()) {
 		lwD3D11MeshSetTerrain(1);
+		if (_dev_obj) {
+			_dev_obj->SetTexture(1, 0);
+			_dev_obj->SetTexture(2, 0);
+			_dev_obj->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+			_dev_obj->SetTextureStageState(2, D3DTSS_COLOROP, D3DTOP_DISABLE);
+			_dev_obj->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+			_dev_obj->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+			_dev_obj->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+		}
+	}
 	return 0L;
 }
 HRESULT RenderStateMgr::BeginTranspObject() {
@@ -221,8 +231,25 @@ HRESULT RenderStateMgr::BeginTranspObject() {
 	return 0L;
 }
 HRESULT RenderStateMgr::BeginVfx() {
-	if (lwIsDx11Active())
+	if (lwIsDx11Active()) {
 		lwD3D11MeshSetVfx(1);
+		if (_dev_obj) {
+			_dev_obj->SetTexture(1, 0);
+			_dev_obj->SetTexture(2, 0);
+			_dev_obj->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+			_dev_obj->SetTextureStageState(2, D3DTSS_COLOROP, D3DTOP_DISABLE);
+			_dev_obj->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+			_dev_obj->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+			_dev_obj->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+			_dev_obj->SetRenderState(D3DRS_TEXTUREFACTOR, 0xffffffff);
+			lwMatrix44 tex_id;
+			lwMatrix44Identity(&tex_id);
+			_dev_obj->SetTransform(D3DTS_TEXTURE0, &tex_id);
+			_dev_obj->SetTransform(D3DTS_TEXTURE1, &tex_id);
+			_dev_obj->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+			_dev_obj->SetTextureStageState(1, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+		}
+	}
 	return 0L;
 }
 

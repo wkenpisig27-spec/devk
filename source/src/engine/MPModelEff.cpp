@@ -1442,6 +1442,14 @@ void	CMPStrip::Render()
 	_pCEffFile->Pass(0);
 	m_pDev->SetRenderState( D3DRS_SRCBLEND,_eSrcBlend );
 	m_pDev->SetRenderState( D3DRS_DESTBLEND,_eDestBlend);
+	if (lwIsDx11Active())
+	{
+		// t3 uses TFACTOR; the strip fade lives in vertex diffuse alpha.
+		m_pDev->SetTextureStageStateForced(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+		m_pDev->SetTextureStageStateForced(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+		m_pDev->SetTextureStageStateForced(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+		m_pDev->SetTexture(1, NULL);
+	}
 	D3DXMATRIX mat;
 	D3DXMatrixIdentity(&mat);
 

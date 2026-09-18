@@ -47,10 +47,11 @@ During character shadow map generation, `lwDeviceObject11` sets `_bShadowPass` a
 
 1. **Tag passes** — mesh hooks for scene object + transparent (alongside existing character/sea/visual). **Done.**
 2. **Per-subsystem inventory** — `docs/DX11_PHASE3_RS_INVENTORY.txt` (SceneRender, MPMap, VFX, UI, minimap). **Done.**
-3. **Native PSO bundles** — `ResolveMeshOutputMerger` in `lwD3D11Mesh.cpp`: character/scene-object/transparent/terrain/vfx. Cull/MSAA still from cache; VFX/additive still read D3DRS blend + Z. **Done.**
+3. **Native PSO bundles** — `ResolveMeshOutputMerger` in `lwD3D11Mesh.cpp`: character/scene-object/transparent/terrain/vfx/sea via `kMeshPass`. Cull/MSAA still from cache; character hair alpha and VFX additive still read limited D3DRS. **Done.**
 4. **Retire unused cache slots** — `#if !MINDPOWER_USE_D3D9_DEVICE` no-op for unused RS (fog table, wrap, vertex blend, material sources, …) and TSS (stages ≥3, bump, texcoord index). Forced RS/TSS still write the cache. **Done.**
+5. **Pass-state combiner** — terrain splat is tex1 + stage1 COLOROP → `dual=1` (alpha from `EnableAlpha`); VFX still decodes TSS after `BeginVfx` clears leftover tex1. Character/scene/transp/default still decode stage 1–2 TSS (weapon dual-tex). **Done.**
 
-Remaining FF: stage 0–2 combiner ops still translated per draw; D3DX math types remain until Phase 4/DirectXMath.
+Remaining FF: UV/TFACTOR/alpha-test still packed per draw from cache; character dual-tex still reads TSS. D3DX math names remain (`lwD3DXCompat.h`).
 
 ## Relation to Phase 2
 

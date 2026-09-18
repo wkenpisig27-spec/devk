@@ -66,7 +66,7 @@ Exit criterion met: no unguarded `GetDevice()` in the DX11-only compile; dual-bu
 
 Exit criterion met: Release|x64 links without `d3dx9.lib`; gameplay smoke passes.
 
-### Phase 3 — Shrink FF emulation — **complete** (combiner subset remains)
+### Phase 3 — Shrink FF emulation — **complete**
 
 - [x] Pass contract doc — `docs/DX11_PHASE3_FF_AUDIT.md` (RS/TSS consumed by `lwD3D11Mesh`)
 - [x] Tag scene-object + transparent passes — `RenderStateMgr` → `lwD3D11MeshSetSceneObject` / `SetTranspObject`
@@ -79,7 +79,7 @@ Exit criterion met: Release|x64 links without `d3dx9.lib`; gameplay smoke passes
 
 **Smoke (2026-09-19):** Phase 3 pass bundles + additive/transparent/character focus passed. VFX re-smoke (combat skills, death particles, ground shade, weapon lit, quest) passed.
 
-Stage 0–2 combiner ops still translate per draw (not full DX9 TSS). Math is DirectXMath behind D3DX names (`lwD3DXCompat.h`).
+Stage 0–2 combiners still exist in compiled HLSL (`CombineTss`). Character/scene/transp/default decode TSS for dual-tex; VFX/terrain/sea bake combiner from the pass. Math is DirectXMath behind D3DX names (`lwD3DXCompat.h`).
 
 ### Phase 4 — Rename and re-home types — **complete**
 
@@ -113,13 +113,24 @@ Create*X device macros stay so remaining D3D9 `.cpp` still compiles; they are un
 
 Debug dual-build still uses d3d9.lib + d3dx9.lib.
 
-## Remaining (after Post-5)
+### Pass state — **code complete** (await smoke)
+
+`kMeshPass` in `lwD3D11Mesh.cpp` supplies OM defaults per tagged pass (character / scene / transp / terrain / vfx / sea). Cache is only consulted for cull/MSAA and documented intra-pass variation:
+
+- character/scene: leftover `DESTBLEND_ONE` ignored; hair/cape still enable alpha via `ALPHABLENDENABLE`
+- VFX: leftover `ALPHABLENDENABLE=0` still blends; each effect may still set src/dest. Combiner still decodes TSS (weapon/skill dual-tex). `BeginVfx` / `ResetWeaponGlowStageState` clear leftover tex1/tex2, UV, additive blend, TFACTOR, and alpha-test. Sword trail strips fade via vertex diffuse alpha.
+- terrain: leftover particle dest-blend ignored, but splat `EnableAlpha` still turns on standard alpha (`CACHE_BLEND_ALPHA`). Splat is tex1 SRV + stage1 COLOROP → `dual=1` (not leftover COLOROP alone, and not `dual=2` mask multiply). `BeginTerrain` clears leftover tex1/tex2.
+
+UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character dual-tex still decodes TSS (`dual=2` vs `3` vs `7`).
+
+**Smoke:** character, terrain, transparent props, combat VFX, weapon lit — not only login → world.
+
+## Remaining (after pass state)
 
 Highest-value leftover vs the native target table:
 
-1. **Pass state** — stop packing D3D9 RS/TSS into CBs every draw; bake OM + combiner into pass objects (PSO-style).
-2. **Device handle** — make `lwD3D11NativeContext` the play-path API; stop holding `IDirect3DDevice9*` that is always null on Release.
-3. Optional later: rename D3DX* math to XM*, HLSL `eff.fx` instead of FF technique tables, delete unused `.vsh` assets. Do not delete D3D9 sources while Debug dual-build still needs them.
+1. **Device handle** — make `lwD3D11NativeContext` the play-path API; stop holding `IDirect3DDevice9*` that is always null on Release.
+2. Optional later: rename D3DX* math to XM*, HLSL `eff.fx` instead of FF technique tables, delete unused `.vsh` assets. Do not delete D3D9 sources while Debug dual-build still needs them.
 
 ## Linux / DXVK
 
