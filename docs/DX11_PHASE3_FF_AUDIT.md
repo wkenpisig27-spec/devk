@@ -14,6 +14,7 @@ Goal of Phase 3: classify callers by **pass**, then replace cache-and-translate 
 | Transparent | `BeginTranspObject` / `EndTranspObject` | `lwD3D11MeshSetTranspObject(1/0)` | Alpha foliage, billboards |
 | Terrain | `BeginTerrain` / `EndTerrain` (`SceneRender` around `MPMap::Render`) | `lwD3D11MeshSetTerrain(1/0)` | Land tiles, splats |
 | Sea | `MPMap::RenderSea` | `lwD3D11MeshSetSea(1/0)` | Ocean mesh |
+| VFX | `BeginVfx` / `EndVfx` (`SceneRender` around shade/particles/skills) | `lwD3D11MeshSetVfx(1/0)` | Soft effects, particles, shade maps |
 | Visual tuning | `GameConfig` / `SceneRender` | `lwD3D11MeshSetVisual(...)` | Fog, stylized lit, water |
 
 Legacy RSA atom sets (`_rsa_cha`, `_rsa_sceneobj`, …) still push D3D9 enums into the cache; on DX11 they remain the **compatibility layer** until each pass gets a dedicated PSO.
@@ -44,10 +45,12 @@ During character shadow map generation, `lwDeviceObject11` sets `_bShadowPass` a
 
 ## Phase 3 work order
 
-1. **Tag passes** — mesh hooks for scene object + transparent (alongside existing character/sea/visual).
-2. **Per-subsystem inventory** — `docs/DX11_PHASE3_RS_INVENTORY.txt` (SceneRender, MPMap, VFX, UI, minimap).
-3. **Native PSO bundles** — `ResolveMeshOutputMerger` in `lwD3D11Mesh.cpp`: character/scene-object/transparent passes use fixed depth/blend defaults; cull/MSAA still from cache; VFX overrides (Z off, additive blend) still read D3DRS.
-4. **Retire unused cache slots** — `#if MINDPOWER_DX11_ONLY` no-op for RS/TSS never read on native path (after smoke per subsystem).
+1. **Tag passes** — mesh hooks for scene object + transparent (alongside existing character/sea/visual). **Done.**
+2. **Per-subsystem inventory** — `docs/DX11_PHASE3_RS_INVENTORY.txt` (SceneRender, MPMap, VFX, UI, minimap). **Done.**
+3. **Native PSO bundles** — `ResolveMeshOutputMerger` in `lwD3D11Mesh.cpp`: character/scene-object/transparent/terrain/vfx. Cull/MSAA still from cache; VFX/additive still read D3DRS blend + Z. **Done.**
+4. **Retire unused cache slots** — `#if !MINDPOWER_USE_D3D9_DEVICE` no-op for unused RS (fog table, wrap, vertex blend, material sources, …) and TSS (stages ≥3, bump, texcoord index). Forced RS/TSS still write the cache. **Done.**
+
+Remaining FF: stage 0–2 combiner ops still translated per draw; D3DX math types remain until Phase 4/DirectXMath.
 
 ## Relation to Phase 2
 

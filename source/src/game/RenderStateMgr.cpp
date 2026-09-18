@@ -220,6 +220,11 @@ HRESULT RenderStateMgr::BeginTranspObject() {
 		lwD3D11MeshSetTranspObject(1);
 	return 0L;
 }
+HRESULT RenderStateMgr::BeginVfx() {
+	if (lwIsDx11Active())
+		lwD3D11MeshSetVfx(1);
+	return 0L;
+}
 
 HRESULT RenderStateMgr::EndScene() {
 	if (_rsa_scene) {
@@ -275,5 +280,10 @@ HRESULT RenderStateMgr::EndTranspObject() {
 	}
 	if (lwIsDx11Active())
 		lwD3D11MeshSetTranspObject(0);
+	return 0L;
+}
+HRESULT RenderStateMgr::EndVfx() {
+	if (lwIsDx11Active())
+		lwD3D11MeshSetVfx(0);
 	return 0L;
 }

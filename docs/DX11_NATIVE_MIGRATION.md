@@ -66,7 +66,7 @@ Exit criterion met: no unguarded `GetDevice()` in the DX11-only compile; dual-bu
 
 Exit criterion met: Release|x64 links without `d3dx9.lib`; gameplay smoke passes.
 
-### Phase 3 — Shrink FF emulation *(in progress)*
+### Phase 3 — Shrink FF emulation — **complete** (combiner subset remains)
 
 - [x] Pass contract doc — `docs/DX11_PHASE3_FF_AUDIT.md` (RS/TSS consumed by `lwD3D11Mesh`)
 - [x] Tag scene-object + transparent passes — `RenderStateMgr` → `lwD3D11MeshSetSceneObject` / `SetTranspObject`
@@ -74,8 +74,12 @@ Exit criterion met: Release|x64 links without `d3dx9.lib`; gameplay smoke passes
 - [x] Native OM bundles (character / scene-object / transparent) — `ResolveMeshOutputMerger` in `lwD3D11Mesh.cpp`
 - [x] Terrain pass — `SceneRender` → `BeginTerrain` / `EndTerrain`, `lwD3D11MeshSetTerrain`, OM bundle + no stylized cel on land
 - [x] DX11-only no-op cache for legacy RS (shade/dither/fog table/clip/fill) in `lwDeviceObject11::SetRenderState`
+- [x] VFX pass — `BeginVfx` / `EndVfx` around shade maps, particles, skill effects; unlit + depth-read OM
+- [x] Unused TSS no-ops (stages ≥3, bump, texcoord index) — forced TSS still cached
 
-**Smoke (2026-09-19):** Phase 3 pass bundles + additive/transparent/character focus passed.
+**Smoke (2026-09-19):** Phase 3 pass bundles + additive/transparent/character focus passed. VFX re-smoke (combat skills, death particles, ground shade, weapon lit, quest) passed.
+
+Stage 0–2 combiner ops still translate per draw (not full DX9 TSS). D3DX math types stay until Phase 4.
 
 ### Phase 4 — Rename and re-home types
 

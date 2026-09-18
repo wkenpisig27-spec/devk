@@ -54,8 +54,12 @@
   scene_object: same OM as character; stylized CB via scene_object flag (future)
   transparent : depth_read, blend SRCALPHA/INVSRCALPHA; cache overrides for additive/ZWRITE
   terrain     : depth_write ON, blend SRCALPHA/INVSRCALPHA; no stylized cel (look.w)
+  vfx         : depth_read (write off unless opaque tech), blend from cache; unlit, no cel
   default     : full cache translation (untagged draws)
 
-## Next: no-op candidates on DX11-only (after bundle coverage)
-  D3DRS_SHADEMODE, D3DRS_DITHERENABLE, D3DRS_SPECULARENABLE, D3DRS_COLORVERTEX,
-  D3DRS_FOGENABLE (when visual fog CB used), D3DRS_EDGEANTIALIAS — cache-only on mesh path
+## Unused cache (DX11-only no-ops)
+  RS: SHADEMODE, DITHER, SPECULAR, COLORVERTEX, FOG*, CLIPPING, FILLMODE, LASTPIXEL,
+      LOCALVIEWER, NORMALIZENORMALS, *MATERIALSOURCE, VERTEXBLEND, WRAP0-7,
+      ANTIALIASEDLINEENABLE, DEPTHBIAS / SLOPESCALEDEPTHBIAS
+  TSS: stages >= 3; bump env; TEXCOORDINDEX; COLORARG0 / ALPHAARG0 / RESULTARG / CONSTANT
+  Forced SetRenderState / SetTextureStageState still write the cache (VFX + markers).

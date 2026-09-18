@@ -882,6 +882,7 @@ void CGameScene::_Render() {
 		// Guarantee effects start from clean texture-stage state (slimepirates).
 		ResetWeaponGlowStageState();
 
+		rsm->BeginVfx();
 		try {
 			RenderEffectMap();
 		} catch (...) {
@@ -893,6 +894,7 @@ void CGameScene::_Render() {
 			_pcPugMgr->Render();
 
 		ResMgr.RestoreEffect();
+		rsm->EndVfx();
 
 		g_pGameApp->m_dwRenderEffectTime = mpt.End();
 	}
@@ -922,6 +924,7 @@ void CGameScene::_Render() {
 		// Particles (monster death ghost.par, etc.) — keep MSAA AA off.
 		g_Render.SetRenderStateForced(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
 
+		rsm->BeginVfx();
 		ResMgr.Render();
 
 		// try
@@ -934,6 +937,7 @@ void CGameScene::_Render() {
 		}
 
 		ResMgr.RestoreEffect();
+		rsm->EndVfx();
 
 		g_pGameApp->m_dwRenderEffectTime += mpt.End();
 	}
@@ -988,10 +992,15 @@ void CGameScene::RenderEffectMap() {
 }
 
 void CGameScene::_RenderUpSeaShade() {
+	RenderStateMgr* rsm = g_pGameApp->GetRenderStateMgr();
+	if (rsm)
+		rsm->BeginVfx();
 	for (int n = 0; n < _vecTempShade.size(); ++n) {
 		_pShadeArray[*_vecTempShade[n]].Render();
 	}
 	_vecTempShade.clear();
+	if (rsm)
+		rsm->EndVfx();
 }
 
 void CGameScene::RenderSMallMap() {

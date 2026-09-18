@@ -33,10 +33,12 @@ public:
 	HRESULT BeginSceneItem();
 	HRESULT BeginTerrain();
 	HRESULT BeginTranspObject();
+	HRESULT BeginVfx();
 	HRESULT EndScene();
 	HRESULT EndCharacter();
 	HRESULT EndSceneObject();
 	HRESULT EndSceneItem();
 	HRESULT EndTerrain();
 	HRESULT EndTranspObject();
+	HRESULT EndVfx();
 };

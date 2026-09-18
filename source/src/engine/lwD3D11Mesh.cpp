@@ -251,6 +251,7 @@ struct MeshState
     int scene_object;
     int transp_object;
     int terrain;
+    int vfx;
     int fog_on;
     int height_fog;
     int sea;
@@ -584,6 +585,11 @@ void lwD3D11MeshSetTerrain(int enabled)
     s_mesh.terrain = enabled ? 1 : 0;
 }
 
+void lwD3D11MeshSetVfx(int enabled)
+{
+    s_mesh.vfx = enabled ? 1 : 0;
+}
+
 int lwD3D11MeshWaterEnhance()
 {
     return s_mesh.water_enhance ? 1 : 0;
@@ -845,15 +851,16 @@ static void ResolveMeshOutputMerger(lwDeviceObject11* dev, const FvfInfo& info, 
     DWORD zenable = dev->GetCachedRS(D3DRS_ZENABLE);
     DWORD zwrite = dev->GetCachedRS(D3DRS_ZWRITEENABLE);
 
-    const int pass = s_mesh.transp_object ? 3
-        : (s_mesh.character ? 1 : (s_mesh.scene_object ? 2 : (s_mesh.terrain ? 4 : 0)));
+    const int pass = s_mesh.vfx ? 5
+        : (s_mesh.transp_object ? 3
+        : (s_mesh.character ? 1 : (s_mesh.scene_object ? 2 : (s_mesh.terrain ? 4 : 0))));
 
     ID3D11DepthStencilState* depth = s_mesh.depth_on;
     ID3D11BlendState* blend = s_mesh.blend_opaque;
 
     if (pass != 0)
     {
-        depth = (pass == 3) ? s_mesh.depth_read : s_mesh.depth_on;
+        depth = (pass == 3 || pass == 5) ? s_mesh.depth_read : s_mesh.depth_on;
         blend = s_mesh.blend_alpha;
         if (zenable == 0)
             depth = s_mesh.depth_off;
@@ -1119,7 +1126,7 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     cb.outlineColor[3] = s_mesh.outline_color[3];
     cb.more[0] = info.has_diff ? 1.0f : 0.0f;
     cb.more[1] = (lighting == 0 || !info.has_nrm) ? 1.0f : 0.0f;
-    if (s_mesh.character || info.has_blend || s_mesh.transp_object)
+    if (s_mesh.character || info.has_blend || s_mesh.transp_object || s_mesh.vfx)
         cb.more[1] = 1.0f;
     DWORD cop0 = dev->GetCachedTSS(0, D3DTSS_COLOROP);
     DWORD ca1 = dev->GetCachedTSS(0, D3DTSS_COLORARG1);
@@ -1210,7 +1217,7 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     }
 
     EyeFromView(dev->GetMatView(), cb.look);
-    cb.look[3] = (s_mesh.stylized && !s_mesh.character && !info.has_blend && !s_mesh.terrain) ? 1.0f : 0.0f;
+    cb.look[3] = (s_mesh.stylized && !s_mesh.character && !info.has_blend && !s_mesh.terrain && !s_mesh.vfx) ? 1.0f : 0.0f;
     cb.hemiSky[0] = cb.ambient[0] * 0.12f + 0.02f;
     cb.hemiSky[1] = cb.ambient[1] * 0.12f + 0.03f;
     cb.hemiSky[2] = cb.ambient[2] * 0.12f + 0.05f;

@@ -768,8 +768,32 @@ LW_RESULT lwDeviceObject11::SetRenderState(D3DRENDERSTATETYPE state, DWORD value
     case D3DRS_FOGSTART:
     case D3DRS_FOGEND:
     case D3DRS_FOGDENSITY:
+    case D3DRS_FOGVERTEXMODE:
+    case D3DRS_RANGEFOGENABLE:
     case D3DRS_CLIPPING:
+    case D3DRS_CLIPPLANEENABLE:
     case D3DRS_FILLMODE:
+    case D3DRS_LASTPIXEL:
+    case D3DRS_LOCALVIEWER:
+    case D3DRS_NORMALIZENORMALS:
+    case D3DRS_DIFFUSEMATERIALSOURCE:
+    case D3DRS_SPECULARMATERIALSOURCE:
+    case D3DRS_AMBIENTMATERIALSOURCE:
+    case D3DRS_EMISSIVEMATERIALSOURCE:
+    case D3DRS_VERTEXBLEND:
+    case D3DRS_INDEXEDVERTEXBLENDENABLE:
+    case D3DRS_TWEENFACTOR:
+    case D3DRS_WRAP0:
+    case D3DRS_WRAP1:
+    case D3DRS_WRAP2:
+    case D3DRS_WRAP3:
+    case D3DRS_WRAP4:
+    case D3DRS_WRAP5:
+    case D3DRS_WRAP6:
+    case D3DRS_WRAP7:
+    case D3DRS_ANTIALIASEDLINEENABLE:
+    case D3DRS_DEPTHBIAS:
+    case D3DRS_SLOPESCALEDEPTHBIAS:
         return LW_RET_OK;
     default:
         break;
@@ -797,6 +821,29 @@ LW_RESULT lwDeviceObject11::SetRenderStateForced(D3DRENDERSTATETYPE state, DWORD
 
 LW_RESULT lwDeviceObject11::SetTextureStageState(DWORD stage, D3DTEXTURESTAGESTATETYPE type, DWORD value)
 {
+#if !MINDPOWER_USE_D3D9_DEVICE
+    if (stage >= 3)
+        return LW_RET_OK;
+    switch (type)
+    {
+    case D3DTSS_COLOROP:
+    case D3DTSS_COLORARG1:
+    case D3DTSS_COLORARG2:
+        break;
+    case D3DTSS_ALPHAOP:
+    case D3DTSS_ALPHAARG1:
+    case D3DTSS_ALPHAARG2:
+        if (stage > 0)
+            return LW_RET_OK;
+        break;
+    case D3DTSS_TEXTURETRANSFORMFLAGS:
+        if (stage > 1)
+            return LW_RET_OK;
+        break;
+    default:
+        return LW_RET_OK;
+    }
+#endif
     if (_bShadowPass && stage <= 1)
     {
         if (type == D3DTSS_COLOROP || type == D3DTSS_COLORARG1 ||
