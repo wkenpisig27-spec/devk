@@ -63,7 +63,7 @@
 /EHa %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\src\game;..\..\include\game;..\..\include\engine;..\..\include\status;..\..\include\enclib;..\..\include\serversdk;..\..\include\calua;..\..\include\common;..\..\include\util;..\..\include\audiosdl;..\..\include\sdl;..\..\include\discord;..\..\include\directx;..\..\include\unicode;..\..\include\icuhelper;..\..\include\luajit;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>USE_DX_VERSION;LW_USE_DX9;DIRECT3D_VERSION=0x0900;_WIN64;_DEBUG;_WINDOWS;_LUA_GAME;_WIN32_WINNT=0x0500;NOMINMAX;TABLE_ENCRYPTION_ENABLED=1;BOTAN_FUTURE_INTERNAL_HEADER_OK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_DX_VERSION;LW_USE_DX9;DIRECT3D_VERSION=0x0900;MINDPOWER_DX11_ONLY=1;_WIN64;_DEBUG;_WINDOWS;_LUA_GAME;_WIN32_WINNT=0x0500;NOMINMAX;TABLE_ENCRYPTION_ENABLED=1;BOTAN_FUTURE_INTERNAL_HEADER_OK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -85,7 +85,7 @@
       <ConformanceMode>false</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>AudioSDL_D.lib;MindPower3D_D9D.lib;d3d9.lib;d3dx9d.lib;d3d11.lib;dxgi.lib;Ws2_32.lib;lua51.lib;CaLua.lib;LIBDBC_D.lib;util_D.lib;Common_D.lib;dxguid.lib;ddraw.lib;atls.lib;Status_D.lib;SDL.lib;SDL_mixer.lib;SDLmain.lib;ICUHelper_D.lib;icudt.lib;icuucd.lib;icuind.lib;Psapi.lib;discord-rpc.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AudioSDL_D.lib;MindPower3D_D11D.lib;d3d11.lib;dxgi.lib;Ws2_32.lib;lua51.lib;CaLua.lib;LIBDBC_D.lib;util_D.lib;Common_D.lib;dxguid.lib;ddraw.lib;atls.lib;Status_D.lib;SDL.lib;SDL_mixer.lib;SDLmain.lib;ICUHelper_D.lib;icudt.lib;icuucd.lib;icuind.lib;Psapi.lib;discord-rpc.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\$(Configuration);$(ProjectDir)..\..\lib\Release;$(ProjectDir)..\..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

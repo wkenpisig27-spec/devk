@@ -2,11 +2,11 @@
 
 // Compile-time renderer policy for the native D3D11 migration branch.
 //
-// MINDPOWER_DX11_ONLY — set in MindPower3D + game Release|x64 on feature/dx11-native.
+// MINDPOWER_DX11_ONLY — set in MindPower3D + game Debug|x64 and Release|x64.
 //   * No lwDeviceObject (D3D9) construction
 //   * Backend forced to DX11 at runtime
-//   * Long-term: remove dual-backend code when Phase 5 completes
-//     (Release|x64 already excludes lwDeviceObject.cpp)
+//   * Play-path GPU handle is lwD3D11NativeContext (not IDirect3DDevice9*)
+//   * lwDeviceObject.cpp is excluded from both configs
 //
 // MINDPOWER_NATIVE_DX11_API — Phase 4+ gate for subsystems that include d3d11.h
 //   via lwDirectX.h. Reserved; do not require it for existing DeviceObject11 paths.

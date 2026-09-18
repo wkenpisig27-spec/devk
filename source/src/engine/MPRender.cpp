@@ -117,7 +117,9 @@ D3DMULTISAMPLE_TYPE MPRender::SelectBestMSAA(IDirect3DX* d3d, D3DFORMAT backFmt,
 MPRender::MPRender()
     : _hWnd(0),
       _pD3D(NULL),
+#if MINDPOWER_USE_D3D9_DEVICE
       _pD3DDevice(NULL),
+#endif
       _p2DSprite(NULL),
       _dwBackgroundColor(0),
       _bClearTarget(true),
@@ -380,8 +382,6 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 	_pD3D = dev_obj->GetDirect3D();
 #if MINDPOWER_USE_D3D9_DEVICE
 	_pD3DDevice = dev_obj->GetDevice();
-#else
-	_pD3DDevice = NULL;
 #endif
 	_IMgr.sys = sys;
 	_IMgr.sys_graphics = sys_graphics;
@@ -437,8 +437,10 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 BOOL MPRender::InitResource() {
 #ifdef USE_RENDER
 	if (!ResMgr.InitRes(this, (D3DXMATRIX*)_IMgr.dev_obj->GetMatView(), (D3DXMATRIX*)_IMgr.dev_obj->GetMatViewProj()))
-#else
+#elif MINDPOWER_USE_D3D9_DEVICE
 	if (!ResMgr.InitRes(_pD3DDevice, &GetWorldViewMatrix(), &GetViewProjMatrix()))
+#else
+	if (!ResMgr.InitRes(this, (D3DXMATRIX*)_IMgr.dev_obj->GetMatView(), (D3DXMATRIX*)_IMgr.dev_obj->GetMatViewProj()))
 #endif
 	{
 		LG("error", "msg��ʼ��ResMgrʧ��,�˳�!");
@@ -613,11 +615,13 @@ void MPRender::SetViewport(int nStartX, int nStartY, int nWidth, int nHeight) {
 		lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
 		if (!d11 || LW_FAILED(d11->SetViewPort(&_view)))
 			LG("render", "Error when SetViewport() on DeviceObject11\n");
+#if MINDPOWER_USE_D3D9_DEVICE
 	} else {
 		HRESULT hr = _pD3DDevice->SetViewport(&_view);
 		if (FAILED(hr)) {
 			LG("render", "Error when SetViewport(), [%d].\n", hr);
 		}
+#endif
 	}
 	// LG("render", "Set View Port [x = %d, y = %d , w = %d, h = %d\n", nStartX, nStartY, nWidth, nHeight);
 }
@@ -958,6 +962,7 @@ BOOL MPRender::BeginRender(bool clear) // vim
 		return true;
 	}
 
+#if MINDPOWER_USE_D3D9_DEVICE
 	if (clear) // vim
 	{
 		if (FAILED(_pD3DDevice->Clear(0L, NULL, _dwClearFlag, _dwBackgroundColor, 1.0f, 0L))) {
@@ -971,6 +976,9 @@ BOOL MPRender::BeginRender(bool clear) // vim
 	}
 
 	return true;
+#else
+	return false;
+#endif
 }
 
 void MPRender::ResolveScenePost()
@@ -1006,6 +1014,9 @@ void MPRender::EndRender(const bool present) // vim
 		return;
 	}
 
+#if !MINDPOWER_USE_D3D9_DEVICE
+	(void)present;
+#else
 	if (FAILED(_pD3DDevice->EndScene())) {
 		LG("error", "D3D End Scene Fail!\n");
 		return;
@@ -1081,6 +1092,7 @@ void MPRender::EndRender(const bool present) // vim
 			_pD3DDevice->Present(&rc, nullptr, nullptr, nullptr);
 		}
 	}
+#endif
 }
 
 

@@ -6,7 +6,7 @@ Goal: **true D3D11** end-to-end — no runtime D3D9 device, no long-term relianc
 
 | Layer | Today (DX11 play path) | Target (native) |
 | --- | --- | --- |
-| Device | `lwDeviceObject11`, `GetDevice()` NULL | `ID3D11Device` / `ID3D11DeviceContext` as primary API |
+| Device | `lwD3D11NativeContext` (`ID3D11Device` / context / swapchain); `GetDevice()` is a D3D9 leftover that returns NULL | same (PSO later) |
 | State | D3D9 enums → 11 state objects in `lwDeviceObject11` | PSO + root signature / explicit CBs per pass |
 | Shaders | SM4 HLSL + FF mesh shader + ShaderMgr11 VS | All draws through compiled HLSL; retire `.vsh` / asm |
 | Loaders | DDS/BMP/TGA + GDI+ (`lwD3D11CreateTextureFromMemory`) | same (DirectXTex optional) |
@@ -15,13 +15,14 @@ Goal: **true D3D11** end-to-end — no runtime D3D9 device, no long-term relianc
 
 ## Build flag
 
-`MINDPOWER_DX11_ONLY=1` (Release x64 on this branch):
+`MINDPOWER_DX11_ONLY=1` (Debug|x64 and Release|x64 on this branch):
 
 - Forces active backend to DX11 regardless of `renderer=` in ini.
-- Never constructs `lwDeviceObject` (D3D9).
+- Never constructs `lwDeviceObject` (D3D9). `lwDeviceObject.cpp` is excluded from both configs.
+- Play-path GPU handle is **`lwD3D11NativeContext`** (`lwD3D11NativeGetDevice/GetContext/GetSwapChain`). `MPRender` does not store `IDirect3DDevice9*`.
 - UI should not offer DX9 (when wired).
 
-Native API work uses **`lwD3D11NativeContext`** as the long-term home for device/context/swapchain access instead of `GetDevice()`.
+Lib names: Debug `MindPower3D_D11D.lib`, Release `MindPower3D_D11R.lib`. Neither links `d3d9.lib` / `d3dx9`.
 
 ## Phases
 
@@ -35,7 +36,7 @@ Native API work uses **`lwD3D11NativeContext`** as the long-term home for device
 
 ### Phase 1 — Kill D3D9 device islands (game + engine) — **complete**
 
-All active D3D9 device use on **`MINDPOWER_DX11_ONLY` Release x64** is gated (`#if MINDPOWER_USE_D3D9_DEVICE`) or short-circuited via `MindPowerDx11OnlyBuild()` / `dev_obj` / `lwD3D11CreateTextureFromFile`.
+All active D3D9 device use on **`MINDPOWER_DX11_ONLY` Debug and Release x64** is gated (`#if MINDPOWER_USE_D3D9_DEVICE`) or short-circuited via `MindPowerDx11OnlyBuild()` / `dev_obj` / `lwD3D11CreateTextureFromFile`.
 
 Delivered:
 
@@ -85,7 +86,7 @@ Stage 0–2 combiners still exist in compiled HLSL (`CombineTss`). Character/sce
 
 - [x] Split `lwDirectX.h`: shared math/viewport/COM typedefs in `lwDirectXShared.h`; public headers include `d3d11.h`
 - [x] D3D9 device lib pragma (`d3d9.lib`) only when `MINDPOWER_USE_D3D9_DEVICE`; `d3dx9.lib` stays for math until DirectXMath
-- [x] Release|x64 lib output `MindPower3D_D11R.lib` (Debug dual-build stays `MindPower3D_D9D.lib`)
+- [x] Lib output `MindPower3D_D11R.lib` (Release) / `MindPower3D_D11D.lib` (Debug)
 
 Create*X device macros stay so remaining D3D9 `.cpp` still compiles; they are unused on the DX11-only play path.
 
@@ -93,10 +94,10 @@ Create*X device macros stay so remaining D3D9 `.cpp` still compiles; they are un
 
 ### Phase 5 — Delete DX9 backend — **complete** (optional source strip remains)
 
-- [x] Exclude `lwDeviceObject.cpp` from Release|x64 (`MINDPOWER_DX11_ONLY`)
+- [x] Exclude `lwDeviceObject.cpp` from Debug|x64 and Release|x64 (`MINDPOWER_DX11_ONLY`)
 - [x] Gate remaining `lwDeviceObject*` casts (shadow, stream list, VS pixel-shader)
 - [x] Skip D3D8.1 runtime version probe on DX11-only init
-- [x] `lwIsDx11Active()` is a compile-time `1` on DX11-only (header inline); Debug dual-build keeps the runtime check
+- [x] `lwIsDx11Active()` is a compile-time `1` on DX11-only (header inline)
 - [x] LINUX/DXVK — native client is Windows-only; see below
 - [x] Drop `d3d9.lib` from game Release (wrappers inherit `lwDx11I*`, not `IDirect3D*9`)
 
@@ -111,7 +112,7 @@ Create*X device macros stay so remaining D3D9 `.cpp` still compiles; they are un
 
 **Smoke (2026-09-19):** login → world passed after Post-5.
 
-Debug dual-build still uses d3d9.lib + d3dx9.lib.
+Debug and Release are both DX11-only (`MindPower3D_D11D.lib` / `MindPower3D_D11R.lib`). D3D9 sources remain in the tree but are not compiled or linked on the play path.
 
 ### Pass state — **code complete** (await smoke)
 
@@ -125,18 +126,23 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 **Smoke:** character, terrain, transparent props, combat VFX, weapon lit — not only login → world.
 
-## Remaining (after pass state)
+## Remaining (after native device handle)
 
 Highest-value leftover vs the native target table:
 
-1. **Device handle** — make `lwD3D11NativeContext` the play-path API; stop holding `IDirect3DDevice9*` that is always null on Release.
-2. Optional later: rename D3DX* math to XM*, HLSL `eff.fx` instead of FF technique tables, delete unused `.vsh` assets. Do not delete D3D9 sources while Debug dual-build still needs them.
+1. Optional later: rename D3DX* math to XM*, HLSL `eff.fx` instead of FF technique tables, delete unused `.vsh` assets. Do not delete D3D9 sources unless asked — they are already out of the play-path compile.
+
+### Device handle — **complete**
+
+- `lwD3D11NativeBindDevice` from `lwDeviceObject11::CreateDevice`; `lwD3D11NativeUnbindDevice` on destroy.
+- `MPRender` no longer stores `IDirect3DDeviceX*` on DX11-only. `GetDevice()` is a leftover that returns nullptr. Use `g_Render.GetD3D11Device()` / `GetD3D11Context()` / `GetSwapChain()`, or `lwD3D11NativeGet*`.
+- Debug|x64 uses the same `MINDPOWER_DX11_ONLY` play path as Release.
 
 ## Linux / DXVK
 
-The native D3D11 client on this branch (`MINDPOWER_DX11_ONLY`, Release|x64 `Game.exe`) is **Windows-only**. It does not use a D3D9 device, so DXVK’s D3D9 translation path does not apply. A Linux/DXVK play client would need either:
+The native D3D11 client on this branch (`MINDPOWER_DX11_ONLY`, Debug and Release x64) is **Windows-only**. It does not use a D3D9 device, so DXVK’s D3D9 translation path does not apply. A Linux/DXVK play client would need either:
 
-- the dual-build D3D9 backend (`lwDeviceObject`, Debug / `main`), or
+- the D3D9 backend still on `main`, or
 - a separate Vulkan/DXVK-native port (out of scope here)
 
 Server binaries still build on Linux (`source/scripts/build-linux.sh`). Do not treat DX9-on-Linux as a requirement for this fork’s DX11 play path.
@@ -154,7 +160,7 @@ Snapshot at branch start — see commit message / `docs/DX11_NATIVE_INVENTORY.tx
 ## Rules for new code on this branch
 
 1. Do **not** call `IDirect3DDevice9` or `g_Render.GetDevice()` without an DX11 alternative.
-2. Prefer `lwGetActiveDeviceObject11()` or `lwD3D11NativeGetDevice()`.
+2. Prefer `lwD3D11NativeGetDevice()` / `GetContext()` / `GetSwapChain()`, or `lwGetActiveDeviceObject11()`.
 3. New rendering features use HLSL + `ID3D11*` only.
 4. Keep gameplay, network, and asset formats unchanged.
 

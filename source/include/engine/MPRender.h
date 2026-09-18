@@ -18,6 +18,7 @@
 #include "lwIFunc.h"
 #include "lwRenderBackend.h"
 #include "lwDeviceObject11.h"
+#include "lwD3D11NativeContext.h"
 
 #define USE_MANAGED_RES
 
@@ -83,9 +84,15 @@ public:
     void				EnableClearTarget(BOOL bEnable = TRUE)      { _bClearTarget  = bEnable; } 
     void				EnableClearZBuffer(BOOL bEnable = TRUE)     { _bClearZBuffer = bEnable; }
     void				EnableClearStencil(BOOL bEnable = TRUE)     { _bClearStencil = bEnable; }
-	// D3D9-only escape hatch. New code must go through this object's Set*/Draw*
-	// helpers. DX11 will leave this NULL — see lwD3D11Gaps.
+	// D3D9-only leftover. Play-path GPU access is lwD3D11NativeGetDevice/Context.
+#if MINDPOWER_USE_D3D9_DEVICE
 	IDirect3DDeviceX*	GetDevice()                                 { return _pD3DDevice;	    }
+#else
+	IDirect3DDeviceX*	GetDevice()                                 { return nullptr;	        }
+	ID3D11Device*		GetD3D11Device()                            { return lwD3D11NativeGetDevice(); }
+	ID3D11DeviceContext* GetD3D11Context()                          { return lwD3D11NativeGetContext(); }
+	IDXGISwapChain*		GetSwapChain()                              { return lwD3D11NativeGetSwapChain(); }
+#endif
 	IDirect3DX*			GetD3DObj()									{ return _pD3D;				}
 	void				SetTexture(int nStage, IDirect3DTextureX* pTexture);
 	void				EnableAlpha(BOOL bEnable);
@@ -267,9 +274,14 @@ public:
 
 	void	InitRender(IDirect3DX* pd3d,IDirect3DDeviceX*	pDev)
 	{
+#if MINDPOWER_USE_D3D9_DEVICE
 		_pD3D = pd3d;
 		_pD3DDevice = pDev;
 		_pD3D->GetDeviceCaps(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &_d3dCaps);
+#else
+		(void)pd3d;
+		(void)pDev;
+#endif
 	}
 public:
 	void	BeginState(int iIdx);
@@ -298,7 +310,9 @@ protected:
 	//{lemon modify@2004.9.3
 	CMPFont*				_pFont;
 	//@}
+#if MINDPOWER_USE_D3D9_DEVICE
 	IDirect3DDeviceX*		_pD3DDevice;
+#endif
 	IDirect3DVertexBufferX*	_pDynUPVB{ nullptr };
 	UINT					_dwDynUPVBBytes{ 0 };
     D3DVIEWPORTX            _view;
@@ -663,8 +677,10 @@ inline void MPRender::UpdateLight()
 {
     if (lwIsDx11Active() && _IMgr.dev_obj)
         _IMgr.dev_obj->SetLight(0, &_Light);
+#if MINDPOWER_USE_D3D9_DEVICE
     else
         _pD3DDevice->SetLight(0, &_Light);
+#endif
 }
 
 inline void MPRender::SetDirectLightDir(float x, float y, float z)
@@ -676,8 +692,10 @@ inline void MPRender::SetDirectLightDir(float x, float y, float z)
     _Light.Position.z   = z;
     if (lwIsDx11Active() && _IMgr.dev_obj)
         _IMgr.dev_obj->SetLight(0, &_Light);
+#if MINDPOWER_USE_D3D9_DEVICE
     else
         _pD3DDevice->SetLight(0, &_Light);
+#endif
 }
 
 inline void MPRender::SetDirectLightColor(float r, float g, float b, float a)
@@ -688,8 +706,10 @@ inline void MPRender::SetDirectLightColor(float r, float g, float b, float a)
     _Light.Diffuse.a   = a;
     if (lwIsDx11Active() && _IMgr.dev_obj)
         _IMgr.dev_obj->SetLight(0, &_Light);
+#if MINDPOWER_USE_D3D9_DEVICE
     else
         _pD3DDevice->SetLight(0, &_Light);
+#endif
 }
 inline void MPRender::SetDirectLIghtAmbient(float r, float g, float b, float a)
 {
@@ -699,8 +719,10 @@ inline void MPRender::SetDirectLIghtAmbient(float r, float g, float b, float a)
     _Light.Ambient.a   = a;
     if (lwIsDx11Active() && _IMgr.dev_obj)
         _IMgr.dev_obj->SetLight(0, &_Light);
+#if MINDPOWER_USE_D3D9_DEVICE
     else
         _pD3DDevice->SetLight(0, &_Light);
+#endif
 }
 inline void MPRender::UpdateCullInfo( ) 
 {

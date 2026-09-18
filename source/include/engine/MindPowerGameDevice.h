@@ -4,7 +4,7 @@
 #include "MPRender.h"
 #include "lwRenderBackend.h"
 
-// Legacy IDirect3DDevice9* for subsystems that accept nullptr and use dev_obj (DX11).
+// D3D9 leftover. DX11-only play path uses lwD3D11NativeGetDevice() / GetContext().
 inline IDirect3DDeviceX* MP_LegacyD3D9DeviceOpt()
 {
 #if MINDPOWER_USE_D3D9_DEVICE

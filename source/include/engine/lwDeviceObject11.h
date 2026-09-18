@@ -8,6 +8,7 @@
 #include "lwClassDecl.h"
 #include "lwInterfaceExt.h"
 #include "lwPreDefinition.h"
+#include "lwD3D11NativeContext.h"
 
 LW_BEGIN
 
@@ -33,6 +34,7 @@ public:
     LW_RESULT SetDirect3D(IDirect3DX* d3d);
     LW_RESULT SetDevice(IDirect3DDeviceX* dev);
     IDirect3DX* GetDirect3D() { return 0; }
+    // D3D9 iface leftover. Play-path handle is lwD3D11NativeGetDevice().
     IDirect3DDeviceX* GetDevice() { return 0; }
     lwD3DCreateParam* GetD3DCreateParam() { return &_d3d_create_param; }
     D3DDISPLAYMODE* GetAdapterDisplayMode() { return &_display_mode; }
@@ -129,8 +131,21 @@ public:
     void PopOffscreenTargets();
     void UnbindPixelTextures();
 
-    ID3D11Device* GetD3D11Device() { return _device; }
-    ID3D11DeviceContext* GetD3D11Context() { return _context; }
+    ID3D11Device* GetD3D11Device()
+    {
+        ID3D11Device* n = lwD3D11NativeGetDevice();
+        return n ? n : _device;
+    }
+    ID3D11DeviceContext* GetD3D11Context()
+    {
+        ID3D11DeviceContext* n = lwD3D11NativeGetContext();
+        return n ? n : _context;
+    }
+    IDXGISwapChain* GetSwapChain()
+    {
+        IDXGISwapChain* n = lwD3D11NativeGetSwapChain();
+        return n ? n : _swapchain;
+    }
 
     IDirect3DVertexBufferX* GetBoundVB() const { return _bound_vb; }
     UINT GetBoundVBOffset() const { return _bound_vb_off; }

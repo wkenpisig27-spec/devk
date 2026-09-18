@@ -112,6 +112,7 @@ lwDeviceObject11::~lwDeviceObject11()
 {
     if (s_active11 == this)
         s_active11 = 0;
+    lwD3D11NativeUnbindDevice();
 
     if (_up_vb)
     {
