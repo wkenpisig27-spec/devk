@@ -21,8 +21,6 @@
 #include <dxgi.h>
 
 // D3DX math / effects helpers still live in d3dx9.lib until a DirectXMath pass.
-// d3d9.lib is only auto-linked when the D3D9 device backend is compiled in;
-// Release|x64 DX11-only already lists d3d9.lib from game.vcxproj until Phase 5.
 #pragma comment(lib, "d3dx9.lib")
 #pragma comment(lib, "dinput8.lib")
 

@@ -58,8 +58,11 @@ HRESULT lwD3D11VertexBuffer::QueryInterface(REFIID riid, void** ppvObj)
 {
     if (!ppvObj)
         return E_POINTER;
-    if (riid == IID_IUnknown || riid == IID_IDirect3DResource9 ||
-        riid == IID_IDirect3DVertexBuffer9 || riid == s_iid_d11vb)
+    if (riid == IID_IUnknown || riid == s_iid_d11vb
+#if MINDPOWER_USE_D3D9_DEVICE
+        || riid == IID_IDirect3DResource9 || riid == IID_IDirect3DVertexBuffer9
+#endif
+        )
     {
         *ppvObj = this;
         AddRef();
@@ -143,8 +146,11 @@ HRESULT lwD3D11IndexBuffer::QueryInterface(REFIID riid, void** ppvObj)
 {
     if (!ppvObj)
         return E_POINTER;
-    if (riid == IID_IUnknown || riid == IID_IDirect3DResource9 ||
-        riid == IID_IDirect3DIndexBuffer9 || riid == s_iid_d11ib)
+    if (riid == IID_IUnknown || riid == s_iid_d11ib
+#if MINDPOWER_USE_D3D9_DEVICE
+        || riid == IID_IDirect3DResource9 || riid == IID_IDirect3DIndexBuffer9
+#endif
+        )
     {
         *ppvObj = this;
         AddRef();

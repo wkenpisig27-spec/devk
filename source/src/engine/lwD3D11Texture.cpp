@@ -64,9 +64,11 @@ HRESULT lwD3D11Texture::QueryInterface(REFIID riid, void** ppvObj)
 {
     if (!ppvObj)
         return E_POINTER;
-    if (riid == IID_IUnknown || riid == IID_IDirect3DResource9 ||
-        riid == IID_IDirect3DBaseTexture9 || riid == IID_IDirect3DTexture9 ||
-        riid == s_iid_d11tex)
+    if (riid == IID_IUnknown || riid == s_iid_d11tex
+#if MINDPOWER_USE_D3D9_DEVICE
+        || riid == IID_IDirect3DResource9 || riid == IID_IDirect3DBaseTexture9 || riid == IID_IDirect3DTexture9
+#endif
+        )
     {
         *ppvObj = this;
         AddRef();

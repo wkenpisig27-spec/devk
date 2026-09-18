@@ -59,7 +59,7 @@ Exit criterion met: no unguarded `GetDevice()` in the DX11-only compile; dual-bu
 
 1. **Audit** — `docs/DX11_PHASE2_D3DX_INVENTORY.txt` (dual-build D3DX behind `#if MINDPOWER_USE_D3D9_DEVICE` or dead-stripped when `lwIsDx11Active()` is constant)
 2. **Textures** — `BitmapFont`, `lwDDSFile`, `lwResourceMgr`, `lwDeviceObject::CreateTextureFromFileInMemory` on DX11 helpers
-3. **Link** — `d3dx9.lib` removed from Release x64 `game.vcxproj` (keep `d3d9.lib` until Phase 5)
+3. **Link** — `d3dx9.lib` removed from Release x64 `game.vcxproj` AdditionalDependencies (header still pragma-links math). `d3d9.lib` dropped in Phase 5.
 4. **Math** — defer D3DXMath → DirectXMath unless link audit forces it
 
 **Smoke (2026-09-19):** same Phase 1 checklist passed after Phase 2 builds.
@@ -91,17 +91,18 @@ Create*X device macros stay so remaining D3D9 `.cpp` still compiles; they are un
 
 **Smoke (2026-09-19):** login → world after header/lib rename passed.
 
-### Phase 5 — Delete DX9 backend *(in progress)*
+### Phase 5 — Delete DX9 backend — **complete** (optional source strip remains)
 
 - [x] Exclude `lwDeviceObject.cpp` from Release|x64 (`MINDPOWER_DX11_ONLY`)
 - [x] Gate remaining `lwDeviceObject*` casts (shadow, stream list, VS pixel-shader)
 - [x] Skip D3D8.1 runtime version probe on DX11-only init
 - [x] `lwIsDx11Active()` is a compile-time `1` on DX11-only (header inline); Debug dual-build keeps the runtime check
 - [x] LINUX/DXVK — native client is Windows-only; see below
-- [ ] Drop `d3d9.lib` from game Release (still needed until COM wrappers stop inheriting `IDirect3D*9`)
-- [ ] Strip remaining `if (lwIsDx11Active())` source (optional; already constant-folded)
+- [x] Drop `d3d9.lib` from game Release (wrappers still inherit `IDirect3D*9` headers; no `Direct3DCreate9` / D3D9 IID imports)
 
-**Smoke (2026-09-19):** login → world passed after excluding `lwDeviceObject.cpp` and inlining `lwIsDx11Active()`.
+Optional later: strip remaining `if (lwIsDx11Active())` source (already constant-folded). Wrappers still subclass `IDirect3DTexture9` etc. until a follow-on pass.
+
+**Smoke (2026-09-19):** login → world passed after excluding `lwDeviceObject.cpp`, inlining `lwIsDx11Active()`, and dropping `d3d9.lib`.
 
 Debug|x64 dual-build still compiles `lwDeviceObject.cpp`. D3DX math types stay in `lwDirectXShared.h`.
 

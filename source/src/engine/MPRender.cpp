@@ -271,6 +271,7 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 		bUsePixelShader = false;
 		lwD3D11Gap(LW_D3D11_SKIP, "d3d9-adapter-probe",
 			"D3D11 Init fills present_param from HWND; D3D9 adapter/MSAA probe skipped");
+#if MINDPOWER_USE_D3D9_DEVICE
 	} else {
 	IDirect3DX* d3d = Direct3DCreateX(D3D_SDK_VERSION);
 	D3DDISPLAYMODE d3ddm;
@@ -340,6 +341,7 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 
 	d3dcp.behavior_flag |= D3DCREATE_MULTITHREADED;
 	d3d->Release();
+#endif
 	}
 
 
@@ -498,6 +500,7 @@ int MPRender::ToggleFullScreen(int width, int height, D3DFORMAT depth_fmt, BOOL 
 	if (lwIsDx11Active()) {
 		lwD3D11Gap(LW_D3D11_SKIP, "toggle-msaa-adjust",
 			"D3D11 resize keeps the swapchain sample count from CreateDevice");
+#if MINDPOWER_USE_D3D9_DEVICE
 	} else {
 		d3dcp.present_param.MultiSampleType = SelectBestMSAA(
 			dev,
@@ -512,6 +515,7 @@ int MPRender::ToggleFullScreen(int width, int height, D3DFORMAT depth_fmt, BOOL 
 			LG("error", "msgToggleFullScreen error");
 			return 0;
 		}
+#endif
 	}
 
 	if (ToggleFullScreen(&d3dcp.present_param, &wnd_info) == 0) {

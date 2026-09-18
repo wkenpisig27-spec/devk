@@ -1,11 +1,35 @@
 //
 #include "stdafx.h"
 #include "lwD3DSettings.h"
+#include "MindPowerRenderConfig.h"
 
 LW_BEGIN
 
 LW_RESULT lwInitDefaultD3DCreateParam( lwD3DCreateParam* param, HWND hwnd )
 {
+#if !MINDPOWER_USE_D3D9_DEVICE
+    RECT rc = { 0, 0, 1024, 768 };
+    if (hwnd)
+        GetClientRect(hwnd, &rc);
+
+    param->adapter = D3DADAPTER_DEFAULT;
+    param->dev_type = D3DDEVTYPE_HAL;
+    param->hwnd = hwnd;
+    param->behavior_flag = D3DCREATE_HARDWARE_VERTEXPROCESSING;
+
+    memset(&param->present_param, 0, sizeof(param->present_param));
+    param->present_param.AutoDepthStencilFormat = D3DFMT_D24S8;
+    param->present_param.BackBufferCount = 1;
+    param->present_param.BackBufferFormat = D3DFMT_A8R8G8B8;
+    param->present_param.BackBufferHeight = (rc.bottom > rc.top) ? (rc.bottom - rc.top) : 768;
+    param->present_param.BackBufferWidth = (rc.right > rc.left) ? (rc.right - rc.left) : 1024;
+    param->present_param.EnableAutoDepthStencil = 1;
+    param->present_param.hDeviceWindow = hwnd;
+    param->present_param.SwapEffect = D3DSWAPEFFECT_DISCARD;
+    param->present_param.Windowed = 1;
+    param->present_param.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
+    return LW_RET_OK;
+#else
     IDirect3DX* d3d = Direct3DCreateX( D3D_SDK_VERSION );
 
     if( d3d == NULL )
@@ -41,6 +65,7 @@ LW_RESULT lwInitDefaultD3DCreateParam( lwD3DCreateParam* param, HWND hwnd )
     LW_SAFE_RELEASE( d3d );
     
     return LW_RET_OK;
+#endif
 }
 
 LW_RESULT lwLoadD3DSettings( lwD3DCreateParam* param, const char* file )
