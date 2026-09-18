@@ -28,6 +28,7 @@ MINDPOWER_API void lwD3D11MeshSetVisual(
     float fog_density,
     int water_enhance);
 MINDPOWER_API void lwD3D11MeshSetSea(int enabled);
+MINDPOWER_API void lwD3D11MeshSetCharacter(int enabled);
 MINDPOWER_API int lwD3D11MeshWaterEnhance();
 
 MINDPOWER_API LW_RESULT lwD3D11MeshDrawPrimitive(

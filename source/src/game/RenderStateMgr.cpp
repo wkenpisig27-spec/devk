@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include "RenderStateMgr.h"
 #include "GameConfig.h"
+#include "lwD3D11Mesh.h"
+#include "lwRenderBackend.h"
 
 RenderStateMgr::RenderStateMgr()
     : _dev_obj(0), _rsa_scene(0), _rsa_cha(0), _rsa_sceneobj(0), _rsa_sceneitem(0), _rsa_terrain(0), _rsa_transpobj(0) {
@@ -175,6 +177,9 @@ HRESULT RenderStateMgr::BeginCharacter() {
 	_dev_obj->SetLight(0, &_cha_lgt);
 	_dev_obj->LightEnable(0, TRUE);
 
+	if (lwIsDx11Active())
+		lwD3D11MeshSetCharacter(1);
+
 	return 0L;
 }
 HRESULT RenderStateMgr::BeginSceneObject() {
@@ -224,6 +229,9 @@ HRESULT RenderStateMgr::EndCharacter() {
 
 	_dev_obj->SetLight(0, &_cha_lgt_old);
 	_dev_obj->LightEnable(0, _cha_lgt_enable_old);
+
+	if (lwIsDx11Active())
+		lwD3D11MeshSetCharacter(0);
 
 	return 0L;
 }

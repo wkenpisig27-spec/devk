@@ -33,7 +33,7 @@ static const char* kMeshHLSL =
     "  float4 hemiSky;\n"
     "  float4 hemiGnd;\n"
     "  float4 fog; /* rgb + density */\n"
-    "  float4 fogMore; /* x=fog, y=heightFog, z=sea, w unused */\n"
+    "  float4 fogMore; /* x=fog, y=heightFog, z=sea, w=flatChar */\n"
     "};\n"
     "cbuffer CB1 : register(b1) {\n"
     "  row_major float4x4 bones[64];\n"
@@ -141,7 +141,7 @@ static const char* kMeshHLSL =
     "  }\n"
     "  float3 tint;\n"
     "  if (mix & 1) tint = tfactor.rgb;\n"
-    "  else if (more.y > 0.5) tint = i.col.rgb;\n"
+    "  else if (more.y > 0.5 || flags.x > 0.5 || fogMore.w > 0.5) tint = i.col.rgb;\n"
     "  else {\n"
     "    float3 n = normalize(i.nrm);\n"
     "    float3 L = -normalize(lightDir.xyz);\n"
@@ -244,6 +244,7 @@ struct MeshState
     ID3D11Buffer* fan_ib;
     UINT fan_ib_prims;
     int stylized;
+    int character;
     int fog_on;
     int height_fog;
     int sea;
@@ -476,6 +477,7 @@ LW_RESULT lwD3D11MeshInit(ID3D11Device* device, ID3D11DeviceContext* context)
     s_mesh.outline_color[2] = 0.20f;
     s_mesh.outline_color[3] = 0.70f;
     s_mesh.stylized = 1;
+    s_mesh.character = 0;
     s_mesh.fog_on = 1;
     s_mesh.height_fog = 0;
     s_mesh.sea = 0;
@@ -546,6 +548,11 @@ void lwD3D11MeshSetVisual(
 void lwD3D11MeshSetSea(int enabled)
 {
     s_mesh.sea = enabled ? 1 : 0;
+}
+
+void lwD3D11MeshSetCharacter(int enabled)
+{
+    s_mesh.character = enabled ? 1 : 0;
 }
 
 int lwD3D11MeshWaterEnhance()
@@ -1002,6 +1009,8 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     cb.outlineColor[3] = s_mesh.outline_color[3];
     cb.more[0] = info.has_diff ? 1.0f : 0.0f;
     cb.more[1] = (lighting == 0 || !info.has_nrm) ? 1.0f : 0.0f;
+    if (s_mesh.character || info.has_blend)
+        cb.more[1] = 1.0f;
     DWORD cop0 = dev->GetCachedTSS(0, D3DTSS_COLOROP);
     DWORD ca1 = dev->GetCachedTSS(0, D3DTSS_COLORARG1);
     DWORD carg2 = dev->GetCachedTSS(0, D3DTSS_COLORARG2);
@@ -1091,7 +1100,7 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     }
 
     EyeFromView(dev->GetMatView(), cb.look);
-    cb.look[3] = s_mesh.stylized ? 1.0f : 0.0f;
+    cb.look[3] = (s_mesh.stylized && !s_mesh.character && !info.has_blend) ? 1.0f : 0.0f;
     cb.hemiSky[0] = cb.ambient[0] * 0.12f + 0.02f;
     cb.hemiSky[1] = cb.ambient[1] * 0.12f + 0.03f;
     cb.hemiSky[2] = cb.ambient[2] * 0.12f + 0.05f;
@@ -1107,7 +1116,7 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     cb.fogMore[0] = s_mesh.fog_on ? 1.0f : 0.0f;
     cb.fogMore[1] = s_mesh.height_fog ? 1.0f : 0.0f;
     cb.fogMore[2] = s_mesh.sea ? 1.0f : 0.0f;
-    cb.fogMore[3] = 0.0f;
+    cb.fogMore[3] = s_mesh.character ? 1.0f : 0.0f;
 
     D3D11_MAPPED_SUBRESOURCE mapped = {};
     if (SUCCEEDED(s_mesh.context->Map(s_mesh.cb0, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))

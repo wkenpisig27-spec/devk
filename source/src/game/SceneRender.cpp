@@ -588,6 +588,8 @@ void CGameScene::_Render() {
 				if (pCha->GetEmiColorFlag()) {
 					cha_lgt = 0;
 				}
+				if (lwIsDx11Active())
+					cha_lgt = 0;
 
 				g_Render.SetRenderState(D3DRS_LIGHTING, cha_lgt);
 				if (cha_lgt) {
@@ -698,6 +700,8 @@ void CGameScene::_Render() {
 				if (pCha->GetEmiColorFlag()) {
 					cha_lgt = 0;
 				}
+				if (lwIsDx11Active())
+					cha_lgt = 0;
 
 				g_Render.SetRenderState(D3DRS_LIGHTING, cha_lgt);
 				if (cha_lgt) {

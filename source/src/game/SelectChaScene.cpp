@@ -12,6 +12,7 @@
 #include "ItemRecord.h"
 #include "PacketCmd.h"
 #include "GameConfig.h"
+#include "lwRenderBackend.h"
 
 #include "Character.h"
 #include "caLua.h"
@@ -359,7 +360,7 @@ void CSelectChaScene::_Render() {
 			continue;
 
 		dev_obj->SetRenderState(D3DRS_LIGHTING, 0);
-		if (m_nCurChaIndex == iter - begin) {
+		if (m_nCurChaIndex == iter - begin && !lwIsDx11Active()) {
 			dev_obj->SetRenderState(D3DRS_LIGHTING, 1);
 			// pAure[(*iter)->iPos]->SetState(STATE_VISIBLE, 1);
 			(*iter)->pCha->setYaw(m_Yaws[m_nCurChaIndex]);
