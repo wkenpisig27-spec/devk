@@ -116,8 +116,10 @@ int CSystemProperties::ApplyVideo() {
 	D3DFORMAT format = m_videoProp.bDepth32 ? D3DFMT_D24X8 : D3DFMT_D16;
 
 	MPIDeviceObject* dev_obj = g_Render.GetInterfaceMgr()->dev_obj;
-	if (FAILED(dev_obj->CheckCurrentDeviceFormat(BBFI_DEPTHSTENCIL, format))) {
-		format = D3DFMT_D16;
+	if (m_videoProp.bDepth32 && FAILED(dev_obj->CheckCurrentDeviceFormat(BBFI_DEPTHSTENCIL, format))) {
+		format = D3DFMT_D24S8;
+		if (FAILED(dev_obj->CheckCurrentDeviceFormat(BBFI_DEPTHSTENCIL, format)))
+			format = D3DFMT_D16;
 	}
 	g_pGameApp->ChangeVideoStyle(width, height, format, !m_videoProp.bFullScreen);
 
@@ -520,7 +522,7 @@ bool CSystemMgr::Init() {
 	cbxColor = (CCheckGroup*)frmVideo->Find("cbxColor"); // ��ͼ����
 	if (!cbxColor)
 		return Error(RES_STRING(CL_LANGUAGE_MATCH_45), frmVideo->GetName(), "cbxColor");
-	cbxColor->SetActiveIndex(m_sysProp.m_videoProp.bDepth32 ? 1 : 0); // �������ļ���������ʾ�ڿؼ��� Michael Chen 2005-04-22
+	cbxColor->SetActiveIndex(m_sysProp.m_videoProp.bDepth32 ? 0 : 1); // 0=32-bit, 1=16-bit
 
 	cboResolution = (CCombo*)frmVideo->Find("cboResolution"); // 贴图精度
 	if (!cboResolution)
@@ -706,7 +708,8 @@ void CSystemMgr::_evtVideoFormMouseEvent(CCompent* pSender, int nMsgType, int x,
 				CCharacter::SetIsShowShadow(false);
 			}
 		}
-		D3DFORMAT format = g_stUISystem.cbxColor->GetActiveIndex() == 0 ? D3DFMT_D24X8 : D3DFMT_D16;
+		const bool bDepth32 = g_stUISystem.cbxColor->GetActiveIndex() == 0; // 0=32-bit, 1=16-bit
+		D3DFORMAT format = bDepth32 ? D3DFMT_D24X8 : D3DFMT_D16;
 
 		int width;
 		int height;
@@ -757,8 +760,10 @@ void CSystemMgr::_evtVideoFormMouseEvent(CCompent* pSender, int nMsgType, int x,
 		GetRender().SetIsChangeResolution(true);
 
 		MPIDeviceObject* dev_obj = g_Render.GetInterfaceMgr()->dev_obj;
-		if (FAILED(dev_obj->CheckCurrentDeviceFormat(BBFI_DEPTHSTENCIL, format))) {
-			format = D3DFMT_D16;
+		if (bDepth32 && FAILED(dev_obj->CheckCurrentDeviceFormat(BBFI_DEPTHSTENCIL, format))) {
+			format = D3DFMT_D24S8;
+			if (FAILED(dev_obj->CheckCurrentDeviceFormat(BBFI_DEPTHSTENCIL, format)))
+				format = D3DFMT_D16;
 		}
 		g_pGameApp->ChangeVideoStyle(width, height, format, bWindowed);
 
@@ -766,7 +771,7 @@ void CSystemMgr::_evtVideoFormMouseEvent(CCompent* pSender, int nMsgType, int x,
 		g_stUISystem.m_sysProp.m_videoProp.nTexture     = nTextureHigh;
 		g_stUISystem.m_sysProp.m_videoProp.bAnimation   = bMovieOn;
 		g_stUISystem.m_sysProp.m_videoProp.nShadowMode  = bShadowOn ? 1 : 0;
-		g_stUISystem.m_sysProp.m_videoProp.bDepth32     = (format == D3DFMT_D24X8);
+		g_stUISystem.m_sysProp.m_videoProp.bDepth32     = bDepth32;
 		g_stUISystem.m_sysProp.m_videoProp.nQuality     = nQualityIdx;
 		g_stUISystem.m_sysProp.m_videoProp.bFullScreen   = (g_Config.m_bFullScreen == TRUE);
 		g_stUISystem.m_sysProp.m_videoProp.bResolution  = g_stUISystem.cboResolution->GetList()->GetItems()->GetSelect()->GetIndex();
