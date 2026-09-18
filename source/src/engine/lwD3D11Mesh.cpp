@@ -252,6 +252,7 @@ struct MeshState
     int transp_object;
     int terrain;
     int vfx;
+    int hint_additive;
     int fog_on;
     int height_fog;
     int sea;
@@ -589,6 +590,11 @@ void lwD3D11MeshSetTerrain(int enabled)
 void lwD3D11MeshSetVfx(int enabled)
 {
     s_mesh.vfx = enabled ? 1 : 0;
+}
+
+void lwD3D11MeshHintAdditive(int enabled)
+{
+    s_mesh.hint_additive = enabled ? 1 : 0;
 }
 
 int lwD3D11MeshWaterEnhance()
@@ -972,7 +978,8 @@ static void ResolveMeshOutputMerger(lwDeviceObject11* dev, const FvfInfo& info, 
         DWORD a = dev->GetCachedRS(D3DRS_ALPHABLENDENABLE);
         if (a != 0xffffffff && a != 0)
             alpha = 1;
-        if (pass->cache_blend == CACHE_BLEND_FULL)
+        if (pass->cache_blend == CACHE_BLEND_FULL ||
+            (pass->id == MESH_PASS_SCENE && s_mesh.hint_additive))
         {
             srcblend = dev->GetCachedRS(D3DRS_SRCBLEND);
             destblend = dev->GetCachedRS(D3DRS_DESTBLEND);

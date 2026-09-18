@@ -198,8 +198,18 @@ HRESULT RenderStateMgr::BeginSceneObject() {
 	_dev_obj->SetLight(0, &_scnobj_lgt);
 	_dev_obj->LightEnable(0, TRUE);
 
-	if (lwIsDx11Active())
+	if (lwIsDx11Active()) {
 		lwD3D11MeshSetSceneObject(1);
+		if (_dev_obj) {
+			_dev_obj->SetTexture(1, 0);
+			_dev_obj->SetTexture(2, 0);
+			_dev_obj->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+			_dev_obj->SetTextureStageState(2, D3DTSS_COLOROP, D3DTOP_DISABLE);
+			_dev_obj->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+			_dev_obj->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+			_dev_obj->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+		}
+	}
 
 	return 0L;
 }

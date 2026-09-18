@@ -28,12 +28,26 @@
 #include "lwRenderBackend.h"
 #include "lwD3D11Texture.h"
 #include "lwDeviceObject11.h"
+#include "lwD3D11Mesh.h"
 #include "MindPowerRenderConfig.h"
 
 using namespace std;
 
 LW_BEGIN
 
+static int MeshRsaDestIsAdditive(lwRenderStateAtomSet* rsa)
+{
+    if (!rsa)
+        return 0;
+    DWORD id = LW_INVALID_INDEX;
+    if (LW_FAILED(rsa->FindState(&id, D3DRS_DESTBLEND)))
+        return 0;
+    lwRenderStateAtom* seq = rsa->GetStateSeq();
+    if (!seq || id >= rsa->GetStateNum())
+        return 0;
+    const DWORD dest = seq[id].value0;
+    return (dest == D3DBLEND_ONE || dest == D3DBLEND_INVSRCCOLOR || dest == D3DBLEND_SRCCOLOR) ? 1 : 0;
+}
 
 unsigned int __stdcall __thread_proc_load_tex(void* param)
 {
@@ -1586,6 +1600,19 @@ LW_RESULT lwMesh::BeginSet()
 
     _rsa_0.BeginRenderState(dev_obj, 0, LW_MESH_RS_NUM);
 
+    if (lwIsDx11Active())
+    {
+        if (MeshRsaDestIsAdditive(&_rsa_0))
+        {
+            lwD3D11MeshHintAdditive(1);
+            dev_obj->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+        }
+        else
+        {
+            lwD3D11MeshHintAdditive(0);
+        }
+    }
+
 __ret_ok:
     ret = LW_RET_OK;
 __ret:
@@ -2213,6 +2240,13 @@ LW_RESULT lwMtlTexAgent::BeginSet()
         }
         _rsa_0.SetValue(id[0], v[0]);
         _rsa_0.SetValue(id[1], v[1]);
+        // RSA may not contain SRC/DEST (FindState fails). Push the additive
+        // pair into the device cache so DX11 mesh OM can honor it.
+        dev_obj->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+        dev_obj->SetRenderState(D3DRS_SRCBLEND, v[0]);
+        dev_obj->SetRenderState(D3DRS_DESTBLEND, v[1]);
+        if (lwIsDx11Active())
+            lwD3D11MeshHintAdditive(1);
     }
 
     // check opacity flag
@@ -2305,6 +2339,12 @@ LW_RESULT lwMtlTexAgent::BeginSet()
         }
         _rsa_0.BeginRenderState(dev_obj, 0, RSA_SET_SIZE);
 
+        if (lwIsDx11Active() && MeshRsaDestIsAdditive(&_rsa_0))
+        {
+            lwD3D11MeshHintAdditive(1);
+            dev_obj->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+        }
+
     }
     ret = LW_RET_OK;
 __ret:
@@ -2363,6 +2403,9 @@ LW_RESULT lwMtlTexAgent::EndSet()
     }
 
     _rsa_0.EndRenderState(dev_obj, 0, RSA_SET_SIZE);
+
+    if (lwIsDx11Active())
+        lwD3D11MeshHintAdditive(0);
 
     ret = LW_RET_OK;
 __ret:
