@@ -40,8 +40,8 @@ Port or guard every `GetDevice()` site (~75 references in `source/src`). Priorit
 1. **Crash / map enter** — `Scene.cpp` (EffBox, PathBox, SmallMap), `SMallMap.cpp` *(in progress: `MP_LegacyD3D9DeviceOpt()`, PathBox/EffBox null dev_obj)*
 2. **Resources** — `lwResourceMgr.cpp` (`D3DXCreateTextureFromFileEx` → 11 or DDS) *(stencil clear + file-load `#else` branch)*
 3. **UI** — `UIRender.cpp`, `BitmapFont*.cpp`, `GameAppInit.cpp`
-4. **Legacy VS** — `lwxRenderCtrVS.cpp`, `lwShaderMgr.cpp` (DX9 only paths `#if !MINDPOWER_DX11_ONLY`)
-5. **Effects / sky** — `EffectFile.cpp`, `MPMap` sky dome, `MPResManger.cpp` *(LoadTotalVShader no-op on DX11; D3D9 backbuffer paths `#if`-gated)*
+4. **Legacy VS** — `lwxRenderCtrVS.cpp`, `lwShaderMgr.cpp` *(D3D9 VS/PS and constant-table paths `#if MINDPOWER_USE_D3D9_DEVICE`)*
+5. **Effects / sky** — `EffectFile.cpp`, `MPMap` sky dome, `MPResManger.cpp` *(eff.fx stub on DX11-only; MPResManger gated)*
 
 Exit: `MINDPOWER_DX11_ONLY` build with zero unguarded `GetDevice()` calls.
 

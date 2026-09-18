@@ -6,6 +6,7 @@
 #include "lwRenderBackend.h"
 #include "lwD3D11Mesh.h"
 #include "lwD3D11Gaps.h"
+#include "MindPowerRenderConfig.h"
 #include "ShaderLoad.h"
 
 LW_BEGIN
@@ -518,6 +519,7 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_dx8::BeginSet(lwIRenderCtrlAgent* agent)
     }
 
     // ===== pixel shader (bloco adicionado, mantido pr�ximo ao original) =====
+#if MINDPOWER_USE_D3D9_DEVICE
     if (!mPixelShaderName.empty())
     {
         IDirect3DDeviceX* device = dev_obj->GetDevice();
@@ -566,6 +568,7 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_dx8::BeginSet(lwIRenderCtrlAgent* agent)
                 device->SetPixelShader((IDirect3DPixelShaderX*)mPixelShader);
         }
     }
+#endif
 
     // ===== vertex shader =====
     {
@@ -614,8 +617,10 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_dx8::EndSet(lwIRenderCtrlAgent* agent)
         dev_obj->SetRenderState(D3DRS_FOGENABLE, TRUE);
     }
 
+#if MINDPOWER_USE_D3D9_DEVICE
 	if (IDirect3DDeviceX* end_dev = dev_obj->GetDevice())
 		end_dev->SetPixelShader(0);
+#endif
 
 #if(defined LW_USE_DX9)
     dev_obj->SetVertexShader(NULL);
@@ -816,16 +821,17 @@ LW_RESULT lwxRenderCtrlVSVertexBlend::BeginSet(lwIRenderCtrlAgent* agent)
     if (!dev_obj)
         goto __ret;
 
-    dev = dev_obj->GetDevice();
-    if (!dev && !lwIsDx11Active())
-        goto __ret;
-
     if (lwIsDx11Active())
     {
         Dx11ApplyVertexBlend(dev_obj, agent);
         ret = LW_RET_OK;
         goto __ret;
     }
+
+#if MINDPOWER_USE_D3D9_DEVICE
+    dev = dev_obj->GetDevice();
+    if (!dev)
+        goto __ret;
 
     mesh_agent = agent->GetMeshAgent();
     if (!mesh_agent)
@@ -949,6 +955,7 @@ LW_RESULT lwxRenderCtrlVSVertexBlend::BeginSet(lwIRenderCtrlAgent* agent)
     }
 
     ret = LW_RET_OK;
+#endif
 
 __ret:
     // restaura FOG se falhou e t�nhamos desligado
@@ -1016,10 +1023,6 @@ LW_RESULT lwxRenderCtrlVSVertexBlend::BeginSetSubset(DWORD subset, lwIRenderCtrl
     if (!mtltex_agent)
         goto __ret;
 
-    dev = dev_obj->GetDevice();
-    if (!dev && !lwIsDx11Active())
-        goto __ret;
-
     if (lwIsDx11Active())
     {
         mtl = mtltex_agent->GetMaterial();
@@ -1055,6 +1058,11 @@ LW_RESULT lwxRenderCtrlVSVertexBlend::BeginSetSubset(DWORD subset, lwIRenderCtrl
         ret = LW_RET_OK;
         goto __ret;
     }
+
+#if MINDPOWER_USE_D3D9_DEVICE
+    dev = dev_obj->GetDevice();
+    if (!dev)
+        goto __ret;
 
     mtl = mtltex_agent->GetMaterial();
     if (!mtl)
@@ -1148,6 +1156,7 @@ LW_RESULT lwxRenderCtrlVSVertexBlend::BeginSetSubset(DWORD subset, lwIRenderCtrl
     }
 
     ret = LW_RET_OK;
+#endif
 
 __ret:
     return ret;
@@ -1204,7 +1213,10 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_fx::BeginSet(lwIRenderCtrlAgent* agent)
         Dx11ApplyVertexBlend(dev_obj, agent);
         return LW_RET_OK;
     }
+#if MINDPOWER_USE_D3D9_DEVICE
     IDirect3DDeviceX* dev = dev_obj->GetDevice();
+    if (!dev)
+        return LW_RET_FAILED;
     lwIMeshAgent* mesh_agent = agent->GetMeshAgent();
     lwIMesh* mesh = mesh_agent->GetMesh();
     DWORD blend_factor = mesh->GetMeshInfo()->bone_infl_factor;
@@ -1300,6 +1312,9 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_fx::BeginSet(lwIRenderCtrlAgent* agent)
     ret = LW_RET_OK;
 __ret:
     return ret;
+#else
+    return LW_RET_FAILED;
+#endif
 
 }
 LW_RESULT lwxRenderCtrlVSVertexBlend_fx::EndSet(lwIRenderCtrlAgent* agent)
@@ -1335,7 +1350,10 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_fx::BeginSetSubset(DWORD subset, lwIRenderC
         Dx11ResetTexTransform(dev_obj);
         return LW_RET_OK;
     }
+#if MINDPOWER_USE_D3D9_DEVICE
     IDirect3DDeviceX* dev = dev_obj->GetDevice();
+    if (!dev)
+        return LW_RET_FAILED;
 
     lwMaterial* mtl = mtltex_agent->GetMaterial();
 
@@ -1414,6 +1432,9 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_fx::BeginSetSubset(DWORD subset, lwIRenderC
     ret = LW_RET_OK;
 __ret:
     return ret;
+#else
+    return LW_RET_FAILED;
+#endif
 
 }
 LW_RESULT lwxRenderCtrlVSVertexBlend_fx::EndSetSubset(DWORD subset, lwIRenderCtrlAgent* agent)

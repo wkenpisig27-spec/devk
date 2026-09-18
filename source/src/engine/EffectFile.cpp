@@ -12,6 +12,7 @@
 #include "MPRender.h"
 #include "lwRenderBackend.h"
 #include "lwD3D11Gaps.h"
+#include "MindPowerRenderConfig.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -57,6 +58,20 @@ BOOL CMPEffectFile::LoadEffectFromFile( LPCSTR pszfile)
 	HRESULT hr;
 	ID3DXBuffer* pErrorBuffer = NULL;
 #ifdef USE_RENDER
+#if !MINDPOWER_USE_D3D9_DEVICE
+	if (!m_pDev) {
+		return FALSE;
+	}
+	free();
+	_iTechNum = 7;
+	_vecTechniques.resize(7);
+	for (int i = 0; i < 7; ++i)
+		_vecTechniques[i] = (D3DXHANDLE)(INT_PTR)(i + 1);
+	m_passes = 1;
+	lwD3D11Gap(LW_D3D11_FALLBACK, "eff-fx-state-table",
+		"shader\\eff.fx t0-t6 applied as DeviceObject FF states (no D3DX)");
+	return TRUE;
+#else
 	if (lwIsDx11Active() || !m_pDev || !m_pDev->GetDevice()) {
 		free();
 		_iTechNum = 7;
@@ -69,6 +84,7 @@ BOOL CMPEffectFile::LoadEffectFromFile( LPCSTR pszfile)
 		return TRUE;
 	}
 	hr = D3DXCreateEffectFromFile(m_pDev->GetDevice(), pszfile, NULL, NULL, 0, NULL, &m_pEffect, &pErrorBuffer);
+#endif
 #else
 	hr = D3DXCreateEffectFromFile(m_pDev, pszfile, &m_pEffect, &pErrorBuffer);
 #endif
