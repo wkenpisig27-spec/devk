@@ -11,6 +11,7 @@
 #include "lwxRenderCtrlVS.h"
 #include "lwRenderBackend.h"
 #include "lwD3D11Gaps.h"
+#include "MindPowerRenderConfig.h"
 
 
 LW_BEGIN
@@ -275,7 +276,8 @@ LW_RESULT lwInitMeshLibSystem(lwISystem** ret_sys, lwISysGraphics** ret_sys_grap
     if(LW_FAILED(sys->Initialize()))
         goto __ret;
 
-    // check current directx version
+    // D3D9 runtime version probe — skip on DX11-only (DXGI device, not D3D8.1)
+#if MINDPOWER_USE_D3D9_DEVICE
     {
         DWORD ver = sys->GetSystemInfo()->GetDirectXVersion();
         if(ver < DX_VERSION_8_1)
@@ -284,6 +286,7 @@ LW_RESULT lwInitMeshLibSystem(lwISystem** ret_sys, lwISysGraphics** ret_sys_grap
             goto __ret;
         }
     }
+#endif
     {
         // begin init path info
         lwIPathInfo* path_info = 0;
@@ -394,7 +397,8 @@ LW_RESULT lwInitMeshLibSystem(lwISystem** ret_sys, lwISysGraphics** ret_sys_grap
     if(LW_FAILED(sys->Initialize()))
         goto __ret;
 
-    // check current directx version
+    // D3D9 runtime version probe — skip on DX11-only (DXGI device, not D3D8.1)
+#if MINDPOWER_USE_D3D9_DEVICE
     {
         DWORD ver = sys->GetSystemInfo()->GetDirectXVersion();
         if(ver < DX_VERSION_8_1)
@@ -403,6 +407,7 @@ LW_RESULT lwInitMeshLibSystem(lwISystem** ret_sys, lwISysGraphics** ret_sys_grap
             goto __ret;
         }
     }
+#endif
 
     if(LW_FAILED(sys->CreateGraphicsSystem(&sys_graphics)))
         goto __ret;

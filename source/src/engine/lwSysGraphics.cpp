@@ -3,7 +3,9 @@
 #include "stdafx.h"
 #include "lwSysGraphics.h"
 #include "MindPowerRenderConfig.h"
+#if MINDPOWER_USE_D3D9_DEVICE
 #include "lwDeviceObject.h"
+#endif
 #include "lwDeviceObject11.h"
 #include "lwRenderBackend.h"
 #include "lwD3D11Gaps.h"

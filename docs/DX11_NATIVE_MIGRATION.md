@@ -91,11 +91,28 @@ Create*X device macros stay so remaining D3D9 `.cpp` still compiles; they are un
 
 **Smoke (2026-09-19):** login → world after header/lib rename passed.
 
-### Phase 5 — Delete DX9 backend
+### Phase 5 — Delete DX9 backend *(in progress)*
 
-- Remove `lwDeviceObject.cpp`, dual-backend switches, `lwIsDx11Active()` branches
-- Single init path in `lwIFunc.cpp`
-- Update LINUX/DXVK notes (separate VM or abandon DX9-on-Linux for this fork)
+- [x] Exclude `lwDeviceObject.cpp` from Release|x64 (`MINDPOWER_DX11_ONLY`)
+- [x] Gate remaining `lwDeviceObject*` casts (shadow, stream list, VS pixel-shader)
+- [x] Skip D3D8.1 runtime version probe on DX11-only init
+- [x] `lwIsDx11Active()` is a compile-time `1` on DX11-only (header inline); Debug dual-build keeps the runtime check
+- [x] LINUX/DXVK — native client is Windows-only; see below
+- [ ] Drop `d3d9.lib` from game Release (still needed until COM wrappers stop inheriting `IDirect3D*9`)
+- [ ] Strip remaining `if (lwIsDx11Active())` source (optional; already constant-folded)
+
+**Smoke (2026-09-19):** login → world passed after excluding `lwDeviceObject.cpp` and inlining `lwIsDx11Active()`.
+
+Debug|x64 dual-build still compiles `lwDeviceObject.cpp`. D3DX math types stay in `lwDirectXShared.h`.
+
+## Linux / DXVK
+
+The native D3D11 client on this branch (`MINDPOWER_DX11_ONLY`, Release|x64 `Game.exe`) is **Windows-only**. It does not use a D3D9 device, so DXVK’s D3D9 translation path does not apply. A Linux/DXVK play client would need either:
+
+- the dual-build D3D9 backend (`lwDeviceObject`, Debug / `main`), or
+- a separate Vulkan/DXVK-native port (out of scope here)
+
+Server binaries still build on Linux (`source/scripts/build-linux.sh`). Do not treat DX9-on-Linux as a requirement for this fork’s DX11 play path.
 
 ## `GetDevice()` inventory (auto-tracked)
 

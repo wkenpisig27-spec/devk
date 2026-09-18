@@ -2,7 +2,10 @@
 #include "GlobalInc.h"
 #include "MPShadowMap.h"
 #include "MPRender.h"
+#include "MindPowerRenderConfig.h"
+#if MINDPOWER_USE_D3D9_DEVICE
 #include "lwDeviceObject.h"
+#endif
 #include "lwDeviceObject11.h"
 #include "lwD3D11Texture.h"
 #include "lwD3D11Buffer.h"
@@ -357,17 +360,23 @@ static void SetShadowPassFlag(bool on)
         d11->SetShadowPassMode(on);
         return;
     }
+#if MINDPOWER_USE_D3D9_DEVICE
     lwIDeviceObject* obj = ShadowDevObj();
     if (obj)
         static_cast<lwDeviceObject*>(obj)->SetShadowPassMode(on);
+#endif
 }
 
 static bool IsShadowPassFlag()
 {
     if (MindPower::lwDeviceObject11* d11 = MindPower::lwGetActiveDeviceObject11())
         return d11->IsShadowPassMode();
+#if MINDPOWER_USE_D3D9_DEVICE
     lwIDeviceObject* obj = ShadowDevObj();
     return obj ? static_cast<lwDeviceObject*>(obj)->IsShadowPassMode() : false;
+#else
+    return false;
+#endif
 }
 
 static void ApplyShadowSilhouetteStates(lwIDeviceObject* obj, bool cutout)
@@ -791,6 +800,9 @@ void CMPShadowMap::UpdateLightMatrices() {
 }
 
 bool CMPShadowMap::BeginShadowPass() {
+#if !MINDPOWER_USE_D3D9_DEVICE
+    return BeginShadowPassDx11();
+#else
     if (lwIsDx11Active())
         return BeginShadowPassDx11();
 
@@ -878,6 +890,7 @@ bool CMPShadowMap::BeginShadowPass() {
     _pDev->SetPixelShader(NULL);
 
     return true;
+#endif
 }
 
 void CMPShadowMap::SetAlphaCutoutCasterMode(bool enabled) {
@@ -891,6 +904,9 @@ void CMPShadowMap::SetAlphaCutoutCasterMode(bool enabled) {
 }
 
 void CMPShadowMap::EndShadowPass() {
+#if !MINDPOWER_USE_D3D9_DEVICE
+    EndShadowPassDx11();
+#else
     if (lwIsDx11Active())
     {
         EndShadowPassDx11();
@@ -939,6 +955,7 @@ void CMPShadowMap::EndShadowPass() {
     // Restore original View/Proj matrices
     g_Render.SetTransformView(&_matSavedView);
     g_Render.SetTransformProj(&_matSavedProj);
+#endif
 }
 
 void CMPShadowMap::BindShadowMap(int textureStage) {

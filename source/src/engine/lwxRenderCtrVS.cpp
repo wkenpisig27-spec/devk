@@ -2,11 +2,13 @@
 
 #include "stdafx.h"
 #include "lwxRenderCtrlVS.h"
+#include "MindPowerRenderConfig.h"
+#if MINDPOWER_USE_D3D9_DEVICE
 #include "lwDeviceObject.h"
+#endif
 #include "lwRenderBackend.h"
 #include "lwD3D11Mesh.h"
 #include "lwD3D11Gaps.h"
-#include "MindPowerRenderConfig.h"
 #include "ShaderLoad.h"
 
 LW_BEGIN

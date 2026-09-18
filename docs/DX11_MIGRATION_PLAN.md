@@ -64,7 +64,7 @@ So: scene meshes work because of the custom mesh HLSL + FF-state emulation, **no
 
 - Runtime select behind `lwIDeviceObject`. **No** `LW_USE_DX11` compile fork.
 - `GetDevice()` returns NULL on DX11 — callers must use `lwIDeviceObject` / `g_Render` / `lwGetActiveDeviceObject11()`.
-- DX9 remains default and the Linux/DXVK path.
+- Dual-build DX9 remains the Linux/DXVK option. `feature/dx11-native` Release|x64 is Windows D3D11-only (no D3D9 device). See `docs/DX11_NATIVE_MIGRATION.md`.
 - Cel-shade inverted hull stays a second VS pass.
 - Do not copy Crimson shader trees.
 

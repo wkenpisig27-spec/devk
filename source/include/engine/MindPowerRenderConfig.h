@@ -6,6 +6,7 @@
 //   * No lwDeviceObject (D3D9) construction
 //   * Backend forced to DX11 at runtime
 //   * Long-term: remove dual-backend code when Phase 5 completes
+//     (Release|x64 already excludes lwDeviceObject.cpp)
 //
 // MINDPOWER_NATIVE_DX11_API — Phase 4+ gate for subsystems that include d3d11.h
 //   via lwDirectX.h. Reserved; do not require it for existing DeviceObject11 paths.

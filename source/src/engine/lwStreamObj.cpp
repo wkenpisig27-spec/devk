@@ -1,10 +1,13 @@
 //
 #include "stdafx.h"
 #include "lwStreamObj.h"
-#include "lwDeviceObject.h"
 #include "lwErrorCode.h"
 #include "lwStdInc.h"
 #include "lwRenderBackend.h"
+#include "MindPowerRenderConfig.h"
+#if MINDPOWER_USE_D3D9_DEVICE
+#include "lwDeviceObject.h"
+#endif
 
 LW_BEGIN
 
@@ -1938,11 +1941,13 @@ LW_RESULT lwVertexBuffer::Release()
     if(LW_FAILED(Destroy()))
         goto __ret;
     {
+#if MINDPOWER_USE_D3D9_DEVICE
         if (!lwIsDx11Active())
         {
             lwDeviceObject* devobj = reinterpret_cast<lwDeviceObject*>(_dev_obj);
             devobj->_ReleaseStreamBuffer(this);
         }
+#endif
 
         LW_DELETE(this);
     }
@@ -2078,11 +2083,13 @@ LW_RESULT lwIndexBuffer::Release()
     if(LW_FAILED(Destroy()))
         goto __ret;
     {
+#if MINDPOWER_USE_D3D9_DEVICE
         if (!lwIsDx11Active())
         {
             lwDeviceObject* devobj = reinterpret_cast<lwDeviceObject*>(_dev_obj);
             devobj->_ReleaseStreamBuffer(this);
         }
+#endif
 
         LW_DELETE(this);
     }

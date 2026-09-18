@@ -71,14 +71,12 @@ lwRenderBackend lwGetActiveRenderBackend()
 	return s_active;
 }
 
+#if MINDPOWER_USE_D3D9_DEVICE
 int lwIsDx11Active()
 {
-#if !MINDPOWER_USE_D3D9_DEVICE
-	return 1;
-#else
 	return (s_active == LW_RENDER_BACKEND_DX11) ? 1 : 0;
-#endif
 }
+#endif
 
 lwRenderBackend lwResolveRenderBackend()
 {
