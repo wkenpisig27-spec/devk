@@ -1,6 +1,8 @@
 //
 #include "stdafx.h"
 #include "lwMisc.h"
+#include "lwRenderBackend.h"
+#include "lwD3D11Mesh.h"
 
 LW_BEGIN
 
@@ -105,12 +107,30 @@ int lwHexStrToInt(const char* str)
 LW_RESULT lwRenderStateAtomBeginSetRS(lwIDeviceObject* dev_obj, lwRenderStateAtom* rsa_seq, DWORD num)
 {
     lwRenderStateAtom* p;
+    const int dx11 = lwIsDx11Active();
     for(DWORD i = 0; i < num; i++)
     {
         p = &rsa_seq[i];
 
         if(p->state == LW_INVALID_INDEX)
             break;
+
+        if (dx11)
+        {
+            if (p->state >= D3DRS_ZENABLE)
+            {
+                if (!lwD3D11MeshReadRs(p->state, &p->value1))
+                    p->value1 = p->value0;
+                lwD3D11MeshNoteRs(p->state, p->value0);
+            }
+            else
+            {
+                if (!lwD3D11MeshReadTss(0, p->state, &p->value1))
+                    p->value1 = p->value0;
+                lwD3D11MeshNoteTss(0, p->state, p->value0);
+            }
+            continue;
+        }
 
         if (p->state >= D3DRS_ZENABLE)
             dev_obj->GetRenderState(p->state, &p->value1);
@@ -130,6 +150,7 @@ LW_RESULT lwRenderStateAtomBeginSetRS(lwIDeviceObject* dev_obj, lwRenderStateAto
 LW_RESULT lwRenderStateAtomEndSetRS(lwIDeviceObject* dev_obj, lwRenderStateAtom* rsa_seq, DWORD num)
 {
     lwRenderStateAtom* p;
+    const int dx11 = lwIsDx11Active();
     for(DWORD i = 0; i < num; i++)
     {
         p = &rsa_seq[i];
@@ -139,7 +160,14 @@ LW_RESULT lwRenderStateAtomEndSetRS(lwIDeviceObject* dev_obj, lwRenderStateAtom*
 
         if(p->value0 != p->value1)
         {
-            if (p->state >= D3DRS_ZENABLE)
+            if (dx11)
+            {
+                if (p->state >= D3DRS_ZENABLE)
+                    lwD3D11MeshNoteRs(p->state, p->value1);
+                else
+                    lwD3D11MeshNoteTss(0, p->state, p->value1);
+            }
+            else if (p->state >= D3DRS_ZENABLE)
                 dev_obj->SetRenderState((D3DRENDERSTATETYPE)p->state, p->value1);
             else
                 dev_obj->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)p->state, p->value1);
@@ -153,12 +181,21 @@ LW_RESULT lwRenderStateAtomEndSetRS(lwIDeviceObject* dev_obj, lwRenderStateAtom*
 LW_RESULT lwRenderStateAtomBeginSetTSS(DWORD stage, lwIDeviceObject* dev_obj, lwRenderStateAtom* rsa_seq, DWORD num)
 {
     lwRenderStateAtom* p;
+    const int dx11 = lwIsDx11Active();
     for(DWORD i = 0; i < num; i++)
     {
         p = &rsa_seq[i];
 
         if(p->state == LW_INVALID_INDEX)
             break;
+
+        if (dx11)
+        {
+            if (!lwD3D11MeshReadSamp(p->state, &p->value1))
+                p->value1 = p->value0;
+            lwD3D11MeshNoteSamp(p->state, p->value0);
+            continue;
+        }
 
         dev_obj->GetSamplerState(stage, (D3DSAMPLERSTATETYPE)p->state, &p->value1);
         if(p->value0 != p->value1)
@@ -172,6 +209,7 @@ LW_RESULT lwRenderStateAtomBeginSetTSS(DWORD stage, lwIDeviceObject* dev_obj, lw
 LW_RESULT lwRenderStateAtomEndSetTSS(DWORD stage, lwIDeviceObject* dev_obj, lwRenderStateAtom* rsa_seq, DWORD num)
 {
     lwRenderStateAtom* p;
+    const int dx11 = lwIsDx11Active();
     for(DWORD i = 0; i < num; i++)
     {
         p = &rsa_seq[i];
@@ -181,7 +219,10 @@ LW_RESULT lwRenderStateAtomEndSetTSS(DWORD stage, lwIDeviceObject* dev_obj, lwRe
 
         if(p->value0 != p->value1)
         {
-            dev_obj->SetSamplerState(stage, (D3DSAMPLERSTATETYPE)p->state, p->value1);
+            if (dx11)
+                lwD3D11MeshNoteSamp(p->state, p->value1);
+            else
+                dev_obj->SetSamplerState(stage, (D3DSAMPLERSTATETYPE)p->state, p->value1);
             p->value1 = p->value0;
         }
     }

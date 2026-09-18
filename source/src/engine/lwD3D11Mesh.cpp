@@ -749,6 +749,62 @@ void lwD3D11MeshNoteSamp(DWORD type, DWORD value)
         s_draw.samp_mag = value;
 }
 
+int lwD3D11MeshReadRs(DWORD state, DWORD* value)
+{
+    if (!value)
+        return 0;
+    switch (state)
+    {
+    case D3DRS_ALPHABLENDENABLE: *value = s_draw.alpha ? TRUE : FALSE; return 1;
+    case D3DRS_SRCBLEND: *value = s_draw.src; return 1;
+    case D3DRS_DESTBLEND: *value = s_draw.dest; return 1;
+    case D3DRS_ZENABLE: *value = s_draw.zenable ? TRUE : FALSE; return 1;
+    case D3DRS_ZWRITEENABLE: *value = s_draw.zwrite ? TRUE : FALSE; return 1;
+    case D3DRS_CULLMODE: *value = s_draw.cull; return 1;
+    case D3DRS_MULTISAMPLEANTIALIAS: *value = s_draw.msaa ? TRUE : FALSE; return 1;
+    case D3DRS_LIGHTING: *value = s_draw.lighting ? TRUE : FALSE; return 1;
+    case D3DRS_AMBIENT: *value = s_draw.ambient; return 1;
+    case D3DRS_TEXTUREFACTOR: *value = s_draw.tfactor; return 1;
+    case D3DRS_ALPHATESTENABLE: *value = s_draw.atest ? TRUE : FALSE; return 1;
+    case D3DRS_ALPHAREF: *value = s_draw.aref; return 1;
+    case D3DRS_ALPHAFUNC: *value = s_draw.afunc; return 1;
+    default: return 0;
+    }
+}
+
+int lwD3D11MeshReadTss(DWORD stage, DWORD type, DWORD* value)
+{
+    if (!value || stage > 2)
+        return 0;
+    switch (type)
+    {
+    case D3DTSS_COLOROP: *value = s_draw.cop[stage]; return 1;
+    case D3DTSS_COLORARG1: *value = s_draw.ca1[stage]; return 1;
+    case D3DTSS_COLORARG2: *value = s_draw.ca2[stage]; return 1;
+    case D3DTSS_ALPHAARG1: *value = s_draw.aa1[stage]; return 1;
+    case D3DTSS_ALPHAARG2: *value = s_draw.aa2[stage]; return 1;
+    case D3DTSS_TEXTURETRANSFORMFLAGS: *value = s_draw.ttff[stage]; return 1;
+    default: return 0;
+    }
+}
+
+int lwD3D11MeshReadSamp(DWORD type, DWORD* value)
+{
+    if (!value)
+        return 0;
+    if (type == D3DSAMP_ADDRESSU)
+    {
+        *value = s_draw.samp_addr;
+        return 1;
+    }
+    if (type == D3DSAMP_MAGFILTER)
+    {
+        *value = s_draw.samp_mag;
+        return 1;
+    }
+    return 0;
+}
+
 static const char* kEffHLSL =
     "cbuffer CB0 : register(b0) {\n"
     "  row_major float4x4 world;\n"

@@ -130,12 +130,16 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 Highest-value leftover vs the native target table:
 
-1. Leftover D3D9 *language*: some materials still apply RSA atoms via `SetRenderState` (hair). Pass begin, `EnableAlpha`, additive materials, and terrain combiners use native setters.
+1. Leftover D3D9 *language*: `GetDevice()` still returns null; `lwDeviceObject.h` is still the leftover type. Material RSA no longer talks D3DRS.
+
+### native RSA apply — **complete**
+
+- Hair/cape/opacity/mesh RSA atoms apply through `lwD3D11MeshNoteRs` / `NoteTss` / `NoteSamp` (save/restore from `MeshNativeDraw`, not `SetRenderState`).
+- DX11 skips character/scene/transp *pass* RSA begin/end. Per-mesh material RSA still runs.
 
 ### native write APIs — **complete**
 
 - `EnableAlpha`, `RenderStateMgr` pass begin, additive materials, and terrain splat combiners call `lwD3D11MeshSetAlpha` / `SetBlend` / `SetCombiner` instead of D3DRS/TSS.
-- DX11 skips character/scene/transp RSA begin/end.
 
 ### native draw notes — **complete**
 
