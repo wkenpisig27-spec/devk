@@ -59,7 +59,7 @@ Exit criterion met: no unguarded `GetDevice()` in the DX11-only compile; dual-bu
 
 1. **Audit** — `docs/DX11_PHASE2_D3DX_INVENTORY.txt` (symbols still referenced under `MINDPOWER_DX11_ONLY`)
 2. **Textures** — all runtime loads via `lwD3D11Texture` / `lwD3D11CreateTextureFromFile` / DDS path
-3. **Link** — remove `d3dx9.lib` from Release x64 `game.vcxproj` (keep `d3d9.lib` until Phase 5 if still required)
+3. **Link** — remove `d3dx9.lib` from Release x64 `game.vcxproj` *(done; link verified)* (keep `d3d9.lib` until Phase 5 if still required)
 4. **Math** — defer D3DXMath → DirectXMath unless link audit forces it
 
 Exit: Release|x64 builds without `d3dx9.lib`; Phase 1 smoke still passes.

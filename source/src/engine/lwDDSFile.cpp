@@ -3,6 +3,10 @@
 #include "lwDDSFile.h"
 #include "lwErrorCode.h"
 #include "lwGraphicsutil.h"
+#include "MindPowerRenderConfig.h"
+#include "lwRenderBackend.h"
+#include "lwDeviceObject11.h"
+#include "lwD3D11Texture.h"
 LW_BEGIN
 
 LW_STD_IMPLEMENTATION(lwDDSFile)
@@ -43,23 +47,33 @@ LW_RESULT lwDDSFile::LoadOriginTexture(const char* file, DWORD mip_level, D3DFOR
 
     IDirect3DTextureX* tex = 0;
 
-    if(FAILED(D3DXCreateTextureFromFileEx(
-        _dev, 
-        file,
-        D3DX_DEFAULT, 
-        D3DX_DEFAULT,
-        mip_level,
-        0,
-        format,
-        D3DPOOL_MANAGED,
-        D3DX_FILTER_POINT,
-        D3DX_FILTER_POINT,
-        colorkey,
-        NULL,
-        NULL,
-        &tex)))
+#if MINDPOWER_USE_D3D9_DEVICE
+    if (_dev && !MindPowerDx11OnlyBuild() && !lwIsDx11Active()) {
+        if(FAILED(D3DXCreateTextureFromFileEx(
+            _dev,
+            file,
+            D3DX_DEFAULT,
+            D3DX_DEFAULT,
+            mip_level,
+            0,
+            format,
+            D3DPOOL_MANAGED,
+            D3DX_FILTER_POINT,
+            D3DX_FILTER_POINT,
+            colorkey,
+            NULL,
+            NULL,
+            &tex)))
+        {
+            goto __ret;
+        }
+    } else
+#endif
     {
-        goto __ret;
+        lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
+        if (!d11 || LW_FAILED(lwD3D11CreateTextureFromFile(
+                d11->GetD3D11Device(), file, colorkey, &tex)) || !tex)
+            goto __ret;
     }
     
     {

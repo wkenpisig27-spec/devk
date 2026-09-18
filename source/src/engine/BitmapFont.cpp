@@ -237,12 +237,13 @@ bool CBitmapFont::ParsePage(const char* line, const char* texturePath, IDirect3D
     sprintf_s(fullPath, "%s%s", texturePath, fileName);
     
     IDirect3DTextureX* pTexture = nullptr;
-    if (lwIsDx11Active()) {
+    if (MindPowerDx11OnlyBuild() || lwIsDx11Active()) {
         lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
         if (!d11 || !d11->GetD3D11Device() ||
             LW_FAILED(lwD3D11CreateTextureFromFile(d11->GetD3D11Device(), fullPath, 0, &pTexture))) {
             pTexture = nullptr;
         }
+#if MINDPOWER_USE_D3D9_DEVICE
     } else {
         HRESULT hr = D3DXCreateTextureFromFileExA(
             pDevice,
@@ -263,6 +264,9 @@ bool CBitmapFont::ParsePage(const char* line, const char* texturePath, IDirect3D
         if (FAILED(hr))
             pTexture = nullptr;
     }
+#else
+    }
+#endif
     
     if (!pTexture) {
         OutputDebugStringA("BitmapFont: Failed to load texture: ");
