@@ -273,14 +273,14 @@ void CSMallWnd::Render() {
 		d11->SetViewPort(&vp);
 		return;
 	}
-	if (!g_Render.GetDevice())
-		return;
-	g_Render.GetDevice()->GetViewport(&vp);
-	g_Render.GetDevice()->SetViewport(&cvp);
-
-	RenderScene();
-
-	g_Render.GetDevice()->SetViewport(&vp);
+#if MINDPOWER_USE_D3D9_DEVICE
+	if (IDirect3DDeviceX* dev = g_Render.GetDevice()) {
+		dev->GetViewport(&vp);
+		dev->SetViewport(&cvp);
+		RenderScene();
+		dev->SetViewport(&vp);
+	}
+#endif
 
 	// RenderMask();
 }
@@ -1259,8 +1259,10 @@ void CAniWnd::RenderScene() {
 	if (_bClockOffscreen) {
 		if (d11)
 			d11->Clear(D3DCLEAR_TARGET, 0x00000000, 0, 0);
-		else if (g_Render.GetDevice())
-			g_Render.GetDevice()->Clear(0, 0, D3DCLEAR_TARGET, 0x00000000, 0, 0);
+#if MINDPOWER_USE_D3D9_DEVICE
+		else if (IDirect3DDeviceX* dev = g_Render.GetDevice())
+			dev->Clear(0, 0, D3DCLEAR_TARGET, 0x00000000, 0, 0);
+#endif
 	}
 	D3DXMATRIX matIdentity;
 	D3DXMatrixIdentity(&matIdentity);
@@ -1428,12 +1430,14 @@ void CCharacter2D::Render() {
 		_vp.MaxZ = vp.MaxZ;
 		d11->SetViewPort(&_vp);
 		d11->Clear(D3DCLEAR_ZBUFFER, 0, 1, 0);
-	} else if (g_Render.GetDevice()) {
-		g_Render.GetDevice()->GetViewport(&vp);
+#if MINDPOWER_USE_D3D9_DEVICE
+	} else if (IDirect3DDeviceX* dev = g_Render.GetDevice()) {
+		dev->GetViewport(&vp);
 		_vp.MinZ = vp.MinZ;
 		_vp.MaxZ = vp.MaxZ;
-		g_Render.GetDevice()->SetViewport(&_vp);
-		g_Render.GetDevice()->Clear(0, 0, D3DCLEAR_ZBUFFER, 0, 1, 0);
+		dev->SetViewport(&_vp);
+		dev->Clear(0, 0, D3DCLEAR_ZBUFFER, 0, 1, 0);
+#endif
 	} else {
 		return;
 	}

@@ -16,6 +16,7 @@
 #include "lwPhysique.h"
 #include "lwRenderBackend.h"
 #include "lwD3D11Gaps.h"
+#include "MindPowerRenderConfig.h"
 
 using namespace std;
 
@@ -316,6 +317,7 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX
 		m_d3dBackBuffer.Width = bb_w;
 		m_d3dBackBuffer.Height = bb_h;
 		m_d3dBackBuffer.Format = D3DFMT_A8R8G8B8;
+#if MINDPOWER_USE_D3D9_DEVICE
 	} else {
 		IDirect3DSurfaceX* pBackBuffer = 0;
 		m_pDev->GetDevice()->GetBackBuffer( 0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer );
@@ -324,6 +326,9 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX
 			pBackBuffer->Release();
 		}
 	}
+#else
+	}
+#endif
 #else
 	{
 		IDirect3DSurfaceX* pBackBuffer = 0;
@@ -360,9 +365,13 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX
 	if (lwIsDx11Active() || !m_pDev->GetDevice()) {
 		lwD3D11Gap(LW_D3D11_SKIP, "initres-getdevicecaps",
 			"GetDeviceCaps skipped on DX11; using synthetic MPRender caps");
+#if MINDPOWER_USE_D3D9_DEVICE
 	} else {
 		m_pDev->GetDevice()->GetDeviceCaps(&m_caps);
 	}
+#else
+	}
+#endif
 #else
 	m_pDev->GetDeviceCaps(&m_caps);       // initialize m_pd3dDevice before using
 #endif
@@ -1560,6 +1569,14 @@ bool	CMPResManger::LoadTotalEffect()
 
 bool	CMPResManger::LoadTotalVShader()
 {
+#ifdef USE_RENDER
+	if (lwIsDx11Active() || !m_pDev->GetDevice())
+		return true;
+#endif
+#if !MINDPOWER_USE_D3D9_DEVICE
+	return true;
+#endif
+
 	char t_Path[MAX_PATH];
 		
 	LPD3DXBUFFER pCode;   //!?????
@@ -2458,6 +2475,7 @@ BOOL CMPResManger::OnResetDevice()
 	if (lwIsDx11Active() || !m_pDev->GetDevice()) {
 		lwD3D11Gap(LW_D3D11_SKIP, "resetdevice-getbackbuffer",
 			"OnResetDevice GetBackBuffer is D3D9; keep the HWND-sized desc from InitRes");
+#if MINDPOWER_USE_D3D9_DEVICE
 	} else {
 		IDirect3DSurfaceX* pBackBuffer = 0;
 		m_pDev->GetDevice()->GetBackBuffer( 0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer );
@@ -2466,6 +2484,9 @@ BOOL CMPResManger::OnResetDevice()
 			pBackBuffer->Release();
 		}
 	}
+#else
+	}
+#endif
 #else
 	IDirect3DSurfaceX* pBackBuffer;
 	m_pDev->GetBackBuffer( 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer );

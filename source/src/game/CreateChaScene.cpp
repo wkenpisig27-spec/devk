@@ -2,6 +2,7 @@
 
 #include "createchascene.h"
 #include "lwDeviceObject11.h"
+#include "MindPowerRenderConfig.h"
 
 #include "CameraCtrl.h"
 #include "GameApp.h"
@@ -1439,10 +1440,12 @@ void CCreateChaScene::RenderCha(int x, int y) {
 		d11->Clear(D3DCLEAR_ZBUFFER, 0, 1.0f, 0);
 		d11->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
 		d11->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+#if MINDPOWER_USE_D3D9_DEVICE
 	} else if (IDirect3DDeviceX* d3d9 = g_Render.GetDevice()) {
 		d3d9->Clear(0, NULL, D3DCLEAR_ZBUFFER, 0, 1.0f, 0);
 		d3d9->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
 		d3d9->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+#endif
 	}
 
 	if (m_nSelChaIndex < 0 || m_nSelChaIndex > 3)

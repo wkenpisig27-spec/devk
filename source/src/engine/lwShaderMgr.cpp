@@ -8,6 +8,7 @@
 #include "lwRenderBackend.h"
 #include "lwD3D11Gaps.h"
 #include "lwShaderMgr11.h"
+#include "MindPowerRenderConfig.h"
 
 LW_BEGIN
 
@@ -129,6 +130,14 @@ LW_RESULT lwShaderMgr8::RegisterVertexShader(DWORD type, DWORD* code, DWORD size
 
     DWORD handle;
     IDirect3DDeviceX* dev = _dev_obj->GetDevice();
+    if (!dev) {
+#if !MINDPOWER_USE_D3D9_DEVICE
+        goto __ret;
+#else
+        if (lwIsDx11Active())
+            goto __ret;
+#endif
+    }
 
     if(type < 0 || type >= _vs_size)
         goto __ret;
@@ -136,7 +145,7 @@ LW_RESULT lwShaderMgr8::RegisterVertexShader(DWORD type, DWORD* code, DWORD size
     if(_vs_seq[type].handle)
         goto __ret;
 
-    if(FAILED(dev->CreateVertexShader(decl, code, &handle, usage)))
+    if (!dev || FAILED(dev->CreateVertexShader(decl, code, &handle, usage)))
         goto __ret;
 
     {

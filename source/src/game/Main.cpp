@@ -18,6 +18,7 @@
 #include "SceneObjFile.h"
 #include "UIImeinput.h"
 #include "GameConfig.h"
+#include "MindPowerRenderConfig.h"
 #include "PacketCmd.h"
 #include "UIsystemform.h"
 #include "EffectObj.h"
@@ -593,9 +594,11 @@ catch (std::exception& e) {
 
 			D3DCAPSX caps;
 			memset(&caps, 0, sizeof(caps));
+#if MINDPOWER_USE_D3D9_DEVICE
 			if (IDirect3DDeviceX* d3d9 = g_Render.GetDevice())
 				d3d9->GetDeviceCaps(&caps);
 			else
+#endif
 				caps = g_Render.GetOrgCap();
 
 			fprintf(fp, "DeviceType %X\r\n", caps.DeviceType);

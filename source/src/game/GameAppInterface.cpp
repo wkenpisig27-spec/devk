@@ -20,6 +20,7 @@
 #include "WorldScene.h"
 
 #include "GlobalVar.h"
+#include "MindPowerRenderConfig.h"
 #include "PlaySound.h"
 #include "PacketCmd.h"
 #include "Track.h"
@@ -485,6 +486,7 @@ BOOL CGameApp::_CreateSmMap(MPTerrain* pTerr) {
 
 		g_Render.CaptureScreen(fileName);
 
+#if MINDPOWER_USE_D3D9_DEVICE
 		IDirect3DTextureX* pTex = nullptr;
 		if (IDirect3DDeviceX* d3d9 = g_Render.GetDevice()) {
 			D3DXCreateTextureFromFileEx(d3d9,
@@ -506,6 +508,7 @@ BOOL CGameApp::_CreateSmMap(MPTerrain* pTerr) {
 				SAFE_RELEASE(pTex);
 			}
 		}
+#endif
 	}
 	return TRUE;
 }
