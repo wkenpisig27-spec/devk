@@ -198,6 +198,9 @@ HRESULT RenderStateMgr::BeginSceneObject() {
 	_dev_obj->SetLight(0, &_scnobj_lgt);
 	_dev_obj->LightEnable(0, TRUE);
 
+	if (lwIsDx11Active())
+		lwD3D11MeshSetSceneObject(1);
+
 	return 0L;
 }
 HRESULT RenderStateMgr::BeginSceneItem() {
@@ -211,6 +214,8 @@ HRESULT RenderStateMgr::BeginTranspObject() {
 		_rsa_transpobj->BeginRenderState(_dev_obj, 0, 10);
 		_rsa_transpobj->BeginTextureStageState(_dev_obj, 10, 10, 0);
 	}
+	if (lwIsDx11Active())
+		lwD3D11MeshSetTranspObject(1);
 	return 0L;
 }
 
@@ -248,6 +253,9 @@ HRESULT RenderStateMgr::EndSceneObject() {
 		}
 	}
 
+	if (lwIsDx11Active())
+		lwD3D11MeshSetSceneObject(0);
+
 	return 0L;
 }
 HRESULT RenderStateMgr::EndSceneItem() {
@@ -261,5 +269,7 @@ HRESULT RenderStateMgr::EndTranspObject() {
 		_rsa_transpobj->EndRenderState(_dev_obj, 0, 10);
 		_rsa_transpobj->EndTextureStageState(_dev_obj, 10, 10, 0);
 	}
+	if (lwIsDx11Active())
+		lwD3D11MeshSetTranspObject(0);
 	return 0L;
 }

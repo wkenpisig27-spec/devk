@@ -1,33 +1,26 @@
 # Phase 2 — D3DX API inventory (link-time targets for MINDPOWER_DX11_ONLY Release x64)
+# Status: exit met — Release|x64 game links without d3dx9.lib; smoke passed 2026-09-19.
 # D3DXMath types (D3DXMATRIX, D3DXVector*) are headers; keep until optional DirectXMath migration.
 # This list is D3DX *library* calls (d3dx9.lib).
 
-## Textures (priority — route to lwD3D11CreateTextureFromFile / lwLoadTex / DDS)
-source/src/engine/lwResourceMgr.cpp          D3DXCreateTextureFromFileEx, D3DXCreateTextureFromFile (#if dual)
-source/src/engine/lwDDSFile.cpp              D3DXCreateTextureFromFileEx, D3DXLoadSurfaceFromSurface, D3DXLoadVolumeFromVolume
-source/src/engine/lwDeviceObject.cpp       D3DXCreateTextureFromFileInMemoryEx
-source/src/engine/BitmapFont.cpp             D3DXCreateTextureFromFileExA (#else dual)
-source/src/engine/d3dutil.cpp                D3DXCreateTextureFromFileEx
-source/src/game/SMallMap.cpp                 D3DXCreateTextureFromFileEx (#ifndef MGR)
-source/src/game/GameAppInterface.cpp         D3DXCreateTextureFromFileEx, D3DXSaveTextureToFile (#if dual, editor)
+## Textures — DONE (DX11 path or #if MINDPOWER_USE_D3D9_DEVICE)
+source/src/engine/lwResourceMgr.cpp          D3DXCreateTextureFromFileEx (#if dual)
+source/src/engine/lwDDSFile.cpp              D3DXCreateTextureFromFileEx, D3DXLoad* (#if dual)
+source/src/engine/lwDeviceObject.cpp       D3DXCreateTextureFromFileInMemoryEx (#if dual)
+source/src/engine/BitmapFont.cpp             D3DXCreateTextureFromFileExA (#if dual)
+source/src/game/SMallMap.cpp                 D3DXCreateTextureFromFileEx (#ifndef MGR — inactive; MGR defined)
+source/src/game/GameAppInterface.cpp         D3DXCreateTextureFromFileEx (#if dual, editor)
 
-## Shaders / effects
+## Shaders / effects — dual-build only (not linked on DX11-only dead strip)
 source/src/engine/lwShaderMgr.cpp            D3DXAssembleShader*, D3DXCompileShader*
-source/src/engine/lwShaderMgr.cpp            ID3DXInclude (ShaderIncludeHandler)
-source/src/engine/MPResManger.cpp            D3DXAssembleShaderFromFile (#if MINDPOWER_USE_D3D9_DEVICE body)
-source/src/engine/lwxRenderCtrVS.cpp           D3DXAssembleShaderFromFile, D3DXGetShaderConstantTable (#if gated)
+source/src/engine/MPResManger.cpp            D3DXAssembleShaderFromFile (#if !MINDPOWER_USE_D3D9_DEVICE early out)
+source/src/engine/lwxRenderCtrVS.cpp           D3DXAssembleShaderFromFile (#if gated)
 source/src/engine/MPMap.cpp                  D3DXAssembleShaderFromFile (#if MINDPOWER_USE_D3D9_DEVICE)
 source/src/engine/EffectFile.cpp             D3DXCreateEffectFromFile (#if dual)
-source/src/engine/MPShadowMap.cpp              D3DXCreateEffect
-source/src/engine/d3dutil.cpp                D3DXAssembleShaderFromFile
+source/src/engine/MPShadowMap.cpp              D3DXCreateEffect (CreateDx11 first when lwIsDx11Active)
+source/src/engine/d3dutil.cpp                D3DXCreateTextureFromFileEx, D3DXAssembleShaderFromFile (legacy util)
 
-## Sprites / misc
+## Sprites / misc — gated or inactive
 source/src/engine/MPRender.cpp               D3DXCreateSprite (#if MINDPOWER_USE_D3D9_DEVICE)
 source/src/game/UIRender.cpp                 D3DXCreateSprite (#if dual)
 source/src/engine/mygraph.cpp                D3DXCreateTexture (legacy util)
-
-## Phase 2 order
-1. Gate or replace remaining compiled D3DX texture paths on DX11-only
-2. Gate D3DX shader compile paths (ShaderMgr11 already primary on DX11)
-3. Trial link without d3dx9.lib on game Release x64; fix unresolved symbols
-4. Repeat for engine if needed

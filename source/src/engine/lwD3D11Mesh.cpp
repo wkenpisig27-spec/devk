@@ -245,6 +245,8 @@ struct MeshState
     UINT fan_ib_prims;
     int stylized;
     int character;
+    int scene_object;
+    int transp_object;
     int fog_on;
     int height_fog;
     int sea;
@@ -478,6 +480,8 @@ LW_RESULT lwD3D11MeshInit(ID3D11Device* device, ID3D11DeviceContext* context)
     s_mesh.outline_color[3] = 0.70f;
     s_mesh.stylized = 1;
     s_mesh.character = 0;
+    s_mesh.scene_object = 0;
+    s_mesh.transp_object = 0;
     s_mesh.fog_on = 1;
     s_mesh.height_fog = 0;
     s_mesh.sea = 0;
@@ -553,6 +557,16 @@ void lwD3D11MeshSetSea(int enabled)
 void lwD3D11MeshSetCharacter(int enabled)
 {
     s_mesh.character = enabled ? 1 : 0;
+}
+
+void lwD3D11MeshSetSceneObject(int enabled)
+{
+    s_mesh.scene_object = enabled ? 1 : 0;
+}
+
+void lwD3D11MeshSetTranspObject(int enabled)
+{
+    s_mesh.transp_object = enabled ? 1 : 0;
 }
 
 int lwD3D11MeshWaterEnhance()
@@ -1009,7 +1023,7 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     cb.outlineColor[3] = s_mesh.outline_color[3];
     cb.more[0] = info.has_diff ? 1.0f : 0.0f;
     cb.more[1] = (lighting == 0 || !info.has_nrm) ? 1.0f : 0.0f;
-    if (s_mesh.character || info.has_blend)
+    if (s_mesh.character || info.has_blend || s_mesh.transp_object)
         cb.more[1] = 1.0f;
     DWORD cop0 = dev->GetCachedTSS(0, D3DTSS_COLOROP);
     DWORD ca1 = dev->GetCachedTSS(0, D3DTSS_COLORARG1);

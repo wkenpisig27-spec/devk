@@ -55,20 +55,23 @@ Delivered:
 
 Exit criterion met: no unguarded `GetDevice()` in the DX11-only compile; dual-build retains D3D9 behind `#if MINDPOWER_USE_D3D9_DEVICE`.
 
-### Phase 2 — Replace D3DX9 link dependency *(in progress)*
+### Phase 2 — Replace D3DX9 link dependency — **complete**
 
-1. **Audit** — `docs/DX11_PHASE2_D3DX_INVENTORY.txt` (symbols still referenced under `MINDPOWER_DX11_ONLY`)
-2. **Textures** — `BitmapFont`, `lwDDSFile::LoadOriginTexture`, `lwResourceMgr` file loads, `lwDeviceObject::CreateTextureFromFileInMemory` delegate to DX11; remaining inventory in `DX11_PHASE2_D3DX_INVENTORY.txt`
-3. **Link** — remove `d3dx9.lib` from Release x64 `game.vcxproj` *(done; link verified)* (keep `d3d9.lib` until Phase 5 if still required)
+1. **Audit** — `docs/DX11_PHASE2_D3DX_INVENTORY.txt` (dual-build D3DX behind `#if MINDPOWER_USE_D3D9_DEVICE` or dead-stripped when `lwIsDx11Active()` is constant)
+2. **Textures** — `BitmapFont`, `lwDDSFile`, `lwResourceMgr`, `lwDeviceObject::CreateTextureFromFileInMemory` on DX11 helpers
+3. **Link** — `d3dx9.lib` removed from Release x64 `game.vcxproj` (keep `d3d9.lib` until Phase 5)
 4. **Math** — defer D3DXMath → DirectXMath unless link audit forces it
 
-Exit: Release|x64 builds without `d3dx9.lib`; Phase 1 smoke still passes.
+**Smoke (2026-09-19):** same Phase 1 checklist passed after Phase 2 builds.
 
-### Phase 3 — Shrink FF emulation
+Exit criterion met: Release|x64 links without `d3dx9.lib`; gameplay smoke passes.
 
-- Audit `lwDeviceObject11::SetRenderState` / TSS cache — classify by draw pass
-- Introduce native mesh/terrain PSOs; stop translating unused D3D9 states
-- Document state contract per subsystem (world, UI, VFX)
+### Phase 3 — Shrink FF emulation *(in progress)*
+
+- [x] Pass contract doc — `docs/DX11_PHASE3_FF_AUDIT.md` (RS/TSS consumed by `lwD3D11Mesh`)
+- [x] Tag scene-object + transparent passes — `RenderStateMgr` → `lwD3D11MeshSetSceneObject` / `SetTranspObject`
+- [ ] Per-subsystem `SetRenderState` inventory (world, UI, VFX)
+- [ ] Native PSO bundles per pass; no-op uncached D3DRS on DX11-only
 
 ### Phase 4 — Rename and re-home types
 
