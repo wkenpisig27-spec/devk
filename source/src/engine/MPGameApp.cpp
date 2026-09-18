@@ -18,6 +18,7 @@
 #include "lwGuidObj.h"
 #include "lwInterface.h"
 #include "lwIFunc.h"
+#include "MindPowerRenderConfig.h"
 #include "MPCharacter.h"
 
 #include "MPResourceSet.h"
@@ -319,9 +320,11 @@ void MPGameApp::_RenderAxis()
 #if(defined USE_MANAGED_RES)
     g_Render.SetTransformWorld(&mat);
 #else
+#if MINDPOWER_USE_D3D9_DEVICE
 	if (IDirect3DDeviceX* d3d9 = g_Render.GetDevice())
 		d3d9->SetTransform( D3DTS_WORLD , &mat);
 	else
+#endif
 		g_Render.SetTransformWorld(&mat);
 #endif
 

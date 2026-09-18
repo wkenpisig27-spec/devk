@@ -28,6 +28,7 @@
 #include "lwRenderBackend.h"
 #include "lwD3D11Texture.h"
 #include "lwDeviceObject11.h"
+#include "MindPowerRenderConfig.h"
 
 using namespace std;
 
@@ -1662,8 +1663,10 @@ LW_RESULT lwMesh::DrawSubset(DWORD subset)
         {
             if (lwDeviceObject11* d11_st = lwGetActiveDeviceObject11())
                 d11_st->Clear(D3DCLEAR_STENCIL, 0, 1.0f, 0);
+#if MINDPOWER_USE_D3D9_DEVICE
             else if (IDirect3DDeviceX* dev_st = dev_obj->GetDevice())
                 dev_st->Clear(0, NULL, D3DCLEAR_STENCIL, 0, 1.0f, 0);
+#endif
 
             dev_obj->SetRenderState(D3DRS_STENCILENABLE, TRUE);
             dev_obj->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
@@ -4287,15 +4290,17 @@ IDirect3DTextureX* lwResourceMgr::_createMonochromaticTexture(
 	else
 	{
 		IDirect3DTextureX* texture = 0;
-		IDirect3DDeviceX* device = _dev_obj->GetDevice();
-		if (device) {
+#if MINDPOWER_USE_D3D9_DEVICE
+		if (IDirect3DDeviceX* device = _dev_obj->GetDevice()) {
 			HRESULT hr = D3DXCreateTextureFromFile(
 				device,
 				filterTexture.c_str(),
 				&texture );
 			if( FAILED( hr ) )
 				return 0;
-		} else if (lwIsDx11Active()) {
+		} else
+#endif
+		if (MindPowerDx11OnlyBuild() || lwIsDx11Active()) {
 			lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
 			if (!d11 || LW_FAILED(lwD3D11CreateTextureFromFile(
 				d11->GetD3D11Device(), filterTexture.c_str(), 0, &texture)) || !texture)

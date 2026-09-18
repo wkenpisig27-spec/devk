@@ -12,6 +12,7 @@
 #include "lwD3D11Gaps.h"
 #include "lwDeviceObject11.h"
 #include "lwD3D11Blit.h"
+#include "MindPowerRenderConfig.h"
 
 using namespace std;
 
@@ -370,7 +371,11 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 
 	lwIDeviceObject* dev_obj = sys_graphics->GetDeviceObject();
 	_pD3D = dev_obj->GetDirect3D();
+#if MINDPOWER_USE_D3D9_DEVICE
 	_pD3DDevice = dev_obj->GetDevice();
+#else
+	_pD3DDevice = NULL;
+#endif
 	_IMgr.sys = sys;
 	_IMgr.sys_graphics = sys_graphics;
 	_IMgr.dev_obj = sys_graphics->GetDeviceObject();
@@ -384,14 +389,16 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 
 	ResMgr.m_pSys = sys;
 	ResMgr.m_pSysGraphics = sys_graphics;
-	if (lwIsDx11Active()) {
+	if (MindPowerDx11OnlyBuild() || lwIsDx11Active()) {
 		lwD3D11Gap(LW_D3D11_SKIP, "vs-shader-skip",
 			"ResMgr.LoadTotalVShader is D3D9 vs_3_0; skipped on DeviceObject11");
 		lwD3D11Gap(LW_D3D11_SKIP, "d3dx-sprite-skip",
 			"D3DXCreateSprite needs IDirect3DDevice9; UI sprites wait for Slice 8");
+#if MINDPOWER_USE_D3D9_DEVICE
 	} else {
 		ResMgr.LoadTotalVShader(sys_graphics);
 		D3DXCreateSprite(_pD3DDevice, &_p2DSprite);
+#endif
 	}
 	D3DUtil_InitLight(_Light, D3DLIGHT_DIRECTIONAL, -1.0f, -1.0f, -1.0f);
 	SetDirectLIghtAmbient(0.05f, 0.05f, 0.10f, 1.0f);  // subtle cool fill light (complements warm diffuse)

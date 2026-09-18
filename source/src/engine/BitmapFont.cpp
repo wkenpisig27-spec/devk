@@ -12,6 +12,7 @@
 #include "lwD3D11Blit.h"
 #include "lwD3D11Texture.h"
 #include "lwDeviceObject11.h"
+#include "MindPowerRenderConfig.h"
 
 #include <fstream>
 #include <sstream>
@@ -68,10 +69,14 @@ void CBitmapFont::Release()
 
 bool CBitmapFont::Load(const char* fontFile, const char* texturePath, MPRender* pRender)
 {
-    if (lwIsDx11Active())
+    if (MindPowerDx11OnlyBuild() || lwIsDx11Active())
         return Load(fontFile, texturePath, (IDirect3DDeviceX*)0);
     if (!pRender) return false;
+#if MINDPOWER_USE_D3D9_DEVICE
     return Load(fontFile, texturePath, pRender->GetDevice());
+#else
+    return false;
+#endif
 }
 
 bool CBitmapFont::Load(const char* fontFile, const char* texturePath, IDirect3DDeviceX* pDevice)

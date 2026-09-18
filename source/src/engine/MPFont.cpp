@@ -12,6 +12,7 @@
 #include "lwPredefinition.h"
 #include "lwRenderBackend.h"
 #include "lwD3D11Gaps.h"
+#include "MindPowerRenderConfig.h"
 
 using namespace std;
 
@@ -169,8 +170,10 @@ bool CMPFont::CreateFont( IDirect3DDeviceX* pd3dDevice, char szFontName[], int n
 #ifdef USE_RENDER
 	if (!_pDev)
 		return false;
+#if MINDPOWER_USE_D3D9_DEVICE
 	if (!lwIsDx11Active() && !_pDev->GetDevice())
 		return false;
+#endif
 #endif
 	lwIResourceMgr* res_mgr = _pDev->GetInterfaceMgr()->res_mgr;
 

@@ -16,6 +16,7 @@
 #include "lwRenderBackend.h"
 #include "lwD3D11Gaps.h"
 #include "lwD3D11Mesh.h"
+#include "MindPowerRenderConfig.h"
 
 
 using namespace std;
@@ -1515,16 +1516,15 @@ void MPMap::_RenderVB(BOOL bWireframe)
 //jze
 BOOL MPMap::UseShader()
 {
-	if (lwIsDx11Active() || !g_Render.GetDevice())
+#if !MINDPOWER_USE_D3D9_DEVICE
+	return FALSE;
+#else
+	if (MindPowerDx11OnlyBuild() || lwIsDx11Active() || !g_Render.GetDevice())
 		return false;
 	if( (g_Render.GetOrgCap().VertexShaderVersion < D3DVS_VERSION(1,1)) || (g_Render.GetOrgCap().PixelShaderVersion < D3DPS_VERSION(1,1)) )
-	{
 		return false;
-	}
-	else
-	{
-		return true;
-	}
+	return true;
+#endif
 }
 
 void MPMap::CreateSkyDoom(D3DXVECTOR3 center, float radius, char* txPath, bool hemisphere)
@@ -1656,6 +1656,7 @@ void MPMap::CreateSkyDoom(D3DXVECTOR3 center, float radius, char* txPath, bool h
 	}
 
 
+#if MINDPOWER_USE_D3D9_DEVICE
 	if(UseShader())
 	{
 		lwInterfaceMgr* imgr = g_Render.GetInterfaceMgr();
@@ -1771,6 +1772,7 @@ void MPMap::CreateSkyDoom(D3DXVECTOR3 center, float radius, char* txPath, bool h
 		dev->SetPixelShader(0);
 	}
 	else
+#endif
 	{
 		g_Render.ResetWorldTransform();
 		g_Render.SetRenderState(D3DRS_CULLMODE,D3DCULL_NONE);

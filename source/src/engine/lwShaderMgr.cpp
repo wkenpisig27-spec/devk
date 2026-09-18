@@ -220,8 +220,13 @@ __ret:
 LW_RESULT lwShaderMgr8::UnregisterVertexShader(DWORD type)
 {
     LW_RESULT ret = LW_RET_FAILED;
-    
+
+#if !MINDPOWER_USE_D3D9_DEVICE
+    return LW_RET_OK;
+#else
     IDirect3DDeviceX* dev = _dev_obj->GetDevice();
+    if (!dev)
+        return LW_RET_OK;
 
     if(type < 0 || type >= _vs_size)
         goto __ret;
@@ -245,6 +250,7 @@ LW_RESULT lwShaderMgr8::UnregisterVertexShader(DWORD type)
     }
 __ret:
     return ret;
+#endif
 }
 
 LW_RESULT lwShaderMgr8::QueryVertexShader(DWORD* ret_obj, DWORD type)
@@ -266,9 +272,14 @@ __ret:
 }
 LW_RESULT lwShaderMgr8::LoseDevice()
 {
+#if !MINDPOWER_USE_D3D9_DEVICE
+    return LW_RET_OK;
+#else
     LW_RESULT ret = LW_RET_FAILED;
 
     IDirect3DDeviceX* dev = _dev_obj->GetDevice();
+    if (!dev)
+        return LW_RET_OK;
 
     lwShaderInfo* s;
 
@@ -289,12 +300,18 @@ LW_RESULT lwShaderMgr8::LoseDevice()
 
 __ret:
     return ret;
+#endif
 }
 LW_RESULT lwShaderMgr8::ResetDevice()
 {
+#if !MINDPOWER_USE_D3D9_DEVICE
+    return LW_RET_OK;
+#else
     LW_RESULT ret = LW_RET_FAILED;
 
     IDirect3DDeviceX* dev = _dev_obj->GetDevice();
+    if (!dev)
+        return LW_RET_OK;
 
     lwShaderInfo* s;
 
@@ -313,6 +330,7 @@ LW_RESULT lwShaderMgr8::ResetDevice()
 
 __ret:
     return ret;
+#endif
 }
 #endif
 

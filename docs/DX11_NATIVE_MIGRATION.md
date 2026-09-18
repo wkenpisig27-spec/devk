@@ -30,20 +30,30 @@ Native API work uses **`lwD3D11NativeContext`** as the long-term home for device
 - [x] Branch + this doc
 - [x] `MINDPOWER_DX11_ONLY` compile gate
 - [x] `lwD3D11NativeContext` skeleton + init from `lwDeviceObject11`
-- [ ] CI/build only `Release|x64` with flag; smoke login → world
-- [ ] Log `GetDevice()` inventory at startup (gap report)
+- [x] CI/build only `Release|x64` with flag; smoke login → world (manual)
+- [ ] Log `GetDevice()` inventory at startup (gap report) — optional Phase 2 prep
 
-### Phase 1 — Kill D3D9 device islands (game + engine)
+### Phase 1 — Kill D3D9 device islands (game + engine) — **complete**
 
-Port or guard every `GetDevice()` site (~75 references in `source/src`). Priority order:
+All active D3D9 device use on **`MINDPOWER_DX11_ONLY` Release x64** is gated (`#if MINDPOWER_USE_D3D9_DEVICE`) or short-circuited via `MindPowerDx11OnlyBuild()` / `dev_obj` / `lwD3D11CreateTextureFromFile`.
 
-1. **Crash / map enter** — `Scene.cpp` (EffBox, PathBox, SmallMap), `SMallMap.cpp` *(in progress: `MP_LegacyD3D9DeviceOpt()`, PathBox/EffBox null dev_obj)*
-2. **Resources** — `lwResourceMgr.cpp` (`D3DXCreateTextureFromFileEx` → 11 or DDS) *(stencil clear + file-load `#else` branch)*
-3. **UI** — `UIRender.cpp`, `BitmapFont*.cpp`, `GameAppInit.cpp`
-4. **Legacy VS** — `lwxRenderCtrVS.cpp`, `lwShaderMgr.cpp` *(D3D9 VS/PS and constant-table paths `#if MINDPOWER_USE_D3D9_DEVICE`)*
-5. **Effects / sky** — `EffectFile.cpp`, `MPMap` sky dome, `MPResManger.cpp` *(eff.fx stub on DX11-only; MPResManger gated)*
+Delivered:
 
-Exit: `MINDPOWER_DX11_ONLY` build with zero unguarded `GetDevice()` calls.
+1. Scene / minimap / login / create-char — `MP_LegacyD3D9DeviceOpt()`, `lwDeviceObject11` clears
+2. **lwResourceMgr** — stencil clear, file load, color-filter mono textures on D3D11
+3. UI — UIRender, BitmapFontAdapter, BitmapFont, MPFont, MPRender init
+4. **lwxRenderCtrVS**, **lwShaderMgr** (incl. DX8 mgr stubs on DX11-only)
+5. **EffectFile**, **MPResManger**, **MPMap** sky-doom D3D9 shader path (FF sky on DX11)
+
+**Smoke checklist** (run after each Release x64 build):
+
+- [ ] Login → server list → enter world
+- [ ] Create character (3D preview) if applicable
+- [ ] Minimap + large map open/close
+- [ ] Combat / skill VFX (particles)
+- [ ] Logout or character select; one window resize or alt-tab
+
+Exit criterion met: no unguarded `GetDevice()` in the DX11-only compile; dual-build retains D3D9 behind `#if MINDPOWER_USE_D3D9_DEVICE`.
 
 ### Phase 2 — Replace D3DX9 link dependency
 

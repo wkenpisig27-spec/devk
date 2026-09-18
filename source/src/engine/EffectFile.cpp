@@ -72,7 +72,7 @@ BOOL CMPEffectFile::LoadEffectFromFile( LPCSTR pszfile)
 		"shader\\eff.fx t0-t6 applied as DeviceObject FF states (no D3DX)");
 	return TRUE;
 #else
-	if (lwIsDx11Active() || !m_pDev || !m_pDev->GetDevice()) {
+	if (MindPowerDx11OnlyBuild() || lwIsDx11Active() || !m_pDev || !m_pDev->GetDevice()) {
 		free();
 		_iTechNum = 7;
 		_vecTechniques.resize(7);

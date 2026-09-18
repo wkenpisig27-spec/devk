@@ -216,13 +216,14 @@ LW_RESULT lwSysGraphics::TestCooperativeLevel()
 {
     LW_RESULT ret = LW_RET_FAILED;
 
-    if (lwIsDx11Active())
+    if (MindPowerDx11OnlyBuild() || lwIsDx11Active())
     {
         lwD3D11Gap(LW_D3D11_SKIP, "cooperative-level-skip",
             "D3D11 has no device-lost protocol; TestCooperativeLevel reports render-normally");
         return LW_RET_OK;
     }
-    
+
+#if MINDPOWER_USE_D3D9_DEVICE
     HRESULT hr = _dev_obj->GetDevice()->TestCooperativeLevel();
 
     //LG("ttt", "&&& %d\n", GetTickCount());
@@ -284,6 +285,9 @@ LW_RESULT lwSysGraphics::TestCooperativeLevel()
         }
     }
     ret = LW_RET_OK_1;
+#else
+    ret = LW_RET_FAILED;
+#endif
 __ret:
     return ret;
 }

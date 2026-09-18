@@ -298,7 +298,7 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX
 
 	memset(&m_d3dBackBuffer, 0, sizeof(m_d3dBackBuffer));
 #ifdef USE_RENDER
-	if (lwIsDx11Active() || !m_pDev->GetDevice()) {
+	if (MindPowerDx11OnlyBuild() || lwIsDx11Active() || !m_pDev->GetDevice()) {
 		lwD3D11Gap(LW_D3D11_SKIP, "initres-getbackbuffer",
 			"GetDevice() is NULL on DX11; backbuffer desc comes from the HWND size");
 		RECT rc_bb = {};
@@ -362,7 +362,7 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX
 
 
 #ifdef USE_RENDER
-	if (lwIsDx11Active() || !m_pDev->GetDevice()) {
+	if (MindPowerDx11OnlyBuild() || lwIsDx11Active() || !m_pDev->GetDevice()) {
 		lwD3D11Gap(LW_D3D11_SKIP, "initres-getdevicecaps",
 			"GetDeviceCaps skipped on DX11; using synthetic MPRender caps");
 #if MINDPOWER_USE_D3D9_DEVICE
@@ -390,7 +390,7 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX
 #ifdef USE_RENDER
 	// DX11 has no D3D9 VS objects (LoadTotalVShader). Keep the FF/soft draw
 	// path; eff.fx t0-t6 is applied as DeviceObject states in CMPEffectFile.
-	if (lwIsDx11Active() || !m_pDev->GetDevice()) {
+	if (MindPowerDx11OnlyBuild() || lwIsDx11Active() || !m_pDev->GetDevice()) {
 		m_bUseSoft = true;
 		m_bUseSoftOrg = true;
 		lwD3D11Gap(LW_D3D11_FALLBACK, "effect-use-soft",
@@ -432,7 +432,7 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX
 	if(!_bMagr)
 	{
 #ifdef USE_RENDER
-		if (lwIsDx11Active() || !pDev->GetDevice()) {
+		if (MindPowerDx11OnlyBuild() || lwIsDx11Active() || !pDev->GetDevice()) {
 			lwD3D11Gap(LW_D3D11_SKIP, "initres-vshader",
 				"CreateVertexShader is D3D9; skipped on DeviceObject11");
 		} else
@@ -1570,7 +1570,7 @@ bool	CMPResManger::LoadTotalEffect()
 bool	CMPResManger::LoadTotalVShader()
 {
 #ifdef USE_RENDER
-	if (lwIsDx11Active() || !m_pDev->GetDevice())
+	if (MindPowerDx11OnlyBuild() || lwIsDx11Active() || !m_pDev->GetDevice())
 		return true;
 #endif
 #if !MINDPOWER_USE_D3D9_DEVICE
@@ -2472,7 +2472,7 @@ BOOL CMPResManger::OnResetDevice()
 	}
 
 #ifdef USE_RENDER
-	if (lwIsDx11Active() || !m_pDev->GetDevice()) {
+	if (MindPowerDx11OnlyBuild() || lwIsDx11Active() || !m_pDev->GetDevice()) {
 		lwD3D11Gap(LW_D3D11_SKIP, "resetdevice-getbackbuffer",
 			"OnResetDevice GetBackBuffer is D3D9; keep the HWND-sized desc from InitRes");
 #if MINDPOWER_USE_D3D9_DEVICE
