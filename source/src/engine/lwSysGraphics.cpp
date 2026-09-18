@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include "lwSysGraphics.h"
+#include "MindPowerRenderConfig.h"
 #include "lwDeviceObject.h"
 #include "lwDeviceObject11.h"
 #include "lwRenderBackend.h"
@@ -41,10 +42,14 @@ LW_RESULT lwSysGraphics::GetInterface( LW_VOID** i, lwGUID guid )
 lwSysGraphics::lwSysGraphics( lwSystem* sys )
 : _sys(sys), _dev_obj(0), _res_mgr(0), _scene_mgr(0), _lose_dev_proc(0), _reset_dev_proc(0)
 {
+#if !MINDPOWER_USE_D3D9_DEVICE
+    _dev_obj = LW_NEW(lwDeviceObject11(this));
+#else
     if (lwGetRequestedRenderBackend() == LW_RENDER_BACKEND_DX11)
         _dev_obj = LW_NEW(lwDeviceObject11(this));
     else
         _dev_obj = LW_NEW(lwDeviceObject(this));
+#endif
     _res_mgr = LW_NEW(lwResourceMgr(this));  
     _scene_mgr = LW_NEW(lwSceneMgr(this));  
 }
@@ -61,10 +66,14 @@ LW_RESULT lwSysGraphics::CreateDeviceObject(lwIDeviceObject** ret_obj)
     LW_RESULT ret = LW_RET_FAILED;
 
     lwIDeviceObject* o = 0;
+#if !MINDPOWER_USE_D3D9_DEVICE
+    o = LW_NEW(lwDeviceObject11(this));
+#else
     if (lwGetRequestedRenderBackend() == LW_RENDER_BACKEND_DX11)
         o = LW_NEW(lwDeviceObject11(this));
     else
         o = LW_NEW(lwDeviceObject(this));
+#endif
 
     if(o == 0)
         goto __ret;

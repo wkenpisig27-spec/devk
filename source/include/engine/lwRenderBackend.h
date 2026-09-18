@@ -4,7 +4,7 @@
 
 // Runtime renderer selection. Compile-time LW_USE_DX9 stays; DX11 is an
 // optional backend chosen from [video] renderer= in user/system.ini.
-// Slice 1+: dx11 constructs DeviceObject11 (swapchain + clear/present first).
+// feature/dx11-native: MINDPOWER_DX11_ONLY forces DX11 and skips lwDeviceObject.
 
 enum lwRenderBackend
 {

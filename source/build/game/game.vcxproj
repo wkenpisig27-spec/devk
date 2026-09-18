@@ -113,7 +113,7 @@
       <OmitFramePointers>false</OmitFramePointers>
       <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
       <AdditionalIncludeDirectories>..\..\src\game;..\..\include\game;..\..\include\engine;..\..\include\status;..\..\include\enclib;..\..\include\serversdk;..\..\include\calua;..\..\include\common;..\..\include\util;..\..\include\audiosdl;..\..\include\sdl;..\..\include\discord;..\..\include\directx;..\..\include\unicode;..\..\include\icuhelper;..\..\include\luajit;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>USE_DX_VERSION;LW_USE_DX9;DIRECT3D_VERSION=0x0900;_LUA_GAME;__SOUND__;LIGHTENGINE_USE_DLL;NOMINMAX;_WIN64;NDEBUG;_NOSERVER;_CONSOLE;WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP);TABLE_ENCRYPTION_ENABLED=1;BOTAN_FUTURE_INTERNAL_HEADER_OK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_DX_VERSION;LW_USE_DX9;DIRECT3D_VERSION=0x0900;MINDPOWER_DX11_ONLY=1;_LUA_GAME;__SOUND__;LIGHTENGINE_USE_DLL;NOMINMAX;_WIN64;NDEBUG;_NOSERVER;_CONSOLE;WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP);TABLE_ENCRYPTION_ENABLED=1;BOTAN_FUTURE_INTERNAL_HEADER_OK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Sync</ExceptionHandling>

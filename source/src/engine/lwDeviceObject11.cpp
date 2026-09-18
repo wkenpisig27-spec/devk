@@ -8,6 +8,7 @@
 #include "lwD3D11Buffer.h"
 #include "lwD3D11Mesh.h"
 #include "lwShaderMgr11.h"
+#include "lwD3D11NativeContext.h"
 #include "lwRenderBackend.h"
 #include "lwGraphicsUtil.h"
 #include "lwStreamObj.h"
@@ -426,6 +427,8 @@ LW_RESULT lwDeviceObject11::CreateDevice(lwD3DCreateParam* param)
         if (LW_FAILED(lwD3D11PostCreateTargets(_bb_width, _bb_height, _msaa_count)))
             lwD3D11Gap(LW_D3D11_FALLBACK, "hdr-create", "HDR post targets failed; drawing to swapchain");
     }
+
+    lwD3D11NativeBindDevice(_device, _context, _swapchain);
 
     LG("d3d11gaps", "[SysGraphics] DeviceObject11 up: feature=0x%X %ux%u msaa=%u bb_msaa=%u hdr=%d windowed=%d vsync=%d\n",
         (unsigned)got, w, h, _msaa_count, _bb_msaa, lwD3D11PostIsActive(),

@@ -1,0 +1,27 @@
+# GetDevice() reference counts by file (branch start)
+# Regenerate: rg "GetDevice\(\)" source/src --glob "*.cpp" -c
+
+source/src/engine/BitmapFont.cpp:1
+source/src/engine/EffectFile.cpp:2
+source/src/engine/MPFont.cpp:1
+source/src/engine/MPGameApp.cpp:1
+source/src/engine/MPMap.cpp:2
+source/src/engine/MPRender.cpp:1
+source/src/engine/MPResManger.cpp:13
+source/src/engine/lwResourceMgr.cpp:8
+source/src/engine/lwShaderMgr.cpp:8
+source/src/engine/lwSysGraphics.cpp:1
+source/src/engine/lwxRenderCtrVS.cpp:6
+source/src/game/BitmapFontAdapter.cpp:3
+source/src/game/CreateChaScene.cpp:1
+source/src/game/DrawPointList.cpp:2
+source/src/game/FindPath.cpp:1
+source/src/game/GameAppInit.cpp:3
+source/src/game/GameAppInterface.cpp:1
+source/src/game/LoginScene.cpp:1
+source/src/game/Main.cpp:1
+source/src/game/Scene.cpp:11
+source/src/game/SceneRender.cpp:2
+source/src/game/SMallMap.cpp:16
+source/src/game/UIRender.cpp:1
+source/src/game/WorldScene.cpp:2

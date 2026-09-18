@@ -5,6 +5,7 @@
 #include "lwRenderBackend.h"
 #include "lwD3D11Post.h"
 #include "lwD3D11Mesh.h"
+#include "MindPowerRenderConfig.h"
 
 using namespace std;
 
@@ -317,12 +318,17 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 }
 
 void CGameConfig::ApplyRendererToEngine() {
+#if !MINDPOWER_USE_D3D9_DEVICE
+	lwRenderBackend backend = LW_RENDER_BACKEND_DX11;
+	(void)lwParseRenderBackend(m_szRenderer, LW_RENDER_BACKEND_DX11);
+#else
 	lwRenderBackend backend = lwParseRenderBackend(m_szRenderer, LW_RENDER_BACKEND_DX9);
 	if (m_szRenderer[0] &&
 		_stricmp(m_szRenderer, "dx9") != 0 && _stricmp(m_szRenderer, "d3d9") != 0 &&
 		_stricmp(m_szRenderer, "dx11") != 0 && _stricmp(m_szRenderer, "d3d11") != 0) {
 		LG("d3d11gaps", "[FALLBACK] unknown-renderer — '%s', using dx9\n", m_szRenderer);
 	}
+#endif
 	strncpy(m_szRenderer, lwRenderBackendName(backend), sizeof(m_szRenderer) - 1);
 	m_szRenderer[sizeof(m_szRenderer) - 1] = 0;
 	lwSetRequestedRenderBackend(backend);
