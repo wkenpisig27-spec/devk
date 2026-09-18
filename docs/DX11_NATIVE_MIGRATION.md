@@ -10,7 +10,7 @@ Goal: **true D3D11** end-to-end — no runtime D3D9 device, no long-term relianc
 | State | D3D9 enums → 11 state objects in `lwDeviceObject11` | PSO + root signature / explicit CBs per pass |
 | Shaders | SM4 HLSL + FF mesh shader + ShaderMgr11 VS | All draws through compiled HLSL; retire `.vsh` / asm |
 | Loaders | DDS/BMP/TGA + GDI+ (`lwD3D11CreateTextureFromMemory`) | same (DirectXTex optional) |
-| Effects | DeviceObject11 FF table (`eff.fx` techniques as RS) | HLSL effects (optional) |
+| Effects | Compiled `shader\\eff.hlsl` (tex * diffuse/TFACTOR); OM still from `Pass()` | same |
 | Math | DirectXMath via `lwD3DXCompat.h`; public names are XM* (`lwXMMath.h`) | same (storage types, not SIMD registers) |
 
 ## Build flag
@@ -130,7 +130,14 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 Highest-value leftover vs the native target table:
 
-1. Next architecture step: compile `eff.fx` as real HLSL instead of the FF technique table. Later: delete unused `.vsh` assets. Do not delete D3D9 sources unless asked — they are already out of the play-path compile.
+1. Next: delete unused `.vsh` assets. Do not delete D3D9 sources unless asked — they are already out of the play-path compile.
+
+### eff.fx as HLSL — **complete**
+
+- `client/shader/eff.hlsl` is compiled at mesh init / `CMPEffectFile::LoadEffectFromFile`.
+- `Pass()` selects `lwD3D11MeshSetEffTech(0..6)` and binds the compiled PS. Pixel formula is `tex * (TFACTOR or vertex color)` — not TSS ColorOp.
+- OM (z/blend/cull) and sampler still come from the t0–t6 table plus caller overrides after `Pass()` (additive dest-blend, model TFACTOR).
+- `End()` clears the tech so later character/scene draws use the mesh combiner PS again.
 
 ### XM* math rename — **complete**
 

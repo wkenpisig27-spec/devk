@@ -86,7 +86,7 @@ void lwD3D11GapReportInventory()
 		{ "inv-texture-stage",
 		  "Mesh PS maps stage-1/2 combiners (modulate/add/mod2x/lit-A); remaining FF stages still DX9-only" },
 		{ "inv-d3dx-effect",
-		  "eff.fx t0-t6 is a DeviceObject FF state table; CMPModelEff uses the VS-path on DX11 with TFACTOR + vertex UVs" },
+		  "eff.hlsl is compiled for t0-t6; CMPModelEff uses the VS-path on DX11 with TFACTOR + vertex UVs" },
 		{ "inv-d3dx-sprite-font-tex",
 		  "D3DXCreateSprite is skipped; UI/console sprites blit. CMPFont GPU atlas locks empty DX11 textures" },
 		{ "inv-device-lost",

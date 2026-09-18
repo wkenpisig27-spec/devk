@@ -218,6 +218,8 @@ struct MeshState
     ID3D11VertexShader* vs_rigid;
     ID3D11VertexShader* vs_skin;
     ID3D11PixelShader* ps;
+    ID3D11PixelShader* ps_eff;
+    int eff_tech;
     ID3DBlob* vs_rigid_blob;
     ID3DBlob* vs_skin_blob;
     ID3D11Buffer* cb0;
@@ -325,6 +327,7 @@ static void ReleaseMesh()
     if (s_mesh.cb1) s_mesh.cb1->Release();
     if (s_mesh.cb0) s_mesh.cb0->Release();
     if (s_mesh.ps) s_mesh.ps->Release();
+    if (s_mesh.ps_eff) s_mesh.ps_eff->Release();
     if (s_mesh.vs_skin) s_mesh.vs_skin->Release();
     if (s_mesh.vs_rigid) s_mesh.vs_rigid->Release();
     if (s_mesh.vs_skin_blob) s_mesh.vs_skin_blob->Release();
@@ -504,6 +507,8 @@ LW_RESULT lwD3D11MeshInit(ID3D11Device* device, ID3D11DeviceContext* context)
     s_mesh.fog_color[2] = 208.0f / 255.0f;
     s_mesh.fog_color[3] = 1.0f;
     s_mesh.fog_density = 0.00035f;
+    s_mesh.eff_tech = -1;
+    lwD3D11MeshCompileEff("shader\\eff.hlsl");
     s_mesh.ready = 1;
     return LW_RET_OK;
 }
@@ -595,6 +600,121 @@ void lwD3D11MeshSetVfx(int enabled)
 void lwD3D11MeshHintAdditive(int enabled)
 {
     s_mesh.hint_additive = enabled ? 1 : 0;
+}
+
+static const char* kEffHLSL =
+    "cbuffer CB0 : register(b0) {\n"
+    "  row_major float4x4 world;\n"
+    "  row_major float4x4 viewProj;\n"
+    "  float4 lightDir;\n"
+    "  float4 ambient;\n"
+    "  float4 diffuse;\n"
+    "  float4 flags;\n"
+    "  float4 extra;\n"
+    "  float4 outlineColor;\n"
+    "  float4 more;\n"
+    "  float4 tfactor;\n"
+    "  row_major float4x4 uvMat;\n"
+    "  row_major float4x4 uvMat1;\n"
+    "  float4 look;\n"
+    "  float4 hemiSky;\n"
+    "  float4 hemiGnd;\n"
+    "  float4 fog;\n"
+    "  float4 fogMore;\n"
+    "};\n"
+    "Texture2D tex0 : register(t0);\n"
+    "SamplerState samp0 : register(s0);\n"
+    "struct PSIn { float4 pos : SV_POSITION; float3 nrm : NORMAL; float2 uv : TEXCOORD0; float2 uv1 : TEXCOORD1; float4 col : COLOR; float3 wpos : TEXCOORD2; };\n"
+    "float4 PSMain(PSIn i) : SV_TARGET {\n"
+    "  float4 tex = tex0.Sample(samp0, i.uv);\n"
+    "  if (extra.w >= 0.0) clip(tex.a - extra.w);\n"
+    "  int mix = (int)(more.w + 0.5);\n"
+    "  float3 tint = (mix & 1) ? tfactor.rgb : i.col.rgb;\n"
+    "  float a = tex.a * ((mix & 2) ? tfactor.a : i.col.a);\n"
+    "  return float4(tex.rgb * tint, a);\n"
+    "}\n";
+
+static ID3DBlob* CompileEffBlob(const char* path)
+{
+    ID3DBlob* blob = 0;
+    ID3DBlob* err = 0;
+    HRESULT hr = E_FAIL;
+    std::vector<char> file_src;
+    const char* src = kEffHLSL;
+    const char* src_name = "eff.hlsl";
+    if (path && path[0])
+    {
+        FILE* fp = 0;
+        if (fopen_s(&fp, path, "rb") == 0 && fp)
+        {
+            fseek(fp, 0, SEEK_END);
+            const long sz = ftell(fp);
+            fseek(fp, 0, SEEK_SET);
+            if (sz > 0)
+            {
+                file_src.resize((size_t)sz + 1);
+                const size_t n = fread(file_src.data(), 1, (size_t)sz, fp);
+                file_src[n] = 0;
+                src = file_src.data();
+                src_name = path;
+            }
+            fclose(fp);
+        }
+    }
+    hr = D3DCompile(src, strlen(src), src_name, 0, 0, "PSMain", "ps_4_0",
+        D3DCOMPILE_OPTIMIZATION_LEVEL1, 0, &blob, &err);
+    if (FAILED(hr))
+    {
+        if (err)
+        {
+            lwD3D11Gap(LW_D3D11_GAP, "eff-hlsl", "%s", (const char*)err->GetBufferPointer());
+            err->Release();
+        }
+        if (src != kEffHLSL)
+        {
+            hr = D3DCompile(kEffHLSL, strlen(kEffHLSL), "eff.hlsl", 0, 0, "PSMain", "ps_4_0",
+                D3DCOMPILE_OPTIMIZATION_LEVEL1, 0, &blob, &err);
+            if (FAILED(hr))
+            {
+                if (err)
+                {
+                    lwD3D11Gap(LW_D3D11_GAP, "eff-hlsl", "%s", (const char*)err->GetBufferPointer());
+                    err->Release();
+                }
+                return 0;
+            }
+        }
+        else
+            return 0;
+    }
+    if (err)
+        err->Release();
+    return blob;
+}
+
+int lwD3D11MeshCompileEff(const char* path)
+{
+    if (!s_mesh.device)
+        return 0;
+    ID3DBlob* blob = CompileEffBlob(path);
+    if (!blob)
+        return 0;
+    ID3D11PixelShader* ps = 0;
+    HRESULT hr = s_mesh.device->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), 0, &ps);
+    blob->Release();
+    if (FAILED(hr) || !ps)
+        return 0;
+    if (s_mesh.ps_eff)
+        s_mesh.ps_eff->Release();
+    s_mesh.ps_eff = ps;
+    lwD3D11Gap(LW_D3D11_INVENTORY, "eff-hlsl-bound",
+        path && path[0] ? path : "embedded eff.hlsl");
+    return 1;
+}
+
+void lwD3D11MeshSetEffTech(int tech)
+{
+    s_mesh.eff_tech = (tech >= 0 && tech <= 6) ? tech : -1;
 }
 
 int lwD3D11MeshWaterEnhance()
@@ -937,6 +1057,8 @@ static float DecodeDualFromTss(lwDeviceObject11* dev, lwD3D11Texture* tex1, lwD3
 
 static float ResolvePassCombiner(const MeshPassDesc* pass, lwDeviceObject11* dev, lwD3D11Texture* tex1, lwD3D11Texture* tex2)
 {
+    if (s_mesh.eff_tech >= 0)
+        return 0.0f;
     if (pass->combiner == COMBINER_OFF)
         return 0.0f;
     if (pass->combiner == COMBINER_TERRAIN_SPLAT)
@@ -1258,9 +1380,11 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     DWORD ca1 = dev->GetCachedTSS(0, D3DTSS_COLORARG1);
     DWORD carg2 = dev->GetCachedTSS(0, D3DTSS_COLORARG2);
     DWORD aarg2 = dev->GetCachedTSS(0, D3DTSS_ALPHAARG2);
-    const int color_tf = (carg2 == D3DTA_TFACTOR);
-    const int alpha_tf = (aarg2 == D3DTA_TFACTOR);
+    const int color_tf = (s_mesh.eff_tech == 3) || (carg2 == D3DTA_TFACTOR);
+    const int alpha_tf = (s_mesh.eff_tech == 3) || (aarg2 == D3DTA_TFACTOR);
     cb.more[3] = (float)(color_tf + alpha_tf * 2);
+    if (s_mesh.eff_tech >= 0)
+        cb.more[1] = 1.0f;
     if (cop0 == D3DTOP_SELECTARG1 && ca1 == D3DTA_TFACTOR)
     {
         cb.more[1] = 2.0f;
@@ -1363,7 +1487,7 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     if (!use_sm4)
     {
         s_mesh.context->VSSetShader(skin ? s_mesh.vs_skin : s_mesh.vs_rigid, 0, 0);
-        s_mesh.context->PSSetShader(s_mesh.ps, 0, 0);
+        s_mesh.context->PSSetShader((s_mesh.eff_tech >= 0 && s_mesh.ps_eff) ? s_mesh.ps_eff : s_mesh.ps, 0, 0);
         s_mesh.context->VSSetConstantBuffers(0, 1, &s_mesh.cb0);
         s_mesh.context->VSSetConstantBuffers(1, 1, &s_mesh.cb1);
         s_mesh.context->PSSetConstantBuffers(0, 1, &s_mesh.cb0);

@@ -58,6 +58,7 @@ public:
 	BOOL Pass(UINT ipass);
 	BOOL End();
 	void ApplySoftPass();
+	void ApplySoftEnd();
 
 	int	 GetTechCount()						{ return _iTechNum;}
 	int  GetPassCount()						{ return m_passes;}
@@ -201,6 +202,8 @@ inline BOOL CMPEffectFile::End()
 
     if(FAILED(m_pEffect->EndPass()) || FAILED(m_pEffect->End()))
 		return FALSE;
+#else
+	ApplySoftEnd();
 #endif
 	return TRUE;
 }

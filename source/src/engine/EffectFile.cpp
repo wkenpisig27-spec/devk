@@ -12,6 +12,7 @@
 #include "MPRender.h"
 #include "lwRenderBackend.h"
 #include "lwD3D11Gaps.h"
+#include "lwD3D11Mesh.h"
 #include "MindPowerRenderConfig.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -68,8 +69,11 @@ BOOL CMPEffectFile::LoadEffectFromFile( LPCSTR pszfile)
 	for (int i = 0; i < 7; ++i)
 		_vecTechniques[i] = (D3DXHANDLE)(INT_PTR)(i + 1);
 	m_passes = 1;
-	lwD3D11Gap(LW_D3D11_FALLBACK, "eff-fx-state-table",
-		"shader\\eff.fx t0-t6 applied as DeviceObject FF states (no D3DX)");
+	const char* hlsl = "shader\\eff.hlsl";
+	if (!lwD3D11MeshCompileEff(hlsl))
+		lwD3D11MeshCompileEff(pszfile);
+	lwD3D11Gap(LW_D3D11_INVENTORY, "eff-fx-hlsl",
+		"shader\\eff.hlsl compiled for t0-t6 (OM still from Pass)");
 	return TRUE;
 #else
 	if (MindPowerDx11OnlyBuild() || lwIsDx11Active() || !m_pDev || !m_pDev->GetDevice()) {
@@ -230,15 +234,20 @@ IDirect3DDeviceX*	CMPEffectFile::GetDev()
 	return m_pDev;
 }
 
+void CMPEffectFile::ApplySoftEnd()
+{
+	lwD3D11MeshSetEffTech(-1);
+}
+
 void CMPEffectFile::ApplySoftPass()
 {
 	if (!m_pDev)
 		return;
 
-	// Documented FF subset of client/shader/eff.fx (PixelShader=NULL).
-	// Index i is technique ti. Src/Dest blend is left alone except t5/t6;
-	// model/particle code sets those after Pass().
+	// OM/sampler for t0-t6. Pixel formula is compiled eff.hlsl (not TSS ColorOp).
+	// Src/Dest blend is left alone except t5/t6; model/particle code sets those after Pass().
 	const int tech = _iCurTech;
+	lwD3D11MeshSetEffTech(tech);
 	const int zenable = (tech == 5 || tech == 6) ? FALSE : TRUE;
 	const int zwrite = (tech == 1) ? TRUE : FALSE;
 	const int alphablend = (tech == 1) ? FALSE : TRUE;
@@ -276,16 +285,13 @@ void CMPEffectFile::ApplySoftPass()
 		m_pDev->SetRenderState(D3DRS_CLIPPING, FALSE);
 	m_pDev->SetRenderState(D3DRS_VERTEXBLEND, D3DVBF_DISABLE);
 
-	m_pDev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-	m_pDev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	m_pDev->SetTextureStageState(0, D3DTSS_COLORARG2, tfactor_arg ? D3DTA_TFACTOR : D3DTA_DIFFUSE);
-	m_pDev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-	m_pDev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-	m_pDev->SetTextureStageState(0, D3DTSS_ALPHAARG2, tfactor_arg ? D3DTA_TFACTOR : D3DTA_DIFFUSE);
+	if (tfactor_arg)
+	{
+		m_pDev->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_TFACTOR);
+		m_pDev->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_TFACTOR);
+	}
 	m_pDev->SetTextureStageStateForced(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-	m_pDev->SetTextureStageStateForced(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 	m_pDev->SetTextureStageStateForced(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
-	m_pDev->SetTextureStageStateForced(1, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
 	m_pDev->SetTexture(1, NULL);
 
 	m_pDev->SetSamplerState(0, D3DSAMP_ADDRESSU, clamp_uv ? D3DTADDRESS_CLAMP : D3DTADDRESS_WRAP);

@@ -1,3 +1,5 @@
+// DX9 leftover: PixelShader=NULL + RS/TSS recipes.
+// DX11 compiles client/shader/eff.hlsl (tex * diffuse or TFACTOR).
 // Technique 't0' will render the sample scene in one pass. 
 texture tex0;        // First texture
 

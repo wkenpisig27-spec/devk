@@ -388,13 +388,13 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, XMMATRIX* pmat, XMMATRIX* pM
 	}
 
 #ifdef USE_RENDER
-	// DX11 has no D3D9 VS objects (LoadTotalVShader). Keep the FF/soft draw
-	// path; eff.fx t0-t6 is applied as DeviceObject states in CMPEffectFile.
+	// DX11 has no D3D9 VS objects (LoadTotalVShader). Soft draw uses compiled
+	// shader\\eff.hlsl via CMPEffectFile::Pass.
 	if (MindPowerDx11OnlyBuild() || lwIsDx11Active() || !m_pDev->GetDevice()) {
 		m_bUseSoft = true;
 		m_bUseSoftOrg = true;
 		lwD3D11Gap(LW_D3D11_FALLBACK, "effect-use-soft",
-			"DX11 uses CMPModelEff::RenderSoft + eff.fx state table");
+			"DX11 uses CMPModelEff::RenderSoft + compiled shader\\eff.hlsl");
 	}
 #endif
 
