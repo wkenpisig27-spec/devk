@@ -14,8 +14,8 @@ MINDPOWER_API void lwD3D11BlitSetViewport(UINT width, UINT height);
 MINDPOWER_API LW_RESULT lwD3D11BlitSprite(
     IDirect3DTextureX* tex,
     const RECT* src,
-    const D3DXVECTOR2* scale,
-    const D3DXVECTOR2* dest,
+    const XMVECTOR2* scale,
+    const XMVECTOR2* dest,
     DWORD color);
 
 // XYZRHW + DIFFUSE + TEX1 triangle list (bitmap fonts).

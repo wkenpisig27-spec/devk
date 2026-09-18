@@ -217,7 +217,7 @@ public:
 		g_cFindPathEx.SetDestDirection(cx, cy, tx, ty);
 		g_cFindPathEx.SetTarget(cx, cy, tx, ty);
 
-		D3DXVECTOR3 target(static_cast<float>(tx), static_cast<float>(ty), 0);
+		XMVECTOR3 target(static_cast<float>(tx), static_cast<float>(ty), 0);
 		CNavigationBar::g_cNaviBar.SetTarget("", target);
 		CNavigationBar::g_cNaviBar.Show(true);
 

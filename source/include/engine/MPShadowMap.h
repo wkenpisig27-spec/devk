@@ -62,13 +62,13 @@ public:
     float GetOrthoSize() const { return _config.orthoSize; }
 
     // Light direction (normalized, pointing FROM light TO scene)
-    void SetLightDirection(const D3DXVECTOR3& dir);
+    void SetLightDirection(const XMVECTOR3& dir);
     void SetLightDirection(float x, float y, float z);
-    const D3DXVECTOR3& GetLightDirection() const { return _vLightDir; }
+    const XMVECTOR3& GetLightDirection() const { return _vLightDir; }
 
     // Focus point (where the shadow map is centered, typically the camera target)
-    void SetFocusPoint(const D3DXVECTOR3& pos);
-    const D3DXVECTOR3& GetFocusPoint() const { return _vFocusPoint; }
+    void SetFocusPoint(const XMVECTOR3& pos);
+    const XMVECTOR3& GetFocusPoint() const { return _vFocusPoint; }
 
     // Shadow pass - call these around rendering shadow casters
     bool BeginShadowPass();
@@ -84,13 +84,13 @@ public:
     // Render a ground-aligned overlay quad that applies shadow darkening
     // onto already-rendered terrain. Call AFTER terrain renders.
     // Requires the camera's world-view-projection matrix for the overlay vertices.
-    void RenderGroundOverlay(const D3DXMATRIX& matViewProj);
+    void RenderGroundOverlay(const XMMATRIX& matViewProj);
 
     // Access the light-space matrices
-    const D3DXMATRIX& GetLightViewMatrix() const { return _matLightView; }
-    const D3DXMATRIX& GetLightProjMatrix() const { return _matLightProj; }
-    const D3DXMATRIX& GetLightViewProjMatrix() const { return _matLightViewProj; }
-    const D3DXMATRIX& GetShadowTransformMatrix() const { return _matShadowTransform; }
+    const XMMATRIX& GetLightViewMatrix() const { return _matLightView; }
+    const XMMATRIX& GetLightProjMatrix() const { return _matLightProj; }
+    const XMMATRIX& GetLightViewProjMatrix() const { return _matLightViewProj; }
+    const XMMATRIX& GetShadowTransformMatrix() const { return _matShadowTransform; }
 
     // Access shadow map texture (for custom shaders)
     IDirect3DTextureX* GetShadowTexture() const { return _pShadowTexture; }
@@ -107,7 +107,7 @@ private:
     bool CreateResourcesDx11();
     bool BeginShadowPassDx11();
     void EndShadowPassDx11();
-    void RenderGroundOverlayDx11(const D3DXMATRIX& matViewProj);
+    void RenderGroundOverlayDx11(const XMMATRIX& matViewProj);
 
 private:
     IDirect3DDeviceX*      _pDev;
@@ -123,22 +123,22 @@ private:
     IDirect3DSurfaceX*     _pOldRenderTarget;
     IDirect3DSurfaceX*     _pOldDepthSurface;
     D3DVIEWPORTX           _oldViewport;
-    D3DXMATRIX             _matSavedView;
-    D3DXMATRIX             _matSavedProj;
+    XMMATRIX             _matSavedView;
+    XMMATRIX             _matSavedProj;
     DWORD                  _savedAlphaRef;
 
     // Smoothed focus point — lerps toward _vFocusPoint each frame so
     // shadow position transitions (e.g. height changes) are gradual.
-    D3DXVECTOR3            _vFocusPointSmoothed;
+    XMVECTOR3            _vFocusPointSmoothed;
     bool                   _bFocusInitialized;  // Skip lerp on very first frame
 
     // Light-space matrices
-    D3DXVECTOR3            _vLightDir;
-    D3DXVECTOR3            _vFocusPoint;
-    D3DXMATRIX             _matLightView;
-    D3DXMATRIX             _matLightProj;
-    D3DXMATRIX             _matLightViewProj;
-    D3DXMATRIX             _matShadowTransform;  // ViewProj * texScale (for UV lookup)
+    XMVECTOR3            _vLightDir;
+    XMVECTOR3            _vFocusPoint;
+    XMMATRIX             _matLightView;
+    XMMATRIX             _matLightProj;
+    XMMATRIX             _matLightViewProj;
+    XMMATRIX             _matShadowTransform;  // ViewProj * texScale (for UV lookup)
 
     // Shadow effect (depth rendering + sampling)
     LPD3DXEFFECT           _pShadowEffect;

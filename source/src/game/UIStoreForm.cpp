@@ -1549,12 +1549,12 @@ void CStoreMgr::RenderChaTryon(int x, int y) {
 	if (!m_pCurrMainCha)
 		return;
 
-	g_Render.LookAt(D3DXVECTOR3(11.0f, 36.0f, 10.0f), D3DXVECTOR3(8.70f, 12.0f, 8.0f), MPRender::VIEW_3DUI);
+	g_Render.LookAt(XMVECTOR3(11.0f, 36.0f, 10.0f), XMVECTOR3(8.70f, 12.0f, 8.0f), MPRender::VIEW_3DUI);
 	y += 100;
 
 	MPMatrix44 matCha = *m_pCurrMainCha->GetMatrix(); // ??????????
 
-	m_pCurrMainCha->SetScale(D3DXVECTOR3(0.8f, 0.8f, 0.8f));
+	m_pCurrMainCha->SetScale(XMVECTOR3(0.8f, 0.8f, 0.8f));
 	m_pCurrMainCha->SetUIYaw(180 + m_nChaRotate);
 	m_pCurrMainCha->SetUIScaleDis(9.0f * g_Render.GetScrWidth() / 800);
 	m_pCurrMainCha->RenderForUI(x, y, true);

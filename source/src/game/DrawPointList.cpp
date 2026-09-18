@@ -63,10 +63,10 @@ void CDrawPointList::Add(int x, int y, DWORD c, float h) {
 	float fY = (float)y / 100.0f;
 	float fZ = CGameApp::GetCurScene()->GetGridHeight(fX, fY) + h;
 
-	points.push_back(stPoint(D3DXVECTOR3(fX, fY, fZ), c));
+	points.push_back(stPoint(XMVECTOR3(fX, fY, fZ), c));
 }
 
-void CDrawPointList::Add(D3DXVECTOR3 p, DWORD c, float h) {
+void CDrawPointList::Add(XMVECTOR3 p, DWORD c, float h) {
 	if (!_bIsEnabled)
 		return;
 

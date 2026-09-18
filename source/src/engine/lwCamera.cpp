@@ -66,8 +66,8 @@ lwCamera::lwCamera()
 int lwCamera::SetPerspectiveFov(float fov,float aspect,float zn,float zf)
 {
 	//Here we specify the field of view, aspect ration and near and far clipping planes.
-    //D3DXMATRIX m_proj;
-    //D3DXMatrixPerspectiveFovLH(&m_proj, fov, aspect, zn, zf);
+    //XMMATRIX m_proj;
+    //XMMatrixPerspectiveFovLH(&m_proj, fov, aspect, zn, zf);
     //_dev->SetTransform(D3DTS_PROJECTION, &m_proj);
 
 	_fov = fov;
@@ -95,16 +95,16 @@ void lwCamera::Rotate(DWORD axis,float angle)
 
 void lwCamera::SetTransform()
 {
-    D3DXMATRIX m_view;
+    XMMATRIX m_view;
 
 	//_m.m[2][0] = 100.0f;
 	//_m.m[2][1] = 0.0f;
 	//_m.m[2][2] = 0.0f;
 
-	//D3DXMatrixLookAtLH( &m_view, 
-	//	(D3DXVECTOR3*)(&_m.m[3][0]), //Camera Position
-	//	(D3DXVECTOR3*)(&_m.m[2][0]), //Look At Position
-	//	(D3DXVECTOR3*)(&_m.m[1][0]));  //Up Direction
+	//XMMatrixLookAtLH( &m_view, 
+	//	(XMVECTOR3*)(&_m.m[3][0]), //Camera Position
+	//	(XMVECTOR3*)(&_m.m[2][0]), //Look At Position
+	//	(XMVECTOR3*)(&_m.m[1][0]));  //Up Direction
 
 	//zaxis = normal(At - Eye)
 	//	xaxis = normal(cross(Up, zaxis))
@@ -147,7 +147,7 @@ void lwCamera::SetTransform()
 
 void lwCamera::GetMatrixProj( lwMatrix44* mat )
 {
-	D3DXMatrixPerspectiveFovLH((D3DXMATRIX*)mat, _fov, _aspect, _znear, _zfar);
+	XMMatrixPerspectiveFovLH((XMMATRIX*)mat, _fov, _aspect, _znear, _zfar);
 }
 void lwCamera::GetMatrixView( lwMatrix44* mat )
 {

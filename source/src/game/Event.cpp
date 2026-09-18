@@ -75,7 +75,7 @@ void CEvent::Render() {
 		return;
 
 	static int x = 0, y = 0;
-	D3DXVECTOR3& vPos = _pNode->GetPos();
+	XMVECTOR3& vPos = _pNode->GetPos();
 	g_Render.WorldToScreen(vPos.x, vPos.y, vPos.z, &x, &y);
 
 	CHeadSay::RenderText((char*)_strName.c_str(), x, y);

@@ -28,7 +28,7 @@ CMPShadeMap::CMPShadeMap(void)
 	//_fSin = sinf(3.141592654f / 2); 
 	//_fCos = cosf(3.141592654f / 2);
 
-	_SVerPos = D3DXVECTOR3(0.0f,0.0f,0);
+	_SVerPos = XMVECTOR3(0.0f,0.0f,0);
 
 	_dwColor = 0x80ffffff;
 	_pfDailTime = NULL;
@@ -159,8 +159,8 @@ bool	CMPShadeMap::CreateShadeMap(float fRadius)
 	//������VB
 	for( int n = 0; n < _iVerNum; n++)
 	{
-		_SShadePos[n] = D3DXVECTOR3(0,0,0);
-		_SShadeUV[n]  = D3DXVECTOR2(0,0);
+		_SShadePos[n] = XMVECTOR3(0,0,0);
+		_SShadeUV[n]  = XMVECTOR2(0,0);
 	}
 
 	return true;
@@ -190,25 +190,25 @@ bool	CMPShadeMap::SetGridNum(int iNum)
 	//	return false;
 	//SEFFECT_SHADE_VERTEX *pVertex;
 	//_lpVB->Lock(0, 0, (BYTE**)&pVertex, D3DLOCK_NOOVERWRITE  );
-	//pVertex[0].m_SPos			= D3DXVECTOR3(0, 0, 0);//*/D3DXVECTOR3(-0.5f, -0.5f, 0);
+	//pVertex[0].m_SPos			= XMVECTOR3(0, 0, 0);//*/XMVECTOR3(-0.5f, -0.5f, 0);
 	//pVertex[0].m_dwDiffuse	= 0xffffffff;
-	//pVertex[0].m_SUV			= D3DXVECTOR2(0.0f, 1.0f);
-	//pVertex[0].m_SUV2			= D3DXVECTOR2(0, 1);
+	//pVertex[0].m_SUV			= XMVECTOR2(0.0f, 1.0f);
+	//pVertex[0].m_SUV2			= XMVECTOR2(0, 1);
 
-	//pVertex[1].m_SPos			= D3DXVECTOR3(0, 0, 0);//*/D3DXVECTOR3(-0.5f, 0.5f, 0);
+	//pVertex[1].m_SPos			= XMVECTOR3(0, 0, 0);//*/XMVECTOR3(-0.5f, 0.5f, 0);
 	//pVertex[1].m_dwDiffuse	= 0xffffffff;
-	//pVertex[1].m_SUV			= D3DXVECTOR2(0.0f, 0);
-	//pVertex[1].m_SUV2			= D3DXVECTOR2(2, 3);
+	//pVertex[1].m_SUV			= XMVECTOR2(0.0f, 0);
+	//pVertex[1].m_SUV2			= XMVECTOR2(2, 3);
 
-	//pVertex[2].m_SPos			= D3DXVECTOR3(0, 0, 0);//*/D3DXVECTOR3(0.5f, 0.5f, 0);
+	//pVertex[2].m_SPos			= XMVECTOR3(0, 0, 0);//*/XMVECTOR3(0.5f, 0.5f, 0);
 	//pVertex[2].m_dwDiffuse	= 0xffffffff;
-	//pVertex[2].m_SUV			= D3DXVECTOR2(1.0f, 0.0f);
-	//pVertex[2].m_SUV2			= D3DXVECTOR2(4, 5);
+	//pVertex[2].m_SUV			= XMVECTOR2(1.0f, 0.0f);
+	//pVertex[2].m_SUV2			= XMVECTOR2(4, 5);
 
-	//pVertex[3].m_SPos			= D3DXVECTOR3(0, 0, 0);//*/D3DXVECTOR3(0.5f, -0.5f, 0);
+	//pVertex[3].m_SPos			= XMVECTOR3(0, 0, 0);//*/XMVECTOR3(0.5f, -0.5f, 0);
 	//pVertex[3].m_dwDiffuse	= 0xffffffff;
-	//pVertex[3].m_SUV			= D3DXVECTOR2(1.0f, 1.0f);
-	//pVertex[3].m_SUV2			= D3DXVECTOR2(6, 7);
+	//pVertex[3].m_SUV			= XMVECTOR2(1.0f, 1.0f);
+	//pVertex[3].m_SUV2			= XMVECTOR2(6, 7);
 
 	//_lpVB->Unlock();
 	//!����IB
@@ -327,7 +327,7 @@ void	CMPShadeMap::FrameMove(DWORD	dwDailTime)
 
 }
 
-void	CMPShadeMap::MoveTo(D3DXVECTOR3 SVerPos, MPMap* pMap, float	fAngle)
+void	CMPShadeMap::MoveTo(XMVECTOR3 SVerPos, MPMap* pMap, float	fAngle)
 {
 	if(!_bShow)
 		return;
@@ -349,7 +349,7 @@ void	CMPShadeMap::MoveTo(D3DXVECTOR3 SVerPos, MPMap* pMap, float	fAngle)
 	int nX	= (int)((_SVerPos.x - _fRadius / 2 ) /*/ TILESIZE*/);
 	int nY	= (int)((_SVerPos.y - _fRadius / 2 ) /*/ TILESIZE*/);
 
-	//D3DXVECTOR2 vCenter;
+	//XMVECTOR2 vCenter;
 	//vCenter.x = nX* TILESIZE + ((_fGridMax * TILESIZE) / 2);
 	//vCenter.y = nY* TILESIZE + ((_fGridMax * TILESIZE) / 2);
 	//����ǰTILE���������������
@@ -440,13 +440,13 @@ void	CMPShadeMap::MoveTo(D3DXVECTOR3 SVerPos, MPMap* pMap, float	fAngle)
 			}
 			if(fAngle != 0)
 			{
-				D3DXMATRIX mat;
+				XMMATRIX mat;
 
-				D3DXVECTOR3	vpos(0.5f, 0.5f, 0);
-				auto v = D3DXVECTOR3(0, 0, 1);
+				XMVECTOR3	vpos(0.5f, 0.5f, 0);
+				auto v = XMVECTOR3(0, 0, 1);
 				GetMatrixRotation(&mat, &vpos, &v, fAngle);
 
-				D3DXVec2TransformCoord(&_SShadeUV[iIndex], &_SShadeUV[iIndex], &mat);
+				XMVector2TransformCoord(&_SShadeUV[iIndex], &_SShadeUV[iIndex], &mat);
 
 				//_SShadeUV[iIndex] = vUV;
 
@@ -462,8 +462,8 @@ void CMPShadeMap::RenderVS()
 {
 	if (!_bShow)
 		return;
-	D3DXMATRIX t_mat;
-	D3DXMatrixIdentity(&t_mat);
+	XMMATRIX t_mat;
+	XMMatrixIdentity(&t_mat);
 	if (_lpCurTex && _lpCurTex->IsLoadingOK())
 	{
 		// Here SetTexture is your method, inside which pD3DDevice->SetTexture(0, _lpCurTex->GetTex()) is probably called
@@ -511,7 +511,7 @@ void CMPShadeMap::RenderVS()
 	_pModel->m_pDev->SetVertexShaderConstantF(4, *_pMatViewProj, 4);
 	_pModel->m_pDev->SetVertexShaderConstantF(8, _dwColor, 1);
 
-	D3DXVECTOR4 tv(0, 0, 0, 0);
+	XMVECTOR4 tv(0, 0, 0, 0);
 	int nIndex = 9;
 	for (int n = 0; n < _iVerNum; n++)
 	{
@@ -615,8 +615,8 @@ void CMPShadeMap::RenderSoft() {
 		_pModel->GetDev()->SetTexture(1, NULL);
 	}
 
-	D3DXMATRIX t_mat;
-	D3DXMatrixIdentity(&t_mat);
+	XMMATRIX t_mat;
+	XMMatrixIdentity(&t_mat);
 
 	if (_lpCurTex && _lpCurTex->IsLoadingOK())
 		_pModel->m_pDev->SetTexture(0, _lpCurTex->GetTex());
@@ -640,7 +640,7 @@ void CMPShadeMap::RenderSoft() {
 
 	_pModel->RenderModel();
 	_pModel->End();
-	_pCEffectFile->GetDev()->SetRenderState(D3DRS_TEXTUREFACTOR, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+	_pCEffectFile->GetDev()->SetRenderState(D3DRS_TEXTUREFACTOR, XMCOLORF(1.0f, 1.0f, 1.0f, 1.0f));
 	// Restore default modulate args (Texture * Diffuse), not Texture*Texture.
 	_pCEffectFile->GetDev()->SetTextureStageStateForced(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 	_pCEffectFile->GetDev()->SetTextureStageStateForced(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
@@ -682,7 +682,7 @@ bool	CMPShadeMap::SaveToFile(FILE* pFile)
 	fwrite(&t_temp,sizeof(int),1,pFile);
 
 
-	fwrite(&_dwColor, sizeof(D3DXCOLOR),1,pFile);
+	fwrite(&_dwColor, sizeof(XMCOLORF),1,pFile);
 	fwrite(&_iIdxTech, sizeof(int),1,pFile);
 
 	return true;
@@ -704,7 +704,7 @@ bool	CMPShadeMap::LoadFromFile(FILE* pFile)
 	fread(&t_temp,sizeof(int),1,pFile);
 	_eDestBlend = (D3DBLEND)t_temp;
 
-	fread(&_dwColor, sizeof(D3DXCOLOR),1,pFile);
+	fread(&_dwColor, sizeof(XMCOLORF),1,pFile);
 	fread(&_iIdxTech, sizeof(int),1,pFile);
 	return true;
 }
@@ -740,7 +740,7 @@ CMPShadeEX::CMPShadeEX(int iFrameCount)
 	_vecTexOffset.resize(_iNumTex);
 	for(int n = 0; n < _iNumTex; n++)
 	{
-		_vecTexOffset[n] = D3DXVECTOR2(0,0);
+		_vecTexOffset[n] = XMVECTOR2(0,0);
 	}
 	_vecTexSave.clear();
 }
@@ -792,7 +792,7 @@ void	CMPShadeEX::setFrameColor(int iIdx, D3DCOLOR SColor)
 {
 	_vecFrameColor[iIdx] = SColor;
 }
-void	CMPShadeEX::setColor(D3DXCOLOR SColor)
+void	CMPShadeEX::setColor(XMCOLORF SColor)
 {
 	for(int n = 0; n < _iFrameCount; n++)
 	{
@@ -829,7 +829,7 @@ void	CMPShadeEX::FrameMove(DWORD	dwDailTime)
 	else
 		iNextFrame = _iCurFrame + 1;
 	_fLerp = _fCurTime / _fFrameTime;
-	D3DXColorLerp( &_dwColor, &_vecFrameColor[_iCurFrame], &_vecFrameColor[iNextFrame], _fLerp );
+	XMColorLerp( &_dwColor, &_vecFrameColor[_iCurFrame], &_vecFrameColor[iNextFrame], _fLerp );
 
 	_fTexCurTime += *_pfDailTime;
 	if(_fTexCurTime >= _fTexFrameTime)
@@ -843,7 +843,7 @@ void	CMPShadeEX::FrameMove(DWORD	dwDailTime)
 	}
 }
 
-void	CMPShadeEX::MoveTo(D3DXVECTOR3 SVerPos, MPMap* pMap, float	fAngle)
+void	CMPShadeEX::MoveTo(XMVECTOR3 SVerPos, MPMap* pMap, float	fAngle)
 {
 	if(!_bShow)
 		return;
@@ -923,13 +923,13 @@ void	CMPShadeEX::MoveTo(D3DXVECTOR3 SVerPos, MPMap* pMap, float	fAngle)
 			}
 			if(fAngle != 0)
 			{
-				D3DXMATRIX mat;
+				XMMATRIX mat;
 
-				D3DXVECTOR3	vpos(0.5f, 0.5f, 0);
-				const auto v = D3DXVECTOR3(0, 0, 1);
+				XMVECTOR3	vpos(0.5f, 0.5f, 0);
+				const auto v = XMVECTOR3(0, 0, 1);
 				GetMatrixRotation(&mat, &vpos, &v, fAngle);
 
-				D3DXVec2TransformCoord(&_SShadeUV[iIndex], &_SShadeUV[iIndex], &mat);
+				XMVector2TransformCoord(&_SShadeUV[iIndex], &_SShadeUV[iIndex], &mat);
 			}
 		}
 	}
@@ -975,7 +975,7 @@ bool	CMPShadeEX::SaveToFile(FILE* pFile)
 	//!ÿһ֡��ɫ
 	for( int n = 0; n < _iFrameCount; n++)
 	{
-		fwrite(&_vecFrameColor[n],sizeof(D3DXCOLOR),1,pFile);
+		fwrite(&_vecFrameColor[n],sizeof(XMCOLORF),1,pFile);
 	}
 	///////////////!��������任
 	//!ÿһ֡����任ʱ��
@@ -1015,7 +1015,7 @@ bool	CMPShadeEX::LoadFromFile(FILE* pFile)
 	_vecFrameColor.resize(_iFrameCount);
 	for( int n = 0; n < _iFrameCount; n++)
 	{
-		fread(&_vecFrameColor[n],sizeof(D3DXCOLOR),1,pFile);
+		fread(&_vecFrameColor[n],sizeof(XMCOLORF),1,pFile);
 	}
 	///////////////!��������任
 	//!ÿһ֡����任ʱ��
@@ -1088,7 +1088,7 @@ void	CMPShadeCtrl::setFrameColor(int iIdx, D3DCOLOR SColor)
 		((CMPShadeEX*)_pShadeMap)->setFrameColor(iIdx,SColor);
 
 }
-void	CMPShadeCtrl::setColor(D3DXCOLOR SColor)
+void	CMPShadeCtrl::setColor(XMCOLORF SColor)
 {
 	if(_pShadeMap->m_iType == SHADE_SINGLE)
 		_pShadeMap->SetColor(SColor);
@@ -1122,7 +1122,7 @@ void	CMPShadeCtrl::getFrameColor(int iIdx, D3DCOLOR* pSColor)
 	if(_pShadeMap->m_iType == SHADE_ANI)
 		return ((CMPShadeEX*)_pShadeMap)->getFrameColor(iIdx, pSColor);
 }
-void	CMPShadeCtrl::getColor(D3DXCOLOR* pSColor)
+void	CMPShadeCtrl::getColor(XMCOLORF* pSColor)
 {
 	//if(_pShadeMap->m_iType == SHADE_SINGLE)
 		_pShadeMap->getColor(pSColor);
@@ -1138,7 +1138,7 @@ void	CMPShadeCtrl::FrameMove(DWORD	dwDailTime)
 	_pShadeMap->FrameMove(dwDailTime);
 }
 
-void	CMPShadeCtrl::MoveTo(D3DXVECTOR3 SVerPos, MPMap* pMap, float	fAngle)
+void	CMPShadeCtrl::MoveTo(XMVECTOR3 SVerPos, MPMap* pMap, float	fAngle)
 {
 	_pShadeMap->MoveTo(SVerPos,pMap,-fAngle);
 }

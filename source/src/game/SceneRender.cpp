@@ -187,7 +187,7 @@ void CGameScene::_Render() {
 	if (g_Config.m_bEditor) {
 		if (_vMousePos.x > 0) {
 			if (g_Editor.IsEnable())
-				g_Render.AddLine(_vMousePos, D3DXVECTOR3(_vMousePos.x, _vMousePos.y, _vMousePos.z + 4.0f), 0xFFFF0000);
+				g_Render.AddLine(_vMousePos, XMVECTOR3(_vMousePos.x, _vMousePos.y, _vMousePos.z + 4.0f), 0xFFFF0000);
 		}
 
 		// ��ǰ��ɫ�����Ѳ�߹�, ���Ѳ��·�߻��Ƴ���
@@ -196,10 +196,10 @@ void CGameScene::_Render() {
 			CCharacter* pCha = GetCha(i);
 			if (pCha->IsValid()) {
 				if (pCha->getPatrolX() > 0) {
-					D3DXVECTOR3 vec1 = D3DXVECTOR3((float)(pCha->getPatrolX()) / 100.0f, (float)(pCha->getPatrolY()) / 100.0f, 2.0f);
-					D3DXVECTOR3 vec2 = D3DXVECTOR3((float)(pCha->GetCurX()) / 100.0f, (float)(pCha->GetCurY()) / 100.0f, 2.0f);
+					XMVECTOR3 vec1 = XMVECTOR3((float)(pCha->getPatrolX()) / 100.0f, (float)(pCha->getPatrolY()) / 100.0f, 2.0f);
+					XMVECTOR3 vec2 = XMVECTOR3((float)(pCha->GetCurX()) / 100.0f, (float)(pCha->GetCurY()) / 100.0f, 2.0f);
 					g_Render.AddLine(vec1, vec2, 0xFFFFFFFF);
-					g_Render.AddLine(vec1, vec2 + D3DXVECTOR3(0.1f, 0.2f, 0.0f), 0xFFFF0000);
+					g_Render.AddLine(vec1, vec2 + XMVECTOR3(0.1f, 0.2f, 0.0f), 0xFFFF0000);
 				}
 			}
 		}
@@ -208,7 +208,7 @@ void CGameScene::_Render() {
 	// self begin
 	static float fLightDir = 0.0f;
 	fLightDir += 0.02f;
-	if (fLightDir > D3DX_PI * 2.0f)
+	if (fLightDir > XM_PI * 2.0f)
 		fLightDir = 0.0f;
 
 	float fX = 1.0f * tan(fLightDir);
@@ -233,7 +233,7 @@ void CGameScene::_Render() {
 	if (_pShadowMap && _pShadowMap->IsEnabled()) {
 		CCharacter* pMainCha = GetMainCha();
 		if (pMainCha && _pTerrain) {
-			D3DXVECTOR3 mainPos = pMainCha->GetPos();
+			XMVECTOR3 mainPos = pMainCha->GetPos();
 			_pShadowMap->SetFocusPoint(mainPos);
 
 			MPTile* pTile = _pTerrain->GetTile((int)mainPos.x, (int)mainPos.y);
@@ -268,7 +268,7 @@ void CGameScene::_Render() {
 							continue;
 						if (!ShouldCastSceneObjectShadow(pObj))
 							continue;
-						D3DXVECTOR3 objPos = pObj->getPos();
+						XMVECTOR3 objPos = pObj->getPos();
 						float dx = objPos.x - mainPos.x;
 						float dy = objPos.y - mainPos.y;
 						if (dx * dx + dy * dy > shadowRange * shadowRange)
@@ -305,7 +305,7 @@ void CGameScene::_Render() {
 
 	if (_pShadowMap && _pShadowMap->IsEnabled()) {
 		MPIDeviceObject* pDevObj = g_Render.GetInterfaceMgr()->dev_obj;
-		D3DXMATRIX matVP = *(D3DXMATRIX*)pDevObj->GetMatViewProj();
+		XMMATRIX matVP = *(XMMATRIX*)pDevObj->GetMatViewProj();
 		_pShadowMap->RenderGroundOverlay(matVP);
 	}
 
@@ -430,7 +430,7 @@ void CGameScene::_Render() {
 								env_light.Direction.x = pArea->fLightDir[0];
 								env_light.Direction.y = pArea->fLightDir[1];
 								env_light.Direction.z = pArea->fLightDir[2];
-								D3DXVec3Normalize((D3DXVECTOR3*)&env_light.Direction, (D3DXVECTOR3*)&env_light.Direction);
+								XMVector3Normalize((XMVECTOR3*)&env_light.Direction, (XMVECTOR3*)&env_light.Direction);
 
 								MPDwordByte4 db_color;
 								db_color.d = pArea->dwLightColor;
@@ -565,7 +565,7 @@ void CGameScene::_Render() {
 		rsm->BeginCharacter();
 
 		int nArea = -1;
-		D3DXVECTOR3 v(0, 0, 0);
+		XMVECTOR3 v(0, 0, 0);
 		// if( GetMainCha() ) v = GetMainCha()->GetPos();
 		DWORD env_color;
 		DWORD env_color_old;
@@ -585,7 +585,7 @@ void CGameScene::_Render() {
 		BOOL cha_lgt = 1;
 		CChaRecord* cha_record = nullptr;
 		MPTile* tile = nullptr;
-		D3DXCOLOR c;
+		XMCOLORF c;
 		float fLgt;
 		MPDwordByte4 db_color;
 		CAreaInfo* pArea = nullptr;
@@ -627,7 +627,7 @@ void CGameScene::_Render() {
 							env_light.Direction.x = pArea->fLightDir[0];
 							env_light.Direction.y = pArea->fLightDir[1];
 							env_light.Direction.z = pArea->fLightDir[2];
-							D3DXVec3Normalize((D3DXVECTOR3*)&env_light.Direction, (D3DXVECTOR3*)&env_light.Direction);
+							XMVector3Normalize((XMVECTOR3*)&env_light.Direction, (XMVECTOR3*)&env_light.Direction);
 
 							db_color.d = pArea->dwLightColor;
 							env_light.Diffuse.r = (float)(db_color.b[2] / 255.0f);
@@ -739,7 +739,7 @@ void CGameScene::_Render() {
 							env_light.Direction.x = pArea->fLightDir[0];
 							env_light.Direction.y = pArea->fLightDir[1];
 							env_light.Direction.z = pArea->fLightDir[2];
-							D3DXVec3Normalize((D3DXVECTOR3*)&env_light.Direction, (D3DXVECTOR3*)&env_light.Direction);
+							XMVector3Normalize((XMVECTOR3*)&env_light.Direction, (XMVECTOR3*)&env_light.Direction);
 
 							db_color.d = pArea->dwLightColor;
 							env_light.Diffuse.r = (float)(db_color.b[2] / 255.0f);
@@ -797,7 +797,7 @@ void CGameScene::_Render() {
 		//    lgt.Type = D3DLIGHT_DIRECTIONAL;
 		//    lgt.Diffuse.r = lgt.Diffuse.g = lgt.Diffuse.b = lgt.Diffuse.a = 1.0f;
 		//    lgt.Direction = g_pGameApp->GetMainCam()->m_vViewDir;
-		//    D3DXVec3Normalize((D3DXVECTOR3*)&lgt.Direction, (D3DXVECTOR3*)&lgt.Direction);
+		//    XMVector3Normalize((XMVECTOR3*)&lgt.Direction, (XMVECTOR3*)&lgt.Direction);
 
 		//    if(g_mcl.flag == 1)
 		//    {
@@ -810,7 +810,7 @@ void CGameScene::_Render() {
 		//    }
 
 		//    g_Render.SetRenderState(D3DRS_AMBIENT, rs_amb);
-		//    //lgt.Direction = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+		//    //lgt.Direction = XMVECTOR3(0.0f, 1.0f, 0.0f);
 		//    g_Render.SetLight(0, &lgt);
 		//    g_Render.SetRenderState(D3DRS_LIGHTING, TRUE);
 		//    g_Render.LightEnable(0, TRUE);
@@ -1016,7 +1016,7 @@ void CGameScene::RenderSMallMap() {
 	// self begin
 	static float fLightDir = 0.0f;
 	fLightDir += 0.02f;
-	if (fLightDir > D3DX_PI * 2.0f)
+	if (fLightDir > XM_PI * 2.0f)
 		fLightDir = 0.0f;
 
 	float fX = 1.0f * tan(fLightDir);
@@ -1147,7 +1147,7 @@ void CGameScene::RenderSMallMap() {
 						env_light.Direction.x = pArea->fLightDir[0];
 						env_light.Direction.y = pArea->fLightDir[1];
 						env_light.Direction.z = pArea->fLightDir[2];
-						D3DXVec3Normalize((D3DXVECTOR3*)&env_light.Direction, (D3DXVECTOR3*)&env_light.Direction);
+						XMVector3Normalize((XMVECTOR3*)&env_light.Direction, (XMVECTOR3*)&env_light.Direction);
 
 						MPDwordByte4 db_color;
 						db_color.d = pArea->dwLightColor;

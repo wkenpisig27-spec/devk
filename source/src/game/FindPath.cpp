@@ -214,15 +214,15 @@ void CFindPath::SetShortPathFinding(long step, int range) {
 }
 
 void CFindPath::SetTargetPos(int nCurX, int nCurY, int& nTargetX, int& nTargetY, bool bback) {
-	D3DXVECTOR2 vDir;
+	XMVECTOR2 vDir;
 	vDir.x = float(nCurX - nTargetX);
 	vDir.y = float(nCurY - nTargetY);
 
-	float fd = D3DXVec2Length(&vDir);
+	float fd = XMVector2Length(&vDir);
 	float fstep = 0.05f;
-	D3DXVec2Normalize(&vDir, &vDir);
+	XMVector2Normalize(&vDir, &vDir);
 	if (bback) {
-		D3DXVECTOR2 vPos((float)nTargetX + 0.25f, (float)nTargetY + 0.25f);
+		XMVECTOR2 vPos((float)nTargetX + 0.25f, (float)nTargetY + 0.25f);
 
 		int nx = nTargetX, ny = nTargetY;
 		int inum = int(fd / fstep);
@@ -230,7 +230,7 @@ void CFindPath::SetTargetPos(int nCurX, int nCurY, int& nTargetX, int& nTargetY,
 			return;
 		for (int n = 0; n < inum; ++n) {
 			const auto v = vDir * fstep;
-			D3DXVec2Add(&vPos, &vPos, &(v));
+			XMVector2Add(&vPos, &vPos, &(v));
 			nx = int(vPos.x);
 			ny = int(vPos.y);
 			if (nx < 0 || nx >= _nWidth || ny < 0 || ny >= _nWidth)
@@ -243,7 +243,7 @@ void CFindPath::SetTargetPos(int nCurX, int nCurY, int& nTargetX, int& nTargetY,
 		}
 	} else {
 		vDir = -vDir;
-		D3DXVECTOR2 vPos((float)nCurX + 0.25f, (float)nCurY + 0.25f);
+		XMVECTOR2 vPos((float)nCurX + 0.25f, (float)nCurY + 0.25f);
 
 		int nx = nCurX, ny = nCurY;
 		int inum = int(fd / fstep);
@@ -251,7 +251,7 @@ void CFindPath::SetTargetPos(int nCurX, int nCurY, int& nTargetX, int& nTargetY,
 			return;
 		for (int n = 0; n < inum; ++n) {
 			const auto v = vDir * fstep;
-			D3DXVec2Add(&vPos, &vPos, &(v));
+			XMVector2Add(&vPos, &vPos, &(v));
 			nx = int(vPos.x);
 			ny = int(vPos.y);
 			if (nx < 0 || nx >= _nWidth || ny < 0 || ny >= _nWidth)
@@ -269,7 +269,7 @@ void CFindPath::SetTargetPos(int nCurX, int nCurY, int& nTargetX, int& nTargetY,
 
 BOOL CFindPath::IsCross(int nCurX, int nCurY, int nTargetX, int nTargetY) {
 
-	D3DXVECTOR2 vDir;
+	XMVECTOR2 vDir;
 	vDir.x = float(nTargetX - nCurX);
 	vDir.y = float(nTargetY - nCurY);
 
@@ -295,11 +295,11 @@ BOOL CFindPath::IsCross(int nCurX, int nCurY, int nTargetX, int nTargetY) {
 			bydir = 5;
 	}
 
-	float fd = D3DXVec2Length(&vDir);
+	float fd = XMVector2Length(&vDir);
 	float fstep = 0.05f;
-	D3DXVec2Normalize(&vDir, &vDir);
+	XMVector2Normalize(&vDir, &vDir);
 
-	D3DXVECTOR2 vPos((float)nCurX + 0.25f, (float)nCurY + 0.25f);
+	XMVECTOR2 vPos((float)nCurX + 0.25f, (float)nCurY + 0.25f);
 
 	int nx = -1, ny = -1;
 	int inum = int(fd / fstep);
@@ -307,7 +307,7 @@ BOOL CFindPath::IsCross(int nCurX, int nCurY, int nTargetX, int nTargetY) {
 		return TRUE;
 	for (int n = 1; n < inum; ++n) {
 		const auto v = vDir * fstep;
-		D3DXVec2Add(&vPos, &vPos, &(v));
+		XMVector2Add(&vPos, &vPos, &(v));
 		if (nx == int(vPos.x) && ny == int(vPos.y))
 			continue;
 
@@ -503,11 +503,11 @@ BOOL CFindPath::FindPath(CGameScene* pScene, CCharacter* pCha, int nSelfX, int n
 	if (nTargetX == nCurX && nTargetY == nCurY) {
 		return FALSE;
 	}
-	D3DXVECTOR3 vOrg((float)nSelfX / 100.0f, (float)nSelfY / 100.0f, 0.5f);
+	XMVECTOR3 vOrg((float)nSelfX / 100.0f, (float)nSelfY / 100.0f, 0.5f);
 
 	_nCurX = nx;
 	_nCurY = ny;
-	_vStart = D3DXVECTOR3(nCurX * 0.5f + 0.25f, nCurY * 0.5f + 0.25f, 0.5f);
+	_vStart = XMVECTOR3(nCurX * 0.5f + 0.25f, nCurY * 0.5f + 0.25f, 0.5f);
 
 	GetTempTerrain(pScene, pCha, nCurX, nCurY);
 
@@ -530,7 +530,7 @@ BOOL CFindPath::FindPath(CGameScene* pScene, CCharacter* pCha, int nSelfX, int n
 			return FALSE;
 		}
 	}
-	D3DXVECTOR3 vEnd((nCurX + (_nTargetX - _nWidth / 2)) * 0.5f + 0.25f,
+	XMVECTOR3 vEnd((nCurX + (_nTargetX - _nWidth / 2)) * 0.5f + 0.25f,
 					 (nCurY + (_nTargetY - _nWidth / 2)) * 0.5f + 0.25f, 0.5f);
 	if (IsCross((_nWidth / 2), (_nWidth / 2), _nTargetX, _nTargetY)) {
 		_vecPathPoint.clear();
@@ -545,7 +545,7 @@ BOOL CFindPath::FindPath(CGameScene* pScene, CCharacter* pCha, int nSelfX, int n
 	}
 	if (IsWalkLine) {
 		SetTargetPos((_nWidth / 2), (_nWidth / 2), _nTargetX, _nTargetY, false);
-		D3DXVECTOR3 vEnd2((nCurX + (_nTargetX - _nWidth / 2)) * 0.5f + 0.25f,
+		XMVECTOR3 vEnd2((nCurX + (_nTargetX - _nWidth / 2)) * 0.5f + 0.25f,
 						  (nCurY + (_nTargetY - _nWidth / 2)) * 0.5f + 0.25f, 0.5f);
 		_vecPathPoint.clear();
 		if ((_nWidth / 2) == _nTargetX && (_nWidth / 2) == _nTargetY)
@@ -569,7 +569,7 @@ BOOL CFindPath::FindPath(CGameScene* pScene, CCharacter* pCha, int nSelfX, int n
 		if ((_nWidth / 2) == _nTargetX && (_nWidth / 2) == _nTargetY)
 			return FALSE;
 
-		D3DXVECTOR3 vEnd2((nCurX + (_nTargetX - _nWidth / 2)) * 0.5f + 0.25f,
+		XMVECTOR3 vEnd2((nCurX + (_nTargetX - _nWidth / 2)) * 0.5f + 0.25f,
 						  (nCurY + (_nTargetY - _nWidth / 2)) * 0.5f + 0.25f, 0.5f);
 		_vecPathPoint.clear();
 
@@ -606,7 +606,7 @@ BOOL CFindPath::FindPath(CGameScene* pScene, CCharacter* pCha, int nSelfX, int n
 	_vecPathPoint.clear();
 	_vecPathPoint.push_back(vOrg);
 	_vecPathPoint.push_back(_vStart);
-	D3DXVECTOR3 tvm = _vStart;
+	XMVECTOR3 tvm = _vStart;
 	for (m = 1; m < _vecDirSave.size(); ++m) {
 		switch (*_vecDirSave[m - 1]) {
 		case 0:
@@ -701,7 +701,7 @@ bool CFindPath::Find(CGameScene* pScene, CCharacter* pCha, int nSelfX, int nSelf
 			return false;
 		}
 
-		D3DXVECTOR3* pointer;
+		XMVECTOR3* pointer;
 		if (count > 0) {
 			pointer = _vecPathPoint[0];
 			float fX = pointer->x * 100.0f;
@@ -773,8 +773,8 @@ void CFindPathEx::SetTarget(int CurX, int CurY, int TargetX, int TargetY) {
 	m_iTargetX = TargetX;
 	m_iTargetY = TargetY;
 
-	m_GuideTargetList.push(D3DXVECTOR2((FLOAT)TargetX, (FLOAT)TargetY));
-	m_GuideTargetList.push(D3DXVECTOR2((FLOAT)CurX, (FLOAT)CurY));
+	m_GuideTargetList.push(XMVECTOR2((FLOAT)TargetX, (FLOAT)TargetY));
+	m_GuideTargetList.push(XMVECTOR2((FLOAT)CurX, (FLOAT)CurY));
 	g_bIsMouseWalk = false; //  by Waiting 2009-08-04
 }
 
@@ -806,7 +806,7 @@ void CFindPathEx::CalculateGuideStraight() {
 
 	// if delta x,y less than GUIDE_RANDGE, we push target to our stack
 	if (abs(deltaX) <= GUIDE_RANDGE && abs(deltaY) <= GUIDE_RANDGE) {
-		m_GuideTargetList.push(D3DXVECTOR2((FLOAT)m_iTargetX, (FLOAT)m_iTargetY));
+		m_GuideTargetList.push(XMVECTOR2((FLOAT)m_iTargetX, (FLOAT)m_iTargetY));
 		return;
 	}
 
@@ -821,7 +821,7 @@ void CFindPathEx::CalculateGuideStraight() {
 					if (!g_IsMoveAble(pScene->GetMainCha()->getChaCtrlType(), pScene->GetMainCha()->GetDefaultChaInfo()->chTerritory, (EAreaMask)pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100))) {
 						short sRegion = pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100);
 						if (!(sRegion & enumAREA_TYPE_MINE)) {
-							m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(TempY)));
+							m_GuideTargetList.push(XMVECTOR2(float(TempX), float(TempY)));
 							break;
 						}
 					}
@@ -837,7 +837,7 @@ void CFindPathEx::CalculateGuideStraight() {
 					if (!g_IsMoveAble(pScene->GetMainCha()->getChaCtrlType(), pScene->GetMainCha()->GetDefaultChaInfo()->chTerritory, (EAreaMask)pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100))) {
 						short sRegion = pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100);
 						if (!(sRegion & enumAREA_TYPE_MINE)) {
-							m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(TempY)));
+							m_GuideTargetList.push(XMVECTOR2(float(TempX), float(TempY)));
 							break;
 						}
 					}
@@ -855,7 +855,7 @@ void CFindPathEx::CalculateGuideStraight() {
 					if (!g_IsMoveAble(pScene->GetMainCha()->getChaCtrlType(), pScene->GetMainCha()->GetDefaultChaInfo()->chTerritory, (EAreaMask)pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100))) {
 						short sRegion = pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100);
 						if (!(sRegion & enumAREA_TYPE_MINE)) {
-							m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(TempY)));
+							m_GuideTargetList.push(XMVECTOR2(float(TempX), float(TempY)));
 							break;
 						}
 					}
@@ -871,7 +871,7 @@ void CFindPathEx::CalculateGuideStraight() {
 					if (!g_IsMoveAble(pScene->GetMainCha()->getChaCtrlType(), pScene->GetMainCha()->GetDefaultChaInfo()->chTerritory, (EAreaMask)pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100))) {
 						short sRegion = pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100);
 						if (!(sRegion & enumAREA_TYPE_MINE)) {
-							m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(TempY)));
+							m_GuideTargetList.push(XMVECTOR2(float(TempX), float(TempY)));
 							break;
 						}
 					}
@@ -897,7 +897,7 @@ void CFindPathEx::CalculateGuideStraight() {
 					if (!g_IsMoveAble(pScene->GetMainCha()->getChaCtrlType(), pScene->GetMainCha()->GetDefaultChaInfo()->chTerritory, (EAreaMask)pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100))) {
 						short sRegion = pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100);
 						if (!(sRegion & enumAREA_TYPE_MINE)) {
-							m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(TempY)));
+							m_GuideTargetList.push(XMVECTOR2(float(TempX), float(TempY)));
 							break;
 						}
 					}
@@ -916,7 +916,7 @@ void CFindPathEx::CalculateGuideStraight() {
 					if (!g_IsMoveAble(pScene->GetMainCha()->getChaCtrlType(), pScene->GetMainCha()->GetDefaultChaInfo()->chTerritory, (EAreaMask)pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100))) {
 						short sRegion = pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100);
 						if (!(sRegion & enumAREA_TYPE_MINE)) {
-							m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(TempY)));
+							m_GuideTargetList.push(XMVECTOR2(float(TempX), float(TempY)));
 							break;
 						}
 					}
@@ -935,7 +935,7 @@ void CFindPathEx::CalculateGuideStraight() {
 					if (!g_IsMoveAble(pScene->GetMainCha()->getChaCtrlType(), pScene->GetMainCha()->GetDefaultChaInfo()->chTerritory, (EAreaMask)pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100))) {
 						short sRegion = pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100);
 						if (!(sRegion & enumAREA_TYPE_MINE)) {
-							m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(TempY)));
+							m_GuideTargetList.push(XMVECTOR2(float(TempX), float(TempY)));
 							break;
 						}
 					}
@@ -957,7 +957,7 @@ void CFindPathEx::CalculateGuideStraight() {
 					if (!g_IsMoveAble(pScene->GetMainCha()->getChaCtrlType(), pScene->GetMainCha()->GetDefaultChaInfo()->chTerritory, (EAreaMask)pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100))) {
 						short sRegion = pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100);
 						if (!(sRegion & enumAREA_TYPE_MINE)) {
-							m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(TempY)));
+							m_GuideTargetList.push(XMVECTOR2(float(TempX), float(TempY)));
 							break;
 						}
 					}
@@ -976,7 +976,7 @@ void CFindPathEx::CalculateGuideStraight() {
 					if (!g_IsMoveAble(pScene->GetMainCha()->getChaCtrlType(), pScene->GetMainCha()->GetDefaultChaInfo()->chTerritory, (EAreaMask)pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100))) {
 						short sRegion = pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100);
 						if (!(sRegion & enumAREA_TYPE_MINE)) {
-							m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(TempY)));
+							m_GuideTargetList.push(XMVECTOR2(float(TempX), float(TempY)));
 							break;
 						}
 					}
@@ -995,7 +995,7 @@ void CFindPathEx::CalculateGuideStraight() {
 					if (!g_IsMoveAble(pScene->GetMainCha()->getChaCtrlType(), pScene->GetMainCha()->GetDefaultChaInfo()->chTerritory, (EAreaMask)pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100))) {
 						short sRegion = pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100);
 						if (!(sRegion & enumAREA_TYPE_MINE)) {
-							m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(TempY)));
+							m_GuideTargetList.push(XMVECTOR2(float(TempX), float(TempY)));
 							break;
 						}
 					}
@@ -1017,7 +1017,7 @@ void CFindPathEx::CalculateGuideStraight() {
 					if (!g_IsMoveAble(pScene->GetMainCha()->getChaCtrlType(), pScene->GetMainCha()->GetDefaultChaInfo()->chTerritory, (EAreaMask)pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100))) {
 						short sRegion = pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100);
 						if (!(sRegion & enumAREA_TYPE_MINE)) {
-							m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(TempY)));
+							m_GuideTargetList.push(XMVECTOR2(float(TempX), float(TempY)));
 							break;
 						}
 					}
@@ -1036,7 +1036,7 @@ void CFindPathEx::CalculateGuideStraight() {
 					if (!g_IsMoveAble(pScene->GetMainCha()->getChaCtrlType(), pScene->GetMainCha()->GetDefaultChaInfo()->chTerritory, (EAreaMask)pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100))) {
 						short sRegion = pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100);
 						if (!(sRegion & enumAREA_TYPE_MINE)) {
-							m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(TempY)));
+							m_GuideTargetList.push(XMVECTOR2(float(TempX), float(TempY)));
 							break;
 						}
 					}
@@ -1055,7 +1055,7 @@ void CFindPathEx::CalculateGuideStraight() {
 					if (!g_IsMoveAble(pScene->GetMainCha()->getChaCtrlType(), pScene->GetMainCha()->GetDefaultChaInfo()->chTerritory, (EAreaMask)pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100))) {
 						short sRegion = pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100);
 						if (!(sRegion & enumAREA_TYPE_MINE)) {
-							m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(TempY)));
+							m_GuideTargetList.push(XMVECTOR2(float(TempX), float(TempY)));
 							break;
 						}
 					}
@@ -1077,7 +1077,7 @@ void CFindPathEx::CalculateGuideStraight() {
 					if (!g_IsMoveAble(pScene->GetMainCha()->getChaCtrlType(), pScene->GetMainCha()->GetDefaultChaInfo()->chTerritory, (EAreaMask)pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100))) {
 						short sRegion = pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100);
 						if (!(sRegion & enumAREA_TYPE_MINE)) {
-							m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(TempY)));
+							m_GuideTargetList.push(XMVECTOR2(float(TempX), float(TempY)));
 							break;
 						}
 					}
@@ -1096,7 +1096,7 @@ void CFindPathEx::CalculateGuideStraight() {
 					if (!g_IsMoveAble(pScene->GetMainCha()->getChaCtrlType(), pScene->GetMainCha()->GetDefaultChaInfo()->chTerritory, (EAreaMask)pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100))) {
 						short sRegion = pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100);
 						if (!(sRegion & enumAREA_TYPE_MINE)) {
-							m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(TempY)));
+							m_GuideTargetList.push(XMVECTOR2(float(TempX), float(TempY)));
 							break;
 						}
 					}
@@ -1115,7 +1115,7 @@ void CFindPathEx::CalculateGuideStraight() {
 					if (!g_IsMoveAble(pScene->GetMainCha()->getChaCtrlType(), pScene->GetMainCha()->GetDefaultChaInfo()->chTerritory, (EAreaMask)pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100))) {
 						short sRegion = pScene->GetTerrain()->GetBlock()->GetTileRegionAttr(TempX * 50 / 100, TempY * 50 / 100);
 						if (!(sRegion & enumAREA_TYPE_MINE)) {
-							m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(TempY)));
+							m_GuideTargetList.push(XMVECTOR2(float(TempX), float(TempY)));
 							break;
 						}
 					}
@@ -1138,8 +1138,8 @@ void CFindPathEx::CalculateGuideBypass() {
 	int TempX = m_iGuideTargetX + m_iDeltaFlagX * GUIDE_RANDGE_SMALL;
 	int TempY = m_iGuideTargetY + m_iDeltaFlagY * GUIDE_RANDGE_SMALL;
 
-	m_GuideTargetList.push(D3DXVECTOR2(float(TempX), float(m_iGuideTargetY)));
-	m_GuideTargetList.push(D3DXVECTOR2(float(m_iGuideTargetX), float(TempY)));
+	m_GuideTargetList.push(XMVECTOR2(float(TempX), float(m_iGuideTargetY)));
+	m_GuideTargetList.push(XMVECTOR2(float(m_iGuideTargetX), float(TempY)));
 }
 
 bool CFindPathEx::HaveTarget() {

@@ -363,7 +363,7 @@ void CLoginScene::__cha_render_event(C3DCompent* pSender, int x, int y) {
 		d3d9->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 #endif
 	}
-	g_Render.LookAt(D3DXVECTOR3(11.0f, 36.0f, 10.0f), D3DXVECTOR3(8.70f, 12.0f, 8.0f), MPRender::VIEW_3DUI);
+	g_Render.LookAt(XMVECTOR3(11.0f, 36.0f, 10.0f), XMVECTOR3(8.70f, 12.0f, 8.0f), MPRender::VIEW_3DUI);
 	y += 100;
 	MPMatrix44 old_mat = *modelCha->GetMatrix();
 

@@ -266,7 +266,7 @@ DWORD MPSceneObject::GetPrimitiveNum() const
 {
     return _model->GetPrimitiveNum();
 }
-int MPSceneObject::GetPrimitiveBox( DWORD id, D3DXVECTOR3* p1, D3DXVECTOR3* p2 )
+int MPSceneObject::GetPrimitiveBox( DWORD id, XMVECTOR3* p1, XMVECTOR3* p2 )
 {
     lwIPrimitive* p = _model->GetPrimitive( id );
     if( p == NULL )
@@ -288,8 +288,8 @@ int MPSceneObject::GetPrimitiveBox( DWORD id, D3DXVECTOR3* p1, D3DXVECTOR3* p2 )
     lwVec3Mat44Mul( &x1, &mat );
     lwVec3Mat44Mul( &x2, &mat );
 
-    *p1 = *(D3DXVECTOR3*)&x1;
-    *p2 = *(D3DXVECTOR3*)&x2;
+    *p1 = *(XMVECTOR3*)&x1;
+    *p2 = *(XMVECTOR3*)&x2;
 
     return 1;
 }

@@ -414,7 +414,7 @@ void CMiniMapMgr::ShowRadar(const char* szX, const char* szY) {
 	}
 
 	int x = atoi(szX), y = atoi(szY);
-	D3DXVECTOR3 target((float)x, (float)y, 0);
+	XMVECTOR3 target((float)x, (float)y, 0);
 
 	const char* _strName = g_pGameApp->GetCurScene()->GetTerrainName();
 	if (strcmp(_strName, "garner") == 0)
@@ -468,7 +468,7 @@ void CMiniMapMgr::ShowRadar() {
 
 	edtX->SetActive(edtX);
 	int x = atoi(szX), y = atoi(szY);
-	D3DXVECTOR3 target((float)x, (float)y, 0);
+	XMVECTOR3 target((float)x, (float)y, 0);
 
 	const char* szAddress = cboAddr->GetText();
 

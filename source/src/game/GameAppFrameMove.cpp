@@ -73,7 +73,7 @@ void CGameApp::_FrameMove(DWORD dwTimeParam, bool camMove) // Vim
 	// Camera follow
 	if (_bCameraFollow) {
 		if (pCha) {
-			D3DXVECTOR3 vecCha = pCha->GetPos() + D3DXVECTOR3(0, 0, 1.f);
+			XMVECTOR3 vecCha = pCha->GetPos() + XMVECTOR3(0, 0, 1.f);
 
 			pCam->AddPoint(vecCha.x, vecCha.y, vecCha.z);
 			pCam->Update();
@@ -84,9 +84,9 @@ void CGameApp::_FrameMove(DWORD dwTimeParam, bool camMove) // Vim
 		}
 	}
 	if (_bCameraFollow) {
-		D3DXVECTOR3 vecCha = pCam->m_RefPos;
+		XMVECTOR3 vecCha = pCam->m_RefPos;
 		const auto v = -pCam->m_vDir * pCam->_fdistshow;
-		D3DXVec3Add(&vecCha, &vecCha, &(v));
+		XMVector3Add(&vecCha, &vecCha, &(v));
 		if (pTerr) {
 			pTerr->SetShowCenter(vecCha.x, vecCha.y);
 		}
@@ -238,7 +238,7 @@ void CGameApp::_FrameMove(DWORD dwTimeParam, bool camMove) // Vim
 
 		if (pCha) {
 			g_Render.Print(INFO_DEBUG, 290, 410, "cha pos = %f,%f,%f", pCha->GetPos().x * 100, pCha->GetPos().y * 100, pCha->GetPos().z * 100);
-			g_Render.Print(INFO_DEBUG, 290, 430, "cha angle = %d", (int)(int(((float)pCha->getYaw() * 0.01745329f /*+ D3DX_PI*/) * 57.29577f) % 360));
+			g_Render.Print(INFO_DEBUG, 290, 430, "cha angle = %d", (int)(int(((float)pCha->getYaw() * 0.01745329f /*+ XM_PI*/) * 57.29577f) % 360));
 		}
 	}
 

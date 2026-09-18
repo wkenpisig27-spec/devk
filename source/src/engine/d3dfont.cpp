@@ -22,20 +22,20 @@
 //-----------------------------------------------------------------------------
 #define MAX_NUM_VERTICES 50*6
 
-struct FONT2DVERTEX { D3DXVECTOR4 p;   DWORD color;     FLOAT tu, tv; };
-struct FONT3DVERTEX { D3DXVECTOR3 p;   D3DXVECTOR3 n;   FLOAT tu, tv; };
+struct FONT2DVERTEX { XMVECTOR4 p;   DWORD color;     FLOAT tu, tv; };
+struct FONT3DVERTEX { XMVECTOR3 p;   XMVECTOR3 n;   FLOAT tu, tv; };
 
 #define D3DFVF_FONT2DVERTEX (D3DFVF_XYZRHW|D3DFVF_DIFFUSE|D3DFVF_TEX1)
 #define D3DFVF_FONT3DVERTEX (D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_TEX1)
 
-inline FONT2DVERTEX InitFont2DVertex( const D3DXVECTOR4& p, D3DCOLOR color,
+inline FONT2DVERTEX InitFont2DVertex( const XMVECTOR4& p, D3DCOLOR color,
                                       FLOAT tu, FLOAT tv )
 {
     FONT2DVERTEX v;   v.p = p;   v.color = color;   v.tu = tu;   v.tv = tv;
     return v;
 }
 
-inline FONT3DVERTEX InitFont3DVertex( const D3DXVECTOR3& p, const D3DXVECTOR3& n,
+inline FONT3DVERTEX InitFont3DVertex( const XMVECTOR3& p, const XMVECTOR3& n,
                                       FLOAT tu, FLOAT tv )
 {
     FONT3DVERTEX v;   v.p = p;   v.n = n;   v.tu = tu;   v.tv = tv;
@@ -434,12 +434,12 @@ HRESULT CD3DFont::DrawTextScaled( FLOAT x, FLOAT y, FLOAT z,
         w *= (fXScale*vp.Height)/fLineHeight;
         h *= (fYScale*vp.Height)/fLineHeight;
 
-        *pVertices++ = InitFont2DVertex( D3DXVECTOR4(sx+0-0.5f,sy+h-0.5f,sz,rhw), dwColor, tx1, ty2 );
-        *pVertices++ = InitFont2DVertex( D3DXVECTOR4(sx+0-0.5f,sy+0-0.5f,sz,rhw), dwColor, tx1, ty1 );
-        *pVertices++ = InitFont2DVertex( D3DXVECTOR4(sx+w-0.5f,sy+h-0.5f,sz,rhw), dwColor, tx2, ty2 );
-        *pVertices++ = InitFont2DVertex( D3DXVECTOR4(sx+w-0.5f,sy+0-0.5f,sz,rhw), dwColor, tx2, ty1 );
-        *pVertices++ = InitFont2DVertex( D3DXVECTOR4(sx+w-0.5f,sy+h-0.5f,sz,rhw), dwColor, tx2, ty2 );
-        *pVertices++ = InitFont2DVertex( D3DXVECTOR4(sx+0-0.5f,sy+0-0.5f,sz,rhw), dwColor, tx1, ty1 );
+        *pVertices++ = InitFont2DVertex( XMVECTOR4(sx+0-0.5f,sy+h-0.5f,sz,rhw), dwColor, tx1, ty2 );
+        *pVertices++ = InitFont2DVertex( XMVECTOR4(sx+0-0.5f,sy+0-0.5f,sz,rhw), dwColor, tx1, ty1 );
+        *pVertices++ = InitFont2DVertex( XMVECTOR4(sx+w-0.5f,sy+h-0.5f,sz,rhw), dwColor, tx2, ty2 );
+        *pVertices++ = InitFont2DVertex( XMVECTOR4(sx+w-0.5f,sy+0-0.5f,sz,rhw), dwColor, tx2, ty1 );
+        *pVertices++ = InitFont2DVertex( XMVECTOR4(sx+w-0.5f,sy+h-0.5f,sz,rhw), dwColor, tx2, ty2 );
+        *pVertices++ = InitFont2DVertex( XMVECTOR4(sx+0-0.5f,sy+0-0.5f,sz,rhw), dwColor, tx1, ty1 );
         dwNumTriangles += 2;
 
         if( dwNumTriangles*3 > (MAX_NUM_VERTICES-6) )
@@ -518,12 +518,12 @@ HRESULT CD3DFont::DrawText( FLOAT sx, FLOAT sy, DWORD dwColor,
         FLOAT w = (tx2-tx1) *  m_dwTexWidth / m_fTextScale;
         FLOAT h = (ty2-ty1) * m_dwTexHeight / m_fTextScale;
 
-        *pVertices++ = InitFont2DVertex( D3DXVECTOR4(sx+0-0.5f,sy+h-0.5f,0.9f,1.0f), dwColor, tx1, ty2 );
-        *pVertices++ = InitFont2DVertex( D3DXVECTOR4(sx+0-0.5f,sy+0-0.5f,0.9f,1.0f), dwColor, tx1, ty1 );
-        *pVertices++ = InitFont2DVertex( D3DXVECTOR4(sx+w-0.5f,sy+h-0.5f,0.9f,1.0f), dwColor, tx2, ty2 );
-        *pVertices++ = InitFont2DVertex( D3DXVECTOR4(sx+w-0.5f,sy+0-0.5f,0.9f,1.0f), dwColor, tx2, ty1 );
-        *pVertices++ = InitFont2DVertex( D3DXVECTOR4(sx+w-0.5f,sy+h-0.5f,0.9f,1.0f), dwColor, tx2, ty2 );
-        *pVertices++ = InitFont2DVertex( D3DXVECTOR4(sx+0-0.5f,sy+0-0.5f,0.9f,1.0f), dwColor, tx1, ty1 );
+        *pVertices++ = InitFont2DVertex( XMVECTOR4(sx+0-0.5f,sy+h-0.5f,0.9f,1.0f), dwColor, tx1, ty2 );
+        *pVertices++ = InitFont2DVertex( XMVECTOR4(sx+0-0.5f,sy+0-0.5f,0.9f,1.0f), dwColor, tx1, ty1 );
+        *pVertices++ = InitFont2DVertex( XMVECTOR4(sx+w-0.5f,sy+h-0.5f,0.9f,1.0f), dwColor, tx2, ty2 );
+        *pVertices++ = InitFont2DVertex( XMVECTOR4(sx+w-0.5f,sy+0-0.5f,0.9f,1.0f), dwColor, tx2, ty1 );
+        *pVertices++ = InitFont2DVertex( XMVECTOR4(sx+w-0.5f,sy+h-0.5f,0.9f,1.0f), dwColor, tx2, ty2 );
+        *pVertices++ = InitFont2DVertex( XMVECTOR4(sx+0-0.5f,sy+0-0.5f,0.9f,1.0f), dwColor, tx1, ty1 );
         dwNumTriangles += 2;
 
         if( dwNumTriangles*3 > (MAX_NUM_VERTICES-6) )
@@ -619,12 +619,12 @@ HRESULT CD3DFont::Render3DText( TCHAR* strText, DWORD dwFlags )
         FLOAT w = (tx2-tx1) * m_dwTexWidth  / ( 10.0f * m_fTextScale );
         FLOAT h = (ty2-ty1) * m_dwTexHeight / ( 10.0f * m_fTextScale );
 
-        *pVertices++ = InitFont3DVertex( D3DXVECTOR3(x+0,y+0,0), D3DXVECTOR3(0,0,-1), tx1, ty2 );
-        *pVertices++ = InitFont3DVertex( D3DXVECTOR3(x+0,y+h,0), D3DXVECTOR3(0,0,-1), tx1, ty1 );
-        *pVertices++ = InitFont3DVertex( D3DXVECTOR3(x+w,y+0,0), D3DXVECTOR3(0,0,-1), tx2, ty2 );
-        *pVertices++ = InitFont3DVertex( D3DXVECTOR3(x+w,y+h,0), D3DXVECTOR3(0,0,-1), tx2, ty1 );
-        *pVertices++ = InitFont3DVertex( D3DXVECTOR3(x+w,y+0,0), D3DXVECTOR3(0,0,-1), tx2, ty2 );
-        *pVertices++ = InitFont3DVertex( D3DXVECTOR3(x+0,y+h,0), D3DXVECTOR3(0,0,-1), tx1, ty1 );
+        *pVertices++ = InitFont3DVertex( XMVECTOR3(x+0,y+0,0), XMVECTOR3(0,0,-1), tx1, ty2 );
+        *pVertices++ = InitFont3DVertex( XMVECTOR3(x+0,y+h,0), XMVECTOR3(0,0,-1), tx1, ty1 );
+        *pVertices++ = InitFont3DVertex( XMVECTOR3(x+w,y+0,0), XMVECTOR3(0,0,-1), tx2, ty2 );
+        *pVertices++ = InitFont3DVertex( XMVECTOR3(x+w,y+h,0), XMVECTOR3(0,0,-1), tx2, ty1 );
+        *pVertices++ = InitFont3DVertex( XMVECTOR3(x+w,y+0,0), XMVECTOR3(0,0,-1), tx2, ty2 );
+        *pVertices++ = InitFont3DVertex( XMVECTOR3(x+0,y+h,0), XMVECTOR3(0,0,-1), tx1, ty1 );
         dwNumTriangles += 2;
 
         if( dwNumTriangles*3 > (MAX_NUM_VERTICES-6) )

@@ -14,9 +14,9 @@ public:
 	virtual void MouseUp(int nButton);
 	virtual void FrameMove(DWORD dwTime);
 	virtual void Render();
-	virtual void MoveTo(D3DXVECTOR3& vPos);
+	virtual void MoveTo(XMVECTOR3& vPos);
 
 private:
-	D3DXVECTOR3 _vPos;
+	XMVECTOR3 _vPos;
 	CShadeEff* _pCursorEff;
 };

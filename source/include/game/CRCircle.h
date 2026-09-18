@@ -15,7 +15,7 @@ public:
 
 	void MouseDown(int nButton);
 	void MouseUp(int nButton);
-	void MoveTo(D3DXVECTOR3& stPos);
+	void MoveTo(XMVECTOR3& stPos);
 
 	void FrameMove(DWORD dwTime);
 	void Render();

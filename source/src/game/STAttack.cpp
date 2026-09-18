@@ -227,7 +227,7 @@ void CWaitAttackState::ActionFrame(DWORD pose_id, int key_frame) {
 	if (_pSkillInfo->sSkyEffect != 0 && _pSkillInfo->sSkyEffectActionKeyFrame == key_frame) {
 		int nTargetID = -1;
 
-		static D3DXVECTOR3 pos;
+		static XMVECTOR3 pos;
 		pos.x = (float)_nAttackX / 100;
 		pos.y = (float)_nAttackY / 100;
 		pos.z = CGameApp::GetCurScene()->GetGridHeight(pos.x, pos.y);
@@ -237,7 +237,7 @@ void CWaitAttackState::ActionFrame(DWORD pose_id, int key_frame) {
 
 			static lwMatrix44 mat;
 			if (_pSkillInfo->sTargetDummyLink >= 0 && _pTarget->GetObjDummyRunTimeMatrix(&mat, _pSkillInfo->sTargetDummyLink) >= 0) {
-				pos = *(D3DXVECTOR3*)&mat._41;
+				pos = *(XMVECTOR3*)&mat._41;
 			}
 		}
 

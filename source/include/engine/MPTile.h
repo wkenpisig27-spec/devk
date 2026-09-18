@@ -9,8 +9,8 @@
 
 struct MPTileVertex
 {
-	D3DXVECTOR3	p;
-	// D3DXVECTOR3 n;
+	XMVECTOR3	p;
+	// XMVECTOR3 n;
 	DWORD		dwColor;
 	float		tu1, tv1;
 	float		tu2, tv2;
@@ -18,20 +18,20 @@ struct MPTileVertex
 
 struct MPSeaTileVertex
 {
-	D3DXVECTOR3	p;
+	XMVECTOR3	p;
 	DWORD		dwColor;
 	float		tu, tv;
 };
 
 struct MPSkyDoomVertex
 {
-	D3DXVECTOR3 p;
+	XMVECTOR3 p;
 	float       tu,tv;
 };
 
 struct MPLineVertex
 {
-	D3DXVECTOR3	p;
+	XMVECTOR3	p;
 	DWORD		dwColor;
 };
 
@@ -273,13 +273,13 @@ inline void MPTile::SetTerrainUV(int nStageNo, float fU, float fV, float fUVSize
 
 inline bool MPTile::IsVisibale(int sx, int sy,float* hei)
 {
-	D3DXVECTOR3		vTemp, vTrans;
+	XMVECTOR3		vTemp, vTrans;
 	int inx, iny;
 
 	for(int i = 0; i < 4; ++i)
 	{
-		vTrans = D3DXVECTOR3( (float)(sx + Offset[i][0]), (float)(sy + Offset[i][1]),hei[i] );
-		D3DXVec3TransformCoord( &vTemp, &vTrans, &g_Render.GetViewProjMatrix() );
+		vTrans = XMVECTOR3( (float)(sx + Offset[i][0]), (float)(sy + Offset[i][1]),hei[i] );
+		XMVector3TransformCoord( &vTemp, &vTrans, &g_Render.GetViewProjMatrix() );
 		if ( vTemp.z >= 0.0f && vTemp.z < 1.0f ) 
 		{		
 			inx = ( INT ) ( ( vTemp.x + 1) * g_Render.GetScrWidth() / 2.0f +0.5f);

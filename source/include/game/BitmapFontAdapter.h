@@ -92,7 +92,7 @@ public:
     void ORender(const char* str, int x, int y, DWORD color, DWORD outline, int thickness = 1);
     
     // 3D world-space text (projects to screen)
-    void Render3d(const char* str, D3DXVECTOR3& pos, DWORD color = 0xFFFF0000);
+    void Render3d(const char* str, XMVECTOR3& pos, DWORD color = 0xFFFF0000);
     
     // Frame rendering (with background)
     void FrameRender(const char* str, int x, int y);

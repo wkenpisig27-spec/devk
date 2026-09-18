@@ -80,17 +80,17 @@ inline void CPointTrack::AddPoint(float fX, float fY, float fZ, DWORD dwTimePara
 				_PointList.push_back(p);
 				return;
 			}*/
-		D3DXVECTOR3 vp(fX, fY, fZ);
-		D3DXVECTOR3 vsrc(GetCurX(), GetCurY(), GetCurZ());
+		XMVECTOR3 vp(fX, fY, fZ);
+		XMVECTOR3 vsrc(GetCurX(), GetCurY(), GetCurZ());
 		vp = vp - vsrc;
-		float fDis = D3DXVec3Length(&vp);
+		float fDis = XMVector3Length(&vp);
 
 		float d = fDis / 8;
 
-		D3DXVec3Normalize(&vp, &vp);
+		XMVector3Normalize(&vp, &vp);
 		for (int n = 0; n < 8; n++) {
 			const auto v = vp * d;
-			D3DXVec3Add(&vsrc, &vsrc, &(v));
+			XMVector3Add(&vsrc, &vsrc, &(v));
 			p.x = vsrc.x;
 			p.y = vsrc.y;
 			p.z = vsrc.z;
@@ -103,17 +103,17 @@ inline void CPointTrack::AddPoint(float fX, float fY, float fZ, DWORD dwTimePara
 
 	// STrackPoint last = _PointList.back();
 	// if (fabs(fZ - last.z) > 0.1f)
-	// D3DXVECTOR3 vp(fX,  fY,  fZ);
-	// D3DXVECTOR3 vsrc(last.x, last.y, last.z);
+	// XMVECTOR3 vp(fX,  fY,  fZ);
+	// XMVECTOR3 vsrc(last.x, last.y, last.z);
 	// vp = vp - vsrc;
-	// float fDis = D3DXVec3Length(&vp);
+	// float fDis = XMVector3Length(&vp);
 
 	// float d = fDis/2;
 
-	// D3DXVec3Normalize(&vp,&vp);
+	// XMVector3Normalize(&vp,&vp);
 	// for (int n = 0; n < 3; n++)
 	//{
-	//	D3DXVec3Add(&vsrc,&vsrc,&(vp*d));
+	//	XMVector3Add(&vsrc,&vsrc,&(vp*d));
 	//	p.x = vsrc.x;
 	//	p.y = vsrc.y;
 	//	p.z = vsrc.z;
@@ -124,15 +124,15 @@ inline void CPointTrack::AddPoint(float fX, float fY, float fZ, DWORD dwTimePara
 	if (_bUpdateHei) {
 		if (fabs(fZ - _fheight) > 0.5f) {
 			/*		_PointList.clear();
-					D3DXVECTOR3 vp(fX,  fY,  fZ);
-					D3DXVECTOR3 vsrc(front.x, front.y, front.z);
+					XMVECTOR3 vp(fX,  fY,  fZ);
+					XMVECTOR3 vsrc(front.x, front.y, front.z);
 					vp = vp - vsrc;
-					float fDis = D3DXVec3Length(&vp);
+					float fDis = XMVector3Length(&vp);
 					fDis = fDis / (float)_PointList.size();
-					D3DXVec3Normalize(&vp,&vp);
+					XMVector3Normalize(&vp,&vp);
 					for (int o = 0; o < (int)_PointList.size(); o++)
 					{
-						D3DXVec3Add(&vsrc,&vsrc,&(vp*fDis));
+						XMVector3Add(&vsrc,&vsrc,&(vp*fDis));
 						p.x = vsrc.x;
 						p.y = vsrc.y;
 						p.z = vsrc.z;

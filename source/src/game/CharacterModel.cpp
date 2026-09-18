@@ -931,22 +931,22 @@ int CCharacterModel::IsCurPosePlaying() {
 }
 
 void CCharacterModel::RenderForUI(int x, int y, bool bShowLingItem /*= true*/) {
-	D3DXVECTOR3 org, ray;
+	XMVECTOR3 org, ray;
 
 	g_Render.SetCurrentView(MPRender::VIEW_3DUI);
 	g_Render.GetPickRayVector(x, y, &org, &ray);
 
 
-	D3DXVECTOR3 pos;
-	D3DXMATRIX mat_inv;
+	XMVECTOR3 pos;
+	XMMATRIX mat_inv;
 	g_Render.GetInvViewMatrix(&mat_inv);
 
-	pos = *(D3DXVECTOR3*)&mat_inv._41;
+	pos = *(XMVECTOR3*)&mat_inv._41;
 	// pos += ray * (float)_UIScaleDis;
 	pos += ray * 2.0f;
 
-	SetYaw(_UIYaw * D3DX_PI / 180.0f);
-	SetRoll(_UIPitch * D3DX_PI / 180.0f);
+	SetYaw(_UIYaw * XM_PI / 180.0f);
+	SetRoll(_UIPitch * XM_PI / 180.0f);
 	UpdateYawPitchRoll();
 	SetPos(&pos.x);
 
@@ -1022,21 +1022,21 @@ void CCharacterModel::RenderForUI(int x, int y, bool bShowLingItem /*= true*/) {
 	g_Render.SetCurrentView(MPRender::VIEW_WORLD);
 }
 void CCharacterModel::RenderUI(int x, int y) {
-	// D3DXVECTOR3 org, ray;
+	// XMVECTOR3 org, ray;
 
 	// g_Render.SetCurrentView(MPRender::VIEW_3DUI);
 	// g_Render.GetPickRayVector( x, y, &org, &ray );
 
-	// D3DXMATRIX mat_inv;
+	// XMMATRIX mat_inv;
 	// g_Render.GetInvViewMatrix( &mat_inv );
 
-	// pos = *(D3DXVECTOR3*)&mat_inv._41;
+	// pos = *(XMVECTOR3*)&mat_inv._41;
 	// pos += ray * 3.0f;
 
-	// ray = D3DXVECTOR3(0,-1,0);
+	// ray = XMVECTOR3(0,-1,0);
 	// pos = org + ray * 2.0f;
 
-	SetYaw(_UIYaw * D3DX_PI / 180.0f);
+	SetYaw(_UIYaw * XM_PI / 180.0f);
 	UpdateYawPitchRoll();
 
 

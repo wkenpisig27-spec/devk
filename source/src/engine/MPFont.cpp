@@ -421,7 +421,7 @@ bool CMPFont::TextToTexture( char c1, char c2, float & tX, float & tY )
 	}
 	return true;
 }
-void CMPFont::DrawTextClipOnce(char* szText, int nLen, LPRECT psrc, LPRECT pclip,D3DXCOLOR color)
+void CMPFont::DrawTextClipOnce(char* szText, int nLen, LPRECT psrc, LPRECT pclip,XMCOLORF color)
 {
 	if (!_pDev || !_pTex || !_pTexFast)
 		return;
@@ -518,23 +518,23 @@ void CMPFont::DrawTextClipOnce(char* szText, int nLen, LPRECT psrc, LPRECT pclip
 			{
 				if(bExit)
 				{
-					_vecAsh[idxAsh++].SetValue(D3DXVECTOR4(sx,    sy+h, 0.0f,1),color,D3DXVECTOR2(tx1,ty2));
-					_vecAsh[idxAsh++].SetValue(D3DXVECTOR4(sx,	  sy,    0.0f,1),color,D3DXVECTOR2(tx1,ty1));
-					_vecAsh[idxAsh++].SetValue(D3DXVECTOR4(sx+w,  sy+h, 0.0f,1),color,D3DXVECTOR2(tx2,ty2));
+					_vecAsh[idxAsh++].SetValue(XMVECTOR4(sx,    sy+h, 0.0f,1),color,XMVECTOR2(tx1,ty2));
+					_vecAsh[idxAsh++].SetValue(XMVECTOR4(sx,	  sy,    0.0f,1),color,XMVECTOR2(tx1,ty1));
+					_vecAsh[idxAsh++].SetValue(XMVECTOR4(sx+w,  sy+h, 0.0f,1),color,XMVECTOR2(tx2,ty2));
 
-					_vecAsh[idxAsh++].SetValue(D3DXVECTOR4(sx+w,  sy,   0.0f,1),color,D3DXVECTOR2(tx2,ty1));
-					_vecAsh[idxAsh++].SetValue(D3DXVECTOR4(sx+w,  sy+h, 0.0f,1),color,D3DXVECTOR2(tx2,ty2));
-					_vecAsh[idxAsh++].SetValue(D3DXVECTOR4(sx,    sy,   0.0f,1),color,D3DXVECTOR2(tx1,ty1));
+					_vecAsh[idxAsh++].SetValue(XMVECTOR4(sx+w,  sy,   0.0f,1),color,XMVECTOR2(tx2,ty1));
+					_vecAsh[idxAsh++].SetValue(XMVECTOR4(sx+w,  sy+h, 0.0f,1),color,XMVECTOR2(tx2,ty2));
+					_vecAsh[idxAsh++].SetValue(XMVECTOR4(sx,    sy,   0.0f,1),color,XMVECTOR2(tx1,ty1));
 
 				}else
 				{
-					_vecVer[idxHsl++].SetValue(D3DXVECTOR4(sx,    sy+h, 0.0f,1),color,D3DXVECTOR2(tx1,ty2));
-					_vecVer[idxHsl++].SetValue(D3DXVECTOR4(sx,	  sy,    0.0f,1),color,D3DXVECTOR2(tx1,ty1));
-					_vecVer[idxHsl++].SetValue(D3DXVECTOR4(sx+w,  sy+h, 0.0f,1),color,D3DXVECTOR2(tx2,ty2));
+					_vecVer[idxHsl++].SetValue(XMVECTOR4(sx,    sy+h, 0.0f,1),color,XMVECTOR2(tx1,ty2));
+					_vecVer[idxHsl++].SetValue(XMVECTOR4(sx,	  sy,    0.0f,1),color,XMVECTOR2(tx1,ty1));
+					_vecVer[idxHsl++].SetValue(XMVECTOR4(sx+w,  sy+h, 0.0f,1),color,XMVECTOR2(tx2,ty2));
 
-					_vecVer[idxHsl++].SetValue(D3DXVECTOR4(sx+w,  sy,   0.0f,1),color,D3DXVECTOR2(tx2,ty1));
-					_vecVer[idxHsl++].SetValue(D3DXVECTOR4(sx+w,  sy+h, 0.0f,1),color,D3DXVECTOR2(tx2,ty2));
-					_vecVer[idxHsl++].SetValue(D3DXVECTOR4(sx,    sy,   0.0f,1),color,D3DXVECTOR2(tx1,ty1));
+					_vecVer[idxHsl++].SetValue(XMVECTOR4(sx+w,  sy,   0.0f,1),color,XMVECTOR2(tx2,ty1));
+					_vecVer[idxHsl++].SetValue(XMVECTOR4(sx+w,  sy+h, 0.0f,1),color,XMVECTOR2(tx2,ty2));
+					_vecVer[idxHsl++].SetValue(XMVECTOR4(sx,    sy,   0.0f,1),color,XMVECTOR2(tx1,ty1));
 				}
 
 				//��������ȫ���ڲ���������ʾ
@@ -560,23 +560,23 @@ void CMPFont::DrawTextClipOnce(char* szText, int nLen, LPRECT psrc, LPRECT pclip
 				}
 				if(bExit)
 				{
-					_vecAsh[idxAsh++].SetValue(D3DXVECTOR4(tx,    ty+th, 0.0f,1),color,D3DXVECTOR2(tu1,tv2));
-					_vecAsh[idxAsh++].SetValue(D3DXVECTOR4(tx,	  ty,    0.0f,1),color,D3DXVECTOR2(tu1,tv1));
-					_vecAsh[idxAsh++].SetValue(D3DXVECTOR4(tx+tw,  ty+th, 0.0f,1),color,D3DXVECTOR2(tu2,tv2));
+					_vecAsh[idxAsh++].SetValue(XMVECTOR4(tx,    ty+th, 0.0f,1),color,XMVECTOR2(tu1,tv2));
+					_vecAsh[idxAsh++].SetValue(XMVECTOR4(tx,	  ty,    0.0f,1),color,XMVECTOR2(tu1,tv1));
+					_vecAsh[idxAsh++].SetValue(XMVECTOR4(tx+tw,  ty+th, 0.0f,1),color,XMVECTOR2(tu2,tv2));
 
-					_vecAsh[idxAsh++].SetValue(D3DXVECTOR4(tx+tw,  ty,   0.0f,1),color,D3DXVECTOR2(tu2,tv1));
-					_vecAsh[idxAsh++].SetValue(D3DXVECTOR4(tx+tw,  ty+th, 0.0f,1),color,D3DXVECTOR2(tu2,tv2));
-					_vecAsh[idxAsh++].SetValue(D3DXVECTOR4(tx,    ty,   0.0f,1),color,D3DXVECTOR2(tu1,tv1));
+					_vecAsh[idxAsh++].SetValue(XMVECTOR4(tx+tw,  ty,   0.0f,1),color,XMVECTOR2(tu2,tv1));
+					_vecAsh[idxAsh++].SetValue(XMVECTOR4(tx+tw,  ty+th, 0.0f,1),color,XMVECTOR2(tu2,tv2));
+					_vecAsh[idxAsh++].SetValue(XMVECTOR4(tx,    ty,   0.0f,1),color,XMVECTOR2(tu1,tv1));
 
 				}else
 				{
-					_vecVer[idxHsl++].SetValue(D3DXVECTOR4(tx,    ty+th, 0.0f,1),color,D3DXVECTOR2(tu1,tv2));
-					_vecVer[idxHsl++].SetValue(D3DXVECTOR4(tx,	  ty,    0.0f,1),color,D3DXVECTOR2(tu1,tv1));
-					_vecVer[idxHsl++].SetValue(D3DXVECTOR4(tx+tw,  ty+th, 0.0f,1),color,D3DXVECTOR2(tu2,tv2));
+					_vecVer[idxHsl++].SetValue(XMVECTOR4(tx,    ty+th, 0.0f,1),color,XMVECTOR2(tu1,tv2));
+					_vecVer[idxHsl++].SetValue(XMVECTOR4(tx,	  ty,    0.0f,1),color,XMVECTOR2(tu1,tv1));
+					_vecVer[idxHsl++].SetValue(XMVECTOR4(tx+tw,  ty+th, 0.0f,1),color,XMVECTOR2(tu2,tv2));
 
-					_vecVer[idxHsl++].SetValue(D3DXVECTOR4(tx+tw,  ty,   0.0f,1),color,D3DXVECTOR2(tu2,tv1));
-					_vecVer[idxHsl++].SetValue(D3DXVECTOR4(tx+tw,  ty+th, 0.0f,1),color,D3DXVECTOR2(tu2,tv2));
-					_vecVer[idxHsl++].SetValue(D3DXVECTOR4(tx,    ty,   0.0f,1),color,D3DXVECTOR2(tu1,tv1));
+					_vecVer[idxHsl++].SetValue(XMVECTOR4(tx+tw,  ty,   0.0f,1),color,XMVECTOR2(tu2,tv1));
+					_vecVer[idxHsl++].SetValue(XMVECTOR4(tx+tw,  ty+th, 0.0f,1),color,XMVECTOR2(tu2,tv2));
+					_vecVer[idxHsl++].SetValue(XMVECTOR4(tx,    ty,   0.0f,1),color,XMVECTOR2(tu1,tv1));
 				}
 			}
 		}
@@ -594,7 +594,7 @@ void CMPFont::DrawTextClipOnce(char* szText, int nLen, LPRECT psrc, LPRECT pclip
 	}
 }
 
-bool CMPFont::DrawTextClip( char* szText, int nLen, LPRECT psrc, LPRECT pclip,D3DXCOLOR color)
+bool CMPFont::DrawTextClip( char* szText, int nLen, LPRECT psrc, LPRECT pclip,XMCOLORF color)
 {
 	int x,y,rcw,rch;
 	float sx = 0, sy = 0,
@@ -706,7 +706,7 @@ bool CMPFont::DrawTextClip( char* szText, int nLen, LPRECT psrc, LPRECT pclip,D3
 				&&rc.top >= pclip->top && rc.bottom <= pclip->bottom)
 			{
 
-				const D3DXVECTOR4 v[] = {
+				const XMVECTOR4 v[] = {
 				{sx, sy, 0.9f, 1},
 				{tx1, ty2, 0, 1},
 				{sx, sy + h, 0.9f, 1},
@@ -750,7 +750,7 @@ bool CMPFont::DrawTextClip( char* szText, int nLen, LPRECT psrc, LPRECT pclip,D3
 				tu2 = tx2 - ((tx2 - tx1) * flerpx);
 				tv2 = ty2 - ((ty2 - ty1) * flerpy);
 
-				const D3DXVECTOR4 v[] = {
+				const XMVECTOR4 v[] = {
 				{tx, ty, 0.9f, 1},
 				{tu1, tv2, 0, 1},
 				{tx, (ty + th), 0.9f, 1},
@@ -779,14 +779,14 @@ bool CMPFont::DrawTextClip( char* szText, int nLen, LPRECT psrc, LPRECT pclip,D3
 }
 
 
-bool CMPFont::DrawText( int iNumber, int x, int y, D3DXCOLOR color,float fScale)
+bool CMPFont::DrawText( int iNumber, int x, int y, XMCOLORF color,float fScale)
 {
 	char psz[64];
 	sprintf(psz,"%d",iNumber);
 	return DrawText( psz, x, y, color, fScale );
 }
 
-bool CMPFont::DrawText( char* szText, int x, int y, D3DXCOLOR color,  float fScale ,DWORD* dwTime)
+bool CMPFont::DrawText( char* szText, int x, int y, XMCOLORF color,  float fScale ,DWORD* dwTime)
 {
 	int nLen = lstrlen( szText );
 	if( !szText||nLen == 0)
@@ -916,39 +916,39 @@ __ret:
 #ifdef DRAWONCE
 		if(bExit)
 		{
-			_vecAsh[iAshNum++].SetValue(D3DXVECTOR4(sx,    sy+h, 0.0f,1),color,D3DXVECTOR2(tx1,ty2));
-			_vecAsh[iAshNum++].SetValue(D3DXVECTOR4(sx,	  sy,    0.0f,1),color,D3DXVECTOR2(tx1,ty1));
-			_vecAsh[iAshNum++].SetValue(D3DXVECTOR4(sx+w,  sy+h, 0.0f,1),color,D3DXVECTOR2(tx2,ty2));
+			_vecAsh[iAshNum++].SetValue(XMVECTOR4(sx,    sy+h, 0.0f,1),color,XMVECTOR2(tx1,ty2));
+			_vecAsh[iAshNum++].SetValue(XMVECTOR4(sx,	  sy,    0.0f,1),color,XMVECTOR2(tx1,ty1));
+			_vecAsh[iAshNum++].SetValue(XMVECTOR4(sx+w,  sy+h, 0.0f,1),color,XMVECTOR2(tx2,ty2));
 
-			_vecAsh[iAshNum++].SetValue(D3DXVECTOR4(sx+w,  sy,   0.0f,1),color,D3DXVECTOR2(tx2,ty1));
-			_vecAsh[iAshNum++].SetValue(D3DXVECTOR4(sx+w,  sy+h, 0.0f,1),color,D3DXVECTOR2(tx2,ty2));
-			_vecAsh[iAshNum++].SetValue(D3DXVECTOR4(sx,    sy,   0.0f,1),color,D3DXVECTOR2(tx1,ty1));
+			_vecAsh[iAshNum++].SetValue(XMVECTOR4(sx+w,  sy,   0.0f,1),color,XMVECTOR2(tx2,ty1));
+			_vecAsh[iAshNum++].SetValue(XMVECTOR4(sx+w,  sy+h, 0.0f,1),color,XMVECTOR2(tx2,ty2));
+			_vecAsh[iAshNum++].SetValue(XMVECTOR4(sx,    sy,   0.0f,1),color,XMVECTOR2(tx1,ty1));
 
 		}else
 		{
-			_vecVer[iHslNum++].SetValue(D3DXVECTOR4(sx,    sy+h, 0.0f,1),color,D3DXVECTOR2(tx1,ty2));
-			_vecVer[iHslNum++].SetValue(D3DXVECTOR4(sx,	  sy,    0.0f,1),color,D3DXVECTOR2(tx1,ty1));
-			_vecVer[iHslNum++].SetValue(D3DXVECTOR4(sx+w,  sy+h, 0.0f,1),color,D3DXVECTOR2(tx2,ty2));
+			_vecVer[iHslNum++].SetValue(XMVECTOR4(sx,    sy+h, 0.0f,1),color,XMVECTOR2(tx1,ty2));
+			_vecVer[iHslNum++].SetValue(XMVECTOR4(sx,	  sy,    0.0f,1),color,XMVECTOR2(tx1,ty1));
+			_vecVer[iHslNum++].SetValue(XMVECTOR4(sx+w,  sy+h, 0.0f,1),color,XMVECTOR2(tx2,ty2));
 
-			_vecVer[iHslNum++].SetValue(D3DXVECTOR4(sx+w,  sy,   0.0f,1),color,D3DXVECTOR2(tx2,ty1));
-			_vecVer[iHslNum++].SetValue(D3DXVECTOR4(sx+w,  sy+h, 0.0f,1),color,D3DXVECTOR2(tx2,ty2));
-			_vecVer[iHslNum++].SetValue(D3DXVECTOR4(sx,    sy,   0.0f,1),color,D3DXVECTOR2(tx1,ty1));
+			_vecVer[iHslNum++].SetValue(XMVECTOR4(sx+w,  sy,   0.0f,1),color,XMVECTOR2(tx2,ty1));
+			_vecVer[iHslNum++].SetValue(XMVECTOR4(sx+w,  sy+h, 0.0f,1),color,XMVECTOR2(tx2,ty2));
+			_vecVer[iHslNum++].SetValue(XMVECTOR4(sx,    sy,   0.0f,1),color,XMVECTOR2(tx1,ty1));
 
 		}
 #else
 		if(bExit)
 		{
-			rcFont->_vecAsh[iAshNum++] = D3DXVECTOR4(sx,	  sy,    tx1,   ty2);
-			rcFont->_vecAsh[iAshNum++] = D3DXVECTOR4(sx,    sy+h,    tx1,   ty1);
-			rcFont->_vecAsh[iAshNum++] = D3DXVECTOR4(sx+w,  sy+h,    tx2,   ty1);
-			rcFont->_vecAsh[iAshNum++] = D3DXVECTOR4(sx+w,  sy,		 tx2,  ty2);
+			rcFont->_vecAsh[iAshNum++] = XMVECTOR4(sx,	  sy,    tx1,   ty2);
+			rcFont->_vecAsh[iAshNum++] = XMVECTOR4(sx,    sy+h,    tx1,   ty1);
+			rcFont->_vecAsh[iAshNum++] = XMVECTOR4(sx+w,  sy+h,    tx2,   ty1);
+			rcFont->_vecAsh[iAshNum++] = XMVECTOR4(sx+w,  sy,		 tx2,  ty2);
 
 		}else
 		{
-			rcFont->_vecHsl[iHslNum++] = D3DXVECTOR4(sx,	  sy,    tx1,   ty2);
-			rcFont->_vecHsl[iHslNum++] = D3DXVECTOR4(sx,    sy+h,    tx1,   ty1);
-			rcFont->_vecHsl[iHslNum++] = D3DXVECTOR4(sx+w,  sy+h,    tx2,   ty1);
-			rcFont->_vecHsl[iHslNum++] = D3DXVECTOR4(sx+w,  sy,		 tx2,  ty2);
+			rcFont->_vecHsl[iHslNum++] = XMVECTOR4(sx,	  sy,    tx1,   ty2);
+			rcFont->_vecHsl[iHslNum++] = XMVECTOR4(sx,    sy+h,    tx1,   ty1);
+			rcFont->_vecHsl[iHslNum++] = XMVECTOR4(sx+w,  sy+h,    tx2,   ty1);
+			rcFont->_vecHsl[iHslNum++] = XMVECTOR4(sx+w,  sy,		 tx2,  ty2);
 		}
 #endif
 		sx+=offset;
@@ -1037,36 +1037,36 @@ void  CMPFont::RenderOptimize(int iIdx)
 	_pCEffectFile->Pass(0);
 	_pDev->SetVertexShader( *_pdwVS );
 
-	D3DXMATRIX matIdentity;
-	D3DXMatrixIdentity(&matIdentity);
+	XMMATRIX matIdentity;
+	XMMatrixIdentity(&matIdentity);
 
 	_pDev->SetVertexShaderConstant(0, &matIdentity, 4);
 	_pDev->SetVertexShaderConstant(4, _pmat2DViewProj, 4);
 
-	D3DXCOLOR color = prc->dwColor;
+	XMCOLORF color = prc->dwColor;
 	_pDev->SetVertexShaderConstant(8, &color, 1);
 
-	D3DXVECTOR4* pData;
+	XMVECTOR4* pData;
 	if(prc->iAshNum)
 	{
 		_pDev->SetTexture( 0, _pTexFast->GetTex() );
 		for ( INT n = 0; n <prc->iAshNum; ++n)
 		{
 			pData = &prc->_vecAsh[n * 4];
-			_pDev->SetVertexShaderConstant(9,  &D3DXVECTOR4(pData->x,	  pData->y,    0.9f, 1), 1);
-			_pDev->SetVertexShaderConstant(10, &D3DXVECTOR4(pData->z,   pData->w,   0, 1), 1);
+			_pDev->SetVertexShaderConstant(9,  &XMVECTOR4(pData->x,	  pData->y,    0.9f, 1), 1);
+			_pDev->SetVertexShaderConstant(10, &XMVECTOR4(pData->z,   pData->w,   0, 1), 1);
 
 			pData++;
-			_pDev->SetVertexShaderConstant(11, &D3DXVECTOR4(pData->x,	  pData->y,  0.9f, 1), 1);
-			_pDev->SetVertexShaderConstant(12, &D3DXVECTOR4(pData->z,   pData->w,   0, 1), 1);
+			_pDev->SetVertexShaderConstant(11, &XMVECTOR4(pData->x,	  pData->y,  0.9f, 1), 1);
+			_pDev->SetVertexShaderConstant(12, &XMVECTOR4(pData->z,   pData->w,   0, 1), 1);
 
 			pData++;
-			_pDev->SetVertexShaderConstant(13, &D3DXVECTOR4(pData->x,	  pData->y, 0.9f, 1), 1);
-			_pDev->SetVertexShaderConstant(14, &D3DXVECTOR4(pData->z,   pData->w,   0, 1), 1);
+			_pDev->SetVertexShaderConstant(13, &XMVECTOR4(pData->x,	  pData->y, 0.9f, 1), 1);
+			_pDev->SetVertexShaderConstant(14, &XMVECTOR4(pData->z,   pData->w,   0, 1), 1);
 
 			pData++;
-			_pDev->SetVertexShaderConstant(15, &D3DXVECTOR4(pData->x,	  pData->y,    0.9f, 1), 1);
-			_pDev->SetVertexShaderConstant(16, &D3DXVECTOR4(pData->z,   pData->w,   0, 1), 1);
+			_pDev->SetVertexShaderConstant(15, &XMVECTOR4(pData->x,	  pData->y,    0.9f, 1), 1);
+			_pDev->SetVertexShaderConstant(16, &XMVECTOR4(pData->z,   pData->w,   0, 1), 1);
 
 			_pVB->DrawSubset(0);
 		}
@@ -1077,20 +1077,20 @@ void  CMPFont::RenderOptimize(int iIdx)
 		for ( INT n = 0; n < prc->iHslNum; ++n)
 		{
 			pData = &prc->_vecHsl[n * 4];
-			_pDev->SetVertexShaderConstant(9,  &D3DXVECTOR4(pData->x,	  pData->y,    0.9f, 1), 1);
-			_pDev->SetVertexShaderConstant(10, &D3DXVECTOR4(pData->z,   pData->w,   0, 1), 1);
+			_pDev->SetVertexShaderConstant(9,  &XMVECTOR4(pData->x,	  pData->y,    0.9f, 1), 1);
+			_pDev->SetVertexShaderConstant(10, &XMVECTOR4(pData->z,   pData->w,   0, 1), 1);
 
 			pData++;
-			_pDev->SetVertexShaderConstant(11, &D3DXVECTOR4(pData->x,	  pData->y,  0.9f, 1), 1);
-			_pDev->SetVertexShaderConstant(12, &D3DXVECTOR4(pData->z,   pData->w,   0, 1), 1);
+			_pDev->SetVertexShaderConstant(11, &XMVECTOR4(pData->x,	  pData->y,  0.9f, 1), 1);
+			_pDev->SetVertexShaderConstant(12, &XMVECTOR4(pData->z,   pData->w,   0, 1), 1);
 
 			pData++;
-			_pDev->SetVertexShaderConstant(13, &D3DXVECTOR4(pData->x,	  pData->y, 0.9f, 1), 1);
-			_pDev->SetVertexShaderConstant(14, &D3DXVECTOR4(pData->z,   pData->w,   0, 1), 1);
+			_pDev->SetVertexShaderConstant(13, &XMVECTOR4(pData->x,	  pData->y, 0.9f, 1), 1);
+			_pDev->SetVertexShaderConstant(14, &XMVECTOR4(pData->z,   pData->w,   0, 1), 1);
 
 			pData++;
-			_pDev->SetVertexShaderConstant(15, &D3DXVECTOR4(pData->x,	  pData->y,    0.9f, 1), 1);
-			_pDev->SetVertexShaderConstant(16, &D3DXVECTOR4(pData->z,   pData->w,   0, 1), 1);
+			_pDev->SetVertexShaderConstant(15, &XMVECTOR4(pData->x,	  pData->y,    0.9f, 1), 1);
+			_pDev->SetVertexShaderConstant(16, &XMVECTOR4(pData->z,   pData->w,   0, 1), 1);
 
 			_pVB->DrawSubset(0);
 		}
@@ -1108,30 +1108,30 @@ void  CMPFont::RenderOptimize(int iIdx)
 void CMPFont::RenderDrawOptimize(int iIdx)
 {
 	MPFontRect *prc = &_vecFontRect[iIdx];
-	D3DXCOLOR color = prc->dwColor;
+	XMCOLORF color = prc->dwColor;
 	_pDev->SetVertexShaderConstant(8, &color, 1);
 
-	D3DXVECTOR4* pData;
+	XMVECTOR4* pData;
 	if(prc->iAshNum)
 	{
 		_pDev->SetTexture( 0, _pTexFast->GetTex() );
 		for ( INT n = 0; n <prc->iAshNum; ++n)
 		{
 			pData = &prc->_vecAsh[n * 4];
-			_pDev->SetVertexShaderConstant(9,  &D3DXVECTOR4(pData->x,	  pData->y,    0.9f, 1), 1);
-			_pDev->SetVertexShaderConstant(10, &D3DXVECTOR4(pData->z,   pData->w,   0, 1), 1);
+			_pDev->SetVertexShaderConstant(9,  &XMVECTOR4(pData->x,	  pData->y,    0.9f, 1), 1);
+			_pDev->SetVertexShaderConstant(10, &XMVECTOR4(pData->z,   pData->w,   0, 1), 1);
 
 			pData++;
-			_pDev->SetVertexShaderConstant(11, &D3DXVECTOR4(pData->x,	  pData->y,  0.9f, 1), 1);
-			_pDev->SetVertexShaderConstant(12, &D3DXVECTOR4(pData->z,   pData->w,   0, 1), 1);
+			_pDev->SetVertexShaderConstant(11, &XMVECTOR4(pData->x,	  pData->y,  0.9f, 1), 1);
+			_pDev->SetVertexShaderConstant(12, &XMVECTOR4(pData->z,   pData->w,   0, 1), 1);
 
 			pData++;
-			_pDev->SetVertexShaderConstant(13, &D3DXVECTOR4(pData->x,	  pData->y, 0.9f, 1), 1);
-			_pDev->SetVertexShaderConstant(14, &D3DXVECTOR4(pData->z,   pData->w,   0, 1), 1);
+			_pDev->SetVertexShaderConstant(13, &XMVECTOR4(pData->x,	  pData->y, 0.9f, 1), 1);
+			_pDev->SetVertexShaderConstant(14, &XMVECTOR4(pData->z,   pData->w,   0, 1), 1);
 
 			pData++;
-			_pDev->SetVertexShaderConstant(15, &D3DXVECTOR4(pData->x,	  pData->y,    0.9f, 1), 1);
-			_pDev->SetVertexShaderConstant(16, &D3DXVECTOR4(pData->z,   pData->w,   0, 1), 1);
+			_pDev->SetVertexShaderConstant(15, &XMVECTOR4(pData->x,	  pData->y,    0.9f, 1), 1);
+			_pDev->SetVertexShaderConstant(16, &XMVECTOR4(pData->z,   pData->w,   0, 1), 1);
 
 			_pVB->DrawSubset(0);
 		}
@@ -1142,20 +1142,20 @@ void CMPFont::RenderDrawOptimize(int iIdx)
 		for ( INT n = 0; n < prc->iHslNum; ++n)
 		{
 			pData = &prc->_vecHsl[n * 4];
-			_pDev->SetVertexShaderConstant(9,  &D3DXVECTOR4(pData->x,	  pData->y,    0.9f, 1), 1);
-			_pDev->SetVertexShaderConstant(10, &D3DXVECTOR4(pData->z,   pData->w,   0, 1), 1);
+			_pDev->SetVertexShaderConstant(9,  &XMVECTOR4(pData->x,	  pData->y,    0.9f, 1), 1);
+			_pDev->SetVertexShaderConstant(10, &XMVECTOR4(pData->z,   pData->w,   0, 1), 1);
 
 			pData++;
-			_pDev->SetVertexShaderConstant(11, &D3DXVECTOR4(pData->x,	  pData->y,  0.9f, 1), 1);
-			_pDev->SetVertexShaderConstant(12, &D3DXVECTOR4(pData->z,   pData->w,   0, 1), 1);
+			_pDev->SetVertexShaderConstant(11, &XMVECTOR4(pData->x,	  pData->y,  0.9f, 1), 1);
+			_pDev->SetVertexShaderConstant(12, &XMVECTOR4(pData->z,   pData->w,   0, 1), 1);
 
 			pData++;
-			_pDev->SetVertexShaderConstant(13, &D3DXVECTOR4(pData->x,	  pData->y, 0.9f, 1), 1);
-			_pDev->SetVertexShaderConstant(14, &D3DXVECTOR4(pData->z,   pData->w,   0, 1), 1);
+			_pDev->SetVertexShaderConstant(13, &XMVECTOR4(pData->x,	  pData->y, 0.9f, 1), 1);
+			_pDev->SetVertexShaderConstant(14, &XMVECTOR4(pData->z,   pData->w,   0, 1), 1);
 
 			pData++;
-			_pDev->SetVertexShaderConstant(15, &D3DXVECTOR4(pData->x,	  pData->y,    0.9f, 1), 1);
-			_pDev->SetVertexShaderConstant(16, &D3DXVECTOR4(pData->z,   pData->w,   0, 1), 1);
+			_pDev->SetVertexShaderConstant(15, &XMVECTOR4(pData->x,	  pData->y,    0.9f, 1), 1);
+			_pDev->SetVertexShaderConstant(16, &XMVECTOR4(pData->z,   pData->w,   0, 1), 1);
 
 			_pVB->DrawSubset(0);
 		}
@@ -1178,8 +1178,8 @@ inline void CMPFont::Begin()
 	_pCEffectFile->Pass(0);
 	{
 		_pDev->SetVertexShader( *_pdwVS );
-		D3DXMATRIX matIdentity;
-		D3DXMatrixIdentity(&matIdentity);
+		XMMATRIX matIdentity;
+		XMMatrixIdentity(&matIdentity);
 		_pDev->SetVertexShaderConstant(0, &matIdentity, 4);
 		_pDev->SetVertexShaderConstant(4, _pmat2DViewProj, 4);
 	}
@@ -1206,7 +1206,7 @@ void CMPFont::EndClip()
 {
 }
 
-void CMPFont::Draw(char* szText, int x, int y, D3DXCOLOR color)
+void CMPFont::Draw(char* szText, int x, int y, XMCOLORF color)
 {
 	
 	int nLen = lstrlen( szText );
@@ -1329,39 +1329,39 @@ __ret:
 #ifdef DRAWONCE
 		if(bExit)
 		{
-			_vecAsh[iAshNum++].SetValue(D3DXVECTOR4(sx,    sy+h, 0.0f,1),color,D3DXVECTOR2(tx1,ty2));
-			_vecAsh[iAshNum++].SetValue(D3DXVECTOR4(sx,	  sy,    0.0f,1),color,D3DXVECTOR2(tx1,ty1));
-			_vecAsh[iAshNum++].SetValue(D3DXVECTOR4(sx+w,  sy+h, 0.0f,1),color,D3DXVECTOR2(tx2,ty2));
+			_vecAsh[iAshNum++].SetValue(XMVECTOR4(sx,    sy+h, 0.0f,1),color,XMVECTOR2(tx1,ty2));
+			_vecAsh[iAshNum++].SetValue(XMVECTOR4(sx,	  sy,    0.0f,1),color,XMVECTOR2(tx1,ty1));
+			_vecAsh[iAshNum++].SetValue(XMVECTOR4(sx+w,  sy+h, 0.0f,1),color,XMVECTOR2(tx2,ty2));
 
-			_vecAsh[iAshNum++].SetValue(D3DXVECTOR4(sx+w,  sy,   0.0f,1),color,D3DXVECTOR2(tx2,ty1));
-			_vecAsh[iAshNum++].SetValue(D3DXVECTOR4(sx+w,  sy+h, 0.0f,1),color,D3DXVECTOR2(tx2,ty2));
-			_vecAsh[iAshNum++].SetValue(D3DXVECTOR4(sx,    sy,   0.0f,1),color,D3DXVECTOR2(tx1,ty1));
+			_vecAsh[iAshNum++].SetValue(XMVECTOR4(sx+w,  sy,   0.0f,1),color,XMVECTOR2(tx2,ty1));
+			_vecAsh[iAshNum++].SetValue(XMVECTOR4(sx+w,  sy+h, 0.0f,1),color,XMVECTOR2(tx2,ty2));
+			_vecAsh[iAshNum++].SetValue(XMVECTOR4(sx,    sy,   0.0f,1),color,XMVECTOR2(tx1,ty1));
 
 		}else
 		{
-			_vecVer[iHslNum++].SetValue(D3DXVECTOR4(sx,    sy+h, 0.0f,1),color,D3DXVECTOR2(tx1,ty2));
-			_vecVer[iHslNum++].SetValue(D3DXVECTOR4(sx,	  sy,    0.0f,1),color,D3DXVECTOR2(tx1,ty1));
-			_vecVer[iHslNum++].SetValue(D3DXVECTOR4(sx+w,  sy+h, 0.0f,1),color,D3DXVECTOR2(tx2,ty2));
+			_vecVer[iHslNum++].SetValue(XMVECTOR4(sx,    sy+h, 0.0f,1),color,XMVECTOR2(tx1,ty2));
+			_vecVer[iHslNum++].SetValue(XMVECTOR4(sx,	  sy,    0.0f,1),color,XMVECTOR2(tx1,ty1));
+			_vecVer[iHslNum++].SetValue(XMVECTOR4(sx+w,  sy+h, 0.0f,1),color,XMVECTOR2(tx2,ty2));
 
-			_vecVer[iHslNum++].SetValue(D3DXVECTOR4(sx+w,  sy,   0.0f,1),color,D3DXVECTOR2(tx2,ty1));
-			_vecVer[iHslNum++].SetValue(D3DXVECTOR4(sx+w,  sy+h, 0.0f,1),color,D3DXVECTOR2(tx2,ty2));
-			_vecVer[iHslNum++].SetValue(D3DXVECTOR4(sx,    sy,   0.0f,1),color,D3DXVECTOR2(tx1,ty1));
+			_vecVer[iHslNum++].SetValue(XMVECTOR4(sx+w,  sy,   0.0f,1),color,XMVECTOR2(tx2,ty1));
+			_vecVer[iHslNum++].SetValue(XMVECTOR4(sx+w,  sy+h, 0.0f,1),color,XMVECTOR2(tx2,ty2));
+			_vecVer[iHslNum++].SetValue(XMVECTOR4(sx,    sy,   0.0f,1),color,XMVECTOR2(tx1,ty1));
 		}
 
 #else
 		if(bExit)
 		{
-			rcFont->_vecAsh[iAshNum++] = D3DXVECTOR4(sx,	  sy,    tx1,   ty2);
-			rcFont->_vecAsh[iAshNum++] = D3DXVECTOR4(sx,    sy+h,    tx1,   ty1);
-			rcFont->_vecAsh[iAshNum++] = D3DXVECTOR4(sx+w,  sy+h,    tx2,   ty1);
-			rcFont->_vecAsh[iAshNum++] = D3DXVECTOR4(sx+w,  sy,		 tx2,  ty2);
+			rcFont->_vecAsh[iAshNum++] = XMVECTOR4(sx,	  sy,    tx1,   ty2);
+			rcFont->_vecAsh[iAshNum++] = XMVECTOR4(sx,    sy+h,    tx1,   ty1);
+			rcFont->_vecAsh[iAshNum++] = XMVECTOR4(sx+w,  sy+h,    tx2,   ty1);
+			rcFont->_vecAsh[iAshNum++] = XMVECTOR4(sx+w,  sy,		 tx2,  ty2);
 
 		}else
 		{
-			rcFont->_vecHsl[iHslNum++] = D3DXVECTOR4(sx,	  sy,    tx1,   ty2);
-			rcFont->_vecHsl[iHslNum++] = D3DXVECTOR4(sx,    sy+h,    tx1,   ty1);
-			rcFont->_vecHsl[iHslNum++] = D3DXVECTOR4(sx+w,  sy+h,    tx2,   ty1);
-			rcFont->_vecHsl[iHslNum++] = D3DXVECTOR4(sx+w,  sy,		 tx2,  ty2);
+			rcFont->_vecHsl[iHslNum++] = XMVECTOR4(sx,	  sy,    tx1,   ty2);
+			rcFont->_vecHsl[iHslNum++] = XMVECTOR4(sx,    sy+h,    tx1,   ty1);
+			rcFont->_vecHsl[iHslNum++] = XMVECTOR4(sx+w,  sy+h,    tx2,   ty1);
+			rcFont->_vecHsl[iHslNum++] = XMVECTOR4(sx+w,  sy,		 tx2,  ty2);
 		}
 #endif
 		sx+=offset;
@@ -1391,7 +1391,7 @@ __ret:
 }
 
 bool CMPFont::DrawTextShadow( char* szText, int x1, int y1, int x2, int y2,
-							 D3DXCOLOR color1,D3DXCOLOR color2)
+							 XMCOLORF color1,XMCOLORF color2)
 {
 	if( !szText)
 		return false;
@@ -1402,7 +1402,7 @@ bool CMPFont::DrawTextShadow( char* szText, int x1, int y1, int x2, int y2,
 	return true;
 }
 
-bool CMPFont::Draw3DText(char* szText,D3DXVECTOR3& vPos, D3DXCOLOR color,float fScale)
+bool CMPFont::Draw3DText(char* szText,XMVECTOR3& vPos, XMCOLORF color,float fScale)
 {
 	if( !szText) 
 		return false;
@@ -1428,15 +1428,15 @@ bool CMPFont::Draw3DText(char* szText,D3DXVECTOR3& vPos, D3DXCOLOR color,float f
 	_pCEffectFile->SetTechnique(_iRenderIdx);
 	_pCEffectFile->Begin(D3DXFX_DONOTSAVESTATE);
 	_pCEffectFile->Pass(0);
-	D3DXMATRIX matIdentity;
-	D3DXMatrixScaling(&matIdentity,fScale,fScale,fScale );
-	D3DXMatrixMultiply(&matIdentity, _pmatBBoard, &matIdentity);
+	XMMATRIX matIdentity;
+	XMMatrixScaling(&matIdentity,fScale,fScale,fScale );
+	XMMatrixMultiply(&matIdentity, _pmatBBoard, &matIdentity);
 	matIdentity._41 = vPos.x;
 	matIdentity._42 = vPos.y;
 	matIdentity._43 = vPos.z;
 	if(!_bUseSoft)
 	{
-		D3DXMatrixTranspose(&matIdentity, &matIdentity);
+		XMMatrixTranspose(&matIdentity, &matIdentity);
 		_pDev->SetVertexShader(ResMgr.GetFontVS());
 		_pDev->SetVertexDeclaration(ResMgr.GetFontVDecl());
 		_pDev->SetVertexShaderConstantF(0, matIdentity, 4);
@@ -1525,7 +1525,7 @@ bool CMPFont::Draw3DText(char* szText,D3DXVECTOR3& vPos, D3DXCOLOR color,float f
 
 		if(!_bUseSoft)
 		{
-			const D3DXVECTOR4 v[] = {
+			const XMVECTOR4 v[] = {
 			{sx, sy, 0, 1},
 			{tx1, ty2, 0, 1},
 			{sx, sy + h, 0, 1},
@@ -1564,13 +1564,13 @@ bool CMPFont::Draw3DText(char* szText,D3DXVECTOR3& vPos, D3DXCOLOR color,float f
 		
 
 
-			(*pVertices++).SetValue(D3DXVECTOR4(sx,	   sy,   0,1),color,D3DXVECTOR2(tx1,ty2));
-			(*pVertices++).SetValue(D3DXVECTOR4(sx,    sy+h, 0,1),color,D3DXVECTOR2(tx1,ty1));
-			(*pVertices++).SetValue(D3DXVECTOR4(sx+w,  sy,   0,1),color,D3DXVECTOR2(tx2,ty2));
+			(*pVertices++).SetValue(XMVECTOR4(sx,	   sy,   0,1),color,XMVECTOR2(tx1,ty2));
+			(*pVertices++).SetValue(XMVECTOR4(sx,    sy+h, 0,1),color,XMVECTOR2(tx1,ty1));
+			(*pVertices++).SetValue(XMVECTOR4(sx+w,  sy,   0,1),color,XMVECTOR2(tx2,ty2));
 
-			(*pVertices++).SetValue(D3DXVECTOR4(sx+w,  sy+h, 0,1),color,D3DXVECTOR2(tx2,ty1));
-			(*pVertices++).SetValue(D3DXVECTOR4(sx+w,  sy,   0,1),color,D3DXVECTOR2(tx2,ty2));
-			(*pVertices++).SetValue(D3DXVECTOR4(sx,    sy+h, 0,1),color,D3DXVECTOR2(tx1,ty1));
+			(*pVertices++).SetValue(XMVECTOR4(sx+w,  sy+h, 0,1),color,XMVECTOR2(tx2,ty1));
+			(*pVertices++).SetValue(XMVECTOR4(sx+w,  sy,   0,1),color,XMVECTOR2(tx2,ty2));
+			(*pVertices++).SetValue(XMVECTOR4(sx,    sy+h, 0,1),color,XMVECTOR2(tx1,ty1));
 
 #ifdef USE_RENDER
 			lpSVB->Unlock();
@@ -1615,7 +1615,7 @@ bool CMPFont::FindTextFromTex( char c1, char c2, float & tX1, float & tY1 , floa
 	{
 		return false;
 	}
-	D3DXVECTOR4 ver =  _mapUV[w];
+	XMVECTOR4 ver =  _mapUV[w];
 	tX1 = ver.x;
 	tY1 = ver.y;
 	tX2 = ver.z;
@@ -1684,7 +1684,7 @@ skip:
 
 			if(_mapUV.count(w)==0)
 			{
-				D3DXVECTOR4 sUV;
+				XMVECTOR4 sUV;
 				sUV.x = (float)(tX) / ((float)(float)_TextureSizeFast -yue /*- (ch[0] & 0x80 ? yue /2: yue/4*/);
 				sUV.y = (float)(tY) / ((float)(float)_TextureSizeFast -yue /* - (ch[0] & 0x80 ? yue /2: yue/4*/);
 				sUV.z = sUV.x + (float)_TextSize / ((float)_TextureSizeFast -yue/* - (ch[0] & 0x80 ? yue /2: yue/4)*/);

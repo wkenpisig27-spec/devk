@@ -198,7 +198,7 @@ void MPEditor::SetTerrainColor2(int nType) {
 	if (!pTerrain)
 		return;
 
-	D3DXCOLOR dwColor = _dwColor;
+	XMCOLORF dwColor = _dwColor;
 	float fRange;
 
 	if (m_nBrushNo == 1) {
@@ -218,7 +218,7 @@ void MPEditor::SetTerrainColor2(int nType) {
 	float _fty = fy + fRange + 1;
 
 	MPTile* pTile = NULL;
-	D3DXCOLOR tcolor;
+	XMCOLORF tcolor;
 	for (int y = (int)_fy; y < (int)_fty; y++) {
 		for (int x = (int)_fx; x < (int)_ftx; x++) {
 			if (y < 0 || x < 0)
@@ -228,15 +228,15 @@ void MPEditor::SetTerrainColor2(int nType) {
 			if (!pTile) {
 				continue;
 			}
-			const auto v = (D3DXVECTOR2(float(x), float(y)) - D3DXVECTOR2(fx, fy));
-			float fd = D3DXVec2Length(&v);
-			D3DXCOLOR dwOrgColor = (D3DXCOLOR)pTile->dwColor;
+			const auto v = (XMVECTOR2(float(x), float(y)) - XMVECTOR2(fx, fy));
+			float fd = XMVector2Length(&v);
+			XMCOLORF dwOrgColor = (XMCOLORF)pTile->dwColor;
 
 			float flerp = fd / (fRange);
 			if (flerp > 1)
 				flerp = 1;
 
-			D3DXColorLerp(&tcolor, &dwColor, &dwOrgColor, flerp);
+			XMColorLerp(&tcolor, &dwColor, &dwOrgColor, flerp);
 
 			pTile->dwColor = tcolor;
 		}
@@ -487,7 +487,7 @@ void MPEditor::ModifyHeight(float fStep, float fResetHeight) {
 
 void MPEditor::_RenderSelTile(int nX, int nY) {
 	struct MPSelectTileVertex {
-		D3DXVECTOR3 p;
+		XMVECTOR3 p;
 		DWORD dwColor;
 	};
 
@@ -782,8 +782,8 @@ void MPEditor::Render() {
 	g_Render.SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);     // blend the colors based on the
 	g_Render.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA); // alpha value
 
-	D3DXMATRIX mat_identity;
-	D3DXMatrixIdentity(&mat_identity);
+	XMMATRIX mat_identity;
+	XMMatrixIdentity(&mat_identity);
 
 	g_Render.SetTransformWorld(&mat_identity);
 
@@ -816,7 +816,7 @@ void MPEditor::Render() {
 		int nCenterX = nX;
 		int nCenterY = nY;
 
-		static D3DXVECTOR3 vecCenterPos;
+		static XMVECTOR3 vecCenterPos;
 		if (!g_pGameApp->IsCameraFollow()) {
 			int nScrFocus = g_Render.GetScrHeight() / 2;
 
@@ -1145,23 +1145,23 @@ CCharacter* MPEditor::_GetSelectCha() {
 	CGameScene* s = g_pGameApp->GetCurScene();
 	return s->GetSelectCha();
 }
-int HitTestForInfluence(MPSceneObject* obj, int* flag, D3DXVECTOR3* t_pos, const D3DXVECTOR3* nPos) {
+int HitTestForInfluence(MPSceneObject* obj, int* flag, XMVECTOR3* t_pos, const XMVECTOR3* nPos) {
 	MPPickInfo p;
-	D3DXVECTOR3 org(*nPos);
-	D3DXVECTOR3 ray(0.0f, 0.0f, -1.0f);
+	XMVECTOR3 org(*nPos);
+	XMVECTOR3 ray(0.0f, 0.0f, -1.0f);
 
 	*flag = 0;
 
 
 	if (SUCCEEDED(obj->HitTestHelperMesh(&p, (MPVector3*)&org, (MPVector3*)&ray, "block"))) {
 		*flag = 2;
-		*t_pos = *(D3DXVECTOR3*)&p.pos;
+		*t_pos = *(XMVECTOR3*)&p.pos;
 	}
 
 	if (SUCCEEDED(obj->HitTestHelperMesh(&p, (MPVector3*)&org, (MPVector3*)&ray, "terrain"))) {
 		if (*flag == 0 || t_pos->z < p.pos.z) {
 			*flag = 1;
-			*t_pos = *(D3DXVECTOR3*)&p.pos;
+			*t_pos = *(XMVECTOR3*)&p.pos;
 		}
 	}
 
@@ -1258,9 +1258,9 @@ int MPEditor::_GetSceneObjBlockInfo(MPSceneObject* obj, int* x, int* y, int* wid
 
 	int id;
 	int flag;
-	D3DXVECTOR3 t_pos(0.0f, 0.0f, 0.0f);
-	D3DXVECTOR3 pos(0.0f, 0.0f, 100.0f);
-	D3DXVECTOR3 obj_pos = *(D3DXVECTOR3*)&obj->GetMatrix()->_41;
+	XMVECTOR3 t_pos(0.0f, 0.0f, 0.0f);
+	XMVECTOR3 pos(0.0f, 0.0f, 100.0f);
+	XMVECTOR3 obj_pos = *(XMVECTOR3*)&obj->GetMatrix()->_41;
 
 	int hs = ho * 2;
 	int ws = wo * 2;
@@ -1279,7 +1279,7 @@ int MPEditor::_GetSceneObjBlockInfo(MPSceneObject* obj, int* x, int* y, int* wid
 
 			pos.x = xo + j * 0.5f;
 			pos.y = yo + i * 0.5f;
-			t_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+			t_pos = XMVECTOR3(0.0f, 0.0f, 0.0f);
 			HitTestForInfluence(obj, &flag, &t_pos, &pos);
 
 			_AttrBlockSeq2[id] = (BYTE)flag;
@@ -1303,7 +1303,7 @@ int MPEditor::_GetSceneObjBlockInfo(MPSceneObject* obj, int* x, int* y, int* wid
 
 			pos.x = xo + j * 0.5f + 0.25f;
 			pos.y = yo + i * 0.5f + 0.25f;
-			t_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+			t_pos = XMVECTOR3(0.0f, 0.0f, 0.0f);
 			HitTestForInfluence(obj, &flag, &t_pos, &pos);
 
 #if (defined HIT_TEST_CENTER_ONLY)
@@ -1563,7 +1563,7 @@ void MPEditor::_RenderHeightmap() {
 
 	// äÖÈ¾¸ß¶ÈºÐ×Ó
 	int iRadius = 10;
-	D3DXVECTOR3 vpos;
+	XMVECTOR3 vpos;
 	vpos.x = int(pCurTerrain->GetShowCenterX()) - iRadius + 0.25f;
 	vpos.y = int(pCurTerrain->GetShowCenterY()) - iRadius + 0.25f;
 	if (vpos.x < 0)
@@ -1864,7 +1864,7 @@ void MPEditor::cancelIsland() {
 
 void MPEditor::_renderTileAttrib(int nX, int nY, int nAttribIndex) {
 	struct MPPropertyTileVertex {
-		// D3DXVECTOR3 p;
+		// XMVECTOR3 p;
 		VECTOR3 p;
 		DWORD dwColor;
 	};
@@ -1944,7 +1944,7 @@ void MPEditor::_renderTileIsland(int nX, int nY, int nIslandIndex) {
 	return;
 
 	struct MPPropertyTileVertex {
-		// D3DXVECTOR3 p;
+		// XMVECTOR3 p;
 		VECTOR3 p;
 		DWORD dwColor;
 	};

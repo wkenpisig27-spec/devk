@@ -223,7 +223,7 @@ public:
 
 	// �ͷŷ�����Ч:�ӱ���Dummy�ɳ�,�����ٶ�,�����ĳĿ���pTarget,׷��Ŀ�����nTargetChaID
 	CEffectObj* SkyEffect(int nEffectID, int nBeginDummy = 2, int nItemDummy = 0, int nSpeed = 400,
-	                      D3DXVECTOR3* pTarget = nullptr, int nTargetChaID = -1, CSkillRecord* pSkill = nullptr);
+	                      XMVECTOR3* pTarget = nullptr, int nTargetChaID = -1, CSkillRecord* pSkill = nullptr);
 
 	// �Ƿ�Ϊ�ɲ���״̬,������,���״�?����������������ʱ,��������
 	bool IsEnabled() {
@@ -747,7 +747,7 @@ private:
 
 private:
 	bool _IsMoveTimeType; // Ϊfalse��֡�ƶ�(��������),Ϊtrue��ʱ���ƶ�
-	D3DXVECTOR2 _vMoveStart, _vMoveEnd, _vMoveDir;
+	XMVECTOR2 _vMoveStart, _vMoveEnd, _vMoveDir;
 	DWORD _dwStartTime;
 	float _fMoveLen;
 

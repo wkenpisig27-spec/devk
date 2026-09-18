@@ -149,7 +149,7 @@ void CGameApp::MouseButtonDB(int nButton) {
 			// CCharacter *pCha = GetMainCha();
 			// if(pCha)
 			//{
-			//	D3DXVECTOR3 vecCha = pCha->GetPos();
+			//	XMVECTOR3 vecCha = pCha->GetPos();
 
 			//	g_pGameApp->Get ->Reset(vecCha.x,vecCha.y,vecCha.z);
 			//	pCam->SetFollowObj(vecCha);
@@ -219,7 +219,7 @@ void CGameApp::HandleSuperKey() {
 			//{
 			//	CCameraCtrl *pCam = GetMainCam();
 			//	CCharacter *pCha = GetCurScene()->GetMainCha();
-			//	D3DXVECTOR3 vecCha = pCha->GetPos();
+			//	XMVECTOR3 vecCha = pCha->GetPos();
 
 			//	pCam->InitBuf(vecCha.x,vecCha.y,vecCha.z);
 			//	pCam->SetBufVel( pCha->getMoveSpeed() ,pCha->getID());
@@ -421,9 +421,9 @@ void CGameApp::HandleContinueSuperKey() {
 	// if(IsKeyContinue(DIK_Z)) GetMainCam()->Move(MOVE_DOWN);
 
 	if (IsKeyContinue(DIK_O)) {
-		g_Render.SetWorldViewFOV(g_Render.GetWorldViewFOV() - D3DX_PI / 180.0f);
+		g_Render.SetWorldViewFOV(g_Render.GetWorldViewFOV() - XM_PI / 180.0f);
 	} else if (IsKeyContinue(DIK_P)) {
-		g_Render.SetWorldViewFOV(g_Render.GetWorldViewFOV() + D3DX_PI / 180.0f);
+		g_Render.SetWorldViewFOV(g_Render.GetWorldViewFOV() + XM_PI / 180.0f);
 	}
 
 	g_Editor.HandleKeyContinue();

@@ -48,7 +48,7 @@ public:
 		_lpVB = NULL;
 		_lpIBLine = NULL;
 		_bShow = false;
-		D3DXMatrixScaling(&_matScale, 1, 1, 1);
+		XMMatrixScaling(&_matScale, 1, 1, 1);
 		_dwColor = 0xffffffff;
 		_bWriteFrame = FALSE;
 		_bShowLine = FALSE;
@@ -156,11 +156,11 @@ public:
 			_lpIBLine->Unlock();
 		}
 	}
-	void setPos(D3DXVECTOR3 vPos) {
-		D3DXMatrixTranslation(&_matWorld, vPos.x, vPos.y, vPos.z);
+	void setPos(XMVECTOR3 vPos) {
+		XMMatrixTranslation(&_matWorld, vPos.x, vPos.y, vPos.z);
 	}
 	void setScale(float fx, float fy, float fz) {
-		D3DXMatrixScaling(&_matScale, fx, fy, fz);
+		XMMatrixScaling(&_matScale, fx, fy, fz);
 	}
 	void setColor(DWORD dwColor) {
 		_dwColor = dwColor;
@@ -241,8 +241,8 @@ protected:
 	bool _bShowLine;
 	bool _bShowBox;
 
-	D3DXMATRIX _matWorld;
-	D3DXMATRIX _matScale;
+	XMMATRIX _matWorld;
+	XMMATRIX _matScale;
 	DWORD _dwColor;
 	BOOL _bWriteFrame;
 
@@ -297,8 +297,8 @@ inline void Part_dist2(CMagicCtrl* pEffCtrl, void* pParam);
 
 
 //
-inline void Part_fan(CMagicEff* pEffCtrl, D3DXVECTOR3* pStart, D3DXVECTOR3* pEnd);
-inline void Part_sequence(CMagicEff* pEffCtrl, D3DXVECTOR3* pStart, D3DXVECTOR3* pEnd);
+inline void Part_fan(CMagicEff* pEffCtrl, XMVECTOR3* pStart, XMVECTOR3* pEnd);
+inline void Part_sequence(CMagicEff* pEffCtrl, XMVECTOR3* pStart, XMVECTOR3* pEnd);
 
 
 class CMagicEff : /*public CMagicCtrl ,*/ public CSceneNode {
@@ -346,11 +346,11 @@ public:
 	// friend  void		Part_arc(CMagicEff* pEffCtrl);
 	// friend  void		Part_dirlight(CMagicEff* pEffCtrl);
 
-	friend void Part_fan(CMagicEff* pEffCtrl, D3DXVECTOR3* pStart, D3DXVECTOR3* pEnd);
-	friend void Part_sequence(CMagicEff* pEffCtrl, D3DXVECTOR3* pStart, D3DXVECTOR3* pEnd);
+	friend void Part_fan(CMagicEff* pEffCtrl, XMVECTOR3* pStart, XMVECTOR3* pEnd);
+	friend void Part_sequence(CMagicEff* pEffCtrl, XMVECTOR3* pStart, XMVECTOR3* pEnd);
 
 	//////////////////////////////////////////////////////////////////////////
-	void (*GroupEmission)(CMagicEff* pEffCtrl, D3DXVECTOR3* pStart, D3DXVECTOR3* pEnd);
+	void (*GroupEmission)(CMagicEff* pEffCtrl, XMVECTOR3* pStart, XMVECTOR3* pEnd);
 
 
 public:
@@ -396,14 +396,14 @@ public:
 		_bShowBox = bshow;
 	}
 
-	void Emission(int iID = -1, D3DXVECTOR3* vBegin = NULL, D3DXVECTOR3* vEnd = NULL, int iTime = 0);
+	void Emission(int iID = -1, XMVECTOR3* vBegin = NULL, XMVECTOR3* vEnd = NULL, int iTime = 0);
 
 	void Stop();
 	void End();
 
-	void MoveTo(const D3DXVECTOR3* vPos);
+	void MoveTo(const XMVECTOR3* vPos);
 
-	void BindingBone(D3DXMATRIX* pMatBone);
+	void BindingBone(XMMATRIX* pMatBone);
 
 	void SetVel(float fVel) {
 		_fVel = fVel / 100;
@@ -418,7 +418,7 @@ public:
 
 	BOOL HitTestPrimitive(lwVector3& org, lwVector3& ray);
 	BOOL HitTestMap();
-	BOOL HitTestMap(D3DXVECTOR3* vPos);
+	BOOL HitTestMap(XMVECTOR3* vPos);
 
 
 	void HitObj();
@@ -429,8 +429,8 @@ public:
 			_bFoneEff = true;
 		}
 	}
-	void SetFontEffectCom(VEC_string& vecText, int num, CMPResManger* pCResMagr, D3DXVECTOR3* pvDir, int iTexID = 0,
-	                      D3DXCOLOR dwColor = 0xffffffff, bool bUseBack = false, bool bmain = false) {
+	void SetFontEffectCom(VEC_string& vecText, int num, CMPResManger* pCResMagr, XMVECTOR3* pvDir, int iTexID = 0,
+	                      XMCOLORF dwColor = 0xffffffff, bool bUseBack = false, bool bmain = false) {
 		if (_pEffCtrl) {
 			_pEffCtrl->GetPartCtrl()->setFontEffectCom(vecText, num, pCResMagr, pvDir, iTexID, dwColor, bUseBack,
 			                                           bmain);
@@ -555,14 +555,14 @@ protected:
 	float _fBaseSize;
 
 protected:
-	D3DXVECTOR3 _vMapTarget;
+	XMVECTOR3 _vMapTarget;
 	float _fHei;
 
 private:
 	bool _bloop;
 	BOOL _bShowBox;
-	D3DXVECTOR3 _vMin;
-	D3DXVECTOR3 _vMax;
+	XMVECTOR3 _vMin;
+	XMVECTOR3 _vMax;
 
 	bool _bUpdateHei;
 
@@ -571,8 +571,8 @@ protected:
 	float _fsCurTime;
 	float _fsDailTime;
 	int _isID;
-	D3DXVECTOR3 _vsBegin;
-	D3DXVECTOR3 _vsEnd;
+	XMVECTOR3 _vsBegin;
+	XMVECTOR3 _vsEnd;
 	DWORD _dwStartTime; // ???????????????????
 };
 
@@ -600,7 +600,7 @@ public:
 	bool Create(CShadeInfo* pInfo);
 	bool Create(s_string strTexName, float fSize, bool bAni, int iRow, int iColnum);
 
-	bool CreateAttachLight(int iIdxID, float fRange, D3DXCOLOR dwcolor);
+	bool CreateAttachLight(int iIdxID, float fRange, XMCOLORF dwcolor);
 
 	void SetScene(CGameScene* pScene);
 	void Clear();
@@ -631,9 +631,9 @@ public:
 		return _bUpSea;
 	}
 
-	void Emission(WORD wID, const D3DXVECTOR3* vBegin, D3DXVECTOR3* vEnd);
+	void Emission(WORD wID, const XMVECTOR3* vBegin, XMVECTOR3* vEnd);
 
-	void MoveTo(D3DXVECTOR3* SVerPos);
+	void MoveTo(XMVECTOR3* SVerPos);
 
 protected:
 	virtual void _UpdateYaw() {
@@ -663,7 +663,7 @@ public:
 	CPug();
 	~CPug();
 
-	bool Create(D3DXVECTOR3* pvPos, float fangle, MPMap* pMap);
+	bool Create(XMVECTOR3* pvPos, float fangle, MPMap* pMap);
 
 	void MoveTo(MPMap* pMap);
 	void FrameMove(DWORD dwTime);
@@ -677,9 +677,9 @@ protected:
 	CMPShadeCtrl _cShadeEff;
 	float _fAngle;
 	bool _bValid;
-	D3DXCOLOR _dwColor;
+	XMCOLORF _dwColor;
 	float _fCurTime;
-	D3DXVECTOR3 _vPos;
+	XMVECTOR3 _vPos;
 };
 
 #define MAXPUG_COUNT 100
@@ -698,7 +698,7 @@ public:
 		_bPug = false;
 	}
 
-	void NewPug(D3DXVECTOR3* pvPos, float fangle);
+	void NewPug(XMVECTOR3* pvPos, float fangle);
 
 	void FrameMove(DWORD dwTime);
 	void Render();
@@ -718,7 +718,7 @@ public:
 	CNavigationBar() {
 		_bShow = false;
 		_pShadeEff = NULL;
-		_vTarget = D3DXVECTOR3(0, 0, 0);
+		_vTarget = XMVECTOR3(0, 0, 0);
 		_strName = "";
 	}
 	~CNavigationBar() {
@@ -730,7 +730,7 @@ public:
 	bool IsShow() {
 		return _bShow;
 	}
-	void SetTarget(const char* pszName, D3DXVECTOR3& pTarget);
+	void SetTarget(const char* pszName, XMVECTOR3& pTarget);
 
 	void Render();
 
@@ -745,7 +745,7 @@ protected:
 	CMPShadeCtrl* _pShadeEff;
 
 	bool _bShow;
-	D3DXVECTOR3 _vTarget;
+	XMVECTOR3 _vTarget;
 
 	s_string _strName;
 };

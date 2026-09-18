@@ -108,7 +108,7 @@ CCameraCtrl::CCameraCtrl(void) {
 
 CCameraCtrl::~CCameraCtrl(void) {
 }
-void CCameraCtrl::InitModel(const int iType, D3DXVECTOR3* pInitPos) {
+void CCameraCtrl::InitModel(const int iType, XMVECTOR3* pInitPos) {
 	m_iType = iType;
 	m_pModel = &CameraMode[m_iType];
 
@@ -133,10 +133,10 @@ void CCameraCtrl::InitModel(const int iType, D3DXVECTOR3* pInitPos) {
 	m_InitAngle = 0;
 	m_fAngle = m_InitAngle;
 
-	m_vDir = D3DXVECTOR3(0, 1, 0);
-	D3DXMATRIX mat;
-	D3DXMatrixRotationZ(&mat, m_fAngle);
-	D3DXVec3TransformCoord(&m_vDir, &m_vDir, &mat);
+	m_vDir = XMVECTOR3(0, 1, 0);
+	XMMATRIX mat;
+	XMMatrixRotationZ(&mat, m_fAngle);
+	XMVector3TransformCoord(&m_vDir, &m_vDir, &mat);
 
 	m_vDefaultDir = m_vDir;
 	m_fSubVel = 0;
@@ -146,7 +146,7 @@ void CCameraCtrl::InitModel(const int iType, D3DXVECTOR3* pInitPos) {
 	}
 	GetEyePos(m_EyePos, m_RefPos);
 	const auto val = m_EyePos - m_RefPos;
-	D3DXVec3Normalize(&m_vDir, &val);
+	XMVector3Normalize(&m_vDir, &val);
 	m_vDir.z = 0;
 
 	m_fResetRotatVel = g_Config.m_fCameraVel;
@@ -156,7 +156,7 @@ void CCameraCtrl::InitModel(const int iType, D3DXVECTOR3* pInitPos) {
 
 	m_iState = 2;
 }
-void CCameraCtrl::SetModel(int iType, D3DXVECTOR3* pInitPos) {
+void CCameraCtrl::SetModel(int iType, XMVECTOR3* pInitPos) {
 	m_bChangeModel = true;
 
 	// if(m_iType == iType)
@@ -194,7 +194,7 @@ void CCameraCtrl::SetModel(int iType, D3DXVECTOR3* pInitPos) {
 
 		//}
 		// GetEyePos(m_EyePos,m_RefPos);
-		// D3DXVec3Normalize(&m_vDir, &(m_EyePos - m_RefPos));
+		// XMVector3Normalize(&m_vDir, &(m_EyePos - m_RefPos));
 		// m_vDir.z = 0;
 	}
 }
@@ -311,12 +311,12 @@ bool CCameraCtrl::IsDefaultView() {
 // void		CCameraCtrl::InitAngle(float	fAngle)
 //{
 //	m_InitAngle = fAngle;
-//	m_vDir = D3DXVECTOR3(0,1,0);
+//	m_vDir = XMVECTOR3(0,1,0);
 //	m_fAngle = fAngle;
-//	D3DXMATRIX		mat;
-//	D3DXVECTOR4		ver;
-//	D3DXMatrixRotationZ(&mat,m_fAngle);
-//	D3DXVec3Transform(&ver, &m_vDir, &mat);
+//	XMMATRIX		mat;
+//	XMVECTOR4		ver;
+//	XMMatrixRotationZ(&mat,m_fAngle);
+//	XMVector3Transform(&ver, &m_vDir, &mat);
 //	m_vDir.x = ver.x;
 //	m_vDir.y = ver.y;
 //	m_vDir.z = ver.z;
@@ -329,7 +329,7 @@ bool CCameraCtrl::IsDefaultView() {
 //	//SetModel(0);
 //	m_fSubVel = 0;
 //	GetEyePos(m_EyePos,m_RefPos);
-//	D3DXVec3Normalize(&m_vDir, &(m_EyePos - m_RefPos));
+//	XMVector3Normalize(&m_vDir, &(m_EyePos - m_RefPos));
 //	m_vDir.z = 0;
 // }
 
@@ -424,10 +424,10 @@ void CCameraCtrl::FrameMove(DWORD dwTailTime) {
 			m_fSubVel += 0.015f;
 		}
 
-		D3DXMATRIX mat;
-		D3DXVECTOR4 ver;
-		D3DXMatrixRotationZ(&mat, angle - m_fLastAngle);
-		D3DXVec3Transform(&ver, &m_vDir, &mat);
+		XMMATRIX mat;
+		XMVECTOR4 ver;
+		XMMatrixRotationZ(&mat, angle - m_fLastAngle);
+		XMVector3Transform(&ver, &m_vDir, &mat);
 		m_vDir.x = ver.x;
 		m_vDir.y = ver.y;
 		m_vDir.z = 0;
@@ -452,11 +452,11 @@ void CCameraCtrl::FrameMove(DWORD dwTailTime) {
 	GetEyePos(m_EyePos, m_RefPos);
 
 	const auto v = m_RefPos - m_EyePos;
-	D3DXVec3Normalize(&m_vViewDir, &v);
+	XMVector3Normalize(&m_vViewDir, &v);
 	// m_vDir.z = 0;
 
-	const auto v2 = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-	D3DXVec3Cross(&m_vCross, &m_vDir, &v2);
+	const auto v2 = XMVECTOR3(0.0f, 0.0f, 1.0f);
+	XMVector3Cross(&m_vCross, &m_vDir, &v2);
 
 	dwTime = dwTailTime;
 }
@@ -465,13 +465,13 @@ void CCameraCtrl::ScrollToDefault() {
 	m_bReset = false;
 	m_bToDefault = true;
 
-	int num = int(m_fAngle / (D3DX_PI * 2));
-	float fyue = m_fAngle - ((D3DX_PI * 2) * num);
-	if (fabs(fyue) > D3DX_PI + m_InitAngle) {
+	int num = int(m_fAngle / (XM_PI * 2));
+	float fyue = m_fAngle - ((XM_PI * 2) * num);
+	if (fabs(fyue) > XM_PI + m_InitAngle) {
 		if (m_fAngle > 0)
-			fyue = -((D3DX_PI * 2) - fabs(fyue));
+			fyue = -((XM_PI * 2) - fabs(fyue));
 		if (m_fAngle < 0)
-			fyue = ((D3DX_PI * 2) - fabs(fyue));
+			fyue = ((XM_PI * 2) - fabs(fyue));
 	}
 	m_fAngle = fyue;
 
@@ -525,22 +525,22 @@ void CCameraCtrl::MoveForwardBack(float fDist) {
 		m_fasscs = 0.7f;
 	}
 }
-void CCameraCtrl::GetEyePos(D3DXVECTOR3& vpos, D3DXVECTOR3& vRefPos) {
+void CCameraCtrl::GetEyePos(XMVECTOR3& vpos, XMVECTOR3& vRefPos) {
 	m_vDir.z = 0;
 	const auto v = m_vDir * m_fxy;
-	D3DXVec3Add(&vpos, &vRefPos, &v);
+	XMVector3Add(&vpos, &vRefPos, &v);
 	vpos.z = m_fz + vRefPos.z;
 }
 
 void CCameraCtrl::ScrollUD(float fStep) {
 }
 void CCameraCtrl::ScroolLR(float fstep) {
-	float angle = fstep > D3DX_PI ? fstep - D3DX_PI : fstep;
+	float angle = fstep > XM_PI ? fstep - XM_PI : fstep;
 	m_fAngle += angle;
-	D3DXMATRIX mat;
-	D3DXVECTOR4 ver;
-	D3DXMatrixRotationZ(&mat, angle);
-	D3DXVec3Transform(&ver, &m_vDir, &mat);
+	XMMATRIX mat;
+	XMVECTOR4 ver;
+	XMMatrixRotationZ(&mat, angle);
+	XMVector3Transform(&ver, &m_vDir, &mat);
 	m_vDir.x = ver.x;
 	m_vDir.y = ver.y;
 	m_vDir.z = 0;
@@ -567,7 +567,7 @@ bool CCameraCtrl::ScroolFB(float fStep) {
 	return true;
 }
 
-void CCameraCtrl::SetFollowObj(D3DXVECTOR3& vRefObj) {
+void CCameraCtrl::SetFollowObj(XMVECTOR3& vRefObj) {
 	m_RefPos = vRefObj;
 }
 
@@ -581,7 +581,7 @@ void CCameraCtrl::InitPos(float fX, float fY, float fZ, bool bRestoreCustom) {
 	// m_listHei = fZ;
 	// m_fLastHei = fZ;
 
-	// m_vCurPos = D3DXVECTOR3(fX, fY, fZ);
+	// m_vCurPos = XMVECTOR3(fX, fY, fZ);
 
 	m_fCurDist = 0;
 	m_listDir.clear();
@@ -607,7 +607,7 @@ void CCameraCtrl::InitPos(float fX, float fY, float fZ, bool bRestoreCustom) {
 		m_listHei = fZ;
 		m_fLastHei = fZ;
 
-		m_vCurPos = D3DXVECTOR3(fX, fY, fZ);
+		m_vCurPos = XMVECTOR3(fX, fY, fZ);
 
 		m_pModel = &CameraMode[m_iType];
 		m_fxy = m_pModel->m_fmaxxy;
@@ -635,19 +635,19 @@ void CCameraCtrl::AddPoint(float fX, float fY, float fZ) {
 		ftime = 0;
 	}
 
-	D3DXVECTOR2 p(fX, fY);
-	D3DXVECTOR2 d;
-	D3DXVECTOR2 Dir;
+	XMVECTOR2 p(fX, fY);
+	XMVECTOR2 d;
+	XMVECTOR2 Dir;
 	float fDis;
-	D3DXVECTOR2 last;
+	XMVECTOR2 last;
 	float fstep = 0.2f;
 
 	if (!m_listPos.empty()) {
 		last = m_listPos.back();
 
 		Dir = p - last;
-		fDis = D3DXVec2Length(&Dir);
-		D3DXVec2Normalize(&Dir, &Dir);
+		fDis = XMVector2Length(&Dir);
+		XMVector2Normalize(&Dir, &Dir);
 
 		// Filter out micro-movements to reduce jitter
 		if (fDis < 0.04f) {
@@ -693,7 +693,7 @@ void CCameraCtrl::Update() {
 
 	//}
 	////更新位置
-	// D3DXVECTOR2 vpos, vnext;
+	// XMVECTOR2 vpos, vnext;
 	// if(m_listDir.size() > 0)
 	//{
 	//	m_fCurDist += m_fStackVel * *ResMgr.GetDailTime();
@@ -755,7 +755,7 @@ void CCameraCtrl::Update() {
 	//}
 	// int nPointSize = (int)(m_listPos.size());
 
-	D3DXVECTOR2 vpos, vnext;
+	XMVECTOR2 vpos, vnext;
 
 	while (_fProgressRate > 1.0f) {
 		_vCurNode = _vNextNode;
@@ -811,7 +811,7 @@ void CCameraCtrl::EndMove() {
 
 void CCameraCtrl::SetViewTransform() {
 	// g_Render.SetWorldViewFOV(Angle2Radian(m_ffov));
-	D3DXVECTOR3 vRef(m_RefPos);
+	XMVECTOR3 vRef(m_RefPos);
 #ifdef TESTDEMO
 
 	if (g_pGameApp->GetCurScene()) {
@@ -869,29 +869,29 @@ float AngleDistance(float angle1, float angle2) {
 	return angleDistance;
 }
 
-float DistancePoint2Segment(const D3DXVECTOR3& point,
-							const D3DXVECTOR3& segPoint1,
-							const D3DXVECTOR3& segPoint2) {
+float DistancePoint2Segment(const XMVECTOR3& point,
+							const XMVECTOR3& segPoint1,
+							const XMVECTOR3& segPoint2) {
 	const auto point2seg1(segPoint1 - point);
 	const auto point2seg2(segPoint2 - point);
 	const auto segment(segPoint2 - segPoint1);
 	const auto nsegment(-segment);
 
-	if (D3DXVec3Dot(&point2seg1, &nsegment) < 0.f) {
-		return D3DXVec3Length(&point2seg1);
-	} else if (D3DXVec3Dot(&point2seg2, &(segment)) < 0.f) {
-		return D3DXVec3Length(&point2seg2);
+	if (XMVector3Dot(&point2seg1, &nsegment) < 0.f) {
+		return XMVector3Length(&point2seg1);
+	} else if (XMVector3Dot(&point2seg2, &(segment)) < 0.f) {
+		return XMVector3Length(&point2seg2);
 	} else {
-		D3DXVECTOR3 crossProduct;
-		D3DXVec3Cross(&crossProduct, &point2seg1, &point2seg2);
-		return D3DXVec3Length(&crossProduct) * 2.f / D3DXVec3Length(&segment);
+		XMVECTOR3 crossProduct;
+		XMVector3Cross(&crossProduct, &point2seg1, &point2seg2);
+		return XMVector3Length(&crossProduct) * 2.f / XMVector3Length(&segment);
 	}
 }
 
 //
 //  Ninja_Camara.cpp
 //
-Camera::Camera(Controller<D3DXVECTOR3>* _tgt_ctrl,
+Camera::Camera(Controller<XMVECTOR3>* _tgt_ctrl,
 			   Controller<SphereCoord>* _eye_ctrl)
 	: _my_targetController(_tgt_ctrl),
 	  _my_eyeController(_eye_ctrl),
@@ -907,12 +907,12 @@ void Camera::UpdateViewTransform() {
 	g_Render.SetCurrentView(MPRender::VIEW_WORLD);
 }
 
-void Camera::UpdateTargetPosition(const D3DXVECTOR3& v) {
+void Camera::UpdateTargetPosition(const XMVECTOR3& v) {
 	// Get value from controller
 	//_myTarget = _my_targetController->GetValue ( _myTarget, v, 0.15f );
 
 	const auto v2 = _myTarget - v;
-	if (D3DXVec3Length(&v2) < 50.f) {
+	if (XMVector3Length(&v2) < 50.f) {
 		_myTarget = _my_targetController->GetValue(_myTarget, v, 0.15f);
 	} else // 距离过长，目标位置直接更改
 	{
@@ -951,7 +951,7 @@ void Camera::UpdateEyePosition() {
 	_mySC = _my_eyeController->GetValue(_mySC, _mySC_End, 0.3f);
 
 	// Compute final sperical coordinate
-	_myEye = D3DXVECTOR3(_mySC.radius * sin(_mySC.gamma) * sin(_mySC.theta),
+	_myEye = XMVECTOR3(_mySC.radius * sin(_mySC.gamma) * sin(_mySC.theta),
 						 _mySC.radius * sin(_mySC.gamma) * cos(_mySC.theta),
 						 _mySC.radius * cos(_mySC.gamma)) +
 			 _myTarget;

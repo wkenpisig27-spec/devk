@@ -67,8 +67,8 @@ public:
 
 	void		RenderSmMap();
 	
-	BOOL		GetPickPos(int nX, int nY, D3DXVECTOR3 &vPickPos);
-    BOOL        GetPickPosEditor(int nX, int nY, D3DXVECTOR3 &vPickPos);
+	BOOL		GetPickPos(int nX, int nY, XMVECTOR3 &vPickPos);
+    BOOL        GetPickPosEditor(int nX, int nY, XMVECTOR3 &vPickPos);
 	
 	int			GetWidth()								{ return _nWidth;						  }
 	int			GetHeight()								{ return _nHeight;						  }
@@ -247,7 +247,7 @@ protected:
 	DWORD						m_dwMapPos{ 0 };
 //jze
 public:
-	void        CreateSkyDoom(D3DXVECTOR3 center, float radius, char* txPath, bool hemisphere = true); //add by jze 2008.6.27
+	void        CreateSkyDoom(XMVECTOR3 center, float radius, char* txPath, bool hemisphere = true); //add by jze 2008.6.27
 	void		SetupPixelFog(DWORD Color, DWORD Mode,float Start, float End, float Density); //add by jze 2008.7.3
 	void        CloseFog(){ g_Render.SetRenderState(D3DRS_FOGENABLE, FALSE); }
 	BOOL        IsSkyDoom(){return m_bSkyDoom;}

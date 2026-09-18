@@ -363,7 +363,7 @@ void CHeadSay::RenderStateIcons(CCharacter* cha, int x, int y, float scale, floa
 	}
 }
 
-void CHeadSay::Render(D3DXVECTOR3& pos) {
+void CHeadSay::Render(XMVECTOR3& pos) {
 	static int x = 0, y = 0;
 	static int nSayTotalWidth = 32 * CGuiFont::s_Font.GetWidth("a"); // 32??????????
 	g_Render.WorldToScreen(pos.x, pos.y, pos.z + _pOwn->GetDefaultChaInfo()->fHeight, &x, &y);
@@ -626,7 +626,7 @@ void CHeadSay::Render(D3DXVECTOR3& pos) {
 
 			/*if (_pOwn->IsNPC())
 			{
-				s_dwNamePartsColors[NAME_INDEX][0] = 0xFF9BA1E9; // D3DXCOLOR(109,87,218,1);
+				s_dwNamePartsColors[NAME_INDEX][0] = 0xFF9BA1E9; // XMCOLORF(109,87,218,1);
 			}*/
 
 			// ?õ?????????

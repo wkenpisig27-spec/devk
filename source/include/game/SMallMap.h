@@ -16,7 +16,7 @@ public:
 
 	// void			Render();
 
-	void MoveTo(D3DXVECTOR3& vPos, D3DXVECTOR3& vCameraDir, float fCameraAngle, float fCameradDist, int iAngle = 0);
+	void MoveTo(XMVECTOR3& vPos, XMVECTOR3& vCameraDir, float fCameraAngle, float fCameradDist, int iAngle = 0);
 
 	void SetDist(float fDist) {
 		_fDist = fDist;
@@ -33,10 +33,10 @@ public:
 	virtual void FrameMove(DWORD dwDailTime);
 	virtual void Render();
 
-	void GetWndPos(int& nOutX, int& nOutY, D3DXVECTOR3& vWorldPos) {
-		D3DXVECTOR4 vOut;
+	void GetWndPos(int& nOutX, int& nOutY, XMVECTOR3& vWorldPos) {
+		XMVECTOR4 vOut;
 		const auto v = _matView * _matProj;
-		D3DXVec3Transform(&vOut, &vWorldPos, &(v));
+		XMVector3Transform(&vOut, &vWorldPos, &(v));
 		nOutX = int((float)(_rcWnd.right - _rcWnd.left) * (vOut.x / vOut.w * 0.5f + 0.5f));
 		nOutY = int((float)(_rcWnd.bottom - _rcWnd.top) * (0.5f - vOut.y / vOut.w * 0.5f));
 
@@ -72,23 +72,23 @@ protected:
 	D3DSURFACE_DESC _BufParam;
 
 	RECT _rcWnd;
-	D3DXMATRIX _matView;
-	D3DXMATRIX _matProj;
+	XMMATRIX _matView;
+	XMMATRIX _matProj;
 
-	// D3DXVECTOR3				veye,vlookat;
-	// D3DXMATRIX				_matView2;
+	// XMVECTOR3				veye,vlookat;
+	// XMMATRIX				_matView2;
 
-	D3DXVECTOR3 _vEyePt;
-	D3DXVECTOR3 _vLookatPt;
-	D3DXVECTOR3 _vUpVec;
+	XMVECTOR3 _vEyePt;
+	XMVECTOR3 _vLookatPt;
+	XMVECTOR3 _vUpVec;
 
 	float _fDist;
 	int _iAngle;
 
-	// D3DXVECTOR3				_vCameraPos;
-	// D3DXVECTOR3				_vCameraDir;
-	// D3DXVECTOR3				_vCameraTar1[2];
-	// D3DXVECTOR3				_vCameraTar2[2];
+	// XMVECTOR3				_vCameraPos;
+	// XMVECTOR3				_vCameraDir;
+	// XMVECTOR3				_vCameraTar1[2];
+	// XMVECTOR3				_vCameraTar2[2];
 	float _fCameraAngle;
 
 
@@ -105,10 +105,10 @@ protected:
 #define D3DFVF_M2DWA (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 
 struct M2D_AVER {
-	D3DXVECTOR4 m_vPos;
+	XMVECTOR4 m_vPos;
 	DWORD m_color;
-	D3DXVECTOR2 m_fUV;
-	void SetValue(D3DXVECTOR4& vPos, DWORD color, D3DXVECTOR2& fUV) {
+	XMVECTOR2 m_fUV;
+	void SetValue(XMVECTOR4& vPos, DWORD color, XMVECTOR2& fUV) {
 		m_vPos = vPos;
 		m_color = color;
 		m_fUV = fUV;
@@ -117,7 +117,7 @@ struct M2D_AVER {
 
 struct MNPC_PARAM {
 	int iType;
-	// D3DXVECTOR3 vPos;
+	// XMVECTOR3 vPos;
 	int nx, ny;
 };
 
@@ -129,11 +129,11 @@ struct MNPC_PARAM {
 
 #define TEXNUM 18
 struct M2D_VER {
-	D3DXVECTOR4 m_vPos;
+	XMVECTOR4 m_vPos;
 	DWORD m_color;
-	D3DXVECTOR2 m_fUV;
-	D3DXVECTOR2 m_fUV2;
-	void SetValue(D3DXVECTOR4& vPos, DWORD color, D3DXVECTOR2& fUV) {
+	XMVECTOR2 m_fUV;
+	XMVECTOR2 m_fUV2;
+	void SetValue(XMVECTOR4& vPos, DWORD color, XMVECTOR2& fUV) {
 		m_vPos = vPos;
 		m_color = color;
 		m_fUV = fUV;
@@ -160,11 +160,11 @@ public:
 
 	BOOL Init(IDirect3DDeviceX* pDev) {
 		m_pDev = pDev;
-		D3DXVECTOR2 vUV[4] = {
-		    D3DXVECTOR2(0, 0),
-		    D3DXVECTOR2(1, 0),
-		    D3DXVECTOR2(1, 1),
-		    D3DXVECTOR2(0, 1),
+		XMVECTOR2 vUV[4] = {
+		    XMVECTOR2(0, 0),
+		    XMVECTOR2(1, 0),
+		    XMVECTOR2(1, 1),
+		    XMVECTOR2(0, 1),
 		};
 		float frad = 5.0f;
 #ifdef MGR
@@ -222,17 +222,17 @@ public:
 
 		M2D_VER* pVertices;
 		_pVB->Lock(0, 0, (BYTE**)&pVertices, D3DLOCK_DISCARD);
-		(*pVertices++).SetValue(D3DXVECTOR4(-frad, -frad, 0.000001f, float(0)), _dwColor, vUV[0]);
-		(*pVertices++).SetValue(D3DXVECTOR4(frad, -frad, 0.000001f, float(1)), _dwColor, vUV[1]);
-		(*pVertices++).SetValue(D3DXVECTOR4(frad, frad, 0.000001f, float(2)), _dwColor, vUV[2]);
-		(*pVertices++).SetValue(D3DXVECTOR4(-frad, frad, 0.000001f, float(3)), _dwColor, vUV[3]);
+		(*pVertices++).SetValue(XMVECTOR4(-frad, -frad, 0.000001f, float(0)), _dwColor, vUV[0]);
+		(*pVertices++).SetValue(XMVECTOR4(frad, -frad, 0.000001f, float(1)), _dwColor, vUV[1]);
+		(*pVertices++).SetValue(XMVECTOR4(frad, frad, 0.000001f, float(2)), _dwColor, vUV[2]);
+		(*pVertices++).SetValue(XMVECTOR4(-frad, frad, 0.000001f, float(3)), _dwColor, vUV[3]);
 		_pVB->Unlock();
 #endif
 
-		_vers[0] = D3DXVECTOR4(-frad, -frad, 0.000001f, float(1));
-		_vers[1] = D3DXVECTOR4(frad, -frad, 0.000001f, float(1));
-		_vers[2] = D3DXVECTOR4(frad, frad, 0.000001f, float(1));
-		_vers[3] = D3DXVECTOR4(-frad, frad, 0.000001f, float(1));
+		_vers[0] = XMVECTOR4(-frad, -frad, 0.000001f, float(1));
+		_vers[1] = XMVECTOR4(frad, -frad, 0.000001f, float(1));
+		_vers[2] = XMVECTOR4(frad, frad, 0.000001f, float(1));
+		_vers[3] = XMVECTOR4(-frad, frad, 0.000001f, float(1));
 
 		const char* pszName[] = {"texture\\minimap\\0.tga",   "texture\\minimap\\1.tga",  "texture\\minimap\\2.tga",
 		                         "texture\\minimap\\3.tga",   "texture\\minimap\\4.tga",  "texture\\minimap\\5.tga",
@@ -274,16 +274,16 @@ public:
 		rc.right = 10;
 		rc.bottom = 10;
 
-		_vWndVer[0].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
-		_vWndVer[1].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
-		_vWndVer[2].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
-		_vWndVer[3].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
+		_vWndVer[0].m_vPos = XMVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
+		_vWndVer[1].m_vPos = XMVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
+		_vWndVer[2].m_vPos = XMVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
+		_vWndVer[3].m_vPos = XMVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
 
-		D3DXVECTOR2 vUVwnd[4] = {
-		    D3DXVECTOR2(0, 0),
-		    D3DXVECTOR2(1, 0),
-		    D3DXVECTOR2(1, 1),
-		    D3DXVECTOR2(0, 1),
+		XMVECTOR2 vUVwnd[4] = {
+		    XMVECTOR2(0, 0),
+		    XMVECTOR2(1, 0),
+		    XMVECTOR2(1, 1),
+		    XMVECTOR2(0, 1),
 		};
 		_vWndVer[0].m_fUV = vUVwnd[0];
 		_vWndVer[1].m_fUV = vUVwnd[1];
@@ -298,14 +298,14 @@ public:
 		return TRUE;
 	}
 
-	void setPos(D3DXVECTOR3& vPos) {
-		D3DXMatrixTranslation(&_matWorld, vPos.x, vPos.y, 1);
+	void setPos(XMVECTOR3& vPos) {
+		XMMatrixTranslation(&_matWorld, vPos.x, vPos.y, 1);
 	}
 	void setAngle(int z) {
-		D3DXMatrixRotationZ(&_matRotat, Angle2Radian(float(z)) + D3DX_PI);
+		XMMatrixRotationZ(&_matRotat, Angle2Radian(float(z)) + XM_PI);
 	}
 	void setScaling(float x, float y, float z) {
-		D3DXMatrixScaling(&_matScal, x, y, z);
+		XMMatrixScaling(&_matScal, x, y, z);
 	}
 	void setColor(DWORD dwColor) {
 		_dwColor = dwColor;
@@ -322,12 +322,12 @@ public:
 	void Render() {
 		g_Render.SetVertexShaderConstantF(8, _dwColor, 1);
 
-		D3DXVECTOR4 tv;
-		D3DXMATRIX tm = _matScal * _matRotat;
+		XMVECTOR4 tv;
+		XMMATRIX tm = _matScal * _matRotat;
 		for (int i = 0; i < 4; ++i) {
 			tv = _vers[i];
 			const auto v = tm * _matWorld;
-			D3DXVec4Transform(&tv, &_vers[i], &(v));
+			XMVector4Transform(&tv, &_vers[i], &(v));
 			g_Render.SetVertexShaderConstantF(9 + i, tv, 1);
 		}
 #ifdef MGR
@@ -380,10 +380,10 @@ public:
 		rc.right = rc.left + wh;
 		rc.bottom = rc.top + wh;
 
-		_vWndVer[0].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
-		_vWndVer[1].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
-		_vWndVer[2].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
-		_vWndVer[3].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
+		_vWndVer[0].m_vPos = XMVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
+		_vWndVer[1].m_vPos = XMVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
+		_vWndVer[2].m_vPos = XMVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
+		_vWndVer[3].m_vPos = XMVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
 
 		if (iType > 0) {
 			g_Render.SetTexture(0, _pTex[iType]->GetTex());
@@ -419,12 +419,12 @@ protected:
 	IDirect3DVertexBufferX* _pVB;
 #endif
 
-	D3DXMATRIX _matWorld;
-	D3DXMATRIX _matRotat;
-	D3DXMATRIX _matScal;
+	XMMATRIX _matWorld;
+	XMMATRIX _matRotat;
+	XMMATRIX _matScal;
 
-	D3DXCOLOR _dwColor;
-	D3DXVECTOR4 _vers[4];
+	XMCOLORF _dwColor;
+	XMVECTOR4 _vers[4];
 	int _iCurTex;
 
 
@@ -507,7 +507,7 @@ private:
 	IDirect3DTextureX* _pTexDefault;
 #endif
 
-	D3DXCOLOR _dwColor;
+	XMCOLORF _dwColor;
 };
 
 
@@ -529,7 +529,7 @@ public:
 	virtual void Render();
 
 	struct ClockVer {
-		D3DXVECTOR3 vPos;
+		XMVECTOR3 vPos;
 		DWORD dwColor;
 	};
 
@@ -616,9 +616,9 @@ public:
 public:
 	bool _bLoad;
 	D3DVIEWPORTX _vp;
-	D3DXVECTOR3 _vPos;
-	D3DXMATRIXA16 _mat3DUIView;
-	D3DXMATRIXA16 _mat3DUIProj;
+	XMVECTOR3 _vPos;
+	XMMATRIXA16 _mat3DUIView;
+	XMMATRIXA16 _mat3DUIProj;
 
 	CCharacterModel* _pModel;
 	stNetTeamChaPart* _pChaPart;
@@ -642,7 +642,7 @@ protected:
 	int wc, hc;
 	int _rcW, _rcH;
 
-	D3DXCOLOR _dwColor;
+	XMCOLORF _dwColor;
 
 	MPITex** _pTex;
 };
@@ -704,16 +704,16 @@ public:
 		rc.right = NPCSIZE;
 		rc.bottom = NPCSIZE;
 
-		_vWndVer[0].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
-		_vWndVer[1].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
-		_vWndVer[2].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
-		_vWndVer[3].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
+		_vWndVer[0].m_vPos = XMVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
+		_vWndVer[1].m_vPos = XMVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
+		_vWndVer[2].m_vPos = XMVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
+		_vWndVer[3].m_vPos = XMVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
 
-		D3DXVECTOR2 vUVwnd[4] = {
-		    D3DXVECTOR2(0, 0),
-		    D3DXVECTOR2(1, 0),
-		    D3DXVECTOR2(1, 1),
-		    D3DXVECTOR2(0, 1),
+		XMVECTOR2 vUVwnd[4] = {
+		    XMVECTOR2(0, 0),
+		    XMVECTOR2(1, 0),
+		    XMVECTOR2(1, 1),
+		    XMVECTOR2(0, 1),
 		};
 		_vWndVer[0].m_fUV = vUVwnd[0];
 		_vWndVer[1].m_fUV = vUVwnd[1];
@@ -765,28 +765,28 @@ public:
 		rc.bottom = rc.top + nh;
 	}
 	void setAngle(int z) {
-		_vWndVer[0].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
-		_vWndVer[1].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
-		_vWndVer[2].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
-		_vWndVer[3].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
+		_vWndVer[0].m_vPos = XMVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
+		_vWndVer[1].m_vPos = XMVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
+		_vWndVer[2].m_vPos = XMVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
+		_vWndVer[3].m_vPos = XMVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
 
 		// if(z != 0)
 		{
-			D3DXVECTOR2 vpos[4];
-			vpos[0] = D3DXVECTOR2(float(rc.left), float(rc.top));
-			vpos[1] = D3DXVECTOR2(float(rc.right), float(rc.top));
-			vpos[2] = D3DXVECTOR2(float(rc.right), float(rc.bottom));
-			vpos[3] = D3DXVECTOR2(float(rc.left), float(rc.bottom));
+			XMVECTOR2 vpos[4];
+			vpos[0] = XMVECTOR2(float(rc.left), float(rc.top));
+			vpos[1] = XMVECTOR2(float(rc.right), float(rc.top));
+			vpos[2] = XMVECTOR2(float(rc.right), float(rc.bottom));
+			vpos[3] = XMVECTOR2(float(rc.left), float(rc.bottom));
 
 			int n;
-			D3DXMATRIX mat;
-			// D3DXMatrixRotationZ(&mat,Angle2Radian(float(z)));
-			D3DXVECTOR3 tvpos(float(mposx), float(mposy), 0);
-			auto v = D3DXVECTOR3(0, 0, 1);
-			GetMatrixRotation(&mat, &tvpos, &v, Angle2Radian(float(z)) + D3DX_PI);
+			XMMATRIX mat;
+			// XMMatrixRotationZ(&mat,Angle2Radian(float(z)));
+			XMVECTOR3 tvpos(float(mposx), float(mposy), 0);
+			auto v = XMVECTOR3(0, 0, 1);
+			GetMatrixRotation(&mat, &tvpos, &v, Angle2Radian(float(z)) + XM_PI);
 
 			for (n = 0; n < 4; n++) {
-				D3DXVec2TransformCoord(&vpos[n], &vpos[n], &mat);
+				XMVector2TransformCoord(&vpos[n], &vpos[n], &mat);
 				_vWndVer[n].m_vPos.x = vpos[n].x;
 				_vWndVer[n].m_vPos.y = vpos[n].y;
 			}
@@ -815,7 +815,7 @@ public:
 protected:
 	MPITex* _pTex[TEXNUM];
 
-	D3DXVECTOR4 _vers[4];
+	XMVECTOR4 _vers[4];
 	int _iCurTex;
 
 	M2D_AVER _vWndVer[4];
@@ -964,11 +964,11 @@ private:
 
 	MPITex* _pTexDefault;
 
-	D3DXCOLOR _dwColor;
+	XMCOLORF _dwColor;
 
 	CSMNpc _cSmNpc;
 
-	D3DXVECTOR4 _vCameraTar[2];
+	XMVECTOR4 _vCameraTar[2];
 
 	CMiniPack* _pMiniPack;
 };
@@ -1069,11 +1069,11 @@ private:
 
 	MPITex* _pTexDefault{};
 
-	D3DXCOLOR _dwColor;
+	XMCOLORF _dwColor;
 
 	CSMNpc _cSmNpc;
 
-	D3DXVECTOR4 _vCameraTar[2];
+	XMVECTOR4 _vCameraTar[2];
 
 	CMiniPack* _pMiniPack{};
 

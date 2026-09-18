@@ -188,11 +188,11 @@ CGameApp::CGameApp()
 	_dwNotifyTime = 0;
 	_dwNotifyTime1 = 0;
 
-	//_ctrl = new Ninja::LinearController < D3DXVECTOR3 >;
+	//_ctrl = new Ninja::LinearController < XMVECTOR3 >;
 	//_pNinjaCamera = new Ninja::Camera( _ctrl );
 
 	// Added by CLP
-	_camera_target_ctrl = new Ninja::LinearController<D3DXVECTOR3>;
+	_camera_target_ctrl = new Ninja::LinearController<XMVECTOR3>;
 	_camera_eye_ctrl = new Ninja::LinearController<Ninja::SphereCoord>;
 	_pNinjaCamera = new Ninja::Camera(_camera_target_ctrl, _camera_eye_ctrl);
 
@@ -618,16 +618,16 @@ bool CAniClock::Create(int width, DWORD dwColor) {
 	int len = _rcWnd.right - _rcWnd.left;
 	int hei = _rcWnd.bottom - _rcWnd.top;
 
-	_vVertex[0].vPos = D3DXVECTOR4(float(_rcWnd.left + len / 2), float(_rcWnd.top + hei / 2), 0.9f, 1);
-	_vVertex[1].vPos = D3DXVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.top), 0.9f, 1);
-	_vVertex[2].vPos = D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.top), 0.9f, 1);
-	_vVertex[3].vPos = D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.top + hei / 2), 0.9f, 1);
-	_vVertex[4].vPos = D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.bottom), 0.9f, 1);
-	_vVertex[5].vPos = D3DXVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.bottom), 0.9f, 1);
-	_vVertex[6].vPos = D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.bottom), 0.9f, 1);
-	_vVertex[7].vPos = D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.top + hei / 2), 0.9f, 1);
-	_vVertex[8].vPos = D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.top), 0.9f, 1);
-	_vVertex[9].vPos = D3DXVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.top), 0.9f, 1);
+	_vVertex[0].vPos = XMVECTOR4(float(_rcWnd.left + len / 2), float(_rcWnd.top + hei / 2), 0.9f, 1);
+	_vVertex[1].vPos = XMVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.top), 0.9f, 1);
+	_vVertex[2].vPos = XMVECTOR4(float(_rcWnd.right), float(_rcWnd.top), 0.9f, 1);
+	_vVertex[3].vPos = XMVECTOR4(float(_rcWnd.right), float(_rcWnd.top + hei / 2), 0.9f, 1);
+	_vVertex[4].vPos = XMVECTOR4(float(_rcWnd.right), float(_rcWnd.bottom), 0.9f, 1);
+	_vVertex[5].vPos = XMVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.bottom), 0.9f, 1);
+	_vVertex[6].vPos = XMVECTOR4(float(_rcWnd.left), float(_rcWnd.bottom), 0.9f, 1);
+	_vVertex[7].vPos = XMVECTOR4(float(_rcWnd.left), float(_rcWnd.top + hei / 2), 0.9f, 1);
+	_vVertex[8].vPos = XMVECTOR4(float(_rcWnd.left), float(_rcWnd.top), 0.9f, 1);
+	_vVertex[9].vPos = XMVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.top), 0.9f, 1);
 
 	_vVertex[0].dwColor = dwColor;
 	_vVertex[1].dwColor = dwColor;
@@ -657,16 +657,16 @@ void CAniClock::MoveTo(int x, int y) {
 	_rcWnd.right = _rcWnd.left + len;
 	_rcWnd.bottom = _rcWnd.top + hei;
 
-	_vVertex[0].vPos = D3DXVECTOR4(float(_rcWnd.left + len / 2), float(_rcWnd.top + hei / 2), 0.9f, 1);
-	_vVertex[1].vPos = D3DXVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.top), 0.9f, 1);
-	_vVertex[2].vPos = D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.top), 0.9f, 1);
-	_vVertex[3].vPos = D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.top + hei / 2), 0.9f, 1);
-	_vVertex[4].vPos = D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.bottom), 0.9f, 1);
-	_vVertex[5].vPos = D3DXVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.bottom), 0.9f, 1);
-	_vVertex[6].vPos = D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.bottom), 0.9f, 1);
-	_vVertex[7].vPos = D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.top + hei / 2), 0.9f, 1);
-	_vVertex[8].vPos = D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.top), 0.9f, 1);
-	_vVertex[9].vPos = D3DXVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.top), 0.9f, 1);
+	_vVertex[0].vPos = XMVECTOR4(float(_rcWnd.left + len / 2), float(_rcWnd.top + hei / 2), 0.9f, 1);
+	_vVertex[1].vPos = XMVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.top), 0.9f, 1);
+	_vVertex[2].vPos = XMVECTOR4(float(_rcWnd.right), float(_rcWnd.top), 0.9f, 1);
+	_vVertex[3].vPos = XMVECTOR4(float(_rcWnd.right), float(_rcWnd.top + hei / 2), 0.9f, 1);
+	_vVertex[4].vPos = XMVECTOR4(float(_rcWnd.right), float(_rcWnd.bottom), 0.9f, 1);
+	_vVertex[5].vPos = XMVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.bottom), 0.9f, 1);
+	_vVertex[6].vPos = XMVECTOR4(float(_rcWnd.left), float(_rcWnd.bottom), 0.9f, 1);
+	_vVertex[7].vPos = XMVECTOR4(float(_rcWnd.left), float(_rcWnd.top + hei / 2), 0.9f, 1);
+	_vVertex[8].vPos = XMVECTOR4(float(_rcWnd.left), float(_rcWnd.top), 0.9f, 1);
+	_vVertex[9].vPos = XMVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.top), 0.9f, 1);
 
 	for (int n = 0; n < 10; n++) {
 		_vSave[n] = _vVertex[n].vPos;
@@ -693,16 +693,16 @@ void CAniClock::ResetTime(DWORD dwTime) {
 	int len = _rcWnd.right - _rcWnd.left;
 	int hei = _rcWnd.bottom - _rcWnd.top;
 
-	_vVertex[0].vPos = D3DXVECTOR4(float(_rcWnd.left + len / 2), float(_rcWnd.top + hei / 2), 0.9f, 1);
-	_vVertex[1].vPos = D3DXVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.top), 0.9f, 1);
-	_vVertex[2].vPos = D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.top), 0.9f, 1);
-	_vVertex[3].vPos = D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.top + hei / 2), 0.9f, 1);
-	_vVertex[4].vPos = D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.bottom), 0.9f, 1);
-	_vVertex[5].vPos = D3DXVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.bottom), 0.9f, 1);
-	_vVertex[6].vPos = D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.bottom), 0.9f, 1);
-	_vVertex[7].vPos = D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.top + hei / 2), 0.9f, 1);
-	_vVertex[8].vPos = D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.top), 0.9f, 1);
-	_vVertex[9].vPos = D3DXVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.top), 0.9f, 1);
+	_vVertex[0].vPos = XMVECTOR4(float(_rcWnd.left + len / 2), float(_rcWnd.top + hei / 2), 0.9f, 1);
+	_vVertex[1].vPos = XMVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.top), 0.9f, 1);
+	_vVertex[2].vPos = XMVECTOR4(float(_rcWnd.right), float(_rcWnd.top), 0.9f, 1);
+	_vVertex[3].vPos = XMVECTOR4(float(_rcWnd.right), float(_rcWnd.top + hei / 2), 0.9f, 1);
+	_vVertex[4].vPos = XMVECTOR4(float(_rcWnd.right), float(_rcWnd.bottom), 0.9f, 1);
+	_vVertex[5].vPos = XMVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.bottom), 0.9f, 1);
+	_vVertex[6].vPos = XMVECTOR4(float(_rcWnd.left), float(_rcWnd.bottom), 0.9f, 1);
+	_vVertex[7].vPos = XMVECTOR4(float(_rcWnd.left), float(_rcWnd.top + hei / 2), 0.9f, 1);
+	_vVertex[8].vPos = XMVECTOR4(float(_rcWnd.left), float(_rcWnd.top), 0.9f, 1);
+	_vVertex[9].vPos = XMVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.top), 0.9f, 1);
 
 	for (int n = 0; n < 10; n++) {
 		_vSave[n] = _vVertex[n].vPos;
@@ -852,16 +852,16 @@ void CAniClock::Resume(DWORD dwStartTime, DWORD dwPlayTime) {
 	int len = _rcWnd.right - _rcWnd.left;
 	int hei = _rcWnd.bottom - _rcWnd.top;
 
-	_vVertex[0].vPos = D3DXVECTOR4(float(_rcWnd.left + len / 2), float(_rcWnd.top + hei / 2), 0.9f, 1);
-	_vVertex[1].vPos = D3DXVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.top), 0.9f, 1);
-	_vVertex[2].vPos = D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.top), 0.9f, 1);
-	_vVertex[3].vPos = D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.top + hei / 2), 0.9f, 1);
-	_vVertex[4].vPos = D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.bottom), 0.9f, 1);
-	_vVertex[5].vPos = D3DXVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.bottom), 0.9f, 1);
-	_vVertex[6].vPos = D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.bottom), 0.9f, 1);
-	_vVertex[7].vPos = D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.top + hei / 2), 0.9f, 1);
-	_vVertex[8].vPos = D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.top), 0.9f, 1);
-	_vVertex[9].vPos = D3DXVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.top), 0.9f, 1);
+	_vVertex[0].vPos = XMVECTOR4(float(_rcWnd.left + len / 2), float(_rcWnd.top + hei / 2), 0.9f, 1);
+	_vVertex[1].vPos = XMVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.top), 0.9f, 1);
+	_vVertex[2].vPos = XMVECTOR4(float(_rcWnd.right), float(_rcWnd.top), 0.9f, 1);
+	_vVertex[3].vPos = XMVECTOR4(float(_rcWnd.right), float(_rcWnd.top + hei / 2), 0.9f, 1);
+	_vVertex[4].vPos = XMVECTOR4(float(_rcWnd.right), float(_rcWnd.bottom), 0.9f, 1);
+	_vVertex[5].vPos = XMVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.bottom), 0.9f, 1);
+	_vVertex[6].vPos = XMVECTOR4(float(_rcWnd.left), float(_rcWnd.bottom), 0.9f, 1);
+	_vVertex[7].vPos = XMVECTOR4(float(_rcWnd.left), float(_rcWnd.top + hei / 2), 0.9f, 1);
+	_vVertex[8].vPos = XMVECTOR4(float(_rcWnd.left), float(_rcWnd.top), 0.9f, 1);
+	_vVertex[9].vPos = XMVECTOR4(_vVertex[0].vPos.x, float(_rcWnd.top), 0.9f, 1);
 
 	for (int n = 0; n < 10; n++) {
 		_vSave[n] = _vVertex[n].vPos;

@@ -1862,40 +1862,40 @@ __ret:
 //-----------------------------------------------------------------------------
 void lwGetCubeMapViewMatrix(lwMatrix44* mat, DWORD face)
 {
-    D3DXVECTOR3 vEyePt   = D3DXVECTOR3( 0.0f, 0.0f, 0.0f );
-    D3DXVECTOR3 vLookDir;
-    D3DXVECTOR3 vUpDir;
+    XMVECTOR3 vEyePt   = XMVECTOR3( 0.0f, 0.0f, 0.0f );
+    XMVECTOR3 vLookDir;
+    XMVECTOR3 vUpDir;
 
     switch( face )
     {
         case D3DCUBEMAP_FACE_POSITIVE_X:
-            vLookDir = D3DXVECTOR3( 1.0f, 0.0f, 0.0f );
-            vUpDir   = D3DXVECTOR3( 0.0f, 1.0f, 0.0f );
+            vLookDir = XMVECTOR3( 1.0f, 0.0f, 0.0f );
+            vUpDir   = XMVECTOR3( 0.0f, 1.0f, 0.0f );
             break;
         case D3DCUBEMAP_FACE_NEGATIVE_X:
-            vLookDir = D3DXVECTOR3(-1.0f, 0.0f, 0.0f );
-            vUpDir   = D3DXVECTOR3( 0.0f, 1.0f, 0.0f );
+            vLookDir = XMVECTOR3(-1.0f, 0.0f, 0.0f );
+            vUpDir   = XMVECTOR3( 0.0f, 1.0f, 0.0f );
             break;
         case D3DCUBEMAP_FACE_POSITIVE_Y:
-            vLookDir = D3DXVECTOR3( 0.0f, 1.0f, 0.0f );
-            vUpDir   = D3DXVECTOR3( 0.0f, 0.0f,-1.0f );
+            vLookDir = XMVECTOR3( 0.0f, 1.0f, 0.0f );
+            vUpDir   = XMVECTOR3( 0.0f, 0.0f,-1.0f );
             break;
         case D3DCUBEMAP_FACE_NEGATIVE_Y:
-            vLookDir = D3DXVECTOR3( 0.0f,-1.0f, 0.0f );
-            vUpDir   = D3DXVECTOR3( 0.0f, 0.0f, 1.0f );
+            vLookDir = XMVECTOR3( 0.0f,-1.0f, 0.0f );
+            vUpDir   = XMVECTOR3( 0.0f, 0.0f, 1.0f );
             break;
         case D3DCUBEMAP_FACE_POSITIVE_Z:
-            vLookDir = D3DXVECTOR3( 0.0f, 0.0f, 1.0f );
-            vUpDir   = D3DXVECTOR3( 0.0f, 1.0f, 0.0f );
+            vLookDir = XMVECTOR3( 0.0f, 0.0f, 1.0f );
+            vUpDir   = XMVECTOR3( 0.0f, 1.0f, 0.0f );
             break;
         case D3DCUBEMAP_FACE_NEGATIVE_Z:
-            vLookDir = D3DXVECTOR3( 0.0f, 0.0f,-1.0f );
-            vUpDir   = D3DXVECTOR3( 0.0f, 1.0f, 0.0f );
+            vLookDir = XMVECTOR3( 0.0f, 0.0f,-1.0f );
+            vUpDir   = XMVECTOR3( 0.0f, 1.0f, 0.0f );
             break;
     }
 
     // Set the view transform for this cubemap surface
-    D3DXMatrixLookAtLH((D3DXMATRIX*)mat, &vEyePt, &vLookDir, &vUpDir );
+    XMMatrixLookAtLH((XMMATRIX*)mat, &vEyePt, &vLookDir, &vUpDir );
 }
 
 LW_END

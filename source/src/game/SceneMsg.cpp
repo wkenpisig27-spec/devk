@@ -264,7 +264,7 @@ void CGameScene::HandleSceneMsg(int nMsgType, int nParam1, int nParam2, int nPar
 		//	pObj = GetSceneObj(nParam1);
 		//	CShadeEff *pShade;
 
-		//	D3DXCOLOR dwColor;
+		//	XMCOLORF dwColor;
 		//	dwColor.a = 0.5f;
 		//	dwColor.r = pInfo->btPointColor[0]/255;
 		//	dwColor.g = pInfo->btPointColor[1]/255;

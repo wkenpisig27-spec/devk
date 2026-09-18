@@ -131,7 +131,7 @@ MPRender::MPRender()
       _bEnableCaptureAVI(FALSE),
       _bCaptureScreen(FALSE) {
 	_nCurViewType = -1;
-	SetWorldViewFOV(D3DX_PI / 4.0f * 0.90f);
+	SetWorldViewFOV(XM_PI / 4.0f * 0.90f);
 	_dwBackgroundColor = D3DCOLOR_XRGB(128, 128, 128);
 	_fNearClip = 1.0f;
 	_fFarClip = 1000.0f; // Original 1000f
@@ -417,13 +417,13 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 	}
 
 	// begin by lsh
-	D3DXVECTOR3 up = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-	D3DXVECTOR3 eye = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-	D3DXVECTOR3 target = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	D3DXMatrixLookAtLH(&_mat3DUIView, &eye, &target, &up);
+	XMVECTOR3 up = XMVECTOR3(0.0f, 0.0f, 1.0f);
+	XMVECTOR3 eye = XMVECTOR3(0.0f, 1.0f, 0.0f);
+	XMVECTOR3 target = XMVECTOR3(0.0f, 0.0f, 0.0f);
+	XMMatrixLookAtLH(&_mat3DUIView, &eye, &target, &up);
 
 	_fAspect = (float)_nWorldViewWidth / ((float)(_nWorldViewHeight));
-	D3DXMatrixPerspectiveFovLH(&_mat3DUIProj, D3DX_PI * 0.12f, _fAspect, _fNearClip, _fFarClip);
+	XMMatrixPerspectiveFovLH(&_mat3DUIProj, XM_PI * 0.12f, _fAspect, _fNearClip, _fFarClip);
 	SetRenderState(D3DRS_ZENABLE, TRUE);
 	SetRenderState(D3DRS_AMBIENT, 0xffffffff);
 	SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
@@ -436,11 +436,11 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 //-----------------------------------------------------------------------------
 BOOL MPRender::InitResource() {
 #ifdef USE_RENDER
-	if (!ResMgr.InitRes(this, (D3DXMATRIX*)_IMgr.dev_obj->GetMatView(), (D3DXMATRIX*)_IMgr.dev_obj->GetMatViewProj()))
+	if (!ResMgr.InitRes(this, (XMMATRIX*)_IMgr.dev_obj->GetMatView(), (XMMATRIX*)_IMgr.dev_obj->GetMatViewProj()))
 #elif MINDPOWER_USE_D3D9_DEVICE
 	if (!ResMgr.InitRes(_pD3DDevice, &GetWorldViewMatrix(), &GetViewProjMatrix()))
 #else
-	if (!ResMgr.InitRes(this, (D3DXMATRIX*)_IMgr.dev_obj->GetMatView(), (D3DXMATRIX*)_IMgr.dev_obj->GetMatViewProj()))
+	if (!ResMgr.InitRes(this, (XMMATRIX*)_IMgr.dev_obj->GetMatView(), (XMMATRIX*)_IMgr.dev_obj->GetMatViewProj()))
 #endif
 	{
 		LG("error", "msg��ʼ��ResMgrʧ��,�˳�!");
@@ -719,8 +719,8 @@ void MPRender::SetCurrentView(int nType, BOOL bReset) {
 
 	switch (nType) {
 	case VIEW_WORLD: {
-		D3DXMatrixIdentity(&_matProjWorld);
-		D3DXMatrixPerspectiveFovLH(&_matProjWorld, _fWorldViewFOV, _fAspect, _fNearClip, _fFarClip);
+		XMMatrixIdentity(&_matProjWorld);
+		XMMatrixPerspectiveFovLH(&_matProjWorld, _fWorldViewFOV, _fAspect, _fNearClip, _fFarClip);
 
 
 #if (defined USE_MANAGED_RES)
@@ -732,10 +732,10 @@ void MPRender::SetCurrentView(int nType, BOOL bReset) {
 		break;
 	}
 	case VIEW_UI: {
-		D3DXMatrixIdentity(&_matUIView);
-		D3DXMatrixIdentity(&_matUIProj);
+		XMMatrixIdentity(&_matUIView);
+		XMMatrixIdentity(&_matUIProj);
 
-		D3DXMatrixPerspectiveFovLH(&_matUIProj, 0.1f, _fAspect, 10, 100);
+		XMMatrixPerspectiveFovLH(&_matUIProj, 0.1f, _fAspect, 10, 100);
 
 
 #if (defined USE_MANAGED_RES)
@@ -744,10 +744,10 @@ void MPRender::SetCurrentView(int nType, BOOL bReset) {
 		_pD3DDevice->SetTransform(D3DTS_PROJECTION, (D3DMATRIX*)&_matUIProj);
 #endif
 
-		D3DXVECTOR3 upVector = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-		D3DXVECTOR3 vecCam(0, 0, -50);
-		D3DXVECTOR3 vecLookAt(0, 0, 0);
-		D3DXMatrixLookAtLH(&_matUIView, &vecCam, &vecLookAt, &upVector);
+		XMVECTOR3 upVector = XMVECTOR3(0.0f, 1.0f, 0.0f);
+		XMVECTOR3 vecCam(0, 0, -50);
+		XMVECTOR3 vecLookAt(0, 0, 0);
+		XMMatrixLookAtLH(&_matUIView, &vecCam, &vecLookAt, &upVector);
 #if (defined USE_MANAGED_RES)
 		SetTransformView(&_matUIView);
 #else
@@ -784,10 +784,10 @@ void MPRender::SetCurrentView(int nType, BOOL bReset)
     {
         case VIEW_WORLD:
         {
-            D3DXMatrixIdentity(&_matProjWorld);
+            XMMatrixIdentity(&_matProjWorld);
             // SetViewport(_nWorldViewStartX, _nWorldViewStartY, _nWorldViewWidth, _nWorldViewHeight);
             //float fAspect = (float)_nWorldViewWidth / ((float)(_nWorldViewHeight));
-            D3DXMatrixPerspectiveFovLH(&_matProjWorld, _fWorldViewFOV, _fAspect, _fNearClip, _fFarClip);
+            XMMatrixPerspectiveFovLH(&_matProjWorld, _fWorldViewFOV, _fAspect, _fNearClip, _fFarClip);
 
 #if(defined USE_MANAGED_RES)
             SetTransformProj(&_matProjWorld);
@@ -799,12 +799,12 @@ void MPRender::SetCurrentView(int nType, BOOL bReset)
         }
         case VIEW_UI:
         {
-            D3DXMatrixIdentity(&_matUIView);
-            D3DXMatrixIdentity(&_matUIProj);
+            XMMatrixIdentity(&_matUIView);
+            XMMatrixIdentity(&_matUIProj);
 
             //SetViewport(0, 0, _nScrWidth, _nScrHeight);
             //FLOAT fAspect = (float)_nScrWidth / (float)_nScrHeight;
-            D3DXMatrixPerspectiveFovLH(&_matUIProj, 0.1f, _fAspect, 10, 100);
+            XMMatrixPerspectiveFovLH(&_matUIProj, 0.1f, _fAspect, 10, 100);
 
 #if(defined USE_MANAGED_RES)
             SetTransformProj(&_matUIProj);
@@ -812,10 +812,10 @@ void MPRender::SetCurrentView(int nType, BOOL bReset)
             _pD3DDevice->SetTransform( D3DTS_PROJECTION, (D3DMATRIX*)&_matUIProj );
 #endif
 
-            D3DXVECTOR3	upVector = D3DXVECTOR3( 0.0f, 1.0f, 0.0f );
-            D3DXVECTOR3	vecCam(0, 0, -50);
-            D3DXVECTOR3	vecLookAt(0, 0, 0);
-            D3DXMatrixLookAtLH( &_matUIView, &vecCam, &vecLookAt, &upVector );
+            XMVECTOR3	upVector = XMVECTOR3( 0.0f, 1.0f, 0.0f );
+            XMVECTOR3	vecCam(0, 0, -50);
+            XMVECTOR3	vecLookAt(0, 0, 0);
+            XMMatrixLookAtLH( &_matUIView, &vecCam, &vecLookAt, &upVector );
 #if(defined USE_MANAGED_RES)
             SetTransformView(&_matUIView);
 #else
@@ -848,41 +848,41 @@ void MPRender::SetCurrentView(int nType, BOOL bReset)
 
 
 // transform 3d world position into screen space
-void MPRender::GetScreenPos(int& nOutX, int& nOutY, D3DXVECTOR3& vWorldPos) {
-	D3DXVECTOR4 vOut;
-	D3DXVec3Transform(&vOut, &vWorldPos, &_matViewProj);
+void MPRender::GetScreenPos(int& nOutX, int& nOutY, XMVECTOR3& vWorldPos) {
+	XMVECTOR4 vOut;
+	XMVector3Transform(&vOut, &vWorldPos, &_matViewProj);
 	nOutX = _nWorldViewStartX + int((float)_nWorldViewWidth * (vOut.x / vOut.w * 0.5f + 0.5f));
 	nOutY = _nWorldViewStartY + int(((float)(_nWorldViewHeight)) * (0.5f - vOut.y / vOut.w * 0.5f));
 }
 
 
-void MPRender::GetRay(int nScreenX, int nScreenY, D3DXVECTOR3& vRayStart, D3DXVECTOR3& vRayEnd) {
-	D3DXMATRIX matInverse;
+void MPRender::GetRay(int nScreenX, int nScreenY, XMVECTOR3& vRayStart, XMVECTOR3& vRayEnd) {
+	XMMATRIX matInverse;
 
-	D3DXMatrixInverse(&matInverse, NULL, &_matViewProj);
+	XMMatrixInverse(&matInverse, NULL, &_matViewProj);
 
-	D3DXVECTOR4 vOut;
-	D3DXVECTOR3 v;
+	XMVECTOR4 vOut;
+	XMVECTOR3 v;
 	v.x = float(nScreenX - _nWorldViewStartX) / (float)_nWorldViewWidth - 0.5f;
 	v.x += v.x;
 	v.y = 0.5f - float(nScreenY - _nWorldViewStartY) / ((float)(_nWorldViewHeight));
 	v.y += v.y;
 	v.z = 0.0f;
-	D3DXVec3Transform(&vOut, &v, &matInverse);
-	vRayStart = D3DXVECTOR3(vOut.x / vOut.w, vOut.y / vOut.w, vOut.z / vOut.w);
+	XMVector3Transform(&vOut, &v, &matInverse);
+	vRayStart = XMVECTOR3(vOut.x / vOut.w, vOut.y / vOut.w, vOut.z / vOut.w);
 	v.z = 1.0f;
-	D3DXVec3Transform(&vOut, &v, &matInverse);
-	vRayEnd = D3DXVECTOR3(vOut.x / vOut.w, vOut.y / vOut.w, vOut.z / vOut.w);
+	XMVector3Transform(&vOut, &v, &matInverse);
+	vRayEnd = XMVECTOR3(vOut.x / vOut.w, vOut.y / vOut.w, vOut.z / vOut.w);
 }
 
-void MPRender::GetPickRayVector(int nScrPosX, int nScrPosY, D3DXVECTOR3* pPickRayOrig, D3DXVECTOR3* pPickRayDir) {
+void MPRender::GetPickRayVector(int nScrPosX, int nScrPosY, XMVECTOR3* pPickRayOrig, XMVECTOR3* pPickRayDir) {
 	GetRay(nScrPosX, nScrPosY, *pPickRayOrig, *pPickRayDir);
 	(*pPickRayDir) = (*pPickRayDir) - (*pPickRayOrig);
-	D3DXVec3Normalize(pPickRayDir, pPickRayDir);
+	XMVector3Normalize(pPickRayDir, pPickRayDir);
 }
 
-void MPRender::LookAt(D3DXVECTOR3 vecPos, D3DXVECTOR3 vecLookAt, DWORD dwViewType) {
-	D3DXMATRIX* mat = NULL;
+void MPRender::LookAt(XMVECTOR3 vecPos, XMVECTOR3 vecLookAt, DWORD dwViewType) {
+	XMMATRIX* mat = NULL;
 
 	switch (dwViewType) {
 	case VIEW_WORLD:
@@ -895,8 +895,8 @@ void MPRender::LookAt(D3DXVECTOR3 vecPos, D3DXVECTOR3 vecLookAt, DWORD dwViewTyp
 		return;
 	}
 
-	D3DXVECTOR3 upVector = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-	D3DXMatrixLookAtLH(mat, &vecPos, &vecLookAt, &upVector);
+	XMVECTOR3 upVector = XMVECTOR3(0.0f, 0.0f, 1.0f);
+	XMMatrixLookAtLH(mat, &vecPos, &vecLookAt, &upVector);
 
 #if (defined USE_MANAGED_RES)
 	SetTransformView(mat);
@@ -905,8 +905,8 @@ void MPRender::LookAt(D3DXVECTOR3 vecPos, D3DXVECTOR3 vecLookAt, DWORD dwViewTyp
 #endif
 
 
-	// D3DXMATRIX matProj;
-	// D3DXMatrixPerspectiveFovLH( &_matProjWorld, D3DX_PI/4, 1.0f, 1.0f, 1000.0f );
+	// XMMATRIX matProj;
+	// XMMatrixPerspectiveFovLH( &_matProjWorld, XM_PI/4, 1.0f, 1.0f, 1000.0f );
 	//_pD3DDevice->SetTransform( D3DTS_PROJECTION, &_matProjWorld );
 
 	// _matViewProj = _matViewWorld * _matProjWorld;
@@ -1158,9 +1158,9 @@ void MPRender::RenderTextureRect(int nX, int nY, MPTexRect* pRect) {
 	}
 #if MINDPOWER_USE_D3D9_DEVICE
 	_p2DSprite->Begin(D3DXSPRITE_ALPHABLEND);
-	D3DXMATRIX scaleMat;
-	D3DXMatrixIdentity(&scaleMat);
-	scaleMat = *D3DXMatrixScaling(&scaleMat, pRect->fScaleX, pRect->fScaleY, 1.0f);
+	XMMATRIX scaleMat;
+	XMMatrixIdentity(&scaleMat);
+	scaleMat = *XMMatrixScaling(&scaleMat, pRect->fScaleX, pRect->fScaleY, 1.0f);
 	_p2DSprite->SetTransform(&scaleMat);
 	_p2DSprite->Draw(pTexture, pTexRect, NULL, &vecDest, pRect->dwColor);
 	_p2DSprite->End();
@@ -1168,10 +1168,10 @@ void MPRender::RenderTextureRect(int nX, int nY, MPTexRect* pRect) {
 }
 
 void MPRender::RenderLine(float x1, float y1, float z1, float x2, float y2, float z2, DWORD dwColor) {
-	D3DXMATRIXA16 mat;
-	D3DXMatrixIdentity(&mat);
+	XMMATRIXA16 mat;
+	XMMatrixIdentity(&mat);
 
-	D3DXMatrixTranslation(&mat, 0.0f, 0.0f, 0.0f);
+	XMMatrixTranslation(&mat, 0.0f, 0.0f, 0.0f);
 #if (defined USE_MANAGED_RES)
 	SetTransformWorld(&mat);
 #else
@@ -1186,8 +1186,8 @@ void MPRender::RenderLine(float x1, float y1, float z1, float x2, float y2, floa
 	TMP_VERTEX pVertices[2];
 
 	// line 1
-	pVertices[0].pos = D3DXVECTOR3(x1, y1, z1);
-	pVertices[1].pos = D3DXVECTOR3(x2, y2, z2);
+	pVertices[0].pos = XMVECTOR3(x1, y1, z1);
+	pVertices[1].pos = XMVECTOR3(x2, y2, z2);
 	pVertices[0].diffuse = dwColor;
 	pVertices[1].diffuse = dwColor;
 
@@ -1200,7 +1200,7 @@ void MPRender::RenderLine(float x1, float y1, float z1, float x2, float y2, floa
 	// SetRenderState( D3DRS_ZENABLE,  TRUE );
 }
 
-void MPRender::AddLine(const D3DXVECTOR3& v1, const D3DXVECTOR3& v2, DWORD dwColor) {
+void MPRender::AddLine(const XMVECTOR3& v1, const XMVECTOR3& v2, DWORD dwColor) {
 	MPLine* pLine = new MPLine;
 	pLine->v1 = v1;
 	pLine->v2 = v2;

@@ -116,9 +116,9 @@ public:
 	bool					LoadTotalVShader(lwISysGraphics* sys_graphics);
 
 #ifdef USE_RENDER
-	bool					InitRes(MPRender*		pDev, D3DXMATRIX* pmat, D3DXMATRIX* pMatviewproj);
+	bool					InitRes(MPRender*		pDev, XMMATRIX* pmat, XMMATRIX* pMatviewproj);
 #else
-	bool					InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX* pMatviewproj);
+	bool					InitRes(IDirect3DDeviceX*		pDev, XMMATRIX* pmat, XMMATRIX* pMatviewproj);
 
 #endif
 
@@ -182,9 +182,9 @@ public:
 	void					Render();
 	void					UpdateMatrix();
 	float*					GetDailTime()		{ return &_fDailTime;}
-	D3DXMATRIX*				GetBBoardMat()		{ return &_MatBBoard;}
-	D3DXMATRIX*				GetViewProjMat()	{ return &_MatViewProjPose;}
-	D3DXMATRIX*				Get2DViewProjMat()	{ return &_Mat2dViewProj;}
+	XMMATRIX*				GetBBoardMat()		{ return &_MatBBoard;}
+	XMMATRIX*				GetViewProjMat()	{ return &_MatViewProjPose;}
+	XMMATRIX*				Get2DViewProjMat()	{ return &_Mat2dViewProj;}
 	int						GetBackBufferWidth(){ return m_d3dBackBuffer.Width;}
 	int						GetBackBufferHeight(){ return m_d3dBackBuffer.Height;}
 	int&					GetFontBkWidth()	{ return _iFontBkWidth;}
@@ -237,7 +237,7 @@ public:
 	void					DeletePartCtrl(int iID);
 
 
-	void					SendResMessage(const s_string& strPartName, D3DXVECTOR3 vPos, MPMap* pMap);
+	void					SendResMessage(const s_string& strPartName, XMVECTOR3 vPos, MPMap* pMap);
 public:
 	//!3D�豸
 #ifdef		USE_RENDER
@@ -327,11 +327,11 @@ protected:
 	float								_fDailTime;
 	bool								_bInitTime;
 
-	D3DXMATRIX*							_pMatView;
-	D3DXMATRIX							_MatBBoard;
-	D3DXMATRIX*							_pMatViewProj;
-	D3DXMATRIX							_MatViewProjPose;
-	D3DXMATRIX							_Mat2dViewProj;
+	XMMATRIX*							_pMatView;
+	XMMATRIX							_MatBBoard;
+	XMMATRIX*							_pMatViewProj;
+	XMMATRIX							_MatViewProjPose;
+	XMMATRIX							_Mat2dViewProj;
 
 	int									_iFontBkWidth;
 	int									_iFontBkHeight;
@@ -373,7 +373,7 @@ protected:
 #endif
 };
 
-inline void	CMPResManger::SendResMessage(const s_string& strPartName, D3DXVECTOR3 vPos, MPMap* pMap)
+inline void	CMPResManger::SendResMessage(const s_string& strPartName, XMVECTOR3 vPos, MPMap* pMap)
 {
 	int id = GetPartCtrlID(strPartName);
 	if(id < 0)

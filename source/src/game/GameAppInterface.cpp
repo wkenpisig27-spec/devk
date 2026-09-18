@@ -332,8 +332,8 @@ void CGameApp::CreateCharImg() {
 	CCharacter* pCha = nullptr;
 	CChaRecord* pInfo = GetChaRecordInfo(id);
 
-	D3DXVECTOR3 veye(pMainCha->GetPos());
-	D3DXVECTOR3 vlookat = veye;
+	XMVECTOR3 veye(pMainCha->GetPos());
+	XMVECTOR3 vlookat = veye;
 
 	veye.y += 10;
 	veye.z += 3.5f;
@@ -462,17 +462,17 @@ BOOL CGameApp::_CreateSmMap(MPTerrain* pTerr) {
 		if (bSea)
 			return TRUE; // ????????????????g?
 
-		D3DXMATRIX matView, matProj;
-		D3DXVECTOR3 vEyePt = _pCurScene->GetMainCha()->GetPos();
+		XMMATRIX matView, matProj;
+		XMVECTOR3 vEyePt = _pCurScene->GetMainCha()->GetPos();
 		vEyePt.z = SHOWRSIZE;
-		D3DXVECTOR3 vLookatPt = vEyePt;
+		XMVECTOR3 vLookatPt = vEyePt;
 		vLookatPt.z = 0;
-		D3DXVECTOR3 vUpVec = D3DXVECTOR3(0, -1, 0);
-		D3DXMatrixOrthoLH(&matProj, SHOWRSIZE, SHOWRSIZE, 0.0f, 1000.0f);
+		XMVECTOR3 vUpVec = XMVECTOR3(0, -1, 0);
+		XMMatrixOrthoLH(&matProj, SHOWRSIZE, SHOWRSIZE, 0.0f, 1000.0f);
 		g_Render.SetTransformProj(&matProj);
 		char fileName[64];
 
-		D3DXMatrixLookAtLH(&matView, &vEyePt, &vLookatPt, &vUpVec);
+		XMMatrixLookAtLH(&matView, &vEyePt, &vLookatPt, &vUpVec);
 		g_Render.SetTransformView(&matView);
 
 		pTerr->SetShowCenter(vEyePt.x, vEyePt.y);
@@ -1031,7 +1031,7 @@ void CGameApp::Waiting(bool isWaiting, const char* msg) {
 	}
 }
 
-void CGameApp::SetCameraPos(D3DXVECTOR3& pos, bool bRestoreCustom) {
+void CGameApp::SetCameraPos(XMVECTOR3& pos, bool bRestoreCustom) {
 	CCameraCtrl* pCam = GetMainCam();
 
 	// GetCameraTrack()->Reset(pos.x,pos.y,pos.z);
@@ -1640,7 +1640,7 @@ void CGameApp::AutoTest() {
 	if (!pScene)
 		return;
 
-	D3DXVECTOR3 TestPos;
+	XMVECTOR3 TestPos;
 	int nTestX = 0;
 	int nTestY = 0;
 	if (CGameScene::GetMainCha()) {

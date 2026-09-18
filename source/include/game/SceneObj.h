@@ -18,7 +18,7 @@ public:
 	virtual void FrameMove(DWORD dwTimeParam);
 	virtual void Render();
 
-	D3DXVECTOR3& getPos() { return _vPos; }
+	XMVECTOR3& getPos() { return _vPos; }
 	void setSection(int nSectionNO) { _nSectionNO = nSectionNO; }
 	int getSection() { return _nSectionNO; }
 	void setObjType(DWORD type) { _dwObjType = type; }
@@ -30,7 +30,7 @@ public:
 	// lemon add@2004.10.20 for light
 	void UpdateLight();
 	void ClearLight();
-	void MoveLight(D3DXVECTOR3* SVerPos);
+	void MoveLight(XMVECTOR3* SVerPos);
 
 	// lh add@2004.10.20 for music
 	int GetMusicID() { return _nMusicID; }
@@ -47,7 +47,7 @@ public:
 	bool IsBoxVisible_LineWithPlane(lwVector3 vecMin, lwVector3 vecMax, DWORD& index);
 	void SetMaterial(const D3DMATERIALX* mtl);
 	void SetCullingFlag(DWORD flag) { _dwCullingFlag = flag; }
-	int HitTestForInfluence(int* flag, D3DXVECTOR3* t_pos, const D3DXVECTOR3* nPos);
+	int HitTestForInfluence(int* flag, XMVECTOR3* t_pos, const XMVECTOR3* nPos);
 	DWORD GetObjTileColor();
 	int UpdateObjFadeInFadeOut(const MPVector3* org, const MPVector3* ray);
 
@@ -59,7 +59,7 @@ protected:
 	virtual void _UpdatePos();
 	virtual void _UpdateValid(BOOL bValid);
 
-	D3DXVECTOR3 _vPos;
+	XMVECTOR3 _vPos;
 	int _nSectionNO;
 	DWORD _dwObjType;
 	DWORD _dwItemType;
@@ -71,7 +71,7 @@ protected:
 	int _iChaID; // 有可能是角色，或物件，或武器或特效的ID
 	int _iOwerType;
 	float _fRange;
-	D3DXCOLOR _dwcolor;
+	XMCOLORF _dwcolor;
 	float _fx, _fy, _ftx, _fty;
 
 	// lh add@2004.10.20 for music

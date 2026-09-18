@@ -53,8 +53,8 @@ VOID D3DUtil_InitLight( D3DLIGHTX& light, D3DLIGHTTYPE ltType,
     light.Diffuse.r   = 1.0f;
     light.Diffuse.g   = 1.0f;
     light.Diffuse.b   = 1.0f;
-    const auto v = D3DXVECTOR3(x, y, z);
-    D3DXVec3Normalize( (D3DXVECTOR3*)&light.Direction, &v );
+    const auto v = XMVECTOR3(x, y, z);
+    XMVector3Normalize( (XMVECTOR3*)&light.Direction, &v );
     light.Position.x   = x;
     light.Position.y   = y;
     light.Position.z   = z;
@@ -181,43 +181,43 @@ HRESULT D3DUtil_CreateVertexShader( IDirect3DDeviceX* pd3dDevice,
 // Name: D3DUtil_GetCubeMapViewMatrix()
 // Desc: Returns a view matrix for rendering to a face of a cubemap.
 //-----------------------------------------------------------------------------
-D3DXMATRIX D3DUtil_GetCubeMapViewMatrix( DWORD dwFace )
+XMMATRIX D3DUtil_GetCubeMapViewMatrix( DWORD dwFace )
 {
-    D3DXVECTOR3 vEyePt   = D3DXVECTOR3( 0.0f, 0.0f, 0.0f );
-    D3DXVECTOR3 vLookDir;
-    D3DXVECTOR3 vUpDir;
+    XMVECTOR3 vEyePt   = XMVECTOR3( 0.0f, 0.0f, 0.0f );
+    XMVECTOR3 vLookDir;
+    XMVECTOR3 vUpDir;
 
     switch( dwFace )
     {
         case D3DCUBEMAP_FACE_POSITIVE_X:
-            vLookDir = D3DXVECTOR3( 1.0f, 0.0f, 0.0f );
-            vUpDir   = D3DXVECTOR3( 0.0f, 1.0f, 0.0f );
+            vLookDir = XMVECTOR3( 1.0f, 0.0f, 0.0f );
+            vUpDir   = XMVECTOR3( 0.0f, 1.0f, 0.0f );
             break;
         case D3DCUBEMAP_FACE_NEGATIVE_X:
-            vLookDir = D3DXVECTOR3(-1.0f, 0.0f, 0.0f );
-            vUpDir   = D3DXVECTOR3( 0.0f, 1.0f, 0.0f );
+            vLookDir = XMVECTOR3(-1.0f, 0.0f, 0.0f );
+            vUpDir   = XMVECTOR3( 0.0f, 1.0f, 0.0f );
             break;
         case D3DCUBEMAP_FACE_POSITIVE_Y:
-            vLookDir = D3DXVECTOR3( 0.0f, 1.0f, 0.0f );
-            vUpDir   = D3DXVECTOR3( 0.0f, 0.0f,-1.0f );
+            vLookDir = XMVECTOR3( 0.0f, 1.0f, 0.0f );
+            vUpDir   = XMVECTOR3( 0.0f, 0.0f,-1.0f );
             break;
         case D3DCUBEMAP_FACE_NEGATIVE_Y:
-            vLookDir = D3DXVECTOR3( 0.0f,-1.0f, 0.0f );
-            vUpDir   = D3DXVECTOR3( 0.0f, 0.0f, 1.0f );
+            vLookDir = XMVECTOR3( 0.0f,-1.0f, 0.0f );
+            vUpDir   = XMVECTOR3( 0.0f, 0.0f, 1.0f );
             break;
         case D3DCUBEMAP_FACE_POSITIVE_Z:
-            vLookDir = D3DXVECTOR3( 0.0f, 0.0f, 1.0f );
-            vUpDir   = D3DXVECTOR3( 0.0f, 1.0f, 0.0f );
+            vLookDir = XMVECTOR3( 0.0f, 0.0f, 1.0f );
+            vUpDir   = XMVECTOR3( 0.0f, 1.0f, 0.0f );
             break;
         case D3DCUBEMAP_FACE_NEGATIVE_Z:
-            vLookDir = D3DXVECTOR3( 0.0f, 0.0f,-1.0f );
-            vUpDir   = D3DXVECTOR3( 0.0f, 1.0f, 0.0f );
+            vLookDir = XMVECTOR3( 0.0f, 0.0f,-1.0f );
+            vUpDir   = XMVECTOR3( 0.0f, 1.0f, 0.0f );
             break;
     }
 
     // Set the view transform for this cubemap surface
-    D3DXMATRIX matView;
-    D3DXMatrixLookAtLH( &matView, &vEyePt, &vLookDir, &vUpDir );
+    XMMATRIX matView;
+    XMMatrixLookAtLH( &matView, &vEyePt, &vLookDir, &vUpDir );
     return matView;
 }
 
@@ -229,7 +229,7 @@ D3DXMATRIX D3DUtil_GetCubeMapViewMatrix( DWORD dwFace )
 // Desc: Returns a quaternion for the rotation implied by the window's cursor
 //       position.
 //-----------------------------------------------------------------------------
-D3DXQUATERNION D3DUtil_GetRotationFromCursor( HWND hWnd,
+XMQUATERNION D3DUtil_GetRotationFromCursor( HWND hWnd,
                                               FLOAT fTrackBallRadius )
 {
     POINT pt;
@@ -242,7 +242,7 @@ D3DXQUATERNION D3DUtil_GetRotationFromCursor( HWND hWnd,
     FLOAT sz;
 
     if( sx == 0.0f && sy == 0.0f )
-        return D3DXQUATERNION( 0.0f, 0.0f, 0.0f, 1.0f );
+        return XMQUATERNION( 0.0f, 0.0f, 0.0f, 1.0f );
 
     FLOAT d1 = 0.0f;
     FLOAT d2 = sqrtf( sx*sx + sy*sy );
@@ -253,23 +253,23 @@ D3DXQUATERNION D3DUtil_GetRotationFromCursor( HWND hWnd,
         sz = (fTrackBallRadius*fTrackBallRadius) / (2.0f*d2);
 
     // Get two points on trackball's sphere
-    D3DXVECTOR3 p1( sx, sy, sz );
-    D3DXVECTOR3 p2( 0.0f, 0.0f, fTrackBallRadius );
+    XMVECTOR3 p1( sx, sy, sz );
+    XMVECTOR3 p2( 0.0f, 0.0f, fTrackBallRadius );
 
     // Get axis of rotation, which is cross product of p1 and p2
-    D3DXVECTOR3 vAxis;
-    D3DXVec3Cross( &vAxis, &p1, &p2);
+    XMVECTOR3 vAxis;
+    XMVector3Cross( &vAxis, &p1, &p2);
 
     // Calculate angle for the rotation about that axis
     const auto v = p2 - p1;
-    FLOAT t = D3DXVec3Length( &v ) / ( 2.0f*fTrackBallRadius );
+    FLOAT t = XMVector3Length( &v ) / ( 2.0f*fTrackBallRadius );
     if( t > +1.0f) t = +1.0f;
     if( t < -1.0f) t = -1.0f;
     FLOAT fAngle = 2.0f * asinf( t );
 
     // Convert axis to quaternion
-    D3DXQUATERNION quat;
-    D3DXQuaternionRotationAxis( &quat, &vAxis, fAngle );
+    XMQUATERNION quat;
+    XMQuaternionRotationAxis( &quat, &vAxis, fAngle );
     return quat;
 }
 
@@ -432,12 +432,12 @@ End:
 //-----------------------------------------------------------------------------
 CD3DArcBall::CD3DArcBall()
 {
-    D3DXQuaternionIdentity( &m_qDown );
-    D3DXQuaternionIdentity( &m_qNow );
-    D3DXMatrixIdentity( &m_matRotation );
-    D3DXMatrixIdentity( &m_matRotationDelta );
-    D3DXMatrixIdentity( &m_matTranslation );
-    D3DXMatrixIdentity( &m_matTranslationDelta );
+    XMQuaternionIdentity( &m_qDown );
+    XMQuaternionIdentity( &m_qNow );
+    XMMatrixIdentity( &m_matRotation );
+    XMMatrixIdentity( &m_matRotationDelta );
+    XMMatrixIdentity( &m_matTranslation );
+    XMMatrixIdentity( &m_matTranslationDelta );
     m_bDrag = FALSE;
 }
 
@@ -463,7 +463,7 @@ VOID CD3DArcBall::SetWindow( int iWidth, int iHeight, float fRadius )
 // Name:
 // Desc:
 //-----------------------------------------------------------------------------
-D3DXVECTOR3 CD3DArcBall::ScreenToVector( int sx, int sy )
+XMVECTOR3 CD3DArcBall::ScreenToVector( int sx, int sy )
 {
     // Scale to screen
     FLOAT x   =  (sx - m_iWidth/2)  / (m_fRadius*m_iWidth/2);
@@ -481,7 +481,7 @@ D3DXVECTOR3 CD3DArcBall::ScreenToVector( int sx, int sy )
         z = sqrtf( 1.0f - mag );
 
     // Return vector
-    return D3DXVECTOR3( x, y, z );
+    return XMVECTOR3( x, y, z );
 }
 
 
@@ -508,8 +508,8 @@ LRESULT CD3DArcBall::HandleMouseMessages( HWND hWnd, UINT uMsg, WPARAM wParam,
 {
     static int         iCurMouseX;      // Saved mouse position
     static int         iCurMouseY;
-    static D3DXVECTOR3 m_vDown;         // Button down quaternion
-    static D3DXVECTOR3 m_vCur;          // Current quaternion
+    static XMVECTOR3 m_vDown;         // Button down quaternion
+    static XMVECTOR3 m_vCur;          // Current quaternion
 
     // Current mouse position
     int iMouseX = LOWORD(lParam);
@@ -542,22 +542,22 @@ LRESULT CD3DArcBall::HandleMouseMessages( HWND hWnd, UINT uMsg, WPARAM wParam,
             {
                 if( m_bDrag )
                 {
-                    D3DXVECTOR3 vPart;
-                    D3DXVECTOR3 vCur = ScreenToVector( iMouseX, iMouseY );
-                    D3DXVec3Cross( &vPart, &m_vDown, &vCur );
-                    m_qNow = m_qDown * D3DXQUATERNION( vPart.x, vPart.y, vPart.z,
-                                                       D3DXVec3Dot( &m_vDown, &vCur ) );
+                    XMVECTOR3 vPart;
+                    XMVECTOR3 vCur = ScreenToVector( iMouseX, iMouseY );
+                    XMVector3Cross( &vPart, &m_vDown, &vCur );
+                    m_qNow = m_qDown * XMQUATERNION( vPart.x, vPart.y, vPart.z,
+                                                       XMVector3Dot( &m_vDown, &vCur ) );
                 }
 
-                D3DXQUATERNION qConj;
-                D3DXQuaternionConjugate( &qConj, &m_qNow );
+                XMQUATERNION qConj;
+                XMQuaternionConjugate( &qConj, &m_qNow );
 
-                D3DXMatrixRotationQuaternion( &m_matRotationDelta, &qConj );
-                D3DXMatrixTranspose( &m_matRotationDelta, &m_matRotationDelta );
-                D3DXMatrixMultiply( &m_matRotation, &m_matRotation, &m_matRotationDelta );
+                XMMatrixRotationQuaternion( &m_matRotationDelta, &qConj );
+                XMMatrixTranspose( &m_matRotationDelta, &m_matRotationDelta );
+                XMMatrixMultiply( &m_matRotation, &m_matRotation, &m_matRotationDelta );
 
-                D3DXQuaternionIdentity( &m_qDown );
-                D3DXQuaternionIdentity( &m_qNow );
+                XMQuaternionIdentity( &m_qDown );
+                XMQuaternionIdentity( &m_qNow );
                 m_vDown = ScreenToVector( iMouseX, iMouseY );
                 m_bDrag = TRUE;
             }
@@ -569,13 +569,13 @@ LRESULT CD3DArcBall::HandleMouseMessages( HWND hWnd, UINT uMsg, WPARAM wParam,
 
                 if( wParam & MK_RBUTTON )
                 {
-                    D3DXMatrixTranslation( &m_matTranslationDelta, -2*fDeltaX, 2*fDeltaY, 0.0f );
-                    D3DXMatrixMultiply( &m_matTranslation, &m_matTranslation, &m_matTranslationDelta );
+                    XMMatrixTranslation( &m_matTranslationDelta, -2*fDeltaX, 2*fDeltaY, 0.0f );
+                    XMMatrixMultiply( &m_matTranslation, &m_matTranslation, &m_matTranslationDelta );
                 }
                 else  // wParam & MK_MBUTTON
                 {
-                    D3DXMatrixTranslation( &m_matTranslationDelta, 0.0f, 0.0f, 5*fDeltaY );
-                    D3DXMatrixMultiply( &m_matTranslation, &m_matTranslation, &m_matTranslationDelta );
+                    XMMatrixTranslation( &m_matTranslationDelta, 0.0f, 0.0f, 5*fDeltaY );
+                    XMMatrixMultiply( &m_matTranslation, &m_matTranslation, &m_matTranslationDelta );
                 }
 
                 // Store mouse coordinate
@@ -597,7 +597,7 @@ LRESULT CD3DArcBall::HandleMouseMessages( HWND hWnd, UINT uMsg, WPARAM wParam,
 CD3DCamera::CD3DCamera()
 {
 	// Set attributes for the view matrix
-	D3DXVECTOR3 v[] = {
+	XMVECTOR3 v[] = {
 	   {0.0f,0.0f,0.0f},
 	   {0.0f,0.0f,1.0f},
 	   {0.0f,1.0f,0.0f} };
@@ -605,7 +605,7 @@ CD3DCamera::CD3DCamera()
     SetViewParams( v[0], v[1], v[2] );
 
     // Set attributes for the projection matrix
-    SetProjParams( D3DX_PI/4, 1.0f, 1.0f, 1000.0f );
+    SetProjParams( XM_PI/4, 1.0f, 1.0f, 1000.0f );
 }
 
 
@@ -615,8 +615,8 @@ CD3DCamera::CD3DCamera()
 // Name:
 // Desc:
 //-----------------------------------------------------------------------------
-VOID CD3DCamera::SetViewParams( D3DXVECTOR3 &vEyePt, D3DXVECTOR3& vLookatPt,
-                                D3DXVECTOR3& vUpVec )
+VOID CD3DCamera::SetViewParams( XMVECTOR3 &vEyePt, XMVECTOR3& vLookatPt,
+                                XMVECTOR3& vUpVec )
 {
     // Set attributes for the view matrix
     m_vEyePt    = vEyePt;
@@ -624,11 +624,11 @@ VOID CD3DCamera::SetViewParams( D3DXVECTOR3 &vEyePt, D3DXVECTOR3& vLookatPt,
     m_vUpVec    = vUpVec;
     const auto v = m_vLookatPt - m_vEyePt;
 
-    D3DXVec3Normalize( &m_vView, &v );
-    D3DXVec3Cross( &m_vCross, &m_vView, &m_vUpVec );
+    XMVector3Normalize( &m_vView, &v );
+    XMVector3Cross( &m_vCross, &m_vView, &m_vUpVec );
 
-    D3DXMatrixLookAtLH( &m_matView, &m_vEyePt, &m_vLookatPt, &m_vUpVec );
-    D3DXMatrixInverse( &m_matBillboard, NULL, &m_matView );
+    XMMatrixLookAtLH( &m_matView, &m_vEyePt, &m_vLookatPt, &m_vUpVec );
+    XMMatrixInverse( &m_matBillboard, NULL, &m_matView );
     m_matBillboard._41 = 0.0f;
     m_matBillboard._42 = 0.0f;
     m_matBillboard._43 = 0.0f;
@@ -650,5 +650,5 @@ VOID CD3DCamera::SetProjParams( FLOAT fFOV, FLOAT fAspect, FLOAT fNearPlane,
     m_fNearPlane  = fNearPlane;
     m_fFarPlane   = fFarPlane;
 
-    D3DXMatrixPerspectiveFovLH( &m_matProj, fFOV, fAspect, fNearPlane, fFarPlane );
+    XMMatrixPerspectiveFovLH( &m_matProj, fFOV, fAspect, fNearPlane, fFarPlane );
 }

@@ -3,14 +3,14 @@
 
 using namespace std;
 
-D3DXVECTOR3 ComputeNormalVector( D3DXVECTOR3 v1, D3DXVECTOR3 v2, D3DXVECTOR3 v3 )
+XMVECTOR3 ComputeNormalVector( XMVECTOR3 v1, XMVECTOR3 v2, XMVECTOR3 v3 )
 {
-	D3DXVECTOR3 vResult;
-	D3DXVECTOR3 vec1 = ( v2 - v1 );
-	D3DXVECTOR3 vec2 = ( v3 - v1 );
+	XMVECTOR3 vResult;
+	XMVECTOR3 vec1 = ( v2 - v1 );
+	XMVECTOR3 vec2 = ( v3 - v1 );
 	
-	D3DXVec3Cross( &vResult, &vec1, &vec2 );	
-	vResult = vResult / D3DXVec3Length(&vResult);
+	XMVector3Cross( &vResult, &vec1, &vec2 );	
+	vResult = vResult / XMVector3Length(&vResult);
 	return vResult;
 }
 
@@ -134,7 +134,7 @@ int GetVectorRelativeDirection(float *fSrcDir , float *fDestDir , float *pfAngle
 	return nDestDir;
 }
 
-int		BSplineCurveCV(int numCV, D3DXVECTOR3* vCtrl, D3DXVECTOR3* pVertices, int *numVert, int nPrecise, int nStrideInFloat)
+int		BSplineCurveCV(int numCV, XMVECTOR3* vCtrl, XMVECTOR3* pVertices, int *numVert, int nPrecise, int nStrideInFloat)
 {
 	// number of CV must lager than 4, precision must lager than 1
 	if (numCV < 4 || nPrecise < 1)
@@ -150,10 +150,10 @@ int		BSplineCurveCV(int numCV, D3DXVECTOR3* vCtrl, D3DXVECTOR3* pVertices, int *
 
 	// Bezier equation matrix 
 	float		M16[] = { -1, 3, -3, 1, 3, -6, 3, 0, -3, 0, 3, 0, 1, 4, 1, 0 } ; 
-	D3DXMATRIXA16	MBSpline(M16), MCtrl;
-	D3DXMATRIXA16	M12;
+	XMMATRIXA16	MBSpline(M16), MCtrl;
+	XMMATRIXA16	M12;
 
-	D3DXVECTOR3 *pCV = vCtrl;
+	XMVECTOR3 *pCV = vCtrl;
 	float *pOutV = (float*)pVertices;
 	float *pV = (float*)pVertices;
 
@@ -166,7 +166,7 @@ int		BSplineCurveCV(int numCV, D3DXVECTOR3* vCtrl, D3DXVECTOR3* pVertices, int *
 	{
 		// set CV
 		for (int idx = 0;idx < 4;idx ++)
-			memcpy(MCtrl.m[idx], pCV + idx, sizeof(D3DXVECTOR3));
+			memcpy(MCtrl.m[idx], pCV + idx, sizeof(XMVECTOR3));
 		
 		pCV += 1;
 		
@@ -211,32 +211,32 @@ int		BSplineCurveCV(int numCV, D3DXVECTOR3* vCtrl, D3DXVECTOR3* pVertices, int *
 	return 0;
 }
 
-int GetSamplePointList(float fStartX, float fStartY, float fEndX, float fEndY, float fStep, float fStepShift, list<D3DXVECTOR3> &PointList)
+int GetSamplePointList(float fStartX, float fStartY, float fEndX, float fEndY, float fStep, float fStepShift, list<XMVECTOR3> &PointList)
 {
-    D3DXVECTOR3 vecStart(fStartX, fStartY, 0.0f);
-    D3DXVECTOR3 vecEnd(fEndX, fEndY, 0.0f);
+    XMVECTOR3 vecStart(fStartX, fStartY, 0.0f);
+    XMVECTOR3 vecEnd(fEndX, fEndY, 0.0f);
 
-    D3DXVECTOR3 vecTmp = vecEnd - vecStart;
+    XMVECTOR3 vecTmp = vecEnd - vecStart;
     
-    D3DXVECTOR3 vecDir; D3DXVec3Normalize(&vecDir, &vecTmp);
+    XMVECTOR3 vecDir; XMVector3Normalize(&vecDir, &vecTmp);
 
-    D3DXVECTOR3 vM = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-	D3DXVECTOR3 vShift;
-	D3DXVec3Cross(&vShift, &vecDir, &vM); // 取得水平方向的向量
-	D3DXVec3Normalize(&vShift, &vShift);
+    XMVECTOR3 vM = XMVECTOR3(0.0f, 0.0f, 1.0f);
+	XMVECTOR3 vShift;
+	XMVector3Cross(&vShift, &vecDir, &vM); // 取得水平方向的向量
+	XMVector3Normalize(&vShift, &vShift);
 			
     float fDis = DistanceFrom(vecStart, vecEnd);
 
     int nStep = (int)(fDis / fStep);
     
-    D3DXVECTOR3 vecShift1 = (vShift * fStepShift);
-    D3DXVECTOR3 vecShift2 = (vShift * fStepShift * -1.0f);
+    XMVECTOR3 vecShift1 = (vShift * fStepShift);
+    XMVECTOR3 vecShift2 = (vShift * fStepShift * -1.0f);
     
     for(int i = 0; i < nStep; i++)
     {
-        D3DXVECTOR3 v  = vecStart + vecDir * (float)i * fStep;
-        D3DXVECTOR3 v1 = v + vecShift1;
-        D3DXVECTOR3 v2 = v + vecShift2;
+        XMVECTOR3 v  = vecStart + vecDir * (float)i * fStep;
+        XMVECTOR3 v1 = v + vecShift1;
+        XMVECTOR3 v2 = v + vecShift2;
         
         PointList.push_back(v1); 
         PointList.push_back(v2);        

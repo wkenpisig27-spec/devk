@@ -166,11 +166,11 @@ public:
 	~CMPFont();
 	struct FONT_VER
 	{
-		D3DXVECTOR4 m_vPos;
+		XMVECTOR4 m_vPos;
 		//float		m_fIdx;
 		DWORD m_color;
-		D3DXVECTOR2 m_fUV;
-		void SetValue(const D3DXVECTOR4 &_vPos,DWORD _color,const D3DXVECTOR2 &_fUV)
+		XMVECTOR2 m_fUV;
+		void SetValue(const XMVECTOR4 &_vPos,DWORD _color,const XMVECTOR2 &_fUV)
 		{
 			const float offs = -0.5f;
 			m_vPos = _vPos;
@@ -287,8 +287,8 @@ public:
 		std::vector<FONT_VER>	_vecHsl;
 		std::vector<FONT_VER>	_vecAsh;
 #else
-		std::vector<D3DXVECTOR4>	_vecHsl;
-		std::vector<D3DXVECTOR4>	_vecAsh;
+		std::vector<XMVECTOR4>	_vecHsl;
+		std::vector<XMVECTOR4>	_vecAsh;
 #endif
 
 		int iAshNum;
@@ -303,21 +303,21 @@ public:
 	void BindingRes(CMPResManger* pResMagr);
 
 	void Begin();
-	void Draw(char* szText, int x, int y, D3DXCOLOR color);
+	void Draw(char* szText, int x, int y, XMCOLORF color);
 	void End();
 
 	void BeginClip();
-	void DrawTextClipOnce(char* szText, int nLen, LPRECT psrc, LPRECT pclip,D3DXCOLOR color);
+	void DrawTextClipOnce(char* szText, int nLen, LPRECT psrc, LPRECT pclip,XMCOLORF color);
 	void EndClip();
 
-	bool DrawText( char* szText, int x, int y, D3DXCOLOR color = 0xFFFFFFFF,float fScale = 1.0f ,DWORD* dwTime = NULL);
-	bool DrawText( int iNumber, int x, int y, D3DXCOLOR color = 0xFFFFFFFF,float fScale = 1.0f );
+	bool DrawText( char* szText, int x, int y, XMCOLORF color = 0xFFFFFFFF,float fScale = 1.0f ,DWORD* dwTime = NULL);
+	bool DrawText( int iNumber, int x, int y, XMCOLORF color = 0xFFFFFFFF,float fScale = 1.0f );
 	
 	bool DrawTextShadow( char* szText, int x1, int y1, int x2, int y2,
-		D3DXCOLOR color1,D3DXCOLOR color2);
+		XMCOLORF color1,XMCOLORF color2);
 
 
-	bool Draw3DText(char* szText,D3DXVECTOR3& vPos, D3DXCOLOR color = 0xFFFFFFFF,float fScale = 0.3f );
+	bool Draw3DText(char* szText,XMVECTOR3& vPos, XMCOLORF color = 0xFFFFFFFF,float fScale = 0.3f );
 
 	SIZE* GetTextSize(char* szText, SIZE* pSize,float fScale = 1.0f);
 	int	  GetHzLength(float fscale = 1.0f);
@@ -342,7 +342,7 @@ private:
 
 	bool FindTextFromTex( char c1, char c2, float & tX1, float & tY1 , float & tX2, float & tY2);
 
-	bool DrawTextClip( char* szText, int nLen,LPRECT psrc, LPRECT pclip,D3DXCOLOR color = 0xFFFFFFFF);
+	bool DrawTextClip( char* szText, int nLen,LPRECT psrc, LPRECT pclip,XMCOLORF color = 0xFFFFFFFF);
 
 	int FindRect( char* szText, int x,int y, DWORD color,float tfscale)
 	{
@@ -423,9 +423,9 @@ private:
 	bool					_bUseSoft;
 	
 
-	D3DXMATRIX*				_pmatBBoard;
-	D3DXMATRIX*				_pmatViewProj;
-	D3DXMATRIX*				_pmat2DViewProj;
+	XMMATRIX*				_pmatBBoard;
+	XMMATRIX*				_pmatViewProj;
+	XMMATRIX*				_pmat2DViewProj;
 	int*					_iBufWidth;
 	int*					_iBufHeight;
 
@@ -436,7 +436,7 @@ private:
 #endif
 
 	std::vector<WORD>		_vecBufFast;
-	std::map<WORD, D3DXVECTOR4>	_mapUV;
+	std::map<WORD, XMVECTOR4>	_mapUV;
 	int			_RowNumFast;		
 	UINT		_MaFast;
 	int			_TextureSizeFast;

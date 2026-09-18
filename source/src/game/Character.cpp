@@ -472,7 +472,7 @@ void CCharacter::FrameMove(DWORD dwTimeParam) {
 	if (!_isArrive) {
 		if (_IsMoveTimeType) {
 			static float dis;
-			static D3DXVECTOR2 vTmp;
+			static XMVECTOR2 vTmp;
 
 			dis = (float)(CGameApp::GetCurTick() - _dwStartTime) * _fMoveSpeed;
 			if (dis > _fMoveLen) {
@@ -687,7 +687,7 @@ void CCharacter::DestroyLinkItem() {
 }
 
 int CCharacter::_GetTargetAngle(int nTargetX, int nTargetY, BOOL bBack) {
-	D3DXVECTOR2 dPosition = D3DXVECTOR2((float)nTargetX, (float)nTargetY) - D3DXVECTOR2((float)_nCurX, (float)_nCurY);
+	XMVECTOR2 dPosition = XMVECTOR2((float)nTargetX, (float)nTargetY) - XMVECTOR2((float)_nCurX, (float)_nCurY);
 	if (bBack)
 		dPosition *= -1;
 
@@ -805,7 +805,7 @@ bool CCharacter::ItemEffect(int nEffectID, int nItemDummy, int nAngle) {
 		pEffect->setFollowObj((CSceneNode*)item, NODE_ITEM, nItemDummy);
 		if (nAngle != 999)
 			pEffect->SetEffectDir(nAngle);
-		pEffect->Emission(-1, (D3DXVECTOR3*)&mat._41, nullptr);
+		pEffect->Emission(-1, (XMVECTOR3*)&mat._41, nullptr);
 	} else {
 		pEffect->setFollowObj((CSceneNode*)item, NODE_ITEM);
 		if (nAngle != 999)
@@ -895,7 +895,7 @@ CEffectObj* CCharacter::SelfEffect(int nEffectID, int nDummy, bool isLoop, int n
 				if (nAngle != 999)
 					pEffect->SetEffectDir(nAngle);
 				pEffect->setFollowObj((CSceneNode*)this, NODE_CHA, nDummy);
-				pEffect->Emission(-1, (D3DXVECTOR3*)&mat._41, nullptr);
+				pEffect->Emission(-1, (XMVECTOR3*)&mat._41, nullptr);
 			} else {
 				if (nAngle != 999)
 					pEffect->SetEffectDir(nAngle);
@@ -910,7 +910,7 @@ CEffectObj* CCharacter::SelfEffect(int nEffectID, int nDummy, bool isLoop, int n
 			if (nAngle != 999)
 				pEffect->SetEffectDir(nAngle);
 			pEffect->setFollowObj((CSceneNode*)this, NODE_CHA, nDummy);
-			pEffect->Emission(-1, (D3DXVECTOR3*)&mat._41, nullptr);
+			pEffect->Emission(-1, (XMVECTOR3*)&mat._41, nullptr);
 		} else {
 			if (nAngle != 999)
 				pEffect->SetEffectDir(nAngle);
@@ -925,7 +925,7 @@ CEffectObj* CCharacter::SelfEffect(int nEffectID, int nDummy, bool isLoop, int n
 	return pEffect;
 }
 
-CEffectObj* CCharacter::SkyEffect(int nEffectID, int nBeginDummy, int nItemDummy, int nSpeed, D3DXVECTOR3* pTarget, int nTargetChaID, CSkillRecord* pSkill) {
+CEffectObj* CCharacter::SkyEffect(int nEffectID, int nBeginDummy, int nItemDummy, int nSpeed, XMVECTOR3* pTarget, int nTargetChaID, CSkillRecord* pSkill) {
 	if (nEffectID <= 0)
 		return nullptr;
 
@@ -936,14 +936,14 @@ CEffectObj* CCharacter::SkyEffect(int nEffectID, int nBeginDummy, int nItemDummy
 	if (!pEffect->Create(nEffectID))
 		return nullptr;
 
-	static D3DXVECTOR3 pos;
+	static XMVECTOR3 pos;
 	static MPMatrix44 mat;
 	if (nBeginDummy >= 0 && GetObjDummyRunTimeMatrix(&mat, nBeginDummy) >= 0) {
-		pos = *(D3DXVECTOR3*)&mat._41;
+		pos = *(XMVECTOR3*)&mat._41;
 	} else if (nItemDummy >= 0) {
 		CSceneItem* item = GetAttackItem();
 		if (item && item->GetObjDummyRunTimeMatrix(&mat, nItemDummy) >= 0) {
-			pos = *(D3DXVECTOR3*)&mat._41;
+			pos = *(XMVECTOR3*)&mat._41;
 		} else {
 			pos = GetPos();
 		}
@@ -1068,7 +1068,7 @@ void CCharacter::OperatorEffect(char oper, int x, int y) {
 	// case 3:// ???
 	//	if( IsBoat() )
 	//	{
-	//		D3DXVECTOR3 pos;
+	//		XMVECTOR3 pos;
 	//		pos.x = (float)x / 100.0f;
 	//		pos.y = (float)y / 100.0f;
 	//		pos.z = _pScene->GetGridHeight( pos.x, pos.y );
@@ -1083,7 +1083,7 @@ void CCharacter::OperatorEffect(char oper, int x, int y) {
 	// case 1:// ?�?
 	//	if( IsPlayer() )
 	//	{
-	//		D3DXVECTOR3 pos;
+	//		XMVECTOR3 pos;
 	//		pos.x = (float)x / 100.0f;
 	//		pos.y = (float)y / 100.0f;
 	//		pos.z = _pScene->GetGridHeight( pos.x, pos.y );
@@ -1112,10 +1112,10 @@ void CCharacter::UpdateTileColor() {
 	if (!_pScene) return;
 	MPTerrain* t = _pScene->GetTerrain();
 	if (t) {
-		D3DXVECTOR3 v = this->GetPos();
+		XMVECTOR3 v = this->GetPos();
 		MPTile* tile = t->GetTile((int)v.x, (int)v.y);
 		if (tile) {
-			D3DXCOLOR c = tile->dwXColor;
+			XMCOLORF c = tile->dwXColor;
 
 			// if(c.r < 0.4f)
 			//     c.r = 0.4f;
@@ -1280,7 +1280,7 @@ void CCharacter::ActionKeyFrame(DWORD key_id) {
 	// PKO FIX: Null-check GetScene() and GetPugMgr() to prevent crash during scene transitions
 	if (_IsShowShadow && _eChaCtrlType == enumCHACTRL_PLAYER && !IsBoat() && GetScene() && GetScene()->GetTileTexAttr((int)GetPos().x, (int)GetPos().y) == 1) {
 		if (GetScene()->GetPugMgr())
-			GetScene()->GetPugMgr()->NewPug(&GetPos(), (float)getYaw() * 0.01745329f + D3DX_PI);
+			GetScene()->GetPugMgr()->NewPug(&GetPos(), (float)getYaw() * 0.01745329f + XM_PI);
 	}
 }
 
@@ -2104,7 +2104,7 @@ void CCharacter::ForceMove(int nTargetX, int nTargetY) {
 			_vMoveEnd.x = (float)nTargetX;
 			_vMoveEnd.y = (float)nTargetY;
 			_vMoveDir = _vMoveEnd - _vMoveStart;
-			D3DXVec2Normalize(&_vMoveDir, &_vMoveDir);
+			XMVector2Normalize(&_vMoveDir, &_vMoveDir);
 			_isArrive = false;
 			_isStopMove = false;
 		} else {
@@ -2365,7 +2365,7 @@ void CCharacter::_computeLinkedMatrix() {
 			MPMatrix44 playerMat;
 			GetRunTimeMatrix(&playerMat, LINK_ID_PELVIS);
 
-			D3DXVECTOR3 playerPos;
+			XMVECTOR3 playerPos;
 			playerPos.x = playerMat._41;
 			playerPos.y = playerMat._42;
 			playerPos.z = playerMat._43;
@@ -2398,19 +2398,19 @@ void CCharacter::_computeLinkedMatrix() {
 		mParentNode->GetRunTimeMatrix( &mat, mParentBoneID );
 
 		// extract translation information from parent bone.
-		D3DXVECTOR3 pos;
+		XMVECTOR3 pos;
 		pos.x = mat._41;
 		pos.y = mat._42;
 		pos.z = mat._43;
 
 		// extract scaling information from parent bone.
-		D3DXVECTOR3 scale;
+		XMVECTOR3 scale;
 		scale.x = sqrt ( mat._11 * mat._11 + mat._21 * mat._21 + mat._31 * mat._31 );
 		scale.y = sqrt ( mat._12 * mat._12 + mat._22 * mat._22 + mat._32 * mat._32 );
 		scale.z = sqrt ( mat._13 * mat._13 + mat._23 * mat._23 + mat._33 * mat._33 );
 
 		// extract rotation information from parent bone.
-		float rotZ = D3DX_PI - atan2( mat._21, mat._11 );
+		float rotZ = XM_PI - atan2( mat._21, mat._11 );
 		float rotY = - asin( -mat._31 / scale.x );//
 		float rotX = - atan2( mat._32 / scale.y, mat._33 / scale.z );
 

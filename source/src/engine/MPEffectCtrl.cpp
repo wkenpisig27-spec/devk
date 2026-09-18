@@ -127,11 +127,11 @@ CMPEffectCtrl::~CMPEffectCtrl(void)
 }
 
 
-void CMPEffectCtrl::Emission(WORD wID, D3DXVECTOR3* vBegin, D3DXVECTOR3* vEnd)
+void CMPEffectCtrl::Emission(WORD wID, XMVECTOR3* vBegin, XMVECTOR3* vEnd)
 {
 }
 
-void CMPEffectCtrl::SetTarget(D3DXVECTOR3* vTarget)
+void CMPEffectCtrl::SetTarget(XMVECTOR3* vTarget)
 {
 }
 
@@ -145,12 +145,12 @@ void	CMPEffectCtrl::Render()
 	_CPartCtrl.Render();
 }
 
-void	CMPEffectCtrl::MoveTo(D3DXVECTOR3* vPos,MPMap* pmap)
+void	CMPEffectCtrl::MoveTo(XMVECTOR3* vPos,MPMap* pmap)
 {
 	_CPartCtrl.MoveTo(vPos,pmap);
 }
 
-void	CMPEffectCtrl::BindingBone(D3DXMATRIX* pMatBone)
+void	CMPEffectCtrl::BindingBone(XMMATRIX* pMatBone)
 {
 	_CPartCtrl.BindingBone(pMatBone);
 }
@@ -452,7 +452,7 @@ void	CMagicCtrl::Reset()
 		_pPartResult->Reset();
 }
 
-void	CMagicCtrl::MoveTo(const D3DXVECTOR3* vPos)
+void	CMagicCtrl::MoveTo(const XMVECTOR3* vPos)
 {
 	_vPos = *vPos;
 	for (int n = 0; n < _iModelNum; n++)
@@ -461,7 +461,7 @@ void	CMagicCtrl::MoveTo(const D3DXVECTOR3* vPos)
 	}
 }
 
-void	CMagicCtrl::CalculateEmission(D3DXVECTOR3* vStart,D3DXVECTOR3* vTarget)
+void	CMagicCtrl::CalculateEmission(XMVECTOR3* vStart,XMVECTOR3* vTarget)
 {
 	if(!vTarget||!vStart)
 		return;
@@ -471,28 +471,28 @@ void	CMagicCtrl::CalculateEmission(D3DXVECTOR3* vStart,D3DXVECTOR3* vTarget)
 	_vPos = _vOldPos;
 
 	_vDir = _vOldTarget - _vOldPos;
-	_fDist = D3DXVec3LengthSq(&_vDir);
+	_fDist = XMVector3LengthSq(&_vDir);
 
-	D3DXVec3Normalize(&_vDir,&_vDir);
+	XMVector3Normalize(&_vDir,&_vDir);
 	//和地图的碰撞点
 	//_vMapTarget = _vOldPos;
 	//_vMapTarget.z = GetScene()->GetGridHeight(_vMapTarget.x,_vMapTarget.y);
 	//计算弧形算法中起点和目标点之间最高能到的高度
 	const auto v = _vOldTarget - _vOldPos;
-	_fHalfHei =  D3DXVec3Length(&v);
+	_fHalfHei =  XMVector3Length(&v);
 	_vArcOrg = _vOldPos+ _vDir * (_fHalfHei/2);
 	_vArcOrg.z -= _fHalfHei/2;
 
 	//计算起点到圆心的距离（半径）
 	const auto v2 = _vOldPos - _vArcOrg;
-	_fHalfHei = D3DXVec3Length(&v2);
-	D3DXVec3Normalize(&_vArcAxis, &v2);
-	const auto v3 = D3DXVECTOR3(0, 0, -1);
-	D3DXVec3Cross(&_vArcAxis, &_vArcAxis, &v3);
+	_fHalfHei = XMVector3Length(&v2);
+	XMVector3Normalize(&_vArcAxis, &v2);
+	const auto v3 = XMVECTOR3(0, 0, -1);
+	XMVector3Cross(&_vArcAxis, &_vArcAxis, &v3);
 	_fCurArc = 0;
 }
 
-void	CMagicCtrl::Emission(D3DXVECTOR3* vStart,D3DXVECTOR3* vTarget)
+void	CMagicCtrl::Emission(XMVECTOR3* vStart,XMVECTOR3* vTarget)
 {
 	if(!vTarget||!vStart)
 		return;
@@ -507,17 +507,17 @@ void	CMagicCtrl::Emission(D3DXVECTOR3* vStart,D3DXVECTOR3* vTarget)
 	}
 		_vDir = _vTarget - _vPos;
 		if(_fStartDist <= 0)
-			_fStartDist = D3DXVec3Length(&_vDir);
+			_fStartDist = XMVector3Length(&_vDir);
 
-		D3DXVec3Normalize(&_vDir,&_vDir);
+		XMVector3Normalize(&_vDir,&_vDir);
 
-		float fDist = D3DXVec3Length(&_vDir);
+		float fDist = XMVector3Length(&_vDir);
 		if(_vDir.z == 0)
 			_fDirXZ[0] = 0;
 		else
 		{
-			const auto v = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-			_fDirXZ[0] = asinf(D3DXVec3Dot(&_vDir, &v) / fDist);
+			const auto v = XMVECTOR3(0.0f, 0.0f, 1.0f);
+			_fDirXZ[0] = asinf(XMVector3Dot(&_vDir, &v) / fDist);
 		}
 
 		//求在X轴方向旋转的角度
@@ -525,9 +525,9 @@ void	CMagicCtrl::Emission(D3DXVECTOR3* vStart,D3DXVECTOR3* vTarget)
 			_fDirXZ[1] = 0;
 		else
 		{
-			const D3DXVECTOR3 v[] = { D3DXVECTOR3(_vDir.x, _vDir.y, 0.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f) };
-			fDist = D3DXVec3Length(&v[0]);
-			_fDirXZ[1] = acosf(D3DXVec3Dot(&v[0], &v[1]) / fDist);
+			const XMVECTOR3 v[] = { XMVECTOR3(_vDir.x, _vDir.y, 0.0f), XMVECTOR3(0.0f, 1.0f, 0.0f) };
+			fDist = XMVector3Length(&v[0]);
+			_fDirXZ[1] = acosf(XMVector3Dot(&v[0], &v[1]) / fDist);
 			if( _vDir.x >= 0.0f )
 			{
 				_fDirXZ[1] = -_fDirXZ[1];
@@ -550,19 +550,19 @@ void	CMagicCtrl::Emission(D3DXVECTOR3* vStart,D3DXVECTOR3* vTarget)
 	_bStop = false;
 }
 
-void	CMagicCtrl::ResetDir(D3DXVECTOR3* vTarget)
+void	CMagicCtrl::ResetDir(XMVECTOR3* vTarget)
 {
 	_vTarget = *vTarget;
 	_vDir = _vTarget - _vPos;
-	D3DXVec3Normalize(&_vDir,&_vDir);
+	XMVector3Normalize(&_vDir,&_vDir);
 
-	float fDist = D3DXVec3Length(&_vDir);
+	float fDist = XMVector3Length(&_vDir);
 	if(_vDir.z == 0)
 		_fDirXZ[0] = 0;
 	else
 	{
-		const auto v = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-		_fDirXZ[0] = asinf(D3DXVec3Dot(&_vDir, &v) / fDist);
+		const auto v = XMVECTOR3(0.0f, 0.0f, 1.0f);
+		_fDirXZ[0] = asinf(XMVector3Dot(&_vDir, &v) / fDist);
 	}
 
 	//求在X轴方向旋转的角度
@@ -570,9 +570,9 @@ void	CMagicCtrl::ResetDir(D3DXVECTOR3* vTarget)
 		_fDirXZ[1] = 0;
 	else
 	{
-		const D3DXVECTOR3 v[] = { D3DXVECTOR3(_vDir.x, _vDir.y, 0.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f) };
-		fDist = D3DXVec3Length(&v[0]);
-		_fDirXZ[1] = acosf(D3DXVec3Dot(&v[0], &v[1]) / fDist);
+		const XMVECTOR3 v[] = { XMVECTOR3(_vDir.x, _vDir.y, 0.0f), XMVECTOR3(0.0f, 1.0f, 0.0f) };
+		fDist = XMVector3Length(&v[0]);
+		_fDirXZ[1] = acosf(XMVector3Dot(&v[0], &v[1]) / fDist);
 		if( _vDir.x >= 0.0f )
 		{
 			_fDirXZ[1] = -_fDirXZ[1];
@@ -625,13 +625,13 @@ void	CMagicCtrl::Render()
 			_CpModel[n]->Render();
 		}
 
-		D3DXMATRIX mat;
+		XMMATRIX mat;
 		for (int  n = 0; n < _iPartNum; n++)
 		{
 			if(_vecDummy[n] != -1)
 			{
 				_CpModel[0]->GetRunningDummyMatrix(&mat,_vecDummy[n]);
-				_vecPartCtrl[n].MoveTo((D3DXVECTOR3*)&mat._41);
+				_vecPartCtrl[n].MoveTo((XMVECTOR3*)&mat._41);
 
 			}
 			else

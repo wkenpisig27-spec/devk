@@ -415,7 +415,7 @@ CGameScene::CGameScene(stSceneInitParam& param)
 	// s.z = 0;
 	// memset(&s.light, 0, sizeof(s.light));
 	// s.range = 200.0f;
-	// s.pos = D3DXVECTOR3(730.0f, 1486.0f, 0.0f);
+	// s.pos = XMVECTOR3(730.0f, 1486.0f, 0.0f);
 	// s.attenuation1 = 0.5f;
 
 	// s.amb.a = 1.0f;
@@ -688,7 +688,7 @@ CSceneItem* CGameScene::HitTestSceneItem(int nScrX, int nScrY) {
 	MPPickInfo info;
 	MPVector3 org, ray;
 
-	g_Render.GetPickRayVector(nScrX, nScrY, (D3DXVECTOR3*)&org, (D3DXVECTOR3*)&ray);
+	g_Render.GetPickRayVector(nScrX, nScrY, (XMVECTOR3*)&org, (XMVECTOR3*)&ray);
 	MPVector3Normalize(&ray);
 
 	for (int i = 0; i < _nSceneItemCnt; i++) {
@@ -715,7 +715,7 @@ CSceneObj* CGameScene::HitTestSceneObj(int nScrX, int nScrY) {
 	MPPickInfo info;
 	MPVector3 org, ray;
 
-	g_Render.GetPickRayVector(nScrX, nScrY, (D3DXVECTOR3*)&org, (D3DXVECTOR3*)&ray);
+	g_Render.GetPickRayVector(nScrX, nScrY, (XMVECTOR3*)&org, (XMVECTOR3*)&ray);
 	MPVector3Normalize(&ray);
 
 	for (int i = 0; i < _nSceneObjCnt; i++) {
@@ -742,7 +742,7 @@ CCharacter* CGameScene::HitTestCharacter(int nScrX, int nScrY) {
 	MPPickInfo info;
 	MPVector3 org, ray;
 
-	g_Render.GetPickRayVector(nScrX, nScrY, (D3DXVECTOR3*)&org, (D3DXVECTOR3*)&ray);
+	g_Render.GetPickRayVector(nScrX, nScrY, (XMVECTOR3*)&org, (XMVECTOR3*)&ray);
 	MPVector3Normalize(&ray);
 
 	for (int i = 0; i < _nChaCnt; i++) {
@@ -769,7 +769,7 @@ CCharacter* CGameScene::HitCharacter(int nScrX, int nScrY) {
 	MPPickInfo info;
 	MPVector3 org, ray;
 
-	g_Render.GetPickRayVector(nScrX, nScrY, (D3DXVECTOR3*)&org, (D3DXVECTOR3*)&ray);
+	g_Render.GetPickRayVector(nScrX, nScrY, (XMVECTOR3*)&org, (XMVECTOR3*)&ray);
 	MPVector3Normalize(&ray);
 
 	for (int i = 0; i < _nChaCnt; i++) {
@@ -794,15 +794,15 @@ CCharacter* CGameScene::HitCharacter(int nScrX, int nScrY) {
 	return pObjXXX;
 }
 
-int CGameScene::HitTestSceneObjTerrainForInfluence(D3DXVECTOR3* t_pos, const D3DXVECTOR3* nPos) {
+int CGameScene::HitTestSceneObjTerrainForInfluence(XMVECTOR3* t_pos, const XMVECTOR3* nPos) {
 	MPPickInfo p;
 	CSceneObj* pObj;
 	DWORD s = 0;
 	MPVector3 h(0.0f, 0.0f, 0.0f);
 	HRESULT ret;
 
-	D3DXVECTOR3 org(*nPos);
-	D3DXVECTOR3 ray(0.0f, 0.0f, -1.0f);
+	XMVECTOR3 org(*nPos);
+	XMVECTOR3 ray(0.0f, 0.0f, -1.0f);
 
 	const float __max_visible_size = 25.0f;
 
@@ -810,7 +810,7 @@ int CGameScene::HitTestSceneObjTerrainForInfluence(D3DXVECTOR3* t_pos, const D3D
 		pObj = &_pSceneObjArray[i];
 
 		if (pObj && pObj->IsValid()) {
-			D3DXVECTOR3 x_pos = pObj->getPos() - *nPos;
+			XMVECTOR3 x_pos = pObj->getPos() - *nPos;
 
 			if (x_pos.x * x_pos.x + x_pos.y * x_pos.y > __max_visible_size * __max_visible_size) {
 				// static int discard_num = 0;
@@ -852,7 +852,7 @@ int CGameScene::HitTestSceneObjTerrainForInfluence(D3DXVECTOR3* t_pos, const D3D
 
 	return s;
 }
-int CGameScene::HitTestSceneObjTerrain(D3DXVECTOR3* t_pos, const D3DXVECTOR3* org, const D3DXVECTOR3* ray) {
+int CGameScene::HitTestSceneObjTerrain(XMVECTOR3* t_pos, const XMVECTOR3* org, const XMVECTOR3* ray) {
 	MPPickInfo p;
 	CSceneObj* pObj;
 	DWORD s = 0;
@@ -904,14 +904,14 @@ int CGameScene::HitTestSceneObjTerrain(D3DXVECTOR3* t_pos, const D3DXVECTOR3* or
 	return s;
 }
 
-int CGameScene::HitTestSceneObjTerrain(D3DXVECTOR3* t_pos, const D3DXVECTOR3* pos) {
+int CGameScene::HitTestSceneObjTerrain(XMVECTOR3* t_pos, const XMVECTOR3* pos) {
 	MPVector3 org(*(MPVector3*)pos);
 	MPVector3 ray(0.0f, 0.0f, -1.0f);
 
-	return HitTestSceneObjTerrain(t_pos, (D3DXVECTOR3*)&org, (D3DXVECTOR3*)&ray);
+	return HitTestSceneObjTerrain(t_pos, (XMVECTOR3*)&org, (XMVECTOR3*)&ray);
 }
 
-int CGameScene::HitTestSceneObjChair(D3DXMATRIX* t_mat, int* h, const D3DXVECTOR3* nOrg, const D3DXVECTOR3* nRay) {
+int CGameScene::HitTestSceneObjChair(XMMATRIX* t_mat, int* h, const XMVECTOR3* nOrg, const XMVECTOR3* nRay) {
 	MPPickInfo u;
 	CSceneObj* pObj;
 
@@ -970,7 +970,7 @@ int CGameScene::HitTestSceneObjChair(D3DXMATRIX* t_mat, int* h, const D3DXVECTOR
 	return 0;
 }
 
-int CGameScene::HitTestSceneObjWall(D3DXMATRIX* t_mat, const D3DXVECTOR3* nOrg, const D3DXVECTOR3* nRay) {
+int CGameScene::HitTestSceneObjWall(XMMATRIX* t_mat, const XMVECTOR3* nOrg, const XMVECTOR3* nRay) {
 	MPPickInfo u;
 	CSceneObj* pObj;
 
@@ -1020,28 +1020,28 @@ int CGameScene::HitTestSceneObjWall(D3DXMATRIX* t_mat, const D3DXVECTOR3* nOrg, 
 	return 0;
 }
 
-int CGameScene::HitTestSceneObjChair(D3DXVECTOR3* t_pos, int* t_angle, int* h, const D3DXVECTOR3* nOrg,
-                                     const D3DXVECTOR3* nRay) {
-	D3DXMATRIX mat;
+int CGameScene::HitTestSceneObjChair(XMVECTOR3* t_pos, int* t_angle, int* h, const XMVECTOR3* nOrg,
+                                     const XMVECTOR3* nRay) {
+	XMMATRIX mat;
 
 	if (HitTestSceneObjChair(&mat, h, nOrg, nRay) == 0)
 		return 0;
 
-	*t_pos = *(D3DXVECTOR3*)&mat._41;
+	*t_pos = *(XMVECTOR3*)&mat._41;
 	float a = atan2(mat._22, mat._21);
 	*t_angle = Radian2Angle(a);
 
 	return 1;
 }
-int CGameScene::HitTestSceneObjWall(D3DXVECTOR3* t_pos, int* t_angle, const D3DXVECTOR3* nOrg,
-                                    const D3DXVECTOR3* nRay) {
-	D3DXMATRIX mat;
+int CGameScene::HitTestSceneObjWall(XMVECTOR3* t_pos, int* t_angle, const XMVECTOR3* nOrg,
+                                    const XMVECTOR3* nRay) {
+	XMMATRIX mat;
 
 	if (HitTestSceneObjWall(&mat, nOrg, nRay) == 0)
 		return 0;
 
-	*t_pos = *(D3DXVECTOR3*)&mat._41;
-	*t_angle = (int)(atan2(mat._22, mat._21) * 180 / D3DX_PI);
+	*t_pos = *(XMVECTOR3*)&mat._41;
+	*t_angle = (int)(atan2(mat._22, mat._21) * 180 / XM_PI);
 	return 1;
 }
 
@@ -1060,7 +1060,7 @@ int CGameScene::GetMainChaPickRay(MPVector3* org, MPVector3* ray) {
 
 #if (defined USE_CAMERA_TARGET)
 	MPVector3 target = (MPVector3&)GetMainCha()->GetPos();
-	*(D3DXVECTOR3*)(org) = g_pGameApp->GetMainCam()->m_EyePos;
+	*(XMVECTOR3*)(org) = g_pGameApp->GetMainCam()->m_EyePos;
 #endif
 
 #if (defined USE_MAINCHARACTER_POS)
@@ -1081,7 +1081,7 @@ void CGameScene::EnableChaTexLinearFilter(BOOL flag) {
 
 CEffectObj* CGameScene::HitTestEffectObj(int nScrX, int nScrY) {
 	MPVector3 org, ray;
-	g_Render.GetPickRayVector(nScrX, nScrY, (D3DXVECTOR3*)&org, (D3DXVECTOR3*)&ray);
+	g_Render.GetPickRayVector(nScrX, nScrY, (XMVECTOR3*)&org, (XMVECTOR3*)&ray);
 	MPVector3Normalize(&ray);
 	CEffectObj* pEffObj = nullptr;
 
@@ -1789,7 +1789,7 @@ void CGameScene::SetMainCha(int nChaID) {
 	//   CCameraCtrl *pCam = g_pGameApp->GetMainCam();
 	//   MPTerrain *pTerr = GetTerrain();
 
-	//   D3DXVECTOR3 vecCha = pCha->GetPos();
+	//   XMVECTOR3 vecCha = pCha->GetPos();
 	//   vecCha.z = GetGridHeight(vecCha.x,vecCha.y);
 
 	// pCam->InitModel(pCha->IsBoat() ? 3 : 0,&vecCha);
@@ -1868,7 +1868,7 @@ int CGameScene::BeginUpdateSceneObjLight(const CSceneObj* obj, BOOL is_enable) {
 	if (is_enable == 0)
 		return 1;
 
-	D3DXVECTOR3* obj_pos = &const_cast<CSceneObj*>(obj)->getPos();
+	XMVECTOR3* obj_pos = &const_cast<CSceneObj*>(obj)->getPos();
 
 	int dis[2] = {0, 0};
 	int id[2] = {-1, -1};
@@ -2097,7 +2097,7 @@ CEffectObj* CGameScene::CreateEffect(int nEffectID, int nX, int nY, bool isLoop)
 	if (!pEffect->Create(nEffectID))
 		return nullptr;
 
-	D3DXVECTOR3 pos;
+	XMVECTOR3 pos;
 	pos.x = (float)nX / 100.0f;
 	pos.y = (float)nY / 100.0f;
 	pos.z = GetGridHeight(pos.x, pos.y);
@@ -2159,7 +2159,7 @@ void CGameScene::LoadingCall() {
 	// ?????
 	CCameraCtrl* pCam = g_pGameApp->GetMainCam();
 
-	D3DXVECTOR3 vecCha = pObj->GetPos();
+	XMVECTOR3 vecCha = pObj->GetPos();
 	vecCha.z = GetGridHeight(vecCha.x * 100, vecCha.y * 100);
 
 	pCam->InitModel(pObj->IsBoat() ? 3 : 0, &vecCha);

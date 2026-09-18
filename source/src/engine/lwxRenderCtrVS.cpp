@@ -930,7 +930,7 @@ LW_RESULT lwxRenderCtrlVSVertexBlend::BeginSet(lwIRenderCtrlAgent* agent)
                 if (FAILED(_const_tab->SetMatrixArray(
                         dev,
                         _const_tab->GetConstantByName(NULL, "mat_bonepallette"),
-                        (D3DXMATRIX*)bone_ctrl->GetBoneRTMSeq(),
+                        (XMMATRIX*)bone_ctrl->GetBoneRTMSeq(),
                         reg_num)))
                 {
                     goto __ret;
@@ -1112,10 +1112,10 @@ LW_RESULT lwxRenderCtrlVSVertexBlend::BeginSetSubset(DWORD subset, lwIRenderCtrl
     if (!_const_tab)
         goto __ret;
 
-    if (FAILED(_const_tab->SetVector(dev, "mtl_amb", (D3DXVECTOR4*)&amb_dif[0])))
+    if (FAILED(_const_tab->SetVector(dev, "mtl_amb", (XMVECTOR4*)&amb_dif[0])))
         goto __ret;
 
-    if (FAILED(_const_tab->SetVector(dev, "mtl_dif", (D3DXVECTOR4*)&amb_dif[1])))
+    if (FAILED(_const_tab->SetVector(dev, "mtl_dif", (XMVECTOR4*)&amb_dif[1])))
         goto __ret;
 
     // --- UV anim (mantido; s� adicionei bounds-check) ---
@@ -1297,7 +1297,7 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_fx::BeginSet(lwIRenderCtrlAgent* agent)
             if(reg_num == 0)
                 goto __ret;
 
-            if(FAILED(_const_tab->SetMatrixArray(dev, "mat_bonepallette", (D3DXMATRIX*)bone_ctrl->GetBoneRTTMSeq(), reg_num)))
+            if(FAILED(_const_tab->SetMatrixArray(dev, "mat_bonepallette", (XMMATRIX*)bone_ctrl->GetBoneRTTMSeq(), reg_num)))
                 goto __ret;
 
             break;
@@ -1408,10 +1408,10 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_fx::BeginSetSubset(DWORD subset, lwIRenderC
     //    c->a = 1.0f;
 
     //dev_obj->SetVertexShaderConstantF(VS_CONST_REG_LIGHT_AMB, (float*)&amb_dif, 2);
-    if(FAILED(_const_tab->SetVector(dev, "mtl_amb", (D3DXVECTOR4*)&amb_dif[0])))
+    if(FAILED(_const_tab->SetVector(dev, "mtl_amb", (XMVECTOR4*)&amb_dif[0])))
         goto __ret;
 
-    if(FAILED(_const_tab->SetVector(dev, "mtl_dif", (D3DXVECTOR4*)&amb_dif[1])))
+    if(FAILED(_const_tab->SetVector(dev, "mtl_dif", (XMVECTOR4*)&amb_dif[1])))
         goto __ret;
 
     // set texture uv data

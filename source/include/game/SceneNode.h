@@ -126,8 +126,8 @@ public:
 	void SetShadeShow(int iIdx, bool bShow);
 	void SetEffectShow(int iIdx, bool bShow);
 
-	D3DXVECTOR3& GetPos() { return _vPos; }
-	D3DXVECTOR3& getPos() { return _vPos; }
+	XMVECTOR3& GetPos() { return _vPos; }
+	XMVECTOR3& getPos() { return _vPos; }
 
 	long lTag;
 
@@ -172,7 +172,7 @@ protected:
 
 	SGameAttr _Attr;
 
-	D3DXVECTOR3 _vPos; // 用于外部快速访问
+	XMVECTOR3 _vPos; // 用于外部快速访问
 
 protected:
 	CGameScene* _pScene;

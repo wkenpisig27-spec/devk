@@ -432,10 +432,10 @@ CMPShadowMap::CMPShadowMap()
     , _pDx11DepthTex(nullptr)
     , _pDx11DSV(nullptr)
 {
-    D3DXMatrixIdentity(&_matLightView);
-    D3DXMatrixIdentity(&_matLightProj);
-    D3DXMatrixIdentity(&_matLightViewProj);
-    D3DXMatrixIdentity(&_matShadowTransform);
+    XMMatrixIdentity(&_matLightView);
+    XMMatrixIdentity(&_matLightProj);
+    XMMatrixIdentity(&_matLightViewProj);
+    XMMatrixIdentity(&_matShadowTransform);
     memset(&_oldViewport, 0, sizeof(_oldViewport));
 }
 
@@ -566,8 +566,8 @@ bool CMPShadowMap::BeginShadowPassDx11()
     d11->GetD3D11Context()->PSSetShaderResources(0, 1, &none);
 
     lwIDeviceObject* obj = ShadowDevObj();
-    _matSavedView = *(D3DXMATRIX*)obj->GetMatView();
-    _matSavedProj = *(D3DXMATRIX*)obj->GetMatProj();
+    _matSavedView = *(XMMATRIX*)obj->GetMatView();
+    _matSavedProj = *(XMMATRIX*)obj->GetMatProj();
     obj->GetRenderState(D3DRS_ALPHAREF, &_savedAlphaRef);
 
     g_Render.SetTransformView(&_matLightView);
@@ -739,16 +739,16 @@ void CMPShadowMap::SetConfig(const ShadowMapConfig& config) {
     }
 }
 
-void CMPShadowMap::SetLightDirection(const D3DXVECTOR3& dir) {
-    D3DXVec3Normalize(&_vLightDir, &dir);
+void CMPShadowMap::SetLightDirection(const XMVECTOR3& dir) {
+    XMVector3Normalize(&_vLightDir, &dir);
 }
 
 void CMPShadowMap::SetLightDirection(float x, float y, float z) {
-    _vLightDir = D3DXVECTOR3(x, y, z);
-    D3DXVec3Normalize(&_vLightDir, &_vLightDir);
+    _vLightDir = XMVECTOR3(x, y, z);
+    XMVector3Normalize(&_vLightDir, &_vLightDir);
 }
 
-void CMPShadowMap::SetFocusPoint(const D3DXVECTOR3& pos) {
+void CMPShadowMap::SetFocusPoint(const XMVECTOR3& pos) {
     _vFocusPoint = pos;
 }
 
@@ -776,26 +776,26 @@ void CMPShadowMap::UpdateLightMatrices() {
     // The map's light direction often has a low sun angle which creates
     // very elongated shadows. We reduce the horizontal (XY) components
     // to make the shadow projection more overhead while keeping direction.
-    D3DXVECTOR3 shadowDir = _vLightDir;
+    XMVECTOR3 shadowDir = _vLightDir;
     shadowDir.x *= 0.35f;
     shadowDir.y *= 0.35f;
-    D3DXVec3Normalize(&shadowDir, &shadowDir);
+    XMVector3Normalize(&shadowDir, &shadowDir);
 
     // Light position: move back from focus along opposite light direction
-    D3DXVECTOR3 lightPos = _vFocusPointSmoothed - shadowDir * _config.lightHeight;
+    XMVECTOR3 lightPos = _vFocusPointSmoothed - shadowDir * _config.lightHeight;
 
     // Build light view matrix looking at the focus point
     // Use an appropriate up vector (avoid degenerate case when light is straight down)
-    D3DXVECTOR3 up(0.0f, 1.0f, 0.0f);
-    if (fabsf(D3DXVec3Dot(&shadowDir, &up)) > 0.99f) {
-        up = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
+    XMVECTOR3 up(0.0f, 1.0f, 0.0f);
+    if (fabsf(XMVector3Dot(&shadowDir, &up)) > 0.99f) {
+        up = XMVECTOR3(0.0f, 0.0f, 1.0f);
     }
 
-    D3DXMatrixLookAtLH(&_matLightView, &lightPos, &_vFocusPointSmoothed, &up);
+    XMMatrixLookAtLH(&_matLightView, &lightPos, &_vFocusPointSmoothed, &up);
 
     // Orthographic projection for directional light shadows
     float halfSize = _config.orthoSize;
-    D3DXMatrixOrthoLH(&_matLightProj,
+    XMMatrixOrthoLH(&_matLightProj,
         halfSize * 2.0f,  // width
         halfSize * 2.0f,  // height
         _config.nearPlane,
@@ -803,17 +803,17 @@ void CMPShadowMap::UpdateLightMatrices() {
     );
 
     // Combined light view-projection
-    D3DXMatrixMultiply(&_matLightViewProj, &_matLightView, &_matLightProj);
+    XMMatrixMultiply(&_matLightViewProj, &_matLightView, &_matLightProj);
 
     // Shadow transform: light VP * scale/bias to convert from clip space [-1,1] to UV [0,1]
-    D3DXMATRIX matTexScale(
+    XMMATRIX matTexScale(
         0.5f,  0.0f, 0.0f, 0.0f,
         0.0f, -0.5f, 0.0f, 0.0f,
         0.0f,  0.0f, 1.0f, 0.0f,
         0.5f,  0.5f, 0.0f, 1.0f
     );
 
-    D3DXMatrixMultiply(&_matShadowTransform, &_matLightViewProj, &matTexScale);
+    XMMatrixMultiply(&_matShadowTransform, &_matLightViewProj, &matTexScale);
 }
 
 bool CMPShadowMap::BeginShadowPass() {
@@ -840,8 +840,8 @@ bool CMPShadowMap::BeginShadowPass() {
 
     // Save current View/Proj matrices from the engine device object
     MPIDeviceObject* pDevObj = g_Render.GetInterfaceMgr()->dev_obj;
-    _matSavedView = *(D3DXMATRIX*)pDevObj->GetMatView();
-    _matSavedProj = *(D3DXMATRIX*)pDevObj->GetMatProj();
+    _matSavedView = *(XMMATRIX*)pDevObj->GetMatView();
+    _matSavedProj = *(XMMATRIX*)pDevObj->GetMatProj();
 
     // Set light View/Proj so character rendering uses light-space transforms
     // This updates both the D3D device state AND the cached _mat_viewproj
@@ -1051,7 +1051,7 @@ void CMPShadowMap::BuildGroundGrid() {
     }
 }
 
-void CMPShadowMap::RenderGroundOverlay(const D3DXMATRIX& matViewProj) {
+void CMPShadowMap::RenderGroundOverlay(const XMMATRIX& matViewProj) {
     if (lwIsDx11Active())
     {
         RenderGroundOverlayDx11(matViewProj);
@@ -1086,8 +1086,8 @@ void CMPShadowMap::RenderGroundOverlay(const D3DXMATRIX& matViewProj) {
     _pShadowEffect->SetTechnique("ShadowReceive");
 
     // Set shader parameters
-    D3DXMATRIX matIdentity;
-    D3DXMatrixIdentity(&matIdentity);
+    XMMATRIX matIdentity;
+    XMMatrixIdentity(&matIdentity);
     _pShadowEffect->SetMatrix("g_matWorld", &matIdentity);
     _pShadowEffect->SetMatrix("g_matWorldViewProj", &matViewProj);
     _pShadowEffect->SetMatrix("g_matShadowTransform", &_matShadowTransform);
@@ -1131,7 +1131,7 @@ void CMPShadowMap::RenderGroundOverlay(const D3DXMATRIX& matViewProj) {
 #endif
 }
 
-void CMPShadowMap::RenderGroundOverlayDx11(const D3DXMATRIX& matViewProj)
+void CMPShadowMap::RenderGroundOverlayDx11(const XMMATRIX& matViewProj)
 {
     if (!IsEnabled() || !_pShadowTexture || !_pGroundVB || !_pGroundIB)
         return;

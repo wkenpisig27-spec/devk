@@ -77,7 +77,7 @@ HRESULT RenderStateMgr::Init(MPIDeviceObject* dev_obj) {
 		_scnobj_lgt.Direction.x = -1.0f;
 		_scnobj_lgt.Direction.y = -1.0f;
 		_scnobj_lgt.Direction.z = -0.5f;
-		D3DXVec3Normalize((D3DXVECTOR3*)&_scnobj_lgt.Direction, (D3DXVECTOR3*)&_scnobj_lgt.Direction);
+		XMVector3Normalize((XMVECTOR3*)&_scnobj_lgt.Direction, (XMVECTOR3*)&_scnobj_lgt.Direction);
 		_scnobj_lgt.Diffuse.a = 1.0f;
 		_scnobj_lgt.Diffuse.r = 1.0f;
 		_scnobj_lgt.Diffuse.g = 1.0f;
@@ -115,7 +115,7 @@ HRESULT RenderStateMgr::Init(MPIDeviceObject* dev_obj) {
 		_cha_lgt.Direction.x = -1.0f;
 		_cha_lgt.Direction.y = -1.0f;
 		_cha_lgt.Direction.z = -1.0f;
-		D3DXVec3Normalize((D3DXVECTOR3*)&_cha_lgt.Direction, (D3DXVECTOR3*)&_cha_lgt.Direction);
+		XMVector3Normalize((XMVECTOR3*)&_cha_lgt.Direction, (XMVECTOR3*)&_cha_lgt.Direction);
 		_cha_lgt.Diffuse.a = 1.0f;
 		_cha_lgt.Diffuse.r = 1.0f;
 		_cha_lgt.Diffuse.g = 1.0f;

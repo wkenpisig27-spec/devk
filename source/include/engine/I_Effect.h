@@ -294,22 +294,22 @@ class	EffParameter;
 /************************************************************************/
 struct SEFFECT_VERTEX
 {
-	D3DXVECTOR3		m_SPos;
+	XMVECTOR3		m_SPos;
 	FLOAT			m_fIdx;//ֻ������Ƭ��MESH����ΪUV���Ѱַ������
 	DWORD			m_dwDiffuse;
-	D3DXVECTOR2		m_SUV;
+	XMVECTOR2		m_SUV;
 };
 #define		EFFECT_VER_FVF	(D3DFVF_XYZB1 | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 
 
 struct SEFFECT_SHADE_VERTEX
 {
-	D3DXVECTOR3		m_SPos;
+	XMVECTOR3		m_SPos;
 	//float			m_fIdx;//ֻ������Ӱ��MESH����Ϊ���Ѱַ������
 							  //m_fIdx[0]Ϊ����λ�õ�������m_fIdx[1]Ϊuv���������
 	DWORD			m_dwDiffuse;
-	D3DXVECTOR2		m_SUV;
-	D3DXVECTOR2		m_SUV2;
+	XMVECTOR2		m_SUV;
+	XMVECTOR2		m_SUV2;
 };
 #define		EFFECT_SHADE_FVF	(D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX2)
 
@@ -438,7 +438,7 @@ struct ModelParam
 	float fHei;
 	float fTopRadius;
 	float fBottomRadius;
-	std::vector<D3DXVECTOR3> vecVer;
+	std::vector<XMVECTOR3> vecVer;
 	void	Create();
 };
 
@@ -647,7 +647,7 @@ protected:
 #endif
 
 	DWORD						_dwVerCount;
-	std::vector<D3DXVECTOR2>	_baseUV;
+	std::vector<XMVECTOR2>	_baseUV;
 	DWORD						_dwFaceCount;
 
 	//CChaModel*					_pChaModel;
@@ -661,7 +661,7 @@ public:
 /************************************************************************/
 /* ��������任*/
 /************************************************************************/
-typedef     std::vector<D3DXVECTOR2>  TEXCOORD;
+typedef     std::vector<XMVECTOR2>  TEXCOORD;
 
 class CTexCoordList
 {
@@ -673,7 +673,7 @@ public:
 	void		GetCoordFromModel(CEffectModel *pCModel);
 	void		CreateTranslateCoord();
 
-	void		GetCurCoord(S_BVECTOR<D3DXVECTOR2>& vecOutCoord, WORD& wCurIndex,float &fCurTime, float fDailTime);
+	void		GetCurCoord(S_BVECTOR<XMVECTOR2>& vecOutCoord, WORD& wCurIndex,float &fCurTime, float fDailTime);
 
 	void		Reset();
 
@@ -731,7 +731,7 @@ public:
 
 	void					CreateSpliteTexture(int iRow, int iColnum);
 	
-	void					GetCurTexture(S_BVECTOR<D3DXVECTOR2>& coord, WORD&  wCurIndex,float& fCurTime, float fDailTime);
+	void					GetCurTexture(S_BVECTOR<XMVECTOR2>& coord, WORD&  wCurIndex,float& fCurTime, float fDailTime);
 	void					Reset();
 
 	void					Clear();
@@ -833,16 +833,16 @@ public:
 public:
 #ifdef USE_RENDER
 	bool	CreateEffectFont(MPRender*  pDev,
-		CMPResManger	*pCResMagr,int iTexID,D3DXCOLOR dwColor, bool bUseBack = false,bool bmain =false);
+		CMPResManger	*pCResMagr,int iTexID,XMCOLORF dwColor, bool bUseBack = false,bool bmain =false);
 #else
 	bool	CreateEffectFont(IDirect3DDeviceX*  pDev,
-		CMPResManger	*pCResMagr,int iTexID,D3DXCOLOR dwColor, bool bUseBack = false,bool bmain = false);
+		CMPResManger	*pCResMagr,int iTexID,XMCOLORF dwColor, bool bUseBack = false,bool bmain = false);
 #endif
 	
 	void	SetRenderText(char* pszText);
 
-	void	RenderEffectFont(D3DXMATRIX* pmat);
-	void	RenderEffectFontBack(D3DXMATRIX* pmat);
+	void	RenderEffectFont(XMMATRIX* pmat);
+	void	RenderEffectFontBack(XMMATRIX* pmat);
 
 protected:
 	s_string	_strText;
@@ -867,7 +867,7 @@ protected:
 	SEFFECT_VERTEX			t_SEffVer[4];
 
 
-	D3DXCOLOR				_dwColor;
+	XMCOLORF				_dwColor;
 
 };
 
@@ -953,20 +953,20 @@ public:
 	void			setFrameTime(WORD wIndex,float fTime){ _vecFrameTime[wIndex] = fTime;}
 
 	//!�õ�֡��С
-	D3DXVECTOR3		getFrameSize(WORD wIndex)		{ return _vecFrameSize[wIndex];}
-	void			setFrameSize(WORD wIndex,D3DXVECTOR3& SVerSize){ _vecFrameSize[wIndex] = SVerSize;}
+	XMVECTOR3		getFrameSize(WORD wIndex)		{ return _vecFrameSize[wIndex];}
+	void			setFrameSize(WORD wIndex,XMVECTOR3& SVerSize){ _vecFrameSize[wIndex] = SVerSize;}
 
 	//!�õ�֡�Ƕ�
-	D3DXVECTOR3&	getFrameAngle(WORD wIndex)		{ return _vecFrameAngle[wIndex];}
-	void			setFrameAngle(WORD wIndex,D3DXVECTOR3& SVerAngle){_vecFrameAngle[wIndex]=SVerAngle;}
+	XMVECTOR3&	getFrameAngle(WORD wIndex)		{ return _vecFrameAngle[wIndex];}
+	void			setFrameAngle(WORD wIndex,XMVECTOR3& SVerAngle){_vecFrameAngle[wIndex]=SVerAngle;}
 
 	//!�õ�֡λ��
-	D3DXVECTOR3&	getFramePos(WORD wIndex)		{ return _vecFramePos[wIndex];}
-	void			setFramePos(WORD wIndex,D3DXVECTOR3& SVerPos){_vecFramePos[wIndex]=SVerPos;}
+	XMVECTOR3&	getFramePos(WORD wIndex)		{ return _vecFramePos[wIndex];}
+	void			setFramePos(WORD wIndex,XMVECTOR3& SVerPos){_vecFramePos[wIndex]=SVerPos;}
 
 	//!�õ�֡��ɫ
-	D3DXCOLOR&		getFrameColor(WORD wIndex)		{ return _vecFrameColor[wIndex];}
-	void			setFrameColor(WORD wIndex,D3DXCOLOR& SVerColor){_vecFrameColor[wIndex]=SVerColor;}
+	XMCOLORF&		getFrameColor(WORD wIndex)		{ return _vecFrameColor[wIndex];}
+	void			setFrameColor(WORD wIndex,XMCOLORF& SVerColor){_vecFrameColor[wIndex]=SVerColor;}
 
 	//!�õ�֡����ʱ��
 	float	getFrameCoordTime()						{ return m_CTexCoordlist.m_fFrameTime; }
@@ -1029,39 +1029,39 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////
 	//!�õ���ֵ��С
-	void	GetLerpSize(D3DXVECTOR3 *pSOut, WORD wIdx1, WORD wIdx2, float fLerp)
+	void	GetLerpSize(XMVECTOR3 *pSOut, WORD wIdx1, WORD wIdx2, float fLerp)
 	{
 		if(_wFrameCount == 1 || _bSizeSame)
 		{	*pSOut = _vecFrameSize[0];return;}
-		D3DXVec3Lerp(pSOut, &_vecFrameSize[wIdx1], &_vecFrameSize[wIdx2], fLerp);
+		XMVector3Lerp(pSOut, &_vecFrameSize[wIdx1], &_vecFrameSize[wIdx2], fLerp);
 	}
 	//!�õ���ֵ�Ƕ�
-	void	GetLerpAngle(D3DXVECTOR3 *pSOut, WORD wIdx1, WORD wIdx2, float fLerp)
+	void	GetLerpAngle(XMVECTOR3 *pSOut, WORD wIdx1, WORD wIdx2, float fLerp)
 	{
 		if(_wFrameCount == 1 || _bAngleSame)
 		{	*pSOut = _vecFrameAngle[0];return;}
-		D3DXVec3Lerp(pSOut, &_vecFrameAngle[wIdx1], &_vecFrameAngle[wIdx2], fLerp);
+		XMVector3Lerp(pSOut, &_vecFrameAngle[wIdx1], &_vecFrameAngle[wIdx2], fLerp);
 	}
 	//!�õ���ֵλ��
-	void	GetLerpPos(D3DXVECTOR3 *pSOut, WORD wIdx1, WORD wIdx2, float fLerp)
+	void	GetLerpPos(XMVECTOR3 *pSOut, WORD wIdx1, WORD wIdx2, float fLerp)
 	{
 		if(_wFrameCount == 1 || _bPosSame)
 		{	*pSOut =   _vecFramePos[0];return; }
-		D3DXVec3Lerp(pSOut, &_vecFramePos[wIdx1], &_vecFramePos[wIdx2], fLerp);
+		XMVector3Lerp(pSOut, &_vecFramePos[wIdx1], &_vecFramePos[wIdx2], fLerp);
 	}
 	//!�õ���ֵ��ɫ
-	void	GetLerpColor(D3DXCOLOR *pSOut, WORD wIdx1, WORD wIdx2, float fLerp)
+	void	GetLerpColor(XMCOLORF *pSOut, WORD wIdx1, WORD wIdx2, float fLerp)
 	{
 		if(_wFrameCount == 1 || _bColorSame)
 		{	*pSOut =  _vecFrameColor[0];return; }
-		D3DXColorLerp( pSOut, &_vecFrameColor[wIdx1], &_vecFrameColor[wIdx2], fLerp );
+		XMColorLerp( pSOut, &_vecFrameColor[wIdx1], &_vecFrameColor[wIdx2], fLerp );
 	}
 	//!�õ���ֵ����
-	void	GetLerpCoord(S_BVECTOR<D3DXVECTOR2>& vecOutCoord, WORD& wCurIndex,float &fCurTime, float fDailTime)
+	void	GetLerpCoord(S_BVECTOR<XMVECTOR2>& vecOutCoord, WORD& wCurIndex,float &fCurTime, float fDailTime)
 	{
 		m_CTexCoordlist.GetCurCoord(vecOutCoord,wCurIndex,fCurTime,fDailTime);
 	}
-	void GetLerpTexture(S_BVECTOR<D3DXVECTOR2>& vecOutCoord, WORD&  wCurIndex,float& fCurTime, float fDailTime)
+	void GetLerpTexture(S_BVECTOR<XMVECTOR2>& vecOutCoord, WORD&  wCurIndex,float& fCurTime, float fDailTime)
 	{
 		m_CTextruelist.GetCurTexture(vecOutCoord, wCurIndex,fCurTime,fDailTime);
 	}
@@ -1077,14 +1077,14 @@ public:
 		m_flerp = fLerp;
 	}
 
-	void GetRotaLoopMatrix(D3DXMATRIX* pmat, float& pCurRota, float fTime) {
+	void GetRotaLoopMatrix(XMMATRIX* pmat, float& pCurRota, float fTime) {
 		pCurRota += _vRotaLoop.w * fTime;
 		if (pCurRota >= 6.283185f)
 		{
 			pCurRota = pCurRota - 6.283185f;
 		}
-		const auto v = D3DXVECTOR3(_vRotaLoop.x, _vRotaLoop.y, _vRotaLoop.z);
-		D3DXMatrixRotationAxis(pmat, &v, pCurRota);
+		const auto v = XMVECTOR3(_vRotaLoop.x, _vRotaLoop.y, _vRotaLoop.z);
+		XMMatrixRotationAxis(pmat, &v, pCurRota);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -1123,14 +1123,14 @@ public:
 	void		 setEffectModelName(const s_string& strModelName)	{ m_strModelName = strModelName;}
 
 	//!����BILLBOARD����
-	void		 setBillBoardMatrix(D3DXMATRIX* pMatBBoard)	{ _SpmatBBoard = pMatBBoard;}
-	D3DXMATRIX*	 getBillBoardMatrix()						{ return _SpmatBBoard;}
+	void		 setBillBoardMatrix(XMMATRIX* pMatBBoard)	{ _SpmatBBoard = pMatBBoard;}
+	XMMATRIX*	 getBillBoardMatrix()						{ return _SpmatBBoard;}
 
 	bool		 IsBillBoard()								{ return _bBillBoard;}
 
 	void		 SetLoop(bool	bloop)						{ _bRotaLoop = bloop; }
 	bool		 IsRotaLoop()								{ return _bRotaLoop;}
-	D3DXVECTOR4* GetRotaLoop()								{ return &_vRotaLoop;}
+	XMVECTOR4* GetRotaLoop()								{ return &_vRotaLoop;}
 
 	bool		 IsAlpah()									{ return _bAlpha;}
 	void		 EnableAlpha(bool balpha)					{ _bAlpha = balpha;}
@@ -1253,24 +1253,24 @@ protected:
 	//! ÿһ���ʱ��
 	VEC_float			_vecFrameTime;
 	//!	ÿһ��Ĵ�С(���ŵı�����Ĭ��Ϊ1.0f)
-	std::vector<D3DXVECTOR3>			_vecFrameSize;
+	std::vector<XMVECTOR3>			_vecFrameSize;
 	//!	ÿһ��ĽǶ�
-	std::vector<D3DXVECTOR3>			_vecFrameAngle;
+	std::vector<XMVECTOR3>			_vecFrameAngle;
 	//!	ÿһ���λ��
-	std::vector<D3DXVECTOR3>			_vecFramePos;
+	std::vector<XMVECTOR3>			_vecFramePos;
 
 	//!	ÿһ��Ķ�����ɫ(Ĭ��Ϊ0xffffffff)
-	std::vector<D3DXCOLOR>				_vecFrameColor;
+	std::vector<XMCOLORF>				_vecFrameColor;
 
 	//!	ÿһ��Ķ���任
 	INT									_iUseParam;
 	std::vector<ModelParam>				_CylinderParam;
 
 	bool				_bBillBoard;
-	D3DXMATRIX*			_SpmatBBoard;
+	XMMATRIX*			_SpmatBBoard;
 
 	bool				_bRotaLoop;
-	D3DXVECTOR4			_vRotaLoop;
+	XMVECTOR4			_vRotaLoop;
 
 	bool				_bRotaBoard;
 

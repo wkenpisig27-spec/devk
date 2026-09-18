@@ -333,7 +333,7 @@ void CWorldScene::_FrameMove(DWORD dwTimeParam) {
 				if (key & M_Down) {
 					if (GetMainCha()) {
 						if (key & M_LDown) {
-							D3DXVECTOR3 vPos;
+							XMVECTOR3 vPos;
 							GetPickPos(g_pGameApp->GetMouseX(), g_pGameApp->GetMouseY(), vPos);
 							int nScrX = (int)(vPos.x * 100.0f);
 							int nScrY = (int)(vPos.y * 100.0f);
@@ -585,7 +585,7 @@ BOOL CWorldScene::_InitUI() {
 }
 
 bool CWorldScene::_IsBlock(CCharacter* pCha, int x, int y) {
-	static D3DXVECTOR3 vPos;
+	static XMVECTOR3 vPos;
 	GetPickPos(x, y, vPos);
 
 	int nX = (int)(vPos.x * 100.0f);
@@ -609,7 +609,7 @@ void CWorldScene::_SceneCursor() {
 	static CCharacter* pMain = nullptr;
 	static CCharacter* pCha = nullptr;
 	static CSkillRecord* pSkill = nullptr;
-	static D3DXVECTOR3 t_pos;
+	static XMVECTOR3 t_pos;
 	static int t_angle;
 	static int h;
 
@@ -869,7 +869,7 @@ void CWorldScene::_SceneCursor() {
 			}
 
 			if (IsDefault) {
-				static D3DXVECTOR3 vPos;
+				static XMVECTOR3 vPos;
 				static int nScrX, nScrY;
 
 				GetPickPos(nMouseX, nMouseY, vPos);
@@ -1235,7 +1235,7 @@ void CWorldScene::SetMainCha(int nChaID) {
 	CCameraCtrl* pCam = g_pGameApp->GetMainCam();
 	MPTerrain* pTerr = GetTerrain();
 
-	D3DXVECTOR3 vecCha = pCha->GetPos();
+	XMVECTOR3 vecCha = pCha->GetPos();
 	vecCha.z = GetGridHeight(vecCha.x, vecCha.y);
 
 	pCam->InitModel(pCha->IsBoat() ? 3 : 0, &vecCha);
@@ -1299,7 +1299,7 @@ bool CWorldScene::_MouseButtonDB(int nButton) {
 	// CCharacter *pCha = GetMainCha();
 	// if(pCha)
 	//{
-	//	D3DXVECTOR3 vecCha = pCha->GetPos();
+	//	XMVECTOR3 vecCha = pCha->GetPos();
 
 	//	g_pGameApp->Get ->Reset(vecCha.x,vecCha.y,vecCha.z);
 	//	pCam->SetFollowObj(vecCha);
@@ -1320,7 +1320,7 @@ CCharacter* CWorldScene::HitSelectCharacter(int nScrX, int nScrY, int nSelect) {
 	MPPickInfo info;
 	MPVector3 org, ray;
 
-	g_Render.GetPickRayVector(nScrX, nScrY, (D3DXVECTOR3*)&org, (D3DXVECTOR3*)&ray);
+	g_Render.GetPickRayVector(nScrX, nScrY, (XMVECTOR3*)&org, (XMVECTOR3*)&ray);
 	MPVector3Normalize(&ray);
 	int i = 0;
 	switch (nSelect) {
@@ -1596,7 +1596,7 @@ int CWorldScene::PickItem() {
 	// Compute player's 3D world position once for the magnet target.
 	float fPlayerX = (float)pMain->GetServerX() / 100.0f;
 	float fPlayerY = (float)pMain->GetServerY() / 100.0f;
-	D3DXVECTOR3 vPlayerPos(fPlayerX, fPlayerY, GetGridHeight(fPlayerX, fPlayerY) + 1.0f);
+	XMVECTOR3 vPlayerPos(fPlayerX, fPlayerY, GetGridHeight(fPlayerX, fPlayerY) + 1.0f);
 
 	// Cap items per batch to avoid flooding the GateServer.
 	const int MAX_PICK_PER_BATCH = 20;

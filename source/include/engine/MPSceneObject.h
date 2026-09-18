@@ -64,7 +64,7 @@ public:
     DWORD GetLinkItemNum() const { return _link_item_num; }
     MPSceneItem* GetLinkItem( DWORD id );
     DWORD GetPrimitiveNum() const;
-    int GetPrimitiveBox( DWORD id, D3DXVECTOR3* p1, D3DXVECTOR3* p2 );
+    int GetPrimitiveBox( DWORD id, XMVECTOR3* p1, XMVECTOR3* p2 );
     void SetTextureLOD(DWORD level);
     float GetOpacity();
     DWORD GetTransparentFlag() const;

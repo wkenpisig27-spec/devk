@@ -23,10 +23,10 @@ class MINDPOWER_API MPCameraNOLEECH
 public:
 	
 	// йс╫г
-	D3DXVECTOR3	m_EyePos;
-	D3DXVECTOR3	m_RefPos;
+	XMVECTOR3	m_EyePos;
+	XMVECTOR3	m_RefPos;
 	
-	D3DXVECTOR3 m_vRoll;
+	XMVECTOR3 m_vRoll;
 
 	
 	float m_fRoll;
@@ -43,22 +43,22 @@ public:
 		m_RefPos.z = rz;
 	}
 	VOID	Move(DWORD dwMoveType);
-	D3DXVECTOR3 GetRollVector()
+	XMVECTOR3 GetRollVector()
 	{
-		D3DXMATRIX mat;
-		D3DXMatrixRotationY(&mat , D3DXToRadian(m_fRoll));
+		XMMATRIX mat;
+		XMMatrixRotationY(&mat , XMConvertToRadians(m_fRoll));
 	
-		D3DXVECTOR4 v;
-		const auto v2 = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-		D3DXVec3Transform(&v , &v2 , &mat);
+		XMVECTOR4 v;
+		const auto v2 = XMVECTOR3(0.0f, 0.0f, 1.0f);
+		XMVector3Transform(&v , &v2 , &mat);
 		
-		m_vRoll = (D3DXVECTOR3)v;
+		m_vRoll = (XMVECTOR3)v;
 		return m_vRoll;
 	}
 
 	void	MoveForward(float fStep, BOOL bHang = TRUE);
 	void	MoveRight(float fStep, BOOL bHang = TRUE);
-	void	Turn(float fStep, D3DXVECTOR3 *pFocusVec = NULL);
+	void	Turn(float fStep, XMVECTOR3 *pFocusVec = NULL);
 	
 
 	virtual void			FrameMove(DWORD	dwTailTime);
@@ -109,8 +109,8 @@ public:
 //			m_fResetRotatVel = 2.7f;
 //			m_fResetRotatAccl = 0.005f;
 //		}
-//		D3DXVECTOR3	m_vDir;
-//		D3DXVECTOR3	m_vCross;
+//		XMVECTOR3	m_vDir;
+//		XMVECTOR3	m_vCross;
 //
 //		float	m_fxy;
 //		float	m_fz;
@@ -153,11 +153,11 @@ public:
 //		}
 //		void	ScroolLR(float fstep)
 //		{
-//			m_fAngle = fstep > D3DX_PI ? fstep - D3DX_PI : fstep;
-//			D3DXMATRIX		mat;
-//			D3DXVECTOR4		ver;
-//			D3DXMatrixRotationZ(&mat,m_fAngle);
-//			D3DXVec3Transform(&ver, &m_vDir, &mat);
+//			m_fAngle = fstep > XM_PI ? fstep - XM_PI : fstep;
+//			XMMATRIX		mat;
+//			XMVECTOR4		ver;
+//			XMMatrixRotationZ(&mat,m_fAngle);
+//			XMVector3Transform(&ver, &m_vDir, &mat);
 //			m_vDir.x = ver.x;
 //			m_vDir.y = ver.y;
 //			m_vDir.z = 0;
@@ -182,15 +182,15 @@ public:
 //			m_ffov = m_stFov *(1.0f - m_fstep1) + m_enFov * m_fstep1;
 //			return true;
 //		}
-//		void	GetEyePos(D3DXVECTOR3& vpos,D3DXVECTOR3& vRefPos)
+//		void	GetEyePos(XMVECTOR3& vpos,XMVECTOR3& vRefPos)
 //		{
 //			m_vDir.z = 0;
-//			D3DXVec3Add(&vpos,&vRefPos,&(m_vDir * m_fxy));
+//			XMVector3Add(&vpos,&vRefPos,&(m_vDir * m_fxy));
 //			vpos.z = m_fz+ vRefPos.z;
 //		}
 //	}m_cameractrl;
 //
-//	void			SetFollowObj(D3DXVECTOR3&	vRefObj)
+//	void			SetFollowObj(XMVECTOR3&	vRefObj)
 //	{
 //		m_RefPos  = vRefObj;
 //	}

@@ -34,7 +34,7 @@ CSceneItem::CSceneItem()
 	: CSceneNode(), _nCharacterID(-1), _fTerrainHeight(0.0f), _IsSystem(false), _IsShowName(false), _IsAlpha(false), _pItemInfo(nullptr), _pArcTrack(nullptr), _pEvent(nullptr), _dwForgeValue(0),
 	  _bMagnetPickup(false), _lMagnetWorldID(0), _lMagnetHandle(0),
 	  mParentCharacter(0), mEffect(0) {
-	_vPos = D3DXVECTOR3(0, 0, 0);
+	_vPos = XMVECTOR3(0, 0, 0);
 	_pSceneHeight = new CSceneHeight(this);
 }
 
@@ -333,7 +333,7 @@ void CSceneItem::Render() {
 	lwEnableFullbrightFixedFunction(FALSE);
 }
 
-void CSceneItem::PlayArcAni(D3DXVECTOR3 vStart, D3DXVECTOR3 vEnd, float fVel, float fHei, DWORD dwDurationMs) {
+void CSceneItem::PlayArcAni(XMVECTOR3 vStart, XMVECTOR3 vEnd, float fVel, float fHei, DWORD dwDurationMs) {
 	if (!_pArcTrack)
 		_pArcTrack = new CArcTrack;
 	_pArcTrack->Start(vStart, vEnd, fVel, fHei, dwDurationMs);
@@ -579,7 +579,7 @@ CEffectObj* CSceneItem::bindEffect(int dummyID, int effectID, bool isLoop, int a
 		if (angle != -1)
 			effect->SetEffectDir(angle);
 		effect->setFollowObj((CSceneNode*)this, NODE_ITEM, dummyID);
-		effect->Emission(-1, (D3DXVECTOR3*)&matrix._41, nullptr);
+		effect->Emission(-1, (XMVECTOR3*)&matrix._41, nullptr);
 	} else {
 		if (angle != -1)
 			effect->SetEffectDir(angle);

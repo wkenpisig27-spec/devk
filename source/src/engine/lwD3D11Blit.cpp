@@ -282,8 +282,8 @@ static void MakeQuad(BlitVert* v, float x, float y, float w, float h, float u1, 
 LW_RESULT lwD3D11BlitSprite(
     IDirect3DTextureX* tex,
     const RECT* src,
-    const D3DXVECTOR2* scale,
-    const D3DXVECTOR2* dest,
+    const XMVECTOR2* scale,
+    const XMVECTOR2* dest,
     DWORD color)
 {
     lwD3D11Texture* t11 = lwAsD3D11Texture(tex);

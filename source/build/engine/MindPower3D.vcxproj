@@ -120,6 +120,7 @@
     <ClInclude Include="..\..\include\engine\lwITypes2.h" />
     <ClInclude Include="..\..\include\engine\lwIUtil.h" />
     <ClInclude Include="..\..\include\engine\lwMath.h" />
+    <ClInclude Include="..\..\include\engine\lwXMMath.h" />
     <ClInclude Include="..\..\include\engine\lwObjectMethod.h" />
     <ClInclude Include="..\..\include\engine\lwShaderTypes.h" />
     <ClInclude Include="..\..\include\engine\lwStdInc.h" />

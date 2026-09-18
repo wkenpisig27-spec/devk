@@ -7,7 +7,7 @@ public:
 
 public:
 	void Clear() { points.clear(); }
-	void Add(D3DXVECTOR3 p, DWORD c = 0xff00ffff, float h = 0.0);
+	void Add(XMVECTOR3 p, DWORD c = 0xff00ffff, float h = 0.0);
 	void Add(int x, int y, DWORD c = 0xff00ffff, float h = 0.0);
 	void Reader();
 	void SetIsEnabled(bool v) { _bIsEnabled = v; }
@@ -20,9 +20,9 @@ public:
 
 private:
 	struct stPoint {
-		stPoint(D3DXVECTOR3 p, DWORD c) : pos(p), color(c) {}
+		stPoint(XMVECTOR3 p, DWORD c) : pos(p), color(c) {}
 		DWORD color;
-		D3DXVECTOR3 pos;
+		XMVECTOR3 pos;
 	};
 
 	typedef std::vector<stPoint> vpoint;

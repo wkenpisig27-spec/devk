@@ -288,9 +288,9 @@ bool CMPResManger::InitRes3()
 }
 
 #ifdef USE_RENDER
-bool	CMPResManger::InitRes(MPRender*		pDev, D3DXMATRIX* pmat, D3DXMATRIX* pMatviewproj)
+bool	CMPResManger::InitRes(MPRender*		pDev, XMMATRIX* pmat, XMMATRIX* pMatviewproj)
 #else
-bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX* pMatviewproj)
+bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, XMMATRIX* pmat, XMMATRIX* pMatviewproj)
 #endif
 {
 	OutputDebugStringA("PKO: CMPResManger::InitRes() - starting...\n");
@@ -352,7 +352,7 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, D3DXMATRIX* pmat, D3DXMATRIX
 	_iFontBkHeight= (rc_client.bottom - rc_client.top) / 2;
 
 
-	D3DXMatrixOrthoLH(&_Mat2dViewProj, float(m_d3dBackBuffer.Width), float(m_d3dBackBuffer.Height), 0.0f, 1.0f);
+	XMMatrixOrthoLH(&_Mat2dViewProj, float(m_d3dBackBuffer.Width), float(m_d3dBackBuffer.Height), 0.0f, 1.0f);
 	
 	m_caps = m_pDev->GetOrgCap();
 	if(  m_caps.VertexShaderVersion < D3DVS_VERSION(1,1) || m_caps.PixelShaderVersion < D3DPS_VERSION(1,4) )
@@ -1448,7 +1448,7 @@ bool	CMPResManger::LoadEffectFromFile(int idx, char* pszFileName)
 	_vecEffectParam[idx].m_szSoundName = t_pszName;
 
 	fread(&_vecEffectParam[idx].m_bRotating, sizeof(bool),1,t_pFile);
-	fread(&_vecEffectParam[idx].m_SVerRota, sizeof(D3DXVECTOR3),1,t_pFile);
+	fread(&_vecEffectParam[idx].m_SVerRota, sizeof(XMVECTOR3),1,t_pFile);
 	fread(&_vecEffectParam[idx].m_fRotaVel, sizeof(float),1,t_pFile);
 
 	fread(&t_temp,sizeof(int),1,t_pFile);
@@ -2275,7 +2275,7 @@ CMPPartCtrl*	CMPResManger::GetPartCtrlByID(int iID)
 		}
 		else
 		{
-			const auto v = D3DXVECTOR3(0, 0, 0);
+			const auto v = XMVECTOR3(0, 0, 0);
 			(*slot)->MoveTo(&v);
 		}
 	}
@@ -2495,7 +2495,7 @@ BOOL CMPResManger::OnResetDevice()
 	pBackBuffer->Release();
 #endif
 
-	D3DXMatrixOrthoLH(&_Mat2dViewProj, float(m_d3dBackBuffer.Width), float(m_d3dBackBuffer.Height), 0.0f, 1.0f);
+	XMMatrixOrthoLH(&_Mat2dViewProj, float(m_d3dBackBuffer.Width), float(m_d3dBackBuffer.Height), 0.0f, 1.0f);
 
 	// ��ResetDevice��call back�����У�g_Render��GetScrWidth ��û����������
     // �������lwDeviceObject�Ľӿ�
@@ -2586,13 +2586,13 @@ void CMPResManger::UpdateMatrix()
 {
 	if (_pMatView)
 	{
-		D3DXMatrixInverse(&_MatBBoard, NULL, _pMatView);
+		XMMatrixInverse(&_MatBBoard, NULL, _pMatView);
 		_MatBBoard._41 = 0.0f;
 		_MatBBoard._42 = 0.0f;
 		_MatBBoard._43 = 0.0f;
 	}
 	if (_pMatViewProj)
-		D3DXMatrixTranspose(&_MatViewProjPose, _pMatViewProj);
+		XMMatrixTranspose(&_MatViewProjPose, _pMatViewProj);
 }
 
 void CMPResManger::FrameMove(DWORD dwTime)

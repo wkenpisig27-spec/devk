@@ -136,23 +136,23 @@ inline float MPTerrainData::GetHeight(float fX, float fY)
 		}
 	}
 
-	D3DXVECTOR3 v0( fx1, fy1, fHeight[0]);
-	D3DXVECTOR3 v1( fx2, fy1, fHeight[1]);
-	D3DXVECTOR3 v2( fx1, fy2, fHeight[2]);
-	D3DXVECTOR3 v3( fx2, fy2, fHeight[3]);
+	XMVECTOR3 v0( fx1, fy1, fHeight[0]);
+	XMVECTOR3 v1( fx2, fy1, fHeight[1]);
+	XMVECTOR3 v2( fx1, fy2, fHeight[2]);
+	XMVECTOR3 v3( fx2, fy2, fHeight[3]);
 
 	VECTOR3 vOrig(fX, fY, 20.0f);
 	VECTOR3 vDir(0, 0, -1);
 	float u, v;
 
 	VECTOR3 vPickPos;
-	if( D3DXIntersectTri(&v0, &v1, &v2, &vOrig, &vDir, &u, &v, nullptr) == TRUE)
+	if( XMIntersectTri(&v0, &v1, &v2, &vOrig, &vDir, &u, &v, nullptr) == TRUE)
 	{
 		vPickPos = v0 + u * (v1 - v0) + v * (v2 - v0);
 		return vPickPos.z;
 	}
 
-	if( D3DXIntersectTri(&v2, &v1, &v3, &vOrig, &vDir, &u, &v, nullptr) == TRUE)
+	if( XMIntersectTri(&v2, &v1, &v3, &vOrig, &vDir, &u, &v, nullptr) == TRUE)
 	{
 		vPickPos = v2 + u * (v1 - v2) + v * (v3 - v2);
 		return vPickPos.z;

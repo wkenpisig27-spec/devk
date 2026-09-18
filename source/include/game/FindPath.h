@@ -14,7 +14,7 @@ public:
 	~CFindPath();
 
 	void RenderPath(MPTerrain* pTerrain);
-	S_BVECTOR<D3DXVECTOR3>& GetResultPath() { return _vecPathPoint; }
+	S_BVECTOR<XMVECTOR3>& GetResultPath() { return _vecPathPoint; }
 
 	int GetLength() { return _nLength; }
 	bool Find(CGameScene* pScene, CCharacter* pCha, int nSelfX, int nSelfY, int nTargetX, int nTargetY, bool& IsWalkLine);
@@ -33,7 +33,7 @@ protected:
 	BOOL FindPath(CGameScene* pScene, CCharacter* pCha, int nSelfX, int nSelfY, int nTargetX, int nTargetY, bool& IsWalkLine);
 
 protected:
-	D3DXVECTOR3 _vStart;
+	XMVECTOR3 _vStart;
 
 	int _nCurX, _nCurY;
 
@@ -42,7 +42,7 @@ protected:
 
 	S_BVECTOR<BYTE> _vecDir;
 	S_BVECTOR<BYTE> _vecDirSave;
-	S_BVECTOR<D3DXVECTOR3> _vecPathPoint;
+	S_BVECTOR<XMVECTOR3> _vecPathPoint;
 
 	int _nWidth;
 
@@ -94,7 +94,7 @@ private:
 	int m_iGuideTargetX;
 	int m_iGuideTargetY;
 
-	std::stack<D3DXVECTOR2> m_GuideTargetList;
+	std::stack<XMVECTOR2> m_GuideTargetList;
 
 	DWORD m_dwTime;
 

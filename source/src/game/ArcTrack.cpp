@@ -2,13 +2,13 @@
 #include "arctrack.h"
 #include "GameApp.h"
 
-void CArcTrack::Start(const D3DXVECTOR3& vStart, const D3DXVECTOR3& vEnd, float fVel, float fHei, DWORD dwDurationMs) {
+void CArcTrack::Start(const XMVECTOR3& vStart, const XMVECTOR3& vEnd, float fVel, float fHei, DWORD dwDurationMs) {
 	_vStart = vStart;
 	_vEnd = vEnd;
 	_fHei = fHei;
 	_fVel = fVel / 1000.0f; // Edit by Mdr.st original 1000.0f
 
-	_vOrg = D3DXVECTOR3(-_fHei, 0, 0);
+	_vOrg = XMVECTOR3(-_fHei, 0, 0);
 	_fCurAngle = 0;
 	_isEnd = false;
 
@@ -32,10 +32,10 @@ void CArcTrack::FrameMove() {
 	float fres = 0;
 	_fCurAngle += _fVel * (float)(CGameApp::GetCurTick() - _dwLastTime);
 
-	D3DXMATRIX mat;
-	D3DXVECTOR4 ver;
-	D3DXMatrixRotationY(&mat, _fCurAngle);
-	D3DXVec3Transform(&ver, &_vOrg, &mat);
+	XMMATRIX mat;
+	XMVECTOR4 ver;
+	XMMatrixRotationY(&mat, _fCurAngle);
+	XMVector3Transform(&ver, &_vOrg, &mat);
 
 	fres = ver.x + _fHei;
 	if (fabs(fres) < 0.0000001)

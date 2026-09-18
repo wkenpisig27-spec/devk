@@ -332,7 +332,7 @@ void CSelectChaScene::_Render() {
 	env_light.Direction.x = -1.0f;
 	env_light.Direction.y = -1.0f;
 	env_light.Direction.z = -0.5f;
-	D3DXVec3Normalize((D3DXVECTOR3*)&env_light.Direction, (D3DXVECTOR3*)&env_light.Direction);
+	XMVector3Normalize((XMVECTOR3*)&env_light.Direction, (XMVECTOR3*)&env_light.Direction);
 
 	MPDwordByte4 c;
 	c.b[3] = 0xff;
@@ -408,7 +408,7 @@ void CSelectChaScene::_RenderUI() {
 			int nScreenX, nScreenY;
 			lwMatrix44 mat;
 
-			D3DXVECTOR3 pos = (*iter)->pCha->GetPos();
+			XMVECTOR3 pos = (*iter)->pCha->GetPos();
 			(*iter)->pCha->GetRunTimeMatrix(&mat, 1);
 
 			pos.x = mat._41;

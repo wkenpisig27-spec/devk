@@ -726,7 +726,7 @@ void NetActorSkillEff(unsigned int nID, stNetNotiSkillEffect &SkillEff)
 			CEffectObj	*pEffect = CGameApp::GetCurScene()->GetFirstInvalidEffObj();
 			if( pEffect && pEffect->Create( pSkill->sSkyEffect ) )
 			{
-				D3DXVECTOR3 pos, target;
+				XMVECTOR3 pos, target;
 				pos.x = (float)SkillEff.SSrcPos.x / 100;
 				pos.y = (float)SkillEff.SSrcPos.y / 100;
 
@@ -741,7 +741,7 @@ void NetActorSkillEff(unsigned int nID, stNetNotiSkillEffect &SkillEff)
 					lwMatrix44 mat;
 					if( pTarget->GetObjDummyRunTimeMatrix( &mat, pSkill->sTargetDummyLink ) >=0 )
 					{
-						target = *(D3DXVECTOR3*)&mat._41;
+						target = *(XMVECTOR3*)&mat._41;
 					}
 					else
 					{
@@ -867,7 +867,7 @@ void NetActorSkillEff(unsigned int nID, stNetNotiSkillEffect& SkillEff) {
 		if (pSkill->IsEffectHarm()) {
 			CEffectObj* pEffect = CGameApp::GetCurScene()->GetFirstInvalidEffObj();
 			if (pEffect && pEffect->Create(pSkill->sSkyEffect)) {
-				D3DXVECTOR3 pos, target;
+				XMVECTOR3 pos, target;
 				pos.x = (float)SkillEff.SSrcPos.x / 100;
 				pos.y = (float)SkillEff.SSrcPos.y / 100;
 
@@ -878,7 +878,7 @@ void NetActorSkillEff(unsigned int nID, stNetNotiSkillEffect& SkillEff) {
 				} else {
 					lwMatrix44 mat;
 					if (pTarget->GetObjDummyRunTimeMatrix(&mat, pSkill->sTargetDummyLink) >= 0) {
-						target = *(D3DXVECTOR3*)&mat._41;
+						target = *(XMVECTOR3*)&mat._41;
 					} else {
 						target = pTarget->GetPos();
 					}
@@ -2571,7 +2571,7 @@ void NetItemUseSuccess(unsigned int nID, short sItemID) {
 
 		MPMatrix44 mat;
 		if (nDummy >= 0 && pCha->GetObjDummyRunTimeMatrix(&mat, nDummy) >= 0) {
-			pEffect->Emission(-1, (D3DXVECTOR3*)&mat._41, nullptr);
+			pEffect->Emission(-1, (XMVECTOR3*)&mat._41, nullptr);
 		} else {
 			pEffect->Emission(-1, &pCha->GetPos(), nullptr);
 		}

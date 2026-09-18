@@ -33,7 +33,7 @@ bool CSceneSign::Init(CGameScene* pScene) {
 	_pAttackShade = _pScene->GetFirstInvalidShadeObj();
 	if (_pAttackShade) {
 		_pAttackShade->Create(2);
-		D3DXVECTOR3 d(0, 0, 0);
+		XMVECTOR3 d(0, 0, 0);
 		_pAttackShade->Emission(0, &d, nullptr);
 		_pAttackShade->SetValid(TRUE);
 		_pAttackShade->SetHide(TRUE);
@@ -63,7 +63,7 @@ void CSceneSign::Show(CCharacter* pCha) {
 		_eStyle = enumAttack;
 		if (_pAttack) {
 			_pAttackShade->SetHide(FALSE);
-			D3DXVECTOR3 d;
+			XMVECTOR3 d;
 			d.x = (float)_pCha->GetCurX() / 100.0f;
 			d.y = (float)_pCha->GetCurY() / 100.0f;
 			d.z = _pScene->GetGridHeight(d.x, d.y);
@@ -117,7 +117,7 @@ void CSceneSign::FrameMove(DWORD dwTime) {
 	if (_pAttack && _eStyle == enumAttack) {
 		_pAttack->setPos(_pCha->GetCurX(), _pCha->GetCurY());
 
-		static D3DXVECTOR3 d;
+		static XMVECTOR3 d;
 		d.x = (float)_pCha->GetCurX() / 100.0f;
 		d.y = (float)_pCha->GetCurY() / 100.0f;
 		d.z = _pScene->GetGridHeight(d.x, d.y);

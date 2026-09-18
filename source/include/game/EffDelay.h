@@ -52,7 +52,7 @@ public:
 	void Reset() { _eStyle = enumNone; }
 	void Exec();
 
-	void SetPosEffect(int nEffID, const D3DXVECTOR3& pos);
+	void SetPosEffect(int nEffID, const XMVECTOR3& pos);
 	void SetServerHarm(CHitRepresent& Hit, CServerHarm* pHarm);
 
 private:
@@ -61,7 +61,7 @@ private:
 	int _nEffectID;
 
 	// enumPos
-	D3DXVECTOR3 _Pos;
+	XMVECTOR3 _Pos;
 
 	// enumActor
 	CHitRepresent _cHit;
@@ -97,7 +97,7 @@ inline void CEffDelay::SetServerHarm(CHitRepresent& Hit, CServerHarm* pHarm) {
 	_pHarm = pHarm;
 }
 
-inline void CEffDelay::SetPosEffect(int nEffID, const D3DXVECTOR3& pos) {
+inline void CEffDelay::SetPosEffect(int nEffID, const XMVECTOR3& pos) {
 	if (_eStyle != enumNone) {
 		LG("CEffDelay", "msgCEffDelay::SetPosEffect(nEffID[%d],pos[%f,%f,%f]) Style[%d] is Valid", nEffID, pos.x, pos.y, pos.z, _eStyle);
 	}

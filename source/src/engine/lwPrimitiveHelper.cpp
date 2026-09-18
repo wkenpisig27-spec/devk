@@ -753,8 +753,8 @@ LW_RESULT lwHelperMesh::HitTest( lwPickInfo* info, const lwVector3* org, const l
 
         //lwMatrix44Multiply( &mat, &hmi->mat, mat_parent );
         //lwMatrix44Inverse( &mat_inv, &mat );
-        D3DXMatrixMultiply( (D3DXMATRIX*)&mat, (D3DXMATRIX*)&hmi->mat, (D3DXMATRIX*)mat_parent );
-        D3DXMatrixInverse( (D3DXMATRIX*)&mat_inv, NULL, (D3DXMATRIX*)&mat );
+        XMMatrixMultiply( (XMMATRIX*)&mat, (XMMATRIX*)&hmi->mat, (XMMATRIX*)mat_parent );
+        XMMatrixInverse( (XMMATRIX*)&mat_inv, NULL, (XMMATRIX*)&mat );
 
         org_inv = *org;
         lwVec3Mat44Mul(&org_inv, &mat_inv);

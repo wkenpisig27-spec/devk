@@ -173,7 +173,7 @@ void CSceneObj::Render() {
 
 	// MPSceneObject::Render();
 
-	// int nX, nY; g_Render.GetScreenPos(nX, nY, D3DXVECTOR3((float)GetCurX() / 100.0f, (float)GetCurY() / 100.0f, 0.6f));
+	// int nX, nY; g_Render.GetScreenPos(nX, nY, XMVECTOR3((float)GetCurX() / 100.0f, (float)GetCurY() / 100.0f, 0.6f));
 	// g_Render.Print(INFO_GAME, nX, nY - 40, "%d", _dwID);
 }
 
@@ -256,16 +256,16 @@ bool CSceneObj::IsBoxVisible(MPVector3 vecMin, MPVector3 vecMax, DWORD& index) {
 
 bool CSceneObj::IsBoxVisible_LineWithPlane(MPVector3 vecMin, MPVector3 vecMax, DWORD& index) {
 	//	return true;
-	static D3DXVECTOR3 vecBounds[8];
+	static XMVECTOR3 vecBounds[8];
 
-	vecBounds[0] = D3DXVECTOR3(vecMin.x, vecMin.y, vecMin.z);
-	vecBounds[1] = D3DXVECTOR3(vecMax.x, vecMin.y, vecMin.z);
-	vecBounds[2] = D3DXVECTOR3(vecMin.x, vecMax.y, vecMin.z);
-	vecBounds[3] = D3DXVECTOR3(vecMax.x, vecMax.y, vecMin.z);
-	vecBounds[4] = D3DXVECTOR3(vecMin.x, vecMin.y, vecMax.z);
-	vecBounds[5] = D3DXVECTOR3(vecMax.x, vecMin.y, vecMax.z);
-	vecBounds[6] = D3DXVECTOR3(vecMin.x, vecMax.y, vecMax.z);
-	vecBounds[7] = D3DXVECTOR3(vecMax.x, vecMax.y, vecMax.z);
+	vecBounds[0] = XMVECTOR3(vecMin.x, vecMin.y, vecMin.z);
+	vecBounds[1] = XMVECTOR3(vecMax.x, vecMin.y, vecMin.z);
+	vecBounds[2] = XMVECTOR3(vecMin.x, vecMax.y, vecMin.z);
+	vecBounds[3] = XMVECTOR3(vecMax.x, vecMax.y, vecMin.z);
+	vecBounds[4] = XMVECTOR3(vecMin.x, vecMin.y, vecMax.z);
+	vecBounds[5] = XMVECTOR3(vecMax.x, vecMin.y, vecMax.z);
+	vecBounds[6] = XMVECTOR3(vecMin.x, vecMax.y, vecMax.z);
+	vecBounds[7] = XMVECTOR3(vecMax.x, vecMax.y, vecMax.z);
 
 	BYTE bOutside;
 	ZeroMemory(&bOutside, sizeof(bOutside));
@@ -274,7 +274,7 @@ bool CSceneObj::IsBoxVisible_LineWithPlane(MPVector3 vecMin, MPVector3 vecMax, D
 	ZeroMemory(&bOutsideArray, sizeof(bOutsideArray));
 
 	MPCullInfo* pCull = g_Render.GetCullInfo();
-	D3DXVECTOR3 vecPoint;
+	XMVECTOR3 vecPoint;
 
 	// ????????�??????????j?
 
@@ -321,7 +321,7 @@ bool CSceneObj::IsBoxVisible_LineWithPlane(MPVector3 vecMin, MPVector3 vecMax, D
 
 	// Now see if any of the bounding box edges penetrate any of the faces of
 	// the frustum
-	D3DXVECTOR3 edge2[12][2] =
+	XMVECTOR3 edge2[12][2] =
 		{
 			vecBounds[0], vecBounds[1], // front bottom
 			vecBounds[2], vecBounds[3], // front top
@@ -336,7 +336,7 @@ bool CSceneObj::IsBoxVisible_LineWithPlane(MPVector3 vecMin, MPVector3 vecMax, D
 			vecBounds[1], vecBounds[5], // right bottom
 			vecBounds[3], vecBounds[7], // right top
 		};
-	D3DXVECTOR3 face2[6][4] =
+	XMVECTOR3 face2[6][4] =
 		{
 			pCull->vecFrustum[0], pCull->vecFrustum[2], pCull->vecFrustum[3], pCull->vecFrustum[1], // front
 			pCull->vecFrustum[4], pCull->vecFrustum[5], pCull->vecFrustum[7], pCull->vecFrustum[6], // back
@@ -346,8 +346,8 @@ bool CSceneObj::IsBoxVisible_LineWithPlane(MPVector3 vecMin, MPVector3 vecMax, D
 			pCull->vecFrustum[0], pCull->vecFrustum[4], pCull->vecFrustum[5], pCull->vecFrustum[1], // bottom
 		};
 
-	D3DXVECTOR3* pEdge;
-	D3DXVECTOR3* pFace;
+	XMVECTOR3* pEdge;
+	XMVECTOR3* pFace;
 	pEdge = &edge2[0][0];
 
 	for (INT iEdge = 0; iEdge < 12; iEdge++) {
@@ -467,7 +467,7 @@ void CSceneObj::UpdateLight() {
 			pEff = _pScene->GetEffect(_iChaID);
 			if (pEff) {
 				_vPos = pEff->getPos();
-				_dwcolor = (D3DXCOLOR)dif;
+				_dwcolor = (XMCOLORF)dif;
 				_dwcolor.a = 1;
 				_fRange = range;
 				MoveLight(&_vPos);
@@ -476,7 +476,7 @@ void CSceneObj::UpdateLight() {
 		break;
 
 	default:
-		_dwcolor = (D3DXCOLOR)dif * 0.7f;
+		_dwcolor = (XMCOLORF)dif * 0.7f;
 		_dwcolor.a = 1;
 		_fRange = range;
 		MoveLight(&_vPos);
@@ -510,7 +510,7 @@ void CSceneObj::ClearLight() {
 	}
 }
 
-void CSceneObj::MoveLight(D3DXVECTOR3* SVerPos) {
+void CSceneObj::MoveLight(XMVECTOR3* SVerPos) {
 	if (!_pTerrain)
 		return;
 	MPTile* pTile = nullptr;
@@ -526,9 +526,9 @@ void CSceneObj::MoveLight(D3DXVECTOR3* SVerPos) {
 
 	DWORD d;
 	g_Render.GetRenderState(D3DRS_AMBIENT, &d);
-	D3DXCOLOR amb = d;
+	XMCOLORF amb = d;
 
-	D3DXCOLOR tcolor;
+	XMCOLORF tcolor;
 	MPTile* pTileset = nullptr;
 	for (int y = (int)_fy; y < (int)_fty; y++) {
 		for (int x = (int)_fx; x < (int)_ftx; x++) {
@@ -541,19 +541,19 @@ void CSceneObj::MoveLight(D3DXVECTOR3* SVerPos) {
 				continue;
 			}
 
-			const auto v = (D3DXVECTOR2(float(x), float(y)) - D3DXVECTOR2(_vPos.x, _vPos.y));
-			const float fd = D3DXVec2LengthSq(&v);
-			D3DXCOLOR dwOrgColor = (D3DXCOLOR)pTile->dwColor;
+			const auto v = (XMVECTOR2(float(x), float(y)) - XMVECTOR2(_vPos.x, _vPos.y));
+			const float fd = XMVector2LengthSq(&v);
+			XMCOLORF dwOrgColor = (XMCOLORF)pTile->dwColor;
 
 			float flerp = fd / (_fRange * _fRange);
 			if (flerp > 1)
 				flerp = 1;
 
-				// D3DXColorLerp(&tcolor,&_dwcolor,&dwOrgColor,flerp);
+				// XMColorLerp(&tcolor,&_dwcolor,&dwOrgColor,flerp);
 				// if(pTile->dwTColor != 0)
 				//{
-				//	//D3DXColorLerp(&tcolor,&tcolor,&(D3DXCOLOR)pTile->dwTColor,0.5f);
-				//	D3DXColorAdd(&tcolor,&tcolor,&(D3DXCOLOR)pTile->dwTColor);
+				//	//XMColorLerp(&tcolor,&tcolor,&(XMCOLORF)pTile->dwTColor,0.5f);
+				//	D3DXColorAdd(&tcolor,&tcolor,&(XMCOLORF)pTile->dwTColor);
 				//	tcolor -= dwOrgColor;
 
 				//	tcolor.a = tcolor.a < 0 ? -tcolor.a: tcolor.a;
@@ -577,7 +577,7 @@ void CSceneObj::MoveLight(D3DXVECTOR3* SVerPos) {
 
 DWORD CSceneObj::GetObjTileColor() {
 	DWORD c = 0;
-	D3DXVECTOR3 v = this->getPos();
+	XMVECTOR3 v = this->getPos();
 	MPTerrain* t = _pScene->GetTerrain();
 	if (t) {
 		MPTile* tile = t->GetTile((int)v.x, (int)v.y);
@@ -596,10 +596,10 @@ void CSceneObj::SetMaterial(const D3DMATERIALX* mtl) {
 	CSceneObjInfo* info = GetSceneObjInfo(getTypeID());
 
 	if (t && info->bShadeFlag) {
-		D3DXVECTOR3 v = this->getPos();
+		XMVECTOR3 v = this->getPos();
 		MPTile* tile = t->GetTile((int)v.x, (int)v.y);
 		if (tile) {
-			D3DXCOLOR c = tile->dwColor;
+			XMCOLORF c = tile->dwColor;
 
 			m.Ambient.r *= c.r;
 			m.Ambient.g *= c.g;
@@ -610,10 +610,10 @@ void CSceneObj::SetMaterial(const D3DMATERIALX* mtl) {
 	MPSceneObject::SetMaterial(&m);
 }
 
-int CSceneObj::HitTestForInfluence(int* flag, D3DXVECTOR3* t_pos, const D3DXVECTOR3* nPos) {
+int CSceneObj::HitTestForInfluence(int* flag, XMVECTOR3* t_pos, const XMVECTOR3* nPos) {
 	lwPickInfo p;
-	D3DXVECTOR3 org(*nPos);
-	D3DXVECTOR3 ray(0.0f, 0.0f, -1.0f);
+	XMVECTOR3 org(*nPos);
+	XMVECTOR3 ray(0.0f, 0.0f, -1.0f);
 
 	*flag = 0;
 
@@ -622,10 +622,10 @@ int CSceneObj::HitTestForInfluence(int* flag, D3DXVECTOR3* t_pos, const D3DXVECT
 
 	if (LW_SUCCEEDED(HitTestHelperMesh(&p, (MPVector3*)&org, (MPVector3*)&ray, "block"))) {
 		*flag = 2;
-		*t_pos = *(D3DXVECTOR3*)&p.pos;
+		*t_pos = *(XMVECTOR3*)&p.pos;
 	} else if (LW_SUCCEEDED(HitTestHelperMesh(&p, (MPVector3*)&org, (MPVector3*)&ray, "terrain"))) {
 		*flag = 1;
-		*t_pos = *(D3DXVECTOR3*)&p.pos;
+		*t_pos = *(XMVECTOR3*)&p.pos;
 	}
 
 	return 1;

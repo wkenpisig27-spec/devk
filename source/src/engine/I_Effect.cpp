@@ -33,7 +33,7 @@ I_Effect::I_Effect(void)
 	m_flerp = 0;
 
 	_bRotaLoop = false;
-	_vRotaLoop = D3DXVECTOR4(0,0,0,0);
+	_vRotaLoop = XMVECTOR4(0,0,0,0);
 
 	_bAlpha = true;
 	_bRotaBoard = true;
@@ -82,12 +82,12 @@ void	I_Effect::Init(IDirect3DDeviceX*	 pDev,EFFECT_TYPE  eType, WPARAM wParam, L
 	{
 		_vecFrameTime[n]	= _fLength / _wFrameCount;
 
-		_vecFrameSize[n]	=  //D3DXVECTOR3((rand()%100)/10,(rand()%100)/10,1.0f);//*/
-			D3DXVECTOR3(1.0f,1.0f,1.0f);
-		_vecFrameAngle[n]	= /*D3DXVECTOR4(0,1,1,(rand()%3));//*/
-			D3DXVECTOR3(0,0,0);
-		_vecFramePos[n]		= /*D3DXVECTOR3(0,(rand()%5),-(rand()%5));//*/
-			D3DXVECTOR3(0,0,0);
+		_vecFrameSize[n]	=  //XMVECTOR3((rand()%100)/10,(rand()%100)/10,1.0f);//*/
+			XMVECTOR3(1.0f,1.0f,1.0f);
+		_vecFrameAngle[n]	= /*XMVECTOR4(0,1,1,(rand()%3));//*/
+			XMVECTOR3(0,0,0);
+		_vecFramePos[n]		= /*XMVECTOR3(0,(rand()%5),-(rand()%5));//*/
+			XMVECTOR3(0,0,0);
 
 		_vecFrameColor[n]	= /*D3DCOLOR_ARGB((int)(255 - 255/(n + 1)),255,255,255);
 		//*/D3DCOLOR_ARGB(255,255,255,255);
@@ -470,22 +470,22 @@ bool	I_Effect::SaveToFile(FILE* pFile)
 	//!ÿһ֡��С
 	for(WORD n = 0; n < _wFrameCount; n++)
 	{
-		fwrite(&_vecFrameSize[n],sizeof(D3DXVECTOR3),1,pFile);
+		fwrite(&_vecFrameSize[n],sizeof(XMVECTOR3),1,pFile);
 	}
 	//!ÿһ֡�Ƕ�
 	for(WORD n = 0; n < _wFrameCount; n++)
 	{
-		fwrite(&_vecFrameAngle[n],sizeof(D3DXVECTOR3),1,pFile);
+		fwrite(&_vecFrameAngle[n],sizeof(XMVECTOR3),1,pFile);
 	}
 	//!ÿһ֡λ��
 	for(WORD n = 0; n < _wFrameCount; n++)
 	{
-		fwrite(&_vecFramePos[n],sizeof(D3DXVECTOR3),1,pFile);
+		fwrite(&_vecFramePos[n],sizeof(XMVECTOR3),1,pFile);
 	}
 	//!ÿһ֡��ɫ
 	for(WORD n = 0; n < _wFrameCount; n++)
 	{
-		fwrite(&_vecFrameColor[n],sizeof(D3DXCOLOR),1,pFile);
+		fwrite(&_vecFrameColor[n],sizeof(XMCOLORF),1,pFile);
 	}
 	///////////////!��������任
 	//!��������
@@ -496,7 +496,7 @@ bool	I_Effect::SaveToFile(FILE* pFile)
 	for (WORD n = 0; n < m_CTexCoordlist.m_wCoordCount; ++n)
 	{
 		fwrite(&m_CTexCoordlist.m_vecCoordList[n].front(), 
-			sizeof(D3DXVECTOR2),m_CTexCoordlist.m_wVerCount,pFile);
+			sizeof(XMVECTOR2),m_CTexCoordlist.m_wVerCount,pFile);
 	}
 	///////////////!��������֡�任
 	//m_CTextruelist.GetTextureFromModel(m_pCModel);
@@ -511,7 +511,7 @@ bool	I_Effect::SaveToFile(FILE* pFile)
 	for(WORD n = 0; n < m_CTextruelist.m_wTexCount; n++)
 	{
 		fwrite(&m_CTextruelist.m_vecTexList[n].front(), 
-			sizeof(D3DXVECTOR2),m_CTexCoordlist.m_wVerCount,pFile);
+			sizeof(XMVECTOR2),m_CTexCoordlist.m_wVerCount,pFile);
 	}
 	//!����ģ������
 	lstrcpy(t_pszName,m_pCModel->m_strName.c_str());
@@ -548,7 +548,7 @@ bool	I_Effect::SaveToFile(FILE* pFile)
 		}
 	}
 	fwrite(&_bRotaLoop, sizeof(bool),1,pFile);
-	fwrite(&_vRotaLoop, sizeof(D3DXVECTOR4),1,pFile);
+	fwrite(&_vRotaLoop, sizeof(XMVECTOR4),1,pFile);
 	
 	fwrite(&_bAlpha, sizeof(bool),1,pFile);
 
@@ -592,25 +592,25 @@ bool	I_Effect::LoadFromFile(FILE* pFile,DWORD dwVersion)
 	_vecFrameSize.resize(_wFrameCount);
 	for(WORD n = 0; n < _wFrameCount; n++)
 	{
-		fread(&_vecFrameSize[n],sizeof(D3DXVECTOR3),1,pFile);
+		fread(&_vecFrameSize[n],sizeof(XMVECTOR3),1,pFile);
 	}
 	//!ÿһ֡�Ƕ�
 	_vecFrameAngle.resize(_wFrameCount);
 	for(WORD n = 0; n < _wFrameCount; n++)
 	{
-		fread(&_vecFrameAngle[n],sizeof(D3DXVECTOR3),1,pFile);
+		fread(&_vecFrameAngle[n],sizeof(XMVECTOR3),1,pFile);
 	}
 	//!ÿһ֡λ��
 	_vecFramePos.resize(_wFrameCount);
 	for(WORD n = 0; n < _wFrameCount; n++)
 	{
-		fread(&_vecFramePos[n],sizeof(D3DXVECTOR3),1,pFile);
+		fread(&_vecFramePos[n],sizeof(XMVECTOR3),1,pFile);
 	}
 	//!ÿһ֡��ɫ
 	_vecFrameColor.resize(_wFrameCount);
 	for(WORD n = 0; n < _wFrameCount; n++)
 	{
-		fread(&_vecFrameColor[n],sizeof(D3DXCOLOR),1,pFile);
+		fread(&_vecFrameColor[n],sizeof(XMCOLORF),1,pFile);
 	}
 	///////////////!��������任
 	//!��������
@@ -624,7 +624,7 @@ bool	I_Effect::LoadFromFile(FILE* pFile,DWORD dwVersion)
 	{
 		m_CTexCoordlist.m_vecCoordList[n].resize(m_CTexCoordlist.m_wVerCount);
 		fread(&m_CTexCoordlist.m_vecCoordList[n].front(), 
-			sizeof(D3DXVECTOR2),m_CTexCoordlist.m_wVerCount,pFile);
+			sizeof(XMVECTOR2),m_CTexCoordlist.m_wVerCount,pFile);
 	}
 	///////////////!��������֡ͼ�任
 	//!��������
@@ -659,7 +659,7 @@ bool	I_Effect::LoadFromFile(FILE* pFile,DWORD dwVersion)
 		m_CTextruelist.m_vecTexList[n].resize(m_CTexCoordlist.m_wVerCount);
 				
 		fread(&m_CTextruelist.m_vecTexList[n].front(), 
-			sizeof(D3DXVECTOR2),m_CTexCoordlist.m_wVerCount,pFile);
+			sizeof(XMVECTOR2),m_CTexCoordlist.m_wVerCount,pFile);
 	}
 
 	fread(t_pszName, sizeof(char),32,pFile);
@@ -743,7 +743,7 @@ bool	I_Effect::LoadFromFile(FILE* pFile,DWORD dwVersion)
 	if(dwVersion > 4)
 	{
 		fread(&_bRotaLoop, sizeof(bool),1,pFile);
-		fread(&_vRotaLoop, sizeof(D3DXVECTOR4),1,pFile);
+		fread(&_vRotaLoop, sizeof(XMVECTOR4),1,pFile);
 	}
 	if(dwVersion > 5)
 		fread(&_bAlpha, sizeof(bool),1,pFile);
@@ -1187,20 +1187,20 @@ bool	CEffectModel::CreateTriangle()
 #else
 
 	SEFFECT_VERTEX t_SEffVer[3];
-	t_SEffVer[0].m_SPos			= D3DXVECTOR3(-0.5f, 0, 0);
+	t_SEffVer[0].m_SPos			= XMVECTOR3(-0.5f, 0, 0);
 	t_SEffVer[0].m_fIdx			= 0;
 	t_SEffVer[0].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[0].m_SUV			= D3DXVECTOR2(0, 1.0f);
+	t_SEffVer[0].m_SUV			= XMVECTOR2(0, 1.0f);
 
-	t_SEffVer[1].m_SPos			= D3DXVECTOR3(0, 0, 0.5f);
+	t_SEffVer[1].m_SPos			= XMVECTOR3(0, 0, 0.5f);
 	t_SEffVer[1].m_fIdx			= 1;
 	t_SEffVer[1].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[1].m_SUV			= D3DXVECTOR2(0.5f, 0);
+	t_SEffVer[1].m_SUV			= XMVECTOR2(0.5f, 0);
 
-	t_SEffVer[2].m_SPos			= D3DXVECTOR3(0.5f, 0, 0);
+	t_SEffVer[2].m_SPos			= XMVECTOR3(0.5f, 0, 0);
 	t_SEffVer[2].m_fIdx			= 2;
 	t_SEffVer[2].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[2].m_SUV			= D3DXVECTOR2(1.0f, 1.0f);
+	t_SEffVer[2].m_SUV			= XMVECTOR2(1.0f, 1.0f);
 	
 	HRESULT hr;
 	hr	= m_pDev->CreateVertexBuffer(sizeof(SEFFECT_VERTEX)* _dwVerCount, 
@@ -1288,20 +1288,20 @@ bool	CEffectModel::CreatePlaneTriangle()
 #else
 
 	SEFFECT_VERTEX t_SEffVer[3];
-	t_SEffVer[0].m_SPos			= D3DXVECTOR3(-0.5f, 0.5f, 0);
+	t_SEffVer[0].m_SPos			= XMVECTOR3(-0.5f, 0.5f, 0);
 	t_SEffVer[0].m_fIdx			= 0;
 	t_SEffVer[0].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[0].m_SUV			= D3DXVECTOR2(0, 1.0f);
+	t_SEffVer[0].m_SUV			= XMVECTOR2(0, 1.0f);
 
-	t_SEffVer[1].m_SPos			= D3DXVECTOR3(0, -0.5f, 0);
+	t_SEffVer[1].m_SPos			= XMVECTOR3(0, -0.5f, 0);
 	t_SEffVer[1].m_fIdx			= 1;
 	t_SEffVer[1].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[1].m_SUV			= D3DXVECTOR2(0.5f, 0);
+	t_SEffVer[1].m_SUV			= XMVECTOR2(0.5f, 0);
 
-	t_SEffVer[2].m_SPos			= D3DXVECTOR3(0.5f, 0.5f, 0);
+	t_SEffVer[2].m_SPos			= XMVECTOR3(0.5f, 0.5f, 0);
 	t_SEffVer[2].m_fIdx			= 2;
 	t_SEffVer[2].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[2].m_SUV			= D3DXVECTOR2(1.0f, 1.0f);
+	t_SEffVer[2].m_SUV			= XMVECTOR2(1.0f, 1.0f);
 	
 	HRESULT hr;
 	hr	= m_pDev->CreateVertexBuffer(sizeof(SEFFECT_VERTEX)* _dwVerCount, 
@@ -1389,25 +1389,25 @@ bool	CEffectModel::CreateRect()
 #else
 
 	SEFFECT_VERTEX t_SEffVer[4];
-	t_SEffVer[0].m_SPos			= D3DXVECTOR3(-0.5f, 0, 0);
+	t_SEffVer[0].m_SPos			= XMVECTOR3(-0.5f, 0, 0);
 	t_SEffVer[0].m_fIdx			= 0;
 	t_SEffVer[0].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[0].m_SUV			= D3DXVECTOR2(0, 1.0f);
+	t_SEffVer[0].m_SUV			= XMVECTOR2(0, 1.0f);
 
-	t_SEffVer[1].m_SPos			= D3DXVECTOR3(-0.5f, 0, 1.0f);
+	t_SEffVer[1].m_SPos			= XMVECTOR3(-0.5f, 0, 1.0f);
 	t_SEffVer[1].m_fIdx			= 1;
 	t_SEffVer[1].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[1].m_SUV			= D3DXVECTOR2(0, 0);
+	t_SEffVer[1].m_SUV			= XMVECTOR2(0, 0);
 
-	t_SEffVer[2].m_SPos			= D3DXVECTOR3(0.5f, 0, 1.0f);
+	t_SEffVer[2].m_SPos			= XMVECTOR3(0.5f, 0, 1.0f);
 	t_SEffVer[2].m_fIdx			= 2;
 	t_SEffVer[2].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[2].m_SUV			= D3DXVECTOR2(1.0f, 0.0f);
+	t_SEffVer[2].m_SUV			= XMVECTOR2(1.0f, 0.0f);
 
-	t_SEffVer[3].m_SPos			= D3DXVECTOR3(0.5f, 0, 0);
+	t_SEffVer[3].m_SPos			= XMVECTOR3(0.5f, 0, 0);
 	t_SEffVer[3].m_fIdx			= 3;
 	t_SEffVer[3].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[3].m_SUV			= D3DXVECTOR2(1.0f, 1.0f);
+	t_SEffVer[3].m_SUV			= XMVECTOR2(1.0f, 1.0f);
 
 	HRESULT hr;
 	hr	= m_pDev->CreateVertexBuffer(sizeof(SEFFECT_VERTEX) * _dwVerCount, 
@@ -1498,25 +1498,25 @@ bool	CEffectModel::CreateRectZ()
 #else
 
 	SEFFECT_VERTEX t_SEffVer[4];
-	t_SEffVer[0].m_SPos			= D3DXVECTOR3(0, 0, 0);
+	t_SEffVer[0].m_SPos			= XMVECTOR3(0, 0, 0);
 	t_SEffVer[0].m_fIdx			= 0;
 	t_SEffVer[0].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[0].m_SUV			= D3DXVECTOR2(0, 1.0f);
+	t_SEffVer[0].m_SUV			= XMVECTOR2(0, 1.0f);
 
-	t_SEffVer[1].m_SPos			= D3DXVECTOR3(0, 0, 1);
+	t_SEffVer[1].m_SPos			= XMVECTOR3(0, 0, 1);
 	t_SEffVer[1].m_fIdx			= 1;
 	t_SEffVer[1].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[1].m_SUV			= D3DXVECTOR2(0, 0);
+	t_SEffVer[1].m_SUV			= XMVECTOR2(0, 0);
 
-	t_SEffVer[2].m_SPos			= D3DXVECTOR3(0, 1, 1);
+	t_SEffVer[2].m_SPos			= XMVECTOR3(0, 1, 1);
 	t_SEffVer[2].m_fIdx			= 2;
 	t_SEffVer[2].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[2].m_SUV			= D3DXVECTOR2(1.0f, 0.0f);
+	t_SEffVer[2].m_SUV			= XMVECTOR2(1.0f, 0.0f);
 
-	t_SEffVer[3].m_SPos			= D3DXVECTOR3(0, 1, 0);
+	t_SEffVer[3].m_SPos			= XMVECTOR3(0, 1, 0);
 	t_SEffVer[3].m_fIdx			= 3;
 	t_SEffVer[3].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[3].m_SUV			= D3DXVECTOR2(1.0f, 1.0f);
+	t_SEffVer[3].m_SUV			= XMVECTOR2(1.0f, 1.0f);
 
 	HRESULT hr;
 	hr	= m_pDev->CreateVertexBuffer(sizeof(SEFFECT_VERTEX) * _dwVerCount, 
@@ -1606,25 +1606,25 @@ bool	CEffectModel::CreatePlaneRect()
 #else
 
 	SEFFECT_VERTEX t_SEffVer[4];
-	t_SEffVer[0].m_SPos			= D3DXVECTOR3(-0.5f, -0.5f, 0);
+	t_SEffVer[0].m_SPos			= XMVECTOR3(-0.5f, -0.5f, 0);
 	t_SEffVer[0].m_fIdx			= 0;
 	t_SEffVer[0].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[0].m_SUV			= D3DXVECTOR2(0.0f, 1.0f);
+	t_SEffVer[0].m_SUV			= XMVECTOR2(0.0f, 1.0f);
 
-	t_SEffVer[1].m_SPos			= D3DXVECTOR3(-0.5f, 0.5f, 0);
+	t_SEffVer[1].m_SPos			= XMVECTOR3(-0.5f, 0.5f, 0);
 	t_SEffVer[1].m_fIdx			= 1;
 	t_SEffVer[1].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[1].m_SUV			= D3DXVECTOR2(0.0f, 0);
+	t_SEffVer[1].m_SUV			= XMVECTOR2(0.0f, 0);
 
-	t_SEffVer[2].m_SPos			= D3DXVECTOR3(0.5f, 0.5f, 0);
+	t_SEffVer[2].m_SPos			= XMVECTOR3(0.5f, 0.5f, 0);
 	t_SEffVer[2].m_fIdx			= 2;
 	t_SEffVer[2].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[2].m_SUV			= D3DXVECTOR2(1.0f, 0.0f);
+	t_SEffVer[2].m_SUV			= XMVECTOR2(1.0f, 0.0f);
 
-	t_SEffVer[3].m_SPos			= D3DXVECTOR3(0.5f, -0.5f, 0);
+	t_SEffVer[3].m_SPos			= XMVECTOR3(0.5f, -0.5f, 0);
 	t_SEffVer[3].m_fIdx			= 3;
 	t_SEffVer[3].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[3].m_SUV			= D3DXVECTOR2(1.0f, 1.0f);
+	t_SEffVer[3].m_SUV			= XMVECTOR2(1.0f, 1.0f);
 
 	HRESULT hr;
 	hr	= m_pDev->CreateVertexBuffer(sizeof(SEFFECT_VERTEX) * _dwVerCount, 
@@ -1687,30 +1687,30 @@ bool	CEffectModel::CreateCone(int nSeg,float fHei,float fRadius)
 	if (lwIsDx11Active() || !m_pRes)
 	{
 		int idx = 0;
-		const float rDeltaSegAngle = (2.0f * D3DX_PI / m_nSegments);
+		const float rDeltaSegAngle = (2.0f * XM_PI / m_nSegments);
 		const float rSegmentLength = 1.0f / (float)m_nSegments;
 		for (int nCurrentSegment = 0; nCurrentSegment <= m_nSegments && (DWORD)(idx + 1) < _dwVerCount; nCurrentSegment++)
 		{
 			const float xTop = 0.0f;
 			const float zTop = 0.0f;
-			m_vEffVer[idx].m_SPos = D3DXVECTOR3(xTop, zTop, m_rHeight);
-			m_vEffVer[idx].m_SUV = D3DXVECTOR2(1.0f - (rSegmentLength * (float)nCurrentSegment), 0.0f);
+			m_vEffVer[idx].m_SPos = XMVECTOR3(xTop, zTop, m_rHeight);
+			m_vEffVer[idx].m_SUV = XMVECTOR2(1.0f - (rSegmentLength * (float)nCurrentSegment), 0.0f);
 			m_vEffVer[idx].m_fIdx = (float)idx;
 			m_vEffVer[idx].m_dwDiffuse = 0xffffffff;
 			idx++;
 
 			const float x0 = m_rBotRadius * sinf(nCurrentSegment * rDeltaSegAngle);
 			const float z0 = m_rBotRadius * cosf(nCurrentSegment * rDeltaSegAngle);
-			m_vEffVer[idx].m_SPos = D3DXVECTOR3(x0, z0, 0.0f);
-			m_vEffVer[idx].m_SUV = D3DXVECTOR2(1.0f - (rSegmentLength * (float)nCurrentSegment), 1.5f);
+			m_vEffVer[idx].m_SPos = XMVECTOR3(x0, z0, 0.0f);
+			m_vEffVer[idx].m_SUV = XMVECTOR2(1.0f - (rSegmentLength * (float)nCurrentSegment), 1.5f);
 			m_vEffVer[idx].m_fIdx = (float)idx;
 			m_vEffVer[idx].m_dwDiffuse = 0xffffffff;
 			idx++;
 		}
 		for (DWORD n = (DWORD)idx; n < _dwVerCount; n++)
 		{
-			m_vEffVer[n].m_SPos = D3DXVECTOR3(0, 0, 0);
-			m_vEffVer[n].m_SUV = D3DXVECTOR2(0, 0);
+			m_vEffVer[n].m_SPos = XMVECTOR3(0, 0, 0);
+			m_vEffVer[n].m_SUV = XMVECTOR2(0, 0);
 			m_vEffVer[n].m_fIdx = (float)n;
 			m_vEffVer[n].m_dwDiffuse = 0xffffffff;
 		}
@@ -1741,9 +1741,9 @@ bool	CEffectModel::CreateCone(int nSeg,float fHei,float fRadius)
 	//lwVector2* pCoord = mi.texcoord0_seq;
 	int idx = 0;
 
-	float rDeltaSegAngle = (2.0f * D3DX_PI / m_nSegments);
+	float rDeltaSegAngle = (2.0f * XM_PI / m_nSegments);
 	float rSegmentLength = 1.0f / (float)m_nSegments;
-	float ny0 = (90.0f - (float)D3DXToDegree(atan(m_rHeight / m_rBotRadius))) / 90.0f;
+	float ny0 = (90.0f - (float)XMConvertToDegrees(atan(m_rHeight / m_rBotRadius))) / 90.0f;
 	for(nCurrentSegment = 0; nCurrentSegment <= m_nSegments && (DWORD)(idx + 1) < _dwVerCount; nCurrentSegment++)
 	{
 		float x0 = m_rBotRadius * sinf(nCurrentSegment * rDeltaSegAngle);
@@ -1754,8 +1754,8 @@ bool	CEffectModel::CreateCone(int nSeg,float fHei,float fRadius)
 		mi.vertex_seq[idx].y = 0.0f;
 		mi.texcoord0_seq[idx].x = 1.0f - (rSegmentLength * (float)nCurrentSegment);
 		mi.texcoord0_seq[idx].y = 0.0f;
-		m_vEffVer[idx].m_SPos = (D3DXVECTOR3)mi.vertex_seq[idx];
-		m_vEffVer[idx].m_SUV = (D3DXVECTOR2)mi.texcoord0_seq[idx];
+		m_vEffVer[idx].m_SPos = (XMVECTOR3)mi.vertex_seq[idx];
+		m_vEffVer[idx].m_SUV = (XMVECTOR2)mi.texcoord0_seq[idx];
 		idx++;
 
 		mi.vertex_seq[idx].x = x0;
@@ -1763,8 +1763,8 @@ bool	CEffectModel::CreateCone(int nSeg,float fHei,float fRadius)
 		mi.vertex_seq[idx].y = z0;
 		mi.texcoord0_seq[idx].x = 1.0f - (rSegmentLength * (float)nCurrentSegment);
 		mi.texcoord0_seq[idx].y = 1.5f;
-		m_vEffVer[idx].m_SPos = (D3DXVECTOR3)mi.vertex_seq[idx];
-		m_vEffVer[idx].m_SUV = (D3DXVECTOR2)mi.texcoord0_seq[idx];
+		m_vEffVer[idx].m_SPos = (XMVECTOR3)mi.vertex_seq[idx];
+		m_vEffVer[idx].m_SUV = (XMVECTOR2)mi.texcoord0_seq[idx];
 		idx++;
 	}
 	for (DWORD n = 0; n < _dwVerCount; n++)
@@ -1820,9 +1820,9 @@ bool	CEffectModel::CreateCone(int nSeg,float fHei,float fRadius)
 	//	return false;
 	//}
 
-	float rDeltaSegAngle = (2.0f * D3DX_PI / m_nSegments);
+	float rDeltaSegAngle = (2.0f * XM_PI / m_nSegments);
 	float rSegmentLength = 1.0f / (float)m_nSegments;
-	float ny0 = (90.0f - (float)D3DXToDegree(atan(m_rHeight / m_rBotRadius))) / 90.0f;
+	float ny0 = (90.0f - (float)XMConvertToDegrees(atan(m_rHeight / m_rBotRadius))) / 90.0f;
 
 	//For each segment, add a triangle to the sides triangle list
 	DWORD written = 0;
@@ -1942,30 +1942,30 @@ bool	CEffectModel::CreateCylinder(int nSeg,float fHei,float fTopRadius,float fBo
 	if (lwIsDx11Active() || !m_pRes)
 	{
 		int idx = 0;
-		const float rDeltaSegAngle = (2.0f * D3DX_PI / m_nSegments);
+		const float rDeltaSegAngle = (2.0f * XM_PI / m_nSegments);
 		const float rSegmentLength = 1.0f / (float)m_nSegments;
 		for (int nCurrentSegment = 0; nCurrentSegment <= m_nSegments && (DWORD)(idx + 1) < _dwVerCount; nCurrentSegment++)
 		{
 			float x0 = m_rRadius * sinf(nCurrentSegment * rDeltaSegAngle);
 			float z0 = m_rRadius * cosf(nCurrentSegment * rDeltaSegAngle);
-			m_vEffVer[idx].m_SPos = D3DXVECTOR3(x0, z0, m_rHeight);
-			m_vEffVer[idx].m_SUV = D3DXVECTOR2(1.0f - (rSegmentLength * (float)nCurrentSegment), 0.0f);
+			m_vEffVer[idx].m_SPos = XMVECTOR3(x0, z0, m_rHeight);
+			m_vEffVer[idx].m_SUV = XMVECTOR2(1.0f - (rSegmentLength * (float)nCurrentSegment), 0.0f);
 			m_vEffVer[idx].m_fIdx = (float)idx;
 			m_vEffVer[idx].m_dwDiffuse = 0xffffffff;
 			idx++;
 
 			x0 = m_rBotRadius * sinf(nCurrentSegment * rDeltaSegAngle);
 			z0 = m_rBotRadius * cosf(nCurrentSegment * rDeltaSegAngle);
-			m_vEffVer[idx].m_SPos = D3DXVECTOR3(x0, z0, 0.0f);
-			m_vEffVer[idx].m_SUV = D3DXVECTOR2(1.0f - (rSegmentLength * (float)nCurrentSegment), 1.0f);
+			m_vEffVer[idx].m_SPos = XMVECTOR3(x0, z0, 0.0f);
+			m_vEffVer[idx].m_SUV = XMVECTOR2(1.0f - (rSegmentLength * (float)nCurrentSegment), 1.0f);
 			m_vEffVer[idx].m_fIdx = (float)idx;
 			m_vEffVer[idx].m_dwDiffuse = 0xffffffff;
 			idx++;
 		}
 		for (DWORD n = (DWORD)idx; n < _dwVerCount; n++)
 		{
-			m_vEffVer[n].m_SPos = D3DXVECTOR3(0, 0, 0);
-			m_vEffVer[n].m_SUV = D3DXVECTOR2(0, 0);
+			m_vEffVer[n].m_SPos = XMVECTOR3(0, 0, 0);
+			m_vEffVer[n].m_SUV = XMVECTOR2(0, 0);
 			m_vEffVer[n].m_fIdx = (float)n;
 			m_vEffVer[n].m_dwDiffuse = 0xffffffff;
 		}
@@ -1996,9 +1996,9 @@ bool	CEffectModel::CreateCylinder(int nSeg,float fHei,float fTopRadius,float fBo
 	//lwVector2* pCoord = mi.texcoord0_seq;
 	int idx = 0;
 
-	float rDeltaSegAngle = (2.0f * D3DX_PI / m_nSegments);
+	float rDeltaSegAngle = (2.0f * XM_PI / m_nSegments);
 	float rSegmentLength = 1.0f / (float)m_nSegments;
-	float ny0 = (90.0f - (float)D3DXToDegree(atan(m_rHeight / m_rRadius))) / 90.0f;
+	float ny0 = (90.0f - (float)XMConvertToDegrees(atan(m_rHeight / m_rRadius))) / 90.0f;
 	for(nCurrentSegment = 0; nCurrentSegment <= m_nSegments && (DWORD)(idx + 1) < _dwVerCount; nCurrentSegment++)
 	{
 		float x0 = m_rRadius * sinf(nCurrentSegment * rDeltaSegAngle);
@@ -2008,12 +2008,12 @@ bool	CEffectModel::CreateCylinder(int nSeg,float fHei,float fTopRadius,float fBo
 		mi.vertex_seq[idx].z = m_rHeight;
 		mi.vertex_seq[idx].y = z0;
 
-		m_vEffVer[idx].m_SPos = (D3DXVECTOR3)mi.vertex_seq[idx];
+		m_vEffVer[idx].m_SPos = (XMVECTOR3)mi.vertex_seq[idx];
 
 		mi.texcoord0_seq[idx].x = 1.0f - (rSegmentLength * (float)nCurrentSegment);
 		mi.texcoord0_seq[idx].y = 0.0f;
 
-		m_vEffVer[idx].m_SUV = (D3DXVECTOR2)mi.texcoord0_seq[idx];
+		m_vEffVer[idx].m_SUV = (XMVECTOR2)mi.texcoord0_seq[idx];
 
 		idx++;
 
@@ -2023,12 +2023,12 @@ bool	CEffectModel::CreateCylinder(int nSeg,float fHei,float fTopRadius,float fBo
 		mi.vertex_seq[idx].z = 0.0f;
 		mi.vertex_seq[idx].y = z0;
 
-		m_vEffVer[idx].m_SPos = (D3DXVECTOR3)mi.vertex_seq[idx];
+		m_vEffVer[idx].m_SPos = (XMVECTOR3)mi.vertex_seq[idx];
 
 		mi.texcoord0_seq[idx].x = 1.0f - (rSegmentLength * (float)nCurrentSegment);
 		mi.texcoord0_seq[idx].y = 1.0f;
 
-		m_vEffVer[idx].m_SUV = (D3DXVECTOR2)mi.texcoord0_seq[idx];
+		m_vEffVer[idx].m_SUV = (XMVECTOR2)mi.texcoord0_seq[idx];
 
 		idx++;
 	}
@@ -2072,9 +2072,9 @@ bool	CEffectModel::CreateCylinder(int nSeg,float fHei,float fTopRadius,float fBo
 		return false;
 	}
 
-	float rDeltaSegAngle = (2.0f * D3DX_PI / m_nSegments);
+	float rDeltaSegAngle = (2.0f * XM_PI / m_nSegments);
 	float rSegmentLength = 1.0f / (float)m_nSegments;
-	float ny0 = (90.0f - (float)D3DXToDegree(atan(m_rHeight / m_rRadius))) / 90.0f;
+	float ny0 = (90.0f - (float)XMConvertToDegrees(atan(m_rHeight / m_rRadius))) / 90.0f;
 
 	//For each segment, add a triangle to the sides triangle list
 	DWORD written = 0;
@@ -2224,8 +2224,8 @@ bool	CEffectModel::CreateShadeModel(WORD wVerNum , WORD wFaceNum,int iGridCrossN
 	for( int n = 0; n < MAX_SHADER_VERNUM; n++)
 	{
 		pVertex[n].m_dwDiffuse = 0xffffffff;
-		pVertex[n].m_SPos = D3DXVECTOR3(0,0,0);//!����ȫ��Ϊ��
-		pVertex[n].m_SUV  = D3DXVECTOR2(0,0);
+		pVertex[n].m_SPos = XMVECTOR3(0,0,0);//!����ȫ��Ϊ��
+		pVertex[n].m_SUV  = XMVECTOR2(0,0);
 		pVertex[n].m_SUV2.x = (float)nIndex;
 		nIndex++;
 		pVertex[n].m_SUV2.y = (float)nIndex;
@@ -2469,9 +2469,9 @@ void	CEffectModel::RenderTob(ModelParam* last, ModelParam* next, float lerp)
 		return;
 	for (DWORD n = 0; n < _dwVerCount; ++n)
 	{
-		const D3DXVECTOR3& a = last->vecVer[n < nlast ? n : 0];
-		const D3DXVECTOR3& b = next->vecVer[n < nnext ? n : 0];
-		D3DXVec3Lerp(&m_vEffVer[n].m_SPos, &a, &b, lerp);
+		const XMVECTOR3& a = last->vecVer[n < nlast ? n : 0];
+		const XMVECTOR3& b = next->vecVer[n < nnext ? n : 0];
+		XMVector3Lerp(&m_vEffVer[n].m_SPos, &a, &b, lerp);
 	}
 	m_pDev->SetVertexShader(NULL);
 	m_pDev->SetFVF(EFFECT_VER_FVF);
@@ -2498,9 +2498,9 @@ void	ModelParam::Create()
 
 	int idx = 0;
 
-	float rDeltaSegAngle = (2.0f * D3DX_PI / iSegments);
+	float rDeltaSegAngle = (2.0f * XM_PI / iSegments);
 	float rSegmentLength = 1.0f / (float)iSegments;
-	float ny0 = (90.0f - (float)D3DXToDegree(atan(fHei / fTopRadius))) / 90.0f;
+	float ny0 = (90.0f - (float)XMConvertToDegrees(atan(fHei / fTopRadius))) / 90.0f;
 	(void)rSegmentLength;
 	(void)ny0;
 	for(nCurrentSegment = 0; nCurrentSegment <= iSegments; nCurrentSegment++)
@@ -2560,30 +2560,30 @@ void	CTexCoordList::CreateTranslateCoord()
 	m_wVerCount		= 4;
 	m_wCoordCount	= 2;
 	m_vecCoordList.resize(m_wCoordCount);
-	D3DXVECTOR2 t_SVer[4];
+	XMVECTOR2 t_SVer[4];
 	m_vecCoordList[0].resize(m_wVerCount);
 	m_vecCoordList[1].resize(m_wVerCount);
-	//t_SVer[0]			= D3DXVECTOR2(0, 0.0f);
-	//t_SVer[1]			= D3DXVECTOR2(0, 1.0f);
-	//t_SVer[2]			= D3DXVECTOR2(1.0f, 1.0f);
-	//t_SVer[3]			= D3DXVECTOR2(1.0f, 0.0f);
-	t_SVer[0]			= D3DXVECTOR2(0, 0.1f);
-	t_SVer[1]			= D3DXVECTOR2(0, 0.0f);
-	t_SVer[2]			= D3DXVECTOR2(1.0f, 0.0f);
-	t_SVer[3]			= D3DXVECTOR2(1.0f, 0.1f);
+	//t_SVer[0]			= XMVECTOR2(0, 0.0f);
+	//t_SVer[1]			= XMVECTOR2(0, 1.0f);
+	//t_SVer[2]			= XMVECTOR2(1.0f, 1.0f);
+	//t_SVer[3]			= XMVECTOR2(1.0f, 0.0f);
+	t_SVer[0]			= XMVECTOR2(0, 0.1f);
+	t_SVer[1]			= XMVECTOR2(0, 0.0f);
+	t_SVer[2]			= XMVECTOR2(1.0f, 0.0f);
+	t_SVer[3]			= XMVECTOR2(1.0f, 0.1f);
 
 	for(WORD i = 0; i < m_wVerCount; ++i)
 	{
 		m_vecCoordList[0][i] = t_SVer[i];
 	}
-	//t_SVer[0]			= D3DXVECTOR2(0, 0.1f);
-	//t_SVer[1]			= D3DXVECTOR2(0, 0.1f);
-	//t_SVer[2]			= D3DXVECTOR2(1.0f, 0.1f);
-	//t_SVer[3]			= D3DXVECTOR2(1.0f, 0.1f);
-	t_SVer[0]			= D3DXVECTOR2(0, 1.2f);
-	t_SVer[1]			= D3DXVECTOR2(0, 0.0f);
-	t_SVer[2]			= D3DXVECTOR2(1.0f, 0.0f);
-	t_SVer[3]			= D3DXVECTOR2(1.0f, 1.2f);
+	//t_SVer[0]			= XMVECTOR2(0, 0.1f);
+	//t_SVer[1]			= XMVECTOR2(0, 0.1f);
+	//t_SVer[2]			= XMVECTOR2(1.0f, 0.1f);
+	//t_SVer[3]			= XMVECTOR2(1.0f, 0.1f);
+	t_SVer[0]			= XMVECTOR2(0, 1.2f);
+	t_SVer[1]			= XMVECTOR2(0, 0.0f);
+	t_SVer[2]			= XMVECTOR2(1.0f, 0.0f);
+	t_SVer[3]			= XMVECTOR2(1.0f, 1.2f);
 
 	for(WORD i = 0; i < m_wVerCount; ++i)
 	{
@@ -2629,7 +2629,7 @@ void	CTexCoordList::Reset()
 	//}
 }
 
-void	CTexCoordList::GetCurCoord(S_BVECTOR<D3DXVECTOR2>& vecOutCoord, WORD& wCurIndex,float &fCurTime, float fDailTime)
+void	CTexCoordList::GetCurCoord(S_BVECTOR<XMVECTOR2>& vecOutCoord, WORD& wCurIndex,float &fCurTime, float fDailTime)
 {
 	if (m_wVerCount == 0 || m_wCoordCount == 0 || m_vecCoordList.empty())
 		return;
@@ -2645,7 +2645,7 @@ void	CTexCoordList::GetCurCoord(S_BVECTOR<D3DXVECTOR2>& vecOutCoord, WORD& wCurI
 		const WORD nsrc = (WORD)src.size();
 		for (WORD n = 0; n < ncopy; ++n)
 		{
-			D3DXVECTOR2* dst = vecOutCoord[n];
+			XMVECTOR2* dst = vecOutCoord[n];
 			if (!dst)
 				continue;
 			*dst = src[n < nsrc ? n : 0];
@@ -2682,12 +2682,12 @@ void	CTexCoordList::GetCurCoord(S_BVECTOR<D3DXVECTOR2>& vecOutCoord, WORD& wCurI
 	const WORD nb = (WORD)b.size();
 	for (WORD n = 0; n < ncopy; ++n)
 	{
-		D3DXVECTOR2* dst = vecOutCoord[n];
+		XMVECTOR2* dst = vecOutCoord[n];
 		if (!dst)
 			continue;
-		const D3DXVECTOR2& va = a[n < na ? n : 0];
-		const D3DXVECTOR2& vb = b[n < nb ? n : 0];
-		D3DXVec2Lerp(dst, &va, &vb, t_fLerp);
+		const XMVECTOR2& va = a[n < na ? n : 0];
+		const XMVECTOR2& vb = b[n < nb ? n : 0];
+		XMVector2Lerp(dst, &va, &vb, t_fLerp);
 	}
 }
 
@@ -2741,11 +2741,11 @@ void	CTexList::CreateSpliteTexture(int iRow, int iColnum)
 	float fw = 1.0f / iRow;
 	float fh = 1.0f / iColnum;
 
-	D3DXVECTOR2 suv[4];
-	suv[0]		= D3DXVECTOR2(0, 1.0f);
-	suv[1]		= D3DXVECTOR2(0, 0);
-	suv[2]		= D3DXVECTOR2(1.0f, 0.0f);
-	suv[3]		= D3DXVECTOR2(1.0f, 1.0f);
+	XMVECTOR2 suv[4];
+	suv[0]		= XMVECTOR2(0, 1.0f);
+	suv[1]		= XMVECTOR2(0, 0);
+	suv[2]		= XMVECTOR2(1.0f, 0.0f);
+	suv[3]		= XMVECTOR2(1.0f, 1.0f);
 
 	m_vecTexList.clear();
 	m_vecTexList.resize(m_wTexCount);
@@ -2798,7 +2798,7 @@ void	CTexList::GetTextureFromModel(CEffectModel *pCModel)
 	pCModel->Unlock();
 }
 
-void  CTexList::GetCurTexture(S_BVECTOR<D3DXVECTOR2>& coord, WORD&  wCurIndex,float& fCurTime, float fDailTime)
+void  CTexList::GetCurTexture(S_BVECTOR<XMVECTOR2>& coord, WORD&  wCurIndex,float& fCurTime, float fDailTime)
 {
 	if (coord.size() <= 0 || m_wTexCount == 0 || m_vecTexList.empty())
 		return;
@@ -2810,7 +2810,7 @@ void  CTexList::GetCurTexture(S_BVECTOR<D3DXVECTOR2>& coord, WORD&  wCurIndex,fl
 			return;
 		for(WORD i = 0; i < (WORD)coord.size(); ++i)
 		{
-			D3DXVECTOR2* dst = coord[i];
+			XMVECTOR2* dst = coord[i];
 			if (dst)
 				*dst = src[i < nsrc ? i : 0];
 		}
@@ -2834,7 +2834,7 @@ void  CTexList::GetCurTexture(S_BVECTOR<D3DXVECTOR2>& coord, WORD&  wCurIndex,fl
 		return;
 	for(WORD i = 0; i < (WORD)coord.size(); ++i)
 	{
-		D3DXVECTOR2* dst = coord[i];
+		XMVECTOR2* dst = coord[i];
 		if (dst)
 			*dst = src[i < nsrc ? i : 0];
 	}
@@ -2954,10 +2954,10 @@ CEffectFont::~CEffectFont()
 
 #ifdef USE_RENDER 
 bool	CEffectFont::CreateEffectFont(MPRender*  pDev,
-									  CMPResManger*pCResMagr,int iTexID,D3DXCOLOR dwColor, bool bUseBack,bool bmain)
+									  CMPResManger*pCResMagr,int iTexID,XMCOLORF dwColor, bool bUseBack,bool bmain)
 #else
 bool	CEffectFont::CreateEffectFont(IDirect3DDeviceX*  pDev,
-									  CMPResManger*pCResMagr,int iTexID,D3DXCOLOR dwColor, bool bUseBack,bool bmain)
+									  CMPResManger*pCResMagr,int iTexID,XMCOLORF dwColor, bool bUseBack,bool bmain)
 #endif
 {
 	//if(!pDev)
@@ -3066,25 +3066,25 @@ bool	CEffectFont::CreateEffectFont(IDirect3DDeviceX*  pDev,
 
 
 	//SEFFECT_VERTEX t_SEffVer[4];
-	t_SEffVer[0].m_SPos			= D3DXVECTOR3(-fx, -fy, 0);
+	t_SEffVer[0].m_SPos			= XMVECTOR3(-fx, -fy, 0);
 	t_SEffVer[0].m_fIdx			= 0;
 	t_SEffVer[0].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[0].m_SUV			= D3DXVECTOR2(0.0f, 1.0f);
+	t_SEffVer[0].m_SUV			= XMVECTOR2(0.0f, 1.0f);
 
-	t_SEffVer[1].m_SPos			= D3DXVECTOR3(-fx, fy, 0);
+	t_SEffVer[1].m_SPos			= XMVECTOR3(-fx, fy, 0);
 	t_SEffVer[1].m_fIdx			= 1;
 	t_SEffVer[1].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[1].m_SUV			= D3DXVECTOR2(0.0f, 0);
+	t_SEffVer[1].m_SUV			= XMVECTOR2(0.0f, 0);
 
-	t_SEffVer[2].m_SPos			= D3DXVECTOR3(fx, fy, 0);
+	t_SEffVer[2].m_SPos			= XMVECTOR3(fx, fy, 0);
 	t_SEffVer[2].m_fIdx			= 2;
 	t_SEffVer[2].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[2].m_SUV			= D3DXVECTOR2(1.0f, 0.0f);
+	t_SEffVer[2].m_SUV			= XMVECTOR2(1.0f, 0.0f);
 
-	t_SEffVer[3].m_SPos			= D3DXVECTOR3(fx, -fy, 0);
+	t_SEffVer[3].m_SPos			= XMVECTOR3(fx, -fy, 0);
 	t_SEffVer[3].m_fIdx			= 3;
 	t_SEffVer[3].m_dwDiffuse	= 0xffffffff;
-	t_SEffVer[3].m_SUV			= D3DXVECTOR2(1.0f, 1.0f);
+	t_SEffVer[3].m_SUV			= XMVECTOR2(1.0f, 1.0f);
 
 	//HRESULT hr;
 	//hr	= m_pDev->CreateVertexBuffer(sizeof(SEFFECT_VERTEX) * 4, 
@@ -3182,7 +3182,7 @@ void	CEffectFont::SetRenderText(char* pszText)
 	//_lpBackVB->Unlock();
 
 }
-void	CEffectFont::RenderEffectFontBack(D3DXMATRIX* pmat)
+void	CEffectFont::RenderEffectFontBack(XMMATRIX* pmat)
 {
 	//m_pDev->SetRenderState( D3DRS_TEXTUREFACTOR,
 	//	0xffffffff );
@@ -3207,12 +3207,12 @@ void	CEffectFont::RenderEffectFontBack(D3DXMATRIX* pmat)
 #endif
 
 	//m_pDev->SetStreamSource(0,_lpBackVB,sizeof(SEFFECT_VERTEX));
-	//D3DXMATRIX	mat;
-	//D3DXMatrixIdentity(&mat);
-	//D3DXMatrixScaling(&mat,(float)_vecCurText.size()+0.5f,2,1);
-	//D3DXMatrixTranslation(&matt,0,0,0 );
-	//D3DXMatrixMultiply(&mat,&mat,&matt);
-	//D3DXMatrixMultiply(&mat,&mat,pmat);
+	//XMMATRIX	mat;
+	//XMMatrixIdentity(&mat);
+	//XMMatrixScaling(&mat,(float)_vecCurText.size()+0.5f,2,1);
+	//XMMatrixTranslation(&matt,0,0,0 );
+	//XMMatrixMultiply(&mat,&mat,&matt);
+	//XMMatrixMultiply(&mat,&mat,pmat);
 #ifdef USE_RENDER
 	m_pDev->SetTransformWorld(pmat);
 
@@ -3226,7 +3226,7 @@ void	CEffectFont::RenderEffectFontBack(D3DXMATRIX* pmat)
 
 }
  
-void	CEffectFont::RenderEffectFont(D3DXMATRIX* pmat)
+void	CEffectFont::RenderEffectFont(XMMATRIX* pmat)
 {
 	if(_bUseBack)
 	{

@@ -125,7 +125,7 @@ void CGameApp::_HandleMsg(DWORD dwTypeID, WPARAM wParam, LPARAM lParam) {
 		g_Editor.Init((int)wParam);
 		CMapInfo* pInfo = GetMapInfo((int)wParam);
 		CCameraCtrl* pCam = g_pGameApp->GetMainCam();
-		auto v = D3DXVECTOR3((float)pInfo->nInitX, (float)pInfo->nInitY, 0);
+		auto v = XMVECTOR3((float)pInfo->nInitX, (float)pInfo->nInitY, 0);
 		pCam->SetFollowObj(v);
 		// EnableCameraFollow(FALSE);
 		break;

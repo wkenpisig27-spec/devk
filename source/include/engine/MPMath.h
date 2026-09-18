@@ -8,7 +8,7 @@
 #define MODUDLE_RNMath
 
 
-D3DXVECTOR3 ComputeNormalVector( D3DXVECTOR3 v1, D3DXVECTOR3 v2, D3DXVECTOR3 v3 );
+XMVECTOR3 ComputeNormalVector( XMVECTOR3 v1, XMVECTOR3 v2, XMVECTOR3 v3 );
 
 BOOL Get2DLineIntersection(float *pv1,float *pv2, float *pv3, float *pv4, float *pv0, BOOL bline);
 
@@ -26,7 +26,7 @@ inline float GetM2D(float *pfVector)
 
 
 //�㷨�����ߵ�����Ĺ�ϵ�� p1, p2 ,p �Ƿ���p1,p2֮�仹����p1,p2���⡣: added by billy
-inline bool IsPoint3Intersect(D3DXVECTOR3 *p, D3DXVECTOR3* p1, D3DXVECTOR3  *p2  )
+inline bool IsPoint3Intersect(XMVECTOR3 *p, XMVECTOR3* p1, XMVECTOR3  *p2  )
 {
 
 	if ( (( p->x - p1->x) *( p->x -p2->x)<0)  || (( p->y - p1->y) *( p->y -p2->y)<0 ) || (( p->z - p1->z) *( p->z -p2->z)<0 ) )
@@ -35,8 +35,8 @@ inline bool IsPoint3Intersect(D3DXVECTOR3 *p, D3DXVECTOR3* p1, D3DXVECTOR3  *p2 
 }
 
 //�㷨����������ཻ���  .: added by billy 
-inline  BOOL EdgeIntersectsFace( D3DXVECTOR3* pEdges, D3DXVECTOR3* pFacePoints, 
-                         D3DXPLANE* pPlane )
+inline  BOOL EdgeIntersectsFace( XMVECTOR3* pEdges, XMVECTOR3* pFacePoints, 
+                         XMPLANE* pPlane )
 {
    
 	//����߶�2�������һ�ߣ��򲻻��ཻ
@@ -53,16 +53,16 @@ inline  BOOL EdgeIntersectsFace( D3DXVECTOR3* pEdges, D3DXVECTOR3* pFacePoints,
     }
 
 	//�󽻵�
-    D3DXVECTOR3 ptIntersection;
-    if( NULL == D3DXPlaneIntersectLine( &ptIntersection, pPlane, &pEdges[0], &pEdges[1] ) )
+    XMVECTOR3 ptIntersection;
+    if( NULL == XMPlaneIntersectLine( &ptIntersection, pPlane, &pEdges[0], &pEdges[1] ) )
         return FALSE;
 
     // Project onto a 2D plane to make the pt-in-poly test easier
     FLOAT fAbsA = (pPlane->a > 0 ? pPlane->a : -pPlane->a);
     FLOAT fAbsB = (pPlane->b > 0 ? pPlane->b : -pPlane->b);
     FLOAT fAbsC = (pPlane->c > 0 ? pPlane->c : -pPlane->c);
-    D3DXVECTOR2 facePoints[4];
-    D3DXVECTOR2 point;
+    XMVECTOR2 facePoints[4];
+    XMVECTOR2 point;
     if( fAbsA > fAbsB && fAbsA > fAbsC )
     {
         // Plane is mainly pointing along X axis, so use Y and Z
@@ -149,10 +149,10 @@ inline float GetVectorAngle2D(float *pfVector1 , float *pfVector2)
 
 
 
-inline float DistanceFrom(const D3DXVECTOR3& v1, const D3DXVECTOR3& v2)
+inline float DistanceFrom(const XMVECTOR3& v1, const XMVECTOR3& v2)
 {
-	D3DXVECTOR3 v3 = v1 - v2;
-	return D3DXVec3Length(&v3);
+	XMVECTOR3 v3 = v1 - v2;
+	return XMVector3Length(&v3);
 }
 
 inline int GetVectorRelativePos(float *pfVector1 , float *pfVector2)
@@ -221,17 +221,17 @@ inline DWORD FLOAT2DWORD( FLOAT f ) { return *((DWORD*)&f); }
 
 #include <algorithm>
 
-int		BSplineCurveCV(int numCV, D3DXVECTOR3* vCtrl, D3DXVECTOR3* vertices, int *numVert, int nPrecise, int nStrideInFloat = 3);
+int		BSplineCurveCV(int numCV, XMVECTOR3* vCtrl, XMVECTOR3* vertices, int *numVert, int nPrecise, int nStrideInFloat = 3);
 
 inline float CalculateCircleRate( float fValue )
 {
 	fValue = (std::max)( 0.0f, (std::min)( fValue, 1.0f ) );
-	return ( sinf( ( fValue - 0.5f ) * D3DX_PI ) + 1.0f ) / 2;
+	return ( sinf( ( fValue - 0.5f ) * XM_PI ) + 1.0f ) / 2;
 }
 
 
 inline DWORD F2DW( FLOAT f ) { return *((DWORD*)&f); }
 
-int	GetSamplePointList(float fStartX, float fStartY, float fEndX, float fEndY, float fStep, float fStepShift, std::list<D3DXVECTOR3> &PointList);
+int	GetSamplePointList(float fStartX, float fStartY, float fEndX, float fEndY, float fStep, float fStepShift, std::list<XMVECTOR3> &PointList);
 
 #endif

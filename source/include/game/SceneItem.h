@@ -59,7 +59,7 @@ public:
 
 	bool GetItemHeight(float* out_height);
 	// lemon add@2005.1.5 for 爆料
-	void PlayArcAni(D3DXVECTOR3 vStart, D3DXVECTOR3 vEnd, float fVel = 0.01f, float fHei = 3.0f, DWORD dwDurationMs = 2000);
+	void PlayArcAni(XMVECTOR3 vStart, XMVECTOR3 vEnd, float fVel = 0.01f, float fHei = 3.0f, DWORD dwDurationMs = 2000);
 	bool IsMagneting() const { return _pArcTrack != nullptr; }
 
 protected:

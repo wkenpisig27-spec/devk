@@ -953,7 +953,7 @@ void CEquipMgr::SwitchMap() {
 }
 
 void CEquipMgr::RenderModel(int x, int y, CCharacter* original, CCharacter* model, int rotation, bool refresh) {
-	g_Render.LookAt(D3DXVECTOR3(11.0f, 36.0f, 10.0f), D3DXVECTOR3(8.70f, 12.0f, 8.0f), MPRender::VIEW_3DUI);
+	g_Render.LookAt(XMVECTOR3(11.0f, 36.0f, 10.0f), XMVECTOR3(8.70f, 12.0f, 8.0f), MPRender::VIEW_3DUI);
 
 	MPMatrix44 matrix = *model->GetMatrix();
 

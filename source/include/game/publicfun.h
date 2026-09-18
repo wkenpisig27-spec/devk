@@ -69,7 +69,7 @@ inline int FixAngle(int nAngle) {
 
 // 得到从x1到x2的角度
 inline int GetLineAngle(int x1, int y1, int x2, int y2) {
-	D3DXVECTOR2 dPosition = D3DXVECTOR2((float)x2, (float)y2) - D3DXVECTOR2((float)x1, (float)y1);
+	XMVECTOR2 dPosition = XMVECTOR2((float)x2, (float)y2) - XMVECTOR2((float)x1, (float)y1);
 	int nAngle = (int)(180.0f - Radian2Angle(atan2f(dPosition.x, dPosition.y)));
 
 	return FixAngle(nAngle);
@@ -112,10 +112,10 @@ inline BOOL IsValidHeight(DWORD dwCharType, float fHeight) {
 
 // 从x1, y1沿x2, y2方向移动dis后的坐标
 inline void GetDistancePos(int x1, int y1, int x2, int y2, int dis, int& x, int& y) {
-	D3DXVECTOR2 v1((float)x1, (float)y1);
-	D3DXVECTOR2 v2((float)x2, (float)y2);
-	D3DXVECTOR2 v3 = v2 - v1;
-	D3DXVec2Normalize(&v3, &v3);
+	XMVECTOR2 v1((float)x1, (float)y1);
+	XMVECTOR2 v2((float)x2, (float)y2);
+	XMVECTOR2 v3 = v2 - v1;
+	XMVector2Normalize(&v3, &v3);
 	v2 = v1 + v3 * (float)dis;
 	x = (int)v2.x;
 	y = (int)v2.y;
@@ -123,10 +123,10 @@ inline void GetDistancePos(int x1, int y1, int x2, int y2, int dis, int& x, int&
 
 // 从x1, y1沿x2, y2反方向移动dis后的坐标
 inline void GetInDistancePos(int x1, int y1, int x2, int y2, int dis, int& x, int& y) {
-	D3DXVECTOR2 v1((float)x1, (float)y1);
-	D3DXVECTOR2 v2((float)x2, (float)y2);
-	D3DXVECTOR2 v3 = v1 - v2;
-	D3DXVec2Normalize(&v3, &v3);
+	XMVECTOR2 v1((float)x1, (float)y1);
+	XMVECTOR2 v2((float)x2, (float)y2);
+	XMVECTOR2 v3 = v1 - v2;
+	XMVector2Normalize(&v3, &v3);
 	v2 = v1 + v3 * (float)dis;
 	x = (int)v2.x;
 	y = (int)v2.y;
@@ -134,18 +134,18 @@ inline void GetInDistancePos(int x1, int y1, int x2, int y2, int dis, int& x, in
 
 // 从x1, y1沿angle方向移动dis后的坐标
 inline void GetAnglePos(int x1, int y1, int Dist, int angle, int& x, int& y) {
-	D3DXVECTOR2 v1((float)x1, (float)y1);
-	D3DXVECTOR2 v2(0, 1);
-	D3DXVECTOR4 ver;
-	D3DXMATRIX mat;
-	D3DXMatrixRotationZ(&mat, (float(angle + 180)) * 0.01745329f);
-	D3DXVec2Transform(&ver, &v2, &mat);
+	XMVECTOR2 v1((float)x1, (float)y1);
+	XMVECTOR2 v2(0, 1);
+	XMVECTOR4 ver;
+	XMMATRIX mat;
+	XMMatrixRotationZ(&mat, (float(angle + 180)) * 0.01745329f);
+	XMVector2Transform(&ver, &v2, &mat);
 
 	v2.x = ver.x;
 	v2.y = ver.y;
 
 	const auto v3 = v2 * float(Dist);
-	D3DXVec2Add(&v1, &v1, &v3);
+	XMVector2Add(&v1, &v1, &v3);
 	x = (int)v1.x;
 	y = (int)v1.y;
 }

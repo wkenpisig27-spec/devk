@@ -10,21 +10,21 @@
 class MINDPOWER_API MPEffVector3
 {
 public:
-	D3DXVECTOR3 m_vSelf;
+	XMVECTOR3 m_vSelf;
 public:
 	MPEffVector3() : m_vSelf(0, 0, 0) {}
 	MPEffVector3(float x, float y, float z) : m_vSelf(x, y, z) {}
 	MPEffVector3(const MPEffVector3& v) : m_vSelf(v.m_vSelf) {}
-	MPEffVector3(const D3DXVECTOR3& dxV) : m_vSelf(dxV) {}
+	MPEffVector3(const XMVECTOR3& dxV) : m_vSelf(dxV) {}
 
-	D3DXVECTOR3& GetDXValue()	{ return m_vSelf; }
+	XMVECTOR3& GetDXValue()	{ return m_vSelf; }
 
 	// 数学操作
 	inline MPEffVector3 operator + ( const MPEffVector3& rkVector ) const
 	{
 		MPEffVector3 kSum;
 
-		D3DXVec3Add(&(kSum.m_vSelf), &m_vSelf, &(rkVector.m_vSelf));
+		XMVector3Add(&(kSum.m_vSelf), &m_vSelf, &(rkVector.m_vSelf));
 
 		return kSum;
 	}
@@ -32,7 +32,7 @@ public:
 
 	inline MPEffVector3& operator *= ( float fScalar )
 	{
-		D3DXVec3Scale(&m_vSelf, &m_vSelf, fScalar);
+		XMVector3Scale(&m_vSelf, &m_vSelf, fScalar);
 		return *this;
 	}
 
@@ -48,16 +48,16 @@ public:
 
 	inline MPEffVector3 crossProduct( const MPEffVector3& rkVector ) const
 	{
-		D3DXVECTOR3 kCross;
+		XMVECTOR3 kCross;
 		
-		D3DXVec3Cross( &kCross, &m_vSelf, &(rkVector.m_vSelf));
+		XMVector3Cross( &kCross, &m_vSelf, &(rkVector.m_vSelf));
 
 		return kCross;
 	}
 
 	inline float squaredLength () const
 	{
-		return D3DXVec3LengthSq(&m_vSelf);
+		return XMVector3LengthSq(&m_vSelf);
 	}
 
 	/** 单位化向量.
@@ -67,12 +67,12 @@ public:
 	*/
 	inline float normalise()
 	{
-		float fLength = D3DXVec3Length(&m_vSelf);
+		float fLength = XMVector3Length(&m_vSelf);
 
 		// 对于零向量也可以使用，不过并不改变任何值
 		if ( fLength > 1e-06f )
 		{
-			D3DXVec3Normalize(&m_vSelf, &m_vSelf);
+			XMVector3Normalize(&m_vSelf, &m_vSelf);
 		}
 
 		return fLength;

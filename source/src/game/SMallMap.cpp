@@ -35,7 +35,7 @@ HRESULT _DbgOuts(TCHAR* strFile, DWORD dwLine, HRESULT hr, TCHAR* strMsg) {
 	return hr;
 }
 
-BOOL PosInRange(D3DXVECTOR3& pos, D3DXVECTOR3& Org, float fRange) {
+BOOL PosInRange(XMVECTOR3& pos, XMVECTOR3& Org, float fRange) {
 	// return ((pos.x > (Org.x - fRange)) && (pos.x < (Org.x + fRange))
 	//	&& (pos.y > (Org.y - fRange)) && (pos.y > (Org.y + fRange)));
 	return (fabs(pos.x - Org.x) < fRange && fabs(pos.y - Org.y) < fRange);
@@ -61,13 +61,13 @@ bool CSMallWnd::Create(IDirect3DDeviceX* pDev, RECT rcwnd, CGameScene* pScene, i
 	_rcWnd = rcwnd;
 
 	m_pScene = pScene;
-	D3DXMatrixIdentity(&_matView);
+	XMMatrixIdentity(&_matView);
 
 	// LPDIRECT3DSURFACE8	pBackBuffer;
 	//   m_pDev->GetBackBuffer( 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer );
 	//   pBackBuffer->GetDesc( &_BufParam );
 	//   pBackBuffer->Release();
-	// D3DXMatrixOrthoLH(&_matProj, SHOWWIDTH,
+	// XMMatrixOrthoLH(&_matProj, SHOWWIDTH,
 	//	SHOWWIDTH, 0.0f, 500.0f);
 	int texsize = bksize;
 
@@ -144,13 +144,13 @@ bool CSMallWnd::Create(IDirect3DDeviceX* pDev, RECT rcwnd, CGameScene* pScene, i
 
 
 	_fDist = SHOWWIDTH;
-	_vEyePt = D3DXVECTOR3(0, 0, _fDist);
-	_vLookatPt = D3DXVECTOR3(0, 0, 0);
-	_vUpVec = D3DXVECTOR3(0, -1, 0);
+	_vEyePt = XMVECTOR3(0, 0, _fDist);
+	_vLookatPt = XMVECTOR3(0, 0, 0);
+	_vUpVec = XMVECTOR3(0, -1, 0);
 
-	D3DXMatrixLookAtLH(&_matView, &_vEyePt, &_vLookatPt, &_vUpVec);
+	XMMatrixLookAtLH(&_matView, &_vEyePt, &_vLookatPt, &_vUpVec);
 
-	D3DXMatrixPerspectiveFovLH(&_matProj, 1.570796f, 1, 0.0f, 1000.0f);
+	XMMatrixPerspectiveFovLH(&_matProj, 1.570796f, 1, 0.0f, 1000.0f);
 
 	// char* pszName = "/system/game.exe";
 	// int  nLen = lstrlen(pszName);
@@ -217,9 +217,9 @@ bool CSMallWnd::Create(IDirect3DDeviceX* pDev, RECT rcwnd, CGameScene* pScene, i
 ////	}
 //
 //	////static float fx = 2187.25f;
-//	////veye = D3DXVECTOR3(fx,2778.9127f,30);
-//	////vlookat = D3DXVECTOR3(fx,2778.9127f,0);
-//	////D3DXMatrixLookAtLH( &_matView2, &veye, &vlookat, &_vUpVec );
+//	////veye = XMVECTOR3(fx,2778.9127f,30);
+//	////vlookat = XMVECTOR3(fx,2778.9127f,0);
+//	////XMMatrixLookAtLH( &_matView2, &veye, &vlookat, &_vUpVec );
 //	////fx += 0.01f;
 //
 //	//RenderMask();
@@ -285,7 +285,7 @@ void CSMallWnd::Render() {
 	// RenderMask();
 }
 
-void CSMallWnd::MoveTo(D3DXVECTOR3& vPos, D3DXVECTOR3& vCameraDir, float fCameraAngle, float fCameradDist, int iAngle) {
+void CSMallWnd::MoveTo(XMVECTOR3& vPos, XMVECTOR3& vCameraDir, float fCameraAngle, float fCameradDist, int iAngle) {
 	if (fabs(vPos.x - _vEyePt.x) > 0.0f || fabs(vPos.y - _vEyePt.y) > 0.0f) {
 		_vEyePt = vPos;
 		_vLookatPt = vPos;
@@ -296,7 +296,7 @@ void CSMallWnd::MoveTo(D3DXVECTOR3& vPos, D3DXVECTOR3& vCameraDir, float fCamera
 
 	_vEyePt.z = _fDist;
 
-	D3DXMatrixLookAtLH(&_matView, &_vEyePt, &_vLookatPt, &_vUpVec);
+	XMMatrixLookAtLH(&_matView, &_vEyePt, &_vLookatPt, &_vUpVec);
 
 	_iAngle = iAngle;
 
@@ -307,15 +307,15 @@ void CSMallWnd::MoveTo(D3DXVECTOR3& vPos, D3DXVECTOR3& vCameraDir, float fCamera
 	//_vCameraTar1[0].z = 0.2f;
 	//_vCameraTar2[0] = _vCameraTar1[0];
 
-	// D3DXMATRIX	mat;
-	// D3DXVECTOR3 vdir;
+	// XMMATRIX	mat;
+	// XMVECTOR3 vdir;
 
-	// D3DXMatrixRotationZ(&mat,-0.5235987f);
-	// D3DXVec3TransformCoord(&vdir,&_vCameraDir,&mat);
+	// XMMatrixRotationZ(&mat,-0.5235987f);
+	// XMVector3TransformCoord(&vdir,&_vCameraDir,&mat);
 	//_vCameraTar1[1] = _vCameraTar1[0] + vdir * (fCameradDist * 2);
 
-	// D3DXMatrixRotationZ(&mat,0.5235987f);
-	// D3DXVec3TransformCoord(&vdir,&_vCameraDir,&mat);
+	// XMMatrixRotationZ(&mat,0.5235987f);
+	// XMVector3TransformCoord(&vdir,&_vCameraDir,&mat);
 	//_vCameraTar2[1] = _vCameraTar1[0] + vdir * (fCameradDist* 2);
 
 	_fCameraAngle = fCameraAngle;
@@ -341,13 +341,13 @@ CSMallMap2D::~CSMallMap2D(void) {
 }
 
 void CSMallMap2D::InitScene() {
-	D3DXVECTOR2 vUV[4] = {
-	    D3DXVECTOR2(0, 0),
-	    D3DXVECTOR2(1, 0),
-	    D3DXVECTOR2(1, 1),
-	    D3DXVECTOR2(0, 1),
+	XMVECTOR2 vUV[4] = {
+	    XMVECTOR2(0, 0),
+	    XMVECTOR2(1, 0),
+	    XMVECTOR2(1, 1),
+	    XMVECTOR2(0, 1),
 	};
-	_dwColor = D3DXCOLOR(1, 1, 1, 1);
+	_dwColor = XMCOLORF(1, 1, 1, 1);
 #ifdef MGR
 	MPIResourceMgr* res_mgr = g_Render.GetInterfaceMgr()->res_mgr;
 	res_mgr->CreateMesh(&_pVB);
@@ -424,7 +424,7 @@ void CSMallMap2D::InitScene() {
 	M2D_VER* pVertices;
 	_pVB->Lock(0, 0, (BYTE**)&pVertices, D3DLOCK_DISCARD);
 	for (int n = 0; n < 4; n++) {
-		(*pVertices++).SetValue(D3DXVECTOR4(0, 0, 0, float(n)), _dwColor, vUV[n]);
+		(*pVertices++).SetValue(XMVECTOR4(0, 0, 0, float(n)), _dwColor, vUV[n]);
 	}
 	_pVB->Unlock();
 
@@ -437,10 +437,10 @@ void CSMallMap2D::InitScene() {
 
 	M2D_VER* pVers;
 	_pVBWnd->Lock(0, 0, (BYTE**)&pVers, D3DLOCK_DISCARD);
-	(*pVers++).SetValue(D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.top), 0.9f, 1), 0xffffffff, vUV[0]);
-	(*pVers++).SetValue(D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.top), 0.9f, 1), 0xffffffff, vUV[1]);
-	(*pVers++).SetValue(D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.bottom), 0.9f, 1), 0xffffffff, vUV[2]);
-	(*pVers++).SetValue(D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.bottom), 0.9f, 1), 0xffffffff, vUV[3]);
+	(*pVers++).SetValue(XMVECTOR4(float(_rcWnd.left), float(_rcWnd.top), 0.9f, 1), 0xffffffff, vUV[0]);
+	(*pVers++).SetValue(XMVECTOR4(float(_rcWnd.right), float(_rcWnd.top), 0.9f, 1), 0xffffffff, vUV[1]);
+	(*pVers++).SetValue(XMVECTOR4(float(_rcWnd.right), float(_rcWnd.bottom), 0.9f, 1), 0xffffffff, vUV[2]);
+	(*pVers++).SetValue(XMVECTOR4(float(_rcWnd.left), float(_rcWnd.bottom), 0.9f, 1), 0xffffffff, vUV[3]);
 	_pVBWnd->Unlock();
 #endif
 
@@ -530,8 +530,8 @@ void CSMallMap2D::InitScene() {
 void CSMallMap2D::RenderScene() {
 	m_pScene = g_pGameApp->GetCurScene();
 	// g_Render.GetDevice()->Clear(0,0,D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER,0xff000000,1,0);
-	D3DXMATRIX matIdentity;
-	D3DXMatrixIdentity(&matIdentity);
+	XMMATRIX matIdentity;
+	XMMatrixIdentity(&matIdentity);
 	// g_Render.SetRenderState( D3DRS_MULTISAMPLEANTIALIAS,FALSE);
 	g_Render.SetRenderState(D3DRS_ZENABLE, FALSE);
 	g_Render.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
@@ -580,7 +580,7 @@ void CSMallMap2D::RenderScene() {
 		g_Render.SetTransformProj(&_matProj);
 		g_Render.SetTransformView(&_matView);
 	} else {
-		D3DXMATRIX vpPose;
+		XMMATRIX vpPose;
 		const auto matrix = _matView * _matProj;
 		g_Render.SetVertexShader(ResMgr.GetMinimapVS());
 		g_Render.SetVertexDeclaration(ResMgr.GetMinimapVDecl());
@@ -666,22 +666,22 @@ void CSMallMap2D::RenderScene() {
 #else
 				_pVB->Lock(0, 0, (BYTE**)&pVertices, 0);
 #endif
-				(*pVertices++).m_vPos = D3DXVECTOR4(float(sx), float(sy), 0, 1);
-				(*pVertices++).m_vPos = D3DXVECTOR4(float(sx) + SHOWRSIZE, float(sy), 0, 1);
-				(*pVertices++).m_vPos = D3DXVECTOR4(float(sx) + SHOWRSIZE, float(sy) + SHOWRSIZE, 0, 1);
-				(*pVertices++).m_vPos = D3DXVECTOR4(float(sx), float(sy) + SHOWRSIZE, 0, 1);
+				(*pVertices++).m_vPos = XMVECTOR4(float(sx), float(sy), 0, 1);
+				(*pVertices++).m_vPos = XMVECTOR4(float(sx) + SHOWRSIZE, float(sy), 0, 1);
+				(*pVertices++).m_vPos = XMVECTOR4(float(sx) + SHOWRSIZE, float(sy) + SHOWRSIZE, 0, 1);
+				(*pVertices++).m_vPos = XMVECTOR4(float(sx), float(sy) + SHOWRSIZE, 0, 1);
 #ifdef MGR
 				_lpSVB->Unlock();
 #else
 				_pVB->Unlock();
 #endif
 			} else {
-				g_Render.SetVertexShaderConstantF(9, D3DXVECTOR4(float(sx), float(sy), 0, 1), 1);
-				g_Render.SetVertexShaderConstantF(10, D3DXVECTOR4(float(sx) + SHOWRSIZE, float(sy), 0, 1), 1);
+				g_Render.SetVertexShaderConstantF(9, XMVECTOR4(float(sx), float(sy), 0, 1), 1);
+				g_Render.SetVertexShaderConstantF(10, XMVECTOR4(float(sx) + SHOWRSIZE, float(sy), 0, 1), 1);
 
-				g_Render.SetVertexShaderConstantF(11, D3DXVECTOR4(float(sx) + SHOWRSIZE, float(sy) + SHOWRSIZE, 0, 1),
+				g_Render.SetVertexShaderConstantF(11, XMVECTOR4(float(sx) + SHOWRSIZE, float(sy) + SHOWRSIZE, 0, 1),
 				                                  1);
-				g_Render.SetVertexShaderConstantF(12, D3DXVECTOR4(float(sx), float(sy) + SHOWRSIZE, 0, 1), 1);
+				g_Render.SetVertexShaderConstantF(12, XMVECTOR4(float(sx), float(sy) + SHOWRSIZE, 0, 1), 1);
 			}
 #ifdef MGR
 			_pVB->DrawSubset(0);
@@ -776,7 +776,7 @@ void CSMallMap2D::RenderScene() {
 			if (pscobj /*&& pscobj->IsValid()*/ && pInfo->nFlag != 0) {
 				if (PosInRange(pscobj->getPos(), _vEyePt, SHOWRSIZE)) {
 					_Cha.setTexture(15);
-					_Cha.setAngle((int)D3DX_PI);
+					_Cha.setAngle((int)XM_PI);
 					_Cha.setPos(pscobj->getPos());
 					_Cha.setScaling(0.5f, 0.5f, 0.5f);
 					_Cha.setColor(0xffffffff);
@@ -851,11 +851,11 @@ void CSMallMap2D::RenderScene() {
 	}
 
 	// g_Render.SetTexture(0, NULL);
-	// D3DXMATRIX matIden;
+	// XMMATRIX matIden;
 
-	////D3DXMatrixRotationZ(&matIden,0.1f);
+	////XMMatrixRotationZ(&matIden,0.1f);
 	// GetMatrixRotation(&matIden,&_vCameraPos,\
-	//	&D3DXVECTOR3(0,0,1),_fCameraAngle);
+	//	&XMVECTOR3(0,0,1),_fCameraAngle);
 
 
 	// g_Render.SetTransformWorld(&matIden);
@@ -873,8 +873,8 @@ void CSMallMap2D::RenderScene() {
 	// int r = 0;
 	// for (; r < 5; ++r)
 	//{
-	//	g_Render.DrawPrimitiveUP(D3DPT_LINELIST,1,&_vCameraTar1,sizeof(D3DXVECTOR3));
-	//	g_Render.DrawPrimitiveUP(D3DPT_LINELIST,1,&_vCameraTar2,sizeof(D3DXVECTOR3));
+	//	g_Render.DrawPrimitiveUP(D3DPT_LINELIST,1,&_vCameraTar1,sizeof(XMVECTOR3));
+	//	g_Render.DrawPrimitiveUP(D3DPT_LINELIST,1,&_vCameraTar2,sizeof(XMVECTOR3));
 	// }
 
 	// g_Render.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
@@ -886,8 +886,8 @@ void CSMallMap2D::RenderScene() {
 }
 
 void CSMallMap2D::RenderMask() {
-	D3DXMATRIX matIdentity;
-	D3DXMatrixIdentity(&matIdentity);
+	XMMATRIX matIdentity;
+	XMMatrixIdentity(&matIdentity);
 	// g_Render.SetRenderState( D3DRS_MULTISAMPLEANTIALIAS,FALSE);
 	g_Render.SetRenderState(D3DRS_ZENABLE, FALSE);
 	g_Render.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
@@ -981,40 +981,40 @@ void CAniWnd::Play(DWORD dwPlayTime) {
 
 void CAniWnd::ResetTime(DWORD dwTime) {
 	_fPlayTime = (float)dwTime / 1000;
-	_vSave[0].vPos = D3DXVECTOR3(0, 0, 0);
+	_vSave[0].vPos = XMVECTOR3(0, 0, 0);
 	_vSave[0].dwColor = 0xffffffff;
 
-	_vSave[1].vPos = D3DXVECTOR3(0, -30, 0);
+	_vSave[1].vPos = XMVECTOR3(0, -30, 0);
 	_vSave[1].dwColor = 0xffffffff;
 
-	_vSave[2].vPos = D3DXVECTOR3(30, 0, 0);
+	_vSave[2].vPos = XMVECTOR3(30, 0, 0);
 	_vSave[2].dwColor = 0xffffffff;
 
-	_vSave[3].vPos = D3DXVECTOR3(0, 30, 0);
+	_vSave[3].vPos = XMVECTOR3(0, 30, 0);
 	_vSave[3].dwColor = 0xffffffff;
 
-	_vSave[4].vPos = D3DXVECTOR3(-30, 0, 0);
+	_vSave[4].vPos = XMVECTOR3(-30, 0, 0);
 	_vSave[4].dwColor = 0xffffffff;
 
-	_vSave[5].vPos = D3DXVECTOR3(0, -30, 0);
+	_vSave[5].vPos = XMVECTOR3(0, -30, 0);
 	_vSave[5].dwColor = 0xffffffff;
 
-	_vVertex[0].vPos = D3DXVECTOR3(0, 0, 0);
+	_vVertex[0].vPos = XMVECTOR3(0, 0, 0);
 	_vVertex[0].dwColor = 0xffffffff;
 
-	_vVertex[1].vPos = D3DXVECTOR3(0, -30, 0);
+	_vVertex[1].vPos = XMVECTOR3(0, -30, 0);
 	_vVertex[1].dwColor = 0xffffffff;
 
-	_vVertex[2].vPos = D3DXVECTOR3(30, 0, 0);
+	_vVertex[2].vPos = XMVECTOR3(30, 0, 0);
 	_vVertex[2].dwColor = 0xffffffff;
 
-	_vVertex[3].vPos = D3DXVECTOR3(0, 30, 0);
+	_vVertex[3].vPos = XMVECTOR3(0, 30, 0);
 	_vVertex[3].dwColor = 0xffffffff;
 
-	_vVertex[4].vPos = D3DXVECTOR3(-30, 0, 0);
+	_vVertex[4].vPos = XMVECTOR3(-30, 0, 0);
 	_vVertex[4].dwColor = 0xffffffff;
 
-	_vVertex[5].vPos = D3DXVECTOR3(0, -30, 0);
+	_vVertex[5].vPos = XMVECTOR3(0, -30, 0);
 	_vVertex[5].dwColor = 0xffffffff;
 
 	_fCurAngle = 0; // 6.283185f / (float)_dwTime;
@@ -1028,10 +1028,10 @@ void CAniWnd::FrameMove(DWORD dwDailTime) {
 	_fCurAngle = (_fCurTime / _fPlayTime) * 6.283185f;
 	//_fCurAngle = 0.12f;
 
-	D3DXVECTOR4 ver;
-	D3DXMATRIX mat;
-	D3DXMatrixRotationZ(&mat, _fCurAngle);
-	D3DXVec3Transform(&ver, &_vSave[1].vPos, &mat);
+	XMVECTOR4 ver;
+	XMMATRIX mat;
+	XMMatrixRotationZ(&mat, _fCurAngle);
+	XMVector3Transform(&ver, &_vSave[1].vPos, &mat);
 
 	_vVertex[1].vPos.x = ver.x;
 	_vVertex[1].vPos.y = ver.y;
@@ -1143,11 +1143,11 @@ void CAniWnd::MoveWnd(int x, int y) {
 	_rcWnd.right = x + w;
 	_rcWnd.bottom = y + h;
 
-	D3DXVECTOR2 vUV[4] = {
-	    D3DXVECTOR2(0, 0),
-	    D3DXVECTOR2(1, 0),
-	    D3DXVECTOR2(1, 1),
-	    D3DXVECTOR2(0, 1),
+	XMVECTOR2 vUV[4] = {
+	    XMVECTOR2(0, 0),
+	    XMVECTOR2(1, 0),
+	    XMVECTOR2(1, 1),
+	    XMVECTOR2(0, 1),
 	};
 	M2D_AVER* pVers;
 #ifdef MGR
@@ -1156,7 +1156,7 @@ void CAniWnd::MoveWnd(int x, int y) {
 #else
 	_pVBWnd->Lock(0, 0, (BYTE**)&pVers, D3DLOCK_DISCARD);
 #endif
-	D3DXVECTOR4 v[] = {
+	XMVECTOR4 v[] = {
 	    {float(_rcWnd.left), float(_rcWnd.top), 0.9f, 1},     {float(_rcWnd.right), float(_rcWnd.top), 0.9f, 1},
 	    {float(_rcWnd.right), float(_rcWnd.bottom), 0.9f, 1}, {float(_rcWnd.left), float(_rcWnd.bottom), 0.9f, 1},
 	    {float(_rcWnd.left), float(_rcWnd.top), 0.9f, 1},     {float(_rcWnd.right), float(_rcWnd.top), 0.9f, 1},
@@ -1180,11 +1180,11 @@ void CAniWnd::MoveWnd(int x, int y) {
 }
 
 void CAniWnd::InitScene() {
-	D3DXVECTOR2 vUV[4] = {
-	    D3DXVECTOR2(0, 0),
-	    D3DXVECTOR2(1, 0),
-	    D3DXVECTOR2(1, 1),
-	    D3DXVECTOR2(0, 1),
+	XMVECTOR2 vUV[4] = {
+	    XMVECTOR2(0, 0),
+	    XMVECTOR2(1, 0),
+	    XMVECTOR2(1, 1),
+	    XMVECTOR2(0, 1),
 	};
 #ifdef MGR
 	MPIResourceMgr* res_mgr = g_Render.GetInterfaceMgr()->res_mgr;
@@ -1242,21 +1242,21 @@ void CAniWnd::InitScene() {
 
 	M2D_AVER* pVers;
 	_pVBWnd->Lock(0, 0, (BYTE**)&pVers, D3DLOCK_DISCARD);
-	_vWndVer[0].SetValue(D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.top), 0.9f, 1), 0x80ffffff, vUV[0]);
-	_vWndVer[0].SetValue(D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.top), 0.9f, 1), 0x80ffffff, vUV[1]);
-	_vWndVer[0].SetValue(D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.bottom), 0.9f, 1), 0x80ffffff, vUV[2]);
-	_vWndVer[0].SetValue(D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.bottom), 0.9f, 1), 0x80ffffff, vUV[3]);
+	_vWndVer[0].SetValue(XMVECTOR4(float(_rcWnd.left), float(_rcWnd.top), 0.9f, 1), 0x80ffffff, vUV[0]);
+	_vWndVer[0].SetValue(XMVECTOR4(float(_rcWnd.right), float(_rcWnd.top), 0.9f, 1), 0x80ffffff, vUV[1]);
+	_vWndVer[0].SetValue(XMVECTOR4(float(_rcWnd.right), float(_rcWnd.bottom), 0.9f, 1), 0x80ffffff, vUV[2]);
+	_vWndVer[0].SetValue(XMVECTOR4(float(_rcWnd.left), float(_rcWnd.bottom), 0.9f, 1), 0x80ffffff, vUV[3]);
 
-	(*pVers++).SetValue(D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.top), 0.9f, 1), 0x80ffffff, vUV[0]);
-	(*pVers++).SetValue(D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.top), 0.9f, 1), 0x80ffffff, vUV[1]);
-	(*pVers++).SetValue(D3DXVECTOR4(float(_rcWnd.right), float(_rcWnd.bottom), 0.9f, 1), 0x80ffffff, vUV[2]);
-	(*pVers++).SetValue(D3DXVECTOR4(float(_rcWnd.left), float(_rcWnd.bottom), 0.9f, 1), 0x80ffffff, vUV[3]);
+	(*pVers++).SetValue(XMVECTOR4(float(_rcWnd.left), float(_rcWnd.top), 0.9f, 1), 0x80ffffff, vUV[0]);
+	(*pVers++).SetValue(XMVECTOR4(float(_rcWnd.right), float(_rcWnd.top), 0.9f, 1), 0x80ffffff, vUV[1]);
+	(*pVers++).SetValue(XMVECTOR4(float(_rcWnd.right), float(_rcWnd.bottom), 0.9f, 1), 0x80ffffff, vUV[2]);
+	(*pVers++).SetValue(XMVECTOR4(float(_rcWnd.left), float(_rcWnd.bottom), 0.9f, 1), 0x80ffffff, vUV[3]);
 
 	_pVBWnd->Unlock();
 
 #endif
 	SetDist(10);
-	D3DXVECTOR3 v[] = {D3DXVECTOR3(0, 0, 0), D3DXVECTOR3(0, 1, 0)};
+	XMVECTOR3 v[] = {XMVECTOR3(0, 0, 0), XMVECTOR3(0, 1, 0)};
 	MoveTo(v[0], v[1], 7, 0);
 }
 
@@ -1270,8 +1270,8 @@ void CAniWnd::RenderScene() {
 			dev->Clear(0, 0, D3DCLEAR_TARGET, 0x00000000, 0, 0);
 #endif
 	}
-	D3DXMATRIX matIdentity;
-	D3DXMatrixIdentity(&matIdentity);
+	XMMATRIX matIdentity;
+	XMMatrixIdentity(&matIdentity);
 	g_Render.SetRenderState(D3DRS_ZENABLE, FALSE);
 	g_Render.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
@@ -1295,8 +1295,8 @@ void CAniWnd::RenderScene() {
 	g_Render.SetFVF(D3DFVF_CLOCK);
 	g_Render.SetTransformWorld(&matIdentity);
 	if (d11) {
-		D3DXMATRIX proj;
-		D3DXMatrixPerspectiveFovLH(&proj, 1.570796f, 1.0f, 0.1f, 1000.0f);
+		XMMATRIX proj;
+		XMMatrixPerspectiveFovLH(&proj, 1.570796f, 1.0f, 0.1f, 1000.0f);
 		g_Render.SetTransformProj(&proj);
 	} else {
 		g_Render.SetTransformProj(&_matProj);
@@ -1363,16 +1363,16 @@ CCharacter2D::CCharacter2D(void) {
 	_bLoad = false;
 	_pModel = NULL;
 	//_dwColor = 0xffffffff;
-	_vPos = D3DXVECTOR3(0, 0, 0);
+	_vPos = XMVECTOR3(0, 0, 0);
 
 	_pChaPart = new stNetTeamChaPart;
 	memset(_pChaPart, 0, sizeof(stNetTeamChaPart));
 
-	D3DXVECTOR3 up = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-	D3DXVECTOR3 eye = D3DXVECTOR3(0, 1, 0);
-	D3DXVECTOR3 target = D3DXVECTOR3(0.0f, 0.0f, 0);
-	D3DXMatrixLookAtLH(&_mat3DUIView, &eye, &target, &up);
-	D3DXMatrixPerspectiveFovLH(&_mat3DUIProj, D3DX_PI * 0.12f, 1, 1, 1000);
+	XMVECTOR3 up = XMVECTOR3(0.0f, 0.0f, 1.0f);
+	XMVECTOR3 eye = XMVECTOR3(0, 1, 0);
+	XMVECTOR3 target = XMVECTOR3(0.0f, 0.0f, 0);
+	XMMatrixLookAtLH(&_mat3DUIView, &eye, &target, &up);
+	XMMatrixPerspectiveFovLH(&_mat3DUIProj, XM_PI * 0.12f, 1, 1, 1000);
 }
 
 CCharacter2D::~CCharacter2D(void) {
@@ -1382,18 +1382,18 @@ CCharacter2D::~CCharacter2D(void) {
 
 void CCharacter2D::Create(RECT rc) {
 	/*
-	D3DXVECTOR2 vUV[4] = {
-	    D3DXVECTOR2(0,0),
-	        D3DXVECTOR2(1,0),
-	        D3DXVECTOR2(1,1),
-	        D3DXVECTOR2(0,1),
+	XMVECTOR2 vUV[4] = {
+	    XMVECTOR2(0,0),
+	        XMVECTOR2(1,0),
+	        XMVECTOR2(1,1),
+	        XMVECTOR2(0,1),
 	};
 	*/
 
-	//_vWndVer[0].m_vPos = D3DXVECTOR4(float(_rcWnd.left),float(_rcWnd.top),0.9f,1);
-	//_vWndVer[1].m_vPos = D3DXVECTOR4(float(_rcWnd.right),float(_rcWnd.top),0.9f,1);
-	//_vWndVer[2].m_vPos = D3DXVECTOR4(float(_rcWnd.right),float(_rcWnd.bottom),0.9f,1);
-	//_vWndVer[3].m_vPos = D3DXVECTOR4(float(_rcWnd.left),float(_rcWnd.bottom),0.9f,1);
+	//_vWndVer[0].m_vPos = XMVECTOR4(float(_rcWnd.left),float(_rcWnd.top),0.9f,1);
+	//_vWndVer[1].m_vPos = XMVECTOR4(float(_rcWnd.right),float(_rcWnd.top),0.9f,1);
+	//_vWndVer[2].m_vPos = XMVECTOR4(float(_rcWnd.right),float(_rcWnd.bottom),0.9f,1);
+	//_vWndVer[3].m_vPos = XMVECTOR4(float(_rcWnd.left),float(_rcWnd.bottom),0.9f,1);
 
 	//_vWndVer[0].m_fUV = vUV[0];
 	//_vWndVer[1].m_fUV = vUV[1] ;
@@ -1532,7 +1532,7 @@ void CCharacter2D::LoadCha(DWORD dwID, bool IsMonster) {
 		return;
 	}
 	_vPos.z = -pInfo->fHeight;
-	// pCha->SetYaw( D3DX_PI );
+	// pCha->SetYaw( XM_PI );
 	if (pInfo->sModel == 139)
 		pCha->PlayPose(1, PLAY_LOOP, -1, 32, 1, 5, true);
 	else
@@ -1555,24 +1555,24 @@ void CCharacter2D::LoadCha(DWORD dwID, bool IsMonster) {
 		pChaAttr = GetClientAttr(0);
 	}
 
-	D3DXVECTOR3 up = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-	// D3DXVECTOR3	eye = D3DXVECTOR3( -0.6f,1.2f, -fz[dwID - 1] +0.3f);
-	// D3DXVECTOR3	target = D3DXVECTOR3( 0.0f, 0.0f,-fz[dwID - 1] -0.1f);
+	XMVECTOR3 up = XMVECTOR3(0.0f, 0.0f, 1.0f);
+	// XMVECTOR3	eye = XMVECTOR3( -0.6f,1.2f, -fz[dwID - 1] +0.3f);
+	// XMVECTOR3	target = XMVECTOR3( 0.0f, 0.0f,-fz[dwID - 1] -0.1f);
 
-	D3DXVECTOR3 eye(0, 1, 0);
-	D3DXMATRIX mat;
-	D3DXMatrixRotationZ(&mat, float(pChaAttr->sTeamAngle) * 0.01745329f);
-	D3DXVec3TransformCoord(&eye, &eye, &mat);
+	XMVECTOR3 eye(0, 1, 0);
+	XMMATRIX mat;
+	XMMatrixRotationZ(&mat, float(pChaAttr->sTeamAngle) * 0.01745329f);
+	XMVector3TransformCoord(&eye, &eye, &mat);
 	eye *= pChaAttr->fTeamDis;
 	eye.z = 0.4f;
 	_vPos.z += pChaAttr->fTeamHei;
-	D3DXVECTOR3 target = D3DXVECTOR3(0.0f, 0.0f, 0);
+	XMVECTOR3 target = XMVECTOR3(0.0f, 0.0f, 0);
 
-	D3DXMatrixLookAtLH(&_mat3DUIView, &eye, &target, &up);
+	XMMatrixLookAtLH(&_mat3DUIView, &eye, &target, &up);
 	if (IsMonster) {
-		D3DXMatrixPerspectiveFovLH(&_mat3DUIProj, D3DX_PI * 0.14f, 1, 1, 1000);
+		XMMatrixPerspectiveFovLH(&_mat3DUIProj, XM_PI * 0.14f, 1, 1, 1000);
 	} else {
-		D3DXMatrixPerspectiveFovLH(&_mat3DUIProj, D3DX_PI * 0.12f, 1, 1, 1000);
+		XMMatrixPerspectiveFovLH(&_mat3DUIProj, XM_PI * 0.12f, 1, 1, 1000);
 	}
 	_bLoad = true;
 }
@@ -1634,11 +1634,11 @@ void CCharacter2D::UpdataFace(stNetTeamChaPart& stPart, bool IsPlayer) {
 CBigMap::CBigMap() {
 	_dwColor = 0xffffffff;
 
-	D3DXVECTOR2 vUV[4] = {
-	    D3DXVECTOR2(0, 0),
-	    D3DXVECTOR2(1, 0),
-	    D3DXVECTOR2(1, 1),
-	    D3DXVECTOR2(0, 1),
+	XMVECTOR2 vUV[4] = {
+	    XMVECTOR2(0, 0),
+	    XMVECTOR2(1, 0),
+	    XMVECTOR2(1, 1),
+	    XMVECTOR2(0, 1),
 	};
 	_vWndVer[0].m_fUV = vUV[0];
 	_vWndVer[1].m_fUV = vUV[1];
@@ -1715,10 +1715,10 @@ void CBigMap::Render() {
 
 	M2D_AVER vVer[4];
 
-	vVer[0].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
-	vVer[1].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
-	vVer[2].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
-	vVer[3].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
+	vVer[0].m_vPos = XMVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
+	vVer[1].m_vPos = XMVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
+	vVer[2].m_vPos = XMVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
+	vVer[3].m_vPos = XMVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
 
 
 	g_Render.SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
@@ -1763,16 +1763,16 @@ Ctemp::Ctemp() {
 	rc.right = 70;
 	rc.bottom = 70;
 
-	_vWndVer[0].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
-	_vWndVer[1].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
-	_vWndVer[2].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
-	_vWndVer[3].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
+	_vWndVer[0].m_vPos = XMVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
+	_vWndVer[1].m_vPos = XMVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
+	_vWndVer[2].m_vPos = XMVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
+	_vWndVer[3].m_vPos = XMVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
 
-	D3DXVECTOR2 vUV[4] = {
-	    D3DXVECTOR2(0, 0),
-	    D3DXVECTOR2(1, 0),
-	    D3DXVECTOR2(1, 1),
-	    D3DXVECTOR2(0, 1),
+	XMVECTOR2 vUV[4] = {
+	    XMVECTOR2(0, 0),
+	    XMVECTOR2(1, 0),
+	    XMVECTOR2(1, 1),
+	    XMVECTOR2(0, 1),
 	};
 	_vWndVer[0].m_fUV = vUV[0];
 	_vWndVer[1].m_fUV = vUV[1];
@@ -1848,25 +1848,25 @@ void CMinimap::InitScene() {
 	rc.top = _rcWnd.top;
 	rc.right = _rcWnd.right;
 	rc.bottom = _rcWnd.bottom;
-	_vWndVer[0].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
-	_vWndVer[1].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
-	_vWndVer[2].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
-	_vWndVer[3].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
+	_vWndVer[0].m_vPos = XMVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
+	_vWndVer[1].m_vPos = XMVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
+	_vWndVer[2].m_vPos = XMVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
+	_vWndVer[3].m_vPos = XMVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
 
 	rc.left = 0;
 	rc.top = 0;
 	rc.right = 64;
 	rc.bottom = 64;
-	_vPicVer[0].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
-	_vPicVer[1].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
-	_vPicVer[2].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
-	_vPicVer[3].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
+	_vPicVer[0].m_vPos = XMVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
+	_vPicVer[1].m_vPos = XMVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
+	_vPicVer[2].m_vPos = XMVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
+	_vPicVer[3].m_vPos = XMVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
 
-	D3DXVECTOR2 vUV[4] = {
-	    D3DXVECTOR2(0, 0),
-	    D3DXVECTOR2(1, 0),
-	    D3DXVECTOR2(1, 1),
-	    D3DXVECTOR2(0, 1),
+	XMVECTOR2 vUV[4] = {
+	    XMVECTOR2(0, 0),
+	    XMVECTOR2(1, 0),
+	    XMVECTOR2(1, 1),
+	    XMVECTOR2(0, 1),
 	};
 
 	for (int n = 0; n < 4; n++) {
@@ -1994,11 +1994,11 @@ void CMinimap::RenderScene() {
 	//	RECT rc;
 	//	int m;
 	//
-	//	D3DXVECTOR2 vUVwnd[4] = {
-	//		D3DXVECTOR2(0,0),
-	//			D3DXVECTOR2(1,0),
-	//			D3DXVECTOR2(1,1),
-	//			D3DXVECTOR2(0,1),
+	//	XMVECTOR2 vUVwnd[4] = {
+	//		XMVECTOR2(0,0),
+	//			XMVECTOR2(1,0),
+	//			XMVECTOR2(1,1),
+	//			XMVECTOR2(0,1),
 	//	};
 	//	_vWndVer[0].m_fUV = vUVwnd[0];
 	//	_vWndVer[1].m_fUV = vUVwnd[1] ;
@@ -2043,10 +2043,10 @@ void CMinimap::RenderScene() {
 	//			rc.left =  tempx + n * 64;
 	//			rc.right =  rc.left + 64 - 1;
 	//
-	//			_vPicVer[0].m_vPos = D3DXVECTOR4(float(rc.left),float(rc.top),0.9f,1);
-	//			_vPicVer[1].m_vPos = D3DXVECTOR4(float(rc.right),float(rc.top),0.9f,1);
-	//			_vPicVer[2].m_vPos = D3DXVECTOR4(float(rc.right),float(rc.bottom),0.9f,1);
-	//			_vPicVer[3].m_vPos = D3DXVECTOR4(float(rc.left),float(rc.bottom),0.9f,1);
+	//			_vPicVer[0].m_vPos = XMVECTOR4(float(rc.left),float(rc.top),0.9f,1);
+	//			_vPicVer[1].m_vPos = XMVECTOR4(float(rc.right),float(rc.top),0.9f,1);
+	//			_vPicVer[2].m_vPos = XMVECTOR4(float(rc.right),float(rc.bottom),0.9f,1);
+	//			_vPicVer[3].m_vPos = XMVECTOR4(float(rc.left),float(rc.bottom),0.9f,1);
 	//
 	//			g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN,2,&_vPicVer,sizeof(M2D_AVER));
 	//		}
@@ -2129,10 +2129,10 @@ void CMinimap::RenderScene() {
 			rct.right = rct.left + 64;
 			rct.bottom = rct.top + 64;
 
-			_vPicVer[0].m_vPos = D3DXVECTOR4(float(rct.left), float(rct.top), 0.9f, 1);
-			_vPicVer[1].m_vPos = D3DXVECTOR4(float(rct.right), float(rct.top), 0.9f, 1);
-			_vPicVer[2].m_vPos = D3DXVECTOR4(float(rct.right), float(rct.bottom), 0.9f, 1);
-			_vPicVer[3].m_vPos = D3DXVECTOR4(float(rct.left), float(rct.bottom), 0.9f, 1);
+			_vPicVer[0].m_vPos = XMVECTOR4(float(rct.left), float(rct.top), 0.9f, 1);
+			_vPicVer[1].m_vPos = XMVECTOR4(float(rct.right), float(rct.top), 0.9f, 1);
+			_vPicVer[2].m_vPos = XMVECTOR4(float(rct.right), float(rct.bottom), 0.9f, 1);
+			_vPicVer[3].m_vPos = XMVECTOR4(float(rct.left), float(rct.bottom), 0.9f, 1);
 
 			g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &_vPicVer, sizeof(M2D_AVER));
 		}
@@ -2216,18 +2216,18 @@ void CMinimap::RenderScene() {
 	_cSmNpc.Render();
 
 	//////////////////////////////////////////////////////////////////////////
-	_vCameraTar[0] = D3DXVECTOR4(float(lenw + _rcWnd.left), float(lenw + 24 + _rcWnd.top), 0, 1);
+	_vCameraTar[0] = XMVECTOR4(float(lenw + _rcWnd.left), float(lenw + 24 + _rcWnd.top), 0, 1);
 
 	g_Render.SetTexture(0, NULL);
-	D3DXMATRIX matIden;
+	XMMATRIX matIden;
 
-	D3DXVECTOR3 v[] = {D3DXVECTOR3(float(lenw + _rcWnd.left), float(lenw + _rcWnd.top), 0), D3DXVECTOR3(0, 0, 1)};
+	XMVECTOR3 v[] = {XMVECTOR3(float(lenw + _rcWnd.left), float(lenw + _rcWnd.top), 0), XMVECTOR3(0, 0, 1)};
 
 	GetMatrixRotation(&matIden, &v[0], &v[1], _fCameraAngle);
-	D3DXVec4Transform(&_vCameraTar[0], &_vCameraTar[0], &matIden);
+	XMVector4Transform(&_vCameraTar[0], &_vCameraTar[0], &matIden);
 
-	_vCameraTar[1] = D3DXVECTOR4(float(lenw / 2 + 6 + _rcWnd.left), float(lenw / 2 + 6 + _rcWnd.top), 0, 1);
-	D3DXVec4Transform(&_vCameraTar[1], &_vCameraTar[1], &matIden);
+	_vCameraTar[1] = XMVECTOR4(float(lenw / 2 + 6 + _rcWnd.left), float(lenw / 2 + 6 + _rcWnd.top), 0, 1);
+	XMVector4Transform(&_vCameraTar[1], &_vCameraTar[1], &matIden);
 
 	g_Render.SetVertexShader(NULL);
 	g_Render.SetFVF(D3DFVF_XYZRHW);
@@ -2239,12 +2239,12 @@ void CMinimap::RenderScene() {
 	g_Render.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_TFACTOR);
 	g_Render.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG2);
 
-	g_Render.DrawPrimitiveUP(D3DPT_LINELIST, 1, &_vCameraTar, sizeof(D3DXVECTOR4));
+	g_Render.DrawPrimitiveUP(D3DPT_LINELIST, 1, &_vCameraTar, sizeof(XMVECTOR4));
 
-	_vCameraTar[1] = D3DXVECTOR4(float(lenw + 26 + _rcWnd.left), float(lenw / 2 + 6 + _rcWnd.top), 0, 1);
-	D3DXVec4Transform(&_vCameraTar[1], &_vCameraTar[1], &matIden);
+	_vCameraTar[1] = XMVECTOR4(float(lenw + 26 + _rcWnd.left), float(lenw / 2 + 6 + _rcWnd.top), 0, 1);
+	XMVector4Transform(&_vCameraTar[1], &_vCameraTar[1], &matIden);
 
-	g_Render.DrawPrimitiveUP(D3DPT_LINELIST, 1, &_vCameraTar, sizeof(D3DXVECTOR4));
+	g_Render.DrawPrimitiveUP(D3DPT_LINELIST, 1, &_vCameraTar, sizeof(XMVECTOR4));
 
 	g_Render.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 	g_Render.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
@@ -2317,25 +2317,25 @@ void CLargerMap::InitScene() {
 	rc.top = _rcWnd.top;
 	rc.right = _rcWnd.right;
 	rc.bottom = _rcWnd.bottom;
-	_vWndVer[0].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
-	_vWndVer[1].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
-	_vWndVer[2].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
-	_vWndVer[3].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
+	_vWndVer[0].m_vPos = XMVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
+	_vWndVer[1].m_vPos = XMVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
+	_vWndVer[2].m_vPos = XMVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
+	_vWndVer[3].m_vPos = XMVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
 
 	rc.left = 0;
 	rc.top = 0;
 	rc.right = 64;
 	rc.bottom = 64;
-	_vPicVer[0].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
-	_vPicVer[1].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
-	_vPicVer[2].m_vPos = D3DXVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
-	_vPicVer[3].m_vPos = D3DXVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
+	_vPicVer[0].m_vPos = XMVECTOR4(float(rc.left), float(rc.top), 0.9f, 1);
+	_vPicVer[1].m_vPos = XMVECTOR4(float(rc.right), float(rc.top), 0.9f, 1);
+	_vPicVer[2].m_vPos = XMVECTOR4(float(rc.right), float(rc.bottom), 0.9f, 1);
+	_vPicVer[3].m_vPos = XMVECTOR4(float(rc.left), float(rc.bottom), 0.9f, 1);
 
-	D3DXVECTOR2 vUV[4] = {
-	    D3DXVECTOR2(0, 0),
-	    D3DXVECTOR2(1, 0),
-	    D3DXVECTOR2(1, 1),
-	    D3DXVECTOR2(0, 1),
+	XMVECTOR2 vUV[4] = {
+	    XMVECTOR2(0, 0),
+	    XMVECTOR2(1, 0),
+	    XMVECTOR2(1, 1),
+	    XMVECTOR2(0, 1),
 	};
 
 	for (int n = 0; n < 4; n++) {
@@ -2643,7 +2643,7 @@ void CLargerMap::RenderScene() {
 		                        mouse_coord.x, mouse_coord.y);
 
 
-		D3DXVECTOR3 v(mouse_coord.x, mouse_coord.y, 0);
+		XMVECTOR3 v(mouse_coord.x, mouse_coord.y, 0);
 		CNavigationBar::g_cNaviBar.SetTarget("", v);
 		CNavigationBar::g_cNaviBar.Show(true);
 	} else if (g_pGameApp->IsMouseContinue(0) || (g_pGameApp->GetMouseKey() & M_LDown)) {
@@ -2716,10 +2716,10 @@ void CLargerMap::RenderScene() {
 	// rc.right = 1024;
 	// rc.top = 0;
 	// rc.bottom = 768;
-	//_vPicVer[0].m_vPos = D3DXVECTOR4(float(rc.left),float(rc.top),0.9f,1);
-	//_vPicVer[1].m_vPos = D3DXVECTOR4(float(rc.right),float(rc.top),0.9f,1);
-	//_vPicVer[2].m_vPos = D3DXVECTOR4(float(rc.right),float(rc.bottom),0.9f,1);
-	//_vPicVer[3].m_vPos = D3DXVECTOR4(float(rc.left),float(rc.bottom),0.9f,1);
+	//_vPicVer[0].m_vPos = XMVECTOR4(float(rc.left),float(rc.top),0.9f,1);
+	//_vPicVer[1].m_vPos = XMVECTOR4(float(rc.right),float(rc.top),0.9f,1);
+	//_vPicVer[2].m_vPos = XMVECTOR4(float(rc.right),float(rc.bottom),0.9f,1);
+	//_vPicVer[3].m_vPos = XMVECTOR4(float(rc.left),float(rc.bottom),0.9f,1);
 	// g_Render.SetTexture(0, _pTexMask->GetTex());
 
 	// g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN,2,&_vPicVer,sizeof(M2D_AVER));
@@ -2749,10 +2749,10 @@ void CLargerMap::RenderScene() {
 				g_Render.SetTexture(0, NULL);
 			RECT* prc = &vecRect[idx];
 
-			_vPicVer[0].m_vPos = D3DXVECTOR4(float(prc->left), float(prc->top), 0.9f, 1);
-			_vPicVer[1].m_vPos = D3DXVECTOR4(float(prc->right), float(prc->top), 0.9f, 1);
-			_vPicVer[2].m_vPos = D3DXVECTOR4(float(prc->right), float(prc->bottom), 0.9f, 1);
-			_vPicVer[3].m_vPos = D3DXVECTOR4(float(prc->left), float(prc->bottom), 0.9f, 1);
+			_vPicVer[0].m_vPos = XMVECTOR4(float(prc->left), float(prc->top), 0.9f, 1);
+			_vPicVer[1].m_vPos = XMVECTOR4(float(prc->right), float(prc->top), 0.9f, 1);
+			_vPicVer[2].m_vPos = XMVECTOR4(float(prc->right), float(prc->bottom), 0.9f, 1);
+			_vPicVer[3].m_vPos = XMVECTOR4(float(prc->left), float(prc->bottom), 0.9f, 1);
 
 			g_Render.DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &_vPicVer, sizeof(M2D_AVER));
 		}

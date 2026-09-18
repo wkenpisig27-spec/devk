@@ -73,8 +73,8 @@ bool CUIPanel::Create(IDirect3DDeviceX* pDev) {
 #endif
 }
 
-void CUIPanel::Draw(IDirect3DTextureX* pSrcTexture, CONST RECT* pSrcRect, CONST D3DXVECTOR2* pScaling,
-                    CONST D3DXVECTOR2* pRotationCenter, FLOAT Rotation, CONST D3DXVECTOR2* pTranslation,
+void CUIPanel::Draw(IDirect3DTextureX* pSrcTexture, CONST RECT* pSrcRect, CONST XMVECTOR2* pScaling,
+                    CONST XMVECTOR2* pRotationCenter, FLOAT Rotation, CONST XMVECTOR2* pTranslation,
                     D3DCOLOR Color) {
 #if !MINDPOWER_USE_D3D9_DEVICE
 	(void)pSrcTexture; (void)pSrcRect; (void)pScaling;
@@ -128,7 +128,7 @@ void CUIPanel::Draw(IDirect3DTextureX* pSrcTexture, CONST RECT* pSrcRect, CONST 
 
 	m_pDev->SetRenderState(D3DRS_LIGHTING, FALSE);
 
-	D3DXMATRIX matscale;
+	XMMATRIX matscale;
 
 	D3DSURFACE_DESC BufParam;
 	pSrcTexture->GetLevelDesc(0, &BufParam);
@@ -1414,8 +1414,8 @@ void UIRender::RenderSprite(LPTEXTURE tex, RECT* rc, VECTOR2* vscale, VECTOR2* v
 #if MINDPOWER_USE_D3D9_DEVICE
 	if (_p2DSprite) {
 		_p2DSprite->Begin(D3DXSPRITE_ALPHABLEND);
-		D3DXMATRIX m;
-		D3DXMatrixTransformation2D(&m, NULL, 0, vscale, NULL, 0, vdest);
+		XMMATRIX m;
+		XMMatrixTransformation2D(&m, NULL, 0, vscale, NULL, 0, vdest);
 		_p2DSprite->SetTransform(&m);
 		switch (_p2DSprite->Draw(tex, rc, NULL, NULL, dwColor)) {
 		case D3DERR_INVALIDCALL:

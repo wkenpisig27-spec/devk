@@ -24,7 +24,7 @@ class CSceneObj;
 class CEffectObj;
 class CGameScene;
 class CSkillRecord;
-struct D3DXVECTOR3;
+struct XMVECTOR3;
 
 namespace GUI {
 class CGuiData;

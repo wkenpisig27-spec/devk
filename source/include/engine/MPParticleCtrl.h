@@ -33,11 +33,11 @@ class  CMPModelEff;
 //	virtual void				RenderVS()						 {}
 //	virtual void				RenderSoft()					 {}
 //
-//	virtual void				Emission(WORD wID, D3DXVECTOR3 vBegin, D3DXVECTOR3 vEnd) {}
+//	virtual void				Emission(WORD wID, XMVECTOR3 vBegin, XMVECTOR3 vEnd) {}
 //
 //public:
 //
-//	D3DXVECTOR3			m_CPath[2];
+//	XMVECTOR3			m_CPath[2];
 //
 //	WORD				m_wID;
 //
@@ -62,16 +62,16 @@ class  CMPModelEff;
 //
 //	void				Render();
 //
-//	void				Emission(WORD wID, D3DXVECTOR3 vBegin, D3DXVECTOR3 vEnd);
+//	void				Emission(WORD wID, XMVECTOR3 vBegin, XMVECTOR3 vEnd);
 //
 //public:
 //	bool				IsPlaying()					{ return (m_bEmiss || m_CBlast->IsPlaying());}
 //	bool				IsHit()						{ bool bhit = _bHit; _bHit = false; return bhit;}
-//	void				SetTarget(D3DXVECTOR3 vTarget);
+//	void				SetTarget(XMVECTOR3 vTarget);
 //
 //	void				Blast();
 //
-//	void				MoveTo(D3DXVECTOR3 vPos,MPMap* pMap);
+//	void				MoveTo(XMVECTOR3 vPos,MPMap* pMap);
 //public:
 //	bool				_bHit;
 //	CMPModelEff*		_pCModelEff;
@@ -84,12 +84,12 @@ class  CMPModelEff;
 //
 //
 //	float				m_fTargDist;
-//	D3DXVECTOR3			m_vTargDir;
+//	XMVECTOR3			m_vTargDir;
 //
 //
-//	D3DXVECTOR3			m_vPos;
+//	XMVECTOR3			m_vPos;
 //	float				m_fDist;
-//	D3DXVECTOR3			m_vDir;
+//	XMVECTOR3			m_vDir;
 //
 //	float				m_fVel;
 //
@@ -112,10 +112,10 @@ class  CMPModelEff;
 //
 //	void				Render();
 //
-//	void				Emission(WORD wID, D3DXVECTOR3 vBegin, D3DXVECTOR3 vEnd);
+//	void				Emission(WORD wID, XMVECTOR3 vBegin, XMVECTOR3 vEnd);
 //
 //public:
-//	void				SetTarget(D3DXVECTOR3 vTarget, D3DXVECTOR3 vTarget2, float fAngle);
+//	void				SetTarget(XMVECTOR3 vTarget, XMVECTOR3 vTarget2, float fAngle);
 //	void				Walk();
 //	void				Stop();
 //public:
@@ -123,7 +123,7 @@ class  CMPModelEff;
 //
 //	CMPRipple*			m_CRippleMove;
 //
-//	D3DXVECTOR3			m_vPos;
+//	XMVECTOR3			m_vPos;
 //};
 //////////////////////////////////////////////////////////////////////////
 #define		LINK_FVF	(D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1)
@@ -135,9 +135,9 @@ class CMPLink
 public:
 	struct LinkVer
 	{
-		D3DXVECTOR3		m_SPos;
+		XMVECTOR3		m_SPos;
 		DWORD			m_dwDiffuse;
-		D3DXVECTOR2		m_SUV;
+		XMVECTOR2		m_SUV;
 	};
 	struct MPFrame
 	{
@@ -159,15 +159,15 @@ public:
 		_fCurTime = 0;
 		//_fRadius = 1.0f;
 
-		//_vStart = D3DXVECTOR3(0,0,0);
-		//_vEnd = D3DXVECTOR3(0,0,0);
+		//_vStart = XMVECTOR3(0,0,0);
+		//_vEnd = XMVECTOR3(0,0,0);
 	}
 	~CMPLink()
 	{
 	}
 
 	bool	Create(MPCharacter *pChaMain,int iDummy1,MPCharacter *pChaTag, int iDummy2, \
-		char* pszTex, int iTexNum,CMPResManger* pResMgr,D3DXVECTOR3* pEyePos,MPRender*	pDev);
+		char* pszTex, int iTexNum,CMPResManger* pResMgr,XMVECTOR3* pEyePos,MPRender*	pDev);
 
 	void	FrameMove();
 
@@ -182,7 +182,7 @@ public:
 
 protected:
 	CMPEffectFile* _pCEffFile;
-	D3DXVECTOR3*  _pEyePos;
+	XMVECTOR3*  _pEyePos;
 	MPCharacter *_pChaMain;
 	MPCharacter *_pChaTag;
 	lwITex		**_pTex;
@@ -190,8 +190,8 @@ protected:
 	MPFrame*	_pFrame;
 
 
-	D3DXVECTOR3 _vStart;
-	D3DXVECTOR3 _vEnd;
+	XMVECTOR3 _vStart;
+	XMVECTOR3 _vEnd;
 
 	float		_fRadius;
 
@@ -200,7 +200,7 @@ protected:
 
 
 	float       _fdist;
-	D3DXVECTOR3 _vdir;
+	XMVECTOR3 _vdir;
 
 	int			_iCurTex;
 	float       _fCurTime;
@@ -219,8 +219,8 @@ public:
 		_eSrcBlend		= D3DBLEND_SRCALPHA;
 		_eDestBlend		= D3DBLEND_INVSRCALPHA;
 		_dwCurColor = 0xffffffff;
-		D3DXMatrixIdentity(&_matBone);
-		D3DXMatrixIdentity(&_matWorld);
+		XMMatrixIdentity(&_matBone);
+		XMMatrixIdentity(&_matWorld);
 	}
 	~CChaModel(){}
 	void	SetDivece(MPRender*	pDev)	{ m_pDev = pDev; }
@@ -253,22 +253,22 @@ public:
 	void	End();
 
 	void		SetCurColor(DWORD	dwcolor){ _dwCurColor = dwcolor;}
-	D3DXCOLOR	GetCurColor()				{ return _dwCurColor;}
+	XMCOLORF	GetCurColor()				{ return _dwCurColor;}
 
 	D3DBLEND	GetSrcBlend(){return _eSrcBlend;}
 	void		SetSrcBlend(D3DBLEND srcblend){ _eSrcBlend = srcblend;}
 	D3DBLEND	GetDestBlend(){return _eDestBlend;}
 	void		SetDestBlend(D3DBLEND destblend){ _eDestBlend = destblend;}
 
-	void	BindingBone(D3DXMATRIX* pBone)
+	void	BindingBone(XMMATRIX* pBone)
 	{
 		if(pBone)
 			_matBone = *pBone;
 	}
-	void	MoveTo(const D3DXVECTOR3* pPos)
+	void	MoveTo(const XMVECTOR3* pPos)
 	{
 		if(pPos)
-			D3DXMatrixTranslation(&_matWorld,pPos->x,pPos->y,pPos->z);
+			XMMatrixTranslation(&_matWorld,pPos->x,pPos->y,pPos->z);
 	}
 	void UpdateMatrix()
 	{
@@ -287,18 +287,18 @@ protected:
 
 	bool	LoadPose(SChaAction& SCharAct);
 
-	D3DXMATRIX								_matBone;
-	D3DXMATRIX								_matWorld;
-	D3DXMATRIX								_matResult;
+	XMMATRIX								_matBone;
+	XMMATRIX								_matWorld;
+	XMMATRIX								_matResult;
 
 protected:
 	WORD									_wFrameCount;
 	//S_BVECTOR<float>						_vecFrameSize;
-	//S_BVECTOR<D3DXCOLOR>					_vecFrameColor;
+	//S_BVECTOR<XMCOLORF>					_vecFrameColor;
 
 	D3DBLEND								_eSrcBlend;
 	D3DBLEND								_eDestBlend;
-	D3DXCOLOR								_dwCurColor;	
+	XMCOLORF								_dwCurColor;	
 
 private:
 	int		_iID;
@@ -353,7 +353,7 @@ public:
 	void						Reset()
 	{
 		m_fCurTime = 0;
-		const auto v = D3DXVECTOR3(0, 0, 0);
+		const auto v = XMVECTOR3(0, 0, 0);
 		MoveTo(&v);
 		for (int n = 0; n < m_iPartNum; ++n)
 		{
@@ -382,7 +382,7 @@ public:
 	}
 	bool						IsPlaying();
 
-	void						MoveTo(const D3DXVECTOR3* vPos,MPMap* pmap = NULL)
+	void						MoveTo(const XMVECTOR3* vPos,MPMap* pmap = NULL)
 	{
 		for (auto n = 0; n < m_iPartNum; ++n)
 		{
@@ -399,7 +399,7 @@ public:
 			}
 		}
 	}
-	void						BindingBone(D3DXMATRIX* pMatBone)
+	void						BindingBone(XMMATRIX* pMatBone)
 	{
 		for (auto  n = 0; n < m_iPartNum; ++n)
 		{
@@ -416,7 +416,7 @@ public:
 		}
 	}
 
-	//void						BindingBoneDir(D3DXMATRIX* pMatBone)
+	//void						BindingBoneDir(XMMATRIX* pMatBone)
 	//{
 	//	for(int i(0); i<m_iPartNum; ++i)  
 	//		m_vecPartSys[i]->BindingBoneDir(pMatBone);
@@ -465,7 +465,7 @@ public:
 		}
 	}
 	void setFontEffectCom(VEC_string& vecText, int num,
-		CMPResManger *pCResMagr ,D3DXVECTOR3* pvDir,int iTexID,D3DXCOLOR dwColor,bool bUseBack,bool bmain= false)
+		CMPResManger *pCResMagr ,XMVECTOR3* pvDir,int iTexID,XMCOLORF dwColor,bool bUseBack,bool bmain= false)
 	{
 		for (int n = 0; n < m_iPartNum; ++n)
 		{
@@ -486,7 +486,7 @@ public:
 			if( m_vecPartSys[n] ) m_vecPartSys[n]->setUseZBuff(bUseZ);
 		}
 	}
-	void setDir(D3DXVECTOR3* pvPos)
+	void setDir(XMVECTOR3* pvPos)
 	{
 		for (int n = 0; n < m_iPartNum; ++n)
 		{

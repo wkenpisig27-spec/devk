@@ -224,7 +224,7 @@ void CGuiFont::ORender(unsigned int nIndex, const char* str, int x, int y, DWORD
     pFont->DrawTextOutline(str, x, y, color, outline, thickness);
 }
 
-void CGuiFont::Render3d(const char* str, D3DXVECTOR3& pos, DWORD color) {
+void CGuiFont::Render3d(const char* str, XMVECTOR3& pos, DWORD color) {
     // Note: 3D world-space text rendering is handled by the game's WorldToScreen
     // projection. This method provides a simple NDC-to-screen fallback for
     // pre-projected coordinates. Most game code uses WorldToScreen + regular Render.

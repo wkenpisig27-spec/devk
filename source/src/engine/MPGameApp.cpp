@@ -314,8 +314,8 @@ void MPGameApp::_RenderAxis()
 		DWORD diffuse;
 	};
 
-	D3DXMATRIX mat;
-	D3DXMatrixIdentity(&mat);
+	XMMATRIX mat;
+	XMMatrixIdentity(&mat);
 
 #if(defined USE_MANAGED_RES)
     g_Render.SetTransformWorld(&mat);
@@ -332,20 +332,20 @@ void MPGameApp::_RenderAxis()
 	AXIS_VERTEX pVertices[6];
 
 	// z 
-	pVertices[0].pos = D3DXVECTOR3(0.0f , 0.0f , 0.0f);
-	pVertices[1].pos = D3DXVECTOR3(0.0f , 0.0f , 50.0f);
+	pVertices[0].pos = XMVECTOR3(0.0f , 0.0f , 0.0f);
+	pVertices[1].pos = XMVECTOR3(0.0f , 0.0f , 50.0f);
 	pVertices[0].diffuse = 0xffffffff;
 	pVertices[1].diffuse = 0xffffffff;
 
 	// x 
-	pVertices[2].pos = D3DXVECTOR3(0.0f ,   0.0f , 0.0f);
-	pVertices[3].pos = D3DXVECTOR3(100.0f , 0.0f , 0.0f);
+	pVertices[2].pos = XMVECTOR3(0.0f ,   0.0f , 0.0f);
+	pVertices[3].pos = XMVECTOR3(100.0f , 0.0f , 0.0f);
 	pVertices[2].diffuse = 0xffff0000;
 	pVertices[3].diffuse = 0xffff0000;
 
 	// y 
-	pVertices[4].pos = D3DXVECTOR3(0.0f , 0.0f ,   0.0f);
-	pVertices[5].pos = D3DXVECTOR3(0.0f , 100.0f , 0.0f);
+	pVertices[4].pos = XMVECTOR3(0.0f , 0.0f ,   0.0f);
+	pVertices[5].pos = XMVECTOR3(0.0f , 100.0f , 0.0f);
 	pVertices[4].diffuse = 0xFF00ffff;
 	pVertices[5].diffuse = 0xFF00ffff;
 	

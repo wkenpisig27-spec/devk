@@ -11,7 +11,7 @@ Goal: **true D3D11** end-to-end — no runtime D3D9 device, no long-term relianc
 | Shaders | SM4 HLSL + FF mesh shader + ShaderMgr11 VS | All draws through compiled HLSL; retire `.vsh` / asm |
 | Loaders | DDS/BMP/TGA + GDI+ (`lwD3D11CreateTextureFromMemory`) | same (DirectXTex optional) |
 | Effects | DeviceObject11 FF table (`eff.fx` techniques as RS) | HLSL effects (optional) |
-| Math | DirectXMath via `lwD3DXCompat.h` (D3DX names, native impl) | optional rename to XM* |
+| Math | DirectXMath via `lwD3DXCompat.h`; public names are XM* (`lwXMMath.h`) | same (storage types, not SIMD registers) |
 
 ## Build flag
 
@@ -61,7 +61,7 @@ Exit criterion met: no unguarded `GetDevice()` in the DX11-only compile; dual-bu
 1. **Audit** — `docs/DX11_PHASE2_D3DX_INVENTORY.txt` (dual-build D3DX behind `#if MINDPOWER_USE_D3D9_DEVICE` or dead-stripped when `lwIsDx11Active()` is constant)
 2. **Textures** — `BitmapFont`, `lwDDSFile`, `lwResourceMgr`, `lwDeviceObject::CreateTextureFromFileInMemory` on DX11 helpers
 3. **Link** — `d3dx9.lib` and `d3d9.lib` dropped from Release x64 (`lwD3DXCompat.h` + DirectXMath).
-4. **Math** — DirectXMath in `lwD3DXCompat.h`; D3DXVECTOR/MATRIX names kept for asset layout
+4. **Math** — DirectXMath in `lwD3DXCompat.h`; play-path names are XM* (`lwXMMath.h`). Storage layout still matches D3DX (12-byte vec3 / 64-byte matrix + operators). Not `DirectX::XMVECTOR` / `DirectX::XMMATRIX`.
 
 **Smoke (2026-09-19):** same Phase 1 checklist passed after Phase 2 builds.
 
@@ -130,7 +130,14 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 Highest-value leftover vs the native target table:
 
-1. Optional later: rename D3DX* math to XM*, HLSL `eff.fx` instead of FF technique tables, delete unused `.vsh` assets. Do not delete D3D9 sources unless asked — they are already out of the play-path compile.
+1. Next architecture step: compile `eff.fx` as real HLSL instead of the FF technique table. Later: delete unused `.vsh` assets. Do not delete D3D9 sources unless asked — they are already out of the play-path compile.
+
+### XM* math rename — **complete**
+
+- `lwXMMath.h` exposes XM* storage types (`XMVECTOR3`, `XMMATRIX`, `XMCOLORF`, …) and same-signature wrappers (`XMMatrixLookAtLH`, `XMVector3Normalize`, …).
+- Implementation stays in `lwD3DXCompat.h` (DirectXMath load/store). D3DX names remain as aliases so dual-build / missed call sites still compile.
+- Engine + game call sites renamed. Texture/effect `D3DXCreate*` / `ID3DX*` APIs unchanged.
+- Do not `using namespace DirectX` in TUs that use the global `XMMATRIX` storage type.
 
 ### Device handle — **complete**
 

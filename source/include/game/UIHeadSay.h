@@ -32,7 +32,7 @@ public:
 		_dwFaceTime = 0;
 	}
 	void AddItem(CItemEx* obj);
-	void Render(D3DXVECTOR3& pos);
+	void Render(XMVECTOR3& pos);
 	void RenderStateIcons(CCharacter* cha, int x, int y, float scale, float spacing, int rowSize, bool Rendertimer);
 	// ������ʾ��Ѫ��:numѪ����max��Ѫ��,attacknum������������
 	void SetLifeNum(int num, int max);

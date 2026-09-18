@@ -40,7 +40,7 @@ bool CReadyDieState::_Start() {
 			int x, y;
 			int dis = rand() % 15 + 5;
 			GetInDistancePos(int(_pCha->GetPos().x * 10.0f), int(_pCha->GetPos().y * 10.0f), int(_pAttack->GetPos().x * 10.0f), int(_pAttack->GetPos().y * 10.0f), dis, x, y);
-			D3DXVECTOR3 end;
+			XMVECTOR3 end;
 			end.x = (float)x / 10.0f;
 			end.y = (float)y / 10.0f;
 

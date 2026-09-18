@@ -10,15 +10,15 @@ class MPRadian;
 class MINDPOWER_API MPEffQuaternion
 {
 public:
-	D3DXQUATERNION m_qSelf;
+	XMQUATERNION m_qSelf;
 public:
 	MPEffQuaternion() : m_qSelf(0, 0, 0, 0) {}
 	MPEffQuaternion(float w, float x, float y, float z) 
 		: m_qSelf(w, x, y, z) {}
-	MPEffQuaternion(const D3DXQUATERNION& dxQ) : m_qSelf(dxQ) {}
+	MPEffQuaternion(const XMQUATERNION& dxQ) : m_qSelf(dxQ) {}
 	MPEffQuaternion(const MPEffQuaternion& q) : m_qSelf(q.m_qSelf) {}
 
-	D3DXQUATERNION& GetDXValue() { return m_qSelf; }
+	XMQUATERNION& GetDXValue() { return m_qSelf; }
 
 	// 根据这个四元数旋转这个向量
 	MPEffVector3 operator* (const MPEffVector3& rkVector) const;

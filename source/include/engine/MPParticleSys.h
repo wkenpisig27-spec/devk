@@ -45,29 +45,29 @@ inline float Randf(float _f1,float _f2)
 }
 
 
-inline	 bool	PointInstrPointRange(D3DXVECTOR3* vPoint1, D3DXVECTOR3* vPoint2, float fRange)
+inline	 bool	PointInstrPointRange(XMVECTOR3* vPoint1, XMVECTOR3* vPoint2, float fRange)
 {
 	return ((fabs(vPoint1->x - vPoint2->x) < fRange) &&
 			(fabs(vPoint1->y - vPoint2->y) < fRange))/* &&
 			(fabs(vPoint1->z - vPoint2->z) < fRange))*/;
 }
-inline	 bool	PointPointRange(D3DXVECTOR3* vPoint1, D3DXVECTOR3* vPoint2, float fRange)
+inline	 bool	PointPointRange(XMVECTOR3* vPoint1, XMVECTOR3* vPoint2, float fRange)
 {
 	return ((fabs(vPoint1->x - vPoint2->x) < fRange) &&
 			(fabs(vPoint1->y - vPoint2->y) < fRange) &&
 			(fabs(vPoint1->z - vPoint2->z) < fRange));
 }
-inline D3DXMATRIX * GetMatrixRotation( D3DXMATRIX *pout,const D3DXVECTOR3 *Point,\
-								const D3DXVECTOR3 *aixs,float angle)
+inline XMMATRIX * GetMatrixRotation( XMMATRIX *pout,const XMVECTOR3 *Point,\
+								const XMVECTOR3 *aixs,float angle)
 {
-	D3DXMATRIX r, r2;
-	D3DXMATRIX r1 = D3DXMATRIX(1, 0, 0, 0,
+	XMMATRIX r, r2;
+	XMMATRIX r1 = XMMATRIX(1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, 1, 0,
 		-Point->x, -Point->y, -Point->z, 1);
-	D3DXMatrixRotationAxis(&r2,aixs,angle);
+	XMMatrixRotationAxis(&r2,aixs,angle);
 	r = r1 * r2;
-	r1 = D3DXMATRIX(1, 0, 0, 0,
+	r1 = XMMATRIX(1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, 1, 0,
 		Point->x, Point->y, Point->z, 1);
@@ -75,17 +75,17 @@ inline D3DXMATRIX * GetMatrixRotation( D3DXMATRIX *pout,const D3DXVECTOR3 *Point
 	*pout = r;
 	return pout;
 }
-inline void	 GetDirRotation(D3DXVECTOR2* pOut, D3DXVECTOR3* pDir)
+inline void	 GetDirRotation(XMVECTOR2* pOut, XMVECTOR3* pDir)
 {
-	float fDist = D3DXVec3Length(pDir);
+	float fDist = XMVector3Length(pDir);
 	if(pDir->z == 0)
 	{
 		pOut->x = 0;
 	}
 	else
 	{
-		const auto v = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-		pOut->x = asinf(D3DXVec3Dot(pDir, &v) / fDist);
+		const auto v = XMVECTOR3(0.0f, 0.0f, 1.0f);
+		pOut->x = asinf(XMVector3Dot(pDir, &v) / fDist);
 	}
 	//求在X轴方向旋转的角度
 	if(pDir->x == 0 && pDir->y == 0)
@@ -94,9 +94,9 @@ inline void	 GetDirRotation(D3DXVECTOR2* pOut, D3DXVECTOR3* pDir)
 	}
 	else
 	{
-		const D3DXVECTOR3 v[] = { D3DXVECTOR3(pDir->x, pDir->y, 0.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f) };
-		fDist = D3DXVec3Length(&v[0]);
-		pOut->y = acosf(D3DXVec3Dot(&v[0], &v[1]) / fDist);
+		const XMVECTOR3 v[] = { XMVECTOR3(pDir->x, pDir->y, 0.0f), XMVECTOR3(0.0f, 1.0f, 0.0f) };
+		fDist = XMVector3Length(&v[0]);
+		pOut->y = acosf(XMVector3Dot(&v[0], &v[1]) / fDist);
 		if( pDir->x >= 0.0f )
 		{
 			pOut->y = -pOut->y;
@@ -148,37 +148,37 @@ public:
 	{
 		return m_fCurTime / m_fFrameTime;
 	}
-	void						Reset(const D3DXVECTOR3 &vPos)
+	void						Reset(const XMVECTOR3 &vPos)
 	{
 		m_fCurTime = 0;
 		m_wCurFrame = 0;
 		m_vOldPos = m_vPos = vPos;
-		D3DXMatrixIdentity(&m_SCurMat);
-		D3DXMatrixIdentity(&m_SBoneMat);
+		XMMatrixIdentity(&m_SCurMat);
+		XMMatrixIdentity(&m_SBoneMat);
 
 		m_fFrameTime = 0;
-		m_vCurAngle = D3DXVECTOR3(0,0,0);
+		m_vCurAngle = XMVECTOR3(0,0,0);
 		m_fSize = 0;
-		m_SCurColor = D3DXCOLOR(0,0,0,0);
+		m_SCurColor = XMCOLORF(0,0,0,0);
 
 		m_fPartTime = 0;
 	}
 public:
-	D3DXVECTOR3					m_vPos;
-	D3DXVECTOR3					m_vOldPos;
-	D3DXVECTOR3					m_vVel;
-	D3DXVECTOR3					m_vAccel;
+	XMVECTOR3					m_vPos;
+	XMVECTOR3					m_vOldPos;
+	XMVECTOR3					m_vVel;
+	XMVECTOR3					m_vAccel;
 	bool						m_bLive;
 	float						m_fLife;
 
 	float						m_fCurTime;
 	WORD						m_wCurFrame;
-	D3DXCOLOR					m_SCurColor;
+	XMCOLORF					m_SCurColor;
 	float						m_fSize;
-	D3DXVECTOR3					m_vCurAngle;
-	D3DXMATRIX					m_SCurMat;
+	XMVECTOR3					m_vCurAngle;
+	XMMATRIX					m_SCurMat;
 	float						m_fFrameTime;
-	D3DXMATRIX					m_SBoneMat;
+	XMMATRIX					m_SBoneMat;
 
 	float						m_fPartTime;
 };
@@ -301,7 +301,7 @@ public:
 
 	bool				Create(int iType, const s_string& strPartName,int iNumPart,
 								const s_string& strModelName,const s_string& strTexName,
-								D3DXVECTOR3 vRange, WORD wFrameCount,bool bBillBoard,
+								XMVECTOR3 vRange, WORD wFrameCount,bool bBillBoard,
 								CMPResManger	*pCResMagr);
 
 	void				InitParam();
@@ -347,12 +347,12 @@ public:
 	float				GetSysStep()		{ return _fStep;}
 	void				SetSysStep(float fstep){ _fStep = fstep;}	
 
-	D3DXVECTOR3			GetSysDir(){return _vDir;}
+	XMVECTOR3			GetSysDir(){return _vDir;}
 	void				SetSysDirX(float fx){_vDir.x = fx;}
 	void				SetSysDirY(float fy){_vDir.y = fy;}
 	void				SetSysDirZ(float fz){_vDir.z = fz;}
 
-	D3DXVECTOR3			GetSysAccel(){return _vAccel;}
+	XMVECTOR3			GetSysAccel(){return _vAccel;}
 	void				SetSysAccelX(float fx){_vAccel.x = fx;}
 	void				SetSysAccelY(float fy){_vAccel.y = fy;}
 	void				SetSysAccelZ(float fz){_vAccel.z = fz;}
@@ -381,19 +381,19 @@ public:
 			m_cShade.Create(_strTexName,pCResMagr,*_vecFrameSize[0]);
 	}
 
-	D3DXVECTOR3			GetFrameAngle(int iFrame)
+	XMVECTOR3			GetFrameAngle(int iFrame)
 	{ 
 		//if(iFrame <_wFrameCount)
 			return *_vecFrameAngle[iFrame];
-		//return D3DXVECTOR3(0,0,0);
+		//return XMVECTOR3(0,0,0);
 	}
-	void				SetFrameAngle(int iFrame, D3DXVECTOR3 vAngle)
+	void				SetFrameAngle(int iFrame, XMVECTOR3 vAngle)
 	{ 		
 		if(iFrame <_wFrameCount)
 			*_vecFrameAngle[iFrame] = vAngle;
 	}
 
-	D3DXCOLOR			GetFrameColor(int iFrame)
+	XMCOLORF			GetFrameColor(int iFrame)
 	{ 
 		//if(iFrame <_wFrameCount)
 			return *_vecFrameColor[iFrame];
@@ -447,7 +447,7 @@ public:
 		_vOffset.y = fy;
 		_vOffset.z = fz;
 	}
-	D3DXVECTOR3&		GetPosOffset(){return _vOffset;}
+	XMVECTOR3&		GetPosOffset(){return _vOffset;}
 public:
 	void				Reset(bool	bLife);
 
@@ -459,9 +459,9 @@ public:
 
 	bool				IsPlaying();
 
-	void				MoveTo(const D3DXVECTOR3* vPos,MPMap* pmap = nullptr);
+	void				MoveTo(const XMVECTOR3* vPos,MPMap* pmap = nullptr);
 	
-	void				BindingBone(D3DXMATRIX* pMatBone);
+	void				BindingBone(XMMATRIX* pMatBone);
 
 	void setYaw(float fYaw);
 	void setPitch(float fPitch);
@@ -474,12 +474,12 @@ public:
 	void setFontEffect(CMPFont*	pFont);
 	void setFontEffText(const char* pszText);
 	void setFontEffectCom(VEC_string& vecText, int num, 
-		CMPResManger *pCResMagr,D3DXVECTOR3* pvDir,int iTexID,
-		D3DXCOLOR dwColor= 0xffffffff, bool bUseBack = false,bool bmain= false);	
+		CMPResManger *pCResMagr,XMVECTOR3* pvDir,int iTexID,
+		XMCOLORF dwColor= 0xffffffff, bool bUseBack = false,bool bmain= false);	
 	void unFontEffCom();
 	void setRenderIdx(int idx)	{ _iRenderIdx = idx; }
 	void setUseZBuff(bool bUseZ);
-	//void setTarget(D3DXVECTOR3* vTarget);
+	//void setTarget(XMVECTOR3* vTarget);
 
 	bool IsDelay(){return(_fDelayTime > 0 && _fCurPlayTime < _fDelayTime);}
 	bool UpdateDelay();
@@ -511,11 +511,11 @@ public:
 		_pItem->GetObjDummyRunTimeMatrix((lwMatrix44*)&matDummy2,_iDummy2);
 		//_bModelRange  = true;
 
-		D3DXVECTOR3*	pv1 = (D3DXVECTOR3*)&matDummy1._41;
-		D3DXVECTOR3*	pv2 = (D3DXVECTOR3*)&matDummy2._41;
+		XMVECTOR3*	pv1 = (XMVECTOR3*)&matDummy1._41;
+		XMVECTOR3*	pv2 = (XMVECTOR3*)&matDummy2._41;
 		_vDummyDir = *pv1 - *pv2;
-		_fDummyDist = D3DXVec3Length(&_vDummyDir);
-		D3DXVec3Normalize(&_vDummyDir,&_vDummyDir);
+		_fDummyDist = XMVector3Length(&_vDummyDir);
+		XMVector3Normalize(&_vDummyDir,&_vDummyDir);
 		_vDummyPos = *pv2;
 		return true;
 	}
@@ -615,12 +615,12 @@ protected:
 	bool				_bLoop;
 	WORD				_wDeath;
 	bool				_bUseBone;
-	D3DXMATRIX			_SBoneMat;
+	XMMATRIX			_SBoneMat;
 
 	float								_fLife;
-	D3DXVECTOR3							_vDir;
+	XMVECTOR3							_vDir;
 	float								_fVecl;
-	D3DXVECTOR3							_vAccel;
+	XMVECTOR3							_vAccel;
 	//float								_fInfXY;//在XY轴方向受到的影响
 
 	float								_fStep;//每隔多少时间创建一个粒子
@@ -630,7 +630,7 @@ protected:
 	float								_fPlayTime;//播放时间长度
 	float								_fCurPlayTime;
 
-	D3DXVECTOR3							_vScale;
+	XMVECTOR3							_vScale;
 
 	bool				_bFontEff;
 	CMPFont*			_pFont;
@@ -639,7 +639,7 @@ protected:
 	bool				_bFontCom;
 	CEffectFont*		_pcEffFont;
 	VEC_string			_vecText;
-	D3DXVECTOR3			_vFontDir;
+	XMVECTOR3			_vFontDir;
 
 	bool				_bUseZ;
 
@@ -669,31 +669,31 @@ protected:
 //	S_BVECTOR<CMPModelEff>					_vecPart;
 //#endif
 
-	D3DXVECTOR3								_vPos;
+	XMVECTOR3								_vPos;
 
-	D3DXVECTOR3								_vOffset;
+	XMVECTOR3								_vOffset;
 
 
 	bool									_bModelRange;//使用模型范围来产生粒子
 	s_string								_strVirualModel;//用来查找的虚拟模型的名称
-	std::vector<D3DXVECTOR3>				_vecPointRange;//用来产生粒子的点
+	std::vector<XMVECTOR3>				_vecPointRange;//用来产生粒子的点
 	WORD									_wVecNum;//顶点数量
 
 	float									_fRange[3];	//!粒子在这个范围之内产生
 
 	WORD									_wFrameCount;
 	S_BVECTOR<float>						_vecFrameSize;
-	S_BVECTOR<D3DXVECTOR3>					_vecFrameAngle;
-	S_BVECTOR<D3DXCOLOR>					_vecFrameColor;
+	S_BVECTOR<XMVECTOR3>					_vecFrameAngle;
+	S_BVECTOR<XMCOLORF>					_vecFrameColor;
 
-	S_BVECTOR<D3DXVECTOR3>					_vecBone;//创建的骨骼节点，粒子在这个节点上排序
+	S_BVECTOR<XMVECTOR3>					_vecBone;//创建的骨骼节点，粒子在这个节点上排序
 
 	DWORD*									_pdwVShader;
 	float*									_pfDailTime;
-	D3DXMATRIX*								_pMatViewProj;
+	XMMATRIX*								_pMatViewProj;
 
 	bool									_bBillBoard;
-	D3DXMATRIX*								_SpmatBBoard;
+	XMMATRIX*								_SpmatBBoard;
 
 	int										_iRenderIdx;
 	CMPEffectFile*							_pCEffectFile;
@@ -706,7 +706,7 @@ protected:
 
 	//运动路径
 	CEffPath*								_pcPath;
-	D3DXVECTOR3								_vSavePos;
+	XMVECTOR3								_vSavePos;
 
 	//shade
 	bool									m_bShade;
@@ -719,20 +719,20 @@ protected:
 	//dummy
 	int										_iDummy1,_iDummy2;
 	MPSceneItem*							_pItem;
-	D3DXVECTOR3								_vDummyPos,_vDummyDir;
+	XMVECTOR3								_vDummyPos,_vDummyDir;
 	float									_fDummyDist;
 
 	int										_iRoadom;
 	bool									_bModelDir;
-	D3DXVECTOR2								_vTemDir;
+	XMVECTOR2								_vTemDir;
 };
 
-inline void		RotatingXZ(D3DXMATRIX* pmat,float fAngleX, float fAngleZ)
+inline void		RotatingXZ(XMMATRIX* pmat,float fAngleX, float fAngleZ)
 {
-	D3DXMATRIX mat;
-	D3DXMatrixRotationX(&mat, fAngleX);
-	D3DXMatrixRotationZ(pmat, fAngleZ);
-	D3DXMatrixMultiply(pmat, &mat, pmat);
+	XMMATRIX mat;
+	XMMatrixRotationX(&mat, fAngleX);
+	XMMatrixRotationZ(pmat, fAngleZ);
+	XMMatrixMultiply(pmat, &mat, pmat);
 }
 
 
@@ -754,13 +754,13 @@ inline void		RotatingXZ(D3DXMATRIX* pmat,float fAngleX, float fAngleZ)
 //
 //public:
 //	bool				Create(int iType, s_string	strPartName,int iNumPart,s_string strModelName,
-//									D3DXVECTOR2 vRange, WORD wFrameCount, CMPResManger	*pCResMagr);
+//									XMVECTOR2 vRange, WORD wFrameCount, CMPResManger	*pCResMagr);
 //	//在没有从文件中读取时用这个函数初始化变量
-//	void				InitParam(D3DXVECTOR3 vDir,D3DXVECTOR3	vVecl,
-//									D3DXVECTOR3 vAccel, int iLife, int iInfXY  =0);
+//	void				InitParam(XMVECTOR3 vDir,XMVECTOR3	vVecl,
+//									XMVECTOR3 vAccel, int iLife, int iInfXY  =0);
 //
 //
-//	void				MoveTo(D3DXVECTOR3 vPos);
+//	void				MoveTo(XMVECTOR3 vPos);
 //
 //	void				FrameMove(DWORD	dwDailTime);
 //
@@ -780,8 +780,8 @@ inline void		RotatingXZ(D3DXMATRIX* pmat,float fAngleX, float fAngleZ)
 //		return _bPlay;
 //	}
 //
-//	void				Emission(int iID, D3DXVECTOR3& vTarget);
-//	void				SetTarget(D3DXVECTOR3& vTarget);
+//	void				Emission(int iID, XMVECTOR3& vTarget);
+//	void				SetTarget(XMVECTOR3& vTarget);
 //	////////////////////////////////////////////////////////
 //	int					GetType()			{ return _iType;}
 //
@@ -818,7 +818,7 @@ inline void		RotatingXZ(D3DXMATRIX* pmat,float fAngleX, float fAngleZ)
 //
 //
 //	S_BVECTOR<float>					_vecFrameSize;
-//	S_BVECTOR<D3DXVECTOR3>				_vecFrameAngle;
+//	S_BVECTOR<XMVECTOR3>				_vecFrameAngle;
 //
 //	int									_iType;
 //	bool								_bPlay;
@@ -827,23 +827,23 @@ inline void		RotatingXZ(D3DXMATRIX* pmat,float fAngleX, float fAngleZ)
 //	int									_iParNum;
 //	WORD								_wFrameCount;
 //
-//	D3DXVECTOR3							_vPos;
-//	D3DXVECTOR3							_vOldPos;
+//	XMVECTOR3							_vPos;
+//	XMVECTOR3							_vOldPos;
 //
-//	D3DXVECTOR2							_vRange;	//!粒子在这个范围之内产生
+//	XMVECTOR2							_vRange;	//!粒子在这个范围之内产生
 //
 //
 //	float*								_pfDailTime;
 ///////////////////////////////////////////////////
 //	int									_iLife;
-//	D3DXVECTOR3							_vDir;
-//	D3DXVECTOR3							_vVecl;
-//	D3DXVECTOR3							_vAccel;
+//	XMVECTOR3							_vDir;
+//	XMVECTOR3							_vVecl;
+//	XMVECTOR3							_vAccel;
 //	int									_iInfXY;//在XY轴方向受到的影响
 //
 //	WORD								_wDeath;//有多少粒子已经死亡。
 //
-//	D3DXVECTOR3							_vTarget;//目标
+//	XMVECTOR3							_vTarget;//目标
 //	float								_fDirXZ[2];//在XZ方向上的角度
 //};
 //

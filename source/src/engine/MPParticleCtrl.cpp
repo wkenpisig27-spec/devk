@@ -44,7 +44,7 @@ using namespace std;
 //{
 //	m_CFire = new CMPFire;
 //
-//	m_CFire->Init("����",5,"Flare.tga",MESH_PLANERECT,D3DXVECTOR2(0,0),5,true);
+//	m_CFire->Init("����",5,"Flare.tga",MESH_PLANERECT,XMVECTOR2(0,0),5,true);
 //	m_CFire->BindingRes(pResMagr);
 //	m_CFire->setParticleVel(10);
 //	m_CFire->setParticleLife(10);
@@ -55,14 +55,14 @@ using namespace std;
 //
 //
 //	m_CBlast = new CMPBlast;
-//	m_CBlast->Init("��ը",10,"Flare.tga",MESH_PLANERECT,D3DXVECTOR2(1.0f,1.0f),5,true);
+//	m_CBlast->Init("��ը",10,"Flare.tga",MESH_PLANERECT,XMVECTOR2(1.0f,1.0f),5,true);
 //	m_CBlast->BindingRes(pResMagr);
 //	m_CBlast->setParticleColor(0xffff7000);
 //
 //	m_bEmiss	= false;
 //	m_pfDailTime = pResMagr->GetDailTime();
-//	m_vPos		= D3DXVECTOR3(0,0,0);
-//	m_vDir		= D3DXVECTOR3(0,0,0);
+//	m_vPos		= XMVECTOR3(0,0,0);
+//	m_vDir		= XMVECTOR3(0,0,0);
 //	m_fVel		= 7.0f;
 //	m_fRadius = 0.2f;
 //
@@ -84,7 +84,7 @@ using namespace std;
 //	//_pCShade->Play();
 //
 //}
-//void	CMPParticleTrace::MoveTo(D3DXVECTOR3 vPos,MPMap* pMap)
+//void	CMPParticleTrace::MoveTo(XMVECTOR3 vPos,MPMap* pMap)
 //{
 //	if(m_bEmiss)
 //	{
@@ -101,7 +101,7 @@ using namespace std;
 //
 //		//! ������õ�Ŀ��ID��λ�ã��ж�Ŀ�����λ���Ƿ��Ŀ�����һ�µġ�
 //
-//		//SetTarget(D3DXVECTOR3(f,20,0));
+//		//SetTarget(XMVECTOR3(f,20,0));
 //
 //		m_CFire->MoveTo(m_vPos);
 //
@@ -130,7 +130,7 @@ using namespace std;
 //	m_CBlast->Render();
 //}
 //
-//void	CMPParticleTrace::Emission(WORD wID, D3DXVECTOR3 vBegin, D3DXVECTOR3 vEnd)
+//void	CMPParticleTrace::Emission(WORD wID, XMVECTOR3 vBegin, XMVECTOR3 vEnd)
 //{
 //	if(m_bEmiss)
 //		return;
@@ -145,9 +145,9 @@ using namespace std;
 //	m_CFire->MoveTo(vBegin);
 //
 //	m_vDir = vEnd - vBegin;
-//	m_fDist = D3DXVec3LengthSq(&m_vDir);
+//	m_fDist = XMVector3LengthSq(&m_vDir);
 //
-//	D3DXVec3Normalize(&m_vDir,&m_vDir);
+//	XMVector3Normalize(&m_vDir,&m_vDir);
 //	m_bEmiss	= true;
 //
 //	_pCModelEff->Play();
@@ -168,7 +168,7 @@ using namespace std;
 //		_bHit =  true;
 //}
 //
-//void	CMPParticleTrace::SetTarget(D3DXVECTOR3 vTarget)
+//void	CMPParticleTrace::SetTarget(XMVECTOR3 vTarget)
 //{
 //	float fDist  = m_fVel * *m_pfDailTime;
 //	m_vPos	 += m_vDir * fDist;
@@ -184,21 +184,21 @@ using namespace std;
 //	//!�õ�Ŀ�����λ������λ���ƶ��ķ���
 //	m_vTargDir = vTarget - m_CPath[1];
 //	//!�õ�Ŀ�����λ�ú���λ��֮��ľ���
-//	m_fTargDist = D3DXVec3LengthSq(&m_vTargDir);
-//	D3DXVec3Normalize(&m_vTargDir, &m_vTargDir);
+//	m_fTargDist = XMVector3LengthSq(&m_vTargDir);
+//	XMVector3Normalize(&m_vTargDir, &m_vTargDir);
 //
 //	//!�õ����ӵ�λ����Ҫ��Ŀ���ƶ��ķ����ƶ��ľ���.
 //	//	��ʽΪ������ = Ŀ���ƶ��ľ��� / ����������Դ��Ŀ��ľ��� * ���ӵ�ǰλ�ú���һ֡λ�õľ���
 //	float flerp = (m_fTargDist / m_fDist) * fDist;
-//	//m_fDist = fDist;//D3DXVec3Length(&(m_vPos - m_vOldPos));
+//	//m_fDist = fDist;//XMVector3Length(&(m_vPos - m_vOldPos));
 //
 //	//!����Ŀ���ƶ��ķ���ȥ�ƶ�����
 //	m_vPos	 += m_vTargDir * flerp;
 //	//!���¼��㵱ǰ������Ҫ�ƶ��ķ���;��롣
 //	m_CPath[1] = vTarget;
 //	m_vDir = vTarget - m_vPos;
-//	m_fDist = D3DXVec3LengthSq(&m_vDir);
-//	D3DXVec3Normalize(&m_vDir,&m_vDir);
+//	m_fDist = XMVector3LengthSq(&m_vDir);
+//	XMVector3Normalize(&m_vDir,&m_vDir);
 //}
 //
 ///************************************************************************/
@@ -219,7 +219,7 @@ using namespace std;
 //{
 //
 //	m_CRippleStop = new CMPRipple;
-//	m_CRippleStop->Init("����",5,"Ripple.tga",MESH_PLANERECT,D3DXVECTOR2(0.f,0.f),4,false);
+//	m_CRippleStop->Init("����",5,"Ripple.tga",MESH_PLANERECT,XMVECTOR2(0.f,0.f),4,false);
 //	m_CRippleStop->BindingRes(pResMagr);
 //	m_CRippleStop->setParticleLife(100);
 //	m_CRippleStop->SetAlphaType(D3DBLEND_SRCALPHA,D3DBLEND_INVSRCALPHA);
@@ -227,7 +227,7 @@ using namespace std;
 //	//m_CRipple->Play();
 //
 //	m_CRippleMove = new CMPRipple;
-//	m_CRippleMove->Init("����2",13,"Ripple2.tga",MESH_PLANERECT,D3DXVECTOR2(0.f,0.f),4,false);
+//	m_CRippleMove->Init("����2",13,"Ripple2.tga",MESH_PLANERECT,XMVECTOR2(0.f,0.f),4,false);
 //	m_CRippleMove->BindingRes(pResMagr);
 //	m_CRippleMove->SetAlphaType(D3DBLEND_SRCALPHA,D3DBLEND_INVSRCALPHA);
 //	m_CRippleMove->setParticleLife(200);
@@ -237,7 +237,7 @@ using namespace std;
 //	//m_CRipple.Play();
 //
 //	m_pfDailTime = pResMagr->GetDailTime();
-//	//m_vPos		= D3DXVECTOR3(0,0,0);
+//	//m_vPos		= XMVECTOR3(0,0,0);
 //}
 //
 //void	CMPParticleRipple::FrameMove(DWORD	dwDailTime)
@@ -246,7 +246,7 @@ using namespace std;
 //		//! ������õ�Ŀ��ID��λ�ã��ж�Ŀ�����λ���Ƿ��Ŀ�����һ�µġ�
 //
 //
-//		//SetTarget(D3DXVECTOR3(0,20,0));
+//		//SetTarget(XMVECTOR3(0,20,0));
 //
 //	m_CRippleStop->FrameMove(dwDailTime);
 //
@@ -259,13 +259,13 @@ using namespace std;
 //	m_CRippleMove->Render();
 //}
 //
-//void	CMPParticleRipple::Emission(WORD wID, D3DXVECTOR3 vBegin, D3DXVECTOR3 vEnd)
+//void	CMPParticleRipple::Emission(WORD wID, XMVECTOR3 vBegin, XMVECTOR3 vEnd)
 //{
 //	//m_wID = wID;
 //	Walk();
 //}
 //
-//void	CMPParticleRipple::SetTarget(D3DXVECTOR3 vTarget, D3DXVECTOR3 vTarget2,float fAngle)
+//void	CMPParticleRipple::SetTarget(XMVECTOR3 vTarget, XMVECTOR3 vTarget2,float fAngle)
 //{	
 //	m_CRippleMove->SetAngle(fAngle);
 //	m_CRippleStop->SetAngle(fAngle);
@@ -1108,7 +1108,7 @@ void	CChaModel::SaveToFile(FILE* file)
 	fwrite(&eblend,sizeof(int),1,file);
 	eblend = (int)_eDestBlend;
 	fwrite(&eblend,sizeof(int),1,file);
-	fwrite(&_dwCurColor,sizeof(D3DXCOLOR),1,file);
+	fwrite(&_dwCurColor,sizeof(XMCOLORF),1,file);
 
 }
 void	CChaModel::LoadFromFile(FILE* file)
@@ -1123,7 +1123,7 @@ void	CChaModel::LoadFromFile(FILE* file)
 	_eSrcBlend = (D3DBLEND)eblend;
 	fread(&eblend,sizeof(int),1,file);
 	_eDestBlend = (D3DBLEND)eblend;
-	fread(&_dwCurColor,sizeof(D3DXCOLOR),1,file);
+	fread(&_dwCurColor,sizeof(XMCOLORF),1,file);
 
 	char psID[32];
 	sprintf(psID,"%d",_iID);
@@ -1146,7 +1146,7 @@ void	CChaModel::LoadFromMemory(CMemoryBuf* pbuf)
 	_eSrcBlend = (D3DBLEND)eblend;
 	pbuf->mread(&eblend,sizeof(int),1);
 	_eDestBlend = (D3DBLEND)eblend;
-	pbuf->mread(&_dwCurColor,sizeof(D3DXCOLOR),1);
+	pbuf->mread(&_dwCurColor,sizeof(XMCOLORF),1);
 
 	char psID[32];
 	sprintf(psID,"%d",_iID);
@@ -1161,7 +1161,7 @@ void	CChaModel::LoadFromMemory(CMemoryBuf* pbuf)
 //////////////////////////////////////////////////////////////////////////
 
 bool	CMPLink::Create(MPCharacter *pChaMain,int iDummy1,MPCharacter *pChaTag, int iDummy2, \
-			   char* pszTex, int iTexNum,CMPResManger* pResMgr,D3DXVECTOR3* pEyePos,MPRender*	pDev)
+			   char* pszTex, int iTexNum,CMPResManger* pResMgr,XMVECTOR3* pEyePos,MPRender*	pDev)
 {
 	m_pDev = pDev;
 	_pCEffFile = pResMgr->GetEffectFile();
@@ -1175,17 +1175,17 @@ bool	CMPLink::Create(MPCharacter *pChaMain,int iDummy1,MPCharacter *pChaTag, int
 	if(pChaTag->GetObjDummyRunTimeMatrix(&mat2,iDummy2) != 0)
 		return false;
 
-	_vStart = (*(D3DXVECTOR3*)&mat1._41);
-	_vEnd = (*(D3DXVECTOR3*)&mat2._41);
+	_vStart = (*(XMVECTOR3*)&mat1._41);
+	_vEnd = (*(XMVECTOR3*)&mat2._41);
 #else
-	_vStart = D3DXVECTOR3(0,0,0);
-	_vEnd = D3DXVECTOR3(10,0,0);
+	_vStart = XMVECTOR3(0,0,0);
+	_vEnd = XMVECTOR3(10,0,0);
 #endif
 	_vdir =  _vEnd - _vStart;
-	_fdist = D3DXVec3Length( &_vdir );
-	D3DXVec3Normalize(&_vdir,&_vdir);
+	_fdist = XMVector3Length( &_vdir );
+	XMVector3Normalize(&_vdir,&_vdir);
 
-	//D3DXVec3Cross(&_vcross,&D3DXVECTOR3(0,0,-1), &_vdir);
+	//XMVector3Cross(&_vcross,&XMVECTOR3(0,0,-1), &_vdir);
 
 	int n;
 
@@ -1221,32 +1221,32 @@ bool	CMPLink::Create(MPCharacter *pChaMain,int iDummy1,MPCharacter *pChaTag, int
 void	CMPLink::ColArc(float fradius)
 {
 	//if(!_pPath)
-	//	_pPath = new D3DXVECTOR3[LINK_FACE];
+	//	_pPath = new XMVECTOR3[LINK_FACE];
 
-	D3DXVECTOR3 veyedir,vcross;
+	XMVECTOR3 veyedir,vcross;
 	const auto v = *_pEyePos - _vStart;
 
-	D3DXVec3Normalize(&veyedir,&v);
-	D3DXVec3Cross(&vcross,&_vdir,&veyedir);
-	D3DXVec3Normalize(&vcross,&vcross);
-	//D3DXVec3Cross(&vcross,&veyedir,&vcross);
+	XMVector3Normalize(&veyedir,&v);
+	XMVector3Cross(&vcross,&_vdir,&veyedir);
+	XMVector3Normalize(&vcross,&vcross);
+	//XMVector3Cross(&vcross,&veyedir,&vcross);
 
-	//vcross = D3DXVECTOR3(0,0,1);
+	//vcross = XMVECTOR3(0,0,1);
 
-	D3DXVECTOR3 vOrg(-fradius,0,0);
-	D3DXVECTOR3 vTemp;
+	XMVECTOR3 vOrg(-fradius,0,0);
+	XMVECTOR3 vTemp;
 
 
-	D3DXMATRIX mat;
+	XMMATRIX mat;
 	int n;
 	int num = 10;
-	float fstep = (D3DX_PI / 2.0f) / float(num);
+	float fstep = (XM_PI / 2.0f) / float(num);
 	float fhei;
 	float ft;
 	for (n = 0; n < num; ++n)
 	{
-		D3DXMatrixRotationY(&mat,n * fstep);
-		D3DXVec3TransformCoord(&vTemp,&vOrg,&mat);
+		XMMatrixRotationY(&mat,n * fstep);
+		XMVector3TransformCoord(&vTemp,&vOrg,&mat);
 		fhei = vTemp.z;
 
 		ft = fradius + vTemp.x;
@@ -1299,18 +1299,18 @@ void	CMPLink::GetPhysique()
 	if(_pChaTag->GetObjDummyRunTimeMatrix(&mat2,_iDummy2) != 0)
 		return false;
 
-	_vStart = (*(D3DXVECTOR3*)&mat1._41);
-	_vEnd = (*(D3DXVECTOR3*)&mat2._41);
+	_vStart = (*(XMVECTOR3*)&mat1._41);
+	_vEnd = (*(XMVECTOR3*)&mat2._41);
 #else
-	_vStart = D3DXVECTOR3(0,0,0);
-	_vEnd = D3DXVECTOR3(10,0,0);
+	_vStart = XMVECTOR3(0,0,0);
+	_vEnd = XMVECTOR3(10,0,0);
 #endif
 
 	_vdir =  _vEnd - _vStart;
-	_fdist = D3DXVec3Length( &_vdir );
-	D3DXVec3Normalize(&_vdir,&_vdir);
+	_fdist = XMVector3Length( &_vdir );
+	XMVector3Normalize(&_vdir,&_vdir);
 
-	//D3DXVec3Cross(&_vcross,&D3DXVECTOR3(0,0,-1), &_vdir);
+	//XMVector3Cross(&_vcross,&XMVECTOR3(0,0,-1), &_vdir);
 
 	//ȡ�뾶���ֵ
 	float frad = 3.0f;
@@ -1351,8 +1351,8 @@ void	CMPLink::Render()
 	m_pDev->SetRenderState( D3DRS_SRCBLEND,D3DBLEND_SRCALPHA );
 	m_pDev->SetRenderState( D3DRS_DESTBLEND,D3DBLEND_ONE);
 
-	D3DXMATRIX mat;
-	D3DXMatrixIdentity(&mat);
+	XMMATRIX mat;
+	XMMatrixIdentity(&mat);
 
 	m_pDev->SetTransformWorld(&mat);
 	m_pDev->SetTexture(0,_pTex[_iCurTex]->GetTex());

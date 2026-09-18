@@ -15,7 +15,7 @@ public:
 
 	virtual void MouseDown(int nButton) {}
 	virtual void MouseUp(int nButton) {}
-	virtual void MoveTo(D3DXVECTOR3& stPos) {}
+	virtual void MoveTo(XMVECTOR3& stPos) {}
 
 	virtual void FrameMove(DWORD dwTime) {}
 	virtual void Render() {}
@@ -40,7 +40,7 @@ public:
 
 	inline void FrameMove(DWORD dwTime);
 	inline void Render();
-	inline void MoveTo(D3DXVECTOR3& stPos);
+	inline void MoveTo(XMVECTOR3& stPos);
 
 	inline void SetIsVisible(bool v) { _bIsVisible = v; }
 
@@ -72,7 +72,7 @@ inline void CursorMgr::Render() {
 		_pCursor->Render();
 }
 
-inline void CursorMgr::MoveTo(D3DXVECTOR3& stPos) {
+inline void CursorMgr::MoveTo(XMVECTOR3& stPos) {
 	if (_bIsVisible && stPos.x != -1)
 		_pCursor->MoveTo(stPos);
 }

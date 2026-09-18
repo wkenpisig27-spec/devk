@@ -37,7 +37,7 @@ void CRCursor::FrameMove(DWORD dwTime) {
 	_pCursorEff->FrameMove(dwTime);
 }
 
-void CRCursor::MoveTo(D3DXVECTOR3& vPos) {
+void CRCursor::MoveTo(XMVECTOR3& vPos) {
 	_vPos = vPos;
 }
 

@@ -270,7 +270,7 @@ bool CMoveState::_Start() {
 
 // Fix #7: Shared coordinate quantization extracted from both WriteInfo implementations.
 // CMoveState::WriteInfo and COneMoveState::WriteInfo now delegate to this helper.
-static void WriteNetMoveInfo(S_BVECTOR<D3DXVECTOR3>& path, stNetMoveInfo& info, const char* logTag) {
+static void WriteNetMoveInfo(S_BVECTOR<XMVECTOR3>& path, stNetMoveInfo& info, const char* logTag) {
 	int n = (int)path.size();
 	if (n > defMAX_POS_NUM)
 		n = defMAX_POS_NUM;
@@ -282,7 +282,7 @@ static void WriteNetMoveInfo(S_BVECTOR<D3DXVECTOR3>& path, stNetMoveInfo& info, 
 	info.pos_num = n;
 }
 
-void CMoveState::WriteInfo(S_BVECTOR<D3DXVECTOR3>& path, stNetMoveInfo& info) {
+void CMoveState::WriteInfo(S_BVECTOR<XMVECTOR3>& path, stNetMoveInfo& info) {
 	// Fix #7: Delegates to shared helper WriteNetMoveInfo (defined below)
 	WriteNetMoveInfo(path, info, "move_path");
 	LG("move_path", "\n\n");
@@ -638,7 +638,7 @@ bool COneMoveState::SendInfo() {
 
 		_cLocalList.Clear();
 
-		S_BVECTOR<D3DXVECTOR3>& path = g_cFindPath.GetResultPath();
+		S_BVECTOR<XMVECTOR3>& path = g_cFindPath.GetResultPath();
 		int n = path.size();
 		for (int i = 1; i < n; i++) {
 			_cLocalList.PushPoint((long)(path[i]->x * 100.0f), (long)(path[i]->y * 100.0f));
@@ -758,7 +758,7 @@ bool COneMoveState::StartMove(int nTargetX, int nTargetY, bool isWalkLine) {
 	}
 
 	_cLocalList.Clear();
-	S_BVECTOR<D3DXVECTOR3>& path = g_cFindPath.GetResultPath();
+	S_BVECTOR<XMVECTOR3>& path = g_cFindPath.GetResultPath();
 	int n = path.size();
 	for (int i = 1; i < n; i++) {
 		_cLocalList.PushPoint((long)(path[i]->x * 100.0f), (long)(path[i]->y * 100.0f));
@@ -861,7 +861,7 @@ void COneMoveState::Cancel() {
 	}
 }
 
-void COneMoveState::WriteInfo(S_BVECTOR<D3DXVECTOR3>& path, stNetMoveInfo& info) {
+void COneMoveState::WriteInfo(S_BVECTOR<XMVECTOR3>& path, stNetMoveInfo& info) {
 	// Turn the wayfinding point into the protocol content sent to the server.
 	// Fix #7: Now delegates to WriteNetMoveInfo (shared with CMoveState::WriteInfo).
 	WriteNetMoveInfo(path, info, "m_path");
@@ -877,7 +877,7 @@ void COneMoveState::WriteInfo(S_BVECTOR<D3DXVECTOR3>& path, stNetMoveInfo& info)
 // IsSameServerPos removed (fix #3): ignored x/y parameters, returned only _nMoveCount<=1,
 // and was never called anywhere in the codebase.
 
-void COneMoveState::CompartMoveList(CMoveList& outlist, S_BVECTOR<D3DXVECTOR3>& path, int length) {
+void COneMoveState::CompartMoveList(CMoveList& outlist, S_BVECTOR<XMVECTOR3>& path, int length) {
 	// For a wayfinding point, the length is divided into multiple segments, less than 0 does not segment
 	CMoveList& cLocalList = outlist;
 	cLocalList.Clear();

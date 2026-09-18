@@ -39,23 +39,23 @@ DWORD CalcEnhancedSeaColor(const VECTOR3& pos, DWORD baseColor, float shoreAlpha
 	BYTE bg = (BYTE)((baseColor >> 8) & 0xff);
 	BYTE bb = (BYTE)(baseColor & 0xff);
 
-	D3DXMATRIX view = g_Render.GetWorldViewMatrix();
-	D3DXMATRIX invView;
-	D3DXMatrixInverse(&invView, NULL, &view);
-	D3DXVECTOR3 eye(invView._41, invView._42, invView._43);
-	D3DXVECTOR3 vpos(pos.x, pos.y, pos.z);
-	D3DXVECTOR3 toCam = eye - vpos;
-	if (D3DXVec3LengthSq(&toCam) > 0.0001f)
-		D3DXVec3Normalize(&toCam, &toCam);
+	XMMATRIX view = g_Render.GetWorldViewMatrix();
+	XMMATRIX invView;
+	XMMatrixInverse(&invView, NULL, &view);
+	XMVECTOR3 eye(invView._41, invView._42, invView._43);
+	XMVECTOR3 vpos(pos.x, pos.y, pos.z);
+	XMVECTOR3 toCam = eye - vpos;
+	if (XMVector3LengthSq(&toCam) > 0.0001f)
+		XMVector3Normalize(&toCam, &toCam);
 
 	// Water surface normal points up; fresnel brightens grazing views.
-	const D3DXVECTOR3 up(0.0f, 0.0f, 1.0f);
-	float ndv = fabsf(D3DXVec3Dot(&up, &toCam));
+	const XMVECTOR3 up(0.0f, 0.0f, 1.0f);
+	float ndv = fabsf(XMVector3Dot(&up, &toCam));
 	float fresnel = 1.0f - ndv;
 	fresnel = fresnel * fresnel;
 
-	D3DXVECTOR3 delta = eye - vpos;
-	float dist = D3DXVec3Length(&delta);
+	XMVECTOR3 delta = eye - vpos;
+	float dist = XMVector3Length(&delta);
 	float fogBlend = 1.0f - expf(-dist * 0.0015f);
 
 	br = (BYTE)min(255.0f, br + fresnel * 70.0f + fogBlend * 20.0f);
@@ -249,7 +249,7 @@ void MPMap::Render()
     if(_bShowCenterPoint)
 	{
 		_RenderFocusRect();
-		g_Render.AddLine(D3DXVECTOR3(_fShowCenterX, _fShowCenterY, 0.0f), D3DXVECTOR3(_fShowCenterX, _fShowCenterY, 4.0f), 0xFF0000FF);
+		g_Render.AddLine(XMVECTOR3(_fShowCenterX, _fShowCenterY, 0.0f), XMVECTOR3(_fShowCenterX, _fShowCenterY, 4.0f), 0xFF0000FF);
    	}
 
 	g_Render.ResetWorldTransform();
@@ -415,7 +415,7 @@ void MPMap::Render()
     m_dwTerrainRenderTime = t.End();
 
 	//SetSkyDoom(true);
-	//CreateSkyDoom(D3DXVECTOR3(_fShowCenterX,_fShowCenterY,0),76,"texture/terrain/clouds.jpg",false);
+	//CreateSkyDoom(XMVECTOR3(_fShowCenterX,_fShowCenterY,0),76,"texture/terrain/clouds.jpg",false);
 }
 
 void MPMap::RenderSmMap()
@@ -908,24 +908,24 @@ void MPMap::RenderSea()
 }
 
 
-BOOL MPMap::GetPickPos(int nPosX, int nPosY, D3DXVECTOR3 &vPickPos)
+BOOL MPMap::GetPickPos(int nPosX, int nPosY, XMVECTOR3 &vPickPos)
 {
-	vPickPos = D3DXVECTOR3(-1, -1, -10000);
+	vPickPos = XMVECTOR3(-1, -1, -10000);
 
-	D3DXVECTOR3 vPickRayOrig, vPickRayDir;
+	XMVECTOR3 vPickRayOrig, vPickRayDir;
 	
 	g_Render.GetPickRayVector(nPosX, nPosY, &vPickRayOrig, &vPickRayDir);
 	
 	float fDistance = 70;
     float fStep     = 0.6f;
 	
-    D3DXVECTOR3 vecEnd = vPickRayOrig + vPickRayDir * fDistance;
-    list<D3DXVECTOR3> PointList;
+    XMVECTOR3 vecEnd = vPickRayOrig + vPickRayDir * fDistance;
+    list<XMVECTOR3> PointList;
     GetSamplePointList(vPickRayOrig.x, vPickRayOrig.y, vecEnd.x, vecEnd.y, fStep, 0.3f, PointList);
     
-    for(list<D3DXVECTOR3>::iterator it = PointList.begin(); it!=PointList.end(); it++)
+    for(list<XMVECTOR3>::iterator it = PointList.begin(); it!=PointList.end(); it++)
     {
-        D3DXVECTOR3 *pVec = &(*it);
+        XMVECTOR3 *pVec = &(*it);
 
         int nX = (int)(pVec->x);
         int nY = (int)(pVec->y);
@@ -974,19 +974,19 @@ BOOL MPMap::GetPickPos(int nPosX, int nPosY, D3DXVECTOR3 &vPickPos)
 		float fy1 = (float)nY;
 		float fy2 = (float)nY + 1;
 		
-		D3DXVECTOR3 v0( fx1, fy1, fHeight[0]); 
-		D3DXVECTOR3 v1( fx2, fy1, fHeight[1]); 
-		D3DXVECTOR3 v2( fx1, fy2, fHeight[2]); 
-		D3DXVECTOR3 v3( fx2, fy2, fHeight[3]); 		
+		XMVECTOR3 v0( fx1, fy1, fHeight[0]); 
+		XMVECTOR3 v1( fx2, fy1, fHeight[1]); 
+		XMVECTOR3 v2( fx1, fy2, fHeight[2]); 
+		XMVECTOR3 v3( fx2, fy2, fHeight[3]); 		
 		
 		float u, v;
-		if( D3DXIntersectTri(&v0, &v1, &v2, &vPickRayOrig, &vPickRayDir, &u, &v, NULL) == TRUE)
+		if( XMIntersectTri(&v0, &v1, &v2, &vPickRayOrig, &vPickRayDir, &u, &v, NULL) == TRUE)
 		{
 			vPickPos = v0 + u * (v1 - v0) + v * (v2 - v0);	
 			return TRUE;
 		}
 			
-		if( D3DXIntersectTri(&v2, &v1, &v3, &vPickRayOrig, &vPickRayDir, &u, &v, NULL) == TRUE)
+		if( XMIntersectTri(&v2, &v1, &v3, &vPickRayOrig, &vPickRayDir, &u, &v, NULL) == TRUE)
 		{
 			vPickPos = v2 + u * (v1 - v2) + v * (v3 - v2);		
 			return TRUE;
@@ -995,24 +995,24 @@ BOOL MPMap::GetPickPos(int nPosX, int nPosY, D3DXVECTOR3 &vPickPos)
 	return FALSE; 
 }
 
-BOOL MPMap::GetPickPosEditor(int nPosX, int nPosY, D3DXVECTOR3 &vPickPos)
+BOOL MPMap::GetPickPosEditor(int nPosX, int nPosY, XMVECTOR3 &vPickPos)
 {
-	vPickPos = D3DXVECTOR3(-1, -1, -10000);
+	vPickPos = XMVECTOR3(-1, -1, -10000);
 
-	D3DXVECTOR3 vPickRayOrig, vPickRayDir;
+	XMVECTOR3 vPickRayOrig, vPickRayDir;
 	
 	g_Render.GetPickRayVector(nPosX, nPosY, &vPickRayOrig, &vPickRayDir);
 	
 	float fDistance = 70;
     float fStep     = 0.6f;
 	
-    D3DXVECTOR3 vecEnd = vPickRayOrig + vPickRayDir * fDistance;
-    list<D3DXVECTOR3> PointList;
+    XMVECTOR3 vecEnd = vPickRayOrig + vPickRayDir * fDistance;
+    list<XMVECTOR3> PointList;
     GetSamplePointList(vPickRayOrig.x, vPickRayOrig.y, vecEnd.x, vecEnd.y, fStep, 0.3f, PointList);
     
-    for(list<D3DXVECTOR3>::iterator it = PointList.begin(); it!=PointList.end(); it++)
+    for(list<XMVECTOR3>::iterator it = PointList.begin(); it!=PointList.end(); it++)
     {
-        D3DXVECTOR3 *pVec = &(*it);
+        XMVECTOR3 *pVec = &(*it);
 
         int nX = (int)(pVec->x);
         int nY = (int)(pVec->y);
@@ -1061,19 +1061,19 @@ BOOL MPMap::GetPickPosEditor(int nPosX, int nPosY, D3DXVECTOR3 &vPickPos)
 		float fy1 = (float)nY;
 		float fy2 = (float)nY + 1;
 		
-		D3DXVECTOR3 v0( fx1, fy1, fHeight[0]); 
-		D3DXVECTOR3 v1( fx2, fy1, fHeight[1]); 
-		D3DXVECTOR3 v2( fx1, fy2, fHeight[2]); 
-		D3DXVECTOR3 v3( fx2, fy2, fHeight[3]); 		
+		XMVECTOR3 v0( fx1, fy1, fHeight[0]); 
+		XMVECTOR3 v1( fx2, fy1, fHeight[1]); 
+		XMVECTOR3 v2( fx1, fy2, fHeight[2]); 
+		XMVECTOR3 v3( fx2, fy2, fHeight[3]); 		
 		
 		float u, v;
-		if( D3DXIntersectTri(&v0, &v1, &v2, &vPickRayOrig, &vPickRayDir, &u, &v, NULL) == TRUE)
+		if( XMIntersectTri(&v0, &v1, &v2, &vPickRayOrig, &vPickRayDir, &u, &v, NULL) == TRUE)
 		{
 			vPickPos = v0 + u * (v1 - v0) + v * (v2 - v0);	
 			return TRUE;
 		}
 			
-		if( D3DXIntersectTri(&v2, &v1, &v3, &vPickRayOrig, &vPickRayDir, &u, &v, NULL) == TRUE)
+		if( XMIntersectTri(&v2, &v1, &v3, &vPickRayOrig, &vPickRayDir, &u, &v, NULL) == TRUE)
 		{
 			vPickPos = v2 + u * (v1 - v2) + v * (v3 - v2);		
 			return TRUE;
@@ -1102,23 +1102,23 @@ float MPMap::GetHeight(float fX, float fY)  // ? �������⣬ ��
 		fHeight[i] = pCurTile->fHeight;
 	}
 	
-	D3DXVECTOR3 v0( fx1, fy1, fHeight[0]); 
-	D3DXVECTOR3 v1( fx2, fy1, fHeight[1]); 
-	D3DXVECTOR3 v2( fx1, fy2, fHeight[2]); 
-	D3DXVECTOR3 v3( fx2, fy2, fHeight[3]); 		
+	XMVECTOR3 v0( fx1, fy1, fHeight[0]); 
+	XMVECTOR3 v1( fx2, fy1, fHeight[1]); 
+	XMVECTOR3 v2( fx1, fy2, fHeight[2]); 
+	XMVECTOR3 v3( fx2, fy2, fHeight[3]); 		
 		
 	VECTOR3 vOrig(fX, fY, 20.0f);
 	VECTOR3 vDir(0, 0, -1);
 	float u, v;
 	
 	VECTOR3 vPickPos;
-	if( D3DXIntersectTri(&v0, &v1, &v2, &vOrig, &vDir, &u, &v, NULL) == TRUE)
+	if( XMIntersectTri(&v0, &v1, &v2, &vOrig, &vDir, &u, &v, NULL) == TRUE)
 	{
 		vPickPos = v0 + u * (v1 - v0) + v * (v2 - v0);	
 		return vPickPos.z;
 	}
 			
-	if( D3DXIntersectTri(&v2, &v1, &v3, &vOrig, &vDir, &u, &v, NULL) == TRUE)
+	if( XMIntersectTri(&v2, &v1, &v3, &vOrig, &vDir, &u, &v, NULL) == TRUE)
 	{
 		vPickPos = v2 + u * (v1 - v2) + v * (v3 - v2);		
 		return vPickPos.z;
@@ -1135,10 +1135,10 @@ void MPMap::_CalTileNormal(int nX, int nY)
 	float f2 = (float)(rand()%20) / 100.0f;
 	float f3 = (float)(rand()%10) / 100.0f;
 	
-	vAround[ 0 ] = D3DXVECTOR3( -1,  0, GetTile(nX - 1, nY)->fHeight);
-	vAround[ 1 ] = D3DXVECTOR3(  0,  1, GetTile(nX, nY + 1)->fHeight);
-	vAround[ 2 ] = D3DXVECTOR3(  1,  0, GetTile(nX + 1, nY)->fHeight);
-	vAround[ 3 ] = D3DXVECTOR3(  0, -1, GetTile(nX, nY - 1)->fHeight);	
+	vAround[ 0 ] = XMVECTOR3( -1,  0, GetTile(nX - 1, nY)->fHeight);
+	vAround[ 1 ] = XMVECTOR3(  0,  1, GetTile(nX, nY + 1)->fHeight);
+	vAround[ 2 ] = XMVECTOR3(  1,  0, GetTile(nX + 1, nY)->fHeight);
+	vAround[ 3 ] = XMVECTOR3(  0, -1, GetTile(nX, nY - 1)->fHeight);	
 	
 	float fHeight = GetTile(nX, nY)->fHeight;
 
@@ -1150,7 +1150,7 @@ void MPMap::_CalTileNormal(int nX, int nY)
 	VECTOR3 vR = ( vNormal[ 0 ] + vNormal[ 1 ]  + vNormal[ 2 ] + vNormal[ 3 ] ) / 4;
 	
 	// vR = VECTOR3(0, 0, 1.0f);
-	D3DXVec3Normalize(&vR, &vR);
+	XMVector3Normalize(&vR, &vR);
 	
 	// GetTile(nX, nY)->vN = vR;
 }
@@ -1527,7 +1527,7 @@ BOOL MPMap::UseShader()
 #endif
 }
 
-void MPMap::CreateSkyDoom(D3DXVECTOR3 center, float radius, char* txPath, bool hemisphere)
+void MPMap::CreateSkyDoom(XMVECTOR3 center, float radius, char* txPath, bool hemisphere)
 {
 	if(!m_bSkyDoom) return;
 
@@ -1755,11 +1755,11 @@ void MPMap::CreateSkyDoom(D3DXVECTOR3 center, float radius, char* txPath, bool h
 		//
 		//render 
 		// i remark these code for close the shader
-		D3DXMATRIX mat;  
-		D3DXMatrixMultiply(&mat,&g_Render.GetWorldViewMatrix(),&g_Render.GetWorldProjMatrix());
-		D3DXMatrixTranspose( &mat, &mat );
+		XMMATRIX mat;  
+		XMMatrixMultiply(&mat,&g_Render.GetWorldViewMatrix(),&g_Render.GetWorldProjMatrix());
+		XMMatrixTranspose( &mat, &mat );
 		dev->SetVertexShaderConstantF(0,mat,4);
-		dev->SetVertexShaderConstantF(4,D3DXVECTOR4(0,(m_txMoveSpeed-=1.0f)/10000*SKYDOOM_TEXTURE_MOVESPEED,0,0),1); //add by jze pass current frame number to vertex shader 
+		dev->SetVertexShaderConstantF(4,XMVECTOR4(0,(m_txMoveSpeed-=1.0f)/10000*SKYDOOM_TEXTURE_MOVESPEED,0,0),1); //add by jze pass current frame number to vertex shader 
 		dev->SetVertexShader((IDirect3DVertexShaderX*)m_SkyDoomVertexShaderHandle);
 		dev->SetPixelShader((IDirect3DPixelShaderX*)m_SkyDoomPixelShaderHandle);
 

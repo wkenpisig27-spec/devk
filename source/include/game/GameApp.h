@@ -202,7 +202,7 @@ public:
 	CMPFont* GetFont() { return &g_CFont; }
 	RenderStateMgr* GetRenderStateMgr() { return _rsm; }
 
-	void SetCameraPos(D3DXVECTOR3& pos, bool bRestoreCustom = true); // bRestoreCustom����Ϊtrue����ʾ����û��Ծ�ͷ�ĸı�
+	void SetCameraPos(XMVECTOR3& pos, bool bRestoreCustom = true); // bRestoreCustom����Ϊtrue����ʾ����û��Ծ�ͷ�ĸı�
 
 	void SetStartMinimap(int ix, int iy, int destx, int desty);
 	CScriptMgr* GetScriptMgr() { return &_stScriptMgr; }
@@ -360,12 +360,12 @@ public:
 
 	Ninja::Camera* GetNinjaCamera() { return _pNinjaCamera; }
 	//	Ninja::Camera*		_pNinjaCamera;
-	//	Ninja::Controller < D3DXVECTOR3 > *_ctrl;
+	//	Ninja::Controller < XMVECTOR3 > *_ctrl;
 
 	// Added by CLP
 private:
 	Ninja::Camera* _pNinjaCamera;
-	Ninja::Controller<D3DXVECTOR3>* _camera_target_ctrl;
+	Ninja::Controller<XMVECTOR3>* _camera_target_ctrl;
 	Ninja::Controller<Ninja::SphereCoord>* _camera_eye_ctrl;
 };
 
@@ -387,7 +387,7 @@ public:
 	void Resume(DWORD dwStartTime, DWORD dwPlayTime);
 
 	struct ClockVer {
-		D3DXVECTOR4 vPos;
+		XMVECTOR4 vPos;
 		DWORD dwColor;
 	};
 
@@ -413,7 +413,7 @@ private:
 	ClockVer _vVertex[10];
 	ClockVer _vTempVer[10];
 
-	D3DXVECTOR4 _vSave[10];
+	XMVECTOR4 _vSave[10];
 };
 
 inline void CGameApp::SendMessage(DWORD dwTypeID, DWORD dwParam1, DWORD dwParam2) {

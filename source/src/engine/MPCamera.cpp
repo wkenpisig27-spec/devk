@@ -17,16 +17,16 @@ MPCameraNOLEECH::~MPCameraNOLEECH() {}
 VOID MPCameraNOLEECH::Move(DWORD dwMoveType) 
 {
 	float fStep = 0.2f;	
-	D3DXVECTOR3 Move(0, 0, 0);
+	XMVECTOR3 Move(0, 0, 0);
 	
 	switch(dwMoveType)
 	{
 		case MOVE_LEFT:
 		{
-			auto v = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
+			auto v = XMVECTOR3(0.0f, 0.0f, 1.0f);
 			auto v2 = (m_RefPos - m_EyePos);
-			D3DXVec3Cross(&Move , &v2 , &v);
-			D3DXVec3Normalize(&Move , &Move);
+			XMVector3Cross(&Move , &v2 , &v);
+			XMVector3Normalize(&Move , &Move);
 			Move*=fStep;
 			m_RefPos+=Move;
 			m_EyePos+=Move;
@@ -34,10 +34,10 @@ VOID MPCameraNOLEECH::Move(DWORD dwMoveType)
 		}
 		case MOVE_RIGHT:
 		{
-			auto v = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
+			auto v = XMVECTOR3(0.0f, 0.0f, 1.0f);
 			auto v2 = (m_RefPos - m_EyePos);
-			D3DXVec3Cross(&Move , &v2 , &v);
-			D3DXVec3Normalize(&Move , &Move);
+			XMVector3Cross(&Move , &v2 , &v);
+			XMVector3Normalize(&Move , &Move);
 			Move*=fStep;
 			m_RefPos-=Move;
 			m_EyePos-=Move;
@@ -46,7 +46,7 @@ VOID MPCameraNOLEECH::Move(DWORD dwMoveType)
 		case MOVE_FORWARD:
 		{
 			auto v = (m_RefPos - m_EyePos);
-		    D3DXVec3Normalize(&Move , &v);
+		    XMVector3Normalize(&Move , &v);
 			Move*=fStep;
 			m_RefPos+=Move;
 			m_EyePos+=Move;
@@ -55,7 +55,7 @@ VOID MPCameraNOLEECH::Move(DWORD dwMoveType)
 		case MOVE_BACKWARD:
 		{
 			auto v = (m_RefPos - m_EyePos);
-			D3DXVec3Normalize(&Move , &v);
+			XMVector3Normalize(&Move , &v);
 			Move*=fStep;
 			m_RefPos-=Move;
 			m_EyePos-=Move;
@@ -63,7 +63,7 @@ VOID MPCameraNOLEECH::Move(DWORD dwMoveType)
 		}
 		case MOVE_UP:
 		{
-			Move = D3DXVECTOR3(0.0f , 0.0f , 1.0f);
+			Move = XMVECTOR3(0.0f , 0.0f , 1.0f);
 			Move*=fStep;
 			m_RefPos+=Move;
 			m_EyePos+=Move;
@@ -71,7 +71,7 @@ VOID MPCameraNOLEECH::Move(DWORD dwMoveType)
 		}
 		case MOVE_DOWN:
 		{
-			Move = D3DXVECTOR3(0.0f , 0.0f , 1.0f);
+			Move = XMVECTOR3(0.0f , 0.0f , 1.0f);
 			Move*=fStep;
 			m_RefPos-=Move;
 			m_EyePos-=Move;
@@ -104,16 +104,16 @@ VOID MPCameraNOLEECH::Move(DWORD dwMoveType)
 // 前后移动镜头, Hang表示是否悬浮移动
 void MPCameraNOLEECH::MoveForward(float fStep, BOOL bHang)
 {
-	D3DXVECTOR3 Move(0 , 0 , 0);
+	XMVECTOR3 Move(0 , 0 , 0);
 	if(bHang)
 	{
-		auto v = (D3DXVECTOR3(m_RefPos.x, m_RefPos.y, 0.0f) - D3DXVECTOR3(m_EyePos.x, m_EyePos.y, 0.0f));
-		D3DXVec3Normalize(&Move , &v);
+		auto v = (XMVECTOR3(m_RefPos.x, m_RefPos.y, 0.0f) - XMVECTOR3(m_EyePos.x, m_EyePos.y, 0.0f));
+		XMVector3Normalize(&Move , &v);
 	}
 	else
 	{
 		auto v = (m_RefPos - m_EyePos);
-		D3DXVec3Normalize(&Move , &v);
+		XMVector3Normalize(&Move , &v);
 	}
 	Move*=fStep;
 	m_RefPos+=Move;
@@ -123,12 +123,12 @@ void MPCameraNOLEECH::MoveForward(float fStep, BOOL bHang)
 // 左右移动镜头, Hang表示是否悬浮移动
 void MPCameraNOLEECH::MoveRight(float fStep, BOOL bHang)
 {
-	D3DXVECTOR3 Move(0 , 0 , 0);
+	XMVECTOR3 Move(0 , 0 , 0);
 	    
-	auto v = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
+	auto v = XMVECTOR3(0.0f, 0.0f, 1.0f);
 	auto v2 = (m_RefPos - m_EyePos);
-	D3DXVec3Cross(&Move , &v2 , &v);
-	D3DXVec3Normalize(&Move , &Move);
+	XMVector3Cross(&Move , &v2 , &v);
+	XMVector3Normalize(&Move , &Move);
 	Move*=fStep;
 	if(bHang)
 	{
@@ -138,32 +138,32 @@ void MPCameraNOLEECH::MoveRight(float fStep, BOOL bHang)
 	m_EyePos+=Move;
 }
 
-void MPCameraNOLEECH::Turn(float fStep, D3DXVECTOR3 *pFocusVec)
+void MPCameraNOLEECH::Turn(float fStep, XMVECTOR3 *pFocusVec)
 {
 	// float fDis = DistanceFrom(m_RefPos, m_EyePos);
 	// float fAngle = (m_RefPos.y - m_EyePos.y) / (m_RefPos.x - m_EyePos.x);
-	D3DXVECTOR3 Move(0, 0, 0);
+	XMVECTOR3 Move(0, 0, 0);
 	
 	if(!pFocusVec)
 	{
-		const D3DXVECTOR3 v[] = {
+		const XMVECTOR3 v[] = {
 			m_RefPos - m_EyePos,
-			D3DXVECTOR3(0.0f, 0.0f, 1.0f) };
-		D3DXVec3Cross(&Move , &v[0], &v[1]);
-		D3DXVec3Normalize(&Move , &Move);
+			XMVECTOR3(0.0f, 0.0f, 1.0f) };
+		XMVector3Cross(&Move , &v[0], &v[1]);
+		XMVector3Normalize(&Move , &Move);
 		Move*=fStep;
 		m_RefPos+=Move;
 	}
 	else
 	{
 		m_RefPos = *pFocusVec;
-		D3DXVECTOR3 vv = m_EyePos - *pFocusVec;
-		D3DXVECTOR3 const v[] = {
-	D3DXVECTOR3(vv.x, vv.y, 0.0f),
-	D3DXVECTOR3(0.0f, 0.0f, 1.0f) };
-		D3DXVec3Normalize(&vv, &vv);
-		D3DXVec3Cross(&Move , &v[0] , &v[1]);
-		D3DXVec3Normalize(&Move , &Move);
+		XMVECTOR3 vv = m_EyePos - *pFocusVec;
+		XMVECTOR3 const v[] = {
+	XMVECTOR3(vv.x, vv.y, 0.0f),
+	XMVECTOR3(0.0f, 0.0f, 1.0f) };
+		XMVector3Normalize(&vv, &vv);
+		XMVector3Cross(&Move , &v[0] , &v[1]);
+		XMVector3Normalize(&Move , &Move);
 		Move*=fStep;
 		m_EyePos+=Move;
 	}
@@ -177,19 +177,19 @@ void		MPCameraNOLEECH::FrameMove(DWORD	dwTailTime)
 //void		MPCamera::InitAngle(float	fAngle)
 //{
 //	m_cameractrl.m_InitAngle = fAngle;
-//	m_cameractrl.m_vDir = D3DXVECTOR3(0,1,0);
+//	m_cameractrl.m_vDir = XMVECTOR3(0,1,0);
 //	m_cameractrl.m_fAngle = fAngle;
-//	D3DXMATRIX		mat;
-//	D3DXVECTOR4		ver;
-//	D3DXMatrixRotationZ(&mat,m_cameractrl.m_fAngle);
-//	D3DXVec3Transform(&ver, &m_cameractrl.m_vDir, &mat);
+//	XMMATRIX		mat;
+//	XMVECTOR4		ver;
+//	XMMatrixRotationZ(&mat,m_cameractrl.m_fAngle);
+//	XMVector3Transform(&ver, &m_cameractrl.m_vDir, &mat);
 //	m_cameractrl.m_vDir.x = ver.x;
 //	m_cameractrl.m_vDir.y = ver.y;
 //	m_cameractrl.m_vDir.z = ver.z;
 //
 //	m_cameractrl.GetEyePos(m_EyePos,m_RefPos);
 //	vDistFrom = m_EyePos - m_RefPos;
-//	D3DXVec3Normalize(&m_cameractrl.m_vDir, &vDistFrom);
+//	XMVector3Normalize(&m_cameractrl.m_vDir, &vDistFrom);
 //	m_cameractrl.m_vDir.z = 0;
 //}
 //
@@ -208,7 +208,7 @@ void		MPCameraNOLEECH::FrameMove(DWORD	dwTailTime)
 //	{
 //		if(m_cameractrl.ScroolFB(m_cameractrl.m_fvel * m_cameractrl.m_fasscs))
 //		{
-//			//D3DXVECTOR3		tv;
+//			//XMVECTOR3		tv;
 //			//m_cameractrl.GetEyePos(tv,m_RefPos);
 //
 //			//vDistFrom = tv - m_RefPos;
@@ -248,10 +248,10 @@ void		MPCameraNOLEECH::FrameMove(DWORD	dwTailTime)
 //	//m_EyePos = m_RefPos + vDistFrom;
 //	m_cameractrl.GetEyePos(m_EyePos,m_RefPos);
 //
-//	D3DXVec3Normalize(&m_cameractrl.m_vDir, &(m_EyePos - m_RefPos));
+//	XMVector3Normalize(&m_cameractrl.m_vDir, &(m_EyePos - m_RefPos));
 //	m_cameractrl.m_vDir.z = 0;
 //
-//	D3DXVec3Cross( &m_cameractrl.m_vCross, &m_cameractrl.m_vDir, &D3DXVECTOR3(0.0f , 0.0f , 1.0f) );
+//	XMVector3Cross( &m_cameractrl.m_vCross, &m_cameractrl.m_vDir, &XMVECTOR3(0.0f , 0.0f , 1.0f) );
 //
 //
 //
@@ -289,7 +289,7 @@ void		MPCameraNOLEECH::FrameMove(DWORD	dwTailTime)
 //	}
 //
 //	//m_cameractrl.ScroolLR(Angle);
-//	//D3DXVECTOR3		tv;
+//	//XMVECTOR3		tv;
 //
 //	//m_cameractrl.GetEyePos(tv,m_RefPos);
 //

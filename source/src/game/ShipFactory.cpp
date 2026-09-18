@@ -309,12 +309,12 @@ void xShipFactory::Render3DView(int x, int y) {
 	if (ship == 0)
 		return;
 
-	D3DXVECTOR3 org, ray;
+	XMVECTOR3 org, ray;
 
 	DWORD sx = x + 180;
 	DWORD sy = y + 90;
 
-	g_Render.LookAt(D3DXVECTOR3(0.0f, 10.0f, 10.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), MPRender::VIEW_3DUI);
+	g_Render.LookAt(XMVECTOR3(0.0f, 10.0f, 10.0f), XMVECTOR3(0.0f, 0.0f, 0.0f), MPRender::VIEW_3DUI);
 
 	lwMatrix44 old_mat = *ship->GetMatrix();
 

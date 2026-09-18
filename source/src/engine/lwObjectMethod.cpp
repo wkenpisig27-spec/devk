@@ -8,7 +8,7 @@ LW_BEGIN
 lwMatrixCtrl::lwMatrixCtrl()
 :
 _mat_ptr( 0 ),
-_angle_yaw( D3DX_PI ),
+_angle_yaw( XM_PI ),
 _angle_pitch( 0.0f ),
 _angle_roll( 0.0f ),
 

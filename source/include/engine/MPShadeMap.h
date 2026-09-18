@@ -33,7 +33,7 @@ public:
 	virtual void		RenderVS();
 	//!���Ӳ����֧��VS��ʹ��
 	void				RenderSoft();
-	virtual void		MoveTo(D3DXVECTOR3 SVerPos, MPMap* pMap, float	fAngle = 0);
+	virtual void		MoveTo(XMVECTOR3 SVerPos, MPMap* pMap, float	fAngle = 0);
 
 	bool				IsShow()			{ return _bShow;}
 	void				Show(bool bShow)	{ _bShow = bShow; }
@@ -43,12 +43,12 @@ public:
 	virtual void		setFrameTime(float fTime)				{}
 	virtual void		setTexFrameTime(float fTime)			{}
 	virtual void		setFrameColor(int iIdx, D3DCOLOR SColor){}
-	virtual void		SetColor(D3DXCOLOR dwColor){ _dwColor = dwColor; }
+	virtual void		SetColor(XMCOLORF dwColor){ _dwColor = dwColor; }
 
 	virtual float		getFrameTime()										{return 0;}
 	virtual float		getTexFrameTime()									{return 0;}
 	virtual void		getFrameColor(int iIdx, D3DCOLOR* pSColor)			{}
-	virtual void		getColor(D3DXCOLOR* pSColor)	
+	virtual void		getColor(XMCOLORF* pSColor)	
 									{ *pSColor = _dwColor;}
 
 	void				SetAlphaType(D3DBLEND eSrcBlend, D3DBLEND eDestBlend)
@@ -76,18 +76,18 @@ protected:
 	IDirect3DIndexBufferX*		_lpIB;
 #endif
 
-	D3DXVECTOR3			_SVerPos;
+	XMVECTOR3			_SVerPos;
 	int					_iVerNum;
 	int					_iIndexNum;
 	int					_iFaceCount;
 
-	D3DXVECTOR3			_SShadePos[MAX_SHADER_VERNUM];
-	D3DXVECTOR2			_SShadeUV[MAX_SHADER_VERNUM];
+	XMVECTOR3			_SShadePos[MAX_SHADER_VERNUM];
+	XMVECTOR2			_SShadeUV[MAX_SHADER_VERNUM];
 #ifdef USE_MGR
 	WORD				_wIndex[MAX_SHADER_IDXNUM];
 #endif
 
-	D3DXCOLOR			_dwColor;
+	XMCOLORF			_dwColor;
 
 
 	s_string				_strTexName;
@@ -107,7 +107,7 @@ protected:
 	int					_iIdxTech;
 	CMPEffectFile*		_pCEffectFile;
 	
-	D3DXMATRIX*			_pMatViewProj;
+	XMMATRIX*			_pMatViewProj;
 
 	D3DBLEND			_eSrcBlend;
 	D3DBLEND			_eDestBlend;
@@ -147,18 +147,18 @@ public:
 	void				setFrameTime(float fTime);
 	void				setTexFrameTime(float fTime);
 	void				setFrameColor(int iIdx, D3DCOLOR SColor);
-	void				setColor(D3DXCOLOR SColor);
+	void				setColor(XMCOLORF SColor);
 
 	int					getFrameCount()			{return _iFrameCount;}
 	float				getFrameTime()			{return _fFrameTime;}
 	float				getTexFrameTime()		{return _fTexFrameTime;}
 	void				getFrameColor(int iIdx, D3DCOLOR* pSColor)
 												{ *pSColor = _vecFrameColor[iIdx];}
-	void				getColor(D3DXCOLOR* pSColor)	
+	void				getColor(XMCOLORF* pSColor)	
 												{*pSColor =  _dwColor;}
 	
 	void				FrameMove(DWORD	dwDailTime);
-	void				MoveTo(D3DXVECTOR3 SVerPos, MPMap* pMap, float	fAngle = 0);
+	void				MoveTo(XMVECTOR3 SVerPos, MPMap* pMap, float	fAngle = 0);
 
 	bool				SaveToFile(FILE* pFile);
 	bool				LoadFromFile(FILE* pFile);
@@ -169,7 +169,7 @@ protected:
 	int					_iCurFrame;
 	//float				_fLife;
 	float				_fFrameTime;
-	std::vector<D3DXCOLOR>		_vecFrameColor;
+	std::vector<XMCOLORF>		_vecFrameColor;
 	float				_fCurTime;
 	float				_fLerp;
 
@@ -177,8 +177,8 @@ protected:
 	float				_fTexCurTime;
 	int					_iNumTex;
 	int					_iCurTex;
-	std::vector<D3DXVECTOR2>  _vecTexOffset;
-	std::vector<D3DXVECTOR2>  _vecTexSave;
+	std::vector<XMVECTOR2>  _vecTexOffset;
+	std::vector<XMVECTOR2>  _vecTexSave;
 	int					_iRow;
 	int					_iCol;
 };
@@ -223,13 +223,13 @@ public:
 	void				setFrameTime(float fTime);
 	void				setTexFrameTime(float fTime);
 	void				setFrameColor(int iIdx, D3DCOLOR SColor);
-	void				setColor(D3DXCOLOR SColor);
+	void				setColor(XMCOLORF SColor);
 
 	int					getFrameCount();
 	float				getFrameTime();
 	float				getTexFrameTime();
 	void				getFrameColor(int iIdx, D3DCOLOR* pSColor);
-	void				getColor(D3DXCOLOR* pSColor);
+	void				getColor(XMCOLORF* pSColor);
 
 	void				setFrameTexture(s_string& strTexName, CMPResManger	*pCResMagr);
 	void				SetAlphaType(D3DBLEND eSrcBlend, D3DBLEND eDestBlend);
@@ -237,7 +237,7 @@ public:
 
 	void				SetUpdate()				{ _pShadeMap->SetUpdate();}
 
-	void				MoveTo(D3DXVECTOR3 SVerPos, MPMap* pMap, float	fAngle = 0);
+	void				MoveTo(XMVECTOR3 SVerPos, MPMap* pMap, float	fAngle = 0);
 	
 	void				FrameMove(DWORD	dwDailTime);
 

@@ -320,18 +320,18 @@ public:
 
 
 public:
-	void		Emission(WORD wID, D3DXVECTOR3* vBegin, D3DXVECTOR3* vEnd);
+	void		Emission(WORD wID, XMVECTOR3* vBegin, XMVECTOR3* vEnd);
 
-	void		SetTarget(D3DXVECTOR3* vTarget);
+	void		SetTarget(XMVECTOR3* vTarget);
 
 	void		FrameMove(DWORD dwDailTime);
 
 	void		Render();
 public:
 
-	void		MoveTo(D3DXVECTOR3* vPos,MPMap* pmap = NULL);
+	void		MoveTo(XMVECTOR3* vPos,MPMap* pmap = NULL);
 
-	void		BindingBone(D3DXMATRIX* pMatBone);
+	void		BindingBone(XMMATRIX* pMatBone);
 
 	void		SetFontEffect(char* pszText,CMPFont* pFont);
 
@@ -356,7 +356,7 @@ public:
 	{
 		_CPartCtrl.setUseZBuff(bUseZ);
 	}
-	void		setDir(D3DXVECTOR3* pDir)
+	void		setDir(XMVECTOR3* pDir)
 	{
 		_CPartCtrl.setDir(pDir);
 	}
@@ -391,7 +391,7 @@ public:
 	bool				Create(int iID,CMPResManger	*pCResMagr);
 
 
-	void				MoveTo(const D3DXVECTOR3* vPos);
+	void				MoveTo(const XMVECTOR3* vPos);
 
 	void				FrameMove(DWORD	dwDailTime);
 
@@ -413,8 +413,8 @@ public:
 	void				SetTargetID(int iID)	{ _iTargetID = iID; }
 	int 				GetTargetID()			{ return _iTargetID; }
 
-	void				Emission(D3DXVECTOR3* vStart,D3DXVECTOR3* vTarget);
-	void				CalculateEmission(D3DXVECTOR3* vStart,D3DXVECTOR3* vTarget);
+	void				Emission(XMVECTOR3* vStart,XMVECTOR3* vTarget);
+	void				CalculateEmission(XMVECTOR3* vStart,XMVECTOR3* vTarget);
 	void				Stop()	
 	{ 
 		if(_pPartResult)
@@ -432,7 +432,7 @@ public:
 	
 	void				SetInValid()	{ _bPlay = false;}
 
-	D3DXVECTOR3*		GetPos(){ return &_vPos;}
+	XMVECTOR3*		GetPos(){ return &_vPos;}
 
 
 	void				Reset();
@@ -442,7 +442,7 @@ public:
 
 	int					GetLightID();
 
-	void				ResetDir(D3DXVECTOR3* vTarget);
+	void				ResetDir(XMVECTOR3* vTarget);
 
 	void				SetVel(float fvel)	{ _fVel = fvel; }
 
@@ -518,26 +518,26 @@ protected:
 	//float*								_pDailTime;
 	int					_iTargetID;
 	/////////////////////////////////////////////////
-	D3DXVECTOR3							_vPos;
-	D3DXVECTOR3							_vDir;
+	XMVECTOR3							_vPos;
+	XMVECTOR3							_vDir;
 	float								_fVel;
-	D3DXVECTOR3							_vTarget;//目标
+	XMVECTOR3							_vTarget;//目标
 	float								_fDirXZ[2];//在XZ方向上的角度
 
 	float								_fStartDist;
 	float								_fCurDist;
 
 	float				_fTargDist;
-	D3DXVECTOR3			_vTargDir;
-	D3DXVECTOR3			_vOldPos;
-	D3DXVECTOR3			_vOldTarget;
+	XMVECTOR3			_vTargDir;
+	XMVECTOR3			_vOldPos;
+	XMVECTOR3			_vOldTarget;
 
 	float				_fDist;
 
 	//for arc
 	float				_fHalfHei;
-	D3DXVECTOR3			_vArcOrg;
-	D3DXVECTOR3			_vArcAxis;
+	XMVECTOR3			_vArcOrg;
+	XMVECTOR3			_vArcAxis;
 	float				_fCurArc;
 
 	int					_iCurSNum;

@@ -24,12 +24,12 @@ void GetNameFromFileName(char* pszOut, char* pszIn, char* postfix) {
 
 	*s = '\0';
 }
-D3DXMATRIX* GetMatrixRotaPoint(D3DXMATRIX* pout, D3DXVECTOR3* Point, D3DXVECTOR3* aixs, float angle) {
-	D3DXMATRIX r, r2;
-	D3DXMATRIX r1 = D3DXMATRIX(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -Point->x, -Point->y, -Point->z, 1);
-	D3DXMatrixRotationAxis(&r2, aixs, angle);
+XMMATRIX* GetMatrixRotaPoint(XMMATRIX* pout, XMVECTOR3* Point, XMVECTOR3* aixs, float angle) {
+	XMMATRIX r, r2;
+	XMMATRIX r1 = XMMATRIX(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -Point->x, -Point->y, -Point->z, 1);
+	XMMatrixRotationAxis(&r2, aixs, angle);
 	r = r1 * r2;
-	r1 = D3DXMATRIX(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, Point->x, Point->y, Point->z, 1);
+	r1 = XMMATRIX(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, Point->x, Point->y, Point->z, 1);
 	r = r * r1;
 	*pout = r;
 	return pout;
@@ -50,7 +50,7 @@ void (*MagicList[])(CMagicCtrl* pEffCtrl, void* pParam) = {
     Part_drop, Part_fly, Part_trace, Part_fshade, Part_arc, Part_dirlight, Part_dist,
 };
 
-void (*GroupList[])(CMagicEff* pEffCtrl, D3DXVECTOR3* pStart, D3DXVECTOR3* pEnd) = {
+void (*GroupList[])(CMagicEff* pEffCtrl, XMVECTOR3* pStart, XMVECTOR3* pEnd) = {
     Part_fan,
     Part_sequence,
 };
@@ -128,7 +128,7 @@ inline void Part_bind(CMagicEff* pEffCtrl) {
 			// lwMatrix44Multiply( &matrix, &tMat, &tMat2 );
 
 			pItem->GetObjDummyRunTimeMatrix(&matrix, pEffCtrl->_iDummy);
-			pEffCtrl->BindingBone((D3DXMATRIX*)&matrix);
+			pEffCtrl->BindingBone((XMMATRIX*)&matrix);
 		}
 		return;
 	}
@@ -137,7 +137,7 @@ inline void Part_bind(CMagicEff* pEffCtrl) {
 		if (pCha->IsBoat()) {
 			if (!pCha->IsUpdate()) {
 				if (pCha->GetObjDummyRunTimeMatrix(&tMat, pEffCtrl->_iDummy, 0)) {
-					const auto v = D3DXVECTOR3(0, 0, 0);
+					const auto v = XMVECTOR3(0, 0, 0);
 					pEffCtrl->MoveTo(&v);
 				}
 			} else
@@ -147,13 +147,13 @@ inline void Part_bind(CMagicEff* pEffCtrl) {
 			if (pCha->GetObjDummyRunTimeMatrix(&tMat, pEffCtrl->_iDummy)) {
 				LG("error", RES_STRING(CL_LANGUAGE_MATCH_55), pEffCtrl->_iIdxID, pEffCtrl->_iDummy,
 				   pCha->GetDefaultChaInfo()->szName);
-				const auto v = D3DXVECTOR3(0, 0, 0);
+				const auto v = XMVECTOR3(0, 0, 0);
 				pEffCtrl->MoveTo(&v);
 				return;
 			}
 		}
 		pEffCtrl->SetEffectDir(pEffCtrl->_pObj->getYaw());
-		pEffCtrl->BindingBone((D3DXMATRIX*)&tMat);
+		pEffCtrl->BindingBone((XMMATRIX*)&tMat);
 		return;
 	}
 __ret:;
@@ -166,7 +166,7 @@ inline void Part_follow(CMagicEff* pEffCtrl) {
 
 	lwMatrix44 tMat;
 
-	D3DXVECTOR3 tpos;
+	XMVECTOR3 tpos;
 	int iangle;
 
 	if (!pEffCtrl->_pObj)
@@ -181,13 +181,13 @@ inline void Part_follow(CMagicEff* pEffCtrl) {
 		pEffCtrl->SetEffectDir(iangle);
 
 		if (pCha->IsBoat()) {
-			tpos = D3DXVECTOR3(pCha->GetPos());
+			tpos = XMVECTOR3(pCha->GetPos());
 			tpos.z = SEA_LEVEL + 0.01f;
-			D3DXMatrixRotationZ((D3DXMATRIX*)&tMat, (float)pCha->getYaw() * 0.01745329f + D3DX_PI);
+			XMMatrixRotationZ((XMMATRIX*)&tMat, (float)pCha->getYaw() * 0.01745329f + XM_PI);
 			tMat._41 = tpos.x;
 			tMat._42 = tpos.y;
 			tMat._43 = tpos.z + pEffCtrl->_nHeightOff / 100;
-			pEffCtrl->BindingBone((D3DXMATRIX*)&tMat);
+			pEffCtrl->BindingBone((XMMATRIX*)&tMat);
 
 		} else {
 			tpos = pCha->GetPos();
@@ -208,7 +208,7 @@ inline void Part_follow(CMagicEff* pEffCtrl) {
 		tMat._41 = pObj->getPos().x;
 		tMat._42 = pObj->getPos().y;
 		tMat._43 = pObj->getPos().z;
-		pEffCtrl->BindingBone((D3DXMATRIX*)&tMat);
+		pEffCtrl->BindingBone((XMMATRIX*)&tMat);
 		break;
 	default:
 		goto __ret;
@@ -225,7 +225,7 @@ inline void Part_foldir(CMagicEff* pEffCtrl) {
 	CSceneItem* pItem = NULL;
 
 	lwMatrix44 tMat;
-	D3DXVECTOR3 tpos;
+	XMVECTOR3 tpos;
 
 	if (!pEffCtrl->_pObj)
 		goto __ret;
@@ -252,7 +252,7 @@ inline void Part_trace(CMagicCtrl* pEffCtrl, void* pParam) {
 
 	CGameScene* pScene = pEff->GetScene();
 	CCharacter* pCha = NULL;
-	D3DXVECTOR3 vTarget;
+	XMVECTOR3 vTarget;
 
 	pEffCtrl->Render();
 
@@ -305,8 +305,8 @@ inline void Part_trace(CMagicCtrl* pEffCtrl, void* pParam) {
 	//! �õ�Ŀ�����λ������λ���ƶ��ķ���
 	pEffCtrl->_vTargDir = vTarget - pEffCtrl->_vOldTarget;
 	//! �õ�Ŀ�����λ�ú���λ��֮��ľ���
-	pEffCtrl->_fTargDist = D3DXVec3LengthSq(&pEffCtrl->_vTargDir);
-	D3DXVec3Normalize(&pEffCtrl->_vTargDir, &pEffCtrl->_vTargDir);
+	pEffCtrl->_fTargDist = XMVector3LengthSq(&pEffCtrl->_vTargDir);
+	XMVector3Normalize(&pEffCtrl->_vTargDir, &pEffCtrl->_vTargDir);
 
 	//! �õ����ӵ�λ����Ҫ��Ŀ���ƶ��ķ����ƶ��ľ���.
 	//	��ʽΪ������ = Ŀ���ƶ��ľ��� / ����������Դ��Ŀ��ľ��� * ���ӵ�ǰλ�ú���һ֡λ�õľ���
@@ -317,8 +317,8 @@ inline void Part_trace(CMagicCtrl* pEffCtrl, void* pParam) {
 	//! ���¼��㵱ǰ������Ҫ�ƶ��ķ���;��롣
 	pEffCtrl->_vOldTarget = vTarget;
 	pEffCtrl->_vDir = vTarget - pEffCtrl->_vPos;
-	pEffCtrl->_fDist = D3DXVec3LengthSq(&pEffCtrl->_vDir);
-	D3DXVec3Normalize(&pEffCtrl->_vDir, &pEffCtrl->_vDir);
+	pEffCtrl->_fDist = XMVector3LengthSq(&pEffCtrl->_vDir);
+	XMVector3Normalize(&pEffCtrl->_vDir, &pEffCtrl->_vDir);
 }
 
 inline void Part_drop(CMagicCtrl* pEffCtrl, void* pParam) {
@@ -373,7 +373,7 @@ inline void Part_fshade(CMagicCtrl* pEffCtrl, void* pParam) {
 		return;
 	}
 
-	D3DXVECTOR3 tvPos = pEffCtrl->_vPos;
+	XMVECTOR3 tvPos = pEffCtrl->_vPos;
 	float size = 3;
 	float alpha = 1;
 	for (int n = 0; n < pEffCtrl->_iCurSNum; n++) {
@@ -406,9 +406,9 @@ inline void Part_arc(CMagicCtrl* pEffCtrl, void* pParam) {
 
 	pEffCtrl->Render();
 	pEffCtrl->_fCurArc += (pEffCtrl->_fVel * *ResMgr.GetDailTime());
-	D3DXVECTOR3 vp = pEffCtrl->_vOldPos + pEffCtrl->_vDir * pEffCtrl->_fCurArc;
-	D3DXVECTOR3 vd = vp - pEffCtrl->_vArcOrg;
-	D3DXVec3Normalize(&vd, &vd);
+	XMVECTOR3 vp = pEffCtrl->_vOldPos + pEffCtrl->_vDir * pEffCtrl->_fCurArc;
+	XMVECTOR3 vd = vp - pEffCtrl->_vArcOrg;
+	XMVector3Normalize(&vd, &vd);
 	pEffCtrl->_vPos = pEffCtrl->_vArcOrg + (vd * (pEffCtrl->_fHalfHei));
 
 	if (PointInstrPointRange(&pEffCtrl->_vPos, &pEffCtrl->_vTarget, 0.5f)) {
@@ -467,12 +467,12 @@ inline void Part_dist2(CMagicCtrl* pEffCtrl, void* pParam) {
 	if (pEffCtrl->_fCurDist > pEffCtrl->_fStartDist)
 		pEffCtrl->Stop();
 }
-inline void Part_fan(CMagicEff* pEffCtrl, D3DXVECTOR3* pStart, D3DXVECTOR3* pEnd) {
+inline void Part_fan(CMagicEff* pEffCtrl, XMVECTOR3* pStart, XMVECTOR3* pEnd) {
 	if (!pEffCtrl->_bGroupMagic)
 		return;
 	int nSize = (INT)pEffCtrl->_pMagicCtrl.size();
 
-	D3DXVECTOR3 vstart, vend;
+	XMVECTOR3 vstart, vend;
 	vstart = *pStart;
 	vend = *pEnd;
 	vend.z = vstart.z;
@@ -484,16 +484,16 @@ inline void Part_fan(CMagicEff* pEffCtrl, D3DXVECTOR3* pStart, D3DXVECTOR3* pEnd
 	}
 	float fAngle = pEffCtrl->_fFanAngle;
 	float fstep = fAngle / ((float)nSize - 1);
-	D3DXVECTOR3 vDir;
-	D3DXVECTOR3 vDir2;
-	D3DXMATRIX mat;
+	XMVECTOR3 vDir;
+	XMVECTOR3 vDir2;
+	XMMATRIX mat;
 	vDir2 = vend - vstart;
-	float dist = D3DXVec3Length(&vDir2);
-	D3DXVec3Normalize(&vDir2, &vDir2);
+	float dist = XMVector3Length(&vDir2);
+	XMVector3Normalize(&vDir2, &vDir2);
 
 	for (INT n = 0; n < nSize; ++n) {
-		D3DXMatrixRotationZ(&mat, (-(fAngle / 2)) + (fstep * (float)n));
-		D3DXVec3TransformCoord(&vDir, &vDir2, &mat);
+		XMMatrixRotationZ(&mat, (-(fAngle / 2)) + (fstep * (float)n));
+		XMVector3TransformCoord(&vDir, &vDir2, &mat);
 
 		vend = vstart + vDir * dist;
 
@@ -501,10 +501,10 @@ inline void Part_fan(CMagicEff* pEffCtrl, D3DXVECTOR3* pStart, D3DXVECTOR3* pEnd
 		pEffCtrl->_pMagicCtrl[n]->Emission(&vstart, &vend);
 	}
 }
-inline void Part_sequence(CMagicEff* pEffCtrl, D3DXVECTOR3* pStart, D3DXVECTOR3* pEnd) {
+inline void Part_sequence(CMagicEff* pEffCtrl, XMVECTOR3* pStart, XMVECTOR3* pEnd) {
 	if (!pEffCtrl->_bGroupMagic)
 		return;
-	D3DXVECTOR3 vstart, vend;
+	XMVECTOR3 vstart, vend;
 	vstart = *pStart;
 	vend = *pEnd;
 
@@ -539,13 +539,13 @@ CMagicEff::CMagicEff() {
 	_iTargetID = -1;
 
 	_iGroupIdx = -1;
-	_vPos = D3DXVECTOR3(0, 0, 0);
+	_vPos = XMVECTOR3(0, 0, 0);
 	_bUpdateHei = false;
 
 	_fVel = 0;
 
-	_vMin = D3DXVECTOR3(0, 0, 0);
-	_vMax = D3DXVECTOR3(0, 0, 0);
+	_vMin = XMVECTOR3(0, 0, 0);
+	_vMax = XMVECTOR3(0, 0, 0);
 	_bShowBox = FALSE;
 	SetHide(FALSE);
 	_bMagic = FALSE;
@@ -559,8 +559,8 @@ CMagicEff::CMagicEff() {
 	_fsCurTime = 0;
 	_fsDailTime = 0;
 	_isID = -1;
-	_vsBegin = D3DXVECTOR3(-1, -1, -1);
-	_vsEnd = D3DXVECTOR3(-1, -1, -1);
+	_vsBegin = XMVECTOR3(-1, -1, -1);
+	_vsEnd = XMVECTOR3(-1, -1, -1);
 
 	_pEffDelay = new CEffDelay(this);
 
@@ -606,14 +606,14 @@ void CMagicEff::Clear() {
 
 	_iTargetID = -1;
 
-	_vPos = D3DXVECTOR3(0, 0, 0);
+	_vPos = XMVECTOR3(0, 0, 0);
 
 	_fVel = 0;
 
 	_bUpdateHei = false;
 
-	_vMin = D3DXVECTOR3(0, 0, 0);
-	_vMax = D3DXVECTOR3(0, 0, 0);
+	_vMin = XMVECTOR3(0, 0, 0);
+	_vMax = XMVECTOR3(0, 0, 0);
 	_bShowBox = FALSE;
 	SetHide(FALSE);
 	_bFoneEff = FALSE;
@@ -624,8 +624,8 @@ void CMagicEff::Clear() {
 	_fsCurTime = 0;
 	_fsDailTime = 0;
 	_isID = -1;
-	_vsBegin = D3DXVECTOR3(-1, -1, -1);
-	_vsEnd = D3DXVECTOR3(-1, -1, -1);
+	_vsBegin = XMVECTOR3(-1, -1, -1);
+	_vsEnd = XMVECTOR3(-1, -1, -1);
 
 	SAFE_DELETE(_pEffCtrl);
 	for (INT n = 0; n < (INT)_pMagicCtrl.size(); ++n) {
@@ -980,7 +980,7 @@ void CMagicEff::setFollowObj(CSceneNode* pObj, NODE_TYPE eType, int iDummy, int 
 			MPMatrix44 mat;
 			const int dummy = (_iDummy >= 0) ? _iDummy : 0;
 			if (_pObj && _pObj->GetRunTimeMatrix(&mat, dummy) && _pEffCtrl) {
-				_pEffCtrl->BindingBone((D3DXMATRIX*)&mat);
+				_pEffCtrl->BindingBone((XMMATRIX*)&mat);
 			}
 		}
 	} else {
@@ -998,7 +998,7 @@ void CMagicEff::setFollowObj(CSceneNode* pObj, NODE_TYPE eType, int iDummy, int 
 			if (_iDummy == -2) {
 				MPMatrix44 mat;
 				if (_pObj && iDummy >= 0 && _pObj->GetRunTimeMatrix(&mat, iDummy) && _pEffCtrl) {
-					_pEffCtrl->BindingBone((D3DXMATRIX*)&mat);
+					_pEffCtrl->BindingBone((XMMATRIX*)&mat);
 				}
 			}
 		}
@@ -1022,17 +1022,17 @@ void CMagicEff::setFollowObj(CSceneNode* pObj, NODE_TYPE eType, int iDummy, int 
 void CMagicEff::SetEffectDir(int iAngle) {
 	if (_bMagic || _bGroupMagic || !_pEffCtrl)
 		return;
-	D3DXMATRIX mat;
-	D3DXVECTOR3 vPos(0, -1, 0);
-	D3DXMatrixRotationZ(&mat, ((float)iAngle * 0.01745329f));
-	D3DXVec3TransformCoord(&vPos, &vPos, &mat);
+	XMMATRIX mat;
+	XMVECTOR3 vPos(0, -1, 0);
+	XMMatrixRotationZ(&mat, ((float)iAngle * 0.01745329f));
+	XMVector3TransformCoord(&vPos, &vPos, &mat);
 
 	_pEffCtrl->setDir(&vPos);
 }
 void CMagicEff::SetEffectMatrix(MPMatrix44* pmat) {
 	if (_bMagic || _bGroupMagic || !pmat)
 		return;
-	_pEffCtrl->BindingBone((D3DXMATRIX*)pmat);
+	_pEffCtrl->BindingBone((XMMATRIX*)pmat);
 }
 
 void CMagicEff::FrameMove(DWORD dwDailTime) {
@@ -1149,7 +1149,7 @@ void CMagicEff::RenderMagic() {
 	}
 }
 
-BOOL CMagicEff::HitTestMap(D3DXVECTOR3* vPos) {
+BOOL CMagicEff::HitTestMap(XMVECTOR3* vPos) {
 	// PKO FIX: Null-check scene to prevent crash during map transitions
 	CGameScene* pScene = GetScene();
 	if (!pScene) return FALSE;
@@ -1213,17 +1213,17 @@ void CMagicEff::_UpdatePos() {
 void CMagicEff::_UpdateHeight() {
 	float fX = (float)_nCurX / 100.0f;
 	float fY = (float)_nCurY / 100.0f;
-	const auto v = D3DXVECTOR3(fX, fY, _fHei + (float)(_nHeightOff) / 100.0f);
+	const auto v = XMVECTOR3(fX, fY, _fHei + (float)(_nHeightOff) / 100.0f);
 	MoveTo(&v);
 }
 
-void CMagicEff::Emission(int iID, D3DXVECTOR3* vBegin, D3DXVECTOR3* vEnd, int iTime) {
+void CMagicEff::Emission(int iID, XMVECTOR3* vBegin, XMVECTOR3* vEnd, int iTime) {
 	try {
 		if (_bDail) {
 			_fsCurTime = 0;
 			_isID = iID;
-			_vsBegin = vBegin ? *vBegin : D3DXVECTOR3(-1, -1, -1);
-			_vsEnd = vEnd ? *vEnd : D3DXVECTOR3(-1, -1, -1);
+			_vsBegin = vBegin ? *vBegin : XMVECTOR3(-1, -1, -1);
+			_vsEnd = vEnd ? *vEnd : XMVECTOR3(-1, -1, -1);
 			return;
 		}
 
@@ -1287,7 +1287,7 @@ void CMagicEff::End() {
 		_pEffCtrl->GetPartCtrl()->End();
 }
 
-void CMagicEff::MoveTo(const D3DXVECTOR3* vPos) {
+void CMagicEff::MoveTo(const XMVECTOR3* vPos) {
 	_vPos = *vPos;
 
 	if (_bMagic) {
@@ -1296,31 +1296,31 @@ void CMagicEff::MoveTo(const D3DXVECTOR3* vPos) {
 		}
 		return;
 	}
-	_vMin = D3DXVECTOR3(-0.5f, -0.5f, -0.5f);
-	_vMax = D3DXVECTOR3(0.5f, 0.5f, 0.5f);
+	_vMin = XMVECTOR3(-0.5f, -0.5f, -0.5f);
+	_vMax = XMVECTOR3(0.5f, 0.5f, 0.5f);
 	_vMin += *vPos;
 	_vMax += *vPos;
 
 	_pEffCtrl->GetPartCtrl()->MoveTo(&_vPos, _pTerrain);
 }
 
-void CMagicEff::BindingBone(D3DXMATRIX* pMatBone) {
-	_vPos = *(D3DXVECTOR3*)&pMatBone->_41;
+void CMagicEff::BindingBone(XMMATRIX* pMatBone) {
+	_vPos = *(XMVECTOR3*)&pMatBone->_41;
 	_pEffCtrl->GetPartCtrl()->BindingBone(pMatBone);
 }
 
 BOOL CMagicEff::HitTestPrimitive(lwVector3& org, lwVector3& ray) {
-	return D3DXBoxBoundProbe(&_vMin, &_vMax, (D3DXVECTOR3*)&org, (D3DXVECTOR3*)&ray);
+	return XMBoxBoundProbe(&_vMin, &_vMax, (XMVECTOR3*)&org, (XMVECTOR3*)&ray);
 }
 
 void CMagicEff::_UpdateYaw() {
 	_pEffCtrl->GetPartCtrl()->setYaw((float)_nYaw / 100 /*Angle2Radian((float)_nYaw)*/);
 }
 void CMagicEff::_UpdatePitch() {
-	_pEffCtrl->GetPartCtrl()->setPitch((float)_nPitch / 100 /*Angle2Radian((float)_nPitch) - D3DX_PI/2*/);
+	_pEffCtrl->GetPartCtrl()->setPitch((float)_nPitch / 100 /*Angle2Radian((float)_nPitch) - XM_PI/2*/);
 }
 void CMagicEff::_UpdateRoll() {
-	_pEffCtrl->GetPartCtrl()->setRoll((float)_nRoll / 100 /*Angle2Radian((float)_nRoll) - D3DX_PI/2*/);
+	_pEffCtrl->GetPartCtrl()->setRoll((float)_nRoll / 100 /*Angle2Radian((float)_nRoll) - XM_PI/2*/);
 }
 
 void CMagicEff::_UpdateScale(float fx, float fy, float fz) {
@@ -1420,7 +1420,7 @@ bool CShadeEff::Create(s_string strTexName, float fSize, bool bAni, int iRow, in
 	return CMPShadeCtrl::Create(strTexName, &ResMgr, fSize, bAni, iRow, iColnum);
 }
 
-bool CShadeEff::CreateAttachLight(int iIdxID, float fRange, D3DXCOLOR dwcolor) {
+bool CShadeEff::CreateAttachLight(int iIdxID, float fRange, XMCOLORF dwcolor) {
 	_bUpSea = false;
 
 	CShadeInfo* pInfo = GetShadeInfo(iIdxID);
@@ -1451,13 +1451,13 @@ bool CShadeEff::CreateAttachLight(int iIdxID, float fRange, D3DXCOLOR dwcolor) {
 	return true;
 }
 
-void CShadeEff::Emission(WORD wID, const D3DXVECTOR3* vBegin, D3DXVECTOR3* vEnd) {
+void CShadeEff::Emission(WORD wID, const XMVECTOR3* vBegin, XMVECTOR3* vEnd) {
 	_vPos = *vBegin;
 	MoveTo(&_vPos);
 	CMPShadeCtrl::Play(wID);
 }
 
-void CShadeEff::MoveTo(D3DXVECTOR3* SVerPos) {
+void CShadeEff::MoveTo(XMVECTOR3* SVerPos) {
 	_vPos = *SVerPos;
 	CMPShadeCtrl::MoveTo(_vPos, _pTerrain);
 }
@@ -1499,7 +1499,7 @@ void CShadeEff::Render() {
 			pObj = _pScene->GetSceneObj(_iChaID);
 			if (pObj) {
 				_vPos = pObj->pos;
-				D3DXCOLOR color = (D3DXCOLOR)pObj->dif;
+				XMCOLORF color = (XMCOLORF)pObj->dif;
 				color.a = 0.25f;
 				setColor(color);
 				CMPShadeCtrl::MoveTo(_vPos, _pTerrain);
@@ -1525,7 +1525,7 @@ CPug::CPug() {
 CPug::~CPug() {
 }
 
-bool CPug::Create(D3DXVECTOR3* pvPos, float fangle, MPMap* pMap) {
+bool CPug::Create(XMVECTOR3* pvPos, float fangle, MPMap* pMap) {
 	std::string str = "pug.tga";
 	if (!_cShadeEff.Create(str, &ResMgr))
 		return false;
@@ -1585,7 +1585,7 @@ void CPugMgr::ClearMemory() {
 	_vecValidID.resize(0);
 }
 
-void CPugMgr::NewPug(D3DXVECTOR3* pvPos, float fangle) {
+void CPugMgr::NewPug(XMVECTOR3* pvPos, float fangle) {
 	if (!_bPug)
 		return;
 	if (_vecValidID.size() <= 0)
@@ -1594,12 +1594,12 @@ void CPugMgr::NewPug(D3DXVECTOR3* pvPos, float fangle) {
 
 	_vecPugArray[idx] = new CPug;
 
-	D3DXMATRIX mat;
-	D3DXVECTOR3 vPos = *pvPos;
-	D3DXVECTOR3 vCross(0, 1, 0);
-	D3DXMatrixRotationZ(&mat, fangle + 1.570796f);
-	D3DXVECTOR4 tvc;
-	D3DXVec3Transform(&tvc, &vCross, &mat);
+	XMMATRIX mat;
+	XMVECTOR3 vPos = *pvPos;
+	XMVECTOR3 vCross(0, 1, 0);
+	XMMatrixRotationZ(&mat, fangle + 1.570796f);
+	XMVECTOR4 tvc;
+	XMVector3Transform(&tvc, &vCross, &mat);
 	vCross.x = tvc.x;
 	vCross.y = tvc.y;
 	vCross.z = tvc.z;
@@ -1647,7 +1647,7 @@ void CPugMgr::Render() {
 
 CNavigationBar CNavigationBar::g_cNaviBar;
 
-void CNavigationBar::SetTarget(const char* pszName, D3DXVECTOR3& pTarget) {
+void CNavigationBar::SetTarget(const char* pszName, XMVECTOR3& pTarget) {
 	s_string strTar = pszName;
 	_strName = g_pGameApp->GetCurScene()->GetTerrainName();
 	if (_strName == "garner")
@@ -1708,8 +1708,8 @@ void CNavigationBar::Render() {
 		_pShadeEff->setColor(0xffffffff);
 		_pShadeEff->GetShadeMap()->SetUpSea(true);
 	}
-	D3DXVECTOR3 vDir;
-	D3DXVECTOR3 vPos = pCha->GetPos();
+	XMVECTOR3 vDir;
+	XMVECTOR3 vPos = pCha->GetPos();
 	s_string strName = pScene->GetTerrainName();
 
 	if (strName == "magicsea") {
@@ -1722,7 +1722,7 @@ void CNavigationBar::Render() {
 	vPos.y = (float)(int)vPos.y;
 
 	const auto v = _vTarget - vPos;
-	D3DXVec3Normalize(&vDir, &(v));
+	XMVector3Normalize(&vDir, &(v));
 	vDir.z = 0;
 
 	float fangle;
@@ -1731,9 +1731,9 @@ void CNavigationBar::Render() {
 		fangle = 0;
 	} else {
 		float fDist;
-		const D3DXVECTOR3 v[] = {D3DXVECTOR3(vDir.x, vDir.y, 0.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f)};
-		fDist = D3DXVec3Length(&v[0]);
-		fangle = acosf(D3DXVec3Dot(&v[0], &v[1]) / fDist);
+		const XMVECTOR3 v[] = {XMVECTOR3(vDir.x, vDir.y, 0.0f), XMVECTOR3(0.0f, 1.0f, 0.0f)};
+		fDist = XMVector3Length(&v[0]);
+		fangle = acosf(XMVector3Dot(&v[0], &v[1]) / fDist);
 		if (vDir.x >= 0.0f) {
 			fangle = -fangle;
 		}

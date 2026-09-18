@@ -32,7 +32,7 @@ void CEffectCortrol::FillDefaultUV(CEffectModel*	pCModel,TEXCOORD& coord)
 	}
 }
 
-static void FillUVFromBVector(CEffectModel* pCModel, S_BVECTOR<D3DXVECTOR2>& uvs)
+static void FillUVFromBVector(CEffectModel* pCModel, S_BVECTOR<XMVECTOR2>& uvs)
 {
 	if (!pCModel)
 		return;
@@ -45,7 +45,7 @@ static void FillUVFromBVector(CEffectModel* pCModel, S_BVECTOR<D3DXVECTOR2>& uvs
 	{
 		for (DWORD i = 0; i < n; ++i)
 		{
-			D3DXVECTOR2* uv = uvs[(int)(i < (DWORD)nuv ? i : 0)];
+			XMVECTOR2* uv = uvs[(int)(i < (DWORD)nuv ? i : 0)];
 			if (uv)
 				pCModel->m_vEffVer[i].m_SUV = *uv;
 		}
@@ -58,7 +58,7 @@ static void FillUVFromBVector(CEffectModel* pCModel, S_BVECTOR<D3DXVECTOR2>& uvs
 		return;
 	for (DWORD i = 0; i < n; ++i)
 	{
-		D3DXVECTOR2* uv = uvs[(int)(i < (DWORD)nuv ? i : 0)];
+		XMVECTOR2* uv = uvs[(int)(i < (DWORD)nuv ? i : 0)];
 		if (uv)
 			pVertex[i].m_SUV = *uv;
 	}
@@ -98,7 +98,7 @@ void CEffectCortrol::FillDefaultUVSoft(CEffectModel* pCModel, TEXCOORD& coord)
 	pCModel->Unlock();
 }
 
-static void Dx11BindEffectPass(I_Effect* eff, const D3DXMATRIX& world, const D3DXCOLOR& color)
+static void Dx11BindEffectPass(I_Effect* eff, const XMMATRIX& world, const XMCOLORF& color)
 {
 	if (!lwIsDx11Active() || !eff || !eff->m_pDev)
 		return;
@@ -148,7 +148,7 @@ bool	CEffPath::LoadPathFromFile(char* pszName)
 	FILE*     stream;
 	char      header[4];
 	DWORD     version,num;
-	D3DXVECTOR3   tvec;
+	XMVECTOR3   tvec;
 	float		ftemp;
 	
 	header[3] = NULL;
@@ -177,7 +177,7 @@ bool	CEffPath::LoadPathFromFile(char* pszName)
 
 	for(DWORD n = 0; n < (DWORD)m_iFrameCount; n++)
 	{
-		fread( &tvec,sizeof( D3DXVECTOR3 ),1,stream );
+		fread( &tvec,sizeof( XMVECTOR3 ),1,stream );
 		ftemp = tvec.y;
 		tvec.y = -tvec.z;
 		tvec.z = ftemp;
@@ -190,9 +190,9 @@ bool	CEffPath::LoadPathFromFile(char* pszName)
 	for( int n=0;n < m_iFrameCount -1;n++ )
 	{
 		m_vecDir[n] = m_vecPath[n+1] - m_vecPath[n];
-		m_vecDist[n] = D3DXVec3Length( &m_vecDir[n] );
-		//D3DXVec3Normalize(&m_vecDir[n],&m_vecDir[n]);
-		D3DXVec3Normalize(&m_vecDir[n], &m_vecDir[n]);
+		m_vecDist[n] = XMVector3Length( &m_vecDir[n] );
+		//XMVector3Normalize(&m_vecDir[n],&m_vecDir[n]);
+		XMVector3Normalize(&m_vecDir[n], &m_vecDir[n]);
 	}
 
 	return true;
@@ -222,8 +222,8 @@ bool CEffPath::LoadPathFromFileLet(const char* file)
 	for(i = 0; i < j -1; i++)
 	{
 		m_vecDir[i] = m_vecPath[i+1] - m_vecPath[i];
-		m_vecDist[i] = D3DXVec3Length( &m_vecDir[i] );
-		D3DXVec3Normalize(&m_vecDir[i],&m_vecDir[i]);
+		m_vecDist[i] = XMVector3Length( &m_vecDir[i] );
+		XMVector3Normalize(&m_vecDir[i],&m_vecDir[i]);
 	}
 
     m_iFrameCount = j;
@@ -237,12 +237,12 @@ void	CEffPath::SavePath(FILE* pf)
 
 	for(int n = 0; n < m_iFrameCount; n++)
 	{
-		fwrite( &m_vecPath[n],sizeof( D3DXVECTOR3 ),1,pf );
+		fwrite( &m_vecPath[n],sizeof( XMVECTOR3 ),1,pf );
 	}
 	for( int n=0;n < m_iFrameCount -1;n++ )
 	{
-		fwrite( &m_vecDir[n],sizeof( D3DXVECTOR3 ),1,pf );
-		fwrite( &m_vecDist[n],sizeof( D3DXVECTOR3 ),1,pf );
+		fwrite( &m_vecDir[n],sizeof( XMVECTOR3 ),1,pf );
+		fwrite( &m_vecDist[n],sizeof( XMVECTOR3 ),1,pf );
 	}
 }
 void	CEffPath::LoadPath(FILE* pf)
@@ -250,18 +250,18 @@ void	CEffPath::LoadPath(FILE* pf)
 	fread( &m_iFrameCount,sizeof( int ),1,pf );
 	fread( &m_fVel,sizeof( float ),1,pf );
 
-	//m_vecPath = new D3DXVECTOR3[m_iFrameCount];
+	//m_vecPath = new XMVECTOR3[m_iFrameCount];
 	//m_vecDist = new float[m_iFrameCount-1];
-	//m_vecDir = new D3DXVECTOR3[m_iFrameCount-1];
+	//m_vecDir = new XMVECTOR3[m_iFrameCount-1];
 
 	for(int n = 0; n < m_iFrameCount; n++)
 	{
-		fread( &m_vecPath[n],sizeof( D3DXVECTOR3 ),1,pf );
+		fread( &m_vecPath[n],sizeof( XMVECTOR3 ),1,pf );
 	}
 	for(int  n=0;n < m_iFrameCount -1;n++ )
 	{
-		fread( &m_vecDir[n],sizeof( D3DXVECTOR3 ),1,pf );
-		fread( &m_vecDist[n],sizeof( D3DXVECTOR3 ),1,pf );
+		fread( &m_vecDir[n],sizeof( XMVECTOR3 ),1,pf );
+		fread( &m_vecDist[n],sizeof( XMVECTOR3 ),1,pf );
 	}
 }
 
@@ -272,12 +272,12 @@ void	CEffPath::LoadPathFromMemory(CMemoryBuf*	pbuf)
 
 	for(int n = 0; n < m_iFrameCount; n++)
 	{
-		pbuf->mread( &m_vecPath[n],sizeof( D3DXVECTOR3 ),1 );
+		pbuf->mread( &m_vecPath[n],sizeof( XMVECTOR3 ),1 );
 	}
 	for(int  n=0;n < m_iFrameCount -1;n++ )
 	{
-		pbuf->mread( &m_vecDir[n],sizeof( D3DXVECTOR3 ),1 );
-		pbuf->mread( &m_vecDist[n],sizeof( D3DXVECTOR3 ),1 );
+		pbuf->mread( &m_vecDir[n],sizeof( XMVECTOR3 ),1 );
+		pbuf->mread( &m_vecDist[n],sizeof( XMVECTOR3 ),1 );
 	}
 }
 
@@ -323,7 +323,7 @@ bool	CMPModelEff::SaveToFile(char* pszFileName)
 	fwrite(t_pszName, sizeof(char),32,t_pFile);
 
 	fwrite(&m_bRotating, sizeof(bool),1,t_pFile);
-	fwrite(&m_SVerRota, sizeof(D3DXVECTOR3),1,t_pFile);
+	fwrite(&m_SVerRota, sizeof(XMVECTOR3),1,t_pFile);
 	fwrite(&m_fRotaVel, sizeof(float),1,t_pFile);
 
 	//!????????
@@ -370,17 +370,17 @@ void CMPModelEff::ReleaseAll()
 	m_iTimes = 0;
 	m_pfDailTime = NULL;
 
-	D3DXMatrixIdentity(&m_SpmatBone);
-	D3DXMatrixIdentity(&m_SMatTempRota);
+	XMMatrixIdentity(&m_SpmatBone);
+	XMMatrixIdentity(&m_SMatTempRota);
 	//m_SpmatBone = NULL;
 
-	D3DXMatrixScaling(&m_SmatScale,1.0f,1.0f,1.0f);
-	D3DXMatrixRotationYawPitchRoll(&m_SmatRota, 0, 0, 0);
-	D3DXMatrixTranslation(&m_SmatTrans,0, 0, 0);
+	XMMatrixScaling(&m_SmatScale,1.0f,1.0f,1.0f);
+	XMMatrixRotationYawPitchRoll(&m_SmatRota, 0, 0, 0);
+	XMMatrixTranslation(&m_SmatTrans,0, 0, 0);
 
-	m_SVerScale = D3DXVECTOR3(1,1,1);
-	m_SVerRota  =  D3DXVECTOR3(0,0,0);
-	m_SVerTrans =  D3DXVECTOR3(0,0,0);
+	m_SVerScale = XMVECTOR3(1,1,1);
+	m_SVerRota  =  XMVECTOR3(0,0,0);
+	m_SVerTrans =  XMVECTOR3(0,0,0);
 		
 	m_iIdxTech = 0;
 	m_pCEffectFile = NULL;
@@ -424,14 +424,14 @@ void CMPModelEff::Reset()
 	{
 		m_vecCortrol[n]->Reset();
 	}
-	D3DXMatrixIdentity(&m_SpmatBone);
-	D3DXMatrixIdentity(&m_SMatTempRota);
+	XMMatrixIdentity(&m_SpmatBone);
+	XMMatrixIdentity(&m_SMatTempRota);
 
-	D3DXMatrixScaling(&m_SmatScale,1.0f,1.0f,1.0f);
-	D3DXMatrixRotationYawPitchRoll(&m_SmatRota, 0, 0, 0);
-	D3DXMatrixTranslation(&m_SmatTrans,0, 0, 0);
+	XMMatrixScaling(&m_SmatScale,1.0f,1.0f,1.0f);
+	XMMatrixRotationYawPitchRoll(&m_SmatRota, 0, 0, 0);
+	XMMatrixTranslation(&m_SmatTrans,0, 0, 0);
 
-	m_SVerPartRota = D3DXVECTOR3(0,0,0);
+	m_SVerPartRota = XMVECTOR3(0,0,0);
 	m_bBindbone=  false;
 	m_fCurRotat = 0;
 }
@@ -472,7 +472,7 @@ void CMPModelEff::RenderAccel(float &fTime)
 	m_pCEffectFile->Begin(D3DXFX_DONOTSAVESTATE);
 	m_pCEffectFile->Pass(0);
 
-	D3DXMATRIX	t_STemp;
+	XMMATRIX	t_STemp;
 
 	GetTransMatrix(t_STemp);
 
@@ -488,7 +488,7 @@ void CMPModelEff::RenderAccel(float &fTime)
 
 		m_pCurCortrol->GetTransformMatrix(&m_SMatResult);
 
-		D3DXMatrixMultiply(&m_SMatResult, &m_SMatResult, &t_STemp);		
+		XMMatrixMultiply(&m_SMatResult, &m_SMatResult, &t_STemp);		
 		if(m_pCEffect->IsItem())
 		{
 			m_pCEffectFile->End();
@@ -499,7 +499,7 @@ void CMPModelEff::RenderAccel(float &fTime)
 
 			if(m_bBindbone)
 			{
-				D3DXMatrixMultiply(&m_pCurCortrol->m_SMatResult, &m_SMatResult, &m_SpmatBone);
+				XMMatrixMultiply(&m_pCurCortrol->m_SMatResult, &m_SMatResult, &m_SpmatBone);
 			}
 			m_pCEffect->m_pDev->SetRenderState(D3DRS_TEXTUREFACTOR, m_pCurCortrol->m_dwCurColor);
 			m_pCEffect->m_pDev->SetTextureStageStateForced(0, D3DTSS_COLORARG2, D3DTA_TFACTOR);
@@ -529,7 +529,7 @@ void CMPModelEff::RenderAccel(float &fTime)
 
 			if(m_bBindbone)
 			{
-				D3DXMatrixMultiply(&m_pCurCortrol->m_SMatResult, &m_SMatResult, &m_SpmatBone);
+				XMMatrixMultiply(&m_pCurCortrol->m_SMatResult, &m_SMatResult, &m_SpmatBone);
 			}
 			m_pCEffect->m_pDev->SetRenderState(D3DRS_TEXTUREFACTOR, m_pCurCortrol->m_dwCurColor);
 			m_pCEffect->m_pDev->SetTextureStageStateForced(0, D3DTSS_COLORARG2, D3DTA_TFACTOR);
@@ -560,8 +560,8 @@ void CMPModelEff::RenderAccel(float &fTime)
 		{
 			if(!m_bUseZ)
 				m_pCEffect->m_pDev->SetRenderState(D3DRS_ZENABLE, FALSE);
-			D3DXVECTOR3 vtpos(&m_SMatResult._41);
-			D3DXMatrixMultiply(&m_SMatResult,&m_SMatResult,m_pCEffect->getBillBoardMatrix());
+			XMVECTOR3 vtpos(&m_SMatResult._41);
+			XMMatrixMultiply(&m_SMatResult,&m_SMatResult,m_pCEffect->getBillBoardMatrix());
 
 			if(m_bBindbone)
 			{
@@ -580,7 +580,7 @@ void CMPModelEff::RenderAccel(float &fTime)
 		}else
 		{
 			if(m_bBindbone)
-				D3DXMatrixMultiply(&m_SMatResult, &m_SMatResult, &m_SpmatBone);
+				XMMatrixMultiply(&m_SMatResult, &m_SMatResult, &m_SpmatBone);
 		}
 		Transpose(m_pCurCortrol->m_SMatResult,m_SMatResult);
 
@@ -720,7 +720,7 @@ void CMPModelEff::Render()
 void CMPModelEff::RenderVS()
 {
 
-	D3DXMATRIX	t_STemp;
+	XMMATRIX	t_STemp;
 
 	GetTransMatrix(t_STemp);
 
@@ -755,15 +755,15 @@ void CMPModelEff::RenderVS()
 //#endif
 		if(m_pCEffect->IsRotaLoop())
 		{
-			D3DXMATRIX sMat;
+			XMMATRIX sMat;
 			m_pCEffect->GetRotaLoopMatrix(&sMat, m_pCurCortrol->m_fCurRotat, *m_pfDailTime);
 			m_pCurCortrol->GetTransformMatrix(&m_SMatResult,&sMat);
 		}
 		else
 			m_pCurCortrol->GetTransformMatrix(&m_SMatResult);
 
-		D3DXMATRIX vertexShaderMat;
-		D3DXMatrixMultiply(&m_SMatResult, &m_SMatResult, &t_STemp);		
+		XMMATRIX vertexShaderMat;
+		XMMatrixMultiply(&m_SMatResult, &m_SMatResult, &t_STemp);		
 		if(m_pCEffect->IsItem())
 		{
 			m_pCEffectFile->SetTechnique(3);
@@ -805,7 +805,7 @@ void CMPModelEff::RenderVS()
 			{
 				if(m_bBindbone)
 				{
-					D3DXMatrixMultiply(&m_pCurCortrol->m_SMatResult, &m_SMatResult, &m_SpmatBone);
+					XMMatrixMultiply(&m_pCurCortrol->m_SMatResult, &m_SMatResult, &m_SpmatBone);
 
 					m_pCEffect->m_pCModel->SetMatrix((lwMatrix44*)&m_pCurCortrol->m_SMatResult);
 				}
@@ -820,16 +820,16 @@ void CMPModelEff::RenderVS()
 				lwIRenderCtrlAgent* rca = prim ? prim->GetRenderCtrlAgent() : 0;
 				const lwMatrix44* gm = rca ? rca->GetGlobalMatrix() : 0;
 				if (gm)
-					D3DXMatrixTranspose(&vertexShaderMat, gm);
+					XMMatrixTranspose(&vertexShaderMat, gm);
 				else
-					D3DXMatrixIdentity(&vertexShaderMat);
+					XMMatrixIdentity(&vertexShaderMat);
 			}
 			else
 			{
 				//char szData[128];
 				//sprintf( szData, "No model file. name = %s.", m_pCEffect->m_strModelName.c_str() );
 				//MessageBox( NULL, szData, "error", MB_OK );
-				D3DXMatrixIdentity(&vertexShaderMat);
+				XMMatrixIdentity(&vertexShaderMat);
 			}
 			m_pCEffect->SetVertexShader();
 			m_pCEffect->m_pDev->SetVertexShaderConstantF(0, vertexShaderMat, 4);
@@ -844,7 +844,7 @@ void CMPModelEff::RenderVS()
 			m_pCEffect->Render();
 
 			m_pCEffectFile->End();
-			m_pCEffect->m_pDev->SetRenderState(D3DRS_TEXTUREFACTOR, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+			m_pCEffect->m_pDev->SetRenderState(D3DRS_TEXTUREFACTOR, XMCOLORF(1.0f, 1.0f, 1.0f, 1.0f));
 			m_pCEffect->m_pDev->SetTextureStageStateForced(0, D3DTSS_COLORARG2, D3DTA_TEXTURE);
 			m_pCEffect->m_pDev->SetTextureStageStateForced(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
 			continue;
@@ -878,9 +878,9 @@ void CMPModelEff::RenderVS()
 
 			if(m_bBindbone)
 			{
-				D3DXMatrixMultiply(&m_pCurCortrol->m_SMatResult, &m_SMatResult, &m_SpmatBone);
+				XMMatrixMultiply(&m_pCurCortrol->m_SMatResult, &m_SMatResult, &m_SpmatBone);
 #ifdef USE_RENDER
-				D3DXMatrixTranspose(&vertexShaderMat, &m_pCurCortrol->m_SMatResult);
+				XMMatrixTranspose(&vertexShaderMat, &m_pCurCortrol->m_SMatResult);
 				m_pCEffect->m_pDev->SetTransformWorld( &m_pCurCortrol->m_SMatResult);
 #else
 				m_pCEffect->m_pDev->SetTransform(D3DTS_WORLDMATRIX(0), &m_pCurCortrol->m_SMatResult);
@@ -888,7 +888,7 @@ void CMPModelEff::RenderVS()
 			}else
 			{
 #ifdef USE_RENDER
-				D3DXMatrixTranspose(&vertexShaderMat, &m_SMatResult);
+				XMMatrixTranspose(&vertexShaderMat, &m_SMatResult);
 				m_pCEffect->m_pDev->SetTransformWorld( &m_SMatResult);
 #else
 				m_pCEffect->m_pDev->SetTransform(D3DTS_WORLDMATRIX(0), &m_SMatResult);
@@ -905,7 +905,7 @@ void CMPModelEff::RenderVS()
 			m_pCEffect->End();
 #endif
 			m_pCEffectFile->End();
-			m_pCEffect->m_pDev->SetRenderState(D3DRS_TEXTUREFACTOR, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+			m_pCEffect->m_pDev->SetRenderState(D3DRS_TEXTUREFACTOR, XMCOLORF(1.0f, 1.0f, 1.0f, 1.0f));
 			m_pCEffect->m_pDev->SetTextureStageStateForced(0, D3DTSS_COLORARG2, D3DTA_TEXTURE);
 			m_pCEffect->m_pDev->SetTextureStageStateForced(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
 			continue;
@@ -933,10 +933,10 @@ void CMPModelEff::RenderVS()
 		{
 			if(!m_bUseZ)
 				m_pCEffect->m_pDev->SetRenderState(D3DRS_ZENABLE, FALSE);
-			D3DXVECTOR3 vtpos(&m_SMatResult._41);
+			XMVECTOR3 vtpos(&m_SMatResult._41);
 			if(!m_pCEffect->IsRotaBoard())
-				D3DXMatrixIdentity(&m_SMatResult);
-			D3DXMatrixMultiply(&m_SMatResult,&m_SMatResult,m_pCEffect->getBillBoardMatrix());
+				XMMatrixIdentity(&m_SMatResult);
+			XMMatrixMultiply(&m_SMatResult,&m_SMatResult,m_pCEffect->getBillBoardMatrix());
 
 			if(m_bBindbone)
 			{
@@ -955,7 +955,7 @@ void CMPModelEff::RenderVS()
 		}else
 		{
 			if(m_bBindbone)
-				D3DXMatrixMultiply(&m_SMatResult, &m_SMatResult, &m_SpmatBone);
+				XMMatrixMultiply(&m_SMatResult, &m_SMatResult, &m_SpmatBone);
 		}
 
 		//m_pCEffect->m_pDev->SetTextureStageStateForced(0,  D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP );
@@ -969,9 +969,9 @@ void CMPModelEff::RenderVS()
 		}*/
 		Dx11BindEffectPass(m_pCEffect, m_SMatResult, m_pCurCortrol->m_dwCurColor);
 		Dx11FillEffectUV(m_pCurCortrol, m_pCEffect);
-		D3DXMatrixTranspose(&m_pCurCortrol->m_SMatResult, &m_SMatResult);
+		XMMatrixTranspose(&m_pCurCortrol->m_SMatResult, &m_SMatResult);
 	
-		//D3DXMATRIX tm;
+		//XMMATRIX tm;
 		//Transpose(m_pCurCortrol->m_SMatResult,m_SMatResult);
 
 			if(!lwIsDx11Active() && m_pCEffect->getType() != EFFECT_MODEL )
@@ -1036,18 +1036,18 @@ void CMPModelEff::RenderSoft()
 	m_pCEffectFile->m_pDev->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_TFACTOR);
 	m_pCEffectFile->m_pDev->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE);
 
-	D3DXMATRIX	t_STemp;
+	XMMATRIX	t_STemp;
 
 	if(m_bRotating)
 	{
 		m_fCurRotat += m_fRotaVel * *m_pfDailTime;
 		if(m_fCurRotat >= 6.283185f)
 			m_fCurRotat = m_fCurRotat - 6.283185f;
-		D3DXMatrixRotationAxis(&m_SmatRota,
+		XMMatrixRotationAxis(&m_SmatRota,
 			&m_SVerRota, m_fCurRotat);
 	}
-	D3DXMatrixMultiply(&t_STemp, &m_SmatScale, &m_SmatRota);
-	D3DXMatrixMultiply(&t_STemp, &t_STemp, &m_SmatTrans);
+	XMMatrixMultiply(&t_STemp, &m_SmatScale, &m_SmatRota);
+	XMMatrixMultiply(&t_STemp, &t_STemp, &m_SmatTrans);
 
 	//m_vecEffect[0]->m_pDev->SetVertexShaderConstant(4, m_pMatViewProj, 4);
 
@@ -1069,7 +1069,7 @@ void CMPModelEff::RenderSoft()
 			continue;
 
 		m_pCurCortrol->GetTransformMatrix(&m_SMatResult);
-		D3DXMatrixMultiply(&m_SMatResult, &m_SMatResult, &t_STemp);		
+		XMMatrixMultiply(&m_SMatResult, &m_SMatResult, &t_STemp);		
 
 		if(m_pCEffect->IsItem())
 		{
@@ -1080,7 +1080,7 @@ void CMPModelEff::RenderSoft()
 			m_pCEffectFile->Pass(0);
 			if(m_bBindbone)
 			{
-				D3DXMatrixMultiply(&m_SMatResult, &m_SMatResult, &m_SpmatBone);
+				XMMatrixMultiply(&m_SMatResult, &m_SMatResult, &m_SpmatBone);
 			}
 			m_pCEffect->m_pDev->SetRenderState(D3DRS_TEXTUREFACTOR, m_pCurCortrol->m_dwCurColor);
 			m_pCEffect->m_pDev->SetTextureStageStateForced(0, D3DTSS_COLORARG2, D3DTA_TFACTOR);
@@ -1114,7 +1114,7 @@ void CMPModelEff::RenderSoft()
 
 			if(m_bBindbone)
 			{
-				D3DXMatrixMultiply(&m_SMatResult, &m_SMatResult, &m_SpmatBone);
+				XMMatrixMultiply(&m_SMatResult, &m_SMatResult, &m_SpmatBone);
 			}
 			m_pCEffect->m_pDev->SetRenderState(D3DRS_TEXTUREFACTOR, m_pCurCortrol->m_dwCurColor);
 			m_pCEffect->m_pDev->SetTextureStageStateForced(0, D3DTSS_COLORARG2, D3DTA_TFACTOR);
@@ -1147,8 +1147,8 @@ void CMPModelEff::RenderSoft()
 			if(!m_bUseZ)
 				m_pCEffect->m_pDev->SetRenderState(D3DRS_ZENABLE, FALSE);
 
-			D3DXVECTOR3 vtpos(&m_SMatResult._41);
-			D3DXMatrixMultiply(&m_SMatResult,&m_SMatResult,m_pCEffect->getBillBoardMatrix());
+			XMVECTOR3 vtpos(&m_SMatResult._41);
+			XMMatrixMultiply(&m_SMatResult,&m_SMatResult,m_pCEffect->getBillBoardMatrix());
 
 			if(m_bBindbone)
 			{
@@ -1164,7 +1164,7 @@ void CMPModelEff::RenderSoft()
 				m_SMatResult._43 = vtpos.z;
 			}
 		}else
-			D3DXMatrixMultiply(&m_SMatResult, &m_SMatResult, &m_SpmatBone);
+			XMMatrixMultiply(&m_SMatResult, &m_SMatResult, &m_SpmatBone);
 
 	/*	if(	m_bUsePath)
 		{
@@ -1172,7 +1172,7 @@ void CMPModelEff::RenderSoft()
 			m_SMatResult._42 += m_CPathCtrl.m_SCurPath.y;
 			m_SMatResult._43 += m_CPathCtrl.m_SCurPath.z;
 		}*/
-		//D3DXMATRIX tm;
+		//XMMATRIX tm;
 		//Transpose(tm,m_SMatResult);
 			if(m_pCEffect->getType() != EFFECT_MODEL)
 			{
@@ -1223,30 +1223,30 @@ void	CMPModelEff::ShowCurFrame(int iCurSubEff, int iCurFrame)
 		m_pCEffect  = m_vecEffect[iCurSubEff];
 
 	//!??????????
-	D3DXVECTOR3 t_sVerSize = m_pCEffect->getFrameSize(iCurFrame);
+	XMVECTOR3 t_sVerSize = m_pCEffect->getFrameSize(iCurFrame);
 
-	D3DXVECTOR3 t_sVerAngle = m_pCEffect->getFrameAngle(iCurFrame);
+	XMVECTOR3 t_sVerAngle = m_pCEffect->getFrameAngle(iCurFrame);
 
 	//!??????????
-	D3DXVECTOR3 t_sVerPos = m_pCEffect->getFramePos(iCurFrame);
+	XMVECTOR3 t_sVerPos = m_pCEffect->getFramePos(iCurFrame);
 
-	D3DXMATRIX t_SMat, t_SMatRot;
-		D3DXMatrixScaling(&t_SMat,t_sVerSize.x,t_sVerSize.y,t_sVerSize.z);
-		D3DXMatrixRotationYawPitchRoll(&t_SMatRot,
+	XMMATRIX t_SMat, t_SMatRot;
+		XMMatrixScaling(&t_SMat,t_sVerSize.x,t_sVerSize.y,t_sVerSize.z);
+		XMMatrixRotationYawPitchRoll(&t_SMatRot,
 			t_sVerAngle.y,t_sVerAngle.x,t_sVerAngle.z);
-		D3DXMatrixMultiply(&m_SMatResult, &t_SMat, &t_SMatRot);
+		XMMatrixMultiply(&m_SMatResult, &t_SMat, &t_SMatRot);
 
 		m_SMatResult._41 = t_sVerPos.x ;
 		m_SMatResult._42 = t_sVerPos.y ;
 		m_SMatResult._43 = t_sVerPos.z ;
 
-		D3DXMatrixMultiply(&t_SMat, &m_SmatScale, &m_SmatRota);
-		D3DXMatrixMultiply(&t_SMat, &t_SMat, &m_SmatTrans);
-	D3DXMatrixMultiply(&m_SMatResult, &m_SMatResult, &t_SMat);
+		XMMatrixMultiply(&t_SMat, &m_SmatScale, &m_SmatRota);
+		XMMatrixMultiply(&t_SMat, &t_SMat, &m_SmatTrans);
+	XMMatrixMultiply(&m_SMatResult, &m_SMatResult, &t_SMat);
 
 
 	//!?????????
-	D3DXCOLOR   t_sColor = m_pCEffect->getFrameColor(iCurFrame);
+	XMCOLORF   t_sColor = m_pCEffect->getFrameColor(iCurFrame);
 
 	//!????????????????
 	//TEXCOORD	t_SCoord;
@@ -1285,24 +1285,24 @@ void	CMPModelEff::ShowCurFrame(int iCurSubEff, int iCurFrame)
 }
 
 void	CMPModelEff::ShowTempFrame(int iCurSubEff,
-		D3DXVECTOR3& pScale, D3DXVECTOR3& pRotating, D3DXVECTOR3& pTranslate,
-		D3DXCOLOR& pColor, TEXCOORD& vecCoord, IDirect3DTextureX* lpTex)
+		XMVECTOR3& pScale, XMVECTOR3& pRotating, XMVECTOR3& pTranslate,
+		XMCOLORF& pColor, TEXCOORD& vecCoord, IDirect3DTextureX* lpTex)
 {
 	m_pCEffect  = m_vecEffect[iCurSubEff];
 
-	D3DXMATRIX t_SMat, t_SMatRot;
-		D3DXMatrixScaling(&t_SMat,pScale.x,pScale.y,pScale.z);
-		D3DXMatrixRotationYawPitchRoll(&t_SMatRot,
+	XMMATRIX t_SMat, t_SMatRot;
+		XMMatrixScaling(&t_SMat,pScale.x,pScale.y,pScale.z);
+		XMMatrixRotationYawPitchRoll(&t_SMatRot,
 			pRotating.y,pRotating.x,pRotating.z);
-		D3DXMatrixMultiply(&m_SMatResult, &t_SMat, &t_SMatRot);
+		XMMatrixMultiply(&m_SMatResult, &t_SMat, &t_SMatRot);
 
 		m_SMatResult._41 = pTranslate.x ;
 		m_SMatResult._42 = pTranslate.y ;
 		m_SMatResult._43 = pTranslate.z ;
 
-		D3DXMatrixMultiply(&t_SMat, &m_SmatScale, &m_SmatRota);
-		D3DXMatrixMultiply(&t_SMat, &t_SMat, &m_SmatTrans);
-	D3DXMatrixMultiply(&m_SMatResult, &m_SMatResult, &t_SMat);
+		XMMatrixMultiply(&t_SMat, &m_SmatScale, &m_SmatRota);
+		XMMatrixMultiply(&t_SMat, &t_SMat, &m_SmatTrans);
+	XMMatrixMultiply(&m_SMatResult, &m_SMatResult, &t_SMat);
 
 			
 	//SEFFECT_VERTEX *pVertex;
@@ -1359,7 +1359,7 @@ CMPStrip::CMPStrip()
 	_fCurTime = 0;
 	_bPlay = false;
 
-	_dwColor = D3DXCOLOR(1,1,1,1);
+	_dwColor = XMCOLORF(1,1,1,1);
 	_fLife = 1.0f;
 	_fStep = 0.05f;
 	_eSrcBlend		= D3DBLEND_SRCALPHA;
@@ -1448,8 +1448,8 @@ void	CMPStrip::Render()
 		m_pDev->SetTextureStageStateForced(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 		m_pDev->SetTexture(1, NULL);
 	}
-	D3DXMATRIX mat;
-	D3DXMatrixIdentity(&mat);
+	XMMATRIX mat;
+	XMMatrixIdentity(&mat);
 
 #ifdef		USE_RENDER
 	m_pDev->SetVertexShader(NULL);
@@ -1478,7 +1478,7 @@ void	CMPStrip::Render()
 #endif
 
 	track* ptrack;
-	D3DXCOLOR color = _dwColor;
+	XMCOLORF color = _dwColor;
 	if(_vecCtrl.size()>1)
 	{
 		for (int n = 0; n< _vecCtrl.size(); ++n)
@@ -1499,7 +1499,7 @@ bool	CMPStrip::SaveToFile(FILE* t_pFile)
 {
 	fwrite(&m_iMaxLen,sizeof(int),1,t_pFile);
 	fwrite(&_iDummy,sizeof(int),2,t_pFile);
-	fwrite(&_dwColor,sizeof(D3DXCOLOR),1,t_pFile);
+	fwrite(&_dwColor,sizeof(XMCOLORF),1,t_pFile);
 	fwrite(&_fLife,sizeof(float),1,t_pFile);
 	fwrite(&_fStep,sizeof(float),1,t_pFile);
 	char pszName[32];
@@ -1515,7 +1515,7 @@ bool	CMPStrip::LoadFromFile(FILE* t_pFile, DWORD dwVersion)
 {
 	fread(&m_iMaxLen,sizeof(int),1,t_pFile);
 	fread(&_iDummy,sizeof(int),2,t_pFile);
-	fread(&_dwColor,sizeof(D3DXCOLOR),1,t_pFile);
+	fread(&_dwColor,sizeof(XMCOLORF),1,t_pFile);
 	fread(&_fLife,sizeof(float),1,t_pFile);
 	fread(&_fStep,sizeof(float),1,t_pFile);
 	char pszName[32];
@@ -1547,7 +1547,7 @@ bool	CMPStrip::LoadFromMemory(CMemoryBuf* pbuf, DWORD dwVersion)
 {
 	pbuf->mread(&m_iMaxLen,sizeof(int),1);
 	pbuf->mread(&_iDummy,sizeof(int),2);
-	pbuf->mread(&_dwColor,sizeof(D3DXCOLOR),1);
+	pbuf->mread(&_dwColor,sizeof(XMCOLORF),1);
 	pbuf->mread(&_fLife,sizeof(float),1);
 	pbuf->mread(&_fStep,sizeof(float),1);
 	char pszName[32];

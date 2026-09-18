@@ -178,7 +178,7 @@ CCharacter* CGameScene::AddCharacter(int nScriptID) {
 		pCha->SetOpaque(static_cast<float>(pInfo->chDiaphaneity) / 100.0f);
 		pCha->SetIsForUI(false);
 		pCha->InitState();
-		pCha->SetScale(D3DXVECTOR3(pInfo->scaling[0], pInfo->scaling[1], pInfo->scaling[2]));
+		pCha->SetScale(XMVECTOR3(pInfo->scaling[0], pInfo->scaling[1], pInfo->scaling[2]));
 	}
 __ret:
 	// if( res_bs && (pInfo->chModalType==enumMODAL_MAIN_CHA) )
@@ -291,7 +291,7 @@ CEffectObj* CGameScene::AddSceneEffect(int nEffectTypeID) {
 			return nullptr;
 		}
 		// pEff->Emission(0,&g_pGameApp->GetMainCam()->m_RefPos, nullptr);
-		auto v = D3DXVECTOR3(0, 0, 0);
+		auto v = XMVECTOR3(0, 0, 0);
 		pEff->Emission(0, &v, nullptr);
 		pEff->SetValid(TRUE);
 	} else {

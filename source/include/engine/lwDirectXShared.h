@@ -3,7 +3,7 @@
 
 // Shared D3D9 math / viewport / resource typedefs used by both backends.
 // DX11-only: d3d9.h for enums/device pointer type; DirectXMath via lwD3DXCompat.h;
-// resource wrappers inherit lwDx11I* instead of IDirect3D*9.
+// play-path math names are XM* (lwXMMath.h). Resource wrappers inherit lwDx11I*.
 
 #include "MindPowerRenderConfig.h"
 
@@ -16,6 +16,7 @@
 
 #if MINDPOWER_USE_D3D9_DEVICE
 #include <d3dx9.h>
+#include "lwXMMath.h"
 #else
 #include "lwD3DXCompat.h"
 #include "lwD3D11ResourceIface.h"

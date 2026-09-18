@@ -15,15 +15,15 @@ struct SCameraMode;
 //		m_stDist = 10;
 //		m_enDist = 1;
 //		m_fAngle = INIT_CAMERA_ANGLE;
-//		m_stHei = D3DX_PI/2;
+//		m_stHei = XM_PI/2;
 //		m_enHei = 0;
 //		m_curHei = 0;
 //	}
 //	~CCameraCtrl(){}
-//	void			InitModel(int iType = 0, D3DXVECTOR3* pInitPos = nullptr)
+//	void			InitModel(int iType = 0, XMVECTOR3* pInitPos = nullptr)
 //	{
 //	}
-//	void			SetModel(int iType = 0, D3DXVECTOR3* pInitPos = nullptr){}
+//	void			SetModel(int iType = 0, XMVECTOR3* pInitPos = nullptr){}
 //	void			ChangeModel(){}
 //
 //	void			EnableRotation(BOOL	benable){}
@@ -42,13 +42,13 @@ struct SCameraMode;
 //
 //	void			ResetCamera(float fAngle){}
 //
-//	void			SetFollowObj(D3DXVECTOR3&	vRefObj);
+//	void			SetFollowObj(XMVECTOR3&	vRefObj);
 //
 //
 //	void			Reset()		{ m_iType = -1;}
 //
 // public:
-//	void	GetEyePos(D3DXVECTOR3& vpos,D3DXVECTOR3& vRefPos){}
+//	void	GetEyePos(XMVECTOR3& vpos,XMVECTOR3& vRefPos){}
 //	bool	ScroolFB(float fStep){}
 //	void	ScroolLR(float fstep){}
 //	void	ScrollUD(float fStep){}
@@ -95,8 +95,8 @@ public:
 	CCameraCtrl(void);
 	~CCameraCtrl(void);
 
-	void InitModel(int iType = 0, D3DXVECTOR3* pInitPos = nullptr);
-	void SetModel(int iType = 0, D3DXVECTOR3* pInitPos = nullptr);
+	void InitModel(int iType = 0, XMVECTOR3* pInitPos = nullptr);
+	void SetModel(int iType = 0, XMVECTOR3* pInitPos = nullptr);
 	void ChangeModel();
 
 	void EnableRotation(BOOL benable);
@@ -117,14 +117,14 @@ public:
 
 	void ResetCamera(float fAngle);
 
-	void SetFollowObj(D3DXVECTOR3& vRefObj);
+	void SetFollowObj(XMVECTOR3& vRefObj);
 
 	void Reset() {
 		m_iType = -1;
 	}
 
 public:
-	void GetEyePos(D3DXVECTOR3& vpos, D3DXVECTOR3& vRefPos);
+	void GetEyePos(XMVECTOR3& vpos, XMVECTOR3& vRefPos);
 	bool ScroolFB(float fStep);
 	void ScroolLR(float fstep);
 	void ScrollUD(float fStep);
@@ -154,9 +154,9 @@ public:
 	float m_flerp;
 	float m_fScale;
 
-	D3DXVECTOR3 m_vDir;
-	D3DXVECTOR3 m_vCross;
-	D3DXVECTOR3 m_vViewDir;
+	XMVECTOR3 m_vDir;
+	XMVECTOR3 m_vCross;
+	XMVECTOR3 m_vViewDir;
 
 	float m_fxy;
 	float m_fz;
@@ -186,7 +186,7 @@ public:
 	float m_fResetRotatAccl;
 
 	bool m_bToDefault;
-	D3DXVECTOR3 m_vDefaultDir;
+	XMVECTOR3 m_vDefaultDir;
 	float m_fSubVel;
 	float m_fLastAngle;
 
@@ -214,13 +214,13 @@ public:
 
 public:
 	INT m_iCha;
-	D3DXVECTOR3 m_vCurPos;
+	XMVECTOR3 m_vCurPos;
 
-	std::list<D3DXVECTOR2> m_listDir;
+	std::list<XMVECTOR2> m_listDir;
 	std::list<float> m_listDist;
 	float m_fCurDist;
 
-	std::list<D3DXVECTOR2> m_listPos;
+	std::list<XMVECTOR2> m_listPos;
 	float m_fStackVel;
 
 	float m_listHei;
@@ -231,13 +231,13 @@ public:
 
 	float m_fmaxDown;
 
-	D3DXVECTOR2 _vCurNode;
-	D3DXVECTOR2 _vNextNode;
-	D3DXVECTOR2 _vLastNode;
+	XMVECTOR2 _vCurNode;
+	XMVECTOR2 _vNextNode;
+	XMVECTOR2 _vLastNode;
 	float _fProgressRate;
 	float _fdistshow;
 
-	D3DXVECTOR2 _vLastPos;
+	XMVECTOR2 _vLastPos;
 
 	DWORD _lastFrameTime;
 };
@@ -261,8 +261,8 @@ inline float Distance(float x1, float y1, float x2, float y2) {
 	return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 
-inline BOOL IsDistanceLessThanValue(const D3DXVECTOR3& v1,
-									const D3DXVECTOR3& v2,
+inline BOOL IsDistanceLessThanValue(const XMVECTOR3& v1,
+									const XMVECTOR3& v2,
 									float value) {
 	return ((v1.x - v2.x) * (v1.x - v2.x) +
 				(v1.y - v2.y) * (v1.y - v2.y) +
@@ -270,40 +270,40 @@ inline BOOL IsDistanceLessThanValue(const D3DXVECTOR3& v1,
 			value * value);
 }
 
-inline BOOL IsDistanceLessThanValue(const D3DXVECTOR2& v1,
-									const D3DXVECTOR2& v2,
+inline BOOL IsDistanceLessThanValue(const XMVECTOR2& v1,
+									const XMVECTOR2& v2,
 									float value) {
 	return ((v1.x - v2.x) * (v1.x - v2.x) +
 				(v1.y - v2.y) * (v1.y - v2.y) <
 			value * value);
 }
 
-inline BOOL IsLengthLessThanValue(const D3DXVECTOR3& v,
+inline BOOL IsLengthLessThanValue(const XMVECTOR3& v,
 								  float value) {
 	return (v.x * v.x + v.y * v.y + v.z * v.z < value * value);
 }
 
-inline BOOL IsLengthLessThanValue(const D3DXVECTOR2& v,
+inline BOOL IsLengthLessThanValue(const XMVECTOR2& v,
 								  float value) {
 	return (v.x * v.x + v.y * v.y < value * value);
 }
 
-inline BOOL IsLengthLessThanVector(const D3DXVECTOR3& v1,
-								   const D3DXVECTOR3& v2) {
+inline BOOL IsLengthLessThanVector(const XMVECTOR3& v1,
+								   const XMVECTOR3& v2) {
 	return (v1.x * v1.x + v1.y * v1.y + v1.z * v1.z <
 			v2.x * v2.x + v2.y * v2.y + v2.z * v2.z);
 }
 
-inline BOOL IsLengthLessThanVector(const D3DXVECTOR2& v1,
-								   const D3DXVECTOR2& v2) {
+inline BOOL IsLengthLessThanVector(const XMVECTOR2& v1,
+								   const XMVECTOR2& v2) {
 	return (v1.x * v1.x + v1.y * v1.y <
 			v2.x * v2.x + v2.y * v2.y);
 }
 
 float AngleDistance(float angle1, float angle2);
-float DistancePoint2Segment(const D3DXVECTOR3& point,
-							const D3DXVECTOR3& segPoint1,
-							const D3DXVECTOR3& segPoint2);
+float DistancePoint2Segment(const XMVECTOR3& point,
+							const XMVECTOR3& segPoint1,
+							const XMVECTOR3& segPoint2);
 
 //
 //  Ninja_Controller.h
@@ -376,14 +376,14 @@ typedef struct SphereCoord {
 
 class Camera {
 public:
-	Camera(Controller<D3DXVECTOR3>* _tgt_ctrl,
+	Camera(Controller<XMVECTOR3>* _tgt_ctrl,
 		   Controller<SphereCoord>* _eye_ctrl);
 
-	D3DXVECTOR3& GetEye() {
+	XMVECTOR3& GetEye() {
 		return _myEye;
 	}
 
-	D3DXVECTOR3& GetTarget() {
+	XMVECTOR3& GetTarget() {
 		return _myTarget;
 	}
 
@@ -391,11 +391,11 @@ public:
 		return _mySC;
 	}
 
-	void SetEye(const D3DXVECTOR3& v) {
+	void SetEye(const XMVECTOR3& v) {
 		_myEye = v;
 	}
 
-	void SetTarget(const D3DXVECTOR3& v) {
+	void SetTarget(const XMVECTOR3& v) {
 		_myTarget = v;
 	}
 
@@ -415,15 +415,15 @@ public:
 		_mySC_End.radius += radius;
 	}
 
-	void UpdateTargetPosition(const D3DXVECTOR3& v);
+	void UpdateTargetPosition(const XMVECTOR3& v);
 	void UpdateEyePosition();
 	void UpdateViewTransform();
 
 private:
 	Controller<SphereCoord>* _my_eyeController;
-	Controller<D3DXVECTOR3>* _my_targetController;
-	D3DXVECTOR3 _myEye;
-	D3DXVECTOR3 _myTarget;
+	Controller<XMVECTOR3>* _my_targetController;
+	XMVECTOR3 _myEye;
+	XMVECTOR3 _myTarget;
 	SphereCoord _mySC;
 	SphereCoord _mySC_End;
 

@@ -83,7 +83,7 @@ protected:
 	virtual bool _IsAllowCancel();
 
 protected:
-	void WriteInfo(S_BVECTOR<D3DXVECTOR3>& path, stNetMoveInfo& info);
+	void WriteInfo(S_BVECTOR<XMVECTOR3>& path, stNetMoveInfo& info);
 	void _SynchroServer();
 
 protected:
@@ -153,13 +153,13 @@ public:
 	float GetRate() { return _fRate; }
 	// 对寻路路径分段
 	// 参数分别为:输入列表,输入路径,分段长度(小于零不分段)
-	static void CompartMoveList(CMoveList& outlist, S_BVECTOR<D3DXVECTOR3>& path, int length);
+	static void CompartMoveList(CMoveList& outlist, S_BVECTOR<XMVECTOR3>& path, int length);
 
 protected:
 	virtual bool _Start();
 	virtual void _End();
 
-	void WriteInfo(S_BVECTOR<D3DXVECTOR3>& path, stNetMoveInfo& info);
+	void WriteInfo(S_BVECTOR<XMVECTOR3>& path, stNetMoveInfo& info);
 	bool SendInfo();
 	bool StartMove(int nTargetX, int nTargetY, bool isWalkLine);
 	void SynchroPos(int x, int y);

@@ -219,7 +219,7 @@ long CALLBACK TerrainNotice(int nFlag, int nSectionX, int nSectionY, DWORD_PTR d
 							infoex[n].nX = nPosX;
 							infoex[n].nY = nPosY;
 							// if(pEffObj->getIdxID() == 1)
-							//	infoex[n].sYawAngle	= pEffObj->getYaw() +  D3DX_PI * 100;
+							//	infoex[n].sYawAngle	= pEffObj->getYaw() +  XM_PI * 100;
 							// else
 							infoex[n].sYawAngle = pEffObj->getYaw();
 							infoex[n].sHeightOff = pEffObj->getHeightOff();
@@ -582,7 +582,7 @@ void CGameApp::MouseButtonDB(int nButton) {
 			// CCharacter *pCha = GetMainCha();
 			// if(pCha)
 			//{
-			//	D3DXVECTOR3 vecCha = pCha->GetPos();
+			//	XMVECTOR3 vecCha = pCha->GetPos();
 
 			//	g_pGameApp->Get ->Reset(vecCha.x,vecCha.y,vecCha.z);
 			//	pCam->SetFollowObj(vecCha);
@@ -655,7 +655,7 @@ void CGameApp::HandleSuperKey() {
 			//{
 			//	CCameraCtrl *pCam = GetMainCam();
 			//	CCharacter *pCha = GetCurScene()->GetMainCha();
-			//	D3DXVECTOR3 vecCha = pCha->GetPos();
+			//	XMVECTOR3 vecCha = pCha->GetPos();
 
 			//	pCam->InitBuf(vecCha.x,vecCha.y,vecCha.z);
 			//	pCam->SetBufVel( pCha->getMoveSpeed() ,pCha->getID());
@@ -812,9 +812,9 @@ void CGameApp::HandleContinueSuperKey() {
 	// if(IsKeyContinue(DIK_Z)) GetMainCam()->Move(MOVE_DOWN);
 
 	if (IsKeyContinue(DIK_O)) {
-		g_Render.SetWorldViewFOV(g_Render.GetWorldViewFOV() - D3DX_PI / 180.0f);
+		g_Render.SetWorldViewFOV(g_Render.GetWorldViewFOV() - XM_PI / 180.0f);
 	} else if (IsKeyContinue(DIK_P)) {
-		g_Render.SetWorldViewFOV(g_Render.GetWorldViewFOV() + D3DX_PI / 180.0f);
+		g_Render.SetWorldViewFOV(g_Render.GetWorldViewFOV() + XM_PI / 180.0f);
 	}
 
 	g_Editor.HandleKeyContinue();
@@ -1422,7 +1422,7 @@ const char* ConsoleCallback(const char* pszCmd) {
 		if (!pScene)
 			return "";
 
-		D3DXVECTOR3 TestPos;
+		XMVECTOR3 TestPos;
 		int nTestX = 0;
 		int nTestY = 0;
 		if (CGameScene::GetMainCha()) {
@@ -1489,7 +1489,7 @@ const char* ConsoleCallback(const char* pszCmd) {
 						continue;
 					}
 
-					D3DXVECTOR3 pos = TestPos;
+					XMVECTOR3 pos = TestPos;
 					pos.x = pos.x + (float)(rand() % 10000) / 1000.0f - 5.0f;
 					pos.y = pos.y + (float)(rand() % 10000) / 1000.0f - 5.0f;
 					pEffect->Emission(-1, &pos, nullptr);
@@ -1537,7 +1537,7 @@ const char* ConsoleCallback(const char* pszCmd) {
 		if (!pScene)
 			return "";
 
-		D3DXVECTOR3 TestPos;
+		XMVECTOR3 TestPos;
 		int nTestX = 0;
 		int nTestY = 0;
 		if (CGameScene::GetMainCha()) {
@@ -1565,7 +1565,7 @@ const char* ConsoleCallback(const char* pszCmd) {
 		CCharacter* _pTarget = _pSelf;
 		CCharacter* _pAttack = _pSelf;
 		lwMatrix44 mat;
-		D3DXVECTOR3 pos;
+		XMVECTOR3 pos;
 		int _nAttackX, _nAttackY;
 		for (int k = nStart; k < nEnd; k++) {
 			pInfo = GetSkillRecordInfo(k);
@@ -1605,7 +1605,7 @@ const char* ConsoleCallback(const char* pszCmd) {
 					nTargetID = _pTarget->getID();
 
 					if (_pSkillInfo->sTargetDummyLink >= 0 && _pTarget->GetObjDummyRunTimeMatrix(&mat, _pSkillInfo->sTargetDummyLink) >= 0) {
-						pos = *(D3DXVECTOR3*)&mat._41;
+						pos = *(XMVECTOR3*)&mat._41;
 					}
 				}
 

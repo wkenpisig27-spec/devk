@@ -17,8 +17,8 @@ public:
 	~CUIPanel();
 	bool Create(IDirect3DDeviceX* pDev);
 
-	void Draw(IDirect3DTextureX* pSrcTexture, CONST RECT* pSrcRect, CONST D3DXVECTOR2* pScaling,
-	          CONST D3DXVECTOR2* pRotationCenter, FLOAT Rotation, CONST D3DXVECTOR2* pTranslation, D3DCOLOR Color);
+	void Draw(IDirect3DTextureX* pSrcTexture, CONST RECT* pSrcRect, CONST XMVECTOR2* pScaling,
+	          CONST XMVECTOR2* pRotationCenter, FLOAT Rotation, CONST XMVECTOR2* pTranslation, D3DCOLOR Color);
 	void Begin() {
 	}
 	void End();

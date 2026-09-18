@@ -36,8 +36,8 @@ struct SceneTranspObjStateDesc {
 // Added by clp
 typedef struct ReallyBigObjectInfo {
 	int typeID;
-	D3DXVECTOR3 position;
-	D3DXQUATERNION orientation;
+	XMVECTOR3 position;
+	XMQUATERNION orientation;
 	float terrainHeight;
 } ReallyBigObjectInfo;
 
@@ -202,7 +202,7 @@ public:
 	virtual void SetScreen(int w, int h, bool IsFull) {
 	}
 
-	BOOL GetPickPos(int nPosX, int nPosY, D3DXVECTOR3& vPickPos) {
+	BOOL GetPickPos(int nPosX, int nPosY, XMVECTOR3& vPickPos) {
 		if (_pTerrain == 0)
 			return 0;
 
@@ -294,14 +294,14 @@ public:
 	CSceneObj* HitTestSceneObj(int nScrX, int nScrY);
 	CCharacter* HitTestCharacter(int nScrX, int nScrY);
 	CCharacter* HitCharacter(int nScrX, int nScrY);
-	int HitTestSceneObjTerrainForInfluence(D3DXVECTOR3* t_pos, const D3DXVECTOR3* nPos);
-	int HitTestSceneObjTerrain(D3DXVECTOR3* t_pos, const D3DXVECTOR3* nPos);
-	int HitTestSceneObjTerrain(D3DXVECTOR3* t_pos, const D3DXVECTOR3* nOrg, const D3DXVECTOR3* nRay);
-	int HitTestSceneObjChair(D3DXMATRIX* t_mat, int* h, const D3DXVECTOR3* nOrg, const D3DXVECTOR3* nRay);
-	int HitTestSceneObjWall(D3DXMATRIX* t_mat, const D3DXVECTOR3* nOrg, const D3DXVECTOR3* nRay);
-	int HitTestSceneObjChair(D3DXVECTOR3* t_pos, int* t_angle, int* h, const D3DXVECTOR3* nOrg,
-	                         const D3DXVECTOR3* nRay);
-	int HitTestSceneObjWall(D3DXVECTOR3* t_pos, int* t_angle, const D3DXVECTOR3* nOrg, const D3DXVECTOR3* nRay);
+	int HitTestSceneObjTerrainForInfluence(XMVECTOR3* t_pos, const XMVECTOR3* nPos);
+	int HitTestSceneObjTerrain(XMVECTOR3* t_pos, const XMVECTOR3* nPos);
+	int HitTestSceneObjTerrain(XMVECTOR3* t_pos, const XMVECTOR3* nOrg, const XMVECTOR3* nRay);
+	int HitTestSceneObjChair(XMMATRIX* t_mat, int* h, const XMVECTOR3* nOrg, const XMVECTOR3* nRay);
+	int HitTestSceneObjWall(XMMATRIX* t_mat, const XMVECTOR3* nOrg, const XMVECTOR3* nRay);
+	int HitTestSceneObjChair(XMVECTOR3* t_pos, int* t_angle, int* h, const XMVECTOR3* nOrg,
+	                         const XMVECTOR3* nRay);
+	int HitTestSceneObjWall(XMVECTOR3* t_pos, int* t_angle, const XMVECTOR3* nOrg, const XMVECTOR3* nRay);
 	int GetMainChaPickRay(MPVector3* org, MPVector3* ray);
 
 	int UpdateSceneAnimLight();
@@ -369,7 +369,7 @@ public:
 	// xuedong 2004.08.23 for add character block
 	long AddCharacterBlock(int nCurX, int nCurY, int nDist, BYTE* byBlockBuff, int nBuffWidth, int sRadii = 40);
 
-	D3DXVECTOR3* GetMouseMap() {
+	XMVECTOR3* GetMouseMap() {
 		return &_vMousePos;
 	}
 	float GetMouseMapX() {
@@ -520,7 +520,7 @@ public:
 	std::size_t _nSceneItemCnt{};
 	std::size_t _nSceneLightCnt{};
 
-	D3DXVECTOR3 _vMousePos;
+	XMVECTOR3 _vMousePos;
 	int _nMouseX, _nMouseY; // �������Ļ�ϵ�����,����
 
 	static e3DMouseState _e3DMouseState;
@@ -568,7 +568,7 @@ protected:
 	CMapInfo* _pMapInfo;
 
 protected: // ��ʱ����
-	D3DXVECTOR3 org, ray;
+	XMVECTOR3 org, ray;
 
 	IDirect3DSurfaceX* windowRenderTarget;
 	IDirect3DSurfaceX* windowDepthSurface;

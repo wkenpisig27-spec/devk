@@ -71,7 +71,7 @@ public:
 	void SetHarmValue(stEffect* pChange, unsigned int nMax) { _HarmValue.SetValue(pChange, nMax); }
 	void SetHarmState(stSkillState* pState, int nCount) { _HarmState.SetValue(pState, nCount); }
 
-	static void CreateEffect(int eType, const char* str, D3DXVECTOR3& start, D3DXVECTOR3& target, D3DXVECTOR3& dir, bool isMain, DWORD& dwDelay);
+	static void CreateEffect(int eType, const char* str, XMVECTOR3& start, XMVECTOR3& target, XMVECTOR3& dir, bool isMain, DWORD& dwDelay);
 	static void ExecHarm(CSizeArray<stEffect>& Value, CCharacter* pTarget, CCharacter* pAttack = nullptr);
 	static void ChaDied(CCharacter* pTarget, CCharacter* pAttack = nullptr);
 

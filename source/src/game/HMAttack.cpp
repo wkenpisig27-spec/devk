@@ -81,15 +81,15 @@ void CAttackEffect::_Exec() {
 
 	if (_IsMiss && _pTarget->IsEnabled()) {
 
-		D3DXVECTOR3 VPOS = _pAttack ? _pAttack->GetPos() : _pTarget->GetPos();
-		D3DXVECTOR3 VPOS2 = _pTarget->GetPos();
+		XMVECTOR3 VPOS = _pAttack ? _pAttack->GetPos() : _pTarget->GetPos();
+		XMVECTOR3 VPOS2 = _pTarget->GetPos();
 
 		VPOS.z += 3;
 		VPOS2.z += 2;
 		CCameraCtrl* pCam = g_pGameApp->GetMainCam();
-		D3DXVECTOR3 vdir = pCam->m_vCross;
+		XMVECTOR3 vdir = pCam->m_vCross;
 		vdir = rand() % 2 ? vdir : -vdir;
-		D3DXVec3Normalize(&vdir, &vdir);
+		XMVector3Normalize(&vdir, &vdir);
 
 		DWORD dwDelay = 0;
 		CreateEffect(enumMiss, "", VPOS2, VPOS, vdir, IsHarmMain(_pTarget, _pAttack), dwDelay);
@@ -137,15 +137,15 @@ void CAttackEffect::ChaDied(CCharacter* pTarget, CCharacter* pAttack) {
 }
 
 void CAttackEffect::ExecHarm(CSizeArray<stEffect>& Value, CCharacter* pTarget, CCharacter* pAttack) {
-	D3DXVECTOR3 VPOS = pAttack ? pAttack->GetPos() : pTarget->GetPos();
-	D3DXVECTOR3 VPOS2 = pTarget->GetPos();
+	XMVECTOR3 VPOS = pAttack ? pAttack->GetPos() : pTarget->GetPos();
+	XMVECTOR3 VPOS2 = pTarget->GetPos();
 
 	VPOS.z += 3;
 	VPOS2.z += 2;
 	CCameraCtrl* pCam = g_pGameApp->GetMainCam();
-	D3DXVECTOR3 vdir = pCam->m_vCross;
+	XMVECTOR3 vdir = pCam->m_vCross;
 	vdir = rand() % 2 ? vdir : -vdir;
-	D3DXVec3Normalize(&vdir, &vdir);
+	XMVector3Normalize(&vdir, &vdir);
 
 	bool isMain = pTarget->IsMainCha();
 
@@ -262,7 +262,7 @@ void CAttackEffect::ExecHarm(CSizeArray<stEffect>& Value, CCharacter* pTarget, C
 	pTarget->RefreshUI();
 }
 
-void CAttackEffect::CreateEffect(int eType, const char* str, D3DXVECTOR3& start, D3DXVECTOR3& target, D3DXVECTOR3& dir, bool isMain, DWORD& dwDelay) {
+void CAttackEffect::CreateEffect(int eType, const char* str, XMVECTOR3& start, XMVECTOR3& target, XMVECTOR3& dir, bool isMain, DWORD& dwDelay) {
 	CEffectObj* pEffect = CGameApp::GetCurScene()->GetFirstInvalidEffObj();
 	if (pEffect == nullptr) {
 		LG("error", RES_STRING(CL_LANGUAGE_MATCH_147));

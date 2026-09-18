@@ -33,7 +33,7 @@ extern MPEditor g_Editor;
 // Can be controlled from Lua via SetDisableMeleeForCasters(true/false)
 bool g_bDisableMeleeForCasters = true;
 
-static D3DXVECTOR3 vPos;
+static XMVECTOR3 vPos;
 static int nScrX, nScrY;
 
 const DWORD DELAY_TIME = 100;

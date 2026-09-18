@@ -26,17 +26,17 @@
 #define LWMATRIX44_DECL
 #define LWQUATERNION_DECL
 
-typedef D3DXVECTOR2 lwVector2;
-typedef D3DXVECTOR3 lwVector3;
-typedef D3DXVECTOR4 lwVector4;
-typedef D3DXMATRIX lwMatrix44;
-typedef D3DXQUATERNION lwQuaternion;
+typedef XMVECTOR2 lwVector2;
+typedef XMVECTOR3 lwVector3;
+typedef XMVECTOR4 lwVector4;
+typedef XMMATRIX lwMatrix44;
+typedef XMQUATERNION lwQuaternion;
 
-#define lwMatrix44Multiply D3DXMatrixMultiply
-#define lwMatrix44Inverse D3DXMatrixInverse
-#define lwMatrix44Transpose D3DXMatrixTranspose
+#define lwMatrix44Multiply XMMatrixMultiply
+#define lwMatrix44Inverse XMMatrixInverse
+#define lwMatrix44Transpose XMMatrixTranspose
 #define lwQuaternionMultiply(ret, q1, q2) \
-    D3DXQuaternionMultiply(ret, q2, q1)
+    XMQuaternionMultiply(ret, q2, q1)
 
 
 #endif

@@ -43,7 +43,7 @@ void CGameScene::_FrameMove(DWORD dwTimeParam) {
 		GetPickPos(g_pGameApp->GetMouseX(), g_pGameApp->GetMouseY(), _vMousePos);
 
 		//{ // scene obj hit test
-		//    D3DXVECTOR3 iorg, iray, hit;
+		//    XMVECTOR3 iorg, iray, hit;
 		//    g_Render.GetPickRayVector( g_pGameApp->GetMouseX(), g_pGameApp->GetMouseX(), &iorg, &iray );
 		//    if( HitTestSceneObjTerrain(&hit, &iorg, &iray ) > 0 )
 		//    {
@@ -59,13 +59,13 @@ void CGameScene::_FrameMove(DWORD dwTimeParam) {
 
 		// 镜头非跟随模式下, 以屏幕中间映射到地表上的位置为镜头焦点
 		if (g_Config.m_bEditor && !g_pGameApp->IsCameraFollow()) {
-			static D3DXVECTOR3 vecPos;
+			static XMVECTOR3 vecPos;
 			static int nScrFocus;
 			nScrFocus = g_Render.GetScrHeight() / 2;
 			if (GetPickPos(g_Render.GetScrWidth() / 2, nScrFocus, vecPos)) {
 				_pTerrain->SetShowCenter(vecPos.x, vecPos.y);
 			}
-			// D3DXVec3Add(&vecCha,&vecCha,&(-pCam->m_vDir * 6));
+			// XMVector3Add(&vecCha,&vecCha,&(-pCam->m_vDir * 6));
 			//_pTerrain->SetShowCenter(vecPos.x, vecPos.y);
 		}
 		_pTerrain->FrameMove(dwTimeParam);
@@ -142,7 +142,7 @@ void CGameScene::_FrameMove(DWORD dwTimeParam) {
 
 	// VECTOR3 vec(_vMousePos.x, _vMousePos.y, 10);
 	// VECTOR3 vecHit;
-	// D3DXVECTOR3 org, ray;
+	// XMVECTOR3 org, ray;
 	// g_Render.GetPickRayVector( g_pGameApp->GetMouseX(), g_pGameApp->GetMouseY(), &org, &ray );
 	// if( this->HitTestSceneObjTerrain(&vecHit, &org, &ray ) > 0 )
 	//{
