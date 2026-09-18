@@ -9,6 +9,10 @@
 #include "lwGraphicsUtil.h"
 #include "lwPrimitive.h"
 #include "lwResourceMgr.h"
+#include "MindPowerRenderConfig.h"
+#include "lwRenderBackend.h"
+#include "lwDeviceObject11.h"
+#include "lwD3D11Texture.h"
 
 // Del by lark.li 20080611
 //#include <FontSystem.h>
@@ -694,6 +698,15 @@ __ret:
 LW_RESULT lwDeviceObject::CreateTextureFromFileInMemory(IDirect3DTextureX** out_tex, void* data, UINT data_size, UINT width, UINT height, UINT mip_level, DWORD usage, D3DFORMAT format, D3DPOOL pool, DWORD filter, DWORD mip_filter, D3DCOLOR colorkey, D3DXIMAGE_INFO* src_info, PALETTEENTRY* palette)
 {
     LW_RESULT ret = LW_RET_FAILED;
+
+#if !MINDPOWER_USE_D3D9_DEVICE
+    lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
+    if (!d11)
+        return LW_RET_FAILED;
+    return d11->CreateTextureFromFileInMemory(
+        out_tex, data, data_size, width, height, mip_level, usage, format, pool,
+        filter, mip_filter, colorkey, src_info, palette);
+#endif
 
     IDirect3DTextureX* t = 0;
     if(FAILED(D3DXCreateTextureFromFileInMemoryEx(

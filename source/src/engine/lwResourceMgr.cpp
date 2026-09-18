@@ -817,12 +817,13 @@ __load_it:
 		else
         {
             IDirect3DDeviceX* d3d9_fileex = dev_obj->GetDevice();
-            if (!d3d9_fileex) {
-                lwDeviceObject11* d11 = lwIsDx11Active() ? lwGetActiveDeviceObject11() : 0;
+            if (!d3d9_fileex || MindPowerDx11OnlyBuild() || lwIsDx11Active()) {
+                lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
                 if (!d11 || LW_FAILED(lwD3D11CreateTextureFromFile(
                     d11->GetD3D11Device(), this->_file_name, _colorkey.color, &_tex)) || !_tex)
                     goto __ret;
             }
+#if MINDPOWER_USE_D3D9_DEVICE
             else if(FAILED(D3DXCreateTextureFromFileEx(d3d9_fileex,
                 this->_file_name, //�ļ���
                 0, //�ļ�����������Ϊ�Զ�
@@ -840,6 +841,7 @@ __load_it:
             {
                 goto __ret;
             }
+#endif
 
         }
 #if 0
@@ -873,12 +875,13 @@ __load_it:
 #else
         {
             IDirect3DDeviceX* d3d9_fileex = dev_obj->GetDevice();
-            if (!d3d9_fileex) {
+            if (!d3d9_fileex || MindPowerDx11OnlyBuild() || lwIsDx11Active()) {
                 lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
                 if (!d11 || LW_FAILED(lwD3D11CreateTextureFromFile(
                     d11->GetD3D11Device(), this->_file_name, _colorkey.color, &_tex)) || !_tex)
                     goto __ret;
             }
+#if MINDPOWER_USE_D3D9_DEVICE
             else if(FAILED(D3DXCreateTextureFromFileEx(d3d9_fileex,
             this->_file_name, //�ļ���
             0, //�ļ�����������Ϊ�Զ�
@@ -896,6 +899,7 @@ __load_it:
             {
                 goto __ret;
             }
+#endif
         }
 #endif
 

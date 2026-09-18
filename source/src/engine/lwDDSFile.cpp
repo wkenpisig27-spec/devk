@@ -272,6 +272,11 @@ HRESULT lwDDSFile::BltAllLevels(D3DCUBEMAP_FACES FaceType, IDirect3DBaseTextureX
         pmiptexDest = (IDirect3DTextureX* )ptexDest;
     }
 
+#if !MINDPOWER_USE_D3D9_DEVICE
+    if (_dev && SUCCEEDED(_dev->UpdateTexture(ptexSrc, ptexDest)))
+        return S_OK;
+    return E_FAIL;
+#else
     for(iLevel = 0; iLevel < _mip_level; iLevel++)
     {
         if(IsVolumeMap())
@@ -306,7 +311,8 @@ HRESULT lwDDSFile::BltAllLevels(D3DCUBEMAP_FACES FaceType, IDirect3DBaseTextureX
         }
     }
 
-    return LW_RET_OK;
+    return S_OK;
+#endif
 }
 
 
