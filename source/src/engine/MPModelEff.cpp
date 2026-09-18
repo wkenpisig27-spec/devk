@@ -1371,23 +1371,36 @@ CMPStrip::~CMPStrip()
 {
 }
 
+static int StripDummyMats(MPSceneItem* item, MPCharacter* cha, int d0, int d1, lwMatrix44* mat1, lwMatrix44* mat2)
+{
+	lwMatrix44Identity(mat1);
+	lwMatrix44Identity(mat2);
+	if (item)
+	{
+		if (LW_FAILED(item->GetObjDummyRunTimeMatrix(mat1, d0)))
+			return 0;
+		if (LW_FAILED(item->GetObjDummyRunTimeMatrix(mat2, d1)))
+			return 0;
+		return 1;
+	}
+	if (cha)
+	{
+		if (LW_FAILED(cha->GetObjDummyRunTimeMatrix(mat1, d0)))
+			return 0;
+		if (LW_FAILED(cha->GetObjDummyRunTimeMatrix(mat2, d1)))
+			return 0;
+		return 1;
+	}
+	return 0;
+}
+
 void	CMPStrip::Play()
 {
 	_vecPath.clear();
 	_vecCtrl.clear();
 
 	lwMatrix44 mat1,mat2;
-	if (_pItem)
-	{
-		//_pItem->FrameMove();
-		_pItem->GetObjDummyRunTimeMatrix(&mat1,_iDummy[0]);
-		_pItem->GetObjDummyRunTimeMatrix(&mat2,_iDummy[1]);
-	}else if(_pCha)
-	{
-		//_pCha->FrameMove();
-		_pCha->GetObjDummyRunTimeMatrix(&mat1,_iDummy[0]);
-		_pCha->GetObjDummyRunTimeMatrix(&mat2,_iDummy[1]);
-	}else
+	if (!StripDummyMats(_pItem, _pCha, _iDummy[0], _iDummy[1], &mat1, &mat2))
 		return;
 
 	GetTrack(&mat1,&mat2);
@@ -1400,15 +1413,8 @@ void	CMPStrip::UpdateFrame()
 	if(!_bPlay)
 		return;
 	lwMatrix44 mat1,mat2;
-	if (_pItem)
-	{
-		_pItem->GetObjDummyRunTimeMatrix(&mat1,_iDummy[0]);
-		_pItem->GetObjDummyRunTimeMatrix(&mat2,_iDummy[1]);
-	}else if(_pCha)
-	{
-		_pCha->GetObjDummyRunTimeMatrix(&mat1,_iDummy[0]);
-		_pCha->GetObjDummyRunTimeMatrix(&mat2,_iDummy[1]);
-	}
+	if (!StripDummyMats(_pItem, _pCha, _iDummy[0], _iDummy[1], &mat1, &mat2))
+		return;
 	GetTrack(&mat1,&mat2);
 }
 
@@ -1420,16 +1426,8 @@ void	CMPStrip::FrameMove()
 	if(_fCurTime >_fStep)
 	{
 		lwMatrix44 mat1,mat2;
-		if (_pItem)
-		{
-			_pItem->GetObjDummyRunTimeMatrix(&mat1,_iDummy[0]);
-			_pItem->GetObjDummyRunTimeMatrix(&mat2,_iDummy[1]);
-		}else if(_pCha)
-		{
-			_pCha->GetObjDummyRunTimeMatrix(&mat1,_iDummy[0]);
-			_pCha->GetObjDummyRunTimeMatrix(&mat2,_iDummy[1]);
-		}
-		GetTrack(&mat1,&mat2);
+		if (StripDummyMats(_pItem, _pCha, _iDummy[0], _iDummy[1], &mat1, &mat2))
+			GetTrack(&mat1,&mat2);
 		_fCurTime = 0;
 	}
 }

@@ -365,7 +365,7 @@ const lwMatrix44* lwItem::GetObjBoneDummyMatrix( DWORD id )
     {
         if( rtmat_seq[ i ].id == id )
         {
-            return &rtmat_seq[ id ].mat;
+            return &rtmat_seq[ i ].mat;
         }
     }
 
@@ -428,6 +428,8 @@ LW_RESULT lwItem::GetDummyMatrix( lwMatrix44* mat, DWORD id )
 
 
         mat_dummy = GetObjBoneDummyMatrix(id);
+        if (mat_dummy == 0)
+            goto __addr_obj_dummy;
         goto __addr_1;
     }
 __addr_obj_dummy:
