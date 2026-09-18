@@ -77,19 +77,23 @@ static const char* kPostHLSL =
     "}\n"
     "float4 PSFxaa(PSIn i) : SV_TARGET {\n"
     "  float2 px = texel;\n"
-    "  float3 rgbNW = tex0.Sample(samp, i.uv + float2(-px.x, -px.y)).rgb;\n"
-    "  float3 rgbNE = tex0.Sample(samp, i.uv + float2( px.x, -px.y)).rgb;\n"
-    "  float3 rgbSW = tex0.Sample(samp, i.uv + float2(-px.x,  px.y)).rgb;\n"
-    "  float3 rgbSE = tex0.Sample(samp, i.uv + float2( px.x,  px.y)).rgb;\n"
-    "  float3 rgbM  = tex0.Sample(samp, i.uv).rgb;\n"
+    "  float3 rgbM = tex0.Sample(samp, i.uv).rgb;\n"
     "  float3 lumaW = float3(0.299f, 0.587f, 0.114f);\n"
-    "  float lumaNW = dot(rgbNW, lumaW);\n"
-    "  float lumaNE = dot(rgbNE, lumaW);\n"
-    "  float lumaSW = dot(rgbSW, lumaW);\n"
-    "  float lumaSE = dot(rgbSE, lumaW);\n"
-    "  float lumaM  = dot(rgbM, lumaW);\n"
-    "  float lumaMin = min(lumaM, min(min(lumaNW, lumaNE), min(lumaSW, lumaSE)));\n"
-    "  float lumaMax = max(lumaM, max(max(lumaNW, lumaNE), max(lumaSW, lumaSE)));\n"
+    "  float lumaM = dot(rgbM, lumaW);\n"
+    "  float lumaN = dot(tex0.Sample(samp, i.uv + float2(0.0f, -px.y)).rgb, lumaW);\n"
+    "  float lumaS = dot(tex0.Sample(samp, i.uv + float2(0.0f,  px.y)).rgb, lumaW);\n"
+    "  float lumaE = dot(tex0.Sample(samp, i.uv + float2( px.x, 0.0f)).rgb, lumaW);\n"
+    "  float lumaWgt = dot(tex0.Sample(samp, i.uv + float2(-px.x, 0.0f)).rgb, lumaW);\n"
+    "  float lumaNW = dot(tex0.Sample(samp, i.uv + float2(-px.x, -px.y)).rgb, lumaW);\n"
+    "  float lumaNE = dot(tex0.Sample(samp, i.uv + float2( px.x, -px.y)).rgb, lumaW);\n"
+    "  float lumaSW = dot(tex0.Sample(samp, i.uv + float2(-px.x,  px.y)).rgb, lumaW);\n"
+    "  float lumaSE = dot(tex0.Sample(samp, i.uv + float2( px.x,  px.y)).rgb, lumaW);\n"
+    "  float lumaMin = min(lumaM, min(min(lumaN, lumaS), min(lumaE, lumaWgt)));\n"
+    "  lumaMin = min(lumaMin, min(min(lumaNW, lumaNE), min(lumaSW, lumaSE)));\n"
+    "  float lumaMax = max(lumaM, max(max(lumaN, lumaS), max(lumaE, lumaWgt)));\n"
+    "  lumaMax = max(lumaMax, max(max(lumaNW, lumaNE), max(lumaSW, lumaSE)));\n"
+    "  if ((lumaMax - lumaMin) < max(0.0312f, lumaMax * 0.125f))\n"
+    "    return float4(rgbM, 1.0f);\n"
     "  float2 dir;\n"
     "  dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));\n"
     "  dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));\n"
@@ -176,7 +180,7 @@ struct PostState
     int targets;
 };
 
-static PostParams s_params = { 0, 0, 0, 0, 0.97f, 1.00f, 0.28f, 0.10f, 0.96f, 1.12f, 0.045f, 0.015f };
+static PostParams s_params = { 0, 0, 0, 0, 0.98f, 1.00f, 0.22f, 0.08f, 1.04f, 1.08f, 0.020f, 0.006f };
 static PostState s_post = {};
 
 template <typename T>
@@ -668,20 +672,6 @@ LW_RESULT lwD3D11PostResolve(IDXGISwapChain* swapchain, ID3D11RenderTargetView* 
         width, height,
         1.0f / (float)s_post.w, 1.0f / (float)s_post.h, 0.0f, 0.0f);
 
-    if (s_params.aa && s_post.ps_fxaa && s_post.ldr_copy && swapchain)
-    {
-        UnbindPS();
-        ID3D11Texture2D* back = 0;
-        if (SUCCEEDED(swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&back)) && back)
-        {
-            s_post.context->CopyResource(s_post.ldr_copy, back);
-            back->Release();
-            DrawPS(s_post.ps_fxaa, backbuffer_rtv, s_post.ldr_copy_srv, 0, s_post.samp_linear,
-                width, height,
-                1.0f / (float)width, 1.0f / (float)height, 0.0f, 0.0f);
-        }
-    }
-
     if (s_params.sharpen && s_post.ldr_copy && swapchain)
     {
         UnbindPS();
@@ -691,6 +681,20 @@ LW_RESULT lwD3D11PostResolve(IDXGISwapChain* swapchain, ID3D11RenderTargetView* 
             s_post.context->CopyResource(s_post.ldr_copy, back);
             back->Release();
             DrawPS(s_post.ps_sharpen, backbuffer_rtv, s_post.ldr_copy_srv, 0, s_post.samp_point,
+                width, height,
+                1.0f / (float)width, 1.0f / (float)height, 0.0f, 0.0f);
+        }
+    }
+
+    if (s_params.aa && s_post.ps_fxaa && s_post.ldr_copy && swapchain)
+    {
+        UnbindPS();
+        ID3D11Texture2D* back = 0;
+        if (SUCCEEDED(swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&back)) && back)
+        {
+            s_post.context->CopyResource(s_post.ldr_copy, back);
+            back->Release();
+            DrawPS(s_post.ps_fxaa, backbuffer_rtv, s_post.ldr_copy_srv, 0, s_post.samp_linear,
                 width, height,
                 1.0f / (float)width, 1.0f / (float)height, 0.0f, 0.0f);
         }

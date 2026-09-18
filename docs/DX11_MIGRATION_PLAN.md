@@ -144,6 +144,7 @@ Status-only checkpoints. DX9 look is unchanged. New look is `[visual]` gated on 
 
 ### Stage 3 — HDR / bloom / grade
 - Existing `R16G16B16A16_FLOAT` stack kept. Quality combo (0=HIGH, 1=MEDIUM, 2=LOW) maps hdr/bloom/sharpen/aa/shadows/sea via `CGameConfig::ApplyQualityPreset` when the user changes quality.
+- **18 Sep 2026 grade pass:** contrast 1.04, sat 1.08, dehaze 0.020, fill 0.006, bloom 0.22. FXAA last (after sharpen) with a low-contrast early-out so painted flats stay sharp.
 
 ### Stage 4 — shadows
 - Default `shadowCasters=blob`, `m_bEnableShadowMap=FALSE`.

@@ -157,14 +157,14 @@ void CGameConfig::SetDefault() // Ĭ������
 	m_bHdr = FALSE;
 	m_bBloom = FALSE;
 	m_bSharpen = FALSE;
-	m_fHdrExposure = 0.97f;
+	m_fHdrExposure = 0.98f;
 	m_fBloomThreshold = 1.00f;
-	m_fBloomIntensity = 0.28f;
-	m_fSharpenStrength = 0.10f;
-	m_fPostContrast = 0.96f;
-	m_fPostSaturation = 1.12f;
-	m_fPostDehaze = 0.045f;
-	m_fPostFill = 0.015f;
+	m_fBloomIntensity = 0.22f;
+	m_fSharpenStrength = 0.08f;
+	m_fPostContrast = 1.04f;
+	m_fPostSaturation = 1.08f;
+	m_fPostDehaze = 0.020f;
+	m_fPostFill = 0.006f;
 
 	strncpy(m_szRenderer, "dx9", sizeof(m_szRenderer) - 1);
 	m_szRenderer[sizeof(m_szRenderer) - 1] = 0;
@@ -237,45 +237,60 @@ void CGameConfig::LoadVisualSettings(const char* pszIniFileName) {
 		m_bEnableShadowMap = FALSE;
 	m_bBloom = GetPrivateProfileInt("visual", "bloom", m_bHdr ? 1 : 0, pszIniFileName) != 0;
 	m_bSharpen = GetPrivateProfileInt("visual", "sharpen", m_bHdr ? 1 : 0, pszIniFileName) != 0;
-	GetPrivateProfileStringA("visual", "hdrExposure", "0.97", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "hdrExposure", "0.98", buf, sizeof(buf), pszIniFileName);
 	m_fHdrExposure = (float)atof(buf);
 	GetPrivateProfileStringA("visual", "bloomThreshold", "1.00", buf, sizeof(buf), pszIniFileName);
 	m_fBloomThreshold = (float)atof(buf);
-	GetPrivateProfileStringA("visual", "bloomIntensity", "0.28", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "bloomIntensity", "0.22", buf, sizeof(buf), pszIniFileName);
 	m_fBloomIntensity = (float)atof(buf);
-	GetPrivateProfileStringA("visual", "sharpenStrength", "0.10", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "sharpenStrength", "0.08", buf, sizeof(buf), pszIniFileName);
 	m_fSharpenStrength = (float)atof(buf);
-	GetPrivateProfileStringA("visual", "contrast", "0.96", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "contrast", "1.04", buf, sizeof(buf), pszIniFileName);
 	m_fPostContrast = (float)atof(buf);
-	GetPrivateProfileStringA("visual", "saturation", "1.12", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "saturation", "1.08", buf, sizeof(buf), pszIniFileName);
 	m_fPostSaturation = (float)atof(buf);
-	GetPrivateProfileStringA("visual", "dehaze", "0.045", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "dehaze", "0.020", buf, sizeof(buf), pszIniFileName);
 	m_fPostDehaze = (float)atof(buf);
-	GetPrivateProfileStringA("visual", "fill", "0.015", buf, sizeof(buf), pszIniFileName);
+	GetPrivateProfileStringA("visual", "fill", "0.006", buf, sizeof(buf), pszIniFileName);
 	m_fPostFill = (float)atof(buf);
 	// Pale grade: contrast 0.88 + fill 0.05 lifted blacks into chalk.
 	if (m_fPostContrast > 0.87f && m_fPostContrast < 0.89f)
-		m_fPostContrast = 0.96f;
+		m_fPostContrast = 1.04f;
 	if (m_fPostFill > 0.045f && m_fPostFill < 0.055f)
-		m_fPostFill = 0.015f;
+		m_fPostFill = 0.006f;
 	if (m_fPostSaturation > 1.13f && m_fPostSaturation < 1.15f)
-		m_fPostSaturation = 1.12f;
+		m_fPostSaturation = 1.08f;
 	if (m_fHdrExposure > 0.99f && m_fHdrExposure < 1.01f)
-		m_fHdrExposure = 0.97f;
+		m_fHdrExposure = 0.98f;
 	if (m_fPostDehaze < 0.005f)
-		m_fPostDehaze = 0.045f;
+		m_fPostDehaze = 0.020f;
 	// Dead-pastel grade: sat 0.87
 	if (m_fPostSaturation > 0.85f && m_fPostSaturation < 0.89f)
-		m_fPostSaturation = 1.12f;
+		m_fPostSaturation = 1.08f;
 	// Punchy first grade (sat/contrast 1.12)
 	if (m_fPostContrast > 1.11f && m_fPostContrast < 1.13f)
-		m_fPostContrast = 0.96f;
+		m_fPostContrast = 1.04f;
 	if (m_fBloomIntensity > 0.39f && m_fBloomIntensity < 0.41f)
-		m_fBloomIntensity = 0.28f;
+		m_fBloomIntensity = 0.22f;
 	if (m_fHdrExposure > 0.89f && m_fHdrExposure < 0.91f)
-		m_fHdrExposure = 0.97f;
+		m_fHdrExposure = 0.98f;
 	if (m_fBloomThreshold > 0.79f && m_fBloomThreshold < 0.81f)
 		m_fBloomThreshold = 1.00f;
+	// Flat-vibrant 0.96 / 1.12 / 0.045 / 0.015 — streets read chalky after stylized lit.
+	if (m_fPostContrast > 0.95f && m_fPostContrast < 0.97f)
+		m_fPostContrast = 1.04f;
+	if (m_fPostSaturation > 1.11f && m_fPostSaturation < 1.13f)
+		m_fPostSaturation = 1.08f;
+	if (m_fPostDehaze > 0.043f && m_fPostDehaze < 0.047f)
+		m_fPostDehaze = 0.020f;
+	if (m_fPostFill > 0.013f && m_fPostFill < 0.017f)
+		m_fPostFill = 0.006f;
+	if (m_fHdrExposure > 0.96f && m_fHdrExposure < 0.975f)
+		m_fHdrExposure = 0.98f;
+	if (m_fBloomIntensity > 0.27f && m_fBloomIntensity < 0.29f)
+		m_fBloomIntensity = 0.22f;
+	if (m_fSharpenStrength > 0.09f && m_fSharpenStrength < 0.11f)
+		m_fSharpenStrength = 0.08f;
 
 	lwD3D11PostSetParams(
 		m_bHdr ? 1 : 0,
@@ -367,7 +382,7 @@ void CGameConfig::ApplyQualityPreset(int nQuality) {
 		m_bHdr = dx11 ? TRUE : FALSE;
 		m_bBloom = dx11 ? TRUE : FALSE;
 		m_bSharpen = FALSE;
-		m_fBloomIntensity = 0.18f;
+		m_fBloomIntensity = 0.14f;
 		strncpy(m_szAA, dx11 ? "fxaa" : "off", sizeof(m_szAA) - 1);
 		strncpy(m_szShadowCasters, "blob", sizeof(m_szShadowCasters) - 1);
 		m_bEnableShadowMap = FALSE;
@@ -377,7 +392,7 @@ void CGameConfig::ApplyQualityPreset(int nQuality) {
 		m_bHdr = dx11 ? TRUE : FALSE;
 		m_bBloom = dx11 ? TRUE : FALSE;
 		m_bSharpen = dx11 ? TRUE : FALSE;
-		m_fBloomIntensity = 0.28f;
+		m_fBloomIntensity = 0.22f;
 		strncpy(m_szAA, dx11 ? "fxaa" : "off", sizeof(m_szAA) - 1);
 		if (dx11) {
 			strncpy(m_szShadowCasters, "characters", sizeof(m_szShadowCasters) - 1);
