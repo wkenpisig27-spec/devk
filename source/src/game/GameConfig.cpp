@@ -394,14 +394,8 @@ void CGameConfig::ApplyQualityPreset(int nQuality) {
 		m_bSharpen = dx11 ? TRUE : FALSE;
 		m_fBloomIntensity = 0.22f;
 		strncpy(m_szAA, dx11 ? "fxaa" : "off", sizeof(m_szAA) - 1);
-		if (dx11) {
-			strncpy(m_szShadowCasters, "characters", sizeof(m_szShadowCasters) - 1);
-			m_bEnableShadowMap = TRUE;
-			m_nShadowMapQuality = 1;
-		} else {
-			strncpy(m_szShadowCasters, "blob", sizeof(m_szShadowCasters) - 1);
-			m_bEnableShadowMap = FALSE;
-		}
+		strncpy(m_szShadowCasters, "blob", sizeof(m_szShadowCasters) - 1);
+		m_bEnableShadowMap = FALSE;
 		m_bWaterEnhance = TRUE;
 		m_bFogEnabled = TRUE;
 	}

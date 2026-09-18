@@ -286,7 +286,7 @@ float4 OutlineClipPos(float3 posOS, float3 nrmOS)
 
 // --- Cel bands (characters) ------------------------------------------------
 #ifndef CEL_ENABLE
-#define CEL_ENABLE   1
+#define CEL_ENABLE   0
 #endif
 #define CEL_BAND0    0.35   // shadow -> mid (sooner mid so less crushed dark)
 #define CEL_BAND1    0.70   // mid    -> lit
@@ -296,7 +296,7 @@ float4 OutlineClipPos(float3 posOS, float3 nrmOS)
 
 // --- Shadow tint (cool shadow / warm highlight) ----------------------------
 #ifndef TINT_ENABLE
-#define TINT_ENABLE  1
+#define TINT_ENABLE  0
 #endif
 // Muted tint — less "modern anime," closer to painted sprite light.
 #define SHADOW_TINT  float3(0.96, 0.97, 1.02)
@@ -312,15 +312,15 @@ float4 OutlineClipPos(float3 posOS, float3 nrmOS)
 
 // --- Rim light (subtle silhouette only) ------------------------------------
 #ifndef RIM_ENABLE
-#define RIM_ENABLE   1
+#define RIM_ENABLE   0
 #endif
 #define RIM_THRESH   0.55
-#define RIM_GAIN     0.30
+#define RIM_GAIN     0.00
 #define RIM_COLOR    float3(1.00, 0.92, 0.82)
 
 // Code-side vibrance (no texture edits). 1.0 = unchanged, >1 = more saturated.
 #ifndef COLOR_VIVID
-#define COLOR_VIVID  1.18
+#define COLOR_VIVID  1.00
 #endif
 
 float3 BoostVividness(float3 c)
@@ -357,30 +357,11 @@ float4 _ApplyDiffuseBand(float NdotL)
 // normal - normalized object-space normal
 float4 CalcLightingFull(float3 posOS, float3 normal)
 {
-    float NdotL = max(0, dot(normal, LightDir.xyz));
-    float4 lit  = _ApplyDiffuseBand(NdotL);
-
-#if (RIM_ENABLE || SPEC_ENABLE)
-    float3 V = normalize(EyePosOS.xyz - posOS);
-#endif
-
-#if SPEC_ENABLE
-    // Half-vector toon specular. step() gives a hard-edged highlight.
-    // Mask by lit side so the highlight cannot bleed into the shadow band.
-    float3 H      = normalize(V + LightDir.xyz);
-    float NdotH   = max(0, dot(normal, H));
-    float specMsk = step(SPEC_THRESH, NdotH) * step(CEL_BAND1, NdotL);
-    lit.rgb += SPEC_COLOR * (specMsk * SPEC_GAIN);
-#endif
-
-#if RIM_ENABLE
-    // Fresnel rim — bright halo on grazing angles, regardless of NdotL.
-    float fresnel = 1.0 - max(0, dot(normal, V));
-    float rimMsk  = step(RIM_THRESH, fresnel);
-    lit.rgb += RIM_COLOR * (rimMsk * RIM_GAIN);
-#endif
-
-    return lit;
+    // Skinned characters: painted albedo only. N·L / cel / rim were the
+    // view-dependent shine when rotating or hovering.
+    (void)posOS;
+    (void)normal;
+    return float4(1.0, 1.0, 1.0, 1.0);
 }
 
 // Backward-compatible normal-only entry point (no rim / no spec).

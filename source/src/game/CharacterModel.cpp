@@ -961,7 +961,6 @@ void CCharacterModel::RenderForUI(int x, int y, bool bShowLingItem /*= true*/) {
 	g_Render.GetRenderState(D3DRS_LIGHTING, &rs_light);
 	g_Render.SetRenderState(D3DRS_LIGHTING, 0);
 
-
 	// g_Render.SetRenderState(D3DRS_ZBIAS, 16 );
 
 	SetColor(_UIColor[0], _UIColor[1], _UIColor[2]);
@@ -1014,10 +1013,6 @@ void CCharacterModel::RenderForUI(int x, int y, bool bShowLingItem /*= true*/) {
 
 	g_Render.SetRenderState(D3DRS_AMBIENT, rs_amb);
 	g_Render.SetRenderState(D3DRS_LIGHTING, rs_light);
-	// g_Render.SetRenderState(D3DRS_ZENABLE,      0);
-	// g_Render.SetRenderState(D3DRS_ZWRITEENABLE, 0);
-	// g_Render.SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL );
-	// g_Render.SetRenderState(D3DRS_ZBIAS, 0 );
 
 	g_Render.SetCurrentView(MPRender::VIEW_WORLD);
 }
@@ -1088,7 +1083,6 @@ void CCharacterModel::RenderUI(int x, int y) {
 
 	g_Render.SetRenderState(D3DRS_AMBIENT, rs_amb);
 	g_Render.SetRenderState(D3DRS_LIGHTING, rs_light);
-
 
 	g_Render.SetCurrentView(MPRender::VIEW_WORLD);
 }
