@@ -7,8 +7,8 @@ Goal: **true D3D11** end-to-end — no runtime D3D9 device, no long-term relianc
 | Layer | Today (DX11 play path) | Target (native) |
 | --- | --- | --- |
 | Device | `lwD3D11NativeContext` (`ID3D11Device` / context / swapchain); `GetDevice()` is a D3D9 leftover that returns NULL | same (PSO later) |
-| State | D3D9 enums → 11 state objects in `lwDeviceObject11` | PSO + root signature / explicit CBs per pass |
-| Shaders | SM4 HLSL + FF mesh shader + ShaderMgr11 VS | same (`.vsh` assets removed; names still map to HLSL) |
+| State | Pass objects (`kMeshPass` / `kEffPass`); leftover RS cache only for intra-pass blend | PSO + root signature / explicit CBs per pass |
+| Shaders | SM4 HLSL + FF mesh shader + ShaderMgr11 VS (`.hlsl` keys) | same |
 | Loaders | DDS/BMP/TGA + GDI+ (`lwD3D11CreateTextureFromMemory`) | same (DirectXTex optional) |
 | Effects | Compiled `shader\\eff.hlsl` (tex * diffuse/TFACTOR); OM still from `Pass()` | same |
 | Math | DirectXMath via `lwD3DXCompat.h`; public names are XM* (`lwXMMath.h`) | same (storage types, not SIMD registers) |
@@ -18,7 +18,7 @@ Goal: **true D3D11** end-to-end — no runtime D3D9 device, no long-term relianc
 `MINDPOWER_DX11_ONLY=1` (Debug|x64 and Release|x64 on this branch):
 
 - Forces active backend to DX11 regardless of `renderer=` in ini.
-- Never constructs `lwDeviceObject` (D3D9). `lwDeviceObject.cpp` is excluded from both configs.
+- Never constructs `lwDeviceObject` (D3D9). `lwDeviceObject.cpp` is removed.
 - Play-path GPU handle is **`lwD3D11NativeContext`** (`lwD3D11NativeGetDevice/GetContext/GetSwapChain`). `MPRender` does not store `IDirect3DDevice9*`.
 - UI should not offer DX9 (when wired).
 
@@ -94,7 +94,7 @@ Create*X device macros stay so remaining D3D9 `.cpp` still compiles; they are un
 
 ### Phase 5 — Delete DX9 backend — **complete** (optional source strip remains)
 
-- [x] Exclude `lwDeviceObject.cpp` from Debug|x64 and Release|x64 (`MINDPOWER_DX11_ONLY`)
+- [x] `lwDeviceObject.cpp` removed (was excluded from Debug|x64 and Release|x64)
 - [x] Gate remaining `lwDeviceObject*` casts (shadow, stream list, VS pixel-shader)
 - [x] Skip D3D8.1 runtime version probe on DX11-only init
 - [x] `lwIsDx11Active()` is a compile-time `1` on DX11-only (header inline)
@@ -112,7 +112,7 @@ Create*X device macros stay so remaining D3D9 `.cpp` still compiles; they are un
 
 **Smoke (2026-09-19):** login → world passed after Post-5.
 
-Debug and Release are both DX11-only (`MindPower3D_D11D.lib` / `MindPower3D_D11R.lib`). D3D9 sources remain in the tree but are not compiled or linked on the play path.
+Debug and Release are both DX11-only (`MindPower3D_D11D.lib` / `MindPower3D_D11R.lib`). The D3D9 device implementation (`lwDeviceObject.cpp`) and unused `d3dfont` sample are gone. `lwDeviceObject.h` stays as a type used by primitive/resource headers.
 
 ### Pass state — **code complete** (await smoke)
 
@@ -130,7 +130,21 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 Highest-value leftover vs the native target table:
 
-1. Next leftover: D3D9 sources stay in the tree until asked — they are already out of the play-path compile.
+1. Leftover D3D9 *language*: character/scene/terrain still decode some RS/TSS for intra-pass variation. Effects use native `kEffPass`. Shader keys are `.hlsl`.
+
+### D3D9 sources — **complete**
+
+- Removed `lwDeviceObject.cpp` (already out of the play-path compile) and unused `d3dfont.cpp` / `d3dfont.h`.
+- `lwDeviceObject.h`, `ShaderLoad.cpp`, and `lwShaderMgr.cpp` stay — DX11 still uses the header type and the shader registration path.
+
+### native effect pass — **complete**
+
+- `CMPEffectFile::Pass()` only calls `lwD3D11MeshSetEffTech`. OM/sampler/alpha-test/TFACTOR mix come from `kEffPass`, not `SetRenderState`.
+- Additive dest-blend after `Pass()` still reads the device blend cache.
+
+### ShaderMgr `.hlsl` keys — **complete**
+
+- `LoadShader0` / `LoadShader1` register `skinmesh8_*.hlsl` / `vs_*.hlsl`. ShaderMgr11 maps those keys to `shader\\hlsl\\*.hlsl`.
 
 ### unused `.vsh` assets — **complete**
 

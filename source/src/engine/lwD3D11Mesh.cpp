@@ -1012,6 +1012,39 @@ static const MeshPassDesc* CurrentMeshPass()
     return &kMeshPass[id];
 }
 
+// Native OM/sampler for compiled eff.hlsl t0-t6. Callers may still override
+// dest-blend after Pass() (additive glow). Pixel mix is tex * (diffuse|TFACTOR).
+struct EffPassDesc
+{
+    int zenable;
+    int zwrite;
+    int alpha_blend;
+    int alpha_test;
+    int cull_none;
+    int clamp_uv;
+    int point_filter;
+    int tfactor;
+    int force_srcdest;
+};
+
+static const EffPassDesc kEffPass[] =
+{
+    { 1, 0, 1, 0, 1, 0, 0, 0, 0 }, // t0 model
+    { 1, 1, 0, 0, 1, 0, 0, 0, 0 }, // t1 opaque
+    { 1, 0, 1, 0, 1, 1, 0, 0, 0 }, // t2 shade
+    { 1, 0, 1, 0, 1, 1, 0, 1, 0 }, // t3 particle
+    { 1, 0, 1, 1, 1, 0, 0, 0, 0 }, // t4 shade2
+    { 0, 0, 1, 0, 0, 1, 1, 0, 1 }, // t5 font
+    { 0, 0, 1, 0, 0, 0, 0, 0, 1 }, // t6 font com
+};
+
+static const EffPassDesc* CurrentEffPass()
+{
+    if (s_mesh.eff_tech < 0 || s_mesh.eff_tech > 6)
+        return 0;
+    return &kEffPass[s_mesh.eff_tech];
+}
+
 static int TexHasSrv(lwD3D11Texture* tex)
 {
     return (tex && tex->GetSRV()) ? 1 : 0;
@@ -1076,26 +1109,49 @@ static float ResolvePassCombiner(const MeshPassDesc* pass, lwDeviceObject11* dev
 
 // Pass object supplies OM defaults. Cache is only consulted for cull/MSAA and
 // documented intra-pass variation (character hair alpha, VFX additive).
+// Compiled eff.hlsl uses kEffPass instead of D3DRS for z/cull/alpha.
 static void ResolveMeshOutputMerger(lwDeviceObject11* dev, const FvfInfo& info, MeshOmResolved* om)
 {
     const MeshPassDesc* pass = CurrentMeshPass();
+    const EffPassDesc* eff = CurrentEffPass();
 
-    DWORD cull = dev->GetCachedRS(D3DRS_CULLMODE);
     DWORD msaa_aa = dev->GetCachedRS(D3DRS_MULTISAMPLEANTIALIAS);
     const int no_aa = (msaa_aa == 0);
     ID3D11RasterizerState* rast = no_aa ? s_mesh.rast_ccw_noaa : s_mesh.rast_ccw;
     if (s_mesh.outline)
         rast = s_mesh.rast_cw;
-    else if (cull == D3DCULL_NONE)
-        rast = no_aa ? s_mesh.rast_none_noaa : s_mesh.rast_none;
-    else if (cull == D3DCULL_CW)
-        rast = no_aa ? s_mesh.rast_cw_noaa : s_mesh.rast_cw;
+    else if (eff)
+        rast = eff->cull_none
+            ? (no_aa ? s_mesh.rast_none_noaa : s_mesh.rast_none)
+            : (no_aa ? s_mesh.rast_ccw_noaa : s_mesh.rast_ccw);
+    else
+    {
+        DWORD cull = dev->GetCachedRS(D3DRS_CULLMODE);
+        if (cull == D3DCULL_NONE)
+            rast = no_aa ? s_mesh.rast_none_noaa : s_mesh.rast_none;
+        else if (cull == D3DCULL_CW)
+            rast = no_aa ? s_mesh.rast_cw_noaa : s_mesh.rast_cw;
+    }
 
     DWORD srcblend = D3DBLEND_SRCALPHA;
     DWORD destblend = D3DBLEND_INVSRCALPHA;
     int additive = 0;
-    int alpha = pass->alpha_blend;
-    if (pass->cache_blend != CACHE_BLEND_NONE)
+    int alpha = eff ? eff->alpha_blend : pass->alpha_blend;
+    if (eff)
+    {
+        if (!eff->force_srcdest)
+        {
+            DWORD src_c = dev->GetCachedRS(D3DRS_SRCBLEND);
+            DWORD dest_c = dev->GetCachedRS(D3DRS_DESTBLEND);
+            if (src_c && src_c != 0xffffffff)
+                srcblend = src_c;
+            if (dest_c && dest_c != 0xffffffff)
+                destblend = dest_c;
+        }
+        additive = (destblend == D3DBLEND_ONE || destblend == D3DBLEND_INVSRCCOLOR ||
+            destblend == D3DBLEND_SRCCOLOR);
+    }
+    else if (pass->cache_blend != CACHE_BLEND_NONE)
     {
         DWORD a = dev->GetCachedRS(D3DRS_ALPHABLENDENABLE);
         if (a != 0xffffffff && a != 0)
@@ -1116,7 +1172,12 @@ static void ResolveMeshOutputMerger(lwDeviceObject11* dev, const FvfInfo& info, 
 
     DWORD zenable = 1;
     DWORD zwrite = pass->depth_write ? TRUE : FALSE;
-    if (pass->cache_blend == CACHE_BLEND_FULL || pass->id == MESH_PASS_DEFAULT)
+    if (eff)
+    {
+        zenable = eff->zenable;
+        zwrite = eff->zwrite;
+    }
+    else if (pass->cache_blend == CACHE_BLEND_FULL || pass->id == MESH_PASS_DEFAULT)
     {
         DWORD ze = dev->GetCachedRS(D3DRS_ZENABLE);
         DWORD zw = dev->GetCachedRS(D3DRS_ZWRITEENABLE);
@@ -1306,9 +1367,16 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     CopyMat(cb.world, dev->GetMatWorld());
     CopyMat(cb.viewProj, dev->GetMatViewProj());
 
-    DWORD lighting = dev->GetCachedRS(D3DRS_LIGHTING);
-    if (lighting == 0xffffffff)
-        lighting = 1;
+    const EffPassDesc* eff = CurrentEffPass();
+    DWORD lighting = 1;
+    if (eff)
+        lighting = 0;
+    else
+    {
+        lighting = dev->GetCachedRS(D3DRS_LIGHTING);
+        if (lighting == 0xffffffff)
+            lighting = 1;
+    }
 
     float rs_amb[4] = { 1, 1, 1, 1 };
     DWORD amb_rs = dev->GetCachedRS(D3DRS_AMBIENT);
@@ -1380,10 +1448,10 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     DWORD ca1 = dev->GetCachedTSS(0, D3DTSS_COLORARG1);
     DWORD carg2 = dev->GetCachedTSS(0, D3DTSS_COLORARG2);
     DWORD aarg2 = dev->GetCachedTSS(0, D3DTSS_ALPHAARG2);
-    const int color_tf = (s_mesh.eff_tech == 3) || (carg2 == D3DTA_TFACTOR);
-    const int alpha_tf = (s_mesh.eff_tech == 3) || (aarg2 == D3DTA_TFACTOR);
+    const int color_tf = (eff && eff->tfactor) || (carg2 == D3DTA_TFACTOR);
+    const int alpha_tf = (eff && eff->tfactor) || (aarg2 == D3DTA_TFACTOR);
     cb.more[3] = (float)(color_tf + alpha_tf * 2);
-    if (s_mesh.eff_tech >= 0)
+    if (eff)
         cb.more[1] = 1.0f;
     if (cop0 == D3DTOP_SELECTARG1 && ca1 == D3DTA_TFACTOR)
     {
@@ -1417,20 +1485,25 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
         cb.more[3] = sy;
     }
 
-    DWORD atest = 0;
-    if (pass->id != MESH_PASS_TERRAIN && pass->id != MESH_PASS_SEA)
-        atest = dev->GetCachedRS(D3DRS_ALPHATESTENABLE);
-    if (atest && atest != 0xffffffff && atest != D3DRS_FORCE_DWORD)
+    if (eff && eff->alpha_test)
+        cb.extra[3] = 0.5f / 255.0f;
+    else
     {
-        DWORD aref = dev->GetCachedRS(D3DRS_ALPHAREF);
-        if (aref == 0xffffffff)
-            aref = 0;
-        DWORD afunc = dev->GetCachedRS(D3DRS_ALPHAFUNC);
-        const float ref = (float)(aref & 0xff) / 255.0f;
-        if (afunc == D3DCMP_NOTEQUAL)
-            cb.extra[3] = ref + 0.5f / 255.0f;
-        else if (afunc == D3DCMP_GREATER || afunc == D3DCMP_GREATEREQUAL || afunc == 0xffffffff)
-            cb.extra[3] = ref;
+        DWORD atest = 0;
+        if (pass->id != MESH_PASS_TERRAIN && pass->id != MESH_PASS_SEA)
+            atest = dev->GetCachedRS(D3DRS_ALPHATESTENABLE);
+        if (atest && atest != 0xffffffff && atest != D3DRS_FORCE_DWORD)
+        {
+            DWORD aref = dev->GetCachedRS(D3DRS_ALPHAREF);
+            if (aref == 0xffffffff)
+                aref = 0;
+            DWORD afunc = dev->GetCachedRS(D3DRS_ALPHAFUNC);
+            const float ref = (float)(aref & 0xff) / 255.0f;
+            if (afunc == D3DCMP_NOTEQUAL)
+                cb.extra[3] = ref + 0.5f / 255.0f;
+            else if (afunc == D3DCMP_GREATER || afunc == D3DCMP_GREATEREQUAL || afunc == 0xffffffff)
+                cb.extra[3] = ref;
+        }
     }
 
     EyeFromView(dev->GetMatView(), cb.look);
@@ -1513,10 +1586,20 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
         srv2 = tex2->GetSRV();
     s_mesh.context->PSSetShaderResources(2, 1, &srv2);
     ID3D11SamplerState* samp = s_mesh.samp;
-    DWORD addr = dev->GetCachedSS(0, D3DSAMP_ADDRESSU);
-    DWORD mag = dev->GetCachedSS(0, D3DSAMP_MAGFILTER);
-    const int point = (mag == D3DTEXF_POINT);
-    const int clamp = (addr == D3DTADDRESS_CLAMP);
+    int point = 0;
+    int clamp = 0;
+    if (const EffPassDesc* eff_samp = CurrentEffPass())
+    {
+        point = eff_samp->point_filter;
+        clamp = eff_samp->clamp_uv;
+    }
+    else
+    {
+        DWORD addr = dev->GetCachedSS(0, D3DSAMP_ADDRESSU);
+        DWORD mag = dev->GetCachedSS(0, D3DSAMP_MAGFILTER);
+        point = (mag == D3DTEXF_POINT);
+        clamp = (addr == D3DTADDRESS_CLAMP);
+    }
     if (point && clamp && s_mesh.samp_point_clamp)
         samp = s_mesh.samp_point_clamp;
     else if (point && s_mesh.samp_point)

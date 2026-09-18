@@ -219,16 +219,16 @@ LW_RESULT LoadShader0(lwISysGraphics* sys_graphics)
 
 #if defined(LW_USE_DX9)
 
-    // ======== DX9: Vertex Shaders (Compiled VSH) ========
+    // ======== DX9 path names: ShaderMgr11 compiles SM4 HLSL ========
     static const DWORD shader_type[] = {
         VST_PU4NT0_LD, VST_PB1U4NT0_LD, VST_PB2U4NT0_LD, VST_PB3U4NT0_LD,
         VST_PNT0_LD_TT0, VST_PNT0_TT0, VST_PNDT0_LD_TT0,
         VST_PNT0_LD, VST_PNDT0, VST_PNDT0_LD, VST_PNDT0_TT0,
     };
     static const char* shader_file[] = {
-        "skinmesh8_1.vsh", "skinmesh8_2.vsh", "skinmesh8_3.vsh", "skinmesh8_4.vsh",
-        "vs_pnt0_ld_t0uvmat.vsh", "vs_pnt0_t0uvmat.vsh", "vs_pndt0_ld_t0uvmat.vsh",
-        "vs_pnt0_ld.vsh", "vs_pndt0.vsh", "vs_pndt0_ld.vsh", "vs_pndt0_t0uvmat.vsh",
+        "skinmesh8_1.hlsl", "skinmesh8_2.hlsl", "skinmesh8_3.hlsl", "skinmesh8_4.hlsl",
+        "vs_pnt0_ld_t0uvmat.hlsl", "vs_pnt0_t0uvmat.hlsl", "vs_pndt0_ld_t0uvmat.hlsl",
+        "vs_pnt0_ld.hlsl", "vs_pndt0.hlsl", "vs_pndt0_ld.hlsl", "vs_pndt0_t0uvmat.hlsl",
     };
     static const DWORD file_types[] = {
         VS_FILE_ASM, VS_FILE_ASM, VS_FILE_ASM, VS_FILE_ASM,
@@ -356,10 +356,10 @@ LW_RESULT LoadShader0(lwISysGraphics* sys_graphics)
     // tamb��m deixe est��tico o sdci_num e o array sdci
     static const DWORD sdci_num = 4;
     static lwShaderDeclCreateInfo sdci[sdci_num] = {
-        SDCI_VALUE(VST_PNT0_LD_TT0,  VDT_PNT0,  VSLT_DIRECTIONAL, VSAT_TEXTURETRANSFORM0, "vs_pnt0_ld_t0uvmat.vsh"),
-        SDCI_VALUE(VST_PNT0_TT0,     VDT_PNT0,  VSLT_INVALID,     VSAT_TEXTURETRANSFORM0, "vs_pnt0_t0uvmat.vsh"),
-        SDCI_VALUE(VST_PNDT0_LD_TT0, VDT_PNDT0, VSLT_DIRECTIONAL, VSAT_TEXTURETRANSFORM0, "vs_pndt0_ld_t0uvmat.vsh"),
-        SDCI_VALUE(VST_PNDT0_TT0,    VDT_PNDT0, VSLT_INVALID,     VSAT_TEXTURETRANSFORM0, "vs_pndt0_t0uvmat.vsh"),
+        SDCI_VALUE(VST_PNT0_LD_TT0,  VDT_PNT0,  VSLT_DIRECTIONAL, VSAT_TEXTURETRANSFORM0, "vs_pnt0_ld_t0uvmat.hlsl"),
+        SDCI_VALUE(VST_PNT0_TT0,     VDT_PNT0,  VSLT_INVALID,     VSAT_TEXTURETRANSFORM0, "vs_pnt0_t0uvmat.hlsl"),
+        SDCI_VALUE(VST_PNDT0_LD_TT0, VDT_PNDT0, VSLT_DIRECTIONAL, VSAT_TEXTURETRANSFORM0, "vs_pndt0_ld_t0uvmat.hlsl"),
+        SDCI_VALUE(VST_PNDT0_TT0,    VDT_PNDT0, VSLT_INVALID,     VSAT_TEXTURETRANSFORM0, "vs_pndt0_t0uvmat.hlsl"),
     };
     {
         DWORD i;
@@ -427,12 +427,12 @@ LW_RESULT LoadShader1(lwISysGraphics* sys_graphics)
 
 	const char* shader_file[] = 
     {
-        "skinmesh8_1_tt1.vsh",
-        "skinmesh8_2_tt1.vsh",
-        "skinmesh8_1_tt2.vsh",
-        "skinmesh8_2_tt2.vsh",
-        "skinmesh8_1_tt3.vsh",
-        "skinmesh8_2_tt3.vsh",
+        "skinmesh8_1_tt1.hlsl",
+        "skinmesh8_2_tt1.hlsl",
+        "skinmesh8_1_tt2.hlsl",
+        "skinmesh8_2_tt2.hlsl",
+        "skinmesh8_1_tt3.hlsl",
+        "skinmesh8_2_tt3.hlsl",
     };
 
     for(int i = 0; i < 6; i++)
@@ -451,10 +451,10 @@ LW_RESULT LoadShader1(lwISysGraphics* sys_graphics)
             VSTU_PB3U4NT0_OUTLINE,
         };
         static const char* outline_shader_file[] = {
-            "skinmesh8_1_outline.vsh",
-            "skinmesh8_2_outline.vsh",
-            "skinmesh8_3_outline.vsh",
-            "skinmesh8_4_outline.vsh",
+            "skinmesh8_1_outline.hlsl",
+            "skinmesh8_2_outline.hlsl",
+            "skinmesh8_3_outline.hlsl",
+            "skinmesh8_4_outline.hlsl",
         };
         for (int i = 0; i < 4; i++)
         {

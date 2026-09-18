@@ -214,46 +214,46 @@ static std::map<unsigned long long, ID3D11InputLayout*> s_layouts;
 
 struct VshMap
 {
-    const char* vsh;
+    const char* key;
     const char* hlsl;
     const char* macro;
 };
 
 static const VshMap kVshMap[] = {
-    { "skinmesh8_1.vsh", "pu4nt0_ld.hlsl", 0 },
-    { "skinmesh8_2.vsh", "pb1u4nt0_ld.hlsl", 0 },
-    { "skinmesh8_3.vsh", "pb2u4nt0_ld.hlsl", 0 },
-    { "skinmesh8_4.vsh", "pb3u4nt0_ld.hlsl", 0 },
-    { "vs_pnt0_ld_t0uvmat.vsh", "vs_pnt0_ld_t0uvmat.hlsl", 0 },
-    { "vs_pnt0_t0uvmat.vsh", "vs_pnt0_t0uvmat.hlsl", 0 },
-    { "vs_pndt0_ld_t0uvmat.vsh", "vs_pndt0_ld_t0uvmat.hlsl", 0 },
-    { "vs_pnt0_ld.vsh", "vs_pnt0_ld.hlsl", 0 },
-    { "vs_pndt0.vsh", "vs_pndt0.hlsl", 0 },
-    { "vs_pndt0_ld.vsh", "vs_pndt0_ld.hlsl", 0 },
-    { "vs_pndt0_t0uvmat.vsh", "vs_pndt0_t0uvmat.hlsl", 0 },
-    { "skinmesh8_1_tt1.vsh", "pu4nt0_ld.hlsl", "USE_UVMAT0" },
-    { "skinmesh8_2_tt1.vsh", "pb1u4nt0_ld.hlsl", "USE_UVMAT0" },
-    { "skinmesh8_3_tt1.vsh", "pb2u4nt0_ld.hlsl", "USE_UVMAT0" },
-    { "skinmesh8_4_tt1.vsh", "pb3u4nt0_ld.hlsl", "USE_UVMAT0" },
-    { "skinmesh8_1_tt2.vsh", "pu4nt0_ld.hlsl", "USE_UVMAT1" },
-    { "skinmesh8_2_tt2.vsh", "pb1u4nt0_ld.hlsl", "USE_UVMAT1" },
-    { "skinmesh8_3_tt2.vsh", "pb2u4nt0_ld.hlsl", "USE_UVMAT1" },
-    { "skinmesh8_4_tt2.vsh", "pb3u4nt0_ld.hlsl", "USE_UVMAT1" },
-    { "skinmesh8_1_tt3.vsh", "pu4nt0_ld.hlsl", "USE_UVMAT2" },
-    { "skinmesh8_2_tt3.vsh", "pb1u4nt0_ld.hlsl", "USE_UVMAT2" },
-    { "skinmesh8_3_tt3.vsh", "pb2u4nt0_ld.hlsl", "USE_UVMAT2" },
-    { "skinmesh8_4_tt3.vsh", "pb3u4nt0_ld.hlsl", "USE_UVMAT2" },
-    { "skinmesh8_1_outline.vsh", "pu4nt0_ld_outline.hlsl", 0 },
-    { "skinmesh8_2_outline.vsh", "pb1u4nt0_ld_outline.hlsl", 0 },
-    { "skinmesh8_3_outline.vsh", "pb2u4nt0_ld_outline.hlsl", 0 },
-    { "skinmesh8_4_outline.vsh", "pb3u4nt0_ld_outline.hlsl", 0 },
-    { "vs_static_outline.vsh", "vs_static_outline.hlsl", 0 },
-    { "vs_pnt0.vsh", "vs_pnt0_ld.hlsl", 0 },
-    { "vs_pnt0_ld_alt.vsh", "vs_pnt0_ld.hlsl", 0 },
-    { "vs_pnt0_t0uvmat_alt.vsh", "vs_pnt0_t0uvmat.hlsl", 0 },
-    { "vs_pnt0_ld_t0uvmat_alt.vsh", "vs_pnt0_ld_t0uvmat.hlsl", 0 },
-    { "vs_pndt0_t0uvmat_alt.vsh", "vs_pndt0_t0uvmat.hlsl", 0 },
-    { "vs_pndt0_ld_t0uvmat_alt.vsh", "vs_pndt0_ld_t0uvmat.hlsl", 0 },
+    { "skinmesh8_1.hlsl", "pu4nt0_ld.hlsl", 0 },
+    { "skinmesh8_2.hlsl", "pb1u4nt0_ld.hlsl", 0 },
+    { "skinmesh8_3.hlsl", "pb2u4nt0_ld.hlsl", 0 },
+    { "skinmesh8_4.hlsl", "pb3u4nt0_ld.hlsl", 0 },
+    { "vs_pnt0_ld_t0uvmat.hlsl", "vs_pnt0_ld_t0uvmat.hlsl", 0 },
+    { "vs_pnt0_t0uvmat.hlsl", "vs_pnt0_t0uvmat.hlsl", 0 },
+    { "vs_pndt0_ld_t0uvmat.hlsl", "vs_pndt0_ld_t0uvmat.hlsl", 0 },
+    { "vs_pnt0_ld.hlsl", "vs_pnt0_ld.hlsl", 0 },
+    { "vs_pndt0.hlsl", "vs_pndt0.hlsl", 0 },
+    { "vs_pndt0_ld.hlsl", "vs_pndt0_ld.hlsl", 0 },
+    { "vs_pndt0_t0uvmat.hlsl", "vs_pndt0_t0uvmat.hlsl", 0 },
+    { "skinmesh8_1_tt1.hlsl", "pu4nt0_ld.hlsl", "USE_UVMAT0" },
+    { "skinmesh8_2_tt1.hlsl", "pb1u4nt0_ld.hlsl", "USE_UVMAT0" },
+    { "skinmesh8_3_tt1.hlsl", "pb2u4nt0_ld.hlsl", "USE_UVMAT0" },
+    { "skinmesh8_4_tt1.hlsl", "pb3u4nt0_ld.hlsl", "USE_UVMAT0" },
+    { "skinmesh8_1_tt2.hlsl", "pu4nt0_ld.hlsl", "USE_UVMAT1" },
+    { "skinmesh8_2_tt2.hlsl", "pb1u4nt0_ld.hlsl", "USE_UVMAT1" },
+    { "skinmesh8_3_tt2.hlsl", "pb2u4nt0_ld.hlsl", "USE_UVMAT1" },
+    { "skinmesh8_4_tt2.hlsl", "pb3u4nt0_ld.hlsl", "USE_UVMAT1" },
+    { "skinmesh8_1_tt3.hlsl", "pu4nt0_ld.hlsl", "USE_UVMAT2" },
+    { "skinmesh8_2_tt3.hlsl", "pb1u4nt0_ld.hlsl", "USE_UVMAT2" },
+    { "skinmesh8_3_tt3.hlsl", "pb2u4nt0_ld.hlsl", "USE_UVMAT2" },
+    { "skinmesh8_4_tt3.hlsl", "pb3u4nt0_ld.hlsl", "USE_UVMAT2" },
+    { "skinmesh8_1_outline.hlsl", "pu4nt0_ld_outline.hlsl", 0 },
+    { "skinmesh8_2_outline.hlsl", "pb1u4nt0_ld_outline.hlsl", 0 },
+    { "skinmesh8_3_outline.hlsl", "pb2u4nt0_ld_outline.hlsl", 0 },
+    { "skinmesh8_4_outline.hlsl", "pb3u4nt0_ld_outline.hlsl", 0 },
+    { "vs_static_outline.hlsl", "vs_static_outline.hlsl", 0 },
+    { "vs_pnt0.hlsl", "vs_pnt0_ld.hlsl", 0 },
+    { "vs_pnt0_ld_alt.hlsl", "vs_pnt0_ld.hlsl", 0 },
+    { "vs_pnt0_t0uvmat_alt.hlsl", "vs_pnt0_t0uvmat.hlsl", 0 },
+    { "vs_pnt0_ld_t0uvmat_alt.hlsl", "vs_pnt0_ld_t0uvmat.hlsl", 0 },
+    { "vs_pndt0_t0uvmat_alt.hlsl", "vs_pndt0_t0uvmat.hlsl", 0 },
+    { "vs_pndt0_ld_t0uvmat_alt.hlsl", "vs_pndt0_ld_t0uvmat.hlsl", 0 },
 };
 
 static const char* Basename(const char* path)
@@ -278,7 +278,7 @@ static const VshMap* FindMap(const char* base)
 {
     for (size_t i = 0; i < sizeof(kVshMap) / sizeof(kVshMap[0]); ++i)
     {
-        if (_stricmp(base, kVshMap[i].vsh) == 0)
+        if (_stricmp(base, kVshMap[i].key) == 0)
             return &kVshMap[i];
     }
     return 0;

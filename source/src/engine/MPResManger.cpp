@@ -1965,13 +1965,13 @@ bool CMPResManger::LoadTotalVShader(lwISysGraphics* sys_graphics)
 
 	const char* shader_file[] = 
 	{
-		"eff1.vsh",
-		"eff2.vsh",
-		"eff3.vsh",
-		"eff4.vsh",
-		"font.vsh",
-		"shadeeff.vsh",
-		"minimap.vsh",
+		"eff1.hlsl",
+		"eff2.hlsl",
+		"eff3.hlsl",
+		"eff4.hlsl",
+		"font.hlsl",
+		"shadeeff.hlsl",
+		"minimap.hlsl",
 	};
 
 	D3DVERTEXELEMENT9* decl_tab[] =

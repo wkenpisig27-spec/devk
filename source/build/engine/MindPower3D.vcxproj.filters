@@ -343,9 +343,6 @@
     <ClCompile Include="..\..\src\engine\lwDDSFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\engine\lwDeviceObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\engine\lwDeviceObject11.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

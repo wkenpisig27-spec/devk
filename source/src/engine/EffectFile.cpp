@@ -241,66 +241,8 @@ void CMPEffectFile::ApplySoftEnd()
 
 void CMPEffectFile::ApplySoftPass()
 {
-	if (!m_pDev)
-		return;
-
-	// OM/sampler for t0-t6. Pixel formula is compiled eff.hlsl (not TSS ColorOp).
-	// Src/Dest blend is left alone except t5/t6; model/particle code sets those after Pass().
-	const int tech = _iCurTech;
-	lwD3D11MeshSetEffTech(tech);
-	const int zenable = (tech == 5 || tech == 6) ? FALSE : TRUE;
-	const int zwrite = (tech == 1) ? TRUE : FALSE;
-	const int alphablend = (tech == 1) ? FALSE : TRUE;
-	const int alphatest = (tech == 4) ? TRUE : FALSE;
-	const int lighting = FALSE;
-	const int specular = (tech == 0 || tech == 1) ? TRUE : FALSE;
-	const int cull = (tech == 5 || tech == 6) ? D3DCULL_CCW : D3DCULL_NONE;
-	const int clamp_uv = (tech == 2 || tech == 3 || tech == 5) ? 1 : 0;
-	const int tfactor_arg = (tech == 3) ? 1 : 0;
-	const int point_filter = (tech == 5) ? 1 : 0;
-	const int set_filter = (tech == 1 || tech == 3) ? 0 : 1;
-
-	m_pDev->SetRenderState(D3DRS_ZENABLE, zenable);
-	m_pDev->SetRenderState(D3DRS_ZWRITEENABLE, zwrite);
-	m_pDev->SetRenderState(D3DRS_LIGHTING, lighting);
-	m_pDev->SetRenderState(D3DRS_FOGENABLE, FALSE);
-	m_pDev->SetRenderState(D3DRS_STENCILENABLE, FALSE);
-	m_pDev->SetRenderState(D3DRS_DITHERENABLE, FALSE);
-	m_pDev->SetRenderState(D3DRS_SPECULARENABLE, specular);
-	m_pDev->SetRenderState(D3DRS_CULLMODE, cull);
-	m_pDev->SetRenderState(D3DRS_ALPHATESTENABLE, alphatest);
-	if (alphatest)
-	{
-		m_pDev->SetRenderState(D3DRS_ALPHAREF, 0xff000000);
-		m_pDev->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_NOTEQUAL);
-	}
-	m_pDev->SetRenderState(D3DRS_ALPHABLENDENABLE, alphablend);
-	if (tech == 5 || tech == 6)
-	{
-		m_pDev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-		m_pDev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-		m_pDev->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
-	}
-	if (tech == 5)
-		m_pDev->SetRenderState(D3DRS_CLIPPING, FALSE);
-	m_pDev->SetRenderState(D3DRS_VERTEXBLEND, D3DVBF_DISABLE);
-
-	if (tfactor_arg)
-	{
-		m_pDev->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_TFACTOR);
-		m_pDev->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_TFACTOR);
-	}
-	m_pDev->SetTextureStageStateForced(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-	m_pDev->SetTextureStageStateForced(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
-	m_pDev->SetTexture(1, NULL);
-
-	m_pDev->SetSamplerState(0, D3DSAMP_ADDRESSU, clamp_uv ? D3DTADDRESS_CLAMP : D3DTADDRESS_WRAP);
-	m_pDev->SetSamplerState(0, D3DSAMP_ADDRESSV, clamp_uv ? D3DTADDRESS_CLAMP : D3DTADDRESS_WRAP);
-	if (set_filter)
-	{
-		const DWORD filt = point_filter ? D3DTEXF_POINT : D3DTEXF_LINEAR;
-		m_pDev->SetSamplerState(0, D3DSAMP_MINFILTER, filt);
-		m_pDev->SetSamplerState(0, D3DSAMP_MAGFILTER, filt);
-	}
+	// Native kEffPass + compiled eff.hlsl. Model/particle code may still set
+	// dest-blend / TFACTOR after Pass(); those stay on the device cache.
+	lwD3D11MeshSetEffTech(_iCurTech);
 }
 
