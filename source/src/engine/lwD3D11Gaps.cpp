@@ -94,7 +94,7 @@ void lwD3D11GapReportInventory()
 		{ "inv-stream-1mb",
 		  "lwStreamObj 1 MB static-stream cap is a DX9 leftover; lift on D3D11" },
 		{ "inv-shader-mgr9",
-		  "lwShaderMgr9 / ShaderLoad.cpp load binary .vsh as vs_3_0 — ShaderMgr11 is a later slice" },
+		  "lwShaderMgr9 / ShaderLoad.cpp are D3D9-only; ShaderMgr11 maps leftover .vsh names to SM4 HLSL" },
 		{ "inv-fixed-function",
 		  "lwRenderCtrlVSFixedFunction + lwRenderCtrlEmb still use the D3D9 FF pipeline" },
 		{ "inv-pixel-shader-raw",

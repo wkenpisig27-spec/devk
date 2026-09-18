@@ -8,7 +8,7 @@ Goal: **true D3D11** end-to-end — no runtime D3D9 device, no long-term relianc
 | --- | --- | --- |
 | Device | `lwD3D11NativeContext` (`ID3D11Device` / context / swapchain); `GetDevice()` is a D3D9 leftover that returns NULL | same (PSO later) |
 | State | D3D9 enums → 11 state objects in `lwDeviceObject11` | PSO + root signature / explicit CBs per pass |
-| Shaders | SM4 HLSL + FF mesh shader + ShaderMgr11 VS | All draws through compiled HLSL; retire `.vsh` / asm |
+| Shaders | SM4 HLSL + FF mesh shader + ShaderMgr11 VS | same (`.vsh` assets removed; names still map to HLSL) |
 | Loaders | DDS/BMP/TGA + GDI+ (`lwD3D11CreateTextureFromMemory`) | same (DirectXTex optional) |
 | Effects | Compiled `shader\\eff.hlsl` (tex * diffuse/TFACTOR); OM still from `Pass()` | same |
 | Math | DirectXMath via `lwD3DXCompat.h`; public names are XM* (`lwXMMath.h`) | same (storage types, not SIMD registers) |
@@ -107,7 +107,7 @@ Create*X device macros stay so remaining D3D9 `.cpp` still compiles; they are un
 
 - [x] Texture/buffer/shader wrappers inherit `lwDx11I*` (`lwD3D11ResourceIface.h`), not Microsoft `IDirect3D*9` COM vtables. `IDirect3DTextureX` etc. typedef to those types on DX11-only (names avoid `MindPower::lwIVertexBuffer`).
 - [x] DirectXMath via `lwD3DXCompat.h`; Release no longer pragma-links `d3dx9.lib`. D3DXVECTOR/MATRIX names kept for asset layout.
-- [x] Stage 0–2 combiners live in compiled FF mesh HLSL (`CombineTss`). Remaining `.vsh` files used by ShaderMgr map to SM4 HLSL (incl. alt/outline).
+- [x] Stage 0–2 combiners live in compiled FF mesh HLSL (`CombineTss`). ShaderMgr `.vsh` names map to SM4 HLSL (incl. alt/outline); the `.vsh` files themselves are gone.
 - [x] Texture create on DX11-only is `lwD3D11CreateTextureFromMemory` / FromFile (DDS/BMP/TGA/GDI+). Remaining D3DX texture/effect/asm APIs are `#if MINDPOWER_USE_D3D9_DEVICE`.
 
 **Smoke (2026-09-19):** login → world passed after Post-5.
@@ -130,7 +130,13 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 Highest-value leftover vs the native target table:
 
-1. Next: delete unused `.vsh` assets. Do not delete D3D9 sources unless asked — they are already out of the play-path compile.
+1. Next leftover: D3D9 sources stay in the tree until asked — they are already out of the play-path compile.
+
+### unused `.vsh` assets — **complete**
+
+- Removed leftover D3D9 vertex-shader assembly under `client/shader` and `helper/shaders`.
+- DX11 never loaded those files: `LoadTotalVShader` is skipped, and ShaderMgr11 maps the old `.vsh` names to `shader\\hlsl\\*.hlsl`.
+- String keys (`skinmesh8_1.vsh`, `eff1.vsh`, …) remain in C++ so mesh/effect registration still resolves.
 
 ### eff.fx as HLSL — **complete**
 
