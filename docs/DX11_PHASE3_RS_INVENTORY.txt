@@ -1,0 +1,60 @@
+# Phase 3 — SetRenderState inventory (source/src, .cpp)
+# Counts are ripgrep matches per file. "Mesh" = affects lwD3D11Mesh OM/CB if state is in audit list.
+
+## Top call sites (SetRenderState occurrences)
+  100  lwDeviceObject.cpp          (D3D9 backend; not built on MINDPOWER_DX11_ONLY)
+  100  SMallMap.cpp                minimap RT — Z off, alpha blend, no lighting (blit path)
+   42  SceneRender.cpp             LIGHTING, AMBIENT, TEXTUREFACTOR, FOGENABLE — mesh CB
+   43  MPMap.cpp                   terrain/sea/fog — blend, cull, FOG*, LIGHTING — mesh + fog CB
+   37  MPModelEff.cpp              model-attached effects
+   35  lwResourceMgr.cpp           colorkey stencil pass — mesh alpha test
+   26  UIRender.cpp                UI overlay — Z off, alpha test (lwD3D11Blit)
+   17  EffectFile.cpp              VFX FF path — Z, blend, cull, alpha test — mesh OM
+   17  CharacterModel.cpp          cha attach / outline adjacency
+   17  d3dfont.cpp                 legacy font (DX9)
+   15  MPParticleCtrl.cpp          SRC/DST blend, TFACTOR, ZWRITE — mesh OM
+   14  MPParticleSys.cpp           ZWRITE, blend, TFACTOR — mesh OM
+    9  GameAppInit.cpp             loading screen states
+    9  BitmapFont.cpp              text quads — Z off (blit/mesh)
+    8  Scene.cpp, LoginScene, lwxRenderCtrVS, CreateChaScene
+    7  I_Effect.cpp, MPRender.cpp
+    4  GameAppRender, MPShadowMap, MPShadeMap
+
+## D3DRS by subsystem (native relevance)
+
+### World / scene (RenderStateMgr + SceneRender + MPMap)
+  D3DRS_LIGHTING, D3DRS_AMBIENT          -> lwD3D11Mesh CB lighting
+  D3DRS_TEXTUREFACTOR                    -> mesh CB tfactor / item tint
+  D3DRS_FOGENABLE, FOGCOLOR, FOG*        -> MPMap legacy; DX11 fog via lwD3D11MeshSetVisual
+  D3DRS_ZENABLE, ZWRITE, ALPHABLEND      -> pass bundles + per-draw override
+  D3DRS_CULLMODE                         -> mesh rasterizer pick
+  D3DRS_SRCBLEND, DESTBLEND              -> mesh blend (particles override)
+
+### Character (RenderStateMgr::_rsa_cha + SceneRender)
+  Same as world; pass tag lwD3D11MeshSetCharacter -> PSO bundle "character"
+
+### Scene object (RenderStateMgr::_rsa_sceneobj)
+  AMBIENT 0xffa0a0a0, LIGHTING TRUE       -> mesh CB; pass tag SetSceneObject
+
+### Transparent (RenderStateMgr::_rsa_transpobj)
+  LIGHTING FALSE, alpha blend             -> mesh CB more[1]; pass tag SetTranspObject, depth_read bundle
+
+### VFX (EffectFile, MPParticle*, MPModelEff, I_Effect)
+  Full FF block in EffectFile::Begin — mesh OM overrides per effect
+  ZWRITEENABLE toggles                    -> must remain cache overrides on top of pass bundle
+
+### UI (UIRender, BitmapFont, GameAppInit loading)
+  Z off, alpha test, no lighting          -> primarily lwD3D11Blit; not pass bundles
+
+### Minimap (SMallMap)
+  Isolated 2D state stack                 -> separate from world pass bundles
+
+## Pass bundle mapping (Phase 3 implementation)
+  character   : depth_write ON, blend SRCALPHA/INVSRCALPHA, cull from cache
+  scene_object: same OM as character; stylized CB via scene_object flag (future)
+  transparent : depth_read, blend SRCALPHA/INVSRCALPHA; cache overrides for additive/ZWRITE
+  default     : full cache translation (terrain, sea, untagged draws)
+
+## Next: no-op candidates on DX11-only (after bundle coverage)
+  D3DRS_SHADEMODE, D3DRS_DITHERENABLE, D3DRS_SPECULARENABLE, D3DRS_COLORVERTEX,
+  D3DRS_FOGENABLE (when visual fog CB used), D3DRS_EDGEANTIALIAS — cache-only on mesh path

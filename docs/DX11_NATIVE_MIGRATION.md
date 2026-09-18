@@ -70,8 +70,9 @@ Exit criterion met: Release|x64 links without `d3dx9.lib`; gameplay smoke passes
 
 - [x] Pass contract doc — `docs/DX11_PHASE3_FF_AUDIT.md` (RS/TSS consumed by `lwD3D11Mesh`)
 - [x] Tag scene-object + transparent passes — `RenderStateMgr` → `lwD3D11MeshSetSceneObject` / `SetTranspObject`
-- [ ] Per-subsystem `SetRenderState` inventory (world, UI, VFX)
-- [ ] Native PSO bundles per pass; no-op uncached D3DRS on DX11-only
+- [x] Per-subsystem `SetRenderState` inventory — `docs/DX11_PHASE3_RS_INVENTORY.txt`
+- [x] Native OM bundles (character / scene-object / transparent) — `ResolveMeshOutputMerger` in `lwD3D11Mesh.cpp`
+- [ ] Terrain pass tag + bundle; no-op uncached D3DRS on DX11-only
 
 ### Phase 4 — Rename and re-home types
 

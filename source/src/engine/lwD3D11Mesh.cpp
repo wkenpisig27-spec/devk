@@ -793,6 +793,81 @@ static ID3D11BlendState* BlendFor(DWORD src, DWORD dest)
     return bs;
 }
 
+struct MeshOmResolved
+{
+    ID3D11RasterizerState* rast;
+    ID3D11DepthStencilState* depth;
+    ID3D11BlendState* blend;
+};
+
+// RenderStateMgr pass tags select default OM; VFX still overrides via D3DRS cache.
+static void ResolveMeshOutputMerger(lwDeviceObject11* dev, const FvfInfo& info, MeshOmResolved* om)
+{
+    DWORD cull = dev->GetCachedRS(D3DRS_CULLMODE);
+    DWORD msaa_aa = dev->GetCachedRS(D3DRS_MULTISAMPLEANTIALIAS);
+    const int no_aa = (msaa_aa == 0);
+    ID3D11RasterizerState* rast = no_aa ? s_mesh.rast_ccw_noaa : s_mesh.rast_ccw;
+    if (s_mesh.outline)
+        rast = s_mesh.rast_cw;
+    else if (cull == D3DCULL_NONE)
+        rast = no_aa ? s_mesh.rast_none_noaa : s_mesh.rast_none;
+    else if (cull == D3DCULL_CW)
+        rast = no_aa ? s_mesh.rast_cw_noaa : s_mesh.rast_cw;
+
+    DWORD srcblend = dev->GetCachedRS(D3DRS_SRCBLEND);
+    DWORD destblend = dev->GetCachedRS(D3DRS_DESTBLEND);
+    if (srcblend == 0xffffffff || srcblend == 0)
+        srcblend = D3DBLEND_SRCALPHA;
+    if (destblend == 0xffffffff || destblend == 0)
+        destblend = D3DBLEND_INVSRCALPHA;
+    const int additive = (destblend == D3DBLEND_ONE || destblend == D3DBLEND_INVSRCCOLOR ||
+        destblend == D3DBLEND_SRCCOLOR);
+
+    DWORD alpha = dev->GetCachedRS(D3DRS_ALPHABLENDENABLE);
+    if (alpha == 0xffffffff)
+        alpha = 0;
+
+    DWORD zenable = dev->GetCachedRS(D3DRS_ZENABLE);
+    DWORD zwrite = dev->GetCachedRS(D3DRS_ZWRITEENABLE);
+
+    const int pass = s_mesh.transp_object ? 3
+        : (s_mesh.character ? 1 : (s_mesh.scene_object ? 2 : 0));
+
+    ID3D11DepthStencilState* depth = s_mesh.depth_on;
+    ID3D11BlendState* blend = s_mesh.blend_opaque;
+
+    if (pass != 0)
+    {
+        depth = (pass == 3) ? s_mesh.depth_read : s_mesh.depth_on;
+        blend = s_mesh.blend_alpha;
+        if (zenable == 0)
+            depth = s_mesh.depth_off;
+        else if (s_mesh.outline || zwrite == 0 || additive)
+            depth = s_mesh.depth_read;
+        if (!alpha && !s_mesh.outline)
+            blend = s_mesh.blend_opaque;
+        else if (additive || s_mesh.outline ||
+            srcblend != D3DBLEND_SRCALPHA || destblend != D3DBLEND_INVSRCALPHA)
+            blend = BlendFor(srcblend, destblend);
+    }
+    else
+    {
+        if (zenable == 0)
+            depth = s_mesh.depth_off;
+        else if (s_mesh.outline || zwrite == 0 || additive)
+            depth = s_mesh.depth_read;
+        else if (alpha && !info.has_nrm && zwrite != TRUE)
+            depth = s_mesh.depth_read;
+
+        if (alpha || s_mesh.outline)
+            blend = BlendFor(srcblend, destblend);
+    }
+
+    om->rast = rast;
+    om->depth = depth;
+    om->blend = blend;
+}
+
 static UINT PrimIndexCount(D3DPRIMITIVETYPE pt, UINT prim_count)
 {
     switch (pt)
@@ -860,6 +935,10 @@ static void ArgbToFloat(DWORD c, float* out)
     out[2] = (c & 0xff) / 255.0f;
     out[3] = ((c >> 24) & 0xff) / 255.0f;
 }
+
+struct MeshOmResolved;
+
+static void ResolveMeshOutputMerger(lwDeviceObject11* dev, const FvfInfo& info, MeshOmResolved* om);
 
 static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int indexed, INT base_vert, UINT start, UINT prim_count)
 {
@@ -1152,43 +1231,8 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     else if (!info.has_nrm && !info.has_blend)
         return LW_RET_OK;
 
-    DWORD cull = dev->GetCachedRS(D3DRS_CULLMODE);
-    DWORD msaa_aa = dev->GetCachedRS(D3DRS_MULTISAMPLEANTIALIAS);
-    const int no_aa = (msaa_aa == 0);
-    ID3D11RasterizerState* rast = no_aa ? s_mesh.rast_ccw_noaa : s_mesh.rast_ccw;
-    if (s_mesh.outline)
-        rast = s_mesh.rast_cw;
-    else if (cull == D3DCULL_NONE)
-        rast = no_aa ? s_mesh.rast_none_noaa : s_mesh.rast_none;
-    else if (cull == D3DCULL_CW)
-        rast = no_aa ? s_mesh.rast_cw_noaa : s_mesh.rast_cw;
-
-    DWORD srcblend = dev->GetCachedRS(D3DRS_SRCBLEND);
-    DWORD destblend = dev->GetCachedRS(D3DRS_DESTBLEND);
-    if (srcblend == 0xffffffff || srcblend == 0)
-        srcblend = D3DBLEND_SRCALPHA;
-    if (destblend == 0xffffffff || destblend == 0)
-        destblend = D3DBLEND_INVSRCALPHA;
-    const int additive = (destblend == D3DBLEND_ONE || destblend == D3DBLEND_INVSRCCOLOR ||
-        destblend == D3DBLEND_SRCCOLOR);
-
-    DWORD alpha = dev->GetCachedRS(D3DRS_ALPHABLENDENABLE);
-    if (alpha == 0xffffffff)
-        alpha = 0;
-
-    DWORD zenable = dev->GetCachedRS(D3DRS_ZENABLE);
-    DWORD zwrite = dev->GetCachedRS(D3DRS_ZWRITEENABLE);
-    ID3D11DepthStencilState* depth = s_mesh.depth_on;
-    if (zenable == 0)
-        depth = s_mesh.depth_off;
-    else if (s_mesh.outline || zwrite == 0 || additive)
-        depth = s_mesh.depth_read;
-    else if (alpha && !info.has_nrm && zwrite != TRUE)
-        depth = s_mesh.depth_read;
-
-    ID3D11BlendState* blend = s_mesh.blend_opaque;
-    if (alpha || s_mesh.outline)
-        blend = BlendFor(srcblend, destblend);
+    MeshOmResolved om = {};
+    ResolveMeshOutputMerger(dev, info, &om);
 
     if (info.has_blend)
     {
@@ -1241,10 +1285,10 @@ static LW_RESULT DrawCommon(lwDeviceObject11* dev, D3DPRIMITIVETYPE pt, int inde
     s_mesh.context->PSSetSamplers(0, 1, &samp);
     s_mesh.context->PSSetSamplers(1, 1, &samp);
     s_mesh.context->PSSetSamplers(2, 1, &samp);
-    s_mesh.context->RSSetState(rast);
-    s_mesh.context->OMSetDepthStencilState(depth, 0);
+    s_mesh.context->RSSetState(om.rast);
+    s_mesh.context->OMSetDepthStencilState(om.depth, 0);
     float bf[4] = { 0, 0, 0, 0 };
-    s_mesh.context->OMSetBlendState(blend, bf, 0xffffffff);
+    s_mesh.context->OMSetBlendState(om.blend, bf, 0xffffffff);
 
     UINT idx_count = PrimIndexCount(pt, prim_count);
     if (indexed)

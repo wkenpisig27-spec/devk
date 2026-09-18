@@ -44,8 +44,8 @@ During character shadow map generation, `lwDeviceObject11` sets `_bShadowPass` a
 ## Phase 3 work order
 
 1. **Tag passes** — mesh hooks for scene object + transparent (alongside existing character/sea/visual).
-2. **Per-subsystem inventory** — `rg SetRenderState` on `SceneRender.cpp`, `UIRender.cpp`, `MPParticle*.cpp`, `EffectFile.cpp`; map to pass table above.
-3. **Native PSO bundles** — one blend/depth/rast combo per pass for world mesh; stop deriving from full D3DRS cache.
+2. **Per-subsystem inventory** — `docs/DX11_PHASE3_RS_INVENTORY.txt` (SceneRender, MPMap, VFX, UI, minimap).
+3. **Native PSO bundles** — `ResolveMeshOutputMerger` in `lwD3D11Mesh.cpp`: character/scene-object/transparent passes use fixed depth/blend defaults; cull/MSAA still from cache; VFX overrides (Z off, additive blend) still read D3DRS.
 4. **Retire unused cache slots** — `#if MINDPOWER_DX11_ONLY` no-op for RS/TSS never read on native path (after smoke per subsystem).
 
 ## Relation to Phase 2
