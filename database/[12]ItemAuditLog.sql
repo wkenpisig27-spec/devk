@@ -1,5 +1,8 @@
 -- Item audit trail for economy dup investigation (Batch 7)
--- Run against GameDB after deployment
+-- Run against GameDB_devk after deployment
+
+USE [GameDB_devk]
+GO
 
 IF OBJECT_ID(N'dbo.item_audit_log', N'U') IS NULL
 BEGIN

@@ -145,18 +145,18 @@ Run in **SQL Server Management Studio**:
 -- Create login
 CREATE LOGIN pko_web WITH PASSWORD = 'YourSecurePassword123!';
 
--- Grant permissions to AccountServer
-USE AccountServer;
+-- Grant permissions to AccountServer_devk
+USE AccountServer_devk;
 CREATE USER pko_web FOR LOGIN pko_web;
 GRANT SELECT, INSERT, UPDATE ON SCHEMA::dbo TO pko_web;
 
--- Grant permissions to GameDB
-USE GameDB;
+-- Grant permissions to GameDB_devk
+USE GameDB_devk;
 CREATE USER pko_web FOR LOGIN pko_web;
 GRANT SELECT ON SCHEMA::dbo TO pko_web;
 
--- Grant permissions to WebsiteDB
-USE WebsiteDB;
+-- Grant permissions to WebsiteDB_devk
+USE WebsiteDB_devk;
 CREATE USER pko_web FOR LOGIN pko_web;
 GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::dbo TO pko_web;
 ```
@@ -167,12 +167,12 @@ Edit `website\.env` with your database credentials:
 
 ```env
 DB_ACCOUNT_HOST=localhost\SQLExpress
-DB_ACCOUNT_NAME=AccountServer
+DB_ACCOUNT_NAME=AccountServer_devk
 DB_ACCOUNT_USER=pko_web
 DB_ACCOUNT_PASS=YourSecurePassword123!
 
 DB_GAME_HOST=localhost\SQLExpress
-DB_GAME_NAME=GameDB
+DB_GAME_NAME=GameDB_devk
 DB_GAME_USER=pko_web
 DB_GAME_PASS=YourSecurePassword123!
 ```

@@ -220,7 +220,7 @@ AccountServer       GameServer(s)
                     GroupServer
                     (guilds, cross-server)
                          ↓
-                    SQL Server (GameDB, AccountServer DB)
+                    SQL Server (GameDB_devk, AccountServer_devk DB)
 ```
 
 ### Client Architecture
@@ -664,9 +664,9 @@ Run scripts in this exact order on a new SQL Server instance:
 
 | # | File | Creates | Notes |
 |---|------|---------|-------|
-| [01] | `AccountServer.sql` | AccountServer DB + tables + 13 SPs | Auth, login, accounts |
-| [02] | `GameDB.sql` | GameDB + all tables + 159 SPs | Characters, items, guilds, boats |
-| [03] | `WebsiteDB.sql` | WebsiteDB | Web dashboard |
+| [01] | `AccountServer.sql` | AccountServer_devk DB + tables + 13 SPs | Auth, login, accounts |
+| [02] | `GameDB.sql` | GameDB_devk + all tables + 159 SPs | Characters, items, guilds, boats |
+| [03] | `WebsiteDB.sql` | WebsiteDB_devk | Web dashboard |
 | [04] | `CreateSQLLogin.sql` | SQL logins: pko_account, pko_game, pko_web | **MUST run after [01]–[03]** |
 | [05] | `CreateAccount.sql` | Account creation SPs | |
 | [06] | `Guild.sql` | Guild system | |
@@ -676,7 +676,7 @@ Run scripts in this exact order on a new SQL Server instance:
 | [10] | `PasswordResetTokens.sql` | Password reset | |
 | [11] | `InventoryExpansion128.sql` | 128-slot inventory | Optional — changes VARCHAR(7000)→VARCHAR(MAX) |
 
-**Why [04] is last among setup scripts:** `CreateSQLLogin.sql` maps SQL logins to specific databases (`USE AccountServer`, `sp_addrolemember`). If the databases don't exist yet, this fails.
+**Why [04] is last among setup scripts:** `CreateSQLLogin.sql` maps SQL logins to specific databases (`USE AccountServer_devk`, `sp_addrolemember`). If the databases don't exist yet, this fails.
 
 ### Key Stored Procedure Rules
 

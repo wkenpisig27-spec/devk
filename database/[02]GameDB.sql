@@ -1,8 +1,8 @@
 USE [master]
 GO
-CREATE DATABASE [GameDB]
+CREATE DATABASE [GameDB_devk]
 GO
-USE [GameDB]
+USE [GameDB_devk]
 GO
 SET ANSI_NULLS ON
 GO
@@ -1107,7 +1107,7 @@ GO
 
 -- PART 2: GameDB Database Stored Procedures
 -- =============================================
-USE [GameDB]
+USE [GameDB_devk]
 GO
 
 -- =============================================
@@ -2089,7 +2089,7 @@ GO
 -- Returns: User info if valid, empty if invalid
 -- =============================================
 
-USE [GameDB]
+USE [GameDB_devk]
 GO
 -- GRANT EXECUTE ON dbo.AddStatLog TO [YourSQLLogin];
 -- GRANT EXECUTE ON dbo.SetDiscInfo TO [YourSQLLogin];
@@ -2126,7 +2126,7 @@ GO
 -- for use with stored_procedure() calls in C++ code
 -- =============================================
 
-USE [GameDB]
+USE [GameDB_devk]
 GO
 
 -- =============================================
@@ -4641,7 +4641,7 @@ GO
 
 -- PART 6: GroupServer Database Stored Procedures
 -- =============================================
-USE [GameDB]
+USE [GameDB_devk]
 GO
 
 -- =============================================
@@ -5730,20 +5730,20 @@ GO
 USE [master]
 GO
 
-ALTER AUTHORIZATION ON DATABASE::[GameDB] TO [sa];
-PRINT 'Reset GameDB owner to sa (fixes Msg 33009 SID mismatch after restore)'
+ALTER AUTHORIZATION ON DATABASE::[GameDB_devk] TO [sa];
+PRINT 'Reset GameDB_devk owner to sa (fixes Msg 33009 SID mismatch after restore)'
 GO
 
-IF (SELECT is_trustworthy_on FROM sys.databases WHERE name = 'GameDB') = 0
+IF (SELECT is_trustworthy_on FROM sys.databases WHERE name = 'GameDB_devk') = 0
 BEGIN
-    ALTER DATABASE [GameDB] SET TRUSTWORTHY ON;
-    PRINT 'Set GameDB TRUSTWORTHY ON'
+    ALTER DATABASE [GameDB_devk] SET TRUSTWORTHY ON;
+    PRINT 'Set GameDB_devk TRUSTWORTHY ON'
 END
 ELSE
-    PRINT 'GameDB already TRUSTWORTHY ON'
+    PRINT 'GameDB_devk already TRUSTWORTHY ON'
 GO
 
-USE [GameDB]
+USE [GameDB_devk]
 GO
 
 IF OBJECT_ID('dbo.GetPlayerLoginInfo', 'P') IS NOT NULL
@@ -5759,7 +5759,7 @@ BEGIN
     SELECT TOP 1
         ISNULL(al.last_login_ip, '') AS last_login_ip,
         ISNULL(al.last_login_mac, '') AS last_login_mac
-    FROM [AccountServer].[dbo].[account_login] al
+    FROM [AccountServer_devk].[dbo].[account_login] al
     WHERE al.[name] = @act_name;
 END
 GO
@@ -5888,7 +5888,7 @@ GO
 
 USE [master]
 GO
-ALTER DATABASE [GameDB]
+ALTER DATABASE [GameDB_devk]
 SET
 READ_WRITE
 GO

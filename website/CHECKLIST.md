@@ -39,9 +39,9 @@ Use this checklist to track your setup progress.
   ```sql
   CREATE LOGIN pko_web WITH PASSWORD = 'YourPassword';
   ```
-- [ ] Granted permissions to AccountServer database
-- [ ] Granted permissions to GameDB database
-- [ ] Granted permissions to WebsiteDB database
+- [ ] Granted permissions to AccountServer_devk database
+- [ ] Granted permissions to GameDB_devk database
+- [ ] Granted permissions to WebsiteDB_devk database
 - [ ] Updated `.env` file with database credentials
 
 ---

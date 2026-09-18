@@ -4,26 +4,26 @@
 -- Run on live servers where GetPlayerLoginInfo returns empty rows or
 -- Msg 33009 SID mismatch after a database restore.
 --
--- RUN ON: master + GameDB + AccountServer
+-- RUN ON: master + GameDB_devk + AccountServer_devk
 -- =============================================
 
 USE [master]
 GO
 
-ALTER AUTHORIZATION ON DATABASE::[GameDB] TO [sa];
-PRINT 'Reset GameDB owner to sa (fixes Msg 33009 SID mismatch)'
+ALTER AUTHORIZATION ON DATABASE::[GameDB_devk] TO [sa];
+PRINT 'Reset GameDB_devk owner to sa (fixes Msg 33009 SID mismatch)'
 GO
 
-IF (SELECT is_trustworthy_on FROM sys.databases WHERE name = 'GameDB') = 0
+IF (SELECT is_trustworthy_on FROM sys.databases WHERE name = 'GameDB_devk') = 0
 BEGIN
-    ALTER DATABASE [GameDB] SET TRUSTWORTHY ON;
-    PRINT 'Set GameDB TRUSTWORTHY ON'
+    ALTER DATABASE [GameDB_devk] SET TRUSTWORTHY ON;
+    PRINT 'Set GameDB_devk TRUSTWORTHY ON'
 END
 ELSE
-    PRINT 'GameDB already TRUSTWORTHY ON'
+    PRINT 'GameDB_devk already TRUSTWORTHY ON'
 GO
 
-USE [GameDB]
+USE [GameDB_devk]
 GO
 
 IF OBJECT_ID('dbo.GetPlayerLoginInfo', 'P') IS NOT NULL
@@ -39,7 +39,7 @@ BEGIN
     SELECT TOP 1
         ISNULL(al.last_login_ip, '') AS last_login_ip,
         ISNULL(al.last_login_mac, '') AS last_login_mac
-    FROM [AccountServer].[dbo].[account_login] al
+    FROM [AccountServer_devk].[dbo].[account_login] al
     WHERE al.[name] = @act_name;
 END
 GO
@@ -47,8 +47,8 @@ GO
 GRANT EXECUTE ON [dbo].[GetPlayerLoginInfo] TO [pko_game];
 GO
 
--- Belt-and-suspenders: direct SELECT grant on AccountServer
-USE [AccountServer]
+-- Belt-and-suspenders: direct SELECT grant on AccountServer_devk
+USE [AccountServer_devk]
 GO
 
 IF EXISTS (SELECT 1 FROM sys.database_principals WHERE name = 'pko_game')
@@ -58,7 +58,7 @@ BEGIN
 END
 GO
 
-USE [GameDB]
+USE [GameDB_devk]
 GO
 
 IF EXISTS (SELECT 1 FROM sys.database_principals WHERE name = 'pko_game')

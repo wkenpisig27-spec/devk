@@ -41,17 +41,17 @@ if (file_exists($envFile)) {
 // =============================================================================
 
 define('DB_ACCOUNT_HOST', getenv('DB_ACCOUNT_HOST') ?: 'localhost\\SQLExpress');
-define('DB_ACCOUNT_NAME', getenv('DB_ACCOUNT_NAME') ?: 'AccountServer');
+define('DB_ACCOUNT_NAME', getenv('DB_ACCOUNT_NAME') ?: 'AccountServer_devk');
 define('DB_ACCOUNT_USER', getenv('DB_ACCOUNT_USER') ?: 'pko_web');
 define('DB_ACCOUNT_PASS', getenv('DB_ACCOUNT_PASS') ?: '');
 
 define('DB_GAME_HOST', getenv('DB_GAME_HOST') ?: 'localhost\\SQLExpress');
-define('DB_GAME_NAME', getenv('DB_GAME_NAME') ?: 'GameDB');
+define('DB_GAME_NAME', getenv('DB_GAME_NAME') ?: 'GameDB_devk');
 define('DB_GAME_USER', getenv('DB_GAME_USER') ?: 'pko_web');
 define('DB_GAME_PASS', getenv('DB_GAME_PASS') ?: '');
 
 define('DB_WEB_HOST', getenv('DB_WEB_HOST') ?: 'localhost\\SQLExpress');
-define('DB_WEB_NAME', getenv('DB_WEB_NAME') ?: 'WebsiteDB');
+define('DB_WEB_NAME', getenv('DB_WEB_NAME') ?: 'WebsiteDB_devk');
 define('DB_WEB_USER', getenv('DB_WEB_USER') ?: 'pko_web');
 define('DB_WEB_PASS', getenv('DB_WEB_PASS') ?: '');
 

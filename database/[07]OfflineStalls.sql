@@ -9,7 +9,7 @@
 -- Run this script AFTER [1]GameDB.sql has been executed.
 -- ============================================
 
-USE [GameDB]
+USE [GameDB_devk]
 GO
 
 -- ============================================

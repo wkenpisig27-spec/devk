@@ -128,18 +128,18 @@ Run this in **SQL Server Management Studio**:
 -- Create login for website
 CREATE LOGIN pko_web WITH PASSWORD = 'YourSecurePassword123!';
 
--- Grant permissions to AccountServer
-USE AccountServer;
+-- Grant permissions to AccountServer_devk
+USE AccountServer_devk;
 CREATE USER pko_web FOR LOGIN pko_web;
 GRANT SELECT, INSERT, UPDATE ON SCHEMA::dbo TO pko_web;
 
--- Grant permissions to GameDB
-USE GameDB;
+-- Grant permissions to GameDB_devk
+USE GameDB_devk;
 CREATE USER pko_web FOR LOGIN pko_web;
 GRANT SELECT ON SCHEMA::dbo TO pko_web;
 
--- Grant permissions to WebsiteDB (if exists)
-USE WebsiteDB;
+-- Grant permissions to WebsiteDB_devk (if exists)
+USE WebsiteDB_devk;
 CREATE USER pko_web FOR LOGIN pko_web;
 GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::dbo TO pko_web;
 ```
@@ -150,7 +150,7 @@ The `.env` file has been created with default development settings. Update these
 
 ```env
 DB_ACCOUNT_HOST=localhost\SQLExpress
-DB_ACCOUNT_NAME=AccountServer
+DB_ACCOUNT_NAME=AccountServer_devk
 DB_ACCOUNT_USER=pko_web
 DB_ACCOUNT_PASS=YourSecurePassword123!
 ```
