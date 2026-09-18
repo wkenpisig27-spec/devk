@@ -8,7 +8,11 @@ class lwDeviceObject11;
 
 LW_BEGIN
 
+#if MINDPOWER_USE_D3D9_DEVICE
 class lwD3D11VertexShader : public IDirect3DVertexShader9
+#else
+class lwD3D11VertexShader : public lwDx11IVertexShader
+#endif
 {
 public:
     lwD3D11VertexShader(ID3D11VertexShader* vs, void* blob);
@@ -30,7 +34,11 @@ private:
     void* _blob;
 };
 
+#if MINDPOWER_USE_D3D9_DEVICE
 class lwD3D11VertexDecl : public IDirect3DVertexDeclaration9
+#else
+class lwD3D11VertexDecl : public lwDx11IVertexDecl
+#endif
 {
 public:
     lwD3D11VertexDecl(const D3DVERTEXELEMENT9* elems, UINT count);

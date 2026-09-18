@@ -774,6 +774,7 @@ LW_RESULT lwxRenderCtrlVSVertexBlend::Initialize(lwIRenderCtrlAgent* agent)
     if (lwIsDx11Active())
         return LW_RET_OK;
 
+#if MINDPOWER_USE_D3D9_DEVICE
     LW_RESULT ret = LW_RET_FAILED;
 
     lwIResourceMgr* res_mgr = agent->GetResourceMgr();
@@ -788,6 +789,9 @@ LW_RESULT lwxRenderCtrlVSVertexBlend::Initialize(lwIRenderCtrlAgent* agent)
     ret = LW_RET_OK;
 __ret:
     return ret;
+#else
+    return LW_RET_OK;
+#endif
 }
 LW_RESULT lwxRenderCtrlVSVertexBlend::BeginSet(lwIRenderCtrlAgent* agent)
 {
@@ -1189,6 +1193,7 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_fx::Initialize(lwIRenderCtrlAgent* agent)
     if (lwIsDx11Active())
         return LW_RET_OK;
 
+#if MINDPOWER_USE_D3D9_DEVICE
     LW_RESULT ret = LW_RET_FAILED;
 
     lwIResourceMgr* res_mgr = agent->GetResourceMgr();
@@ -1203,6 +1208,9 @@ LW_RESULT lwxRenderCtrlVSVertexBlend_fx::Initialize(lwIRenderCtrlAgent* agent)
     ret = LW_RET_OK;
 __ret:
     return ret;
+#else
+    return LW_RET_OK;
+#endif
 }
 LW_RESULT lwxRenderCtrlVSVertexBlend_fx::BeginSet(lwIRenderCtrlAgent* agent)
 {

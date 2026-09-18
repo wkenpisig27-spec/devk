@@ -32,7 +32,7 @@ static void DecryptShaderBuffer(BYTE* data, long& size)
     }
 }
 
-#if (defined LW_USE_DX9)
+#if (defined LW_USE_DX9) && MINDPOWER_USE_D3D9_DEVICE
 //------------------------------------------------------------------------------
 // ShaderIncludeHandler - Handles #include directives in HLSL shaders
 //------------------------------------------------------------------------------
@@ -415,8 +415,12 @@ LW_RESULT lwShaderMgr9::RegisterVertexShader(DWORD type, BYTE* data, DWORD size)
     if (!data || size == 0)
         goto __ret;
 
+#if MINDPOWER_USE_D3D9_DEVICE
     if (FAILED(dev->CreateVertexShader((DWORD*)data, &handle)))
         goto __ret;
+#else
+    goto __ret;
+#endif
 
     i = &_vs_seq[type];
     i->handle = handle;
@@ -445,22 +449,22 @@ LW_RESULT lwShaderMgr9::RegisterVertexShader(DWORD type, const char* file, DWORD
     if (lwIsDx11Active())
     {
         if (type >= _vs_size)
-            goto __ret;
+            return LW_RET_FAILED;
         if (_vs_seq[type].handle)
-            goto __ret;
+            return LW_RET_FAILED;
 
         IDirect3DVertexShaderX* handle = 0;
         if (LW_FAILED(lwD3D11CompileVertexShader(file, defines, &handle)) || !handle)
-            goto __ret;
+            return LW_RET_FAILED;
 
         _vs_seq[type].handle = handle;
         _vs_seq[type].data = 0;
         _vs_seq[type].size = 0;
         _vs_num += 1;
-        ret = LW_RET_OK;
-        goto __ret;
+        return LW_RET_OK;
     }
 
+#if MINDPOWER_USE_D3D9_DEVICE
     FILE* fp = fopen(file, "rb");
     if(fp == NULL)
         goto __ret;
@@ -580,7 +584,9 @@ __ret:
     LW_SAFE_RELEASE(buf_code);
     LW_SAFE_RELEASE(buf_error);
     return ret;
-
+#else
+    return LW_RET_FAILED;
+#endif
 }
 LW_RESULT lwShaderMgr9::RegisterVertexDeclaration(DWORD type, D3DVERTEXELEMENT9* data)
 {
@@ -631,11 +637,15 @@ LW_RESULT lwShaderMgr9::RegisterVertexDeclaration(DWORD type, D3DVERTEXELEMENT9*
     if (_decl_seq[type].handle)
         goto __ret;
 
-    if (!data)  // seguran�a
+    if (!data)
         goto __ret;
 
+#if MINDPOWER_USE_D3D9_DEVICE
     if (FAILED(dev->CreateVertexDeclaration(data, &handle)))
         goto __ret;
+#else
+    goto __ret;
+#endif
 
     _decl_seq[type].handle = handle;
 
@@ -701,8 +711,12 @@ LW_RESULT lwShaderMgr9::ResetDevice()
 
         if(s->handle == 0 && s->data)
         {
+#if MINDPOWER_USE_D3D9_DEVICE
             if(FAILED(dev->CreateVertexShader((DWORD*)s->data, &s->handle)))
                 goto __ret;
+#else
+            goto __ret;
+#endif
         }
     }
 

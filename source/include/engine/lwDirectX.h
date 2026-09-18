@@ -20,11 +20,10 @@
 #include <d3d11.h>
 #include <dxgi.h>
 
-// D3DX math / effects helpers still live in d3dx9.lib until a DirectXMath pass.
-#pragma comment(lib, "d3dx9.lib")
 #pragma comment(lib, "dinput8.lib")
 
 #if MINDPOWER_USE_D3D9_DEVICE
+#pragma comment(lib, "d3dx9.lib")
 #pragma comment(lib, "d3d9.lib")
 #endif
 

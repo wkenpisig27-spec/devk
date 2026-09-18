@@ -245,8 +245,10 @@ public:
             D3DXMatrixInverse( mat, NULL, mat );
             return;
         }
+#if MINDPOWER_USE_D3D9_DEVICE
         GetDevice()->GetTransform( D3DTS_VIEW, mat );
         D3DXMatrixInverse( mat, NULL, mat );
+#endif
     }
 	CMPFont*		GetDeviceFont()		{ return _pFont;}
     void            UpdateLight();
@@ -424,9 +426,13 @@ inline HRESULT MPRender::DrawPrimitiveUP(D3DPRIMITIVETYPE pt_type, UINT count, c
 {
     if (lwIsDx11Active() && _IMgr.dev_obj)
         return (_IMgr.dev_obj->DrawPrimitiveUP(pt_type, count, data, stride) == LW_RET_OK) ? D3D_OK : E_FAIL;
+#if MINDPOWER_USE_D3D9_DEVICE
     if (!_pD3DDevice)
         return E_FAIL;
     return _pD3DDevice->DrawPrimitiveUP(pt_type, count, data, stride);
+#else
+    return E_FAIL;
+#endif
 }
 inline HRESULT MPRender::DrawIndexedPrimitive( D3DPRIMITIVETYPE pt_type, INT base_vert_index, UINT min_index, UINT vert_num, UINT start_index, UINT count )
 {

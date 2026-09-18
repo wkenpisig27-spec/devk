@@ -12,6 +12,11 @@
 #include <stdio.h>
 #include "D3DUtil.h"
 #include "DXUtil.h"
+#include "MindPowerRenderConfig.h"
+#if !MINDPOWER_USE_D3D9_DEVICE
+#include "lwDeviceObject11.h"
+#include "lwD3D11Texture.h"
+#endif
 
 
 
@@ -67,15 +72,24 @@ VOID D3DUtil_InitLight( D3DLIGHTX& light, D3DLIGHTTYPE ltType,
 HRESULT D3DUtil_CreateTexture( IDirect3DDeviceX* pd3dDevice, TCHAR* strTexture,
                                IDirect3DTextureX** ppTexture, D3DFORMAT d3dFormat )
 {
-    // Get the path to the texture
+#if MINDPOWER_USE_D3D9_DEVICE
     TCHAR strPath[MAX_PATH];
-    // DXUtil_FindMediaFile( strPath, strTexture );
-
-    // Create the texture using D3DX
-    return D3DXCreateTextureFromFileEx( pd3dDevice, strPath, 
+    (void)strPath;
+    return D3DXCreateTextureFromFileEx( pd3dDevice, strTexture, 
                 D3DX_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT, 0, d3dFormat, 
                 D3DPOOL_MANAGED, D3DX_FILTER_TRIANGLE|D3DX_FILTER_MIRROR, 
                 D3DX_FILTER_TRIANGLE|D3DX_FILTER_MIRROR, 0, NULL, NULL, ppTexture );
+#else
+    (void)pd3dDevice;
+    (void)d3dFormat;
+    if (!strTexture || !ppTexture)
+        return E_FAIL;
+    MindPower::lwDeviceObject11* d11 = MindPower::lwGetActiveDeviceObject11();
+    if (!d11 || !d11->GetD3D11Device())
+        return E_FAIL;
+    return MindPower::lwD3D11CreateTextureFromFile(d11->GetD3D11Device(), strTexture, 0, ppTexture) == LW_RET_OK
+        ? D3D_OK : E_FAIL;
+#endif
 }
 
 
@@ -143,21 +157,21 @@ HRESULT D3DUtil_CreateVertexShader( IDirect3DDeviceX* pd3dDevice,
                                     TCHAR* strFilename, DWORD* pdwVertexDecl,
                                     DWORD* pdwVertexShader )
 {
+#if MINDPOWER_USE_D3D9_DEVICE
     LPD3DXBUFFER pCode;
     TCHAR        strPath[MAX_PATH];
     HRESULT      hr;
 
-    // Get the path to the vertex shader file
-    //DXUtil_FindMediaFile( strPath, strFilename );
-
-    // Assemble the vertex shader file
-    if( FAILED( hr = D3DXAssembleShaderFromFile( strPath, NULL, NULL, 0, &pCode, NULL ) ) )
+    if( FAILED( hr = D3DXAssembleShaderFromFile( strFilename, NULL, NULL, 0, &pCode, NULL ) ) )
         return hr;
 
-    // Create the vertex shader
     hr = pd3dDevice->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), (IDirect3DVertexShaderX**)pdwVertexShader);
     pCode->Release();
     return hr;
+#else
+    (void)pd3dDevice; (void)strFilename; (void)pdwVertexDecl; (void)pdwVertexShader;
+    return E_NOTIMPL;
+#endif
 }
 
 
@@ -268,6 +282,10 @@ D3DXQUATERNION D3DUtil_GetRotationFromCursor( HWND hWnd,
 //-----------------------------------------------------------------------------
 HRESULT D3DUtil_SetDeviceCursor( IDirect3DDeviceX* pd3dDevice, HCURSOR hCursor )
 {
+#if !MINDPOWER_USE_D3D9_DEVICE
+    (void)pd3dDevice; (void)hCursor;
+    return E_NOTIMPL;
+#else
     HRESULT hr = E_FAIL;
     ICONINFO iconinfo;
     BOOL bBWCursor;
@@ -402,6 +420,7 @@ End:
     SAFE_DELETE_ARRAY( pcrArrayMask );
     SAFE_RELEASE( pCursorBitmap );
     return hr;
+#endif
 }
 
 

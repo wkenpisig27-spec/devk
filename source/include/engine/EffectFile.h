@@ -10,8 +10,13 @@
 #endif // _MSC_VER > 1000
 class   MPRender;
 
-#include "D3dx9effect.h"
+#include "MindPowerAPI.h"
+#include "lwDirectX.h"
 #include "i_effect.h"
+
+#if MINDPOWER_USE_D3D9_DEVICE
+#include "D3dx9effect.h"
+#endif
 
 class CMPEffectFile  
 {
@@ -78,12 +83,14 @@ protected:
 inline BOOL CMPEffectFile::SetTechnique(int iIdx)
 {
 	_iCurTech = iIdx;
+#if MINDPOWER_USE_D3D9_DEVICE
 	if(!m_pEffect)
 		return TRUE;
 	if(iIdx < 0 || iIdx >= (int)_vecTechniques.size())
 		return FALSE;
     if(FAILED(m_pEffect->SetTechnique(_vecTechniques[iIdx])))
 		return FALSE;
+#endif
 	return  TRUE;
 }
 
@@ -122,25 +129,36 @@ inline BOOL CMPEffectFile::SetTechnique(int iIdx)
 //}
 inline BOOL CMPEffectFile::SetTexture(LPCSTR TextureValue, IDirect3DTextureX* pTexture)
 {
+#if MINDPOWER_USE_D3D9_DEVICE
 	if(!m_pEffect)
 		return TRUE;
     if(FAILED(m_pEffect->SetTexture(TextureValue,pTexture)))
 		return FALSE;
+#else
+	(void)TextureValue;
+	(void)pTexture;
+#endif
 	return TRUE;
 }
 inline BOOL CMPEffectFile::SetDword(LPCSTR DwName, DWORD dwvalue)
 {
+#if MINDPOWER_USE_D3D9_DEVICE
 	if(!m_pEffect)
 		return TRUE;
 #if defined(LW_USE_DX8)
     if(FAILED(m_pEffect->SetDword(DwName,dwvalue)))
 		return FALSE;
 #endif
+#else
+	(void)DwName;
+	(void)dwvalue;
+#endif
 	return TRUE;
 }
 
 inline BOOL CMPEffectFile::Begin(DWORD dwIsSave)
 {
+#if MINDPOWER_USE_D3D9_DEVICE
 	if(!m_pEffect)
 	{
 		m_passes = 1;
@@ -148,6 +166,10 @@ inline BOOL CMPEffectFile::Begin(DWORD dwIsSave)
 	}
     if(FAILED(m_pEffect->Begin(&m_passes,dwIsSave)))
 		return FALSE;
+#else
+	(void)dwIsSave;
+	m_passes = 1;
+#endif
 	return TRUE;
 }
 
@@ -158,22 +180,28 @@ inline BOOL CMPEffectFile::Pass(UINT ipass = 0)
 		ApplySoftPass();
 		return TRUE;
 	}
+#if MINDPOWER_USE_D3D9_DEVICE
 #if (defined LW_USE_DX9)
 	if (FAILED(m_pEffect->BeginPass(ipass)) || FAILED(m_pEffect->CommitChanges()))
 #elif (defined LW_USE_DX8)
 	if (FAILED(m_pEffect->Pass(ipass)))
 #endif
 		return FALSE;
+#else
+	(void)ipass;
+	ApplySoftPass();
+#endif
 	return TRUE;
 }
 inline BOOL CMPEffectFile::End()
 {
+#if MINDPOWER_USE_D3D9_DEVICE
 	if(!m_pEffect)
 		return TRUE;
 
     if(FAILED(m_pEffect->EndPass()) || FAILED(m_pEffect->End()))
 		return FALSE;
-
+#endif
 	return TRUE;
 }
 

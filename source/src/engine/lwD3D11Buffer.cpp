@@ -88,12 +88,14 @@ HRESULT lwD3D11VertexBuffer::GetDevice(IDirect3DDevice9** ppDevice)
     return E_NOTIMPL;
 }
 
+#if MINDPOWER_USE_D3D9_DEVICE
 HRESULT lwD3D11VertexBuffer::SetPrivateData(REFGUID, const void*, DWORD, DWORD) { return E_NOTIMPL; }
 HRESULT lwD3D11VertexBuffer::GetPrivateData(REFGUID, void*, DWORD*) { return E_NOTIMPL; }
 HRESULT lwD3D11VertexBuffer::FreePrivateData(REFGUID) { return E_NOTIMPL; }
 DWORD lwD3D11VertexBuffer::SetPriority(DWORD) { return 0; }
 DWORD lwD3D11VertexBuffer::GetPriority() { return 0; }
 void lwD3D11VertexBuffer::PreLoad() {}
+#endif
 D3DRESOURCETYPE lwD3D11VertexBuffer::GetType() { return D3DRTYPE_VERTEXBUFFER; }
 
 HRESULT lwD3D11VertexBuffer::Lock(UINT OffsetToLock, UINT SizeToLock, void** ppbData, DWORD Flags)
@@ -176,12 +178,14 @@ HRESULT lwD3D11IndexBuffer::GetDevice(IDirect3DDevice9** ppDevice)
     return E_NOTIMPL;
 }
 
+#if MINDPOWER_USE_D3D9_DEVICE
 HRESULT lwD3D11IndexBuffer::SetPrivateData(REFGUID, const void*, DWORD, DWORD) { return E_NOTIMPL; }
 HRESULT lwD3D11IndexBuffer::GetPrivateData(REFGUID, void*, DWORD*) { return E_NOTIMPL; }
 HRESULT lwD3D11IndexBuffer::FreePrivateData(REFGUID) { return E_NOTIMPL; }
 DWORD lwD3D11IndexBuffer::SetPriority(DWORD) { return 0; }
 DWORD lwD3D11IndexBuffer::GetPriority() { return 0; }
 void lwD3D11IndexBuffer::PreLoad() {}
+#endif
 D3DRESOURCETYPE lwD3D11IndexBuffer::GetType() { return D3DRTYPE_INDEXBUFFER; }
 
 HRESULT lwD3D11IndexBuffer::Lock(UINT OffsetToLock, UINT SizeToLock, void** ppbData, DWORD Flags)

@@ -6,8 +6,12 @@
 
 LW_BEGIN
 
-// COM wrapper so existing IDirect3DTexture9* / lwITex paths can hold a D3D11 SRV.
+// COM wrapper so IDirect3DTextureX* / lwITex paths can hold a D3D11 SRV.
+#if MINDPOWER_USE_D3D9_DEVICE
 class lwD3D11Texture : public IDirect3DTexture9
+#else
+class lwD3D11Texture : public lwDx11ITexture
+#endif
 {
 public:
     lwD3D11Texture(ID3D11Texture2D* tex, ID3D11ShaderResourceView* srv, UINT w, UINT h, D3DFORMAT fmt, ID3D11RenderTargetView* rtv = 0);
@@ -25,21 +29,25 @@ public:
     STDMETHOD_(ULONG, Release)();
 
     STDMETHOD(GetDevice)(IDirect3DDevice9** ppDevice);
+#if MINDPOWER_USE_D3D9_DEVICE
     STDMETHOD(SetPrivateData)(REFGUID, const void*, DWORD, DWORD);
     STDMETHOD(GetPrivateData)(REFGUID, void*, DWORD*);
     STDMETHOD(FreePrivateData)(REFGUID);
     STDMETHOD_(DWORD, SetPriority)(DWORD);
     STDMETHOD_(DWORD, GetPriority)();
     STDMETHOD_(void, PreLoad)();
+#endif
     STDMETHOD_(D3DRESOURCETYPE, GetType)();
     STDMETHOD_(DWORD, SetLOD)(DWORD);
     STDMETHOD_(DWORD, GetLOD)();
     STDMETHOD_(DWORD, GetLevelCount)();
+#if MINDPOWER_USE_D3D9_DEVICE
     STDMETHOD(SetAutoGenFilterType)(D3DTEXTUREFILTERTYPE);
     STDMETHOD_(D3DTEXTUREFILTERTYPE, GetAutoGenFilterType)();
     STDMETHOD_(void, GenerateMipSubLevels)();
+#endif
     STDMETHOD(GetLevelDesc)(UINT Level, D3DSURFACE_DESC* pDesc);
-    STDMETHOD(GetSurfaceLevel)(UINT, IDirect3DSurface9**);
+    STDMETHOD(GetSurfaceLevel)(UINT, IDirect3DSurfaceX**);
     STDMETHOD(LockRect)(UINT, D3DLOCKED_RECT*, const RECT*, DWORD);
     STDMETHOD(UnlockRect)(UINT);
     STDMETHOD(AddDirtyRect)(const RECT*);

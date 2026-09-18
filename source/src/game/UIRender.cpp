@@ -46,6 +46,11 @@ CUIPanel::~CUIPanel() {
 bool CUIPanel::Create(IDirect3DDeviceX* pDev) {
 	m_pDev = pDev;
 
+#if !MINDPOWER_USE_D3D9_DEVICE
+	(void)pDev;
+	return true;
+#else
+
 	_w = 1;
 	_h = 1;
 
@@ -65,11 +70,17 @@ bool CUIPanel::Create(IDirect3DDeviceX* pDev) {
 	memcpy(lpVertex, Vertices, sizeof(Vertices));
 	_lpVB->Unlock();
 	return true;
+#endif
 }
 
 void CUIPanel::Draw(IDirect3DTextureX* pSrcTexture, CONST RECT* pSrcRect, CONST D3DXVECTOR2* pScaling,
                     CONST D3DXVECTOR2* pRotationCenter, FLOAT Rotation, CONST D3DXVECTOR2* pTranslation,
                     D3DCOLOR Color) {
+#if !MINDPOWER_USE_D3D9_DEVICE
+	(void)pSrcTexture; (void)pSrcRect; (void)pScaling;
+	(void)pRotationCenter; (void)Rotation; (void)pTranslation; (void)Color;
+	return;
+#else
 	m_pDev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	m_pDev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	m_pDev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
@@ -168,6 +179,7 @@ void CUIPanel::Draw(IDirect3DTextureX* pSrcTexture, CONST RECT* pSrcRect, CONST 
 	m_pDev->SetFVF(UI_FVF);
 	m_pDev->SetStreamSource(0, _lpVB, 0, sizeof(UI_VERTEX));
 	m_pDev->DrawPrimitive(D3DPT_TRIANGLEFAN, 0, 2);
+#endif
 }
 void CUIPanel::End() {
 	m_pDev->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
@@ -418,15 +430,19 @@ HRESULT UI_OnResetDevice() {
 void UIRender::OnLostDevice() {
 	if (!_p2DSprite)
 		return;
+#if MINDPOWER_USE_D3D9_DEVICE
 	if (FAILED(_p2DSprite->OnLostDevice()))
 		LG("error", "msglost");
+#endif
 }
 
 void UIRender::OnResetDevice() {
 	if (!_p2DSprite)
 		return;
+#if MINDPOWER_USE_D3D9_DEVICE
 	if (FAILED(_p2DSprite->OnResetDevice()))
 		LG("error", "msgreset");
+#endif
 }
 
 void UIRender::RegisterFunc() {
@@ -1395,6 +1411,7 @@ void UIRender::RenderSprite(LPTEXTURE tex, RECT* rc, VECTOR2* vscale, VECTOR2* v
 		lwD3D11BlitSprite(tex, rc, vscale, vdest, dwColor);
 		return;
 	}
+#if MINDPOWER_USE_D3D9_DEVICE
 	if (_p2DSprite) {
 		_p2DSprite->Begin(D3DXSPRITE_ALPHABLEND);
 		D3DXMATRIX m;
@@ -1413,4 +1430,5 @@ void UIRender::RenderSprite(LPTEXTURE tex, RECT* rc, VECTOR2* vscale, VECTOR2* v
 		_p2DSprite->End();
 		_p2DSprite->Flush();
 	}
+#endif
 }

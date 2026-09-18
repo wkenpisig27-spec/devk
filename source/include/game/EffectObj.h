@@ -120,11 +120,18 @@ public:
 				return;
 			}
 		} else if (pDev) {
+#if MINDPOWER_USE_D3D9_DEVICE
 			pDev->CreateVertexBuffer(sizeof(BoxVer) * 8, D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC, fvf,
 			                         D3DPOOL_DEFAULT, &_lpVB, NULL);
 			pDev->CreateIndexBuffer(sizeof(wIndex), D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_MANAGED, &_lpIB, NULL);
 			pDev->CreateIndexBuffer(sizeof(wIndexLine), D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_MANAGED,
 			                        &_lpIBLine, NULL);
+#else
+			(void)pDev;
+			lwD3D11Gap(LW_D3D11_SKIP, "effectbox-create-vb-d3d9",
+				"CEffectBox D3D9 CreateVertexBuffer path is unused on DX11-only");
+			return;
+#endif
 		} else {
 			lwD3D11Gap(LW_D3D11_SKIP, "effectbox-create-vb",
 				"CEffectBox has no DeviceObject or D3D9 device");

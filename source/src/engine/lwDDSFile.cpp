@@ -117,6 +117,16 @@ LW_RESULT lwDDSFile::Compress(D3DFORMAT new_fmt)
 {
     LW_RESULT ret = LW_RET_FAILED;
 
+#if !MINDPOWER_USE_D3D9_DEVICE
+    (void)new_fmt;
+    if (!_origin_tex)
+        return LW_RET_FAILED;
+    _origin_tex->AddRef();
+    LW_IF_RELEASE(_dds_tex);
+    _dds_tex = _origin_tex;
+    return LW_RET_OK;
+#else
+
     D3DFORMAT src_fmt;
     IDirect3DTextureX* pmiptex;
     IDirect3DCubeTextureX* pcubetex;
@@ -240,10 +250,16 @@ LW_RESULT lwDDSFile::Compress(D3DFORMAT new_fmt)
     ret = LW_RET_OK;
 __ret:
     return ret;
-
+#endif
 }
 HRESULT lwDDSFile::BltAllLevels(D3DCUBEMAP_FACES FaceType, IDirect3DBaseTextureX* ptexSrc, IDirect3DBaseTextureX* ptexDest)
 {
+#if !MINDPOWER_USE_D3D9_DEVICE
+    (void)FaceType;
+    (void)ptexSrc;
+    (void)ptexDest;
+    return E_NOTIMPL;
+#else
     IDirect3DTextureX*  pmiptexSrc;
     IDirect3DTextureX*  pmiptexDest;
     IDirect3DCubeTextureX* pcubetexSrc;
@@ -272,11 +288,6 @@ HRESULT lwDDSFile::BltAllLevels(D3DCUBEMAP_FACES FaceType, IDirect3DBaseTextureX
         pmiptexDest = (IDirect3DTextureX* )ptexDest;
     }
 
-#if !MINDPOWER_USE_D3D9_DEVICE
-    if (_dev && SUCCEEDED(_dev->UpdateTexture(ptexSrc, ptexDest)))
-        return S_OK;
-    return E_FAIL;
-#else
     for(iLevel = 0; iLevel < _mip_level; iLevel++)
     {
         if(IsVolumeMap())
@@ -558,7 +569,7 @@ HRESULT lwDDSFile::SaveAllMipSurfaces(IDirect3DBaseTextureX* ptex, D3DCUBEMAP_FA
         if(pmiptex != NULL)
             hr = pmiptex->GetSurfaceLevel(iLevel, &psurf);
         else
-            hr = pcubetex->GetCubeMapSurface(FaceType, iLevel, &psurf);
+            hr = pcubetex->GetCubeMapSurface(FaceType, iLevel, (IDirect3DSurface9**)&psurf);
 
         if(FAILED(hr))
             return hr;

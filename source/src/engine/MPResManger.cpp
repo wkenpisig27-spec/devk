@@ -1575,7 +1575,7 @@ bool	CMPResManger::LoadTotalVShader()
 #endif
 #if !MINDPOWER_USE_D3D9_DEVICE
 	return true;
-#endif
+#else
 
 	char t_Path[MAX_PATH];
 		
@@ -1763,9 +1763,10 @@ bool	CMPResManger::LoadTotalVShader()
 
 
 	return true;
+#endif
 }
 
-bool	CMPResManger::LoadTotalVShader(lwISysGraphics* sys_graphics)
+bool CMPResManger::LoadTotalVShader(lwISysGraphics* sys_graphics)
 {
 	lwISystem* sys = sys_graphics->GetSystem();
 

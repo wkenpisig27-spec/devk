@@ -9,9 +9,9 @@ Goal: **true D3D11** end-to-end — no runtime D3D9 device, no long-term relianc
 | Device | `lwDeviceObject11`, `GetDevice()` NULL | `ID3D11Device` / `ID3D11DeviceContext` as primary API |
 | State | D3D9 enums → 11 state objects in `lwDeviceObject11` | PSO + root signature / explicit CBs per pass |
 | Shaders | SM4 HLSL + FF mesh shader + ShaderMgr11 VS | All draws through compiled HLSL; retire `.vsh` / asm |
-| Loaders | D3DX9 texture/mesh in places | DirectXTex / WIC / existing `.dds` path |
-| Effects | `eff.fx` / D3DX Effect on DX9 | DeviceObject11 path + HLSL (extend stage-8 work) |
-| Math | D3DX9 vectors/matrices | DirectXMath (gradual) |
+| Loaders | DDS/BMP/TGA + GDI+ (`lwD3D11CreateTextureFromMemory`) | same (DirectXTex optional) |
+| Effects | DeviceObject11 FF table (`eff.fx` techniques as RS) | HLSL effects (optional) |
+| Math | DirectXMath via `lwD3DXCompat.h` (D3DX names, native impl) | optional rename to XM* |
 
 ## Build flag
 
@@ -59,8 +59,8 @@ Exit criterion met: no unguarded `GetDevice()` in the DX11-only compile; dual-bu
 
 1. **Audit** — `docs/DX11_PHASE2_D3DX_INVENTORY.txt` (dual-build D3DX behind `#if MINDPOWER_USE_D3D9_DEVICE` or dead-stripped when `lwIsDx11Active()` is constant)
 2. **Textures** — `BitmapFont`, `lwDDSFile`, `lwResourceMgr`, `lwDeviceObject::CreateTextureFromFileInMemory` on DX11 helpers
-3. **Link** — `d3dx9.lib` removed from Release x64 `game.vcxproj` AdditionalDependencies (header still pragma-links math). `d3d9.lib` dropped in Phase 5.
-4. **Math** — defer D3DXMath → DirectXMath unless link audit forces it
+3. **Link** — `d3dx9.lib` and `d3d9.lib` dropped from Release x64 (`lwD3DXCompat.h` + DirectXMath).
+4. **Math** — DirectXMath in `lwD3DXCompat.h`; D3DXVECTOR/MATRIX names kept for asset layout
 
 **Smoke (2026-09-19):** same Phase 1 checklist passed after Phase 2 builds.
 
@@ -79,7 +79,7 @@ Exit criterion met: Release|x64 links without `d3dx9.lib`; gameplay smoke passes
 
 **Smoke (2026-09-19):** Phase 3 pass bundles + additive/transparent/character focus passed. VFX re-smoke (combat skills, death particles, ground shade, weapon lit, quest) passed.
 
-Stage 0–2 combiner ops still translate per draw (not full DX9 TSS). D3DXVECTOR/MATRIX typedefs live in `lwDirectXShared.h`; DirectXMath swap is still optional later.
+Stage 0–2 combiner ops still translate per draw (not full DX9 TSS). Math is DirectXMath behind D3DX names (`lwD3DXCompat.h`).
 
 ### Phase 4 — Rename and re-home types — **complete**
 
@@ -98,13 +98,28 @@ Create*X device macros stay so remaining D3D9 `.cpp` still compiles; they are un
 - [x] Skip D3D8.1 runtime version probe on DX11-only init
 - [x] `lwIsDx11Active()` is a compile-time `1` on DX11-only (header inline); Debug dual-build keeps the runtime check
 - [x] LINUX/DXVK — native client is Windows-only; see below
-- [x] Drop `d3d9.lib` from game Release (wrappers still inherit `IDirect3D*9` headers; no `Direct3DCreate9` / D3D9 IID imports)
-
-Optional later: strip remaining `if (lwIsDx11Active())` source (already constant-folded). Wrappers still subclass `IDirect3DTexture9` etc. until a follow-on pass.
+- [x] Drop `d3d9.lib` from game Release (wrappers inherit `lwDx11I*`, not `IDirect3D*9`)
 
 **Smoke (2026-09-19):** login → world passed after excluding `lwDeviceObject.cpp`, inlining `lwIsDx11Active()`, and dropping `d3d9.lib`.
 
-Debug|x64 dual-build still compiles `lwDeviceObject.cpp`. D3DX math types stay in `lwDirectXShared.h`.
+### Post-5 — Native types, math, combiners, loaders — **complete**
+
+- [x] Texture/buffer/shader wrappers inherit `lwDx11I*` (`lwD3D11ResourceIface.h`), not Microsoft `IDirect3D*9` COM vtables. `IDirect3DTextureX` etc. typedef to those types on DX11-only (names avoid `MindPower::lwIVertexBuffer`).
+- [x] DirectXMath via `lwD3DXCompat.h`; Release no longer pragma-links `d3dx9.lib`. D3DXVECTOR/MATRIX names kept for asset layout.
+- [x] Stage 0–2 combiners live in compiled FF mesh HLSL (`CombineTss`). Remaining `.vsh` files used by ShaderMgr map to SM4 HLSL (incl. alt/outline).
+- [x] Texture create on DX11-only is `lwD3D11CreateTextureFromMemory` / FromFile (DDS/BMP/TGA/GDI+). Remaining D3DX texture/effect/asm APIs are `#if MINDPOWER_USE_D3D9_DEVICE`.
+
+**Smoke (2026-09-19):** login → world passed after Post-5.
+
+Debug dual-build still uses d3d9.lib + d3dx9.lib.
+
+## Remaining (after Post-5)
+
+Highest-value leftover vs the native target table:
+
+1. **Pass state** — stop packing D3D9 RS/TSS into CBs every draw; bake OM + combiner into pass objects (PSO-style).
+2. **Device handle** — make `lwD3D11NativeContext` the play-path API; stop holding `IDirect3DDevice9*` that is always null on Release.
+3. Optional later: rename D3DX* math to XM*, HLSL `eff.fx` instead of FF technique tables, delete unused `.vsh` assets. Do not delete D3D9 sources while Debug dual-build still needs them.
 
 ## Linux / DXVK
 

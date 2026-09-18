@@ -582,6 +582,7 @@ void CBitmapFont::FlushBatch(int textureIndex)
         return;
     }
 
+#if MINDPOWER_USE_D3D9_DEVICE
     if (!m_pDevice) return;
     
     if (tex)
@@ -589,6 +590,7 @@ void CBitmapFont::FlushBatch(int textureIndex)
     
     m_pDevice->SetFVF(FontVertex::FVF);
     m_pDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, m_nVertexCount / 3, m_Vertices, sizeof(FontVertex));
+#endif
     
     m_nVertexCount = 0;
 }

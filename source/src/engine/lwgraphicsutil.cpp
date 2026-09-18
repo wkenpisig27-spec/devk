@@ -7,6 +7,10 @@
 #include "lwfileutil.h"
 #include "lwErrorCode.h"
 #include "lwD3D.h"
+#include "MindPowerRenderConfig.h"
+#include "lwRenderBackend.h"
+#include "lwDeviceObject11.h"
+#include "lwD3D11Texture.h"
 
 
 
@@ -280,6 +284,7 @@ LW_FRONT_API LW_RESULT lwLoadTexture(IDirect3DTextureX** tex, IDirect3DDeviceX* 
     if(LW_FAILED(lwLoadTexDataInfo(&info, file, fmt, COLORKEY_TYPE_NONE, NULL, 0)))
         goto __ret;
 
+#if MINDPOWER_USE_D3D9_DEVICE
     if(FAILED(dev->CreateTextureX(info.width, info.height, D3DX_DEFAULT, usage, (D3DFORMAT)fmt, pool, &t, 0)))
         goto __ret;
 
@@ -295,6 +300,22 @@ LW_FRONT_API LW_RESULT lwLoadTexture(IDirect3DTextureX** tex, IDirect3DDeviceX* 
 
     surface->UnlockRect();
     surface->Release();
+#else
+    (void)dev;
+    (void)usage;
+    (void)pool;
+    (void)surface;
+    {
+        lwDeviceObject11* d11 = lwGetActiveDeviceObject11();
+        if (!d11 || LW_FAILED(lwD3D11CreateEmptyTexture(
+                d11->GetD3D11Device(), info.width, info.height, (D3DFORMAT)fmt, &t)) || !t)
+            goto __ret;
+        if (FAILED(t->LockRect(0, &lock_rc, 0, 0)))
+            goto __ret;
+        memcpy(lock_rc.pBits, info.data, info.size);
+        t->UnlockRect(0);
+    }
+#endif
 
     *tex = t;
 

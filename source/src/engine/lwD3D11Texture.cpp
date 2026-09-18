@@ -98,19 +98,23 @@ HRESULT lwD3D11Texture::GetDevice(IDirect3DDevice9** ppDevice)
     return E_NOTIMPL;
 }
 
+#if MINDPOWER_USE_D3D9_DEVICE
 HRESULT lwD3D11Texture::SetPrivateData(REFGUID, const void*, DWORD, DWORD) { return E_NOTIMPL; }
 HRESULT lwD3D11Texture::GetPrivateData(REFGUID, void*, DWORD*) { return E_NOTIMPL; }
 HRESULT lwD3D11Texture::FreePrivateData(REFGUID) { return E_NOTIMPL; }
 DWORD lwD3D11Texture::SetPriority(DWORD) { return 0; }
 DWORD lwD3D11Texture::GetPriority() { return 0; }
 void lwD3D11Texture::PreLoad() {}
+#endif
 D3DRESOURCETYPE lwD3D11Texture::GetType() { return D3DRTYPE_TEXTURE; }
 DWORD lwD3D11Texture::SetLOD(DWORD) { return 0; }
 DWORD lwD3D11Texture::GetLOD() { return 0; }
 DWORD lwD3D11Texture::GetLevelCount() { return 1; }
+#if MINDPOWER_USE_D3D9_DEVICE
 HRESULT lwD3D11Texture::SetAutoGenFilterType(D3DTEXTUREFILTERTYPE) { return S_OK; }
 D3DTEXTUREFILTERTYPE lwD3D11Texture::GetAutoGenFilterType() { return D3DTEXF_LINEAR; }
 void lwD3D11Texture::GenerateMipSubLevels() {}
+#endif
 
 HRESULT lwD3D11Texture::GetLevelDesc(UINT Level, D3DSURFACE_DESC* pDesc)
 {
@@ -127,7 +131,7 @@ HRESULT lwD3D11Texture::GetLevelDesc(UINT Level, D3DSURFACE_DESC* pDesc)
     return S_OK;
 }
 
-HRESULT lwD3D11Texture::GetSurfaceLevel(UINT, IDirect3DSurface9** pp)
+HRESULT lwD3D11Texture::GetSurfaceLevel(UINT, IDirect3DSurfaceX** pp)
 {
     if (pp)
         *pp = 0;

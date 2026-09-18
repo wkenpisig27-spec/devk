@@ -167,6 +167,10 @@ HRESULT MPRender::DrawPrimitiveUP_Dynamic(D3DPRIMITIVETYPE type, UINT primCount,
 	if (lwIsDx11Active())
 		return DrawPrimitiveUP(type, primCount, data, stride);
 
+#if !MINDPOWER_USE_D3D9_DEVICE
+	(void)type; (void)primCount; (void)data; (void)stride;
+	return E_FAIL;
+#else
 	if (!_pD3DDevice || !data || stride == 0 || primCount == 0)
 		return E_FAIL;
 
@@ -219,6 +223,7 @@ HRESULT MPRender::DrawPrimitiveUP_Dynamic(D3DPRIMITIVETYPE type, UINT primCount,
 		return _pD3DDevice->DrawPrimitiveUP(type, primCount, data, stride);
 
 	return _pD3DDevice->DrawPrimitive(type, 0, primCount);
+#endif
 }
 
 BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOOL bFullScreen) {
@@ -535,8 +540,10 @@ int MPRender::ToggleFullScreen(D3DPRESENT_PARAMETERS* d3dpp, lwWndInfo* wnd_info
 	if (lwIsDx11Active()) {
 		lwD3D11Gap(LW_D3D11_SKIP, "toggle-d3dx-sprite",
 			"D3DXCreateSprite needs IDirect3DDevice9; skipped after DXGI resize");
+#if MINDPOWER_USE_D3D9_DEVICE
 	} else {
 		D3DXCreateSprite(_pD3DDevice, &_p2DSprite);
+#endif
 	}
 	return ToggleFullScreen();
 }
@@ -1137,6 +1144,7 @@ void MPRender::RenderTextureRect(int nX, int nY, MPTexRect* pRect) {
 		lwD3D11BlitSprite(pTexture, pTexRect, &vecScale, &vecDest, pRect->dwColor);
 		return;
 	}
+#if MINDPOWER_USE_D3D9_DEVICE
 	_p2DSprite->Begin(D3DXSPRITE_ALPHABLEND);
 	D3DXMATRIX scaleMat;
 	D3DXMatrixIdentity(&scaleMat);
@@ -1144,6 +1152,7 @@ void MPRender::RenderTextureRect(int nX, int nY, MPTexRect* pRect) {
 	_p2DSprite->SetTransform(&scaleMat);
 	_p2DSprite->Draw(pTexture, pTexRect, NULL, &vecDest, pRect->dwColor);
 	_p2DSprite->End();
+#endif
 }
 
 void MPRender::RenderLine(float x1, float y1, float z1, float x2, float y2, float z2, DWORD dwColor) {
@@ -1284,6 +1293,10 @@ bool SurfaceToBMP(IDirect3DSurfaceX* pSurface, const char* strName) {
 }
 
 void MPRender::CaptureScreen(const char* szFilename) const {
+#if !MINDPOWER_USE_D3D9_DEVICE
+	(void)szFilename;
+	return;
+#else
 	D3DSURFACE_DESC sDesc;
 	IDirect3DSurfaceX* pBackBuffer;
 	_pD3DDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
@@ -1297,6 +1310,7 @@ void MPRender::CaptureScreen(const char* szFilename) const {
 
 	pBackBuffer->Release();
 	pCapSurface->Release();
+#endif
 }
 
 void MPRender::IgnoreModelTexture(BOOL bIgnore) {

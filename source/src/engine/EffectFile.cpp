@@ -88,6 +88,7 @@ BOOL CMPEffectFile::LoadEffectFromFile( LPCSTR pszfile)
 #else
 	hr = D3DXCreateEffectFromFile(m_pDev, pszfile, &m_pEffect, &pErrorBuffer);
 #endif
+#if MINDPOWER_USE_D3D9_DEVICE
 	if(FAILED(hr))
 	{
 		char errorMsg[1024];
@@ -127,10 +128,10 @@ BOOL CMPEffectFile::LoadEffectFromFile( LPCSTR pszfile)
 
 		sprintf(t_psz,"t%d",_iTechNum);
 	}
-	//_DbgOut( " technique.Name", _iTechNum, S_OK,  (TCHAR*)technique.Name );
-
-
 	return TRUE;
+#else
+	return TRUE;
+#endif
 }
 
 //BOOL CMPEffectFile::LoadEffectFromResource(TCHAR*  pszsrc)
@@ -199,21 +200,25 @@ void CMPEffectFile::free()
 
 BOOL CMPEffectFile::OnLostDevice()
 {
+#if MINDPOWER_USE_D3D9_DEVICE
     if(m_pEffect)
 	{
 		if(FAILED(m_pEffect->OnLostDevice()))
 			return FALSE;
 	}
+#endif
 	return TRUE;
 }
 
 BOOL CMPEffectFile::OnResetDevice()
 {
+#if MINDPOWER_USE_D3D9_DEVICE
     if(m_pEffect)
 	{
 		if(FAILED(m_pEffect->OnResetDevice()))
 			return FALSE;
 	}
+#endif
 	return TRUE;
 }
 #ifdef USE_RENDER

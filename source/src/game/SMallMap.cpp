@@ -1083,6 +1083,11 @@ void CAniWnd::Render() {
 		return;
 	}
 
+#if !MINDPOWER_USE_D3D9_DEVICE
+	RenderScene();
+	RenderMask();
+	return;
+#else
 	if (!m_pDev || !_pCurSuf) {
 		RenderScene();
 		return;
@@ -1105,6 +1110,7 @@ void CAniWnd::Render() {
 	surface->Release();
 	pSaveSuf->Release();
 	RenderMask();
+#endif
 }
 
 bool CAniWnd::BindDx11ClockRT() {

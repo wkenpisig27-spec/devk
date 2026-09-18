@@ -247,6 +247,13 @@ static const VshMap kVshMap[] = {
     { "skinmesh8_2_outline.vsh", "pb1u4nt0_ld_outline.hlsl", 0 },
     { "skinmesh8_3_outline.vsh", "pb2u4nt0_ld_outline.hlsl", 0 },
     { "skinmesh8_4_outline.vsh", "pb3u4nt0_ld_outline.hlsl", 0 },
+    { "vs_static_outline.vsh", "vs_static_outline.hlsl", 0 },
+    { "vs_pnt0.vsh", "vs_pnt0_ld.hlsl", 0 },
+    { "vs_pnt0_ld_alt.vsh", "vs_pnt0_ld.hlsl", 0 },
+    { "vs_pnt0_t0uvmat_alt.vsh", "vs_pnt0_t0uvmat.hlsl", 0 },
+    { "vs_pnt0_ld_t0uvmat_alt.vsh", "vs_pnt0_ld_t0uvmat.hlsl", 0 },
+    { "vs_pndt0_t0uvmat_alt.vsh", "vs_pndt0_t0uvmat.hlsl", 0 },
+    { "vs_pndt0_ld_t0uvmat_alt.vsh", "vs_pndt0_ld_t0uvmat.hlsl", 0 },
 };
 
 static const char* Basename(const char* path)

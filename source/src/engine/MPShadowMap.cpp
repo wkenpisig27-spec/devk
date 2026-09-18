@@ -447,6 +447,7 @@ bool CMPShadowMap::Create(IDirect3DDeviceX* pDev, const ShadowMapConfig& config)
     if (lwIsDx11Active())
         return CreateDx11(config);
 
+#if MINDPOWER_USE_D3D9_DEVICE
     if (!pDev)
         return false;
 
@@ -500,6 +501,10 @@ bool CMPShadowMap::Create(IDirect3DDeviceX* pDev, const ShadowMapConfig& config)
     _bInitialized = true;
     LG("shadow", "Shadow map created: %dx%d\n", _config.resolution, _config.resolution);
     return true;
+#else
+    (void)pDev;
+    return false;
+#endif
 }
 
 bool CMPShadowMap::CreateDx11(const ShadowMapConfig& config)
@@ -621,6 +626,9 @@ bool CMPShadowMap::CreateResources() {
     if (lwIsDx11Active())
         return CreateResourcesDx11();
 
+#if !MINDPOWER_USE_D3D9_DEVICE
+    return false;
+#else
     int res = _config.resolution;
 
     // Create shadow map as a renderable texture
@@ -678,6 +686,7 @@ bool CMPShadowMap::CreateResources() {
     BuildGroundGrid();
 
     return true;
+#endif
 }
 
 void CMPShadowMap::ReleaseResources() {
@@ -692,20 +701,28 @@ void CMPShadowMap::ReleaseResources() {
 
 void CMPShadowMap::Release() {
     ReleaseResources();
+#if MINDPOWER_USE_D3D9_DEVICE
     if (_pShadowEffect) { _pShadowEffect->Release(); _pShadowEffect = nullptr; }
+#else
+    _pShadowEffect = nullptr;
+#endif
     _bInitialized = false;
     _pDev = nullptr;
 }
 
 void CMPShadowMap::OnLostDevice() {
     ReleaseResources();
+#if MINDPOWER_USE_D3D9_DEVICE
     if (_pShadowEffect)
         _pShadowEffect->OnLostDevice();
+#endif
 }
 
 bool CMPShadowMap::OnResetDevice() {
+#if MINDPOWER_USE_D3D9_DEVICE
     if (_pShadowEffect)
         _pShadowEffect->OnResetDevice();
+#endif
     return CreateResources();
 }
 
@@ -959,6 +976,10 @@ void CMPShadowMap::EndShadowPass() {
 }
 
 void CMPShadowMap::BindShadowMap(int textureStage) {
+#if !MINDPOWER_USE_D3D9_DEVICE
+    (void)textureStage;
+    return;
+#else
     if (!_pDev || !IsEnabled() || !_pShadowTexture)
         return;
 
@@ -972,6 +993,7 @@ void CMPShadowMap::BindShadowMap(int textureStage) {
     _pDev->SetSamplerState(textureStage, D3DSAMP_ADDRESSU, D3DTADDRESS_BORDER);
     _pDev->SetSamplerState(textureStage, D3DSAMP_ADDRESSV, D3DTADDRESS_BORDER);
     _pDev->SetSamplerState(textureStage, D3DSAMP_BORDERCOLOR, 0xFFFFFFFF);
+#endif
 }
 
 void CMPShadowMap::UnbindShadowMap(int textureStage) {
@@ -1036,6 +1058,7 @@ void CMPShadowMap::RenderGroundOverlay(const D3DXMATRIX& matViewProj) {
         return;
     }
 
+#if MINDPOWER_USE_D3D9_DEVICE
     if (!IsEnabled() || !_pShadowTexture || !_pShadowEffect || !_pGroundVB || !_pGroundIB)
         return;
 
@@ -1105,6 +1128,7 @@ void CMPShadowMap::RenderGroundOverlay(const D3DXMATRIX& matViewProj) {
 
     // Restore Z-test
     _pDev->SetRenderState(D3DRS_ZENABLE, oldZEnable);
+#endif
 }
 
 void CMPShadowMap::RenderGroundOverlayDx11(const D3DXMATRIX& matViewProj)

@@ -2,7 +2,10 @@
 
 #include "MindPowerAPI.h"
 #include "lwDirectX.h"
+
+#if MINDPOWER_USE_D3D9_DEVICE
 #include <d3dx9.h>
+#endif
 
 // Shadow map resolution presets
 enum eShadowMapQuality {
@@ -141,8 +144,8 @@ private:
     LPD3DXEFFECT           _pShadowEffect;
 
     // Ground overlay grid for terrain shadow rendering
-    IDirect3DVertexBuffer9* _pGroundVB;
-    IDirect3DIndexBuffer9*  _pGroundIB;
+    IDirect3DVertexBufferX* _pGroundVB;
+    IDirect3DIndexBufferX*  _pGroundIB;
     int                    _nGroundGridSize;
     int                    _nGroundVertCount;
     int                    _nGroundTriCount;

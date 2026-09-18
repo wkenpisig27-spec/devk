@@ -1,5 +1,10 @@
 #include "stdafx.h"
 #include "mygraph.h"
+#include "MindPowerRenderConfig.h"
+#if !MINDPOWER_USE_D3D9_DEVICE
+#include "lwDeviceObject11.h"
+#include "lwD3D11Texture.h"
+#endif
 
 IDirect3DDeviceX* g_pd3dDevice     = NULL; // Our rendering device
 
@@ -29,7 +34,13 @@ LPTEXTURE LoadTextureFromRawFile(char *strFileName)
 	fclose(fp);
 	
 	IDirect3DTextureX* pTexture;
+#if MINDPOWER_USE_D3D9_DEVICE
 	if(D3DXCreateTexture(g_pd3dDevice , w , h , D3DX_DEFAULT , 0 , D3DFMT_A8R8G8B8 ,  D3DPOOL_MANAGED , &pTexture)!=D3D_OK)                              
+#else
+	MindPower::lwDeviceObject11* d11 = MindPower::lwGetActiveDeviceObject11();
+	if(!d11 || !d11->GetD3D11Device() ||
+		MindPower::lwD3D11CreateEmptyTexture(d11->GetD3D11Device(), (UINT)w, (UINT)h, D3DFMT_A8R8G8B8, &pTexture) != LW_RET_OK)
+#endif
 	{
 		Log("ERR : %s\n" , "CreateTexture Failed");
 		delete[] pbImageBuf;
