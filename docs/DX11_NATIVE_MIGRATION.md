@@ -6,8 +6,8 @@ Goal: **true D3D11** end-to-end — no runtime D3D9 device, no long-term relianc
 
 | Layer | Today (DX11 play path) | Target (native) |
 | --- | --- | --- |
-| Device | `lwD3D11NativeContext` (`ID3D11Device` / context / swapchain); play path uses `GetD3D11Device` / `GetD3D11Context` / `GetSwapChain` | same (PSO later) |
-| State | Pass objects bind VS/PS/OM; `MeshNativeDraw` is D3D11/native enums | PSO + root signature / explicit CBs per pass |
+| Device | `lwD3D11NativeContext` (`ID3D11Device` / context / swapchain); play path uses `GetD3D11Device` / `GetD3D11Context` / `GetSwapChain` | same |
+| State | Cached pipeline objects (VS/PS/IL/OM + CB b0/b1); `MeshNativeDraw` overlays | same (D3D11 has no D3D12 PSO / root signature) |
 | Shaders | SM4 HLSL + FF mesh shader + ShaderMgr11 VS (`.hlsl` keys) | same |
 | Loaders | DDS/BMP/TGA + GDI+ (`lwD3D11CreateTextureFromMemory`) | same (DirectXTex optional) |
 | Effects | Compiled `shader\\eff.hlsl` (tex * diffuse/TFACTOR); OM from baked `EffPassObject` | same |
@@ -126,13 +126,18 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 **Smoke:** character, terrain, transparent props, combat VFX, weapon lit — not only login → world.
 
-## Remaining (after D3D9 device header)
+## Remaining (after native shader table + pipeline cache)
 
 Highest-value leftover vs the native target table:
 
-1. `ShaderLoad.cpp` and `lwShaderMgr.cpp` stay — they still register `.hlsl` keys and vertex decls for ShaderMgr11. Long-term target is a real PSO / root signature; pass objects already bind VS/PS/OM.
+1. D3D11 has no D3D12 PSO / root signature. Pipeline objects cache VS/PS/IL/OM + CB slots (b0/b1). Input layout stays FVF-keyed. ShaderMgr11 still overlays physique skin VS.
 
-### D3D9 device header — **complete** (await smoke)
+### native shader table + pipeline cache — **complete** (await smoke)
+
+- `lwShaderMgr` is a handle table. `LoadShader0` / `LoadShader1` register `.hlsl` keys and decls; ShaderMgr11 compiles SM4. D3DX assemble / encrypted `.vsh` / device-lost recreate are gone.
+- Draw applies a cached `MeshPassBind` (shaders + layout + OM + CB slots). Miss fills the cache. Physique skin still calls `PrepareDraw` so VS constants stay live.
+
+### D3D9 device header — **complete**
 
 - Removed `lwDeviceObject.h`. Play path already used `lwDeviceObject11`; the D3D9 class header was only included behind `MINDPOWER_USE_D3D9_DEVICE`.
 - `ShaderLoad.cpp` / `lwShaderMgr.cpp` are not parked unused files — they are the DX11 shader registration path.
@@ -206,7 +211,7 @@ Highest-value leftover vs the native target table:
 
 - Removed `lwDeviceObject.cpp` (already out of the play-path compile) and unused `d3dfont.cpp` / `d3dfont.h`.
 - Removed `lwDeviceObject.h`. DX11 play path uses `lwDeviceObject11` only.
-- `ShaderLoad.cpp` and `lwShaderMgr.cpp` stay — the shader registration path still uses them.
+- `ShaderLoad.cpp` and `lwShaderMgr.cpp` register `.hlsl` keys; ShaderMgr11 compiles them. No D3DX assemble.
 
 ### native effect pass — **complete**
 

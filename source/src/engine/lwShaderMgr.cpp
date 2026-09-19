@@ -1,351 +1,14 @@
 #include "stdafx.h"
 #include "lwShaderMgr.h"
 #include "lwInterface.h"
-#include "lwSystem.h"
-#include "lwSysGraphics.h"
-#include "lwResourceMgr.h"
 #include "lwShaderDeclMgr.h"
-#include "lwRenderBackend.h"
-#include "lwD3D11Gaps.h"
 #include "lwShaderMgr11.h"
+#include "lwD3D11Gaps.h"
 #include "MindPowerRenderConfig.h"
 
 LW_BEGIN
 
-static IDirect3DDeviceX* ShaderMgrDevice(lwIDeviceObject* obj)
-{
-#if MINDPOWER_USE_D3D9_DEVICE
-    return obj ? obj->GetDevice() : 0;
-#else
-    (void)obj;
-    return 0;
-#endif
-}
-
-//------------------------------------------------------------------------------
-// Shader Encryption Helper
-//------------------------------------------------------------------------------
-static const char* PKO_SHADER_KEY = "X7#m9$KpL2@v5*ZnQ8!w4&YhF3%r6^Dq";
-// static const char PKO_SHADER_MAGIC[] = "PKOE"; // Not used in Option 2
-
-static void DecryptShaderBuffer(BYTE* data, long& size)
-{
-    // Option 2: Always decrypt (No Header)
-    if (size > 0)
-    {
-        size_t keyLen = strlen(PKO_SHADER_KEY);
-        
-        for (long i = 0; i < size; i++)
-        {
-            data[i] ^= PKO_SHADER_KEY[i % keyLen];
-        }
-    }
-}
-
-#if (defined LW_USE_DX9) && MINDPOWER_USE_D3D9_DEVICE
-//------------------------------------------------------------------------------
-// ShaderIncludeHandler - Handles #include directives in HLSL shaders
-//------------------------------------------------------------------------------
-class ShaderIncludeHandler : public ID3DXInclude
-{
-private:
-    char m_basePath[LW_MAX_PATH];
-
-public:
-    ShaderIncludeHandler(const char* shaderFilePath)
-    {
-        // Extract directory from shader file path
-        strcpy(m_basePath, shaderFilePath);
-        char* lastSlash = strrchr(m_basePath, '\\');
-        if (!lastSlash) lastSlash = strrchr(m_basePath, '/');
-        if (lastSlash) *(lastSlash + 1) = '\0';
-        else m_basePath[0] = '\0';
-    }
-
-    STDMETHOD(Open)(D3DXINCLUDE_TYPE IncludeType, LPCSTR pFileName, 
-                    LPCVOID pParentData, LPCVOID* ppData, UINT* pBytes)
-    {
-        char fullPath[LW_MAX_PATH];
-        sprintf(fullPath, "%s%s", m_basePath, pFileName);
-
-        FILE* fp = fopen(fullPath, "rb");
-        if (!fp) return E_FAIL;
-
-        fseek(fp, 0, SEEK_END);
-        long size = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
-
-        char* data = new char[size + 1];
-        fread(data, 1, size, fp);
-        data[size] = '\0';
-        fclose(fp);
-
-        *ppData = data;
-        *pBytes = (UINT)size;
-        return S_OK;
-    }
-
-    STDMETHOD(Close)(LPCVOID pData)
-    {
-        delete[] (char*)pData;
-        return S_OK;
-    }
-};
-#endif
-
-
-//
-#if (defined LW_USE_DX8)
-
-LW_STD_IMPLEMENTATION(lwShaderMgr8)
-
-lwShaderMgr8::lwShaderMgr8(lwIDeviceObject* dev_obj)
-: _dev_obj(dev_obj), _vs_seq(0), _vs_size(0), _vs_num(0), _decl_mgr(0)
-{
-}
-
-lwShaderMgr8::~lwShaderMgr8()
-{
-    for(DWORD i = 0; _vs_num > 0; i++)
-    {
-        if(_vs_seq[i].handle)
-        {
-            UnregisterVertexShader(i);
-            //LW_DELETE_A(_vs_seq[i].data);
-            //_vs_num -= 1;
-        }
-    }
-
-    LW_IF_DELETE_A(_vs_seq);
-
-    LW_IF_RELEASE(_decl_mgr);
-}
-
-LW_RESULT lwShaderMgr8::Init(DWORD vs_buf_size, DWORD ps_buf_size)
-{
-    _vs_num = 0;
-    _vs_size = vs_buf_size;
-    _vs_seq = LW_NEW(lwShaderInfo[_vs_size]); 
-    memset(_vs_seq, 0, sizeof(lwShaderInfo) * _vs_size);
-
-
-    _decl_mgr = LW_NEW(lwShaderDeclMgr(this));
-
-    return LW_RET_OK;
-}
-
-LW_RESULT lwShaderMgr8::RegisterVertexShader(DWORD type, DWORD* code, DWORD size, DWORD usage, DWORD* decl, DWORD decl_size)
-{
-    LW_RESULT ret = LW_RET_FAILED;
-
-    DWORD handle;
-    IDirect3DDeviceX* dev = ShaderMgrDevice(_dev_obj);
-    if (!dev) {
-#if !MINDPOWER_USE_D3D9_DEVICE
-        goto __ret;
-#else
-        if (lwIsDx11Active())
-            goto __ret;
-#endif
-    }
-
-    if(type < 0 || type >= _vs_size)
-        goto __ret;
-
-    if(_vs_seq[type].handle)
-        goto __ret;
-
-    if (!dev || FAILED(dev->CreateVertexShader(decl, code, &handle, usage)))
-        goto __ret;
-
-    {
-        lwShaderInfo8* i = &_vs_seq[type];
-        i->handle = handle;
-        i->size = size;
-        i->data = LW_NEW(BYTE[i->size]);
-        i->decl = LW_NEW(BYTE[decl_size]);
-        memcpy(i->data, code, size);
-        memcpy(i->decl, decl, decl_size);
-
-        // increase num counter
-        _vs_num += 1;
-
-        ret = LW_RET_OK;
-    }
-__ret:
-
-    return ret;
-}
-LW_RESULT lwShaderMgr8::RegisterVertexShader(DWORD type, const char* file, DWORD usage, DWORD* decl, DWORD decl_size, DWORD binary_flag)
-{
-    LW_RESULT ret = LW_RET_FAILED;
-
-    long size = 0;
-    BYTE* data = 0;
-    DWORD* code = 0;
-    ID3DXBuffer* buf_code = 0;
-    ID3DXBuffer* buf_error = 0;
-
-    FILE* fp = fopen(file, "rb");
-    if(fp == NULL)
-        goto __ret;
-
-	fseek(fp, 0, SEEK_END);
-	
-	size = ftell(fp);
-    data = LW_NEW(BYTE[size]);
-
-	fseek(fp, 0, SEEK_SET);
-
-    fread(data, size, 1, fp);
-
-    fclose(fp);
-
-    // Decrypt if necessary
-    DecryptShaderBuffer(data, size);
-   
-    if(binary_flag)
-    {
-        code = (DWORD*)data;
-    }
-    else
-    {
-        if(FAILED(D3DXAssembleShader(data, size, 0, NULL, &buf_code, &buf_error)))
-            goto __ret;
-
-        code = (DWORD*)buf_code->GetBufferPointer();
-        size = buf_code->GetBufferSize();
-    }
-
-    ret = RegisterVertexShader(type, code, size, usage, decl, decl_size);
-
-    
-__ret:
-    LW_SAFE_DELETE_A(data);
-    LW_SAFE_RELEASE(buf_code);
-    LW_SAFE_RELEASE(buf_error);
-
-    return ret;
-}
-LW_RESULT lwShaderMgr8::UnregisterVertexShader(DWORD type)
-{
-    LW_RESULT ret = LW_RET_FAILED;
-
-#if !MINDPOWER_USE_D3D9_DEVICE
-    return LW_RET_OK;
-#else
-    IDirect3DDeviceX* dev = ShaderMgrDevice(_dev_obj);
-    if (!dev)
-        return LW_RET_OK;
-
-    if(type < 0 || type >= _vs_size)
-        goto __ret;
-
-    {
-        lwShaderInfo* s = &_vs_seq[type];
-
-        if (s == 0)
-            goto __ret;
-
-        dev->DeleteVertexShader(s->handle);
-
-        s->handle = 0;
-        s->size = 0;
-        LW_SAFE_DELETE_A(s->data);
-        LW_SAFE_DELETE_A(s->decl);
-
-        _vs_num -= 1;
-
-        ret = LW_RET_OK;
-    }
-__ret:
-    return ret;
-#endif
-}
-
-LW_RESULT lwShaderMgr8::QueryVertexShader(DWORD* ret_obj, DWORD type)
-{
-    LW_RESULT ret = LW_RET_FAILED;
-
-    if(type < 0 || type >= _vs_size)
-        goto __ret;
-
-    if(_vs_seq[type].handle == 0)
-        goto __ret;
-
-    *ret_obj = _vs_seq[type].handle;
-
-    ret = LW_RET_OK;
-
-__ret:
-    return ret;
-}
-LW_RESULT lwShaderMgr8::LoseDevice()
-{
-#if !MINDPOWER_USE_D3D9_DEVICE
-    return LW_RET_OK;
-#else
-    LW_RESULT ret = LW_RET_FAILED;
-
-    IDirect3DDeviceX* dev = ShaderMgrDevice(_dev_obj);
-    if (!dev)
-        return LW_RET_OK;
-
-    lwShaderInfo* s;
-
-    for(DWORD i = 0; i < _vs_size; i++)
-    {
-        s = &_vs_seq[i];
-
-        if(s->handle)
-        {
-            if(FAILED(dev->DeleteVertexShader(s->handle)))
-                goto __ret;
-
-            s->handle = 0;
-        }
-    }
-
-    ret = LW_RET_OK;
-
-__ret:
-    return ret;
-#endif
-}
-LW_RESULT lwShaderMgr8::ResetDevice()
-{
-#if !MINDPOWER_USE_D3D9_DEVICE
-    return LW_RET_OK;
-#else
-    LW_RESULT ret = LW_RET_FAILED;
-
-    IDirect3DDeviceX* dev = ShaderMgrDevice(_dev_obj);
-    if (!dev)
-        return LW_RET_OK;
-
-    lwShaderInfo* s;
-
-    for(DWORD i = 0; i < _vs_size; i++)
-    {
-        s = &_vs_seq[i];
-
-        if(s->handle == 0 && s->data)
-        {
-            if(FAILED(dev->CreateVertexShader((DWORD*)s->decl, (DWORD*)s->data, &s->handle, 0)))
-                goto __ret;
-        }
-    }
-
-    ret = LW_RET_OK;
-
-__ret:
-    return ret;
-#endif
-}
-#endif
-
-// =================================
-#if(defined LW_USE_DX9)
+#if (defined LW_USE_DX9)
 
 LW_STD_IMPLEMENTATION(lwShaderMgr9)
 
@@ -357,9 +20,9 @@ lwShaderMgr9::lwShaderMgr9(lwIDeviceObject* dev_obj)
 
 lwShaderMgr9::~lwShaderMgr9()
 {
-    for(DWORD i = 0; _vs_num > 0; i++)
+    for (DWORD i = 0; _vs_num > 0; i++)
     {
-        if(_vs_seq[i].handle)
+        if (_vs_seq[i].handle)
         {
             LW_DELETE_A(_vs_seq[i].data);
             LW_RELEASE(_vs_seq[i].handle);
@@ -367,9 +30,9 @@ lwShaderMgr9::~lwShaderMgr9()
         }
     }
 
-    for(DWORD i = 0; _decl_num > 0; i++)
+    for (DWORD i = 0; _decl_num > 0; i++)
     {
-        if(_decl_seq[i].handle)
+        if (_decl_seq[i].handle)
         {
             LW_DELETE_A(_decl_seq[i].data);
             LW_RELEASE(_decl_seq[i].handle);
@@ -382,9 +45,10 @@ lwShaderMgr9::~lwShaderMgr9()
 
 LW_RESULT lwShaderMgr9::Init(DWORD vs_buf_size, DWORD decl_buf_size, DWORD ps_buf_size)
 {
+    (void)ps_buf_size;
     _vs_num = 0;
     _vs_size = vs_buf_size;
-    _vs_seq = LW_NEW(lwVertexShaderInfo[_vs_size]); 
+    _vs_seq = LW_NEW(lwVertexShaderInfo[_vs_size]);
     memset(_vs_seq, 0, sizeof(lwVertexShaderInfo) * _vs_size);
 
     _decl_num = 0;
@@ -393,387 +57,91 @@ LW_RESULT lwShaderMgr9::Init(DWORD vs_buf_size, DWORD decl_buf_size, DWORD ps_bu
     memset(_decl_seq, 0, sizeof(lwVertDeclInfo9) * _decl_size);
 
     _decl_mgr = LW_NEW(lwShaderDeclMgr(this));
-
     return LW_RET_OK;
 }
 
 LW_RESULT lwShaderMgr9::RegisterVertexShader(DWORD type, BYTE* data, DWORD size)
 {
-    LW_RESULT ret = LW_RET_FAILED;
-    IDirect3DDeviceX* dev = ShaderMgrDevice(_dev_obj);
-    IDirect3DVertexShaderX* handle = 0;
-    lwVertexShaderInfo* i = 0;            // << declarado antes de qualquer goto
-
-    if (!dev) {
-        if (lwIsDx11Active())
-        {
-            lwD3D11Gap(LW_D3D11_SKIP, "shadermgr-create-vs-bytecode",
-                "DX11 RegisterVertexShader(bytecode) is unused; HLSL file path compiles SM4");
-            goto __ret;
-        }
-        lwD3D11Gap(LW_D3D11_SKIP, "shadermgr-create-vs",
-            "CreateVertexShader is D3D9; ShaderMgr11 is Slice 3");
-        goto __ret;
-    }
-
-    if (type >= _vs_size)                 // DWORD � unsigned; "type < 0" nunca � verdadeiro
-        goto __ret;
-
-    if (_vs_seq[type].handle)
-        goto __ret;
-
-    if (!data || size == 0)
-        goto __ret;
-
-#if MINDPOWER_USE_D3D9_DEVICE
-    if (FAILED(dev->CreateVertexShader((DWORD*)data, &handle)))
-        goto __ret;
-#else
-    goto __ret;
-#endif
-
-    i = &_vs_seq[type];
-    i->handle = handle;
-    i->size   = size;
-    i->data   = LW_NEW(BYTE[size]);
-    memcpy(i->data, data, size);
-
-    _vs_num += 1;
-    ret = LW_RET_OK;
-
-__ret:
-    return ret;
+    (void)type;
+    (void)data;
+    (void)size;
+    lwD3D11Gap(LW_D3D11_SKIP, "shadermgr-create-vs-bytecode",
+        "DX11 RegisterVertexShader(bytecode) is unused; LoadShader registers .hlsl files");
+    return LW_RET_FAILED;
 }
 
 LW_RESULT lwShaderMgr9::RegisterVertexShader(DWORD type, const char* file, DWORD file_flag, const D3DXMACRO* defines)
 {
-    LW_RESULT ret = LW_RET_FAILED;
+    (void)file_flag;
+    if (type >= _vs_size || !file)
+        return LW_RET_FAILED;
+    if (_vs_seq[type].handle)
+        return LW_RET_FAILED;
 
-    long size = 0;
-    BYTE* data = 0;
-    BYTE* code = 0;
+    IDirect3DVertexShaderX* handle = 0;
+    if (LW_FAILED(lwD3D11CompileVertexShader(file, defines, &handle)) || !handle)
+        return LW_RET_FAILED;
 
-    ID3DXBuffer* buf_code = 0;
-    ID3DXBuffer* buf_error = 0;
-
-    if (lwIsDx11Active())
-    {
-        if (type >= _vs_size)
-            return LW_RET_FAILED;
-        if (_vs_seq[type].handle)
-            return LW_RET_FAILED;
-
-        IDirect3DVertexShaderX* handle = 0;
-        if (LW_FAILED(lwD3D11CompileVertexShader(file, defines, &handle)) || !handle)
-            return LW_RET_FAILED;
-
-        _vs_seq[type].handle = handle;
-        _vs_seq[type].data = 0;
-        _vs_seq[type].size = 0;
-        _vs_num += 1;
-        return LW_RET_OK;
-    }
-
-#if MINDPOWER_USE_D3D9_DEVICE
-    FILE* fp = fopen(file, "rb");
-    if(fp == NULL)
-        goto __ret;
-
-	fseek(fp, 0, SEEK_END);
-	
-	size = ftell(fp);
-    data = LW_NEW(BYTE[size]);
-
-	fseek(fp, 0, SEEK_SET);
-
-    fread(data, size, 1, fp);
-
-    fclose(fp);
-
-    // Decrypt if necessary
-    DecryptShaderBuffer(data, size);
-   
-    if(file_flag == VS_FILE_OBJECT)
-    {
-        code = data;
-    }
-    else
-    {
-
-#if(defined LW_SHADER_DEBUG_VS)
-        DWORD compile_flag = 0;
-        compile_flag |= D3DXSHADER_DEBUG;
-        //compile_flag |= D3DXSHADER_FORCE_VS_SOFTWARE_NOOPT;
-
-        if(file_flag == VS_FILE_ASM)
-        {
-            if(FAILED(D3DXAssembleShaderFromFile(
-                file,
-                NULL, 
-                NULL, 
-                compile_flag, 
-                &buf_code, 
-                &buf_error)))
-            {
-                goto __ret;
-            }
-        }
-        else if(file_flag == VS_FILE_HLSL)
-        {
-            ShaderIncludeHandler includeHandler(file);
-            if(FAILED(D3DXCompileShaderFromFile(
-                file,
-                NULL,
-                &includeHandler,
-                "main",
-                "vs_2_0",
-                compile_flag,
-                &buf_code,
-                &buf_error,
-                NULL)))
-            {
-                if (buf_error)
-                {
-                    const char* errStr = (const char*)buf_error->GetBufferPointer();
-                    MessageBoxA(NULL, errStr, file, MB_OK);
-                }
-                goto __ret;
-            }
-
-        }
-
-#else
-        if(file_flag == VS_FILE_ASM)
-        {
-            if (FAILED(D3DXAssembleShader((LPCSTR)data, size, NULL, NULL, 0, &buf_code, &buf_error)))
-                goto __ret;
-        }
-        else if(file_flag == VS_FILE_HLSL)
-        {
-            DWORD compile_flag = 0;
-            D3DXMACRO macros[2] = {
-                { defines->Name, defines->Definition },
-                { NULL, NULL }
-            };
-            ShaderIncludeHandler includeHandler(file);
-            if(FAILED(D3DXCompileShader(
-                (LPCSTR)data, 
-                size, 
-                macros, 
-                &includeHandler, 
-                "main",
-                "vs_2_0",
-                compile_flag,
-                &buf_code,
-                &buf_error,
-                NULL)))
-            {
-                // Output error message for debugging
-                if (buf_error)
-                {
-                    const char* errStr = (const char*)buf_error->GetBufferPointer();
-                    MessageBoxA(NULL, errStr, file, MB_OK);
-                }
-                goto __ret;
-            }
-        }
-#endif
-
-        code = (BYTE*)buf_code->GetBufferPointer();
-        size = buf_code->GetBufferSize();
-
-    }
-
-    if(LW_FAILED(RegisterVertexShader(type, code, size)))
-        goto __ret;
-
-    ret = LW_RET_OK;
-
-__ret:
-    LW_SAFE_DELETE_A(data);
-    LW_SAFE_RELEASE(buf_code);
-    LW_SAFE_RELEASE(buf_error);
-    return ret;
-#else
-    return LW_RET_FAILED;
-#endif
+    _vs_seq[type].handle = handle;
+    _vs_seq[type].data = 0;
+    _vs_seq[type].size = 0;
+    _vs_num += 1;
+    return LW_RET_OK;
 }
+
 LW_RESULT lwShaderMgr9::RegisterVertexDeclaration(DWORD type, D3DVERTEXELEMENT9* data)
 {
-    LW_RESULT ret = LW_RET_FAILED;
-
-    // Declara��es antecipadas (evita "init skipped by goto")
-    IDirect3DVertexDeclarationX* handle = 0;
-    IDirect3DDeviceX* dev = ShaderMgrDevice(_dev_obj);
-    int i = 0;
-    D3DVERTEXELEMENT9* p = 0;
-
-    if (!dev) {
-        if (lwIsDx11Active())
-        {
-            if (type >= _decl_size)
-                goto __ret;
-            if (_decl_seq[type].handle)
-                goto __ret;
-            if (!data)
-                goto __ret;
-
-            if (LW_FAILED(lwD3D11CreateVertexDecl(data, &handle)) || !handle)
-                goto __ret;
-
-            _decl_seq[type].handle = handle;
-            p = data;
-            while (p->Stream != 0xFF)
-            {
-                ++i;
-                ++p;
-            }
-            ++i;
-            _decl_seq[type].data = LW_NEW(D3DVERTEXELEMENT9[i]);
-            memcpy(_decl_seq[type].data, data, sizeof(D3DVERTEXELEMENT9) * i);
-            _decl_num += 1;
-            ret = LW_RET_OK;
-            goto __ret;
-        }
-        lwD3D11Gap(LW_D3D11_SKIP, "shadermgr-create-decl",
-            "CreateVertexDeclaration is D3D9; ShaderMgr11 is Slice 3");
-        goto __ret;
-    }
-
-    // (Com DWORD, "type < 0" nunca � verdadeiro; pode remover se quiser)
-    if (type >= _decl_size)
-        goto __ret;
-
+    if (type >= _decl_size || !data)
+        return LW_RET_FAILED;
     if (_decl_seq[type].handle)
-        goto __ret;
+        return LW_RET_FAILED;
 
-    if (!data)
-        goto __ret;
+    IDirect3DVertexDeclarationX* handle = 0;
+    if (LW_FAILED(lwD3D11CreateVertexDecl(data, &handle)) || !handle)
+        return LW_RET_FAILED;
 
-#if MINDPOWER_USE_D3D9_DEVICE
-    if (FAILED(dev->CreateVertexDeclaration(data, &handle)))
-        goto __ret;
-#else
-    goto __ret;
-#endif
-
-    _decl_seq[type].handle = handle;
-
-    // Agora sim inicializa p e usa
-    p = data;
+    int n = 0;
+    D3DVERTEXELEMENT9* p = data;
     while (p->Stream != 0xFF)
     {
-        ++i;
+        ++n;
         ++p;
     }
-    ++i;
+    ++n;
 
-    _decl_seq[type].data = LW_NEW(D3DVERTEXELEMENT9[i]);
-    memcpy(_decl_seq[type].data, data, sizeof(D3DVERTEXELEMENT9) * i);
-
+    _decl_seq[type].handle = handle;
+    _decl_seq[type].data = LW_NEW(D3DVERTEXELEMENT9[n]);
+    memcpy(_decl_seq[type].data, data, sizeof(D3DVERTEXELEMENT9) * n);
     _decl_num += 1;
-    ret = LW_RET_OK;
-
-__ret:
-    return ret;
+    return LW_RET_OK;
 }
+
 LW_RESULT lwShaderMgr9::LoseDevice()
 {
-    LW_RESULT ret = LW_RET_FAILED;
-
-    IDirect3DDeviceX* dev = ShaderMgrDevice(_dev_obj);
-    if (!dev) {
-        lwD3D11Gap(LW_D3D11_SKIP, "shadermgr-lose-device",
-            "D3D11 has no device-lost VS release");
-        return LW_RET_OK;
-    }
-
-    lwVertexShaderInfo* s;
-
-    for(DWORD i = 0; i < _vs_size; i++)
-    {
-        s = &_vs_seq[i];
-
-        LW_SAFE_RELEASE(s->handle);
-    }
-
-    ret = LW_RET_OK;
-
-//__ret:
-    return ret;
+    return LW_RET_OK;
 }
+
 LW_RESULT lwShaderMgr9::ResetDevice()
 {
-    LW_RESULT ret = LW_RET_FAILED;
-
-    IDirect3DDeviceX* dev = ShaderMgrDevice(_dev_obj);
-    if (!dev) {
-        lwD3D11Gap(LW_D3D11_SKIP, "shadermgr-reset-device",
-            "D3D11 has no device-lost VS recreate");
-        return LW_RET_OK;
-    }
-
-    lwVertexShaderInfo* s;
-
-    for(DWORD i = 0; i < _vs_size; i++)
-    {
-        s = &_vs_seq[i];
-
-        if(s->handle == 0 && s->data)
-        {
-#if MINDPOWER_USE_D3D9_DEVICE
-            if(FAILED(dev->CreateVertexShader((DWORD*)s->data, &s->handle)))
-                goto __ret;
-#else
-            goto __ret;
-#endif
-        }
-    }
-
-    ret = LW_RET_OK;
-
-__ret:
-    return ret;
+    return LW_RET_OK;
 }
 
 LW_RESULT lwShaderMgr9::QueryVertexShader(IDirect3DVertexShaderX** ret_obj, DWORD type)
 {
-    LW_RESULT ret = LW_RET_FAILED;
-
-    if(type < 0 || type >= _vs_size)
-        goto __ret;
-
-    if(_vs_seq[type].handle == 0)
-        goto __ret;
-
+    if (!ret_obj || type >= _vs_size || !_vs_seq[type].handle)
+        return LW_RET_FAILED;
     *ret_obj = _vs_seq[type].handle;
-
-    ret = LW_RET_OK;
-
-__ret:
-    return ret;
-
+    return LW_RET_OK;
 }
+
 LW_RESULT lwShaderMgr9::QueryVertexDeclaration(IDirect3DVertexDeclarationX** ret_obj, DWORD type)
 {
-    LW_RESULT ret = LW_RET_FAILED;
-
-    if(type < 0 || type >= _decl_size)
-        goto __ret;
-
-    if(_decl_seq[type].handle == 0)
-        goto __ret;
-
+    if (!ret_obj || type >= _decl_size || !_decl_seq[type].handle)
+        return LW_RET_FAILED;
     *ret_obj = _decl_seq[type].handle;
-
-    ret = LW_RET_OK;
-
-__ret:
-    return ret;
-
+    return LW_RET_OK;
 }
 
 #endif
-
 
 LW_END

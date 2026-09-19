@@ -1138,9 +1138,26 @@ struct MeshPassBind
     ID3D11RasterizerState* rast;
     ID3D11DepthStencilState* depth;
     ID3D11BlendState* blend;
+    ID3D11Buffer* vs_cb0;
+    ID3D11Buffer* vs_cb1;
+    ID3D11Buffer* ps_cb0;
     int use_sm4;
     int skin;
 };
+
+struct MeshPipelineKey
+{
+    DWORD fvf;
+    DWORD bits;
+    bool operator<(const MeshPipelineKey& o) const
+    {
+        if (fvf != o.fvf)
+            return fvf < o.fvf;
+        return bits < o.bits;
+    }
+};
+
+static std::map<MeshPipelineKey, MeshPassBind> s_pipelines;
 
 enum MeshPassId
 {
@@ -1258,6 +1275,7 @@ static void ClearPassObjects()
 {
     memset(s_pass_obj, 0, sizeof(s_pass_obj));
     memset(s_eff_obj, 0, sizeof(s_eff_obj));
+    s_pipelines.clear();
 }
 
 static void RebindEffPassShaders()
@@ -1268,6 +1286,7 @@ static void RebindEffPassShaders()
         if (s_eff_obj[i].vs || s_eff_obj[i].ps)
             s_eff_obj[i].ps = ps;
     }
+    s_pipelines.clear();
 }
 
 static void BakePassObjects()
@@ -1508,8 +1527,47 @@ static void ResolveMeshOutputMerger(lwDeviceObject11* dev, const FvfInfo& info, 
     om->blend = blend;
 }
 
-// Shaders come from the baked pass object. Layout is FVF-resolved per draw
-// (cannot bake one IL). ShaderMgr skin VS overlays character physique.
+static unsigned MeshCullBits()
+{
+    if (s_draw.cull == D3D11_CULL_NONE)
+        return 0;
+    if (s_draw.cull == D3D11_CULL_FRONT)
+        return 1;
+    return 2;
+}
+
+static MeshPipelineKey MakePipelineKey(DWORD fvf, int skin, int sm4)
+{
+    const MeshPassObject* pass = CurrentMeshPass();
+    unsigned eff_id = (s_mesh.eff_tech >= 0 && s_mesh.eff_tech <= 6)
+        ? (unsigned)s_mesh.eff_tech + 1 : 0;
+    MeshPipelineKey k;
+    k.fvf = fvf;
+    k.bits = (unsigned)pass->id
+        | (eff_id << 3)
+        | ((skin ? 1u : 0) << 7)
+        | ((sm4 ? 1u : 0) << 8)
+        | (MeshCullBits() << 9)
+        | ((s_draw.msaa ? 1u : 0) << 11)
+        | ((s_draw.alpha ? 1u : 0) << 12)
+        | ((s_mesh.outline ? 1u : 0) << 13)
+        | ((s_draw.zenable ? 0u : 1u) << 14)
+        | ((s_draw.zwrite ? 1u : 0) << 15)
+        | ((s_mesh.hint_additive ? 1u : 0) << 16)
+        | (((unsigned)s_draw.src & 31u) << 17)
+        | (((unsigned)s_draw.dest & 31u) << 22);
+    return k;
+}
+
+static void FillMeshRoot(MeshPassBind* bind)
+{
+    bind->vs_cb0 = s_mesh.cb0;
+    bind->vs_cb1 = s_mesh.cb1;
+    bind->ps_cb0 = s_mesh.cb0;
+}
+
+// Pipeline object: one cached bind (VS/PS/IL/OM + CB slots). Layout is
+// still FVF-keyed — D3D11 has no D3D12 PSO / root signature.
 static int ResolveMeshPassBind(lwDeviceObject11* dev, DWORD fvf, const FvfInfo& info, MeshPassBind* bind)
 {
     const MeshPassObject* pass = CurrentMeshPass();
@@ -1525,6 +1583,29 @@ static int ResolveMeshPassBind(lwDeviceObject11* dev, DWORD fvf, const FvfInfo& 
     if (!layout)
         return 0;
 
+    lwD3D11Texture* tex1_early = lwAsD3D11Texture(dev->GetBoundTex(1));
+    lwD3D11Texture* tex2_early = lwAsD3D11Texture(dev->GetBoundTex(2));
+    const int dual_early = (ResolvePassCombiner(pass, dev, tex1_early, tex2_early) != 0.0f) ? 1 : 0;
+    const int rhw = ((fvf & D3DFVF_POSITION_MASK) == D3DFVF_XYZRHW) ? 1 : 0;
+    const int eff_xyzb1 = ((fvf & D3DFVF_POSITION_MASK) == D3DFVF_XYZB1) &&
+        !(fvf & (D3DFVF_LASTBETA_UBYTE4 | D3DFVF_LASTBETA_D3DCOLOR));
+    const int fvf_only_fx = (!info.has_nrm && !info.has_blend) || eff_xyzb1;
+    const int want_sm4 = (!dual_early && !rhw && !fvf_only_fx && info.has_blend) ? 1 : 0;
+
+    const MeshPipelineKey key = MakePipelineKey(fvf, skin, want_sm4);
+    std::map<MeshPipelineKey, MeshPassBind>::iterator it = s_pipelines.find(key);
+    if (it != s_pipelines.end())
+    {
+        *bind = it->second;
+        if (bind->use_sm4)
+        {
+            ID3D11InputLayout* sm_layout = 0;
+            if (lwD3D11ShaderMgrPrepareDraw(dev, &sm_layout) && sm_layout)
+                bind->layout = sm_layout;
+        }
+        return 1;
+    }
+
     bind->skin = skin;
     bind->layout = layout;
     bind->use_sm4 = 0;
@@ -1536,14 +1617,7 @@ static int ResolveMeshPassBind(lwDeviceObject11* dev, DWORD fvf, const FvfInfo& 
         bind->ps = eff->ps ? eff->ps : pass->ps;
     }
 
-    lwD3D11Texture* tex1_early = lwAsD3D11Texture(dev->GetBoundTex(1));
-    lwD3D11Texture* tex2_early = lwAsD3D11Texture(dev->GetBoundTex(2));
-    const int dual_early = (ResolvePassCombiner(pass, dev, tex1_early, tex2_early) != 0.0f) ? 1 : 0;
-    const int rhw = ((fvf & D3DFVF_POSITION_MASK) == D3DFVF_XYZRHW) ? 1 : 0;
-    const int eff_xyzb1 = ((fvf & D3DFVF_POSITION_MASK) == D3DFVF_XYZB1) &&
-        !(fvf & (D3DFVF_LASTBETA_UBYTE4 | D3DFVF_LASTBETA_D3DCOLOR));
-    const int fvf_only_fx = (!info.has_nrm && !info.has_blend) || eff_xyzb1;
-    if (!dual_early && !rhw && !fvf_only_fx && info.has_blend)
+    if (want_sm4)
     {
         ID3D11InputLayout* sm_layout = 0;
         if (lwD3D11ShaderMgrPrepareDraw(dev, &sm_layout) && sm_layout)
@@ -1554,6 +1628,8 @@ static int ResolveMeshPassBind(lwDeviceObject11* dev, DWORD fvf, const FvfInfo& 
     }
 
     ResolveMeshOutputMerger(dev, info, bind);
+    FillMeshRoot(bind);
+    s_pipelines[key] = *bind;
     return 1;
 }
 
@@ -1564,9 +1640,9 @@ static void ApplyMeshPassBind(const MeshPassBind* bind)
     {
         s_mesh.context->VSSetShader(bind->vs, 0, 0);
         s_mesh.context->PSSetShader(bind->ps, 0, 0);
-        s_mesh.context->VSSetConstantBuffers(0, 1, &s_mesh.cb0);
-        s_mesh.context->VSSetConstantBuffers(1, 1, &s_mesh.cb1);
-        s_mesh.context->PSSetConstantBuffers(0, 1, &s_mesh.cb0);
+        s_mesh.context->VSSetConstantBuffers(0, 1, &bind->vs_cb0);
+        s_mesh.context->VSSetConstantBuffers(1, 1, &bind->vs_cb1);
+        s_mesh.context->PSSetConstantBuffers(0, 1, &bind->ps_cb0);
     }
     s_mesh.context->RSSetState(bind->rast);
     s_mesh.context->OMSetDepthStencilState(bind->depth, 0);

@@ -112,6 +112,7 @@ void lwGetOutlineParams(float* worldWidth, float* r, float* g, float* b)
         *b = g_lwOutlineColorB;
 }
 
+// Native DX11: LoadShader0/1 register .hlsl keys + decls. ShaderMgr11 compiles SM4.
 LW_RESULT LoadShader0(lwISysGraphics* sys_graphics)
 {
     LW_RESULT ret = LW_RET_FAILED;

@@ -57,7 +57,8 @@ typedef lwShaderMgr8 lwShaderMgr;
 #endif
 
 // ===============================================
-// directX9 shader manager
+// Shader handle table. DX11 play path compiles SM4 via ShaderMgr11;
+// LoadShader0/1 register .hlsl keys and vertex decls into this table.
 #if(defined LW_USE_DX9)
 
 class lwShaderMgr9 : public lwIShaderMgr
