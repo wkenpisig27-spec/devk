@@ -4,6 +4,7 @@
 #include <string>
 #include "lwHeader.h"
 #include "lwStdInc.h"
+#include "MindPowerRenderConfig.h"
 #include "lwErrorCode.h"
 #include "lwDirectX.h"
 #include "lwGuidObj.h"
@@ -613,8 +614,9 @@ public:
     virtual LW_RESULT SetDirect3D(IDirect3DX* d3d) PURE_METHOD;
     virtual LW_RESULT SetDevice(IDirect3DDeviceX* dev) PURE_METHOD;
     virtual IDirect3DX* GetDirect3D() PURE_METHOD;
-    // D3D9-only escape hatch. New code must not call this; DX11 will return NULL.
+#if MINDPOWER_USE_D3D9_DEVICE
     virtual IDirect3DDeviceX* GetDevice() PURE_METHOD;
+#endif
     virtual lwD3DCreateParam* GetD3DCreateParam() PURE_METHOD;
     virtual D3DDISPLAYMODE* GetAdapterDisplayMode() PURE_METHOD;
     virtual D3DCAPSX* GetDeviceCaps() PURE_METHOD;

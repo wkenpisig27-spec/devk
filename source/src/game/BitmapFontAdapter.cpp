@@ -110,11 +110,6 @@ int CGuiFont::CreateFont(const char* font, int size800, int size1024, DWORD dwSt
 }
 
 int CGuiFont::LoadBitmapFont(const char* fntFile) {
-    IDirect3DDeviceX* pDevice = GetDevice();
-    if (!pDevice && !lwIsDx11Active()) {
-        return -1;
-    }
-    
     // Create new bitmap font
     CBitmapFont* pFont = new CBitmapFont();
     
@@ -127,9 +122,19 @@ int CGuiFont::LoadBitmapFont(const char* fntFile) {
         texPath = "";
     }
     
-    bool loaded = lwIsDx11Active()
-        ? pFont->Load(fntFile, texPath.c_str(), &g_Render)
-        : pFont->Load(fntFile, texPath.c_str(), pDevice);
+    bool loaded = false;
+    if (lwIsDx11Active())
+        loaded = pFont->Load(fntFile, texPath.c_str(), &g_Render);
+#if MINDPOWER_USE_D3D9_DEVICE
+    else {
+        IDirect3DDeviceX* pDevice = GetDevice();
+        if (!pDevice) {
+            delete pFont;
+            return -1;
+        }
+        loaded = pFont->Load(fntFile, texPath.c_str(), pDevice);
+    }
+#endif
     if (!loaded) {
         delete pFont;
         return -1;
@@ -323,14 +328,9 @@ void CGuiFont::End() {
     }
 }
 
-//----------------------------------------------------------------------
-// Helper: Get D3D Device
-//----------------------------------------------------------------------
+#if MINDPOWER_USE_D3D9_DEVICE
 IDirect3DDeviceX* CGuiFont::GetDevice() {
     extern MINDPOWER_API MPRender g_Render;
-#if !MINDPOWER_USE_D3D9_DEVICE
-    return nullptr;
-#else
     return g_Render.GetDevice();
-#endif
 }
+#endif

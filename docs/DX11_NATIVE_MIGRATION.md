@@ -6,7 +6,7 @@ Goal: **true D3D11** end-to-end — no runtime D3D9 device, no long-term relianc
 
 | Layer | Today (DX11 play path) | Target (native) |
 | --- | --- | --- |
-| Device | `lwD3D11NativeContext` (`ID3D11Device` / context / swapchain); `GetDevice()` is a D3D9 leftover that returns NULL | same (PSO later) |
+| Device | `lwD3D11NativeContext` (`ID3D11Device` / context / swapchain); play path uses `GetD3D11Device` / `GetD3D11Context` / `GetSwapChain` | same (PSO later) |
 | State | Pass objects + native `SetAlpha`/`SetBlend`/`SetCombiner` writers | PSO + root signature / explicit CBs per pass |
 | Shaders | SM4 HLSL + FF mesh shader + ShaderMgr11 VS (`.hlsl` keys) | same |
 | Loaders | DDS/BMP/TGA + GDI+ (`lwD3D11CreateTextureFromMemory`) | same (DirectXTex optional) |
@@ -32,7 +32,7 @@ Lib names: Debug `MindPower3D_D11D.lib`, Release `MindPower3D_D11R.lib`. Neither
 - [x] `MINDPOWER_DX11_ONLY` compile gate
 - [x] `lwD3D11NativeContext` skeleton + init from `lwDeviceObject11`
 - [x] CI/build only `Release|x64` with flag; smoke login → world (manual)
-- [ ] Log `GetDevice()` inventory at startup (gap report) — optional Phase 2 prep
+- [x] Play-path `GetDevice()` removed from `MPRender`; native getters + swapchain desc
 
 ### Phase 1 — Kill D3D9 device islands (game + engine) — **complete**
 
@@ -130,7 +130,17 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 Highest-value leftover vs the native target table:
 
-1. Leftover D3D9 *language*: `GetDevice()` still returns null; `lwDeviceObject.h` is still the leftover type. Material RSA no longer talks D3DRS.
+1. Leftover D3D9 *language*: `lwDeviceObject.h` stays for dual-build. Play path no longer includes it or exposes `lwIDeviceObject::GetDevice()`.
+
+### lwIDeviceObject GetDevice — **complete**
+
+- `GetDevice()` is on the interface only when `MINDPOWER_USE_D3D9_DEVICE`. `lwDeviceObject11` no longer implements a null stub.
+- Play-path sources no longer include `lwDeviceObject.h`. Dual-build still constructs `lwDeviceObject` behind the same flag.
+
+### play-path GetDevice — **complete**
+
+- `MPRender::GetDevice()` exists only on `MINDPOWER_USE_D3D9_DEVICE`. DX11 uses `GetD3D11Device` / `GetD3D11Context` / `GetSwapChain`.
+- Texture load, fonts, and `CMPResManger` backbuffer size no longer probe a null D3D9 handle. Backbuffer desc comes from the DXGI swapchain.
 
 ### native RSA apply — **complete**
 
@@ -149,7 +159,8 @@ Highest-value leftover vs the native target table:
 ### D3D9 sources — **complete**
 
 - Removed `lwDeviceObject.cpp` (already out of the play-path compile) and unused `d3dfont.cpp` / `d3dfont.h`.
-- `lwDeviceObject.h`, `ShaderLoad.cpp`, and `lwShaderMgr.cpp` stay — DX11 still uses the header type and the shader registration path.
+- `lwDeviceObject.h` stays on disk for dual-build. DX11 play path does not include it.
+- `ShaderLoad.cpp` and `lwShaderMgr.cpp` stay — the shader registration path still uses them.
 
 ### native effect pass — **complete**
 
@@ -183,7 +194,7 @@ Highest-value leftover vs the native target table:
 ### Device handle — **complete**
 
 - `lwD3D11NativeBindDevice` from `lwDeviceObject11::CreateDevice`; `lwD3D11NativeUnbindDevice` on destroy.
-- `MPRender` no longer stores `IDirect3DDeviceX*` on DX11-only. `GetDevice()` is a leftover that returns nullptr. Use `g_Render.GetD3D11Device()` / `GetD3D11Context()` / `GetSwapChain()`, or `lwD3D11NativeGet*`.
+- `MPRender` no longer stores `IDirect3DDeviceX*` on DX11-only. There is no `GetDevice()` on that build. Use `g_Render.GetD3D11Device()` / `GetD3D11Context()` / `GetSwapChain()`, or `lwD3D11NativeGet*`.
 - Debug|x64 uses the same `MINDPOWER_DX11_ONLY` play path as Release.
 
 ## Linux / DXVK
@@ -207,7 +218,7 @@ Snapshot at branch start — see commit message / `docs/DX11_NATIVE_INVENTORY.tx
 
 ## Rules for new code on this branch
 
-1. Do **not** call `IDirect3DDevice9` or `g_Render.GetDevice()` without an DX11 alternative.
+1. Do **not** call `IDirect3DDevice9` or `g_Render.GetDevice()` on the DX11 play path.
 2. Prefer `lwD3D11NativeGetDevice()` / `GetContext()` / `GetSwapChain()`, or `lwGetActiveDeviceObject11()`.
 3. New rendering features use HLSL + `ID3D11*` only.
 4. Keep gameplay, network, and asset formats unchanged.

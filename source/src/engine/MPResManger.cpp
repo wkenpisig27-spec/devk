@@ -16,7 +16,37 @@
 #include "lwPhysique.h"
 #include "lwRenderBackend.h"
 #include "lwD3D11Gaps.h"
+#include "lwD3D11NativeContext.h"
 #include "MindPowerRenderConfig.h"
+
+#ifdef USE_RENDER
+static void FillBackBufferFromSwapChain(MPRender* dev, D3DSURFACE_DESC* out)
+{
+	memset(out, 0, sizeof(*out));
+	UINT w = 0;
+	UINT h = 0;
+	if (IDXGISwapChain* sc = lwD3D11NativeGetSwapChain())
+	{
+		DXGI_SWAP_CHAIN_DESC desc = {};
+		if (SUCCEEDED(sc->GetDesc(&desc)))
+		{
+			w = desc.BufferDesc.Width;
+			h = desc.BufferDesc.Height;
+		}
+	}
+	if (w == 0)
+		w = (UINT)dev->GetScrWidth();
+	if (h == 0)
+		h = (UINT)dev->GetScrHeight();
+	if (w == 0)
+		w = 1280;
+	if (h == 0)
+		h = 720;
+	out->Width = w;
+	out->Height = h;
+	out->Format = D3DFMT_A8R8G8B8;
+}
+#endif
 
 using namespace std;
 
@@ -298,25 +328,10 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, XMMATRIX* pmat, XMMATRIX* pM
 
 	memset(&m_d3dBackBuffer, 0, sizeof(m_d3dBackBuffer));
 #ifdef USE_RENDER
-	if (MindPowerDx11OnlyBuild() || lwIsDx11Active() || !m_pDev->GetDevice()) {
+	if (lwIsDx11Active()) {
 		lwD3D11Gap(LW_D3D11_SKIP, "initres-getbackbuffer",
-			"GetDevice() is NULL on DX11; backbuffer desc comes from the HWND size");
-		RECT rc_bb = {};
-		if (m_pDev->GetInterfaceMgr()->dev_obj)
-			m_pDev->GetInterfaceMgr()->dev_obj->GetWindowRect(NULL, &rc_bb);
-		UINT bb_w = (UINT)(rc_bb.right - rc_bb.left);
-		UINT bb_h = (UINT)(rc_bb.bottom - rc_bb.top);
-		if (bb_w == 0)
-			bb_w = (UINT)m_pDev->GetScrWidth();
-		if (bb_h == 0)
-			bb_h = (UINT)m_pDev->GetScrHeight();
-		if (bb_w == 0)
-			bb_w = 1280;
-		if (bb_h == 0)
-			bb_h = 720;
-		m_d3dBackBuffer.Width = bb_w;
-		m_d3dBackBuffer.Height = bb_h;
-		m_d3dBackBuffer.Format = D3DFMT_A8R8G8B8;
+			"backbuffer desc comes from the DXGI swapchain");
+		FillBackBufferFromSwapChain(m_pDev, &m_d3dBackBuffer);
 #if MINDPOWER_USE_D3D9_DEVICE
 	} else {
 		IDirect3DSurfaceX* pBackBuffer = 0;
@@ -362,7 +377,7 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, XMMATRIX* pmat, XMMATRIX* pM
 
 
 #ifdef USE_RENDER
-	if (MindPowerDx11OnlyBuild() || lwIsDx11Active() || !m_pDev->GetDevice()) {
+	if (lwIsDx11Active()) {
 		lwD3D11Gap(LW_D3D11_SKIP, "initres-getdevicecaps",
 			"GetDeviceCaps skipped on DX11; using synthetic MPRender caps");
 #if MINDPOWER_USE_D3D9_DEVICE
@@ -390,7 +405,7 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, XMMATRIX* pmat, XMMATRIX* pM
 #ifdef USE_RENDER
 	// DX11 has no D3D9 VS objects (LoadTotalVShader). Soft draw uses compiled
 	// shader\\eff.hlsl via CMPEffectFile::Pass.
-	if (MindPowerDx11OnlyBuild() || lwIsDx11Active() || !m_pDev->GetDevice()) {
+	if (lwIsDx11Active()) {
 		m_bUseSoft = true;
 		m_bUseSoftOrg = true;
 		lwD3D11Gap(LW_D3D11_FALLBACK, "effect-use-soft",
@@ -432,7 +447,7 @@ bool	CMPResManger::InitRes(IDirect3DDeviceX*		pDev, XMMATRIX* pmat, XMMATRIX* pM
 	if(!_bMagr)
 	{
 #ifdef USE_RENDER
-		if (MindPowerDx11OnlyBuild() || lwIsDx11Active() || !pDev->GetDevice()) {
+		if (lwIsDx11Active()) {
 			lwD3D11Gap(LW_D3D11_SKIP, "initres-vshader",
 				"CreateVertexShader is D3D9; skipped on DeviceObject11");
 		} else
@@ -1570,7 +1585,7 @@ bool	CMPResManger::LoadTotalEffect()
 bool	CMPResManger::LoadTotalVShader()
 {
 #ifdef USE_RENDER
-	if (MindPowerDx11OnlyBuild() || lwIsDx11Active() || !m_pDev->GetDevice())
+	if (lwIsDx11Active())
 		return true;
 #endif
 #if !MINDPOWER_USE_D3D9_DEVICE
@@ -2473,9 +2488,10 @@ BOOL CMPResManger::OnResetDevice()
 	}
 
 #ifdef USE_RENDER
-	if (MindPowerDx11OnlyBuild() || lwIsDx11Active() || !m_pDev->GetDevice()) {
+	if (lwIsDx11Active()) {
 		lwD3D11Gap(LW_D3D11_SKIP, "resetdevice-getbackbuffer",
-			"OnResetDevice GetBackBuffer is D3D9; keep the HWND-sized desc from InitRes");
+			"OnResetDevice refreshes the backbuffer desc from the DXGI swapchain");
+		FillBackBufferFromSwapChain(m_pDev, &m_d3dBackBuffer);
 #if MINDPOWER_USE_D3D9_DEVICE
 	} else {
 		IDirect3DSurfaceX* pBackBuffer = 0;

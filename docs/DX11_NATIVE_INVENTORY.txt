@@ -1,28 +1,6 @@
-# GetDevice() reference counts by file (Phase 1 complete — Release x64 MINDPOWER_DX11_ONLY)
-# Remaining hits are comments, #if MINDPOWER_USE_D3D9_DEVICE dual-build paths, or lwD3D11NativeGetDevice().
+# GetDevice() after interface cleanup (MINDPOWER_DX11_ONLY)
+# MPRender::GetDevice() and lwIDeviceObject::GetDevice() are gone on this build.
+# Remaining hits are comments, #if MINDPOWER_USE_D3D9_DEVICE dual-build paths,
+# or COM stubs (lwD3D11Texture::GetDevice(IDirect3DDevice9**)).
+# Native handle: lwD3D11NativeGetDevice().
 # Regenerate: rg "GetDevice\(\)" source/src --glob "*.cpp" -c | Sort-Object
-
-source/src/engine/BitmapFont.cpp:1
-source/src/engine/EffectFile.cpp:2
-source/src/engine/MPFont.cpp:1
-source/src/engine/MPGameApp.cpp:1
-source/src/engine/MPMap.cpp:2
-source/src/engine/MPRender.cpp:1
-source/src/engine/MPResManger.cpp:13
-source/src/engine/lwResourceMgr.cpp:8
-source/src/engine/lwShaderMgr.cpp:8
-source/src/engine/lwSysGraphics.cpp:1
-source/src/engine/lwxRenderCtrVS.cpp:6
-source/src/game/BitmapFontAdapter.cpp:3
-source/src/game/CreateChaScene.cpp:1
-source/src/game/DrawPointList.cpp:1
-source/src/game/FindPath.cpp:1
-source/src/game/GameAppInit.cpp:3
-source/src/game/GameAppInterface.cpp:1
-source/src/game/LoginScene.cpp:1
-source/src/game/Main.cpp:1
-source/src/game/Scene.cpp:3
-source/src/game/SceneRender.cpp:2
-source/src/game/SMallMap.cpp:9
-source/src/game/UIRender.cpp:1
-source/src/game/WorldScene.cpp:2

@@ -12,6 +12,16 @@
 
 LW_BEGIN
 
+static IDirect3DDeviceX* ShaderMgrDevice(lwIDeviceObject* obj)
+{
+#if MINDPOWER_USE_D3D9_DEVICE
+    return obj ? obj->GetDevice() : 0;
+#else
+    (void)obj;
+    return 0;
+#endif
+}
+
 //------------------------------------------------------------------------------
 // Shader Encryption Helper
 //------------------------------------------------------------------------------
@@ -129,7 +139,7 @@ LW_RESULT lwShaderMgr8::RegisterVertexShader(DWORD type, DWORD* code, DWORD size
     LW_RESULT ret = LW_RET_FAILED;
 
     DWORD handle;
-    IDirect3DDeviceX* dev = _dev_obj->GetDevice();
+    IDirect3DDeviceX* dev = ShaderMgrDevice(_dev_obj);
     if (!dev) {
 #if !MINDPOWER_USE_D3D9_DEVICE
         goto __ret;
@@ -224,7 +234,7 @@ LW_RESULT lwShaderMgr8::UnregisterVertexShader(DWORD type)
 #if !MINDPOWER_USE_D3D9_DEVICE
     return LW_RET_OK;
 #else
-    IDirect3DDeviceX* dev = _dev_obj->GetDevice();
+    IDirect3DDeviceX* dev = ShaderMgrDevice(_dev_obj);
     if (!dev)
         return LW_RET_OK;
 
@@ -277,7 +287,7 @@ LW_RESULT lwShaderMgr8::LoseDevice()
 #else
     LW_RESULT ret = LW_RET_FAILED;
 
-    IDirect3DDeviceX* dev = _dev_obj->GetDevice();
+    IDirect3DDeviceX* dev = ShaderMgrDevice(_dev_obj);
     if (!dev)
         return LW_RET_OK;
 
@@ -309,7 +319,7 @@ LW_RESULT lwShaderMgr8::ResetDevice()
 #else
     LW_RESULT ret = LW_RET_FAILED;
 
-    IDirect3DDeviceX* dev = _dev_obj->GetDevice();
+    IDirect3DDeviceX* dev = ShaderMgrDevice(_dev_obj);
     if (!dev)
         return LW_RET_OK;
 
@@ -390,7 +400,7 @@ LW_RESULT lwShaderMgr9::Init(DWORD vs_buf_size, DWORD decl_buf_size, DWORD ps_bu
 LW_RESULT lwShaderMgr9::RegisterVertexShader(DWORD type, BYTE* data, DWORD size)
 {
     LW_RESULT ret = LW_RET_FAILED;
-    IDirect3DDeviceX* dev = _dev_obj->GetDevice();
+    IDirect3DDeviceX* dev = ShaderMgrDevice(_dev_obj);
     IDirect3DVertexShaderX* handle = 0;
     lwVertexShaderInfo* i = 0;            // << declarado antes de qualquer goto
 
@@ -594,7 +604,7 @@ LW_RESULT lwShaderMgr9::RegisterVertexDeclaration(DWORD type, D3DVERTEXELEMENT9*
 
     // Declara��es antecipadas (evita "init skipped by goto")
     IDirect3DVertexDeclarationX* handle = 0;
-    IDirect3DDeviceX* dev = _dev_obj->GetDevice();
+    IDirect3DDeviceX* dev = ShaderMgrDevice(_dev_obj);
     int i = 0;
     D3DVERTEXELEMENT9* p = 0;
 
@@ -671,7 +681,7 @@ LW_RESULT lwShaderMgr9::LoseDevice()
 {
     LW_RESULT ret = LW_RET_FAILED;
 
-    IDirect3DDeviceX* dev = _dev_obj->GetDevice();
+    IDirect3DDeviceX* dev = ShaderMgrDevice(_dev_obj);
     if (!dev) {
         lwD3D11Gap(LW_D3D11_SKIP, "shadermgr-lose-device",
             "D3D11 has no device-lost VS release");
@@ -696,7 +706,7 @@ LW_RESULT lwShaderMgr9::ResetDevice()
 {
     LW_RESULT ret = LW_RET_FAILED;
 
-    IDirect3DDeviceX* dev = _dev_obj->GetDevice();
+    IDirect3DDeviceX* dev = ShaderMgrDevice(_dev_obj);
     if (!dev) {
         lwD3D11Gap(LW_D3D11_SKIP, "shadermgr-reset-device",
             "D3D11 has no device-lost VS recreate");

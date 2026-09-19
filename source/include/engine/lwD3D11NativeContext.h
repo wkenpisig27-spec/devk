@@ -6,7 +6,7 @@
 
 // Play-path D3D11 handle on MINDPOWER_DX11_ONLY (Debug and Release).
 // Bound from lwDeviceObject11::CreateDevice. Do not store or call
-// IDirect3DDevice9* / MPRender::GetDevice() for live draws.
+// IDirect3DDevice9* for live draws. Use GetD3D11Device / GetContext / GetSwapChain.
 
 #ifdef __cplusplus
 extern "C" {

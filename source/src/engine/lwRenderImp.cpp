@@ -3,7 +3,6 @@
 
 
 #include "lwRenderImp.h"
-#include "lwDeviceObject.h"
 #include "lwResourceMgr.h"
 #include "lwShaderMgr.h"
 #include "lwD3D.h"

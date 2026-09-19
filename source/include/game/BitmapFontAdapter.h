@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 #pragma once
 
+#include "MindPowerRenderConfig.h"
 #include "engine/BitmapFont.h"
 #include <vector>
 #include <string>
@@ -180,8 +181,9 @@ private:
     // Pre-baked outline flag
     bool m_bHasPrebakedOutline;
     
-    // Helper to get D3D device
+#if MINDPOWER_USE_D3D9_DEVICE
     IDirect3DDeviceX* GetDevice();
+#endif
 };
 
 } // namespace GUI

@@ -8,7 +8,6 @@
 #include "lwExpObj.h"
 #include "lwITypes.h"
 #include "lwInterfaceExt.h"
-#include "lwDeviceObject.h"
 #include "lwResourceMgr.h"
 #include "lwPrimitiveHelper.h"
 

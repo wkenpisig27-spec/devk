@@ -85,11 +85,9 @@ public:
     void				EnableClearTarget(BOOL bEnable = TRUE)      { _bClearTarget  = bEnable; } 
     void				EnableClearZBuffer(BOOL bEnable = TRUE)     { _bClearZBuffer = bEnable; }
     void				EnableClearStencil(BOOL bEnable = TRUE)     { _bClearStencil = bEnable; }
-	// D3D9-only leftover. Play-path GPU access is lwD3D11NativeGetDevice/Context.
 #if MINDPOWER_USE_D3D9_DEVICE
 	IDirect3DDeviceX*	GetDevice()                                 { return _pD3DDevice;	    }
 #else
-	IDirect3DDeviceX*	GetDevice()                                 { return nullptr;	        }
 	ID3D11Device*		GetD3D11Device()                            { return lwD3D11NativeGetDevice(); }
 	ID3D11DeviceContext* GetD3D11Context()                          { return lwD3D11NativeGetContext(); }
 	IDXGISwapChain*		GetSwapChain()                              { return lwD3D11NativeGetSwapChain(); }

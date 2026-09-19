@@ -274,6 +274,7 @@ protected:
 		if (pTexInfo->bAlpha)
 			fmt = D3DFMT_A4R4G4B4;
 
+#if MINDPOWER_USE_D3D9_DEVICE
 		if (FAILED(D3DXCreateTextureFromFileInMemoryEx(g_Render.GetDevice(),
 													   pbtBuf,
 													   dwBufSize,
@@ -301,6 +302,10 @@ protected:
 			// pTexInfo->nWidth  = desc.Width;
 			// pTexInfo->nHeight = desc.Height;
 		}
+#else
+		LG("error", "Create Texture From Data[%s] Failed (D3D9-only raw load)!\n", pInfo->szDataName);
+		pTexture = nullptr;
+#endif
 		delete[] pbtBuf;
 
 		return pTexture;

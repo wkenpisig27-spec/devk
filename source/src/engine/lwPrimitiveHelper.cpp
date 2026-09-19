@@ -6,7 +6,6 @@
 #include "lwD3D.h"
 #include "lwRenderImp.h"
 #include "lwResourceMgr.h"
-#include "lwDeviceObject.h"
 #include "lwHelperGeometry.h"
 //#include "lwTimer.h"
 
