@@ -126,17 +126,22 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 **Smoke:** character, terrain, transparent props, combat VFX, weapon lit — not only login → world.
 
-## Remaining (after native MeshNativeDraw)
+## Remaining (after native RSA edge)
 
 Highest-value leftover vs the native target table:
 
-1. RSA `NoteRs` / `NoteTss` / `Read*` still translate D3D9 state IDs at the edge. Material RSA atoms still store `D3DRS_*` / `D3DTSS_*`. After that, leftover D3D9 sources stay on disk until asked.
+1. Material RSA atoms still store `D3DRS_*` / `D3DTSS_*` values. The apply site maps them onto native `Set*`. After that, leftover D3D9 sources stay on disk until asked.
 
-### native MeshNativeDraw — **complete** (await smoke)
+### native RSA edge — **complete** (await smoke)
+
+- Mesh no longer has `NoteRs` / `NoteTss` / `Read*` D3D9 IDs. RSA apply and `lwDeviceObject11` write-through call `SetAlpha` / `SetBlend` / `SetCull` / combiner / sampler setters.
+- Snapshot/restore uses `lwD3D11MeshGetDraw`. Atoms still store D3D9 DWORDs.
+
+### native MeshNativeDraw — **complete**
 
 - `MeshNativeDraw` stores `D3D11_BLEND` / `D3D11_CULL_MODE` / `D3D11_COMPARISON_FUNC` / `D3D11_TEXTURE_ADDRESS_MODE` and `MeshColorOp` / `MeshColorArg`.
 - `SetBlend` / `SetCombiner` take those types. OM, dual-tex, UV, and sampler resolve from them.
-- RSA `Note*` / `Read*` still map D3D9 ↔ native so hair/cape/material atoms keep working.
+- RSA apply maps atom D3D9 IDs onto native `Set*` so hair/cape/material atoms keep working.
 
 ### pass-object shader bind — **complete**
 
@@ -170,7 +175,7 @@ Highest-value leftover vs the native target table:
 
 ### native RSA apply — **complete**
 
-- Hair/cape/opacity/mesh RSA atoms apply through `lwD3D11MeshNoteRs` / `NoteTss` / `NoteSamp` (save/restore from `MeshNativeDraw`, not `SetRenderState`).
+- Hair/cape/opacity/mesh RSA atoms apply through native `Set*` (save/restore from `GetDraw`, not `SetRenderState`).
 - DX11 skips character/scene/transp *pass* RSA begin/end. Per-mesh material RSA still runs.
 
 ### native write APIs — **complete**
@@ -179,7 +184,7 @@ Highest-value leftover vs the native target table:
 
 ### native draw notes — **complete**
 
-- `lwDeviceObject11` write-through updates `MeshNativeDraw` on the RS/TSS/sampler that mesh actually uses.
+- `lwDeviceObject11` write-through calls native `Set*` for the RS/TSS/sampler that mesh actually uses.
 - Character hair alpha, scene additive, terrain splat, and weapon dual-tex no longer call `GetCachedRS` / `GetCachedTSS` at draw time.
 
 ### D3D9 sources — **complete**

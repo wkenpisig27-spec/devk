@@ -660,190 +660,6 @@ void lwD3D11MeshHintAdditive(int enabled)
     s_mesh.hint_additive = enabled ? 1 : 0;
 }
 
-static D3D11_BLEND MapBlend(DWORD d)
-{
-    switch (d)
-    {
-    case D3DBLEND_ZERO: return D3D11_BLEND_ZERO;
-    case D3DBLEND_ONE: return D3D11_BLEND_ONE;
-    case D3DBLEND_SRCCOLOR: return D3D11_BLEND_SRC_COLOR;
-    case D3DBLEND_INVSRCCOLOR: return D3D11_BLEND_INV_SRC_COLOR;
-    case D3DBLEND_SRCALPHA: return D3D11_BLEND_SRC_ALPHA;
-    case D3DBLEND_INVSRCALPHA: return D3D11_BLEND_INV_SRC_ALPHA;
-    case D3DBLEND_DESTALPHA: return D3D11_BLEND_DEST_ALPHA;
-    case D3DBLEND_INVDESTALPHA: return D3D11_BLEND_INV_DEST_ALPHA;
-    case D3DBLEND_DESTCOLOR: return D3D11_BLEND_DEST_COLOR;
-    case D3DBLEND_INVDESTCOLOR: return D3D11_BLEND_INV_DEST_COLOR;
-    case D3DBLEND_SRCALPHASAT: return D3D11_BLEND_SRC_ALPHA_SAT;
-    default: return D3D11_BLEND_ONE;
-    }
-}
-
-static D3D11_BLEND MapBlendOrUnset(DWORD d)
-{
-    if (!d || d == 0xffffffff || d == D3DRS_FORCE_DWORD)
-        return (D3D11_BLEND)0;
-    return MapBlend(d);
-}
-
-static DWORD UnmapBlend(D3D11_BLEND b)
-{
-    switch (b)
-    {
-    case D3D11_BLEND_ZERO: return D3DBLEND_ZERO;
-    case D3D11_BLEND_ONE: return D3DBLEND_ONE;
-    case D3D11_BLEND_SRC_COLOR: return D3DBLEND_SRCCOLOR;
-    case D3D11_BLEND_INV_SRC_COLOR: return D3DBLEND_INVSRCCOLOR;
-    case D3D11_BLEND_SRC_ALPHA: return D3DBLEND_SRCALPHA;
-    case D3D11_BLEND_INV_SRC_ALPHA: return D3DBLEND_INVSRCALPHA;
-    case D3D11_BLEND_DEST_ALPHA: return D3DBLEND_DESTALPHA;
-    case D3D11_BLEND_INV_DEST_ALPHA: return D3DBLEND_INVDESTALPHA;
-    case D3D11_BLEND_DEST_COLOR: return D3DBLEND_DESTCOLOR;
-    case D3D11_BLEND_INV_DEST_COLOR: return D3DBLEND_INVDESTCOLOR;
-    case D3D11_BLEND_SRC_ALPHA_SAT: return D3DBLEND_SRCALPHASAT;
-    default: return 0;
-    }
-}
-
-static D3D11_CULL_MODE MapCull(DWORD d)
-{
-    if (d == D3DCULL_NONE)
-        return D3D11_CULL_NONE;
-    if (d == D3DCULL_CW)
-        return D3D11_CULL_FRONT;
-    return D3D11_CULL_BACK;
-}
-
-static DWORD UnmapCull(D3D11_CULL_MODE c)
-{
-    if (c == D3D11_CULL_NONE)
-        return D3DCULL_NONE;
-    if (c == D3D11_CULL_FRONT)
-        return D3DCULL_CW;
-    return D3DCULL_CCW;
-}
-
-static D3D11_COMPARISON_FUNC MapCmp(DWORD d)
-{
-    switch (d)
-    {
-    case D3DCMP_NEVER: return D3D11_COMPARISON_NEVER;
-    case D3DCMP_LESS: return D3D11_COMPARISON_LESS;
-    case D3DCMP_EQUAL: return D3D11_COMPARISON_EQUAL;
-    case D3DCMP_LESSEQUAL: return D3D11_COMPARISON_LESS_EQUAL;
-    case D3DCMP_GREATER: return D3D11_COMPARISON_GREATER;
-    case D3DCMP_NOTEQUAL: return D3D11_COMPARISON_NOT_EQUAL;
-    case D3DCMP_GREATEREQUAL: return D3D11_COMPARISON_GREATER_EQUAL;
-    case D3DCMP_ALWAYS: return D3D11_COMPARISON_ALWAYS;
-    default: return D3D11_COMPARISON_ALWAYS;
-    }
-}
-
-static DWORD UnmapCmp(D3D11_COMPARISON_FUNC c)
-{
-    switch (c)
-    {
-    case D3D11_COMPARISON_NEVER: return D3DCMP_NEVER;
-    case D3D11_COMPARISON_LESS: return D3DCMP_LESS;
-    case D3D11_COMPARISON_EQUAL: return D3DCMP_EQUAL;
-    case D3D11_COMPARISON_LESS_EQUAL: return D3DCMP_LESSEQUAL;
-    case D3D11_COMPARISON_GREATER: return D3DCMP_GREATER;
-    case D3D11_COMPARISON_NOT_EQUAL: return D3DCMP_NOTEQUAL;
-    case D3D11_COMPARISON_GREATER_EQUAL: return D3DCMP_GREATEREQUAL;
-    default: return D3DCMP_ALWAYS;
-    }
-}
-
-static D3D11_TEXTURE_ADDRESS_MODE MapAddr(DWORD d)
-{
-    if (d == D3DTADDRESS_CLAMP)
-        return D3D11_TEXTURE_ADDRESS_CLAMP;
-    if (d == D3DTADDRESS_MIRROR)
-        return D3D11_TEXTURE_ADDRESS_MIRROR;
-    if (d == D3DTADDRESS_BORDER)
-        return D3D11_TEXTURE_ADDRESS_BORDER;
-    return D3D11_TEXTURE_ADDRESS_WRAP;
-}
-
-static DWORD UnmapAddr(D3D11_TEXTURE_ADDRESS_MODE a)
-{
-    if (a == D3D11_TEXTURE_ADDRESS_CLAMP)
-        return D3DTADDRESS_CLAMP;
-    if (a == D3D11_TEXTURE_ADDRESS_MIRROR)
-        return D3DTADDRESS_MIRROR;
-    if (a == D3D11_TEXTURE_ADDRESS_BORDER)
-        return D3DTADDRESS_BORDER;
-    return D3DTADDRESS_WRAP;
-}
-
-static MeshColorOp MapColorOp(DWORD op)
-{
-    switch (op)
-    {
-    case D3DTOP_DISABLE: return MESH_COP_DISABLE;
-    case D3DTOP_SELECTARG1: return MESH_COP_SELECTARG1;
-    case D3DTOP_SELECTARG2: return MESH_COP_SELECTARG2;
-    case D3DTOP_MODULATE: return MESH_COP_MODULATE;
-    case D3DTOP_MODULATE2X: return MESH_COP_MODULATE2X;
-    case D3DTOP_ADD: return MESH_COP_ADD;
-    case D3DTOP_ADDSMOOTH: return MESH_COP_ADDSMOOTH;
-    case D3DTOP_ADDSIGNED: return MESH_COP_ADDSIGNED;
-    case D3DTOP_ADDSIGNED2X: return MESH_COP_ADDSIGNED2X;
-    case D3DTOP_MODULATEALPHA_ADDCOLOR: return MESH_COP_MODULATEALPHA_ADDCOLOR;
-    default:
-        if (!op || op == 0xffffffff || op == D3DTSS_FORCE_DWORD)
-            return MESH_COP_DISABLE;
-        return MESH_COP_OTHER;
-    }
-}
-
-static DWORD UnmapColorOp(MeshColorOp op)
-{
-    switch (op)
-    {
-    case MESH_COP_DISABLE: return D3DTOP_DISABLE;
-    case MESH_COP_SELECTARG1: return D3DTOP_SELECTARG1;
-    case MESH_COP_SELECTARG2: return D3DTOP_SELECTARG2;
-    case MESH_COP_MODULATE: return D3DTOP_MODULATE;
-    case MESH_COP_MODULATE2X: return D3DTOP_MODULATE2X;
-    case MESH_COP_ADD: return D3DTOP_ADD;
-    case MESH_COP_ADDSMOOTH: return D3DTOP_ADDSMOOTH;
-    case MESH_COP_ADDSIGNED: return D3DTOP_ADDSIGNED;
-    case MESH_COP_ADDSIGNED2X: return D3DTOP_ADDSIGNED2X;
-    case MESH_COP_MODULATEALPHA_ADDCOLOR: return D3DTOP_MODULATEALPHA_ADDCOLOR;
-    default: return D3DTOP_MODULATE;
-    }
-}
-
-static MeshColorArg MapColorArg(DWORD a)
-{
-    switch (a & 0x0f)
-    {
-    case D3DTA_CURRENT: return MESH_CA_CURRENT;
-    case D3DTA_TEXTURE: return MESH_CA_TEXTURE;
-    case D3DTA_TFACTOR: return MESH_CA_TFACTOR;
-    case D3DTA_DIFFUSE: return MESH_CA_DIFFUSE;
-    default: return MESH_CA_OTHER;
-    }
-}
-
-static DWORD UnmapColorArg(MeshColorArg a)
-{
-    switch (a)
-    {
-    case MESH_CA_CURRENT: return D3DTA_CURRENT;
-    case MESH_CA_TEXTURE: return D3DTA_TEXTURE;
-    case MESH_CA_TFACTOR: return D3DTA_TFACTOR;
-    case MESH_CA_DIFFUSE: return D3DTA_DIFFUSE;
-    default: return D3DTA_DIFFUSE;
-    }
-}
-
-D3D11_BLEND lwD3D11MeshMapBlend(DWORD d3d9)
-{
-    return MapBlendOrUnset(d3d9);
-}
-
 void lwD3D11MeshSetAlpha(int enabled)
 {
     s_draw.alpha = enabled ? 1 : 0;
@@ -872,6 +688,26 @@ void lwD3D11MeshSetCombinerArgs(int stage, MeshColorOp op, MeshColorArg arg1, Me
     s_draw.ca2[stage] = arg2;
 }
 
+void lwD3D11MeshSetCombinerColorArg(int stage, int arg, MeshColorArg value)
+{
+    if (stage < 0 || stage > 2)
+        return;
+    if (arg == 1)
+        s_draw.ca1[stage] = value;
+    else if (arg == 2)
+        s_draw.ca2[stage] = value;
+}
+
+void lwD3D11MeshSetCombinerAlphaArg(int stage, int arg, MeshColorArg value)
+{
+    if (stage < 0 || stage > 2)
+        return;
+    if (arg == 1)
+        s_draw.aa1[stage] = value;
+    else if (arg == 2)
+        s_draw.aa2[stage] = value;
+}
+
 void lwD3D11MeshSetLighting(int enabled, DWORD ambient)
 {
     s_draw.lighting = enabled ? 1 : 0;
@@ -879,9 +715,46 @@ void lwD3D11MeshSetLighting(int enabled, DWORD ambient)
         s_draw.ambient = ambient;
 }
 
+void lwD3D11MeshSetAmbient(DWORD ambient)
+{
+    s_draw.ambient = ambient;
+}
+
+void lwD3D11MeshSetZEnable(int enabled)
+{
+    s_draw.zenable = enabled ? 1 : 0;
+}
+
+void lwD3D11MeshSetZWrite(int enabled)
+{
+    s_draw.zwrite = enabled ? 1 : 0;
+}
+
+void lwD3D11MeshSetCull(D3D11_CULL_MODE cull)
+{
+    if (cull)
+        s_draw.cull = cull;
+}
+
+void lwD3D11MeshSetMsaa(int enabled)
+{
+    s_draw.msaa = enabled ? 1 : 0;
+}
+
 void lwD3D11MeshSetAlphaTest(int enabled)
 {
     s_draw.atest = enabled ? 1 : 0;
+}
+
+void lwD3D11MeshSetAlphaRef(DWORD aref)
+{
+    s_draw.aref = aref;
+}
+
+void lwD3D11MeshSetAlphaFunc(D3D11_COMPARISON_FUNC fn)
+{
+    if (fn)
+        s_draw.afunc = fn;
 }
 
 void lwD3D11MeshSetTFactor(DWORD tf)
@@ -895,122 +768,45 @@ void lwD3D11MeshSetUvXform(int stage, int enabled)
         s_draw.uv_xform[stage] = enabled ? 1 : 0;
 }
 
-void lwD3D11MeshNoteRs(DWORD state, DWORD value)
+void lwD3D11MeshSetSampAddr(D3D11_TEXTURE_ADDRESS_MODE addr)
 {
-    switch (state)
-    {
-    case D3DRS_ALPHABLENDENABLE: s_draw.alpha = value ? 1 : 0; break;
-    case D3DRS_SRCBLEND:
-        {
-            D3D11_BLEND b = MapBlendOrUnset(value);
-            if (b)
-                s_draw.src = b;
-        }
-        break;
-    case D3DRS_DESTBLEND:
-        {
-            D3D11_BLEND b = MapBlendOrUnset(value);
-            if (b)
-                s_draw.dest = b;
-        }
-        break;
-    case D3DRS_ZENABLE: s_draw.zenable = value ? 1 : 0; break;
-    case D3DRS_ZWRITEENABLE: s_draw.zwrite = value ? 1 : 0; break;
-    case D3DRS_CULLMODE: s_draw.cull = MapCull(value); break;
-    case D3DRS_MULTISAMPLEANTIALIAS: s_draw.msaa = value ? 1 : 0; break;
-    case D3DRS_LIGHTING: s_draw.lighting = value ? 1 : 0; break;
-    case D3DRS_AMBIENT: s_draw.ambient = value; break;
-    case D3DRS_TEXTUREFACTOR: s_draw.tfactor = value; break;
-    case D3DRS_ALPHATESTENABLE: s_draw.atest = value ? 1 : 0; break;
-    case D3DRS_ALPHAREF: s_draw.aref = value; break;
-    case D3DRS_ALPHAFUNC: s_draw.afunc = MapCmp(value); break;
-    default: break;
-    }
+    if (addr)
+        s_draw.samp_addr = addr;
 }
 
-void lwD3D11MeshNoteTss(DWORD stage, DWORD type, DWORD value)
+void lwD3D11MeshSetSampPoint(int point)
 {
-    if (stage > 2)
+    s_draw.samp_point = point ? 1 : 0;
+}
+
+void lwD3D11MeshGetDraw(MeshNativeDrawSnap* out)
+{
+    if (!out)
         return;
-    switch (type)
+    out->alpha = s_draw.alpha;
+    out->src = s_draw.src;
+    out->dest = s_draw.dest;
+    out->zenable = s_draw.zenable;
+    out->zwrite = s_draw.zwrite;
+    out->cull = s_draw.cull;
+    out->msaa = s_draw.msaa;
+    out->lighting = s_draw.lighting;
+    out->ambient = s_draw.ambient;
+    out->tfactor = s_draw.tfactor;
+    out->atest = s_draw.atest;
+    out->aref = s_draw.aref;
+    out->afunc = s_draw.afunc;
+    for (int i = 0; i < 3; ++i)
     {
-    case D3DTSS_COLOROP: s_draw.cop[stage] = MapColorOp(value); break;
-    case D3DTSS_COLORARG1: s_draw.ca1[stage] = MapColorArg(value); break;
-    case D3DTSS_COLORARG2: s_draw.ca2[stage] = MapColorArg(value); break;
-    case D3DTSS_ALPHAARG1: s_draw.aa1[stage] = MapColorArg(value); break;
-    case D3DTSS_ALPHAARG2: s_draw.aa2[stage] = MapColorArg(value); break;
-    case D3DTSS_TEXTURETRANSFORMFLAGS:
-        s_draw.uv_xform[stage] = (value && value != D3DTTFF_DISABLE &&
-            value != 0xffffffff && value != D3DTSS_FORCE_DWORD) ? 1 : 0;
-        break;
-    default: break;
+        out->cop[i] = s_draw.cop[i];
+        out->ca1[i] = s_draw.ca1[i];
+        out->ca2[i] = s_draw.ca2[i];
+        out->aa1[i] = s_draw.aa1[i];
+        out->aa2[i] = s_draw.aa2[i];
+        out->uv_xform[i] = s_draw.uv_xform[i];
     }
-}
-
-void lwD3D11MeshNoteSamp(DWORD type, DWORD value)
-{
-    if (type == D3DSAMP_ADDRESSU)
-        s_draw.samp_addr = MapAddr(value);
-    else if (type == D3DSAMP_MAGFILTER)
-        s_draw.samp_point = (value == D3DTEXF_POINT) ? 1 : 0;
-}
-
-int lwD3D11MeshReadRs(DWORD state, DWORD* value)
-{
-    if (!value)
-        return 0;
-    switch (state)
-    {
-    case D3DRS_ALPHABLENDENABLE: *value = s_draw.alpha ? TRUE : FALSE; return 1;
-    case D3DRS_SRCBLEND: *value = UnmapBlend(s_draw.src); return 1;
-    case D3DRS_DESTBLEND: *value = UnmapBlend(s_draw.dest); return 1;
-    case D3DRS_ZENABLE: *value = s_draw.zenable ? TRUE : FALSE; return 1;
-    case D3DRS_ZWRITEENABLE: *value = s_draw.zwrite ? TRUE : FALSE; return 1;
-    case D3DRS_CULLMODE: *value = UnmapCull(s_draw.cull); return 1;
-    case D3DRS_MULTISAMPLEANTIALIAS: *value = s_draw.msaa ? TRUE : FALSE; return 1;
-    case D3DRS_LIGHTING: *value = s_draw.lighting ? TRUE : FALSE; return 1;
-    case D3DRS_AMBIENT: *value = s_draw.ambient; return 1;
-    case D3DRS_TEXTUREFACTOR: *value = s_draw.tfactor; return 1;
-    case D3DRS_ALPHATESTENABLE: *value = s_draw.atest ? TRUE : FALSE; return 1;
-    case D3DRS_ALPHAREF: *value = s_draw.aref; return 1;
-    case D3DRS_ALPHAFUNC: *value = UnmapCmp(s_draw.afunc); return 1;
-    default: return 0;
-    }
-}
-
-int lwD3D11MeshReadTss(DWORD stage, DWORD type, DWORD* value)
-{
-    if (!value || stage > 2)
-        return 0;
-    switch (type)
-    {
-    case D3DTSS_COLOROP: *value = UnmapColorOp(s_draw.cop[stage]); return 1;
-    case D3DTSS_COLORARG1: *value = UnmapColorArg(s_draw.ca1[stage]); return 1;
-    case D3DTSS_COLORARG2: *value = UnmapColorArg(s_draw.ca2[stage]); return 1;
-    case D3DTSS_ALPHAARG1: *value = UnmapColorArg(s_draw.aa1[stage]); return 1;
-    case D3DTSS_ALPHAARG2: *value = UnmapColorArg(s_draw.aa2[stage]); return 1;
-    case D3DTSS_TEXTURETRANSFORMFLAGS:
-        *value = s_draw.uv_xform[stage] ? D3DTTFF_COUNT2 : D3DTTFF_DISABLE;
-        return 1;
-    default: return 0;
-    }
-}
-
-int lwD3D11MeshReadSamp(DWORD type, DWORD* value)
-{
-    if (!value)
-        return 0;
-    if (type == D3DSAMP_ADDRESSU)
-    {
-        *value = UnmapAddr(s_draw.samp_addr);
-        return 1;
-    }
-    if (type == D3DSAMP_MAGFILTER)
-    {
-        *value = s_draw.samp_point ? D3DTEXF_POINT : D3DTEXF_LINEAR;
-        return 1;
-    }
-    return 0;
+    out->samp_addr = s_draw.samp_addr;
+    out->samp_point = s_draw.samp_point;
 }
 
 static const char* kEffHLSL =

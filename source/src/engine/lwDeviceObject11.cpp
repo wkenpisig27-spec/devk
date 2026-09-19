@@ -742,6 +742,52 @@ LW_RESULT lwDeviceObject11::SetTextureForced(DWORD stage, IDirect3DTextureX* tex
     return SetTexture(stage, tex);
 }
 
+static void MeshWriteRs(D3DRENDERSTATETYPE state, DWORD value)
+{
+    switch (state)
+    {
+    case D3DRS_ALPHABLENDENABLE: lwD3D11MeshSetAlpha(value ? 1 : 0); break;
+    case D3DRS_SRCBLEND: lwD3D11MeshSetBlend(lwD3D11MeshMapBlend(value), (D3D11_BLEND)0); break;
+    case D3DRS_DESTBLEND: lwD3D11MeshSetBlend((D3D11_BLEND)0, lwD3D11MeshMapBlend(value)); break;
+    case D3DRS_ZENABLE: lwD3D11MeshSetZEnable(value ? 1 : 0); break;
+    case D3DRS_ZWRITEENABLE: lwD3D11MeshSetZWrite(value ? 1 : 0); break;
+    case D3DRS_CULLMODE: lwD3D11MeshSetCull(lwD3D11MeshMapCull(value)); break;
+    case D3DRS_MULTISAMPLEANTIALIAS: lwD3D11MeshSetMsaa(value ? 1 : 0); break;
+    case D3DRS_LIGHTING: lwD3D11MeshSetLighting(value ? 1 : 0, 0); break;
+    case D3DRS_AMBIENT: lwD3D11MeshSetAmbient(value); break;
+    case D3DRS_TEXTUREFACTOR: lwD3D11MeshSetTFactor(value); break;
+    case D3DRS_ALPHATESTENABLE: lwD3D11MeshSetAlphaTest(value ? 1 : 0); break;
+    case D3DRS_ALPHAREF: lwD3D11MeshSetAlphaRef(value); break;
+    case D3DRS_ALPHAFUNC: lwD3D11MeshSetAlphaFunc(lwD3D11MeshMapCmp(value)); break;
+    default: break;
+    }
+}
+
+static void MeshWriteTss(DWORD stage, D3DTEXTURESTAGESTATETYPE type, DWORD value)
+{
+    switch (type)
+    {
+    case D3DTSS_COLOROP: lwD3D11MeshSetCombiner((int)stage, lwD3D11MeshMapColorOp(value)); break;
+    case D3DTSS_COLORARG1: lwD3D11MeshSetCombinerColorArg((int)stage, 1, lwD3D11MeshMapColorArg(value)); break;
+    case D3DTSS_COLORARG2: lwD3D11MeshSetCombinerColorArg((int)stage, 2, lwD3D11MeshMapColorArg(value)); break;
+    case D3DTSS_ALPHAARG1: lwD3D11MeshSetCombinerAlphaArg((int)stage, 1, lwD3D11MeshMapColorArg(value)); break;
+    case D3DTSS_ALPHAARG2: lwD3D11MeshSetCombinerAlphaArg((int)stage, 2, lwD3D11MeshMapColorArg(value)); break;
+    case D3DTSS_TEXTURETRANSFORMFLAGS:
+        lwD3D11MeshSetUvXform((int)stage, (value && value != D3DTTFF_DISABLE &&
+            value != 0xffffffff) ? 1 : 0);
+        break;
+    default: break;
+    }
+}
+
+static void MeshWriteSamp(D3DSAMPLERSTATETYPE type, DWORD value)
+{
+    if (type == D3DSAMP_ADDRESSU)
+        lwD3D11MeshSetSampAddr(lwD3D11MeshMapAddr(value));
+    else if (type == D3DSAMP_MAGFILTER)
+        lwD3D11MeshSetSampPoint(value == D3DTEXF_POINT ? 1 : 0);
+}
+
 LW_RESULT lwDeviceObject11::SetRenderState(D3DRENDERSTATETYPE state, DWORD value)
 {
 #if !MINDPOWER_USE_D3D9_DEVICE
@@ -798,7 +844,7 @@ LW_RESULT lwDeviceObject11::SetRenderState(D3DRENDERSTATETYPE state, DWORD value
     }
     if ((DWORD)state < LW_MAX_RENDERSTATE_NUM)
         _rs_value[state] = value;
-    lwD3D11MeshNoteRs((DWORD)state, value);
+    MeshWriteRs(state, value);
     return LW_RET_OK;
 }
 
@@ -806,7 +852,7 @@ LW_RESULT lwDeviceObject11::SetRenderStateForced(D3DRENDERSTATETYPE state, DWORD
 {
     if ((DWORD)state < LW_MAX_RENDERSTATE_NUM)
         _rs_value[state] = value;
-    lwD3D11MeshNoteRs((DWORD)state, value);
+    MeshWriteRs(state, value);
     return LW_RET_OK;
 }
 
@@ -843,7 +889,7 @@ LW_RESULT lwDeviceObject11::SetTextureStageState(DWORD stage, D3DTEXTURESTAGESTA
     }
     if (stage < LW_MAX_TEXTURESTAGE_NUM && (DWORD)type < LW_MAX_TEXTURESTAGESTATE_NUM)
         _tss_value[stage][type] = value;
-    lwD3D11MeshNoteTss(stage, (DWORD)type, value);
+    MeshWriteTss(stage, type, value);
     return LW_RET_OK;
 }
 
@@ -851,7 +897,7 @@ LW_RESULT lwDeviceObject11::SetTextureStageStateForced(DWORD stage, D3DTEXTUREST
 {
     if (stage < LW_MAX_TEXTURESTAGE_NUM && (DWORD)type < LW_MAX_TEXTURESTAGESTATE_NUM)
         _tss_value[stage][type] = value;
-    lwD3D11MeshNoteTss(stage, (DWORD)type, value);
+    MeshWriteTss(stage, type, value);
     return LW_RET_OK;
 }
 
@@ -860,7 +906,7 @@ LW_RESULT lwDeviceObject11::SetSamplerState(DWORD sampler, D3DSAMPLERSTATETYPE t
     if (sampler < LW_MAX_SAMPLESTAGE_NUM && (DWORD)type < LW_MAX_SAMPLESTATE_NUM)
         _ss_value[sampler][type] = value;
     if (sampler == 0)
-        lwD3D11MeshNoteSamp((DWORD)type, value);
+        MeshWriteSamp(type, value);
     return LW_RET_OK;
 }
 

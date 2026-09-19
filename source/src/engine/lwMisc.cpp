@@ -104,6 +104,112 @@ int lwHexStrToInt(const char* str)
 
 }
 
+static int MeshSnapRs(DWORD state, DWORD* value)
+{
+    MeshNativeDrawSnap d;
+    lwD3D11MeshGetDraw(&d);
+    switch (state)
+    {
+    case D3DRS_ALPHABLENDENABLE: *value = d.alpha ? TRUE : FALSE; return 1;
+    case D3DRS_SRCBLEND: *value = lwD3D11MeshUnmapBlend(d.src); return 1;
+    case D3DRS_DESTBLEND: *value = lwD3D11MeshUnmapBlend(d.dest); return 1;
+    case D3DRS_ZENABLE: *value = d.zenable ? TRUE : FALSE; return 1;
+    case D3DRS_ZWRITEENABLE: *value = d.zwrite ? TRUE : FALSE; return 1;
+    case D3DRS_CULLMODE: *value = lwD3D11MeshUnmapCull(d.cull); return 1;
+    case D3DRS_MULTISAMPLEANTIALIAS: *value = d.msaa ? TRUE : FALSE; return 1;
+    case D3DRS_LIGHTING: *value = d.lighting ? TRUE : FALSE; return 1;
+    case D3DRS_AMBIENT: *value = d.ambient; return 1;
+    case D3DRS_TEXTUREFACTOR: *value = d.tfactor; return 1;
+    case D3DRS_ALPHATESTENABLE: *value = d.atest ? TRUE : FALSE; return 1;
+    case D3DRS_ALPHAREF: *value = d.aref; return 1;
+    case D3DRS_ALPHAFUNC: *value = lwD3D11MeshUnmapCmp(d.afunc); return 1;
+    default: return 0;
+    }
+}
+
+static int MeshSnapTss(DWORD stage, DWORD type, DWORD* value)
+{
+    if (stage > 2)
+        return 0;
+    MeshNativeDrawSnap d;
+    lwD3D11MeshGetDraw(&d);
+    switch (type)
+    {
+    case D3DTSS_COLOROP: *value = lwD3D11MeshUnmapColorOp(d.cop[stage]); return 1;
+    case D3DTSS_COLORARG1: *value = lwD3D11MeshUnmapColorArg(d.ca1[stage]); return 1;
+    case D3DTSS_COLORARG2: *value = lwD3D11MeshUnmapColorArg(d.ca2[stage]); return 1;
+    case D3DTSS_ALPHAARG1: *value = lwD3D11MeshUnmapColorArg(d.aa1[stage]); return 1;
+    case D3DTSS_ALPHAARG2: *value = lwD3D11MeshUnmapColorArg(d.aa2[stage]); return 1;
+    case D3DTSS_TEXTURETRANSFORMFLAGS:
+        *value = d.uv_xform[stage] ? D3DTTFF_COUNT2 : D3DTTFF_DISABLE;
+        return 1;
+    default: return 0;
+    }
+}
+
+static int MeshSnapSamp(DWORD type, DWORD* value)
+{
+    MeshNativeDrawSnap d;
+    lwD3D11MeshGetDraw(&d);
+    if (type == D3DSAMP_ADDRESSU)
+    {
+        *value = lwD3D11MeshUnmapAddr(d.samp_addr);
+        return 1;
+    }
+    if (type == D3DSAMP_MAGFILTER)
+    {
+        *value = d.samp_point ? D3DTEXF_POINT : D3DTEXF_LINEAR;
+        return 1;
+    }
+    return 0;
+}
+
+static void MeshWriteRs(DWORD state, DWORD value)
+{
+    switch (state)
+    {
+    case D3DRS_ALPHABLENDENABLE: lwD3D11MeshSetAlpha(value ? 1 : 0); break;
+    case D3DRS_SRCBLEND: lwD3D11MeshSetBlend(lwD3D11MeshMapBlend(value), (D3D11_BLEND)0); break;
+    case D3DRS_DESTBLEND: lwD3D11MeshSetBlend((D3D11_BLEND)0, lwD3D11MeshMapBlend(value)); break;
+    case D3DRS_ZENABLE: lwD3D11MeshSetZEnable(value ? 1 : 0); break;
+    case D3DRS_ZWRITEENABLE: lwD3D11MeshSetZWrite(value ? 1 : 0); break;
+    case D3DRS_CULLMODE: lwD3D11MeshSetCull(lwD3D11MeshMapCull(value)); break;
+    case D3DRS_MULTISAMPLEANTIALIAS: lwD3D11MeshSetMsaa(value ? 1 : 0); break;
+    case D3DRS_LIGHTING: lwD3D11MeshSetLighting(value ? 1 : 0, 0); break;
+    case D3DRS_AMBIENT: lwD3D11MeshSetAmbient(value); break;
+    case D3DRS_TEXTUREFACTOR: lwD3D11MeshSetTFactor(value); break;
+    case D3DRS_ALPHATESTENABLE: lwD3D11MeshSetAlphaTest(value ? 1 : 0); break;
+    case D3DRS_ALPHAREF: lwD3D11MeshSetAlphaRef(value); break;
+    case D3DRS_ALPHAFUNC: lwD3D11MeshSetAlphaFunc(lwD3D11MeshMapCmp(value)); break;
+    default: break;
+    }
+}
+
+static void MeshWriteTss(DWORD stage, DWORD type, DWORD value)
+{
+    switch (type)
+    {
+    case D3DTSS_COLOROP: lwD3D11MeshSetCombiner((int)stage, lwD3D11MeshMapColorOp(value)); break;
+    case D3DTSS_COLORARG1: lwD3D11MeshSetCombinerColorArg((int)stage, 1, lwD3D11MeshMapColorArg(value)); break;
+    case D3DTSS_COLORARG2: lwD3D11MeshSetCombinerColorArg((int)stage, 2, lwD3D11MeshMapColorArg(value)); break;
+    case D3DTSS_ALPHAARG1: lwD3D11MeshSetCombinerAlphaArg((int)stage, 1, lwD3D11MeshMapColorArg(value)); break;
+    case D3DTSS_ALPHAARG2: lwD3D11MeshSetCombinerAlphaArg((int)stage, 2, lwD3D11MeshMapColorArg(value)); break;
+    case D3DTSS_TEXTURETRANSFORMFLAGS:
+        lwD3D11MeshSetUvXform((int)stage, (value && value != D3DTTFF_DISABLE &&
+            value != 0xffffffff) ? 1 : 0);
+        break;
+    default: break;
+    }
+}
+
+static void MeshWriteSamp(DWORD type, DWORD value)
+{
+    if (type == D3DSAMP_ADDRESSU)
+        lwD3D11MeshSetSampAddr(lwD3D11MeshMapAddr(value));
+    else if (type == D3DSAMP_MAGFILTER)
+        lwD3D11MeshSetSampPoint(value == D3DTEXF_POINT ? 1 : 0);
+}
+
 LW_RESULT lwRenderStateAtomBeginSetRS(lwIDeviceObject* dev_obj, lwRenderStateAtom* rsa_seq, DWORD num)
 {
     lwRenderStateAtom* p;
@@ -119,15 +225,15 @@ LW_RESULT lwRenderStateAtomBeginSetRS(lwIDeviceObject* dev_obj, lwRenderStateAto
         {
             if (p->state >= D3DRS_ZENABLE)
             {
-                if (!lwD3D11MeshReadRs(p->state, &p->value1))
+                if (!MeshSnapRs(p->state, &p->value1))
                     p->value1 = p->value0;
-                lwD3D11MeshNoteRs(p->state, p->value0);
+                MeshWriteRs(p->state, p->value0);
             }
             else
             {
-                if (!lwD3D11MeshReadTss(0, p->state, &p->value1))
+                if (!MeshSnapTss(0, p->state, &p->value1))
                     p->value1 = p->value0;
-                lwD3D11MeshNoteTss(0, p->state, p->value0);
+                MeshWriteTss(0, p->state, p->value0);
             }
             continue;
         }
@@ -163,9 +269,9 @@ LW_RESULT lwRenderStateAtomEndSetRS(lwIDeviceObject* dev_obj, lwRenderStateAtom*
             if (dx11)
             {
                 if (p->state >= D3DRS_ZENABLE)
-                    lwD3D11MeshNoteRs(p->state, p->value1);
+                    MeshWriteRs(p->state, p->value1);
                 else
-                    lwD3D11MeshNoteTss(0, p->state, p->value1);
+                    MeshWriteTss(0, p->state, p->value1);
             }
             else if (p->state >= D3DRS_ZENABLE)
                 dev_obj->SetRenderState((D3DRENDERSTATETYPE)p->state, p->value1);
@@ -191,9 +297,9 @@ LW_RESULT lwRenderStateAtomBeginSetTSS(DWORD stage, lwIDeviceObject* dev_obj, lw
 
         if (dx11)
         {
-            if (!lwD3D11MeshReadSamp(p->state, &p->value1))
+            if (!MeshSnapSamp(p->state, &p->value1))
                 p->value1 = p->value0;
-            lwD3D11MeshNoteSamp(p->state, p->value0);
+            MeshWriteSamp(p->state, p->value0);
             continue;
         }
 
@@ -220,7 +326,7 @@ LW_RESULT lwRenderStateAtomEndSetTSS(DWORD stage, lwIDeviceObject* dev_obj, lwRe
         if(p->value0 != p->value1)
         {
             if (dx11)
-                lwD3D11MeshNoteSamp(p->state, p->value1);
+                MeshWriteSamp(p->state, p->value1);
             else
                 dev_obj->SetSamplerState(stage, (D3DSAMPLERSTATETYPE)p->state, p->value1);
             p->value1 = p->value0;
