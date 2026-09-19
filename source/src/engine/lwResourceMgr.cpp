@@ -45,6 +45,8 @@ static int MeshRsaDestIsAdditive(lwRenderStateAtomSet* rsa)
     if (!seq || id >= rsa->GetStateNum())
         return 0;
     const DWORD dest = seq[id].value0;
+    if (lwMeshRsaIsNative(seq[id].state))
+        return (dest == D3D11_BLEND_ONE || dest == D3D11_BLEND_INV_SRC_COLOR || dest == D3D11_BLEND_SRC_COLOR) ? 1 : 0;
     return (dest == D3DBLEND_ONE || dest == D3DBLEND_INVSRCCOLOR || dest == D3DBLEND_SRCCOLOR) ? 1 : 0;
 }
 
@@ -2333,7 +2335,7 @@ LW_RESULT lwMtlTexAgent::BeginSet()
             if (rsa->state == LW_INVALID_INDEX)
                 break;
 
-            if (rsa->state == D3DRS_ALPHAREF)
+            if (rsa->state == D3DRS_ALPHAREF || rsa->state == MESH_RSA_AREF)
             {
                 if (_opacity != 1.0f)
                 {

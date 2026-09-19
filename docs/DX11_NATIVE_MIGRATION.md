@@ -126,13 +126,19 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 **Smoke:** character, terrain, transparent props, combat VFX, weapon lit — not only login → world.
 
-## Remaining (after native RSA edge)
+## Remaining (after native RSA atoms)
 
 Highest-value leftover vs the native target table:
 
-1. Material RSA atoms still store `D3DRS_*` / `D3DTSS_*` values. The apply site maps them onto native `Set*`. After that, leftover D3D9 sources stay on disk until asked.
+1. Leftover D3D9 sources stay on disk (`lwDeviceObject.h`, `ShaderLoad.cpp`, `lwShaderMgr.cpp`) until asked. Long-term target is still a real PSO / root signature; pass objects already bind VS/PS/OM.
 
-### native RSA edge — **complete** (await smoke)
+### native RSA atoms — **complete** (await smoke)
+
+- Runtime atoms store `MeshRsaField` (`0x8000+`) + native values (`D3D11_BLEND`, `MeshColorOp`, …). Mesh files stay D3D9 `fread` layout.
+- Convert is idempotent at `Assign` (C++ RS/TSS writes) and at `BeginSetRS` / `BeginSetTSS`. `Load` / `SetStateValue(buf)` stay memcpy — D3D9 TSS and sampler IDs collide (`COLOROP` == `ADDRESSU` == 1), so one switch cannot convert a file blob.
+- Sampler atoms use `FieldFromD3D9Samp` on the TSS apply path only. Apply writes native `Set*` when converted. `FindState(D3DRS_*)` still matches the converted field. Additive `SetValue` still passes `D3DBLEND_*`; native SRC/DEST coerce via `MapBlend`.
+
+### native RSA edge — **complete**
 
 - Mesh no longer has `NoteRs` / `NoteTss` / `Read*` D3D9 IDs. RSA apply and `lwDeviceObject11` write-through call `SetAlpha` / `SetBlend` / `SetCull` / combiner / sampler setters.
 - Snapshot/restore uses `lwD3D11MeshGetDraw`. Atoms still store D3D9 DWORDs.

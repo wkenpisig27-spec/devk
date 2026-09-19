@@ -11,6 +11,10 @@
 //
 LW_BEGIN
 
+void lwRenderStateAtomAssign(lwRenderStateAtom* a, DWORD state, DWORD value);
+void lwRenderStateAtomAssignValue(lwRenderStateAtom* a, DWORD value);
+void lwRenderStateAtomSeqToNative(lwRenderStateAtom* seq, DWORD num);
+
 LW_RESULT lwRenderStateAtomBeginSetRS(lwIDeviceObject* dev_obj, lwRenderStateAtom* rsa_seq, DWORD num);
 LW_RESULT lwRenderStateAtomEndSetRS(lwIDeviceObject* dev_obj, lwRenderStateAtom* rsa_seq, DWORD num);
 LW_RESULT lwRenderStateAtomBeginSetTSS(DWORD stage, lwIDeviceObject* dev_obj, lwRenderStateAtom* rsa_seq, DWORD num);
@@ -80,8 +84,7 @@ LW_INLINE LW_RESULT lwRenderStateAtomSet::SetValue(DWORD id, DWORD value) {
 	if (id >= _rsa_num)
 		return LW_RET_FAILED;
 
-	_rsa_seq[id].value0 = value;
-	_rsa_seq[id].value1 = value;
+	lwRenderStateAtomAssignValue(&_rsa_seq[id], value);
 
 	return LW_RET_OK;
 }
@@ -90,9 +93,7 @@ LW_INLINE LW_RESULT lwRenderStateAtomSet::SetStateValue(DWORD id, DWORD state, D
 	if (id >= _rsa_num)
 		return LW_RET_FAILED;
 
-	_rsa_seq[id].state = state;
-	_rsa_seq[id].value0 = value;
-	_rsa_seq[id].value1 = value;
+	lwRenderStateAtomAssign(&_rsa_seq[id], state, value);
 
 	return LW_RET_OK;
 }

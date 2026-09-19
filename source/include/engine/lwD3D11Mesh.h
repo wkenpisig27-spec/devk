@@ -230,6 +230,82 @@ inline DWORD lwD3D11MeshUnmapAddr(D3D11_TEXTURE_ADDRESS_MODE a)
     return D3DTADDRESS_WRAP;
 }
 
+enum MeshRsaField
+{
+    MESH_RSA_NATIVE = 0x8000,
+    MESH_RSA_ALPHA = 0x8000,
+    MESH_RSA_SRCBLEND,
+    MESH_RSA_DESTBLEND,
+    MESH_RSA_ZENABLE,
+    MESH_RSA_ZWRITE,
+    MESH_RSA_CULL,
+    MESH_RSA_MSAA,
+    MESH_RSA_LIGHTING,
+    MESH_RSA_AMBIENT,
+    MESH_RSA_TFACTOR,
+    MESH_RSA_ATEST,
+    MESH_RSA_AREF,
+    MESH_RSA_AFUNC,
+    MESH_RSA_COP,
+    MESH_RSA_CA1,
+    MESH_RSA_CA2,
+    MESH_RSA_AA1,
+    MESH_RSA_AA2,
+    MESH_RSA_UVXFORM,
+    MESH_RSA_SAMP_ADDR,
+    MESH_RSA_SAMP_POINT
+};
+
+inline int lwMeshRsaIsNative(DWORD state)
+{
+    return (state & MESH_RSA_NATIVE) != 0 ? 1 : 0;
+}
+
+inline int lwMeshRsaIsTss(DWORD state)
+{
+    return (state >= MESH_RSA_COP && state <= MESH_RSA_UVXFORM) ? 1 : 0;
+}
+
+inline int lwMeshRsaIsSamp(DWORD state)
+{
+    return (state == MESH_RSA_SAMP_ADDR || state == MESH_RSA_SAMP_POINT) ? 1 : 0;
+}
+
+inline DWORD lwMeshRsaFieldFromD3D9(DWORD state)
+{
+    switch (state)
+    {
+    case D3DRS_ALPHABLENDENABLE: return MESH_RSA_ALPHA;
+    case D3DRS_SRCBLEND: return MESH_RSA_SRCBLEND;
+    case D3DRS_DESTBLEND: return MESH_RSA_DESTBLEND;
+    case D3DRS_ZENABLE: return MESH_RSA_ZENABLE;
+    case D3DRS_ZWRITEENABLE: return MESH_RSA_ZWRITE;
+    case D3DRS_CULLMODE: return MESH_RSA_CULL;
+    case D3DRS_MULTISAMPLEANTIALIAS: return MESH_RSA_MSAA;
+    case D3DRS_LIGHTING: return MESH_RSA_LIGHTING;
+    case D3DRS_AMBIENT: return MESH_RSA_AMBIENT;
+    case D3DRS_TEXTUREFACTOR: return MESH_RSA_TFACTOR;
+    case D3DRS_ALPHATESTENABLE: return MESH_RSA_ATEST;
+    case D3DRS_ALPHAREF: return MESH_RSA_AREF;
+    case D3DRS_ALPHAFUNC: return MESH_RSA_AFUNC;
+    case D3DTSS_COLOROP: return MESH_RSA_COP;
+    case D3DTSS_COLORARG1: return MESH_RSA_CA1;
+    case D3DTSS_COLORARG2: return MESH_RSA_CA2;
+    case D3DTSS_ALPHAARG1: return MESH_RSA_AA1;
+    case D3DTSS_ALPHAARG2: return MESH_RSA_AA2;
+    default: return 0;
+    }
+}
+
+inline DWORD lwMeshRsaFieldFromD3D9Samp(DWORD state)
+{
+    if (state == D3DSAMP_ADDRESSU)
+        return MESH_RSA_SAMP_ADDR;
+    if (state == D3DSAMP_MAGFILTER)
+        return MESH_RSA_SAMP_POINT;
+    return 0;
+}
+
 MINDPOWER_API LW_RESULT lwD3D11MeshInit(ID3D11Device* device, ID3D11DeviceContext* context);
 MINDPOWER_API void lwD3D11MeshShutdown();
 

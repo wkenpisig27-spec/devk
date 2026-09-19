@@ -104,6 +104,159 @@ int lwHexStrToInt(const char* str)
 
 }
 
+static DWORD MeshRsaValueFromD3D9(DWORD d3d9_state, DWORD value)
+{
+    switch (d3d9_state)
+    {
+    case D3DRS_SRCBLEND:
+    case D3DRS_DESTBLEND: return (DWORD)lwD3D11MeshMapBlend(value);
+    case D3DRS_CULLMODE: return (DWORD)lwD3D11MeshMapCull(value);
+    case D3DRS_ALPHAFUNC: return (DWORD)lwD3D11MeshMapCmp(value);
+    case D3DTSS_COLOROP: return (DWORD)lwD3D11MeshMapColorOp(value);
+    case D3DTSS_COLORARG1:
+    case D3DTSS_COLORARG2:
+    case D3DTSS_ALPHAARG1:
+    case D3DTSS_ALPHAARG2: return (DWORD)lwD3D11MeshMapColorArg(value);
+    case D3DRS_ALPHABLENDENABLE:
+    case D3DRS_ZENABLE:
+    case D3DRS_ZWRITEENABLE:
+    case D3DRS_MULTISAMPLEANTIALIAS:
+    case D3DRS_LIGHTING:
+    case D3DRS_ALPHATESTENABLE:
+        return value ? 1 : 0;
+    default: return value;
+    }
+}
+
+static DWORD MeshRsaCoerceValue(DWORD native_state, DWORD value)
+{
+    switch (native_state)
+    {
+    case MESH_RSA_SRCBLEND:
+    case MESH_RSA_DESTBLEND: return (DWORD)lwD3D11MeshMapBlend(value);
+    default: return value;
+    }
+}
+
+static void MeshRsaAtomToNative(lwRenderStateAtom* a)
+{
+    if (!a || a->state == LW_INVALID_INDEX || lwMeshRsaIsNative(a->state))
+        return;
+    const DWORD nf = lwMeshRsaFieldFromD3D9(a->state);
+    if (!nf)
+        return;
+    const DWORD nv = MeshRsaValueFromD3D9(a->state, a->value0);
+    a->state = nf;
+    a->value0 = nv;
+    a->value1 = nv;
+}
+
+static void MeshRsaAtomToNativeSamp(lwRenderStateAtom* a)
+{
+    if (!a || a->state == LW_INVALID_INDEX || lwMeshRsaIsNative(a->state))
+        return;
+    const DWORD nf = lwMeshRsaFieldFromD3D9Samp(a->state);
+    if (!nf)
+        return;
+    DWORD nv = a->value0;
+    if (nf == MESH_RSA_SAMP_ADDR)
+        nv = (DWORD)lwD3D11MeshMapAddr(a->value0);
+    else if (nf == MESH_RSA_SAMP_POINT)
+        nv = (a->value0 == D3DTEXF_POINT) ? 1 : 0;
+    a->state = nf;
+    a->value0 = nv;
+    a->value1 = nv;
+}
+
+void lwRenderStateAtomSeqToNative(lwRenderStateAtom* seq, DWORD num)
+{
+    if (!lwIsDx11Active() || !seq)
+        return;
+    for (DWORD i = 0; i < num; i++)
+        MeshRsaAtomToNative(&seq[i]);
+}
+
+void lwRenderStateAtomAssign(lwRenderStateAtom* a, DWORD state, DWORD value)
+{
+    if (!a)
+        return;
+    a->state = state;
+    a->value0 = value;
+    a->value1 = value;
+    if (lwIsDx11Active())
+        MeshRsaAtomToNative(a);
+}
+
+void lwRenderStateAtomAssignValue(lwRenderStateAtom* a, DWORD value)
+{
+    if (!a)
+        return;
+    if (lwIsDx11Active() && lwMeshRsaIsNative(a->state))
+        value = MeshRsaCoerceValue(a->state, value);
+    a->value0 = value;
+    a->value1 = value;
+}
+
+static void MeshWriteNative(DWORD state, DWORD value)
+{
+    switch (state)
+    {
+    case MESH_RSA_ALPHA: lwD3D11MeshSetAlpha(value ? 1 : 0); break;
+    case MESH_RSA_SRCBLEND: lwD3D11MeshSetBlend((D3D11_BLEND)value, (D3D11_BLEND)0); break;
+    case MESH_RSA_DESTBLEND: lwD3D11MeshSetBlend((D3D11_BLEND)0, (D3D11_BLEND)value); break;
+    case MESH_RSA_ZENABLE: lwD3D11MeshSetZEnable(value ? 1 : 0); break;
+    case MESH_RSA_ZWRITE: lwD3D11MeshSetZWrite(value ? 1 : 0); break;
+    case MESH_RSA_CULL: lwD3D11MeshSetCull((D3D11_CULL_MODE)value); break;
+    case MESH_RSA_MSAA: lwD3D11MeshSetMsaa(value ? 1 : 0); break;
+    case MESH_RSA_LIGHTING: lwD3D11MeshSetLighting(value ? 1 : 0, 0); break;
+    case MESH_RSA_AMBIENT: lwD3D11MeshSetAmbient(value); break;
+    case MESH_RSA_TFACTOR: lwD3D11MeshSetTFactor(value); break;
+    case MESH_RSA_ATEST: lwD3D11MeshSetAlphaTest(value ? 1 : 0); break;
+    case MESH_RSA_AREF: lwD3D11MeshSetAlphaRef(value); break;
+    case MESH_RSA_AFUNC: lwD3D11MeshSetAlphaFunc((D3D11_COMPARISON_FUNC)value); break;
+    case MESH_RSA_COP: lwD3D11MeshSetCombiner(0, (MeshColorOp)value); break;
+    case MESH_RSA_CA1: lwD3D11MeshSetCombinerColorArg(0, 1, (MeshColorArg)value); break;
+    case MESH_RSA_CA2: lwD3D11MeshSetCombinerColorArg(0, 2, (MeshColorArg)value); break;
+    case MESH_RSA_AA1: lwD3D11MeshSetCombinerAlphaArg(0, 1, (MeshColorArg)value); break;
+    case MESH_RSA_AA2: lwD3D11MeshSetCombinerAlphaArg(0, 2, (MeshColorArg)value); break;
+    case MESH_RSA_UVXFORM: lwD3D11MeshSetUvXform(0, value ? 1 : 0); break;
+    case MESH_RSA_SAMP_ADDR: lwD3D11MeshSetSampAddr((D3D11_TEXTURE_ADDRESS_MODE)value); break;
+    case MESH_RSA_SAMP_POINT: lwD3D11MeshSetSampPoint(value ? 1 : 0); break;
+    default: break;
+    }
+}
+
+static int MeshSnapNative(DWORD state, DWORD* value)
+{
+    MeshNativeDrawSnap d;
+    lwD3D11MeshGetDraw(&d);
+    switch (state)
+    {
+    case MESH_RSA_ALPHA: *value = d.alpha ? 1 : 0; return 1;
+    case MESH_RSA_SRCBLEND: *value = (DWORD)d.src; return 1;
+    case MESH_RSA_DESTBLEND: *value = (DWORD)d.dest; return 1;
+    case MESH_RSA_ZENABLE: *value = d.zenable ? 1 : 0; return 1;
+    case MESH_RSA_ZWRITE: *value = d.zwrite ? 1 : 0; return 1;
+    case MESH_RSA_CULL: *value = (DWORD)d.cull; return 1;
+    case MESH_RSA_MSAA: *value = d.msaa ? 1 : 0; return 1;
+    case MESH_RSA_LIGHTING: *value = d.lighting ? 1 : 0; return 1;
+    case MESH_RSA_AMBIENT: *value = d.ambient; return 1;
+    case MESH_RSA_TFACTOR: *value = d.tfactor; return 1;
+    case MESH_RSA_ATEST: *value = d.atest ? 1 : 0; return 1;
+    case MESH_RSA_AREF: *value = d.aref; return 1;
+    case MESH_RSA_AFUNC: *value = (DWORD)d.afunc; return 1;
+    case MESH_RSA_COP: *value = (DWORD)d.cop[0]; return 1;
+    case MESH_RSA_CA1: *value = (DWORD)d.ca1[0]; return 1;
+    case MESH_RSA_CA2: *value = (DWORD)d.ca2[0]; return 1;
+    case MESH_RSA_AA1: *value = (DWORD)d.aa1[0]; return 1;
+    case MESH_RSA_AA2: *value = (DWORD)d.aa2[0]; return 1;
+    case MESH_RSA_UVXFORM: *value = d.uv_xform[0] ? 1 : 0; return 1;
+    case MESH_RSA_SAMP_ADDR: *value = (DWORD)d.samp_addr; return 1;
+    case MESH_RSA_SAMP_POINT: *value = d.samp_point ? 1 : 0; return 1;
+    default: return 0;
+    }
+}
+
 static int MeshSnapRs(DWORD state, DWORD* value)
 {
     MeshNativeDrawSnap d;
@@ -223,7 +376,14 @@ LW_RESULT lwRenderStateAtomBeginSetRS(lwIDeviceObject* dev_obj, lwRenderStateAto
 
         if (dx11)
         {
-            if (p->state >= D3DRS_ZENABLE)
+            MeshRsaAtomToNative(p);
+            if (lwMeshRsaIsNative(p->state))
+            {
+                if (!MeshSnapNative(p->state, &p->value1))
+                    p->value1 = p->value0;
+                MeshWriteNative(p->state, p->value0);
+            }
+            else if (p->state >= D3DRS_ZENABLE)
             {
                 if (!MeshSnapRs(p->state, &p->value1))
                     p->value1 = p->value0;
@@ -268,7 +428,9 @@ LW_RESULT lwRenderStateAtomEndSetRS(lwIDeviceObject* dev_obj, lwRenderStateAtom*
         {
             if (dx11)
             {
-                if (p->state >= D3DRS_ZENABLE)
+                if (lwMeshRsaIsNative(p->state))
+                    MeshWriteNative(p->state, p->value1);
+                else if (p->state >= D3DRS_ZENABLE)
                     MeshWriteRs(p->state, p->value1);
                 else
                     MeshWriteTss(0, p->state, p->value1);
@@ -297,9 +459,19 @@ LW_RESULT lwRenderStateAtomBeginSetTSS(DWORD stage, lwIDeviceObject* dev_obj, lw
 
         if (dx11)
         {
-            if (!MeshSnapSamp(p->state, &p->value1))
-                p->value1 = p->value0;
-            MeshWriteSamp(p->state, p->value0);
+            MeshRsaAtomToNativeSamp(p);
+            if (lwMeshRsaIsNative(p->state))
+            {
+                if (!MeshSnapNative(p->state, &p->value1))
+                    p->value1 = p->value0;
+                MeshWriteNative(p->state, p->value0);
+            }
+            else
+            {
+                if (!MeshSnapSamp(p->state, &p->value1))
+                    p->value1 = p->value0;
+                MeshWriteSamp(p->state, p->value0);
+            }
             continue;
         }
 
@@ -326,7 +498,12 @@ LW_RESULT lwRenderStateAtomEndSetTSS(DWORD stage, lwIDeviceObject* dev_obj, lwRe
         if(p->value0 != p->value1)
         {
             if (dx11)
-                MeshWriteSamp(p->state, p->value1);
+            {
+                if (lwMeshRsaIsNative(p->state))
+                    MeshWriteNative(p->state, p->value1);
+                else
+                    MeshWriteSamp(p->state, p->value1);
+            }
             else
                 dev_obj->SetSamplerState(stage, (D3DSAMPLERSTATETYPE)p->state, p->value1);
             p->value1 = p->value0;
@@ -399,7 +576,6 @@ LW_RESULT lwRenderStateAtomSet::Load(const lwRenderStateAtom* rsa_seq, DWORD rsa
     }
 
     memcpy(_rsa_seq, rsa_seq, sizeof(lwRenderStateAtom) * rsa_num);
-
     return LW_RET_OK;
 }
 
@@ -412,7 +588,9 @@ LW_RESULT lwRenderStateAtomSet::FindState(DWORD* id, DWORD state)
             return LW_RET_FAILED;
         }
 
-        if(_rsa_seq[i].state == state)
+        const DWORD want = (lwIsDx11Active() && !lwMeshRsaIsNative(state))
+            ? lwMeshRsaFieldFromD3D9(state) : 0;
+        if (_rsa_seq[i].state == state || (want && _rsa_seq[i].state == want))
         {
             if(id)
             {
@@ -437,14 +615,15 @@ LW_RESULT lwRenderStateAtomSet::ResetStateValue(DWORD state, DWORD value, DWORD*
             return LW_RET_FAILED;
         }
 
-        if(a->state == state)
+        const DWORD want = (lwIsDx11Active() && !lwMeshRsaIsNative(state))
+            ? lwMeshRsaFieldFromD3D9(state) : 0;
+        if (a->state == state || (want && a->state == want))
         {
             if(old_value)
             {
                 *old_value = value;
             }
-            a->value0 = value;
-            a->value1 = value;
+            lwRenderStateAtomAssignValue(a, value);
 
             return LW_RET_OK;
         }
