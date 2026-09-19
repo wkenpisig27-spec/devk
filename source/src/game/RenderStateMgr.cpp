@@ -168,9 +168,9 @@ HRESULT RenderStateMgr::BeginCharacter() {
 		lwD3D11MeshSetCharacter(1);
 		lwD3D11MeshSetLighting(1, 0xffc0c0c0);
 		lwD3D11MeshSetAlpha(0);
-		lwD3D11MeshSetBlend(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-		lwD3D11MeshSetCombiner(1, D3DTOP_DISABLE);
-		lwD3D11MeshSetCombiner(2, D3DTOP_DISABLE);
+		lwD3D11MeshSetBlend(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA);
+		lwD3D11MeshSetCombiner(1, MESH_COP_DISABLE);
+		lwD3D11MeshSetCombiner(2, MESH_COP_DISABLE);
 		lwD3D11MeshSetAlphaTest(0);
 	} else if (_rsa_cha) {
 		_rsa_cha->BeginRenderState(_dev_obj, 0, 10);
@@ -192,9 +192,9 @@ HRESULT RenderStateMgr::BeginSceneObject() {
 		lwD3D11MeshSetSceneObject(1);
 		lwD3D11MeshSetLighting(1, 0xffa0a0a0);
 		lwD3D11MeshSetAlpha(1);
-		lwD3D11MeshSetBlend(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-		lwD3D11MeshSetCombiner(1, D3DTOP_DISABLE);
-		lwD3D11MeshSetCombiner(2, D3DTOP_DISABLE);
+		lwD3D11MeshSetBlend(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA);
+		lwD3D11MeshSetCombiner(1, MESH_COP_DISABLE);
+		lwD3D11MeshSetCombiner(2, MESH_COP_DISABLE);
 		lwD3D11MeshSetAlphaTest(0);
 		if (_dev_obj) {
 			_dev_obj->SetTexture(1, 0);
@@ -223,10 +223,10 @@ HRESULT RenderStateMgr::BeginSceneItem() {
 HRESULT RenderStateMgr::BeginTerrain() {
 	if (lwIsDx11Active()) {
 		lwD3D11MeshSetTerrain(1);
-		lwD3D11MeshSetCombiner(1, D3DTOP_DISABLE);
-		lwD3D11MeshSetCombiner(2, D3DTOP_DISABLE);
+		lwD3D11MeshSetCombiner(1, MESH_COP_DISABLE);
+		lwD3D11MeshSetCombiner(2, MESH_COP_DISABLE);
 		lwD3D11MeshSetAlphaTest(0);
-		lwD3D11MeshSetBlend(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
+		lwD3D11MeshSetBlend(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA);
 		if (_dev_obj) {
 			_dev_obj->SetTexture(1, 0);
 			_dev_obj->SetTexture(2, 0);
@@ -239,7 +239,7 @@ HRESULT RenderStateMgr::BeginTranspObject() {
 		lwD3D11MeshSetTranspObject(1);
 		lwD3D11MeshSetLighting(0, 0xffffffff);
 		lwD3D11MeshSetAlpha(1);
-		lwD3D11MeshSetBlend(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
+		lwD3D11MeshSetBlend(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA);
 	} else if (_rsa_transpobj) {
 		_rsa_transpobj->BeginRenderState(_dev_obj, 0, 10);
 		_rsa_transpobj->BeginTextureStageState(_dev_obj, 10, 10, 0);
@@ -249,10 +249,10 @@ HRESULT RenderStateMgr::BeginTranspObject() {
 HRESULT RenderStateMgr::BeginVfx() {
 	if (lwIsDx11Active()) {
 		lwD3D11MeshSetVfx(1);
-		lwD3D11MeshSetCombiner(1, D3DTOP_DISABLE);
-		lwD3D11MeshSetCombiner(2, D3DTOP_DISABLE);
+		lwD3D11MeshSetCombiner(1, MESH_COP_DISABLE);
+		lwD3D11MeshSetCombiner(2, MESH_COP_DISABLE);
 		lwD3D11MeshSetAlphaTest(0);
-		lwD3D11MeshSetBlend(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
+		lwD3D11MeshSetBlend(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA);
 		lwD3D11MeshSetTFactor(0xffffffff);
 		lwD3D11MeshSetUvXform(0, 0);
 		lwD3D11MeshSetUvXform(1, 0);

@@ -294,7 +294,7 @@ void MPMap::Render()
 	g_Render.SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);  
 
 	if (lwIsDx11Active())
-		lwD3D11MeshSetCombinerArgs(1, D3DTOP_MODULATE, D3DTA_TEXTURE, D3DTA_DIFFUSE);
+		lwD3D11MeshSetCombinerArgs(1, MESH_COP_MODULATE, MESH_CA_TEXTURE, MESH_CA_DIFFUSE);
 	else
 	{
 		g_Render.SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
@@ -416,7 +416,7 @@ void MPMap::Render()
     g_Render.SetRenderState(D3DRS_CLIPPING, TRUE);
 
 	if (lwIsDx11Active())
-		lwD3D11MeshSetCombiner(1, D3DTOP_DISABLE);
+		lwD3D11MeshSetCombiner(1, MESH_COP_DISABLE);
 	else
 		g_Render.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 
@@ -482,7 +482,7 @@ void MPMap::RenderSmMap()
 	g_Render.SetTextureStageState(0, D3DTSS_COLOROP,   D3DTOP_MODULATE);  
 	
 	if (lwIsDx11Active())
-		lwD3D11MeshSetCombinerArgs(1, D3DTOP_MODULATE, D3DTA_TEXTURE, D3DTA_DIFFUSE);
+		lwD3D11MeshSetCombinerArgs(1, MESH_COP_MODULATE, MESH_CA_TEXTURE, MESH_CA_DIFFUSE);
 	else
 	{
 		g_Render.SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
@@ -1510,7 +1510,7 @@ void MPMap::_RenderVB(BOOL bWireframe)
 			g_Render.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_MIRROR);
 			g_Render.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_MIRROR);
 			if (lwIsDx11Active())
-				lwD3D11MeshSetCombiner(1, D3DTOP_MODULATE);
+				lwD3D11MeshSetCombiner(1, MESH_COP_MODULATE);
 			else
 				g_Render.SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_MODULATE);
             g_Render.SetTexture(1, GetTextureByID(GetTerrainTextureID(pGroup->btTextureID)));

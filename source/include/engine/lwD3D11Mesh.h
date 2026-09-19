@@ -9,6 +9,32 @@ LW_BEGIN
 
 class lwDeviceObject11;
 
+enum MeshColorOp
+{
+    MESH_COP_DISABLE = 0,
+    MESH_COP_SELECTARG1,
+    MESH_COP_SELECTARG2,
+    MESH_COP_MODULATE,
+    MESH_COP_MODULATE2X,
+    MESH_COP_ADD,
+    MESH_COP_ADDSMOOTH,
+    MESH_COP_ADDSIGNED,
+    MESH_COP_ADDSIGNED2X,
+    MESH_COP_MODULATEALPHA_ADDCOLOR,
+    MESH_COP_OTHER
+};
+
+enum MeshColorArg
+{
+    MESH_CA_TEXTURE = 0,
+    MESH_CA_DIFFUSE,
+    MESH_CA_CURRENT,
+    MESH_CA_TFACTOR,
+    MESH_CA_OTHER
+};
+
+MINDPOWER_API D3D11_BLEND lwD3D11MeshMapBlend(DWORD d3d9);
+
 MINDPOWER_API LW_RESULT lwD3D11MeshInit(ID3D11Device* device, ID3D11DeviceContext* context);
 MINDPOWER_API void lwD3D11MeshShutdown();
 
@@ -32,9 +58,9 @@ MINDPOWER_API void lwD3D11MeshSetTerrain(int enabled);
 MINDPOWER_API void lwD3D11MeshSetVfx(int enabled);
 MINDPOWER_API void lwD3D11MeshHintAdditive(int enabled);
 MINDPOWER_API void lwD3D11MeshSetAlpha(int enabled);
-MINDPOWER_API void lwD3D11MeshSetBlend(DWORD src, DWORD dest);
-MINDPOWER_API void lwD3D11MeshSetCombiner(int stage, DWORD op);
-MINDPOWER_API void lwD3D11MeshSetCombinerArgs(int stage, DWORD op, DWORD arg1, DWORD arg2);
+MINDPOWER_API void lwD3D11MeshSetBlend(D3D11_BLEND src, D3D11_BLEND dest);
+MINDPOWER_API void lwD3D11MeshSetCombiner(int stage, MeshColorOp op);
+MINDPOWER_API void lwD3D11MeshSetCombinerArgs(int stage, MeshColorOp op, MeshColorArg arg1, MeshColorArg arg2);
 MINDPOWER_API void lwD3D11MeshSetLighting(int enabled, DWORD ambient);
 MINDPOWER_API void lwD3D11MeshSetAlphaTest(int enabled);
 MINDPOWER_API void lwD3D11MeshSetTFactor(DWORD tf);

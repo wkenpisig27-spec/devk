@@ -7,10 +7,10 @@ Goal: **true D3D11** end-to-end — no runtime D3D9 device, no long-term relianc
 | Layer | Today (DX11 play path) | Target (native) |
 | --- | --- | --- |
 | Device | `lwD3D11NativeContext` (`ID3D11Device` / context / swapchain); play path uses `GetD3D11Device` / `GetD3D11Context` / `GetSwapChain` | same (PSO later) |
-| State | Pass objects + native `SetAlpha`/`SetBlend`/`SetCombiner` writers | PSO + root signature / explicit CBs per pass |
+| State | Pass objects bind VS/PS/OM; `MeshNativeDraw` is D3D11/native enums | PSO + root signature / explicit CBs per pass |
 | Shaders | SM4 HLSL + FF mesh shader + ShaderMgr11 VS (`.hlsl` keys) | same |
 | Loaders | DDS/BMP/TGA + GDI+ (`lwD3D11CreateTextureFromMemory`) | same (DirectXTex optional) |
-| Effects | Compiled `shader\\eff.hlsl` (tex * diffuse/TFACTOR); OM still from `Pass()` | same |
+| Effects | Compiled `shader\\eff.hlsl` (tex * diffuse/TFACTOR); OM from baked `EffPassObject` | same |
 | Math | DirectXMath via `lwD3DXCompat.h`; public names are XM* (`lwXMMath.h`) | same (storage types, not SIMD registers) |
 
 ## Build flag
@@ -126,11 +126,28 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 **Smoke:** character, terrain, transparent props, combat VFX, weapon lit — not only login → world.
 
-## Remaining (after native device handle)
+## Remaining (after native MeshNativeDraw)
 
 Highest-value leftover vs the native target table:
 
-1. Leftover D3D9 *language*: play-path device handles are native. Long-term target is pass objects / PSOs, not a D3D9 factory cache.
+1. RSA `NoteRs` / `NoteTss` / `Read*` still translate D3D9 state IDs at the edge. Material RSA atoms still store `D3DRS_*` / `D3DTSS_*`. After that, leftover D3D9 sources stay on disk until asked.
+
+### native MeshNativeDraw — **complete** (await smoke)
+
+- `MeshNativeDraw` stores `D3D11_BLEND` / `D3D11_CULL_MODE` / `D3D11_COMPARISON_FUNC` / `D3D11_TEXTURE_ADDRESS_MODE` and `MeshColorOp` / `MeshColorArg`.
+- `SetBlend` / `SetCombiner` take those types. OM, dual-tex, UV, and sampler resolve from them.
+- RSA `Note*` / `Read*` still map D3D9 ↔ native so hair/cape/material atoms keep working.
+
+### pass-object shader bind — **complete**
+
+- `BakePassObjects()` stores default VS / skin VS / PS on each `MeshPassObject` / `EffPassObject` with the baked OM.
+- `ResolveMeshPassBind` fills one `MeshPassBind` (shaders + FVF layout + OM). `ApplyMeshPassBind` applies that object. ShaderMgr11 skin VS still overlays character physique.
+- Input layout stays FVF-resolved per draw — it cannot bake onto the pass. Not a D3D12 PSO / root signature.
+
+### pass-object OM bake — **complete**
+
+- `BakePassObjects()` stores each `kMeshPass` / `kEffPass` default as real `ID3D11RasterizerState*` / `DepthStencilState*` / `BlendState*` on `MeshPassObject` / `EffPassObject`.
+- `ResolveMeshOutputMerger` starts from those pointers. Hair alpha, additive dest, cull, and MSAA still overlay from `MeshNativeDraw`.
 
 ### MPRender GetD3DObj — **complete**
 

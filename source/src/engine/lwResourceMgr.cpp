@@ -2248,7 +2248,7 @@ LW_RESULT lwMtlTexAgent::BeginSet()
         if (lwIsDx11Active())
         {
             lwD3D11MeshSetAlpha(1);
-            lwD3D11MeshSetBlend(v[0], v[1]);
+            lwD3D11MeshSetBlend(lwD3D11MeshMapBlend(v[0]), lwD3D11MeshMapBlend(v[1]));
             lwD3D11MeshHintAdditive(1);
         }
         else
