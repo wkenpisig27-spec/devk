@@ -31,9 +31,6 @@ public:
     LW_RESULT ResetDeviceStateCache();
     LW_RESULT ResetDeviceTransformMatrix();
 
-    LW_RESULT SetDirect3D(IDirect3DX* d3d);
-    LW_RESULT SetDevice(IDirect3DDeviceX* dev);
-    IDirect3DX* GetDirect3D() { return 0; }
     lwD3DCreateParam* GetD3DCreateParam() { return &_d3d_create_param; }
     D3DDISPLAYMODE* GetAdapterDisplayMode() { return &_display_mode; }
     D3DCAPSX* GetDeviceCaps() { return &_dev_caps; }

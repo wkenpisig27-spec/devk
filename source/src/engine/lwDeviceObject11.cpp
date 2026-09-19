@@ -543,18 +543,6 @@ LW_RESULT lwDeviceObject11::ResetDeviceTransformMatrix()
     return LW_RET_OK;
 }
 
-LW_RESULT lwDeviceObject11::SetDirect3D(IDirect3DX*)
-{
-    lwD3D11Gap(LW_D3D11_SKIP, "set-d3d9", "D3D9 factory is unused on DeviceObject11");
-    return LW_RET_OK;
-}
-
-LW_RESULT lwDeviceObject11::SetDevice(IDirect3DDeviceX*)
-{
-    lwD3D11Gap(LW_D3D11_SKIP, "set-d3d9-device", "D3D9 device is unused on DeviceObject11");
-    return LW_RET_OK;
-}
-
 LW_RESULT lwDeviceObject11::SetViewPort(const D3DVIEWPORTX* vp)
 {
     if (!vp)

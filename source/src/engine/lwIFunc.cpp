@@ -323,8 +323,13 @@ LW_RESULT lwInitMeshLibSystem(lwISystem** ret_sys, lwISysGraphics** ret_sys_grap
         sys_graphics->SetOutputResetDeviceProc(__global_reset_dev_entry);
 
         dev_obj = sys_graphics->GetDeviceObject();
+#if MINDPOWER_USE_D3D9_DEVICE
         dev_obj->SetDirect3D(d3d);
         dev_obj->SetDevice(dev);
+#else
+        (void)d3d;
+        (void)dev;
+#endif
 
         if (LW_FAILED(dev_obj->InitStateCache()))
             goto __ret;
@@ -455,8 +460,10 @@ LW_RESULT lwInitMeshLibSystem(lwISystem** ret_sys, lwISysGraphics** ret_sys_grap
 
         if (param_info && !lwIsDx11Active())
         {
+#if MINDPOWER_USE_D3D9_DEVICE
             if (LW_FAILED(lwAdjustD3DCreateParam(dev_obj->GetDirect3D(), param, param_info)))
                 goto __ret;
+#endif
         }
         else if (param_info)
         {

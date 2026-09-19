@@ -379,9 +379,11 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 
 
 	lwIDeviceObject* dev_obj = sys_graphics->GetDeviceObject();
-	_pD3D = dev_obj->GetDirect3D();
 #if MINDPOWER_USE_D3D9_DEVICE
+	_pD3D = dev_obj->GetDirect3D();
 	_pD3DDevice = dev_obj->GetDevice();
+#else
+	_pD3D = 0;
 #endif
 	_IMgr.sys = sys;
 	_IMgr.sys_graphics = sys_graphics;
@@ -471,7 +473,6 @@ BOOL MPRender::InitRes3() {
 int MPRender::ToggleFullScreen(int width, int height, D3DFORMAT depth_fmt, BOOL be_windowed) {
 	lwIResourceMgr* res_mgr = _IMgr.res_mgr;
 	lwIDeviceObject* dev_obj = _IMgr.dev_obj;
-	IDirect3DX* dev = lwIsDx11Active() ? 0 : dev_obj->GetDirect3D();
 
 	HWND hwnd = _hWnd;
 
@@ -509,6 +510,7 @@ int MPRender::ToggleFullScreen(int width, int height, D3DFORMAT depth_fmt, BOOL 
 			"D3D11 resize keeps the swapchain sample count from CreateDevice");
 #if MINDPOWER_USE_D3D9_DEVICE
 	} else {
+		IDirect3DX* dev = dev_obj->GetDirect3D();
 		d3dcp.present_param.MultiSampleType = SelectBestMSAA(
 			dev,
 			d3dcp.present_param.BackBufferFormat,

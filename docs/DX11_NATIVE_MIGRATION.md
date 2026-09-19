@@ -130,7 +130,12 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 Highest-value leftover vs the native target table:
 
-1. Leftover D3D9 *language*: `lwDeviceObject.h` stays for dual-build. Play path no longer includes it or exposes `lwIDeviceObject::GetDevice()`.
+1. Leftover D3D9 *language*: `MPRender::GetD3DObj()` still returns a null `IDirect3D9*`. Long-term target is pass objects / PSOs, not a D3D9 factory.
+
+### lwIDeviceObject D3D9 handle — **complete**
+
+- `SetDirect3D` / `SetDevice` / `GetDirect3D` / `GetDevice` exist on the interface only when `MINDPOWER_USE_D3D9_DEVICE`.
+- `lwDeviceObject11` no longer implements those no-ops. Play path uses `lwD3D11NativeGet*`.
 
 ### lwIDeviceObject GetDevice — **complete**
 

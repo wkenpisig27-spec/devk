@@ -611,10 +611,10 @@ public:
     virtual LW_RESULT ResetDeviceStateCache() PURE_METHOD;
     virtual LW_RESULT ResetDeviceTransformMatrix() PURE_METHOD;
 
+#if MINDPOWER_USE_D3D9_DEVICE
     virtual LW_RESULT SetDirect3D(IDirect3DX* d3d) PURE_METHOD;
     virtual LW_RESULT SetDevice(IDirect3DDeviceX* dev) PURE_METHOD;
     virtual IDirect3DX* GetDirect3D() PURE_METHOD;
-#if MINDPOWER_USE_D3D9_DEVICE
     virtual IDirect3DDeviceX* GetDevice() PURE_METHOD;
 #endif
     virtual lwD3DCreateParam* GetD3DCreateParam() PURE_METHOD;
