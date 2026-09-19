@@ -3,9 +3,6 @@
 #include "MPShadowMap.h"
 #include "MPRender.h"
 #include "MindPowerRenderConfig.h"
-#if MINDPOWER_USE_D3D9_DEVICE
-#include "lwDeviceObject.h"
-#endif
 #include "lwDeviceObject11.h"
 #include "lwD3D11Texture.h"
 #include "lwD3D11Buffer.h"

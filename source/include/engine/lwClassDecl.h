@@ -22,7 +22,6 @@ class lwPoseCtrl;
 class lwWeaponMesh;
 
 struct lwMaterial;
-class lwDeviceObject;
 class lwModel;
 
 class lwMesh;

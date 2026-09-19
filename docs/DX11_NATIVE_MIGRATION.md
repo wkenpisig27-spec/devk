@@ -112,7 +112,7 @@ Create*X device macros stay so remaining D3D9 `.cpp` still compiles; they are un
 
 **Smoke (2026-09-19):** login → world passed after Post-5.
 
-Debug and Release are both DX11-only (`MindPower3D_D11D.lib` / `MindPower3D_D11R.lib`). The D3D9 device implementation (`lwDeviceObject.cpp`) and unused `d3dfont` sample are gone. `lwDeviceObject.h` stays as a type used by primitive/resource headers.
+Debug and Release are both DX11-only (`MindPower3D_D11D.lib` / `MindPower3D_D11R.lib`). The D3D9 device implementation (`lwDeviceObject.cpp` / `lwDeviceObject.h`) and unused `d3dfont` sample are gone.
 
 ### Pass state — **code complete** (await smoke)
 
@@ -126,13 +126,18 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 **Smoke:** character, terrain, transparent props, combat VFX, weapon lit — not only login → world.
 
-## Remaining (after ShaderMgr11 native notes)
+## Remaining (after D3D9 device header)
 
 Highest-value leftover vs the native target table:
 
-1. Leftover D3D9 sources stay on disk (`lwDeviceObject.h`, `ShaderLoad.cpp`, `lwShaderMgr.cpp`) until asked. Long-term target is still a real PSO / root signature; pass objects already bind VS/PS/OM.
+1. `ShaderLoad.cpp` and `lwShaderMgr.cpp` stay — they still register `.hlsl` keys and vertex decls for ShaderMgr11. Long-term target is a real PSO / root signature; pass objects already bind VS/PS/OM.
 
-### ShaderMgr11 native notes — **complete** (await smoke)
+### D3D9 device header — **complete** (await smoke)
+
+- Removed `lwDeviceObject.h`. Play path already used `lwDeviceObject11`; the D3D9 class header was only included behind `MINDPOWER_USE_D3D9_DEVICE`.
+- `ShaderLoad.cpp` / `lwShaderMgr.cpp` are not parked unused files — they are the DX11 shader registration path.
+
+### ShaderMgr11 native notes — **complete**
 
 - `lwD3D11ShaderMgrPrepareDraw` reads alpha-test from `MeshNativeDraw` (`GetDraw`) instead of `GetCachedRS(D3DRS_ALPHATEST*)`. Character physique skin VS no longer samples the D3D9 RS cache.
 
@@ -176,7 +181,7 @@ Highest-value leftover vs the native target table:
 ### lwIDeviceObject GetDevice — **complete**
 
 - `GetDevice()` is on the interface only when `MINDPOWER_USE_D3D9_DEVICE`. `lwDeviceObject11` no longer implements a null stub.
-- Play-path sources no longer include `lwDeviceObject.h`. Dual-build still constructs `lwDeviceObject` behind the same flag.
+- Play-path sources no longer include `lwDeviceObject.h`. The D3D9 device class is gone from this branch.
 
 ### play-path GetDevice — **complete**
 
@@ -200,7 +205,7 @@ Highest-value leftover vs the native target table:
 ### D3D9 sources — **complete**
 
 - Removed `lwDeviceObject.cpp` (already out of the play-path compile) and unused `d3dfont.cpp` / `d3dfont.h`.
-- `lwDeviceObject.h` stays on disk for dual-build. DX11 play path does not include it.
+- Removed `lwDeviceObject.h`. DX11 play path uses `lwDeviceObject11` only.
 - `ShaderLoad.cpp` and `lwShaderMgr.cpp` stay — the shader registration path still uses them.
 
 ### native effect pass — **complete**

@@ -6,7 +6,7 @@
 //   * No lwDeviceObject (D3D9) construction
 //   * Backend forced to DX11 at runtime
 //   * Play-path GPU handle is lwD3D11NativeContext (not IDirect3DDevice9*)
-//   * lwDeviceObject.cpp is removed; play path is lwDeviceObject11
+//   * lwDeviceObject.cpp / lwDeviceObject.h are removed; play path is lwDeviceObject11
 //
 // MINDPOWER_NATIVE_DX11_API — Phase 4+ gate for subsystems that include d3d11.h
 //   via lwDirectX.h. Reserved; do not require it for existing DeviceObject11 paths.

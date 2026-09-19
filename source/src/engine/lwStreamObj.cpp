@@ -5,9 +5,6 @@
 #include "lwStdInc.h"
 #include "lwRenderBackend.h"
 #include "MindPowerRenderConfig.h"
-#if MINDPOWER_USE_D3D9_DEVICE
-#include "lwDeviceObject.h"
-#endif
 
 LW_BEGIN
 

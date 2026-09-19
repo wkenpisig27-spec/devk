@@ -193,7 +193,6 @@
     <ClInclude Include="..\src\lwD3DSettings.h" />
     <ClInclude Include="..\src\lwDDS.h" />
     <ClInclude Include="..\src\lwDDSFile.h" />
-    <ClInclude Include="..\src\lwDeviceObject.h" />
     <ClInclude Include="..\src\lwDirectoryBrowser.h" />
     <ClInclude Include="..\src\lwEfxTrack.h" />
     <ClInclude Include="..\src\lwExpObj.h" />

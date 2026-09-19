@@ -330,12 +330,6 @@
 					RelativePath="..\src\lwDDSFile.h">
 				</File>
 				<File
-					RelativePath="..\src\lwDeviceObject.cpp">
-				</File>
-				<File
-					RelativePath="..\src\lwDeviceObject.h">
-				</File>
-				<File
 					RelativePath="..\src\lwDirectoryBrowser.cpp">
 				</File>
 				<File
