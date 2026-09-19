@@ -126,13 +126,17 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 **Smoke:** character, terrain, transparent props, combat VFX, weapon lit — not only login → world.
 
-## Remaining (after native RSA atoms)
+## Remaining (after ShaderMgr11 native notes)
 
 Highest-value leftover vs the native target table:
 
 1. Leftover D3D9 sources stay on disk (`lwDeviceObject.h`, `ShaderLoad.cpp`, `lwShaderMgr.cpp`) until asked. Long-term target is still a real PSO / root signature; pass objects already bind VS/PS/OM.
 
-### native RSA atoms — **complete** (await smoke)
+### ShaderMgr11 native notes — **complete** (await smoke)
+
+- `lwD3D11ShaderMgrPrepareDraw` reads alpha-test from `MeshNativeDraw` (`GetDraw`) instead of `GetCachedRS(D3DRS_ALPHATEST*)`. Character physique skin VS no longer samples the D3D9 RS cache.
+
+### native RSA atoms — **complete**
 
 - Runtime atoms store `MeshRsaField` (`0x8000+`) + native values (`D3D11_BLEND`, `MeshColorOp`, …). Mesh files stay D3D9 `fread` layout.
 - Convert is idempotent at `Assign` (C++ RS/TSS writes) and at `BeginSetRS` / `BeginSetTSS`. `Load` / `SetStateValue(buf)` stay memcpy — D3D9 TSS and sampler IDs collide (`COLOROP` == `ADDRESSU` == 1), so one switch cannot convert a file blob.

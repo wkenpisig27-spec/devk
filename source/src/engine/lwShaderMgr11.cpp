@@ -673,16 +673,12 @@ int lwD3D11ShaderMgrPrepareDraw(lwDeviceObject11* dev, ID3D11InputLayout** out_l
     float ps_extra[4] = { 0, 0, 0, -1.0f };
     if (lwD3D11MeshIsOutline())
         ps_extra[0] = 1.0f;
-    DWORD atest = dev->GetCachedRS(D3DRS_ALPHATESTENABLE);
-    if (atest && atest != 0xffffffff)
-    {
-        DWORD aref = dev->GetCachedRS(D3DRS_ALPHAREF);
-        if (aref == 0xffffffff)
-            aref = 0;
-        DWORD afunc = dev->GetCachedRS(D3DRS_ALPHAFUNC);
-        if (afunc == D3DCMP_GREATER || afunc == D3DCMP_GREATEREQUAL || afunc == 0xffffffff)
-            ps_extra[3] = (float)(aref & 0xff) / 255.0f;
-    }
+    MeshNativeDrawSnap draw;
+    lwD3D11MeshGetDraw(&draw);
+    if (draw.atest &&
+        (draw.afunc == D3D11_COMPARISON_GREATER ||
+         draw.afunc == D3D11_COMPARISON_GREATER_EQUAL))
+        ps_extra[3] = (float)(draw.aref & 0xff) / 255.0f;
     if (SUCCEEDED(s_sm.context->Map(s_sm.ps_cb, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))
     {
         memcpy(mapped.pData, ps_extra, 16);
