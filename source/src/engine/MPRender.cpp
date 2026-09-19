@@ -116,8 +116,8 @@ D3DMULTISAMPLE_TYPE MPRender::SelectBestMSAA(IDirect3DX* d3d, D3DFORMAT backFmt,
 
 MPRender::MPRender()
     : _hWnd(0),
-      _pD3D(NULL),
 #if MINDPOWER_USE_D3D9_DEVICE
+      _pD3D(NULL),
       _pD3DDevice(NULL),
 #endif
       _p2DSprite(NULL),
@@ -382,8 +382,6 @@ BOOL MPRender::Init(HWND hWnd, int nScrWidth, int nScrHeight, int nColorBit, BOO
 #if MINDPOWER_USE_D3D9_DEVICE
 	_pD3D = dev_obj->GetDirect3D();
 	_pD3DDevice = dev_obj->GetDevice();
-#else
-	_pD3D = 0;
 #endif
 	_IMgr.sys = sys;
 	_IMgr.sys_graphics = sys_graphics;

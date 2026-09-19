@@ -87,12 +87,12 @@ public:
     void				EnableClearStencil(BOOL bEnable = TRUE)     { _bClearStencil = bEnable; }
 #if MINDPOWER_USE_D3D9_DEVICE
 	IDirect3DDeviceX*	GetDevice()                                 { return _pD3DDevice;	    }
+	IDirect3DX*			GetD3DObj()									{ return _pD3D;				}
 #else
 	ID3D11Device*		GetD3D11Device()                            { return lwD3D11NativeGetDevice(); }
 	ID3D11DeviceContext* GetD3D11Context()                          { return lwD3D11NativeGetContext(); }
 	IDXGISwapChain*		GetSwapChain()                              { return lwD3D11NativeGetSwapChain(); }
 #endif
-	IDirect3DX*			GetD3DObj()									{ return _pD3D;				}
 	void				SetTexture(int nStage, IDirect3DTextureX* pTexture);
 	void				EnableAlpha(BOOL bEnable);
 	void				EnableZBuffer(BOOL bEnable);
@@ -303,7 +303,9 @@ protected:
 protected:
     
     // Direct 3D
+#if MINDPOWER_USE_D3D9_DEVICE
     IDirect3DX*             _pD3D;
+#endif
     HWND                    _hWnd;
 	//CD3DFont*				_pFont; // �ڲ�����һ��Font������һЩ�������XMMATRIXA16			_matWorld;
 	//{lemon modify@2004.9.3

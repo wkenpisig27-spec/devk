@@ -130,7 +130,11 @@ UV mats, TFACTOR, alpha-test, lights/materials, bones stay per-draw. Character d
 
 Highest-value leftover vs the native target table:
 
-1. Leftover D3D9 *language*: `MPRender::GetD3DObj()` still returns a null `IDirect3D9*`. Long-term target is pass objects / PSOs, not a D3D9 factory.
+1. Leftover D3D9 *language*: play-path device handles are native. Long-term target is pass objects / PSOs, not a D3D9 factory cache.
+
+### MPRender GetD3DObj — **complete**
+
+- `GetD3DObj()` and `_pD3D` exist only on `MINDPOWER_USE_D3D9_DEVICE`. DX11 play path has no `IDirect3D9*` member.
 
 ### lwIDeviceObject D3D9 handle — **complete**
 
