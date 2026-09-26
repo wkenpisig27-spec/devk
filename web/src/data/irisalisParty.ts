@@ -7,13 +7,15 @@ export type Element =
   | "Ice"
   | "Earth"
   | "Dark"
-  | "Fire";
+  | "Fire"
+  | "Lightning"
+  | "Light";
 
 export type CarriedItem = {
   name: string;
   base: string;
   core: string;
-  target: "Legendary";
+  target: string;
   why: string;
 };
 
@@ -285,7 +287,7 @@ export const aniimoRoster: Record<string, AniimoBuild> = {
   piopiota: {
     id: "piopiota",
     name: "Piopiota",
-    number: "054",
+    number: "052",
     role: "Support",
     elements: ["Water"],
     stage: "Nova",

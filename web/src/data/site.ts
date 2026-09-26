@@ -15,6 +15,7 @@ export const nav = [
   { href: "/progress", label: "News" },
   { href: "/classes", label: "Classes" },
   { href: "/guides/pko-classes", label: "Guide" },
+  { href: "/tools/aniimo", label: "Aniimo" },
   { href: "/tools/irisalis-party", label: "Irisalis" },
 ] as const;
 

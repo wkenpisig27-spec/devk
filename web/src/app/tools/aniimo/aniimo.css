@@ -1,0 +1,245 @@
+.lib-hero {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: clamp(4.5rem, 10vw, 6.5rem) clamp(1.25rem, 4vw, 3rem) 1.5rem;
+}
+
+.lib-kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--bloom);
+}
+
+.lib-hero h1 {
+  margin: 0.4rem 0 0;
+  max-width: 16ch;
+  font-family: var(--font-iris-display), Georgia, serif;
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  font-weight: 520;
+  line-height: 0.98;
+  color: var(--foam);
+}
+
+.lib-hero p {
+  margin: 0.9rem 0 0;
+  max-width: 38rem;
+  color: var(--mist);
+  line-height: 1.55;
+}
+
+.lib-app {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.lib-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.lib-search,
+.lib-toolbar select,
+.build-field input,
+.build-field textarea,
+.build-field select {
+  border: 1px solid rgba(216, 239, 230, 0.2);
+  border-radius: 0.6rem;
+  background: rgba(8, 16, 13, 0.55);
+  color: var(--foam);
+  font: inherit;
+  padding: 0.6rem 0.75rem;
+}
+
+.lib-search {
+  flex: 1 1 220px;
+  min-width: 180px;
+}
+
+.lib-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.lib-filters button,
+.element-picks button,
+.lib-row {
+  border: 1px solid rgba(216, 239, 230, 0.16);
+  background: rgba(12, 22, 18, 0.7);
+  color: var(--mist);
+  cursor: pointer;
+  font: inherit;
+}
+
+.lib-filters button,
+.element-picks button {
+  padding: 0.45rem 0.7rem;
+  border-radius: 0.5rem;
+}
+
+.lib-filters button.is-on,
+.element-picks button.is-on {
+  border-color: rgba(232, 160, 176, 0.7);
+  background: rgba(196, 93, 120, 0.28);
+  color: var(--foam);
+}
+
+.lib-count {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.lib-shell {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .lib-shell {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lib-list {
+  max-height: min(72vh, 840px);
+  overflow: auto;
+  display: grid;
+  gap: 0.4rem;
+  padding-right: 0.15rem;
+}
+
+.lib-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "no name role"
+    "state state state";
+  gap: 0.2rem 0.55rem;
+  align-items: center;
+  text-align: left;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.8rem;
+}
+
+.lib-row.is-selected {
+  border-color: rgba(232, 160, 176, 0.7);
+  background: rgba(196, 93, 120, 0.16);
+}
+
+.lib-row.has-build {
+  border-color: rgba(111, 191, 106, 0.35);
+}
+
+.lib-no {
+  grid-area: no;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.lib-name {
+  grid-area: name;
+  font-family: var(--font-iris-display), Georgia, serif;
+  font-size: 1.15rem;
+  color: var(--foam);
+}
+
+.lib-row .slot-role {
+  grid-area: role;
+  justify-self: end;
+}
+
+.lib-state {
+  grid-area: state;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.lib-empty {
+  margin: 0.4rem;
+  color: var(--muted);
+}
+
+.lib-actions,
+.form-actions,
+.lib-io {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+button.iris-cta,
+label.iris-cta {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.empty-sheet h3 {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-iris-display), Georgia, serif;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-weight: 500;
+}
+
+.empty-sheet .iris-cta {
+  margin-top: 1rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.7rem;
+}
+
+.build-field {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.build-field span,
+.element-set legend {
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.build-field textarea {
+  resize: vertical;
+  min-height: 4.5rem;
+}
+
+.element-set {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.element-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.form-error {
+  margin: 0;
+  color: #ffd0da;
+}
+
+.sheet-link {
+  margin: 0;
+}
+
+.sheet-link a {
+  color: var(--bloom);
+}

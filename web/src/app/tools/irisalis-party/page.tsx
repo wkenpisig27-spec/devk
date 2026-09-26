@@ -57,6 +57,9 @@ export default function IrisalisPartyPage() {
           <a className="iris-cta iris-cta-ghost" href="#upgrades">
             Irisalis upgrades
           </a>
+          <a className="iris-cta iris-cta-ghost" href="/tools/aniimo">
+            All Aniimo builds
+          </a>
         </div>
       </header>
 

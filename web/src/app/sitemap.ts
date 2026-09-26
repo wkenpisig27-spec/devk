@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/prereg",
     "/guides/pko-classes",
     "/tools/irisalis-party",
+    "/tools/aniimo",
   ];
   const now = new Date();
   return routes.map((route) => ({
