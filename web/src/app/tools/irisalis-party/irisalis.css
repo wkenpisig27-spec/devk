@@ -287,7 +287,23 @@ body:has(.iris-root)::before {
   height: 70%;
   background: radial-gradient(circle, color-mix(in srgb, var(--slot-accent, #6fbf6a) 35%, transparent), transparent 70%);
   pointer-events: none;
+  z-index: 0;
   animation: slot-pulse 5s ease-in-out infinite;
+}
+
+.slot-action {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.35rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(232, 160, 176, 0.45);
+  background: rgba(196, 93, 120, 0.22);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ffd7e0;
 }
 
 @keyframes slot-pulse {
@@ -383,6 +399,49 @@ body:has(.iris-root)::before {
 .slot-empty {
   margin-top: auto;
   color: var(--muted);
+}
+
+.seat-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.seat-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(216, 239, 230, 0.16);
+  background: rgba(12, 22, 18, 0.7);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.seat-tab span {
+  font-family: var(--font-iris-display), Georgia, serif;
+  font-size: 1rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--foam);
+}
+
+.seat-tab.is-active {
+  border-color: rgba(232, 160, 176, 0.65);
+  background: rgba(196, 93, 120, 0.22);
+  color: var(--bloom);
+}
+
+@media (max-width: 640px) {
+  .seat-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .picker {

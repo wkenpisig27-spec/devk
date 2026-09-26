@@ -58,6 +58,9 @@ function AniimoCard({
             No.{aniimo.number} · {aniimo.elements.join(" / ")}
           </span>
           <span className="slot-stat">{aniimo.bestStat}</span>
+          {!locked && (
+            <span className="slot-action">{selected ? "Picking…" : "Change partner"}</span>
+          )}
         </>
       ) : (
         <span className="slot-empty">Pick a partner</span>
@@ -143,7 +146,7 @@ export function IrisalisPartyBuilder() {
   const [slots, setSlots] = useState<[string, string, string, string]>([
     ...partyPresets[0].slots,
   ]);
-  const [activeSlot, setActiveSlot] = useState(0);
+  const [activeSlot, setActiveSlot] = useState(1);
   const [isPending, startTransition] = useTransition();
 
   const preset = partyPresets.find((p) => p.id === presetId) ?? partyPresets[0];
@@ -162,7 +165,7 @@ export function IrisalisPartyBuilder() {
     startTransition(() => {
       setPresetId(next.id);
       setSlots([...next.slots]);
-      setActiveSlot(0);
+      setActiveSlot(1);
     });
   }
 
@@ -223,6 +226,22 @@ export function IrisalisPartyBuilder() {
             locked={i === 0}
             onSelect={() => setActiveSlot(i)}
           />
+        ))}
+      </div>
+
+      <div className="seat-tabs" role="tablist" aria-label="Inspect party seat">
+        {party.map((aniimo, i) => (
+          <button
+            key={`tab-${i}`}
+            type="button"
+            role="tab"
+            aria-selected={activeSlot === i}
+            className={`seat-tab ${activeSlot === i ? "is-active" : ""}`}
+            onClick={() => setActiveSlot(i)}
+          >
+            Seat {i + 1}
+            <span>{aniimo?.name ?? "Empty"}</span>
+          </button>
         ))}
       </div>
 
