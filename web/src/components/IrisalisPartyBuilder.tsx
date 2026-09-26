@@ -44,7 +44,6 @@ function AniimoCard({
     <button
       type="button"
       onClick={onSelect}
-      disabled={locked && !!aniimo}
       className={`party-slot ${selected ? "is-selected" : ""} ${locked ? "is-locked" : ""}`}
       style={aniimo ? ({ "--slot-accent": aniimo.accent } as CSSProperties) : undefined}
       aria-pressed={selected}
@@ -58,7 +57,9 @@ function AniimoCard({
             No.{aniimo.number} · {aniimo.elements.join(" / ")}
           </span>
           <span className="slot-stat">{aniimo.bestStat}</span>
-          {!locked && (
+          {locked ? (
+            <span className="slot-action slot-action-locked">Main · locked</span>
+          ) : (
             <span className="slot-action">{selected ? "Picking…" : "Change partner"}</span>
           )}
         </>
@@ -66,6 +67,48 @@ function AniimoCard({
         <span className="slot-empty">Pick a partner</span>
       )}
     </button>
+  );
+}
+
+function PartyLoadout({ party }: { party: (AniimoBuild | null)[] }) {
+  const filled = party.filter((a): a is AniimoBuild => !!a);
+  if (filled.length === 0) return null;
+
+  return (
+    <section className="loadout-board" aria-labelledby="loadout-heading">
+      <div className="upgrade-intro">
+        <p className="detail-kicker">Party gear</p>
+        <h2 id="loadout-heading">Carried items at a glance</h2>
+        <p>Every seat’s Legendary target, attribute order, and first upgrade cue — including Irisalis.</p>
+      </div>
+      <div className="loadout-grid">
+        {party.map((aniimo, i) =>
+          aniimo ? (
+            <article
+              key={aniimo.id}
+              className="loadout-card"
+              style={{ "--slot-accent": aniimo.accent } as CSSProperties}
+            >
+              <p className="loadout-seat">{SLOT_LABELS[i]}</p>
+              <h3>{aniimo.name}</h3>
+              <p className={`slot-role ${roleTone(aniimo.role)}`}>{aniimo.role}</p>
+              <p className="loadout-gear">{aniimo.carriedItem.name}</p>
+              <p className="loadout-meta">{aniimo.carriedItem.base}</p>
+              <p className="loadout-attrs">
+                Attr · {aniimo.attributes[0]} → {aniimo.attributes[1]}
+              </p>
+              <p className="loadout-upgrade">{aniimo.upgrades[0]}</p>
+            </article>
+          ) : (
+            <article key={`empty-${i}`} className="loadout-card is-empty">
+              <p className="loadout-seat">{SLOT_LABELS[i]}</p>
+              <h3>Empty</h3>
+              <p className="loadout-meta">Pick a partner to fill this seat.</p>
+            </article>
+          ),
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -267,6 +310,8 @@ export function IrisalisPartyBuilder() {
       )}
 
       {active && <DetailPanel aniimo={active} />}
+
+      <PartyLoadout party={party} />
 
       <section id="upgrades" className="upgrade-board" aria-labelledby="upgrade-heading">
         <div className="upgrade-intro">

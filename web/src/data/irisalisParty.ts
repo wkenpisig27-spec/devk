@@ -57,7 +57,7 @@ export const aniimoRoster: Record<string, AniimoBuild> = {
     bestStat: "ATK 130",
     trait: "Bloom Cluster",
     traitBlurb:
-      "Clone hits bank Dance Power. At 9 stacks the next skill costs 50% less EP and heals nearby allies. Once every 180s she blooms again after fainting.",
+      "Each clone hit banks 1 Dance Power. At 9 stacks the next skill costs 50% less EP and heals nearby allies for 8% of her max HP. Once every 180s she blooms again after fainting.",
     skills: ["Irisalis Shadow", "Whirling Blossom Rain", "Florae Descent"],
     attributes: ["ATK", "REGEN"],
     carriedItem: {
@@ -65,15 +65,15 @@ export const aniimoRoster: Record<string, AniimoBuild> = {
       base: "Damage Amp +10% (Legendary)",
       core: "+0.7 ATK per Aniimo level",
       target: "Legendary",
-      why: "In-game recommended held item for Irisalis. Push Legendary and enhance for the ATK energy breakpoints.",
+      why: "In-game recommended held item (alt: Giant Tortoise Shell). Push Legendary +15 — second energy unlocks another Damage Amp that doubles if ATK Acquired Potential exceeds 15.",
     },
     upgrades: [
-      "Level Irisalis first — Resonance LV6 needs 55, LV7 needs 65.",
+      "Level Irisalis first — Resonance star stage 6 wants Lv 60, stage 7 wants Lv 65.",
       "Spend attribute points ATK → REGEN every time.",
-      "Enhance Ferocious Fang to Legendary, then feed cores to unlock ATK amp tiers.",
-      "Resonance star-ups: Iris Dewdrop Crystals + Sprout Stones; Phenomena Crystal at stages 6–7.",
-      "Bank Omnisource Crystals for Resonance Training LV6 (×1) and LV7 (×2).",
-      "Prismatic Stone the clone kit (Irisalis Shadow / Florae Descent) — one core upgrade sticks.",
+      "Enhance Ferocious Fang to Legendary +15 (Damage Amp stack + rune slots).",
+      "Resonance star-ups: Iris Dewdrop Crystals + Sprout Stones; Phenomena Crystal ×1 at stage 6, ×2 at stage 7.",
+      "Bank scarce crystals for late Resonance — do not scatter them on benches.",
+      "Contract / Prismatic the clone kit (Irisalis Shadow) — Magical Clone Damage is the once-per-species spend.",
     ],
     locked: true,
     accent: "#6fbf6a",
@@ -378,27 +378,27 @@ export const partyPresets: PartyPreset[] = [
 export const upgradePriority = [
   {
     title: "1 · Level Irisalis",
-    body: "Push her level before dumping crystals. Resonance Training LV6 wants 55; LV7 wants 65.",
+    body: "Push her level before dumping crystals. Resonance star stage 6 wants Lv 60; stage 7 wants Lv 65.",
   },
   {
     title: "2 · ATK then REGEN",
     body: "Every attribute point: ATK first, REGEN second. That is the in-game priority for Irisalis.",
   },
   {
-    title: "3 · Ferocious Fang → Legendary",
-    body: "Damage Amp +10% and +0.7 ATK per level. Enhance through energy breakpoints before alt items.",
+    title: "3 · Ferocious Fang → Legendary +15",
+    body: "Core +0.7 ATK per level. Legendary base Damage Amp +10%; at +15 the second energy adds another Damage Amp (doubles if ATK potential > 15).",
   },
   {
     title: "4 · Resonance star-ups",
     body: "Iris Dewdrop Crystals + Sprout Stones each stage. Phenomena Crystal ×1 at stage 6, ×2 at stage 7.",
   },
   {
-    title: "5 · Omnisource Crystals",
-    body: "Hold for Resonance Training LV6 (×1 at 55) and LV7 (×2 at 65). Do not scatter them on benches.",
+    title: "5 · Hold scarce crystals",
+    body: "Save Phenomena / late Resonance materials for Irisalis. Do not scatter them on benches.",
   },
   {
-    title: "6 · Prismatic Stone the clone kit",
-    body: "Core skill upgrade is once-per-Aniimo. Spend it on Irisalis Shadow / Florae Descent clone value.",
+    title: "6 · Contract the clone kit",
+    body: "Once-per-species spend — Irisalis Shadow Magical Clone Damage is the priority over side skills.",
   },
   {
     title: "7 · Partners after the carry",

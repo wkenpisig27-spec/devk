@@ -133,7 +133,7 @@ body:has(.iris-root)::before {
   align-items: center;
   justify-content: center;
   padding: 0.75rem 1.25rem;
-  border-radius: 999px;
+  border-radius: 0.7rem;
   background: linear-gradient(120deg, var(--petal-deep), #e08a78);
   color: #1a0f12;
   font-weight: 700;
@@ -296,7 +296,7 @@ body:has(.iris-root)::before {
   z-index: 1;
   margin-top: 0.35rem;
   padding: 0.28rem 0.65rem;
-  border-radius: 999px;
+  border-radius: 0.55rem;
   border: 1px solid rgba(232, 160, 176, 0.45);
   background: rgba(196, 93, 120, 0.22);
   font-size: 0.72rem;
@@ -304,6 +304,87 @@ body:has(.iris-root)::before {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #ffd7e0;
+}
+
+.slot-action-locked {
+  border-color: rgba(111, 191, 106, 0.45);
+  background: rgba(111, 191, 106, 0.18);
+  color: #d4f5d1;
+}
+
+.loadout-board {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border-radius: 1.35rem;
+  border: 1px solid rgba(216, 239, 230, 0.18);
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(111, 191, 106, 0.12), transparent 45%),
+    rgba(12, 22, 18, 0.75);
+}
+
+.loadout-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 860px) {
+  .loadout-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.loadout-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, var(--slot-accent, #6fbf6a) 35%, transparent);
+  background: color-mix(in srgb, var(--slot-accent, #6fbf6a) 10%, rgba(12, 22, 18, 0.9));
+}
+
+.loadout-card.is-empty {
+  border-style: dashed;
+  opacity: 0.7;
+}
+
+.loadout-seat {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.loadout-card h3 {
+  margin: 0;
+  font-family: var(--font-iris-display), Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.loadout-gear {
+  margin: 0.35rem 0 0;
+  font-weight: 700;
+  color: var(--foam);
+}
+
+.loadout-meta,
+.loadout-attrs,
+.loadout-upgrade {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--mist);
+}
+
+.loadout-upgrade {
+  margin-top: 0.35rem;
+  color: var(--muted);
 }
 
 @keyframes slot-pulse {
@@ -355,7 +436,7 @@ body:has(.iris-root)::before {
   z-index: 1;
   display: inline-flex;
   padding: 0.15rem 0.55rem;
-  border-radius: 999px;
+  border-radius: 0.4rem;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -576,7 +657,7 @@ body:has(.iris-root)::before {
   align-items: center;
   gap: 0.45rem;
   padding: 0.45rem 0.75rem;
-  border-radius: 999px;
+  border-radius: 0.55rem;
   background: rgba(216, 239, 230, 0.08);
   font-weight: 600;
 }
