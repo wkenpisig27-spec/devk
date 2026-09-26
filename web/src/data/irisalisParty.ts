@@ -17,6 +17,20 @@ export type CarriedItem = {
   why: string;
 };
 
+export type AltItem = {
+  name: string;
+  why: string;
+};
+
+export type BaseStats = {
+  hp: number;
+  atk: number;
+  break: number;
+  pdef: number;
+  mdef: number;
+  regen: number;
+};
+
 export type AniimoBuild = {
   id: string;
   name: string;
@@ -31,6 +45,9 @@ export type AniimoBuild = {
   skills: string[];
   attributes: [string, string];
   carriedItem: CarriedItem;
+  altItem?: AltItem;
+  stats?: BaseStats;
+  rotation?: string[];
   upgrades: string[];
   locked?: boolean;
   accent: string;
@@ -60,12 +77,24 @@ export const aniimoRoster: Record<string, AniimoBuild> = {
       "Each clone hit banks 1 Dance Power. At 9 stacks the next skill costs 50% less EP and heals nearby allies for 8% of her max HP. Once every 180s she blooms again after fainting.",
     skills: ["Irisalis Shadow", "Whirling Blossom Rain", "Florae Descent"],
     attributes: ["ATK", "REGEN"],
+    stats: { hp: 90, atk: 130, break: 56, pdef: 78, mdef: 78, regen: 108 },
+    rotation: [
+      "Irisalis Shadow — land Iris Shot so the clone fires a Floral Gleam Beam.",
+      "Florae Descent when charged. That clone stays up beside the Shadow clone.",
+      "Whirling Blossom Rain to command every clone at once.",
+      "Finish a basic-attack chain so the clones keep beaming.",
+      "At 9 Dance Power, spend the skill that costs 50% less EP.",
+    ],
     carriedItem: {
       name: "Ferocious Fang",
       base: "Damage Amp +10% (Legendary)",
       core: "+0.7 ATK per Aniimo level",
       target: "Legendary",
-      why: "In-game recommended held item (alt: Giant Tortoise Shell). Push Legendary +15 — second energy unlocks another Damage Amp that doubles if ATK Acquired Potential exceeds 15.",
+      why: "In-game recommended held item. Push Legendary +15 — second energy unlocks another Damage Amp that doubles if ATK Acquired Potential exceeds 15.",
+    },
+    altItem: {
+      name: "Giant Tortoise Shell",
+      why: "Durability swap when the opening is dangerous and she needs time to set clones.",
     },
     upgrades: [
       "Level Irisalis first — Resonance star stage 6 wants Lv 60, stage 7 wants Lv 65.",
@@ -96,7 +125,11 @@ export const aniimoRoster: Record<string, AniimoBuild> = {
       base: "REGEN +10% (Legendary)",
       core: "+0.7 REGEN per Aniimo level",
       target: "Legendary",
-      why: "Primary in-game held item. Auspicious Bell is the EP-luck alternative.",
+      why: "Primary in-game held item for the field partner.",
+    },
+    altItem: {
+      name: "Auspicious Bell",
+      why: "EP-luck swap when Irisalis is starving for skill casts.",
     },
     upgrades: [
       "Attribute order: HP first, REGEN second.",

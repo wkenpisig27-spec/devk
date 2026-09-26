@@ -245,6 +245,88 @@ body:has(.iris-root)::before {
   line-height: 1.55;
 }
 
+.party-check {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.party-check li {
+  padding: 0.55rem 0.8rem;
+  border-radius: 0.65rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.party-check .is-ok {
+  background: rgba(111, 191, 106, 0.14);
+  color: #d4f5d1;
+}
+
+.party-check .is-gap {
+  background: rgba(196, 93, 120, 0.2);
+  color: #ffd7e0;
+}
+
+.stat-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.stat-bars li {
+  display: grid;
+  grid-template-columns: 4.2rem 1fr 2.4rem;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.82rem;
+  color: var(--mist);
+}
+
+.stat-track {
+  height: 0.45rem;
+  border-radius: 0.2rem;
+  background: rgba(216, 239, 230, 0.1);
+  overflow: hidden;
+}
+
+.stat-track span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--leaf), var(--bloom));
+}
+
+.stat-bars strong {
+  text-align: right;
+  color: var(--foam);
+}
+
+.rotation-list li + li {
+  margin-top: 0.35rem;
+}
+
+.gear-alt {
+  margin: 0.7rem 0 0;
+  color: var(--bloom);
+  line-height: 1.5;
+}
+
+.copy-loadout {
+  margin-top: 0.85rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 0.55rem;
+  border: 1px solid rgba(243, 213, 160, 0.4);
+  background: rgba(243, 213, 160, 0.12);
+  color: var(--bloom);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
 .party-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

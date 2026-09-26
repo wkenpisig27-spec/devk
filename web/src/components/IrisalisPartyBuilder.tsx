@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, useTransition, type CSSProperties } from "react";
 import {
   aniimoRoster,
   partyPresets,
@@ -11,6 +11,22 @@ import {
 } from "@/data/irisalisParty";
 
 const SLOT_LABELS = ["Lead · Irisalis", "Partner 2", "Partner 3", "Partner 4"] as const;
+const STORAGE_KEY = "irisalis-party-v1";
+
+function isSavedParty(value: unknown): value is {
+  presetId: string;
+  slots: [string, string, string, string];
+} {
+  if (!value || typeof value !== "object") return false;
+  const slots = (value as { slots?: unknown }).slots;
+  const presetId = (value as { presetId?: unknown }).presetId;
+  if (typeof presetId !== "string" || !Array.isArray(slots) || slots.length !== 4) return false;
+  if (slots[0] !== "irisalis") return false;
+  const partners = slots.slice(1);
+  if (partners.some((id) => typeof id !== "string" || (id !== "" && !aniimoRoster[id]))) return false;
+  const filled = partners.filter((id) => id !== "");
+  return new Set(filled).size === filled.length;
+}
 
 function roleTone(role: AniimoBuild["role"]) {
   switch (role) {
@@ -70,6 +86,53 @@ function AniimoCard({
   );
 }
 
+function partyNotes(party: (AniimoBuild | null)[]) {
+  const roles = new Set(party.filter((a): a is AniimoBuild => !!a).map((a) => a.role));
+  const notes: { ok: boolean; text: string }[] = [
+    { ok: true, text: "Irisalis locked as Grass DPS" },
+    {
+      ok: roles.has("Break"),
+      text: roles.has("Break")
+        ? "Break seat opens windows for clone burst"
+        : "Missing Break — her burst waits on the target’s bar",
+    },
+    {
+      ok: roles.has("Regen") || roles.has("Heal"),
+      text:
+        roles.has("Regen") || roles.has("Heal")
+          ? "Regen or Heal keeps Dance Power loops funded"
+          : "Missing Regen or Heal — EP and HP drop between clone casts",
+    },
+  ];
+  return notes;
+}
+
+function PartyCheck({ party }: { party: (AniimoBuild | null)[] }) {
+  const notes = partyNotes(party);
+  return (
+    <ul className="party-check" aria-label="Party coverage">
+      {notes.map((note) => (
+        <li key={note.text} className={note.ok ? "is-ok" : "is-gap"}>
+          {note.text}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function loadoutText(party: (AniimoBuild | null)[]) {
+  const lines = party.map((aniimo, i) => {
+    if (!aniimo) return `${SLOT_LABELS[i]}: empty`;
+    return [
+      `${SLOT_LABELS[i]}: ${aniimo.name} (${aniimo.role})`,
+      `  Item: ${aniimo.carriedItem.name} → ${aniimo.carriedItem.target}`,
+      `  Attr: ${aniimo.attributes[0]} → ${aniimo.attributes[1]}`,
+      `  First upgrade: ${aniimo.upgrades[0]}`,
+    ].join("\n");
+  });
+  return ["Irisalis 4-Aniimo party", ...lines].join("\n\n");
+}
+
 function PartyLoadout({ party }: { party: (AniimoBuild | null)[] }) {
   const filled = party.filter((a): a is AniimoBuild => !!a);
   if (filled.length === 0) return null;
@@ -80,6 +143,7 @@ function PartyLoadout({ party }: { party: (AniimoBuild | null)[] }) {
         <p className="detail-kicker">Party gear</p>
         <h2 id="loadout-heading">Carried items at a glance</h2>
         <p>Every seat’s Legendary target, attribute order, and first upgrade cue — including Irisalis.</p>
+        <CopyLoadout party={party} />
       </div>
       <div className="loadout-grid">
         {party.map((aniimo, i) =>
@@ -109,6 +173,26 @@ function PartyLoadout({ party }: { party: (AniimoBuild | null)[] }) {
         )}
       </div>
     </section>
+  );
+}
+
+function CopyLoadout({ party }: { party: (AniimoBuild | null)[] }) {
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(loadoutText(party));
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  return (
+    <button type="button" className="copy-loadout" onClick={copy}>
+      {copied ? "Copied" : "Copy party & gear"}
+    </button>
   );
 }
 
@@ -142,6 +226,43 @@ function DetailPanel({ aniimo }: { aniimo: AniimoBuild }) {
         </div>
       </dl>
 
+      {aniimo.stats && (
+        <section className="detail-block">
+          <h4>Base stats</h4>
+          <ul className="stat-bars">
+            {(
+              [
+                ["HP", aniimo.stats.hp],
+                ["ATK", aniimo.stats.atk],
+                ["BREAK", aniimo.stats.break],
+                ["P.DEF", aniimo.stats.pdef],
+                ["M.DEF", aniimo.stats.mdef],
+                ["REGEN", aniimo.stats.regen],
+              ] as const
+            ).map(([label, value]) => (
+              <li key={label}>
+                <span>{label}</span>
+                <span className="stat-track" aria-hidden>
+                  <span style={{ width: `${Math.min(100, (value / 140) * 100)}%` }} />
+                </span>
+                <strong>{value}</strong>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {aniimo.rotation && (
+        <section className="detail-block">
+          <h4>Rotation</h4>
+          <ol className="rotation-list">
+            {aniimo.rotation.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+        </section>
+      )}
+
       <section className="detail-block">
         <h4>Skills to run</h4>
         <ul>
@@ -170,6 +291,11 @@ function DetailPanel({ aniimo }: { aniimo: AniimoBuild }) {
         <p className="gear-line">{aniimo.carriedItem.core}</p>
         <p className="gear-why">{aniimo.carriedItem.why}</p>
         <p className="gear-target">Upgrade target · {aniimo.carriedItem.target}</p>
+        {aniimo.altItem && (
+          <p className="gear-alt">
+            Alt · {aniimo.altItem.name}. {aniimo.altItem.why}
+          </p>
+        )}
       </section>
 
       <section className="detail-block">
@@ -190,7 +316,26 @@ export function IrisalisPartyBuilder() {
     ...partyPresets[0].slots,
   ]);
   const [activeSlot, setActiveSlot] = useState(1);
+  const [ready, setReady] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
+      if (isSavedParty(saved)) {
+        setPresetId(saved.presetId);
+        setSlots(saved.slots);
+      }
+    } catch {
+      /* ignore broken storage */
+    }
+    setReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ presetId, slots }));
+  }, [presetId, slots, ready]);
 
   const preset = partyPresets.find((p) => p.id === presetId) ?? partyPresets[0];
   const party = useMemo(
@@ -258,6 +403,8 @@ export function IrisalisPartyBuilder() {
       </section>
 
       <p className="playstyle">{presetId === "custom" ? "Mix partners for your roster." : preset.playstyle}</p>
+
+      <PartyCheck party={party} />
 
       <div className="party-grid" role="list">
         {party.map((aniimo, i) => (
